@@ -5,3 +5,32 @@ body {
         color: $blue;
     }
 }
+
+//layout
+#toolbar {
+    width: 100%;
+    text-align: center;
+}
+
+main {
+    display: flex;
+    justify-content: space-between;
+}
+
+#navigation, #inspector, #canvas {
+    display: inline-block;
+}
+
+#navigation {
+    display: inline-block;
+    height: 100%;
+    width: 10rem;
+}
+
+#inspector {
+    width: 10rem;
+}
+
+#canvas {
+    width: calc(100% - 20rem);
+}

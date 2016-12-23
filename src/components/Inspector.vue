@@ -1,5 +1,7 @@
 <template>
-    <h1>Inspector</h1>
+    <section id="inspector">
+        <h1>Inspector</h1>
+    </section>
 </template>
 
 <script>

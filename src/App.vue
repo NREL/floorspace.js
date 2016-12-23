@@ -1,9 +1,11 @@
 <template>
   <div id="app">
-    <canvas-view></canvas-view>
-    <navigation></navigation>
     <toolbar></toolbar>
-    <inspector></inspector>
+    <main>
+        <navigation></navigation>
+        <canvas-view></canvas-view>
+        <inspector></inspector>
+    </main>
   </div>
 </template>
 
@@ -30,7 +32,7 @@ export default {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
+
   margin-top: 60px;
 }
 </style>

@@ -1,5 +1,7 @@
 <template>
-    <h1>Toolbar</h1>
+    <nav id="toolbar">
+        <h1>Toolbar</h1>
+    </nav>
 </template>
 
 <script>

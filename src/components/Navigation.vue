@@ -1,5 +1,7 @@
 <template>
-    <h1>Navigation</h1>
+    <nav id="navigation">
+        <h1>Navigation</h1>
+    </nav>
 </template>
 
 <script>
