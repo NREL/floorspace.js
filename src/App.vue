@@ -1,12 +1,12 @@
 <template>
-  <div id="app">
-    <toolbar></toolbar>
-    <main>
-        <navigation></navigation>
-        <canvas-view></canvas-view>
-        <inspector></inspector>
-    </main>
-  </div>
+    <div id="app">
+        <toolbar></toolbar>
+        <main>
+                <navigation></navigation>
+                <canvas-view></canvas-view>
+                <inspector></inspector>
+        </main>
+    </div>
 </template>
 
 <script>
@@ -16,23 +16,23 @@ import Toolbar from './components/Toolbar'
 import Inspector from './components/Inspector'
 
 export default {
-  name: 'app',
-  components: {
-    'canvas-view': Canvas,
-    'navigation': Navigation,
-    'toolbar': Toolbar,
-    'inspector': Inspector
-  }
+    name: 'app',
+    components: {
+        'canvas-view': Canvas,
+        'navigation': Navigation,
+        'toolbar': Toolbar,
+        'inspector': Inspector
+    }
 }
 </script>
 
 <style src="./scss/main.scss" lang="scss"></style>
 <style>
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    font-family: 'Avenir', Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 
-  margin-top: 60px;
+    margin-top: 60px;
 }
 </style>
