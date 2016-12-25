@@ -93,12 +93,9 @@ function rectSpace(x=0, y=0, h=0, w=0) {
 }
 
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-svg {
-    height: 100%;
-    width: 100%;
-    background-color: white;
+<style lang="scss" scoped>
+@import "./../scss/config";
+#canvas {
+    background-color: $gray-darkest;
 }
 </style>

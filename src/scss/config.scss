@@ -1,8 +1,12 @@
 // colors
-$gray-darkest: #282d30;
-$gray-dark: #3e494b;
-$gray-medium: #596466;
-$gray-light: #eeefef;
+$gray-darkest: #24292c;
+$gray-dark: lighten($gray-darkest, 3%);
+$gray-medium-dark: lighten($gray-darkest, 7%);
+$gray-medium: lighten($gray-darkest, 10%);
+$gray-medium-light: lighten($gray-darkest, 20%);
+$gray-light: lighten($gray-darkest, 60%);
+
+
 
 $blue: #20adc9;
 

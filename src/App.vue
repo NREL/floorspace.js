@@ -27,12 +27,7 @@ export default {
 </script>
 
 <style src="./scss/main.scss" lang="scss"></style>
-<style>
-#app {
-    font-family: 'Avenir', Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+<style lang="scss" scoped>
+@import "./scss/config";
 
-    margin-top: 60px;
-}
 </style>

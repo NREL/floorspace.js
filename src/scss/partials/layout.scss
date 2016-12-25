@@ -12,10 +12,7 @@ html, body {
 
 //layout
 #toolbar {
-    background-color: $gray-dark;
-    border-bottom: 1px solid $gray-medium-light;
     width: 100%;
-    text-align: center;
 }
 #app, main {
     height: 100%;
@@ -24,23 +21,11 @@ main {
     display: flex;
     justify-content: space-between;
 
-    #navigation {
-        background-color: $gray-dark;
-        border-right: 1px solid $gray-medium-light;
-        display: inline-block;
-        width: 17.5rem;
-    }
-
-    #inspector {
-        background-color: $gray-dark;
-        border-left: 1px solid $gray-medium-light;
+    #navigation, #inspector {
         width: 17.5rem;
     }
 
     #canvas {
         width: calc(100% - 35rem);
-        background-color: $gray-darkest;
-
     }
-
 }

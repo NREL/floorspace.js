@@ -15,6 +15,10 @@ export default {
 }
 </script>
 
-<style scoped>
-
+<style lang="scss" scoped>
+@import "./../scss/config";
+    #inspector {
+        background-color: $gray-dark;
+        border-left: 1px solid $gray-darkest;
+    }
 </style>

@@ -1,6 +1,6 @@
 <template>
         <nav id="toolbar">
-                <h1>Toolbar</h1>
+                <p>Toolbar</p>
         </nav>
 </template>
 
@@ -15,5 +15,12 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+@import "./../scss/config";
+
+#toolbar {
+    background-color: $gray-dark;
+    border-bottom: 1px solid $gray-darkest;
+    overflow-y: hidden;
+}
 </style>
