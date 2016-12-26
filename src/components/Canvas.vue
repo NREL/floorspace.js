@@ -1,11 +1,15 @@
 <template>
-    <svg id="canvas" @click="addSpace"></svg>
+    <div id="canvas">
+        <div id="zoom">
+            <span>+</span>
+            <span>-</span>
+        </div>
+        <svg @click="addPoint"></svg>
+    </div>
 </template>
 
 <script>
-
 var d3 = require('d3');
-
 export default {
     name: 'canvas',
     data() {
@@ -15,57 +19,95 @@ export default {
             // array of spaces drawn
             spaces: [],
             // space being drawn
-            currentRect: null
+            currentRect: null,
+            points: []
         }
     },
     mounted: function() {
         // set the svg selection
         this.svg = d3.select('svg');
-
-        // TODO: implement JSON loads from external source
-        this.spaces.push(new rectSpace(10, 20, 50, 30));
-        this.spaces.push(new rectSpace(100, 200, 10, 30));
     },
 
     watch: {
-        // whenever question changes, this function will run
         spaces: function () {
+            this.drawSpaces();
+        },
+        points: function () {
             this.drawSpaces();
         }
     },
     methods: {
-        addSpace: function(e) {
-            // if (this.currentRect) {
-            //     // already in progress, draw the endpoint
-            //     this.endpoint = {
-            //         x:
-            //     }
-            // } else {
-                var origin = this.svg.append('circle');
-                origin.attr('cx', e.offsetX)
-                    .attr('cy', e.offsetY)
-                    .attr('r', 5);
-                this.currentRect = {
-                    origin: {
-                        x: e.offsetX,
-                        y: e.offsetY
-                    }
-                };
-            //}
-
-
+        addPoint: function(e) {
+            let point = {
+                x: e.offsetX,
+                y: e.offsetY
+            };
+            this.points.push(point);
         },
+        // rendering
         drawSpaces: function() {
-            console.log('drawSpaces');
-            this.svg.selectAll('rect')
+            this.drawPoints();
+            this.drawPolygonSpaces();
+           // this.drawRectSpaces();
+        },
+        drawPoints: function() {
+            console.log('drawPoints', JSON.stringify(this.points));
+            let points = this.svg.selectAll('circle');
+            // draw new points
+            points.data(this.points).enter()
+                .append('circle')
+                .attr('cx', (d, i) => {
+                    return d.x;
+                })
+                .attr('cy', (d, i) => {
+                    return d.y;
+                })
+                .attr('r', 5)
+                .attr('fill', 'black')
+                .attr('stroke', 'black')
+
+            // remove expired points
+            points.data(this.points).exit().remove();
+
+            // first point in a polygon
+            let firstPoint = this.svg.select('circle')
+                .on('click', () => {
+                    this.spaces.push({
+                        points: this.points
+                    });
+                    this.points = [];
+                    console.log(d3.event);
+                    console.log(JSON.stringify(this.points));
+                    d3.event.stopPropagation();
+                })
+                .on('mouseenter', () => {
+                    firstPoint.attr('fill', 'white');
+                })
+                .on('mouseleave', () => {
+                    firstPoint.attr('fill', 'gray');
+                });
+        },
+        drawPolygonSpaces: function() {
+            this.svg.selectAll('polygon')
                 .data(this.spaces).enter()
+                .append('polygon')
+                .attr('points', (d, i) => {
+                    var pointsString = "";
+                    d.points.forEach((p) => {
+                        pointsString += (p.x + ',' + p.y + ' ');
+                    });
+                    return pointsString;
+                });
+        },
+        drawRectSpaces: function(e) {
+            this.svg.selectAll('rect')
+                .data(this.rectSpaces).enter()
                 .append('rect')
                 .attr('x', (d, i) => {
-                    console.log('test');
                     return d.origin.x;
                 })
                 .attr('y', (d, i) => {
-                    return d.origin.x;
+                    return d.origin.y;
                 })
                 .attr('width', (d, i) => {
                     return d.size.width;
@@ -73,29 +115,21 @@ export default {
                 .attr('height', (d, i) => {
                     return d.size.height;
                 });
-
         }
     }
 }
 
 
-function rectSpace(x=0, y=0, h=0, w=0) {
-    return {
-        origin: {
-            x: x,
-            y: y
-        },
-        size: {
-            height: h,
-            width: w
-        }
-    };
-}
+
 
 </script>
 <style lang="scss" scoped>
 @import "./../scss/config";
 #canvas {
     background-color: $gray-darkest;
+    svg {
+        height: 100%;
+        width: 100%;
+    }
 }
 </style>
