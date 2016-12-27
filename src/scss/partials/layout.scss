@@ -1,24 +1,15 @@
-html, body {
-    color: $gray-light;
-    height: 100vh;
-    margin: 0;
-    a {
-        color: $blue;
-    }
-}
-
 //layout
 #toolbar {
     height: 3rem;
     width: calc(100% - 17.5rem);
 }
-#app, main {
-    height: calc(100% - 3rem);
+#app {
+    height: 100%;
 }
 main {
     display: flex;
     justify-content: space-between;
-
+    height: calc(100% - 3rem);
     #navigation, #inspector {
         height: 100%;
         width: 17.5rem;

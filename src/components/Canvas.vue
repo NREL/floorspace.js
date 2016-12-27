@@ -1,6 +1,5 @@
 <template>
     <div id="canvas">
-
         <svg @click="addPoint"></svg>
     </div>
 </template>
@@ -9,28 +8,19 @@
 var d3 = require('d3');
 export default {
     name: 'canvas',
-    data() {
+    data: function() {
         return {
-            // d3 svg selection
-            svg: {},
-            // array of spaces drawn
+            // array of spaces drawn - going to be synced with navigation and displayed
             spaces: [],
             // space being drawn
             points: []
-        }
+        };
     },
-    mounted: function() {
-        // set the svg selection
-        this.svg = d3.select('svg');
-    },
-
     watch: {
-        spaces: function () {
-            this.drawPolygonSpaces();
-        },
-        points: function () {
-            this.drawPoints();
-        }
+        // when a space is added, draw all spaces
+        spaces: function() { this.drawPolygonSpaces(); },
+        // when a point is added, draw all points
+        points: function() { this.drawPoints(); }
     },
     methods: {
         addPoint: function(e) {
@@ -42,11 +32,8 @@ export default {
         },
 
         drawPoints: function() {
-            let points = this.svg.selectAll('circle');
-            this.drawPolygonEdges();
-
             // draw new points
-            points.data(this.points).enter()
+            d3.select('svg').selectAll('circle').data(this.points).enter()
                 .append('circle')
                 .attr('cx', (d, i) => {
                     return d.x;
@@ -54,52 +41,43 @@ export default {
                 .attr('cy', (d, i) => {
                     return d.y;
                 })
-                .attr('r', 5)
-                .attr('fill', (d, i) => {
-                    return i ? 'black' : 'gray';
-                })
-                .attr('stroke', 'black')
+                .attr('r', 2);
 
-            // remove expired points
-            points.data(this.points).exit().remove();
+            //connect the points with a guideline
+            this.drawPolygonEdges();
 
-            // first point in a polygon
-            let firstPoint = this.svg.select('circle')
-                //close the shape
+            // set a click listener for the first point in the polynomial, when it is clicked close the shape
+            d3.select('svg').select('circle')
                 .on('click', () => {
-                    this.spaces.push({
-                        points: this.points
-                    });
-                    // prevent a new point from being created when the shape is closed
+                    // create the shape - triggers this.drawPolygonSpaces()
+                    this.spaces.push({ points: this.points });
+                    // clear points, prevent a new point from being created by this click event
                     d3.event.stopPropagation();
                     this.points = [];
                 })
-                .on('mouseenter', () => {
-                    firstPoint.attr('fill', 'white');
-                })
-                .on('mouseleave', () => {
-                    firstPoint.attr('fill', 'gray');
-                });
+                // styles for the first point in the polygon
+                .classed('origin', true)
+                .attr('r', 5);
         },
         drawPolygonEdges: function() {
-            var line = d3.line()
-                .x(function(d) {
-                    return d.x;
-                })
-                .y(function(d) {
-                    return d.y;
-                });
+            // remove expired paths
+            d3.selectAll("path").remove();
 
-            this.svg.append("path")
+            var line = d3.line()
+                .x((d) => { return d.x; })
+                .y((d) => { return d.y; });
+
+            d3.select('svg').append("path")
                 .datum(this.points)
                 .attr("fill", "none")
-                .attr("stroke", 'red')
-                .attr("stroke-width", "2")
-                .attr("d", line);
+                .attr("stroke-width", "1")
+                .attr("d", line)
+                // prevent overlapping the points - screws up click events
+                .lower();
         },
         drawPolygonSpaces: function() {
             // draw a polygon for each space
-            this.svg.selectAll('polygon')
+            d3.select('svg').selectAll('polygon')
                 .data(this.spaces).enter()
                 .append('polygon')
                 .attr('points', (d, i) => {
@@ -109,14 +87,14 @@ export default {
                     });
                     return pointsString;
                 })
-                .attr('stroke', 'red')
-                .attr("stroke-width", "2");
+                .attr("stroke-width", "1");
 
-            //remove expired guidelines
+            //remove expired points and guidelines
             d3.selectAll("path").remove();
+            d3.selectAll('circle').remove();
         },
         drawRectSpaces: function(e) {
-            this.svg.selectAll('rect')
+            d3.select('svg').selectAll('rect')
                 .data(this.rectSpaces).enter()
                 .append('rect')
                 .attr('x', (d, i) => {
@@ -135,12 +113,10 @@ export default {
     }
 }
 
-
-
-
 </script>
 <style lang="scss" scoped>
 @import "./../scss/config";
+// we can't style the dynamically created d3 elements here, put those styles in the scss folder
 #canvas {
     background-color: $gray-darkest;
     svg {
