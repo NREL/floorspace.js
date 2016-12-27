@@ -19,7 +19,6 @@ export default {
             // array of spaces drawn
             spaces: [],
             // space being drawn
-            currentRect: null,
             points: []
         }
     },
@@ -30,10 +29,10 @@ export default {
 
     watch: {
         spaces: function () {
-            this.drawSpaces();
+            this.drawPolygonSpaces();
         },
         points: function () {
-            this.drawSpaces();
+            this.drawPoints();
         }
     },
     methods: {
@@ -44,15 +43,11 @@ export default {
             };
             this.points.push(point);
         },
-        // rendering
-        drawSpaces: function() {
-            this.drawPoints();
-            this.drawPolygonSpaces();
-           // this.drawRectSpaces();
-        },
+
         drawPoints: function() {
-            console.log('drawPoints', JSON.stringify(this.points));
             let points = this.svg.selectAll('circle');
+            this.drawPolygonEdges();
+
             // draw new points
             points.data(this.points).enter()
                 .append('circle')
@@ -63,7 +58,9 @@ export default {
                     return d.y;
                 })
                 .attr('r', 5)
-                .attr('fill', 'black')
+                .attr('fill', (d, i) => {
+                    return i ? 'black' : 'gray';
+                })
                 .attr('stroke', 'black')
 
             // remove expired points
@@ -71,14 +68,14 @@ export default {
 
             // first point in a polygon
             let firstPoint = this.svg.select('circle')
+                //close the shape
                 .on('click', () => {
                     this.spaces.push({
                         points: this.points
                     });
-                    this.points = [];
-                    console.log(d3.event);
-                    console.log(JSON.stringify(this.points));
+                    // prevent a new point from being created when the shape is closed
                     d3.event.stopPropagation();
+                    this.points = [];
                 })
                 .on('mouseenter', () => {
                     firstPoint.attr('fill', 'white');
@@ -87,7 +84,24 @@ export default {
                     firstPoint.attr('fill', 'gray');
                 });
         },
+        drawPolygonEdges: function() {
+            var line = d3.line()
+                .x(function(d) {
+                    return d.x;
+                })
+                .y(function(d) {
+                    return d.y;
+                });
+
+            this.svg.append("path")
+                .datum(this.points)
+                .attr("fill", "none")
+                .attr("stroke", 'red')
+                .attr("stroke-width", "2")
+                .attr("d", line);
+        },
         drawPolygonSpaces: function() {
+            // draw a polygon for each space
             this.svg.selectAll('polygon')
                 .data(this.spaces).enter()
                 .append('polygon')
@@ -97,7 +111,12 @@ export default {
                         pointsString += (p.x + ',' + p.y + ' ');
                     });
                     return pointsString;
-                });
+                })
+                .attr('stroke', 'red')
+                .attr("stroke-width", "2");
+
+            //remove expired guidelines
+            d3.selectAll("path").remove();
         },
         drawRectSpaces: function(e) {
             this.svg.selectAll('rect')
