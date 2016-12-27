@@ -1,9 +1,6 @@
 <template>
     <div id="canvas">
-        <div id="zoom">
-            <span>+</span>
-            <span>-</span>
-        </div>
+
         <svg @click="addPoint"></svg>
     </div>
 </template>

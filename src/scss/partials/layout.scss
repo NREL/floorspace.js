@@ -1,9 +1,6 @@
 html, body {
     color: $gray-light;
     height: 100vh;
-    font-family: 'Avenir', Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
     margin: 0;
     a {
         color: $blue;
@@ -12,20 +9,23 @@ html, body {
 
 //layout
 #toolbar {
-    width: 100%;
+    height: 3rem;
+    width: calc(100% - 17.5rem);
 }
 #app, main {
-    height: 100%;
+    height: calc(100% - 3rem);
 }
 main {
     display: flex;
     justify-content: space-between;
 
     #navigation, #inspector {
+        height: 100%;
         width: 17.5rem;
     }
 
     #canvas {
+        height: 100%;
         width: calc(100% - 35rem);
     }
 }
