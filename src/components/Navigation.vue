@@ -1,17 +1,21 @@
 <template>
 <nav id="navigation">
     <section id="tabs">
-        <span class="active">Stories</span>
-        <span>Thermal Zones</span>
-        <span>Spaces</span>
+        <span v-for="tab in tabs" :class="currentTab === tab ? 'active' : ''" @click="currentTab = tab">
+            {{ tab }}
+        </span>
+
     </section>
-    <h1>Navigation</h1>
-    <div class="active">item</div>
-    <div>item</div>
-    <div>item</div>
-    <div>item</div>
-    <div>item</div>
-    <div>item</div>
+    <section id="breadcrumbs">
+        {{ currentStory }} > {{ currentThermalZone }} > {{ currentSpace }}
+
+    </section>
+    <h2>{{currentTab}}</h2>
+
+
+    <div v-for="item in navItems" :class="currentItem === item ? 'active' : ''" @click="currentItem = item">
+        {{item}}
+    </div>
 </nav>
 </template>
 
@@ -19,7 +23,30 @@
 export default {
     name: 'navigation',
     data() {
-        return {}
+        return {
+            tabs: ['stories', 'thermal zones', 'spaces'],
+            stories: ['ground level'],
+            spaces: ['space 1', 'space 2', 'space 3'],
+            thermalZones: ['zone 1', 'zone 2', 'zone 3'],
+            currentTab: 'spaces',
+            currentStory: '',
+            currentThermalZone: '',
+            currentSpace: ''
+        }
+    },
+    computed: {
+        navItems: function() {
+            if (this.currentTab === 'stories') {
+                this.currentStory = this.stories[0];
+                return this.stories;
+            } else if (this.currentTab === 'thermal zones') {
+                this.currentThermalZone = this.thermalZones[0];
+                return this.thermalZones;
+            } else if (this.currentTab === 'spaces') {
+                this.currentSpace = this.spaces[0];
+                return this.spaces;
+            }
+        }
     }
 }
 </script>
@@ -37,21 +64,14 @@ export default {
         span {
             border-right: 1px solid $gray-darkest;
             display: inline-block;
-            font-size: 10px;
+            font-size: 0.625rem;
             padding: .5rem;
             text-transform: uppercase;
-
-            // &:last-child{
-            //     border: 0;
-            // }
         }
     }
     div {
         width: 100%;
         padding: 0.75rem;
-        // &:nth-child(odd)  {
-        //     background-color: $gray-medium;
-        // }
     }
 
     .active {

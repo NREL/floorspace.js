@@ -33,7 +33,7 @@ export default {
     #zoom {
         span {
             text-transform: uppercase;
-            font-size: 10px;
+            font-size: 0.625rem;
         }
         input {
             background-color: $gray-darkest;
