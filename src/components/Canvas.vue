@@ -61,7 +61,7 @@ export default {
         },
         drawPolygonEdges: function() {
             // remove expired paths
-            d3.selectAll("path").remove();
+            d3.selectAll("#canvas path").remove();
 
             var line = d3.line()
                 .x((d) => { return d.x; })
@@ -90,8 +90,8 @@ export default {
                 .attr("stroke-width", "1");
 
             //remove expired points and guidelines
-            d3.selectAll("path").remove();
-            d3.selectAll('circle').remove();
+            d3.selectAll("#canvas path").remove();
+            d3.selectAll('#canvas circle').remove();
         },
         drawRectSpaces: function(e) {
             d3.select('#canvas svg').selectAll('rect')
