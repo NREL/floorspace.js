@@ -6,18 +6,20 @@
         <span :class="tab === 'spaces' ? 'active' : ''" @click="tab = 'spaces'">Spaces</span>
     </section>
     <section id="breadcrumbs">
-        ...
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path d="M.5 0v14l11-7-11-7z"/></svg>
-        {{ currentStory }}
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path d="M.5 0v14l11-7-11-7z"/></svg>
-        {{ currentThermalZone }}
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path d="M.5 0v14l11-7-11-7z"/></svg>
-        {{ currentSpace }}
-
+        <span v-if="currentStory">
+            {{ currentStory }}
+        </span>
+        <span v-if="currentStory && currentThermalZone">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path d="M.5 0v14l11-7-11-7z"/></svg>
+            {{ currentThermalZone }}
+        </span>
+        <span v-if="currentStory && currentThermalZone && currentSpace">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path d="M.5 0v14l11-7-11-7z"/></svg>
+            {{ currentSpace }}
+        </span>
     </section>
+
     <h2>{{tab}}</h2>
-
-
     <div v-for="item in navItems" :class="currentItem === item ? 'active' : ''" @click="currentItem = item">
         {{item}}
     </div>
@@ -28,19 +30,19 @@
 export default {
     name: 'navigation',
     data() {
-        return {
+        var data =  {
             tab: 'stories',
             selectedItem: '',
-
             // this shouldn't be arrays - this should be a heirarchical structure
             stories: ['ground level'],
             spaces: ['space 1', 'space 2', 'space 3'],
             thermalZones: ['zone 1', 'zone 2', 'zone 3'],
+        };
+        data.currentStory = data.stories[0];
+        data.currentThermalZone = data.thermalZones[0];
+        data.currentSpace = data.spaces[0];
 
-            currentStory: '',
-            currentThermalZone: '',
-            currentSpace: ''
-        }
+        return data;
     },
     computed: {
         navItems: function() {
@@ -84,8 +86,7 @@ export default {
         display: flex;
         padding: .75rem;
         svg {
-            height: .35rem;
-            margin: 0.25rem;
+            margin: 0 0rem 0 .5rem;
             width: .5rem;
             path {
                 fill: $gray-medium-dark;

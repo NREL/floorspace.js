@@ -1,7 +1,6 @@
 //layout
 #toolbar {
-    height: 3rem;
-    width: calc(100% - 17.5rem);
+    height: 5rem;
 }
 #app {
     height: 100%;
@@ -9,7 +8,7 @@
 main {
     display: flex;
     justify-content: space-between;
-    height: calc(100% - 3rem);
+    height: calc(100% - 5rem);
     #navigation, #inspector {
         height: 100%;
         width: 17.5rem;

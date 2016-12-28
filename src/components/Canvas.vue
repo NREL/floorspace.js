@@ -24,17 +24,17 @@ export default {
     },
     methods: {
         addPoint: function(e) {
-            let point = {
+            this.points.push({
                 x: e.offsetX,
                 y: e.offsetY
-            };
-            this.points.push(point);
+            });
         },
 
         drawPoints: function() {
             // draw new points
-            d3.select('svg').selectAll('circle').data(this.points).enter()
-                .append('circle')
+            d3.select('#canvas svg')
+                .selectAll('circle').data(this.points)
+                .enter().append('circle')
                 .attr('cx', (d, i) => {
                     return d.x;
                 })
@@ -47,7 +47,7 @@ export default {
             this.drawPolygonEdges();
 
             // set a click listener for the first point in the polynomial, when it is clicked close the shape
-            d3.select('svg').select('circle')
+            d3.select('#canvas svg').select('circle')
                 .on('click', () => {
                     // create the shape - triggers this.drawPolygonSpaces()
                     this.spaces.push({ points: this.points });
@@ -67,7 +67,7 @@ export default {
                 .x((d) => { return d.x; })
                 .y((d) => { return d.y; });
 
-            d3.select('svg').append("path")
+            d3.select('#canvas svg').append("path")
                 .datum(this.points)
                 .attr("fill", "none")
                 .attr("stroke-width", "1")
@@ -77,7 +77,7 @@ export default {
         },
         drawPolygonSpaces: function() {
             // draw a polygon for each space
-            d3.select('svg').selectAll('polygon')
+            d3.select('#canvas svg').selectAll('polygon')
                 .data(this.spaces).enter()
                 .append('polygon')
                 .attr('points', (d, i) => {
@@ -94,7 +94,7 @@ export default {
             d3.selectAll('circle').remove();
         },
         drawRectSpaces: function(e) {
-            d3.select('svg').selectAll('rect')
+            d3.select('#canvas svg').selectAll('rect')
                 .data(this.rectSpaces).enter()
                 .append('rect')
                 .attr('x', (d, i) => {
