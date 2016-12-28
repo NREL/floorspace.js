@@ -6,7 +6,13 @@
         <span :class="tab === 'spaces' ? 'active' : ''" @click="tab = 'spaces'">Spaces</span>
     </section>
     <section id="breadcrumbs">
-        ... > {{ currentStory }} > {{ currentThermalZone }} > {{ currentSpace }}
+        ...
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path d="M.5 0v14l11-7-11-7z"/></svg>
+        {{ currentStory }}
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path d="M.5 0v14l11-7-11-7z"/></svg>
+        {{ currentThermalZone }}
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path d="M.5 0v14l11-7-11-7z"/></svg>
+        {{ currentSpace }}
 
     </section>
     <h2>{{tab}}</h2>
@@ -71,14 +77,25 @@ export default {
 #navigation {
     background-color: $gray-medium-dark;
     border-right: 1px solid $gray-darkest;
-    font-size: 0.625rem;
+    font-size: 0.75rem;
     #breadcrumbs {
+        align-items: center;
         background-color: $gray-medium-light;
-        padding: .5rem;
+        display: flex;
+        padding: .75rem;
+        svg {
+            height: .35rem;
+            margin: 0.25rem;
+            width: .5rem;
+            path {
+                fill: $gray-medium-dark;
+            }
+        }
     }
     #tabs {
         border-bottom: 1px solid $gray-darkest;
         display: flex;
+        font-size: 0.625rem;
         span {
             border-right: 1px solid $gray-darkest;
             display: inline-block;
