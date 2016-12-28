@@ -1,16 +1,15 @@
 <template>
 <nav id="navigation">
     <section id="tabs">
-        <span v-for="tab in tabs" :class="currentTab === tab ? 'active' : ''" @click="currentTab = tab">
-            {{ tab }}
-        </span>
-
+        <span :class="tab === 'stories' ? 'active' : ''" @click="tab = 'stories'">Stories</span>
+        <span :class="tab === 'thermalZones' ? 'active' : ''" @click="tab = 'thermalZones'">Thermal Zones</span>
+        <span :class="tab === 'spaces' ? 'active' : ''" @click="tab = 'spaces'">Spaces</span>
     </section>
     <section id="breadcrumbs">
-        {{ currentStory }} > {{ currentThermalZone }} > {{ currentSpace }}
+        ... > {{ currentStory }} > {{ currentThermalZone }} > {{ currentSpace }}
 
     </section>
-    <h2>{{currentTab}}</h2>
+    <h2>{{tab}}</h2>
 
 
     <div v-for="item in navItems" :class="currentItem === item ? 'active' : ''" @click="currentItem = item">
@@ -24,11 +23,14 @@ export default {
     name: 'navigation',
     data() {
         return {
-            tabs: ['stories', 'thermal zones', 'spaces'],
+            tab: 'stories',
+            selectedItem: '',
+
+            // this shouldn't be arrays - this should be a heirarchical structure
             stories: ['ground level'],
             spaces: ['space 1', 'space 2', 'space 3'],
             thermalZones: ['zone 1', 'zone 2', 'zone 3'],
-            currentTab: 'spaces',
+
             currentStory: '',
             currentThermalZone: '',
             currentSpace: ''
@@ -36,15 +38,27 @@ export default {
     },
     computed: {
         navItems: function() {
-            if (this.currentTab === 'stories') {
-                this.currentStory = this.stories[0];
-                return this.stories;
-            } else if (this.currentTab === 'thermal zones') {
-                this.currentThermalZone = this.thermalZones[0];
-                return this.thermalZones;
-            } else if (this.currentTab === 'spaces') {
-                this.currentSpace = this.spaces[0];
-                return this.spaces;
+            return this.$data[this.tab];
+        },
+        currentItem: {
+            // defaults to first item
+            get: function() {
+                if (this.tab === 'stories') {
+                    return this.currentStory;
+                } else if (this.tab === 'thermalZones') {
+                    return this.currentThermalZone;
+                } else if (this.tab === 'spaces') {
+                    return this.currentSpace;
+                }
+            },
+            set: function (item) {
+                if (this.tab === 'stories') {
+                    this.currentStory = this.currentStory === item ? null : item;
+                } else if (this.tab === 'thermalZones') {
+                    this.currentThermalZone = this.currentThermalZone === item ? null : item;
+                } else if (this.tab === 'spaces') {
+                    this.currentSpace = this.currentSpace === item ? null : item;
+                }
             }
         }
     }
@@ -57,14 +71,17 @@ export default {
 #navigation {
     background-color: $gray-medium-dark;
     border-right: 1px solid $gray-darkest;
-
+    font-size: 0.625rem;
+    #breadcrumbs {
+        background-color: $gray-medium-light;
+        padding: .5rem;
+    }
     #tabs {
         border-bottom: 1px solid $gray-darkest;
         display: flex;
         span {
             border-right: 1px solid $gray-darkest;
             display: inline-block;
-            font-size: 0.625rem;
             padding: .5rem;
             text-transform: uppercase;
         }
