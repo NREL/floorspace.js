@@ -1,18 +1,18 @@
-.input-number {
+.input-pill {
     position: relative;
 
     label {
         text-transform: uppercase;
         font-size: 0.625rem;
     }
-    input {
+    input, select {
         background-color: $gray-medium-dark;
         border: 1px solid $gray-darkest;
         border-radius: 1rem;
         color: $gray-light;
         height: .75rem;
         padding: 0.25rem 1.25rem 0.25rem 0.75rem;
-        margin: 0 0.5rem;
+        margin: 0 1rem 0 0.25rem;
         width: 2rem;
         &:focus {
             outline: none;
@@ -25,7 +25,7 @@
 
     }
 
-    span.arrows {
+    span.arrow, span.arrows {
         background-color: $gray-medium-light;
         border: 1px solid $gray-darkest;
         border-radius: 0 1rem 1rem 0;
@@ -38,12 +38,24 @@
         width: 1.5rem;
         height: 1.25rem;
 
-        svg {
-            margin: .1rem 0;
-            path {
+        svg path {
                 fill: $gray-light;
-            }
         }
+    }
+    span.arrows svg {
+        margin: .1rem 0;
+    }
+
+    .select-wrapper {
+        border-radius: 1rem;
+        overflow: hidden;
+    }
+    select, .select-wrapper {
+        height: 1.4rem;
+    }
+
+    span.arrow svg {
+        margin: .4rem 0 .2rem 0;
     }
 }
 // <div class="input-number">

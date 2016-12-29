@@ -1,38 +1,57 @@
 <template>
-        <nav id="toolbar">
-            <section class="tools">
-                the actual tools
-            </section>
-            <section class="settings">
-                <div id="zoom">
-                    <div class="input-number">
-                        <label>zoom</label>
-                        <input type="text" :value="100 | percentage">
-                        <span class="arrows">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14">
-                                <path d="M.5 0v14l11-7-11-7z" transform="translate(0 15) rotate(-90)"></path>
-                            </svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14">
-                                <path d="M.5 0v14l11-7-11-7z" transform="translate(13) rotate(90)"></path>
-                            </svg>
-                        </span>
-                    </div>
-               </div>
-               <div class="input-number">
-                   <label>zoom</label>
-                   <input type="text" :value="100 | percentage">
-                   <span class="arrows">
-                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14">
-                           <path d="M.5 0v14l11-7-11-7z" transform="translate(0 15) rotate(-90)"></path>
-                       </svg>
-                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14">
-                           <path d="M.5 0v14l11-7-11-7z" transform="translate(13) rotate(90)"></path>
-                       </svg>
-                   </span>
-               </div>
-            </section>
+    <nav id="toolbar">
+        <section class="tools">
+            the actual tools
+        </section>
+        <section class="settings">
+            <!-- <div class="input-pill">
+                <label>zoom</label>
+                <div class="select-wrapper">
+                    <select>
+                        <option value="volvo">Volvo</option>
+                        <option value="saab">Saab</option>
+                        <option value="mercedes">Mercedes</option>
+                        <option value="audi">Audi</option>
+                    </select>
+                </div>
 
-        </nav>
+
+                <span class="arrow">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14">
+                        <path d="M.5 0v14l11-7-11-7z" transform="translate(13) rotate(90)"></path>
+                    </svg>
+                </span>
+            </div> -->
+
+
+            <div class="input-pill">
+                <label>zoom</label>
+                <input type="text" :value="100 | percentage">
+                <span class="arrows">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14">
+                        <path d="M.5 0v14l11-7-11-7z" transform="translate(0 15) rotate(-90)"></path>
+                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14">
+                        <path d="M.5 0v14l11-7-11-7z" transform="translate(13) rotate(90)"></path>
+                    </svg>
+                </span>
+            </div>
+            <div class="input-pill">
+                <label>drawing mode</label>
+                <input type="text" value="space">
+                <span class="arrows">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14">
+                        <path d="M.5 0v14l11-7-11-7z" transform="translate(0 15) rotate(-90)"></path>
+                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14">
+                        <path d="M.5 0v14l11-7-11-7z" transform="translate(13) rotate(90)"></path>
+                    </svg>
+                </span>
+            </div>
+        </section>
+
+    </nav>
 </template>
 
 <script>
@@ -66,7 +85,7 @@ export default {
             background-color: $gray-medium-light;
         }
         >div {
-            margin: 0 .5rem;
+            margin: 0 1rem 0 0;
             &:first-child {
                 margin-left: 5rem;
             }
