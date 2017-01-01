@@ -1,11 +1,12 @@
 <template>
     <div id="canvas">
-        <svg ref="grid" @click="addPoint"></svg>
+        <svg ref="grid" @click="addPoint" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg>
     </div>
 </template>
 
 <script>
 var d3 = require('d3');
+var xScale, yScale;
 export default {
     name: 'canvas',
     data: function() {
@@ -18,26 +19,35 @@ export default {
         };
     },
     mounted: function() {
+        xScale = d3.scaleLinear()
+            .domain([0, this.$refs.grid.clientWidth])
+            .range([0, 1000]);
+        yScale = d3.scaleLinear()
+            .domain([0, this.$refs.grid.clientHeight])
+            .range([0, 1000]);
+
         // draw the grid
-        let svg = d3.select('#canvas svg');
+        let svg = d3.select('#canvas svg')
+            .attr('height', this.$refs.grid.clientHeight)
+            .attr('width', this.$refs.grid.clientWidth);
 
         svg.selectAll('.vertical')
             .data(d3.range(1, this.$refs.grid.clientWidth / this.gridResolution))
             .enter().append('line')
             .attr('class', 'vertical')
-            .attr('x1', (d) => { return d * this.gridResolution; })
+            .attr('x1', (d) => { return xScale(d * this.gridResolution); })
             .attr('y1', 0)
-            .attr('x2', (d) => { return d * this.gridResolution; })
-            .attr('y2', this.$refs.grid.clientHeight);
+            .attr('x2', (d) => { return xScale(d * this.gridResolution); })
+            .attr('y2', yScale(this.$refs.grid.clientHeight));
 
         svg.selectAll('.horizontal')
             .data(d3.range(1, this.$refs.grid.clientHeight / this.gridResolution))
             .enter().append('line')
             .attr('class', 'horizontal')
             .attr('x1', 0)
-            .attr('y1', (d) => { return d * this.gridResolution; })
-            .attr('x2', this.$refs.grid.clientWidth)
-            .attr('y2', (d) => { return d * this.gridResolution; });
+            .attr('y1', (d) => { return yScale(d * this.gridResolution); })
+            .attr('x2', xScale(this.$refs.grid.clientWidth))
+            .attr('y2', (d) => { return yScale(d * this.gridResolution); });
     },
     watch: {
         // when a space is added, draw all spaces
@@ -51,8 +61,8 @@ export default {
                 y = round(Math.max(2, Math.min(this.$refs.grid.clientHeight - 2, e.offsetY)), this.gridResolution);
 
             this.points.push({
-                x: x,
-                y: y
+                x: xScale(x),
+                y: yScale(y)
             });
 
             function round(p, n) {
@@ -104,7 +114,7 @@ export default {
                 .attr("d", line)
                 // prevent overlapping the points - screws up click events
                 .lower();
-                
+
             // keep grid lines under polygon edges
             d3.selectAll('.vertical, .horizontal').lower();
         },

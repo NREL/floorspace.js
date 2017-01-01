@@ -2,15 +2,15 @@
     <div id="app">
         <toolbar></toolbar>
         <main>
-                <navigation></navigation>
-                <canvas-view></canvas-view>
-                <inspector></inspector>
+            <navigation></navigation>
+            <canvas-view></canvas-view>
+            <inspector></inspector>
         </main>
     </div>
 </template>
 
 <script>
-import Canvas from './components/Canvas'
+import Canvas from './components/Grid'
 import Navigation from './components/Navigation'
 import Toolbar from './components/Toolbar'
 import Inspector from './components/Inspector'
