@@ -6,9 +6,19 @@
         <section class="settings">
 
             <div class="input-select">
-                <label>test</label>
-                <select>
+                <label>zoom</label>
+                <select v-model="scale">
                     <option v-for="i in 10">{{ i * 10 }}%</option>
+                </select>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14" height="10px">
+                    <path d="M.5 0v14l11-7-11-7z" transform="translate(13) rotate(90)"></path>
+                </svg>
+            </div>
+
+            <div class="input-select" id="drawing-mode">
+                <label>drawing mode</label>
+                <select v-model="mode">
+                    <option v-for="mode in modes">{{ mode }}</option>
                 </select>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14" height="10px">
                     <path d="M.5 0v14l11-7-11-7z" transform="translate(13) rotate(90)"></path>
@@ -24,9 +34,13 @@
 export default {
     name: 'toolbar',
     data: function() {
-        return {
-            scale: 100
+        var data =  {
+            modes: ['Space', 'Select', 'Rectangle', 'Polygon', 'Place Component', 'Apply Property', 'Scale'],
+            scale: '100' + '%',
+            mode: null
         };
+        data.mode = data.modes[0];
+        return data;
     }
 }
 </script>
@@ -47,11 +61,16 @@ export default {
         &.settings {
             background-color: $gray-medium-light;
         }
+
         >div {
             margin: 0 1rem 0 0;
             &:first-child {
                 margin-left: 5rem;
             }
+
+        }
+        #drawing-mode > select {
+            width: 8.5rem;
         }
     }
 }
