@@ -4,51 +4,17 @@
             the actual tools
         </section>
         <section class="settings">
-            <!-- <div class="input-pill">
-                <label>zoom</label>
-                <div class="select-wrapper">
-                    <select>
-                        <option value="volvo">Volvo</option>
-                        <option value="saab">Saab</option>
-                        <option value="mercedes">Mercedes</option>
-                        <option value="audi">Audi</option>
-                    </select>
-                </div>
 
-
-                <span class="arrow">
-
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14">
-                        <path d="M.5 0v14l11-7-11-7z" transform="translate(13) rotate(90)"></path>
-                    </svg>
-                </span>
-            </div> -->
-
-
-            <div class="input-pill">
-                <label>zoom</label>
-                <input type="text" :value="100 | percentage">
-                <span class="arrows">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14">
-                        <path d="M.5 0v14l11-7-11-7z" transform="translate(0 15) rotate(-90)"></path>
-                    </svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14">
-                        <path d="M.5 0v14l11-7-11-7z" transform="translate(13) rotate(90)"></path>
-                    </svg>
-                </span>
+            <div class="input-select">
+                <label>test</label>
+                <select>
+                    <option v-for="i in 10">{{ i * 10 }}%</option>
+                </select>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14" height="10px">
+                    <path d="M.5 0v14l11-7-11-7z" transform="translate(13) rotate(90)"></path>
+                </svg>
             </div>
-            <div class="input-pill">
-                <label>drawing mode</label>
-                <input type="text" value="space">
-                <span class="arrows">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14">
-                        <path d="M.5 0v14l11-7-11-7z" transform="translate(0 15) rotate(-90)"></path>
-                    </svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14">
-                        <path d="M.5 0v14l11-7-11-7z" transform="translate(13) rotate(90)"></path>
-                    </svg>
-                </span>
-            </div>
+
         </section>
 
     </nav>
@@ -58,12 +24,9 @@
 export default {
     name: 'toolbar',
     data: function() {
-        return {};
-    },
-    filters: {
-        percentage: function(value) {
-            return value + '%';
-        }
+        return {
+            scale: 100
+        };
     }
 }
 </script>

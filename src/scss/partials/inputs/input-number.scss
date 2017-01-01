@@ -1,72 +1,29 @@
-.input-pill {
+
+.input-select {
     position: relative;
-
     label {
-        text-transform: uppercase;
         font-size: 0.625rem;
+        margin-right: 1rem;
+        text-transform: uppercase;
     }
-    input, select {
-        background-color: $gray-medium-dark;
-        border: 1px solid $gray-darkest;
-        border-radius: 1rem;
+
+    select {
+        background-color: $gray-dark;
+        border: 0;
         color: $gray-light;
-        height: .75rem;
-        padding: 0.25rem 1.25rem 0.25rem 0.75rem;
-        margin: 0 1rem 0 0.25rem;
-        width: 2rem;
-        &:focus {
-            outline: none;
-        }
-        &[type=number]::-webkit-inner-spin-button,
-        &[type=number]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-
+        height: 2rem;
+        padding: 0 .75rem;
+        -webkit-appearance: none;
+        width: 4rem;
     }
 
-    span.arrow, span.arrows {
-        background-color: $gray-medium-light;
-        border: 1px solid $gray-darkest;
-        border-radius: 0 1rem 1rem 0;
-        display: flex;
-        flex-direction: column;
-        padding-right: 0.125rem;
+    svg {
+        pointer-events: none;
         position: absolute;
-        top:0;
-        right: 0px;
-        width: 1.5rem;
-        height: 1.25rem;
-
-        svg path {
-                fill: $gray-light;
+        right: 5px;
+        top: calc(1rem - 3px);
+        path {
+            fill: $gray-medium-light;
         }
-    }
-    span.arrows svg {
-        margin: .1rem 0;
-    }
-
-    .select-wrapper {
-        border-radius: 1rem;
-        overflow: hidden;
-    }
-    select, .select-wrapper {
-        height: 1.4rem;
-    }
-
-    span.arrow svg {
-        margin: .4rem 0 .2rem 0;
     }
 }
-// <div class="input-number">
-//     <label>zoom</label>
-//     <input type="number" value="100%">
-//     <span>
-//         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14">
-//             <path d="M.5 0v14l11-7-11-7z" transform="translate(0 15) rotate(-90)"></path>
-//         </svg>
-//         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14">
-//             <path d="M.5 0v14l11-7-11-7z" transform="translate(13) rotate(90)"></path>
-//         </svg>
-//     </span>
-// </div>
