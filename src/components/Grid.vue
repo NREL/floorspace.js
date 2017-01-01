@@ -73,21 +73,22 @@ export default {
         drawPoints: function() {
             // draw new points
             d3.select('#canvas svg')
-                .selectAll('circle').data(this.points)
-                .enter().append('circle')
+                .selectAll('ellipse').data(this.points)
+                .enter().append('ellipse')
                 .attr('cx', (d, i) => {
                     return d.x;
                 })
                 .attr('cy', (d, i) => {
                     return d.y;
                 })
-                .attr('r', 2);
+                .attr('rx', xScale(2))
+                .attr('ry', yScale(2));
 
             //connect the points with a guideline
             this.drawPolygonEdges();
 
             // set a click listener for the first point in the polynomial, when it is clicked close the shape
-            d3.select('#canvas svg').select('circle')
+            d3.select('#canvas svg').select('ellipse')
                 .on('click', () => {
                     // create the shape - triggers this.drawPolygonSpaces()
                     this.spaces.push({ points: this.points });
@@ -97,7 +98,8 @@ export default {
                 })
                 // styles for the first point in the polygon
                 .classed('origin', true)
-                .attr('r', 5);
+                .attr('rx', xScale(7))
+                .attr('ry', yScale(7));
         },
         drawPolygonEdges: function() {
             // remove expired paths
@@ -134,7 +136,7 @@ export default {
 
             //remove expired points and guidelines
             d3.selectAll("#canvas path").remove();
-            d3.selectAll('#canvas circle').remove();
+            d3.selectAll('#canvas ellipse').remove();
         },
         drawRectSpaces: function(e) {
             d3.select('#canvas svg').selectAll('rect')

@@ -1,23 +1,24 @@
-#canvas {
-    svg {
-        .horizontal, .vertical {
-            stroke: $gray-medium-dark;
-        }
-        polygon, rect, path {
-            fill: $primary;
-            fill-opacity: 0.25;
-            stroke: $secondary;
-        }
-
-        circle {
-            fill: $secondary;
-            stroke: $secondary;
-            &.origin {
-                fill: none;
-                &:hover {
-                    fill: $secondary;
-                }
+#canvas svg {
+    // points
+    ellipse {
+        fill: $secondary;
+        stroke: $secondary;
+        &.origin {
+            fill: none;
+            &:hover {
+                fill: $secondary;
             }
         }
+    }
+    // gridlines
+    line.horizontal, line.vertical {
+        stroke: $gray-medium-dark;
+    }
+
+    // shapes
+    polygon, rect, path {
+        fill: $primary;
+        fill-opacity: 0.25;
+        stroke: $secondary;
     }
 }
