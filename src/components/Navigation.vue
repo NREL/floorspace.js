@@ -5,7 +5,7 @@
         <span :class="tab === 'thermalZones' ? 'active' : ''" @click="tab = 'thermalZones'">Thermal Zones</span>
         <span :class="tab === 'spaces' ? 'active' : ''" @click="tab = 'spaces'">Spaces</span>
     </section>
-    <section id="breadcrumbs">
+    <section id="breadcrumbs" v-show="currentStory || currentThermalZone || currentSpace">
         <span v-if="currentStory">
             {{ currentStory }}
         </span>
@@ -19,7 +19,6 @@
         </span>
     </section>
 
-    <h2>{{tab}}</h2>
     <div v-for="item in navItems" :class="currentItem === item ? 'active' : ''" @click="currentItem = item">
         {{item}}
     </div>
@@ -80,11 +79,15 @@ export default {
     background-color: $gray-medium-dark;
     border-right: 1px solid $gray-darkest;
     font-size: 0.75rem;
-    #breadcrumbs {
+     #breadcrumbs, div {
         align-items: center;
-        background-color: $gray-medium-light;
         display: flex;
-        padding: .75rem;
+        height: 2.5rem;
+        padding: 0 1rem;
+    }
+    #breadcrumbs {
+        background-color: $gray-medium-light;
+        border-bottom: 1px solid $gray-medium-dark;
         svg {
             margin: 0 0rem 0 .5rem;
             width: .5rem;
@@ -103,10 +106,6 @@ export default {
             padding: .5rem;
             text-transform: uppercase;
         }
-    }
-    div {
-        width: 100%;
-        padding: 0.75rem;
     }
 
     .active {

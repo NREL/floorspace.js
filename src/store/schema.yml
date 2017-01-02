@@ -1,0 +1,236 @@
+
+properties:
+  # ?
+ project:
+  type: object
+  # will this just be the scale of the grid as configured on widget instantiation?
+ grid:
+  type: object
+  # ?
+ view:
+  type: object
+  # background image sourced from google maps with associated scale data - could potentially be an api url
+ map:
+  type: object
+  # ?
+ images:
+  type: array
+  # ? can we have multiple buildings in a single building model? will this need to be above story in the model heirarchy
+ buildings:
+  type: array
+  items:
+   "$ref": "#/definitions/Building"
+ building_units:
+  type: array
+  items:
+   "$ref": "#/definitions/BuildingUnit"
+ thermal_zones:
+  type: array
+  items:
+   "$ref": "#/definitions/ThermalZone"
+ space_types:
+  type: array
+  items:
+   "$ref": "#/definitions/SpaceType"
+ constructions:
+  type: array
+  items:
+   type: object
+   properties:
+    id:
+     type: string
+    name:
+     type: string
+ construction_sets:
+  type: array
+  items:
+   "$ref": "#/definitions/ConstructionSet"
+ windows:
+  type: array
+  items:
+   "$ref": "#/definitions/Window"
+ daylighting_controls:
+  type: array
+  items:
+   "$ref": "#/definitions/DaylightingControl"
+# these are the geometry objects that can be created through the interface
+definitions:
+ Geometry:
+  type: object
+  properties:
+   vertices:
+    type: array
+    items:
+     "$ref": "#/definitions/Vertex"
+   edges:
+    type: array
+    items:
+     "$ref": "#/definitions/Edge"
+   faces:
+    type: array
+    items:
+     "$ref": "#/definitions/Face"
+ Vertex:
+  type: object
+  properties:
+   id:
+    type: string
+   x:
+    type: number
+   y:
+    type: number
+   edges:
+    type: array
+    items:
+     type: string
+ Edge:
+  type: object
+  properties:
+   id:
+    type: string
+   vertices:
+    type: array
+    items:
+     type: string
+     minLength: 2
+     maxLength: 2
+   faces:
+    type: array
+    items:
+     type: string
+     minLength: 2
+     maxLength: 2
+ Face:
+  type: object
+  properties:
+   id:
+    type: string
+   edges:
+    type: array
+    minItems: 3
+    items:
+     type: string
+   edge_order:
+    type: array
+    minItems: 3
+    items:
+     type: number
+     enum:
+      -
+   0
+      -
+   1
+ Building:
+  type: object
+  properties:
+   id:
+    type: string
+   name:
+    type: string
+   stories:
+    type: array
+    items:
+     "$ref": "#/definitions/Story"
+ Story:
+  type: object
+  properties:
+   id:
+    type: string
+   name:
+    type: string
+   geometry:
+    "$ref": "#/definitions/Geometry"
+   spaces:
+    type: array
+    items:
+     "$ref": "#/definitions/Space"
+   shading:
+    type: array
+    items:
+     "$ref": "#/definitions/Shading"
+   windows:
+    type: array
+    items:
+     type: object
+     properties:
+      window:
+       type: string
+      vertex:
+       type: string
+ Space:
+  type: object
+  properties:
+   id:
+    type: string
+   name:
+    type: string
+   face:
+    type: string
+   building_unit:
+    type: string
+   thermal_zone:
+    type: string
+   space_type:
+    type: string
+   construction_set:
+    type: string
+   daylighting_controls:
+    type: array
+    items:
+     type: object
+     properties:
+      daylighting_control:
+       type: string
+      vertex:
+       type: string
+ Shading:
+  type: object
+  properties:
+   id:
+    type: string
+   name:
+    type: string
+   face:
+    type: string
+ ThermalZone:
+  type: object
+  properties:
+   id:
+    type: string
+   name:
+    type: string
+ SpaceType:
+  type: object
+  properties:
+   id:
+    type: string
+   name:
+    type: string
+ BuildingUnit:
+  type: object
+  properties:
+   id:
+    type: string
+   name:
+    type: string
+ ConstructionSet:
+  type: object
+  properties:
+   id:
+    type: string
+   name:
+    type: string
+ Window:
+  type: object
+  properties:
+   id:
+    type: string
+   name:
+    type: string
+ DaylightingControl:
+  type: object
+  properties:
+   id:
+    type: string
+   name:
+    type: string

@@ -5,7 +5,7 @@
         </section>
         <section class="settings">
 
-            <div class="input-select">
+            <div class="input-select" id="scale">
                 <label>zoom</label>
                 <select v-model="scale">
                     <option v-for="i in 10">{{ i * 10 }}%</option>
@@ -16,7 +16,7 @@
             </div>
 
             <div class="input-select" id="drawing-mode">
-                <label>drawing mode</label>
+                <label>mode</label>
                 <select v-model="mode">
                     <option v-for="mode in modes">{{ mode }}</option>
                 </select>
@@ -64,14 +64,19 @@ export default {
 
         >div {
             margin: 0 1rem 0 0;
-            &:first-child {
+            &#scale {
                 margin-left: 5rem;
+            }
+            &#drawing-mode {
+                right: 5rem;
+                position: absolute;
+                > select {
+                    width: 8.5rem;
+                }
             }
 
         }
-        #drawing-mode > select {
-            width: 8.5rem;
-        }
+
     }
 }
 </style>

@@ -9,7 +9,6 @@ export default {
     name: 'inspector',
     data() {
         return {
-            msg: 'Welcome to GeoSketch'
         }
     }
 }
@@ -20,5 +19,6 @@ export default {
     #inspector {
         background-color: $gray-dark;
         border-left: 1px solid $gray-darkest;
+        padding: 0 2rem;
     }
 </style>
