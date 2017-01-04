@@ -1,0 +1,21 @@
+// basic layout structure for the entire application
+#toolbar {
+    height: 5rem;
+}
+#app {
+    height: 100%;
+}
+main {
+    display: flex;
+    justify-content: space-between;
+    height: calc(100% - 5rem);
+    #navigation, #inspector {
+        height: 100%;
+        width: 17.5rem;
+    }
+
+    #canvas {
+        height: 100%;
+        width: calc(100% - 35rem);
+    }
+}
