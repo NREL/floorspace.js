@@ -1,28 +1,42 @@
 export default {
     'config': {
         'language': null,
+        'scale': null,
         'units': null
     },
-    'application': {
+    'settings': {
         'scale': null,
-        'drawingMode': '',
-        'tool': ''
+        'drawingMode': null,
+        'tool': null,
+        'selectedStory': null,
+        'selectedThermalZone': null,
+        'selectedSpace': null
     },
-    'geometry': {
+    'structures': {
         'stories': [{
             'name': null,
             'id': null,
-            'thermalZoneIds': []
+            'thermalZoneIds': [],
+            'spaceIds': [],
+            'geometry': {
+                'surfaces': []
+            }
         }],
         'thermalZones': [{
             'name': null,
             'id': null,
-            'spaceIds': []
+            'spaceIds': [],
+            'geometry': {
+                'surfaces': []
+            }
         }],
         'spaces': [{
             'name': null,
             'id': null,
-            'surfaceIds': []
+            'surfaceIds': [],
+            'geometry': {
+                'surfaces': []
+            }
         }],
         'surfaces': [{
             'id': null,

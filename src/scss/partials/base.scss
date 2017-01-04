@@ -1,3 +1,4 @@
+// base color and font configuration for the entire app
 html, body {
     color: $gray-light;
     font-size: 16px;
@@ -7,7 +8,7 @@ html, body {
     -moz-osx-font-smoothing: grayscale;
     margin: 0;
     h1, h2, h3, h4 {
-        font-weight: 100;        
+        font-weight: 100;
     }
     a {
         color: $secondary;

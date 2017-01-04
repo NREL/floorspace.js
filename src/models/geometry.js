@@ -1,23 +1,25 @@
-function rect(x=0, y=0, h=0, w=0) {
+// spaces, thermal zones, and stories each have a geometry object
+// geometry is assumed to be a polygon with an arbitrary number of surfaces
+function geometry() {
     return {
-        origin: {
-            x: x,
-            y: y
-        },
-        size: {
-            height: h,
-            width: w
-        }
+        'surfaces': []
     };
 }
-function polygon(points=[]) {
+
+// each surface is just two points, different geometry definitions can share references to the same surfaces
+function surface(p1, p2) {
     return {
-        points:[]
+        'id': null,
+        'p1': p1,
+        'p2': p2
     };
 }
+
+// points are stored in userspace units, scaling information is stored in the app config
 function point(x=0, y=0) {
     return {
-        x: x,
-        y: y
+        'id': null,
+        'x': x,
+        'y': y
     };
 }

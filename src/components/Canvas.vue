@@ -1,3 +1,4 @@
+<!-- this is the original canvas component, it will likely be replaced permanently by the grid component -->
 <template>
     <div id="canvas">
         <svg @click="addPoint"></svg>
