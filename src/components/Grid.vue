@@ -27,6 +27,7 @@ export default {
         };
     },
     mounted: function() {
+        // configure scales
         xScale = d3.scaleLinear()
             .domain([0, this.$refs.grid.clientWidth])
             .range([0, 1000]);
@@ -35,7 +36,7 @@ export default {
             .range([0, 1000]);
 
         // draw the grid
-        let svg = d3.select('#canvas svg')
+        var svg = d3.select('#canvas svg')
             .attr('height', this.$refs.grid.clientHeight)
             .attr('width', this.$refs.grid.clientWidth);
 
@@ -65,7 +66,7 @@ export default {
     },
     methods: {
         addPoint: function(e) {
-            let x = round(Math.max(2, Math.min(this.$refs.grid.clientWidth - 2, e.offsetX)), this.gridResolution),
+            var x = round(Math.max(2, Math.min(this.$refs.grid.clientWidth - 2, e.offsetX)), this.gridResolution),
                 y = round(Math.max(2, Math.min(this.$refs.grid.clientHeight - 2, e.offsetY)), this.gridResolution);
 
             this.points.push({
@@ -100,6 +101,9 @@ export default {
                 .on('click', () => {
                     // create the shape - triggers this.drawPolygonSpaces()
                     this.spaces.push({ points: this.points });
+
+                    this.$store.commit('createFaceFromVertices', this.points);
+                    
                     // clear points, prevent a new point from being created by this click event
                     d3.event.stopPropagation();
                     this.points = [];
