@@ -8,7 +8,7 @@
 
 export default {
     // models
-    'stories': [{
+    'stories': [/*{
         'id': null,
         'handle': null,
         'name': null,
@@ -16,13 +16,13 @@ export default {
         'floor_to_ceiling_height': 0,
         'multiplier': 0,
         'images': [], // image ids
-        'geometry': null, // geometry id
+        'geometry_id': null, // geometry id
         'spaces': [], // space ids
         'windows': [{
             'window': null,
             'vertex': null
         }]
-    }],
+    }*/],
     'spaces': [{
         'id': null,
         'handle': null,

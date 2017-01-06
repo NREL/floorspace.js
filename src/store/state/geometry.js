@@ -8,7 +8,7 @@
 
 export default {
     // geometry
-    'geometry': [{
+    'geometry': [/*{
         'id': null,
         'vertices': [{
             'id': null,
@@ -23,9 +23,9 @@ export default {
         'faces': [{
             'id': null,
             'edges': [{
-                'edge': null,
+                'edge_id': null,
                 'reverse': false
             }]
         }]
-    }]
+    }*/]
 }
