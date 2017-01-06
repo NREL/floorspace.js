@@ -21,6 +21,7 @@ module.exports = {
 
     "indent": ["error", 4],
 
-    "space-before-function-paren": ["error", "never"]
+    "space-before-function-paren": ["error", "never"],
+    "semi": 0
   }
 }

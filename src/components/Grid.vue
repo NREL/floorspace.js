@@ -102,8 +102,10 @@ export default {
                     // create the shape - triggers this.drawPolygonSpaces()
                     this.spaces.push({ points: this.points });
 
-                    this.$store.commit('createFaceFromVertices', this.points);
-                    
+                    this.$store.commit('createFaceFromVertices', {
+                        points: this.points
+                    });
+
                     // clear points, prevent a new point from being created by this click event
                     d3.event.stopPropagation();
                     this.points = [];
