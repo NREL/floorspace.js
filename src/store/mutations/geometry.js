@@ -9,7 +9,7 @@
 import factory from './../utils/factory'
 
 export default {
-    createFaceFromVertices: function(state, payload) {
+    createFaceFromPoints: function(state, payload) {
         // look up the geometry for the current story
         const story = state.stories.find((s) => {
             return s.id === state.application.currentSelection.story_id;
