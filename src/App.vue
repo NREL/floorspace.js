@@ -17,10 +17,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 </template>
 
 <script>
-import Canvas from './components/Grid'
+// this import order is important, if the grid is loaded before the other elements or after the toolbar, it ends up warped
 import Navigation from './components/Navigation'
-import Toolbar from './components/Toolbar'
 import Inspector from './components/Inspector'
+import Canvas from './components/Grid'
+import Toolbar from './components/Toolbar'
 
 export default {
     name: 'app',

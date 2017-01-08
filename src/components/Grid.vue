@@ -14,7 +14,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <script>
 var d3 = require('d3');
-var xScale, yScale;
+//var this.scaleX, this.scaleY;
 export default {
     name: 'canvas',
     data: function() {
@@ -26,37 +26,20 @@ export default {
             points: []
         };
     },
+    computed: {
+        scaleX () {
+            return this.$store.state.application.scale.x;
+        },
+        scaleY () {
+            return this.$store.state.application.scale.y;
+        }
+    },
     mounted: function() {
-        // configure scales
-        xScale = d3.scaleLinear()
-            .domain([0, this.$refs.grid.clientWidth])
-            .range([0, 1000]);
-        yScale = d3.scaleLinear()
-            .domain([0, this.$refs.grid.clientHeight])
-            .range([0, 1000]);
-
-        // draw the grid
-        var svg = d3.select('#canvas svg')
-            .attr('height', this.$refs.grid.clientHeight)
-            .attr('width', this.$refs.grid.clientWidth);
-
-        svg.selectAll('.vertical')
-            .data(d3.range(1, this.$refs.grid.clientWidth / this.gridResolution))
-            .enter().append('line')
-            .attr('class', 'vertical')
-            .attr('x1', (d) => { return xScale(d * this.gridResolution); })
-            .attr('y1', 0)
-            .attr('x2', (d) => { return xScale(d * this.gridResolution); })
-            .attr('y2', yScale(this.$refs.grid.clientHeight));
-
-        svg.selectAll('.horizontal')
-            .data(d3.range(1, this.$refs.grid.clientHeight / this.gridResolution))
-            .enter().append('line')
-            .attr('class', 'horizontal')
-            .attr('x1', 0)
-            .attr('y1', (d) => { return yScale(d * this.gridResolution); })
-            .attr('x2', xScale(this.$refs.grid.clientWidth))
-            .attr('y2', (d) => { return yScale(d * this.gridResolution); });
+        this.drawGrid();
+        window.addEventListener('resize', this.drawGrid);
+    },
+    beforeDestroy: function () {
+        window.removeEventListener('resize', this.drawGrid)
     },
     watch: {
         // when a space is added, draw all spaces
@@ -70,8 +53,8 @@ export default {
                 y = round(Math.max(2, Math.min(this.$refs.grid.clientHeight - 2, e.offsetY)), this.gridResolution);
 
             this.points.push({
-                x: xScale(x),
-                y: yScale(y)
+                x: this.scaleX(x),
+                y: this.scaleY(y)
             });
 
             function round(p, n) {
@@ -90,8 +73,8 @@ export default {
                 .attr('cy', (d, i) => {
                     return d.y;
                 })
-                .attr('rx', xScale(2))
-                .attr('ry', yScale(2));
+                .attr('rx', this.scaleX(2))
+                .attr('ry', this.scaleY(2));
 
             //connect the points with a guideline
             this.drawPolygonEdges();
@@ -102,7 +85,7 @@ export default {
                     // create the shape - triggers this.drawPolygonSpaces()
                     this.spaces.push({ points: this.points });
 
-                    this.$store.commit('createFaceFromVertices', {
+                    this.$store.commit('createFaceFromPoints', {
                         points: this.points
                     });
 
@@ -112,8 +95,8 @@ export default {
                 })
                 // styles for the first point in the polygon
                 .classed('origin', true)
-                .attr('rx', xScale(7))
-                .attr('ry', yScale(7));
+                .attr('rx', this.scaleX(7))
+                .attr('ry', this.scaleY(7));
         },
         drawPolygonEdges: function() {
             // remove expired paths
@@ -168,9 +151,48 @@ export default {
                 .attr('height', (d, i) => {
                     return d.size.height;
                 });
+        },
+        drawGrid: function() {
+            this.$store.commit('setScaleX', {
+                scaleX: d3.scaleLinear()
+                    .domain([0, this.$refs.grid.clientWidth])
+                    .range([this.$store.state.view.min_x, this.$store.state.view.max_x])
+            });
+
+            this.$store.commit('setScaleY', {
+                scaleY: d3.scaleLinear()
+                    .domain([0, this.$refs.grid.clientHeight])
+                    .range([this.$store.state.view.min_y, this.$store.state.view.max_y])
+            });
+
+            // draw the grid
+            var svg = d3.select('#canvas svg')
+                .attr('height', this.$refs.grid.clientHeight)
+                .attr('width', this.$refs.grid.clientWidth);
+            svg.selectAll('line').remove();
+
+            svg.selectAll('.vertical')
+                .data(d3.range(1, this.$refs.grid.clientWidth / this.gridResolution))
+                .enter().append('line')
+                .attr('class', 'vertical')
+                .attr('x1', (d) => { return this.scaleX(d * this.gridResolution); })
+                .attr('y1', 0)
+                .attr('x2', (d) => { return this.scaleX(d * this.gridResolution); })
+                .attr('y2', this.scaleY(this.$refs.grid.clientHeight));
+
+            svg.selectAll('.horizontal')
+                .data(d3.range(1, this.$refs.grid.clientHeight / this.gridResolution))
+                .enter().append('line')
+                .attr('class', 'horizontal')
+                .attr('x1', 0)
+                .attr('y1', (d) => { return this.scaleY(d * this.gridResolution); })
+                .attr('x2', this.scaleX(this.$refs.grid.clientWidth))
+                .attr('y2', (d) => { return this.scaleY(d * this.gridResolution); });
         }
     }
 }
+
+
 
 </script>
 <style lang="scss" scoped>
