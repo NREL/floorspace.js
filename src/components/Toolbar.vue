@@ -13,14 +13,30 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </section>
         <section class="settings">
 
-            <div class="input-select" id="scale">
-                <label>zoom</label>
-                <select v-model="scale">
-                    <option v-for="i in 10">{{ i * 10 }}%</option>
-                </select>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14" height="10px">
-                    <path d="M.5 0v14l11-7-11-7z" transform="translate(13) rotate(90)"></path>
-                </svg>
+            <div class="input-number">
+                <label>min_x</label>
+                <input v-model.number="min_x">
+            </div>
+            <div class="input-number">
+                <label>min_y</label>
+                <input v-model.number="min_y">
+            </div>
+            <div class="input-number">
+                <label>max_x</label>
+                <input v-model.number="max_x">
+            </div>
+            <div class="input-number">
+                <label>max_y</label>
+                <input v-model.number="max_y">
+            </div>
+
+            <div class="input-number">
+                <label>x_spacing</label>
+                <input v-model.number="x_spacing">
+            </div>
+            <div class="input-number">
+                <label>y_spacing</label>
+                <input v-model.number="y_spacing">
             </div>
 
             <div class="input-select" id="drawing-mode">
@@ -49,6 +65,72 @@ export default {
         };
         data.mode = data.modes[0];
         return data;
+    },
+    computed: {
+
+        // spacing between gridlines, measured in RWU
+        x_spacing: {
+            get() {
+                return this.$store.state.grid.x_spacing;
+            },
+            set(newValue) {
+                this.$store.commit('setGridXSpacing', {
+                    x_spacing: newValue
+                });
+            }
+        },
+        y_spacing: {
+            get() {
+                return this.$store.state.grid.y_spacing;
+            },
+            set(newValue) {
+                this.$store.commit('setGridYSpacing', {
+                    y_spacing: newValue
+                });
+            }
+        },
+
+        // mix_x, min_y, max_x, and max_y are the grid dimensions in real world units
+        min_x: {
+            get() {
+                return this.$store.state.view.min_x;
+            },
+            set(newValue) {
+                this.$store.commit('setViewMinX', {
+                    min_x: newValue
+                });
+            }
+        },
+        min_y: {
+            get() {
+                return this.$store.state.view.min_y;
+            },
+            set(newValue) {
+                this.$store.commit('setViewMinY', {
+                    min_y: newValue
+                });
+            }
+        },
+        max_x: {
+            get() {
+                return this.$store.state.view.max_x;
+            },
+            set(newValue) {
+                this.$store.commit('setViewMaxX', {
+                    max_x: newValue
+                });
+            }
+        },
+        max_y: {
+            get() {
+                return this.$store.state.view.max_y;
+            },
+            set(newValue) {
+                this.$store.commit('setViewMaxY', {
+                    max_y: newValue
+                });
+            }
+        }
     }
 }
 </script>
@@ -68,13 +150,14 @@ export default {
         }
         &.settings {
             background-color: $gray-medium-light;
+            div:first-child {
+                margin-left: 5rem;
+            }
         }
 
         >div {
             margin: 0 1rem 0 0;
-            &#scale {
-                margin-left: 5rem;
-            }
+
             &#drawing-mode {
                 right: 5rem;
                 position: absolute;

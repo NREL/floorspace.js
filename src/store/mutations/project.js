@@ -51,31 +51,19 @@ export default {
     // VIEW
     // state.view.min_x
     setViewMinX: function(state, payload) {
-        if (payload.min_x >= state.view.max_x) {
-            return;
-        }
-        state.view.min_x = payload.min_x;
+        state.view.min_x = payload.min_x < state.view.max_x ? payload.min_x : state.view.min_x;
     },
     // state.view.min_y
     setViewMinY: function(state, payload) {
-        if (payload.min_y >= state.view.max_y) {
-            return;
-        }
-        state.view.min_y = payload.min_y;
+        state.view.min_y = payload.min_y < state.view.max_y ? payload.min_y : state.view.min_y;
     },
     // state.view.max_x
     setViewMaxX: function(state, payload) {
-        if (payload.max_x <= state.view.min_x) {
-            return;
-        }
-        state.view.max_x = payload.max_x;
+        state.view.max_x = payload.max_x > state.view.min_x ? payload.max_x : state.view.max_x;
     },
     // state.view.max_y
     setViewMaxY: function(state, payload) {
-        if (payload.max_y <= state.view.min_y) {
-            return;
-        }
-        state.view.max_y = payload.max_y;
+        state.view.max_y = payload.max_y > state.view.min_y ? payload.max_y : state.view.max_y;
     }
     // TODO: MAP
 };

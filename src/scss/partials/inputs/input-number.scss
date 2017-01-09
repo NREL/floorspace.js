@@ -6,30 +6,24 @@
 // (4) Other than as required in clauses (1) and (2), distributions in any form of modifications or other derivative works may not use the "OpenStudio" trademark, "OS", "os", or any other confusingly similar designation without specific prior written permission from Alliance for Sustainable Energy, LLC.
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-export default {
-    // project
-    'config': {
-        'units': 'ft',
-        'language': 'EN-US',
-        'north_axis': 0
-    },
-    'grid': {
-        'visible': true,
-        'x_spacing': 10,
-        'y_spacing': 10,
-        'x_offset': true,
-        'y_offset': true
-    },
-    'view': {
-        'min_x': 0,
-        'min_y': 0,
-        'max_x': 1000,
-        'max_y': 1000
-    },
-    'map': {
-        'visible': false,
-        'latitude': null,
-        'longitude': null,
-        'elevation': 0
+// reusable number inputs
+.input-number {
+    display: flex;
+    align-items: center;
+    label {
+        font-size: 0.625rem;
+        margin: 0 .5rem 0 1rem;
+        text-transform: uppercase;
     }
-};
+
+    input {
+        background-color: $gray-dark;
+        border: 0;
+        border-radius: 0.35rem;
+        color: $gray-light;
+        height: 2rem;
+        padding: 0 .75rem;
+        -webkit-appearance: none;
+        width: 2rem;
+    }
+}

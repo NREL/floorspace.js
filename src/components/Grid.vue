@@ -8,22 +8,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
     <div id="canvas">
-        <section id="overlay">
-            <label>min_x:</label>
-            <input v-model.number="min_x">
-            <label>min_y:</label>
-            <input v-model.number="min_y">
-            <label>max_x:</label>
-            <input v-model.number="max_x">
-            <label>max_y:</label>
-            <input v-model.number="max_y">
-
-            <label>x resolution:</label>
-            <input v-model.number="xResolution">
-            <label>y resolution:</label>
-            <input v-model.number="yResolution">
-        </section>
-
         <svg ref="grid" @click="addPoint" :viewBox="viewbox" preserveAspectRatio="none"></svg>
     </div>
 </template>
@@ -35,8 +19,6 @@ export default {
     name: 'canvas',
     data: function() {
         return {
-            xResolution: 20,
-            yResolution: 20,
             // array of spaces drawn - going to be synced with navigation and displayed
             spaces: [],
             // space being drawn
@@ -51,47 +33,26 @@ export default {
         scaleY () {
             return this.$store.state.application.scale.y;
         },
+        // the spacing in RWU between gridlines
+        x_spacing () {
+            return this.$store.state.grid.x_spacing;
+        },
+        y_spacing () {
+            return this.$store.state.grid.y_spacing;
+        },
 
         // mix_x, min_y, max_x, and max_y are the grid dimensions in real world units
-        min_x: {
-            get() {
-                return this.$store.state.view.min_x;
-            },
-            set(newValue) {
-                this.$store.commit('setViewMinX', {
-                    min_x: newValue
-                });
-            }
+        min_x() {
+            return this.$store.state.view.min_x;
         },
-        min_y: {
-            get() {
-                return this.$store.state.view.min_y;
-            },
-            set(newValue) {
-                this.$store.commit('setViewMinY', {
-                    min_y: newValue
-                });
-            }
+        min_y() {
+            return this.$store.state.view.min_y;
         },
-        max_x: {
-            get() {
-                return this.$store.state.view.max_x;
-            },
-            set(newValue) {
-                this.$store.commit('setViewMaxX', {
-                    max_x: newValue
-                });
-            }
+        max_x() {
+            return this.$store.state.view.max_x;
         },
-        max_y: {
-            get() {
-                return this.$store.state.view.max_y;
-            },
-            set(newValue) {
-                this.$store.commit('setViewMaxY', {
-                    max_y: newValue
-                });
-            }
+        max_y() {
+            return this.$store.state.view.max_y;
         },
         viewbox: function() {
             return this.$store.state.view.min_x + ' ' +
@@ -113,10 +74,10 @@ export default {
         viewbox: function() {
             this.drawGrid();
         },
-        xResolution: function() {
+        x_spacing: function() {
             this.drawGrid();
         },
-        yResolution: function() {
+        y_spacing: function() {
             this.drawGrid();
         },
         // when a space is added, draw all spaces
@@ -126,8 +87,8 @@ export default {
     },
     methods: {
         addPoint: function(e) {
-            var x = round(Math.max(2, Math.min(this.$refs.grid.clientWidth - 2, e.offsetX)), this.xResolution),
-                y = round(Math.max(2, Math.min(this.$refs.grid.clientHeight - 2, e.offsetY)), this.yResolution);
+            var x = round(Math.max(2, Math.min(this.$refs.grid.clientWidth - 2, e.offsetX)), this.x_spacing),
+                y = round(Math.max(2, Math.min(this.$refs.grid.clientHeight - 2, e.offsetY)), this.y_spacing);
 
             // the point is stored in RWU
             this.points.push({
@@ -251,22 +212,22 @@ export default {
 
             // lines are drawn in RWU
             svg.selectAll('.vertical')
-                .data(d3.range(1, this.$refs.grid.clientWidth / this.xResolution))
+                .data(d3.range(1, this.$refs.grid.clientWidth / this.x_spacing))
                 .enter().append('line')
                 .attr('class', 'vertical')
-                .attr('x1', (d) => { return this.scaleX(d * this.xResolution); })
+                .attr('x1', (d) => { return this.scaleX(d * this.x_spacing); })
                 .attr('y1', this.min_y)
-                .attr('x2', (d) => { return this.scaleX(d * this.xResolution); })
+                .attr('x2', (d) => { return this.scaleX(d * this.x_spacing); })
                 .attr('y2', this.scaleY(this.$refs.grid.clientHeight));
 
             svg.selectAll('.horizontal')
-                .data(d3.range(1, this.$refs.grid.clientHeight / this.yResolution))
+                .data(d3.range(1, this.$refs.grid.clientHeight / this.y_spacing))
                 .enter().append('line')
                 .attr('class', 'horizontal')
                 .attr('x1', this.min_x)
-                .attr('y1', (d) => { return this.scaleY(d * this.yResolution); })
+                .attr('y1', (d) => { return this.scaleY(d * this.y_spacing); })
                 .attr('x2', this.scaleX(this.$refs.grid.clientWidth))
-                .attr('y2', (d) => { return this.scaleY(d * this.yResolution); });
+                .attr('y2', (d) => { return this.scaleY(d * this.y_spacing); });
         }
     }
 }
@@ -285,9 +246,6 @@ export default {
         .horizontal, .vertical {
             fill: gray;
         }
-    }
-    #overlay {
-        position: absolute;
     }
 }
 </style>
