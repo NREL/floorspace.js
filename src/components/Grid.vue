@@ -58,7 +58,7 @@ export default {
                 return this.$store.state.view.min_x;
             },
             set(newValue) {
-                this.$store.commit('setMinX', {
+                this.$store.commit('setViewMinX', {
                     min_x: newValue
                 });
             }
@@ -68,7 +68,7 @@ export default {
                 return this.$store.state.view.min_y;
             },
             set(newValue) {
-                this.$store.commit('setMinY', {
+                this.$store.commit('setViewMinY', {
                     min_y: newValue
                 });
             }
@@ -78,7 +78,7 @@ export default {
                 return this.$store.state.view.max_x;
             },
             set(newValue) {
-                this.$store.commit('setMaxX', {
+                this.$store.commit('setViewMaxX', {
                     max_x: newValue
                 });
             }
@@ -88,7 +88,7 @@ export default {
                 return this.$store.state.view.max_y;
             },
             set(newValue) {
-                this.$store.commit('setMaxY', {
+                this.$store.commit('setViewMaxY', {
                     max_y: newValue
                 });
             }
