@@ -151,10 +151,8 @@ export default {
                 .attr('cy', (d, i) => {
                     return d.y;
                 })
-                .attr('rx', this.scaleX(2))
-                .attr('ry', this.scaleY(2));
-
-            console.log(this.scaleX(2));
+                .attr('rx', this.scaleX(2) - this.min_x)
+                .attr('ry', this.scaleY(2) - this.min_y);
 
             //connect the points with a guideline
             this.drawPolygonEdges();
@@ -175,8 +173,8 @@ export default {
                 })
                 // styles for the first point in the polygon
                 .classed('origin', true)
-                .attr('rx', this.scaleX(7))
-                .attr('ry', this.scaleY(7));
+                .attr('rx', this.scaleX(7) - this.min_x)
+                .attr('ry', this.scaleY(7) - this.min_y);
         },
         drawPolygonEdges: function() {
             // remove expired paths
@@ -233,7 +231,6 @@ export default {
                 });
         },
         drawGrid: function() {
-            console.log("xscale", this.$store.state.view.min_x, this.$store.state.view.max_x);
             this.$store.commit('setScaleX', {
                 scaleX: d3.scaleLinear()
                     .domain([0, this.$refs.grid.clientWidth])
