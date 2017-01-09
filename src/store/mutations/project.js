@@ -10,23 +10,19 @@ export default {
     // CONFIG
     // state.config.units
     setConfigUnits: function(state, payload) {
-        if (payload.units !== 'm' && payload.units !== 'ft') {
-            return;
+        if (payload.units === 'm' || payload.units === 'ft') {
+            state.config.units = payload.units;
         }
-        state.config.units = payload.units;
     },
     // state.config.language
     setConfigLanguage: function(state, payload) {
-        if (payload.language !== 'EN-US') {
-            return;
+        if (payload.language === 'EN-US') {
+            state.config.language = payload.language;
         }
-        state.config.language = payload.language;
     },
     // state.config.north_axis
     setConfigNorthAxis: function(state, payload) {
-        if (parseInt(payload.north_axis)) {
-            state.config.north_axis = payload.north_axis;
-        }
+        state.config.north_axis = parseInt(payload.north_axis) ? payload.north_axis : state.config.north_axis;
     },
 
     // GRID
@@ -37,15 +33,11 @@ export default {
 
     // state.grid.x_spacing
     setGridXSpacing: function(state, payload) {
-        if (parseInt(payload.x_spacing)) {
-            state.grid.x_spacing = payload.x_spacing;
-        }
+        state.grid.x_spacing = parseInt(payload.x_spacing) ? payload.x_spacing : state.grid.x_spacing;
     },
     // state.grid.y_spacing
     setGridYSpacing: function(state, payload) {
-        if (parseInt(payload.y_spacing)) {
-            state.grid.y_spacing = payload.y_spacing;
-        }
+        state.grid.y_spacing = parseInt(payload.y_spacing) ? payload.y_spacing : state.grid.y_spacing;
     },
 
     // VIEW
@@ -65,5 +57,6 @@ export default {
     setViewMaxY: function(state, payload) {
         state.view.max_y = payload.max_y > state.view.min_y ? payload.max_y : state.view.max_y;
     }
+
     // TODO: MAP
 };
