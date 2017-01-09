@@ -16,9 +16,7 @@ export default {
     'grid': {
         'visible': true,
         'x_spacing': 10,
-        'y_spacing': 10,
-        'x_offset': true,
-        'y_offset': true
+        'y_spacing': 10
     },
     'view': {
         'min_x': 0,

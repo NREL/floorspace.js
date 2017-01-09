@@ -14,13 +14,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <script>
 var d3 = require('d3');
-//var this.scaleX, this.scaleY;
 export default {
     name: 'canvas',
     data: function() {
         return {
-            // array of spaces drawn - going to be synced with navigation and displayed
-            spaces: [],
+            // array of polygons drawn - going to be synced with navigation and displayed
+            polygons: [],
             // space being drawn
             points: []
         };
@@ -80,8 +79,8 @@ export default {
         y_spacing: function() {
             this.drawGrid();
         },
-        // when a space is added, draw all spaces
-        spaces: function() { this.drawPolygonSpaces(); },
+        // when a space is added, draw all polygons
+        polygons: function() { this.drawPolygons(); },
         // when a point is added, draw all points
         points: function() { this.drawPoints(); }
     },
@@ -121,8 +120,8 @@ export default {
             // set a click listener for the first point in the polynomial, when it is clicked close the shape
             d3.select('#canvas svg').select('ellipse')
                 .on('click', () => {
-                    // create the shape - triggers this.drawPolygonSpaces()
-                    this.spaces.push({ points: this.points });
+                    // create the shape - triggers this.drawPolygons()
+                    this.polygons.push({ points: this.points });
 
                     this.$store.commit('createFaceFromPoints', {
                         points: this.points
@@ -156,10 +155,10 @@ export default {
             // keep grid lines under polygon edges
             d3.selectAll('.vertical, .horizontal').lower();
         },
-        drawPolygonSpaces: function() {
+        drawPolygons: function() {
             // draw a polygon for each space
             d3.select('#canvas svg').selectAll('polygon')
-                .data(this.spaces).enter()
+                .data(this.polygons).enter()
                 .append('polygon')
                 .attr('points', (d, i) => {
                     var pointsString = "";
@@ -174,9 +173,9 @@ export default {
             d3.selectAll("#canvas path").remove();
             d3.selectAll('#canvas ellipse').remove();
         },
-        drawRectSpaces: function(e) {
+        drawRects: function(e) {
             d3.select('#canvas svg').selectAll('rect')
-                .data(this.rectSpaces).enter()
+                .data(this.rects).enter()
                 .append('rect')
                 .attr('x', (d, i) => {
                     return d.origin.x;
