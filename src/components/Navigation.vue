@@ -9,28 +9,30 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
 <nav id="navigation">
+    <div class="input-text">
+        <input v-model="searchTerm" placeholder="Search">
+    </div>
+
     <section id="tabs">
         <span :class="tab === 'stories' ? 'active' : ''" @click="tab = 'stories'">Stories</span>
-        <span :class="tab === 'thermalZones' ? 'active' : ''" @click="tab = 'thermalZones'">Thermal Zones</span>
         <span :class="tab === 'spaces' ? 'active' : ''" @click="tab = 'spaces'">Spaces</span>
     </section>
-    <section id="breadcrumbs" v-show="currentStory || currentThermalZone || currentSpace">
+    <section id="breadcrumbs" v-show="currentStory || currentSpace">
         <span v-if="currentStory">
-            {{ currentStory }}
+            {{ currentStory.name }}
         </span>
-        <span v-if="currentStory && currentThermalZone">
+        <span v-if="currentStory && currentSpace">{{currentSpace}}
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path d="M.5 0v14l11-7-11-7z"/></svg>
-            {{ currentThermalZone }}
-        </span>
-        <span v-if="currentStory && currentThermalZone && currentSpace">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path d="M.5 0v14l11-7-11-7z"/></svg>
-            {{ currentSpace }}
+            {{ currentSpace.name }}
         </span>
     </section>
 
     <div v-for="item in navItems" :class="currentItem === item ? 'active' : ''" @click="currentItem = item">
-        {{item}}
+        {{ item.name }}
     </div>
+    <svg id="new-item" height="50" viewBox="0 0 256 256" width="50" xmlns="http://www.w3.org/2000/svg">
+        <path d="M208 122h-74V48c0-3.534-2.466-6.4-6-6.4s-6 2.866-6 6.4v74H48c-3.534 0-6.4 2.466-6.4 6s2.866 6 6.4 6h74v74c0 3.534 2.466 6.4 6 6.4s6-2.866 6-6.4v-74h74c3.534 0 6.4-2.466 6.4-6s-2.866-6-6.4-6z"/>
+    </svg>
 </nav>
 </template>
 
@@ -41,28 +43,27 @@ export default {
         var data =  {
             tab: 'stories',
             selectedItem: '',
-            // this shouldn't be arrays - this should be a heirarchical structure
-            stories: ['ground level'],
-            spaces: ['space 1', 'space 2', 'space 3'],
-            thermalZones: ['zone 1', 'zone 2', 'zone 3'],
+            searchTerm: '',
+            currentStory: this.$store.state.stories[0],
+            currentSpace: this.$store.state.spaces[0]
         };
-        data.currentStory = data.stories[0];
-        data.currentThermalZone = data.thermalZones[0];
-        data.currentSpace = data.spaces[0];
-
         return data;
     },
     computed: {
         navItems: function() {
-            return this.$data[this.tab];
+            return this.$store.state[this.tab];
+        },
+        stories () {
+            return this.$store.state.stories;
+        },
+        spaces () {
+            return this.$store.state.spaces;
         },
         currentItem: {
             // defaults to first item
             get: function() {
                 if (this.tab === 'stories') {
                     return this.currentStory;
-                } else if (this.tab === 'thermalZones') {
-                    return this.currentThermalZone;
                 } else if (this.tab === 'spaces') {
                     return this.currentSpace;
                 }
@@ -70,8 +71,6 @@ export default {
             set: function (item) {
                 if (this.tab === 'stories') {
                     this.currentStory = this.currentStory === item ? null : item;
-                } else if (this.tab === 'thermalZones') {
-                    this.currentThermalZone = this.currentThermalZone === item ? null : item;
                 } else if (this.tab === 'spaces') {
                     this.currentSpace = this.currentSpace === item ? null : item;
                 }
@@ -88,7 +87,7 @@ export default {
     background-color: $gray-medium-dark;
     border-right: 1px solid $gray-darkest;
     font-size: 0.75rem;
-     #breadcrumbs, div {
+    #breadcrumbs, div {
         align-items: center;
         display: flex;
         height: 2.5rem;
@@ -117,6 +116,11 @@ export default {
         }
     }
 
+    #new-item {
+        path {
+            fill: $gray-light;
+        }
+    }
     .active {
         background-color: $gray-medium-light;
     }

@@ -9,7 +9,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
     <nav id="toolbar">
         <section class="tools">
-            the actual tools
+            tools
         </section>
         <section class="settings">
 
