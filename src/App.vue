@@ -20,7 +20,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 // this import order is important, if the grid is loaded before the other elements or after the toolbar, it ends up warped
 import Navigation from './components/Navigation'
 import Inspector from './components/Inspector'
-import Canvas from './components/Grid'
+import Canvas from './components/Canvas'
 import Toolbar from './components/Toolbar'
 
 export default {
