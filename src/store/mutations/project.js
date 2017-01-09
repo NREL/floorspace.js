@@ -8,15 +8,27 @@
 
 export default {
     setMinX: function(state, payload) {
+        if (payload.min_x >= state.view.max_x) {
+            return;
+        }
         state.view.min_x = payload.min_x;
     },
     setMinY: function(state, payload) {
+        if (payload.min_y >= state.view.max_y) {
+            return;
+        }
         state.view.min_y = payload.min_y;
     },
     setMaxX: function(state, payload) {
+        if (payload.max_x <= state.view.min_x) {
+            return;
+        }
         state.view.max_x = payload.max_x;
     },
     setMaxY: function(state, payload) {
+        if (payload.max_y <= state.view.min_y) {
+            return;
+        }
         state.view.max_y = payload.max_y;
     }
 
