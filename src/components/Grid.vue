@@ -8,7 +8,23 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
     <div id="canvas">
-        <svg ref="grid" @click="addPoint" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg>
+        <section id="overlay">
+            <label>min_x:</label>
+            <input v-model.number="min_x">
+            <label>min_y:</label>
+            <input v-model.number="min_y">
+            <label>max_x:</label>
+            <input v-model.number="max_x">
+            <label>max_y:</label>
+            <input v-model.number="max_y">
+
+            <label>x resolution:</label>
+            <input v-model.number="xResolution">
+            <label>y resolution:</label>
+            <input v-model.number="yResolution">
+        </section>
+
+        <svg ref="grid" @click="addPoint" :viewBox="viewbox" preserveAspectRatio="none"></svg>
     </div>
 </template>
 
@@ -19,7 +35,8 @@ export default {
     name: 'canvas',
     data: function() {
         return {
-            gridResolution: 20,
+            xResolution: 20,
+            yResolution: 20,
             // array of spaces drawn - going to be synced with navigation and displayed
             spaces: [],
             // space being drawn
@@ -27,13 +44,63 @@ export default {
         };
     },
     computed: {
+        // scales are used to translate pixel values obtained by clicking the grid into real world units used to map points to the grid
         scaleX () {
             return this.$store.state.application.scale.x;
         },
         scaleY () {
             return this.$store.state.application.scale.y;
+        },
+
+        // mix_x, min_y, max_x, and max_y are the grid dimensions in real world units
+        min_x: {
+            get() {
+                return this.$store.state.view.min_x;
+            },
+            set(newValue) {
+                this.$store.commit('setMinX', {
+                    min_x: newValue
+                });
+            }
+        },
+        min_y: {
+            get() {
+                return this.$store.state.view.min_y;
+            },
+            set(newValue) {
+                this.$store.commit('setMinY', {
+                    min_y: newValue
+                });
+            }
+        },
+        max_x: {
+            get() {
+                return this.$store.state.view.max_x;
+            },
+            set(newValue) {
+                this.$store.commit('setMaxX', {
+                    max_x: newValue
+                });
+            }
+        },
+        max_y: {
+            get() {
+                return this.$store.state.view.max_y;
+            },
+            set(newValue) {
+                this.$store.commit('setMaxY', {
+                    max_y: newValue
+                });
+            }
+        },
+        viewbox: function() {
+            return this.$store.state.view.min_x + ' ' +
+                this.$store.state.view.min_y + ' ' +
+                (this.$store.state.view.max_x - this.$store.state.view.min_x ) + ' ' +
+                (this.$store.state.view.max_y - this.$store.state.view.min_y);
         }
     },
+    // if the window changes size, redraw the grid
     mounted: function() {
         this.drawGrid();
         window.addEventListener('resize', this.drawGrid);
@@ -42,6 +109,16 @@ export default {
         window.removeEventListener('resize', this.drawGrid)
     },
     watch: {
+        // if the real world unit dimensions or scales of the grid are altered, redraw it
+        viewbox: function() {
+            this.drawGrid();
+        },
+        xResolution: function() {
+            this.drawGrid();
+        },
+        yResolution: function() {
+            this.drawGrid();
+        },
         // when a space is added, draw all spaces
         spaces: function() { this.drawPolygonSpaces(); },
         // when a point is added, draw all points
@@ -49,9 +126,10 @@ export default {
     },
     methods: {
         addPoint: function(e) {
-            var x = round(Math.max(2, Math.min(this.$refs.grid.clientWidth - 2, e.offsetX)), this.gridResolution),
-                y = round(Math.max(2, Math.min(this.$refs.grid.clientHeight - 2, e.offsetY)), this.gridResolution);
+            var x = round(Math.max(2, Math.min(this.$refs.grid.clientWidth - 2, e.offsetX)), this.xResolution),
+                y = round(Math.max(2, Math.min(this.$refs.grid.clientHeight - 2, e.offsetY)), this.yResolution);
 
+            // the point is stored in RWU
             this.points.push({
                 x: this.scaleX(x),
                 y: this.scaleY(y)
@@ -75,6 +153,8 @@ export default {
                 })
                 .attr('rx', this.scaleX(2))
                 .attr('ry', this.scaleY(2));
+
+            console.log(this.scaleX(2));
 
             //connect the points with a guideline
             this.drawPolygonEdges();
@@ -153,6 +233,7 @@ export default {
                 });
         },
         drawGrid: function() {
+            console.log("xscale", this.$store.state.view.min_x, this.$store.state.view.max_x);
             this.$store.commit('setScaleX', {
                 scaleX: d3.scaleLinear()
                     .domain([0, this.$refs.grid.clientWidth])
@@ -171,23 +252,24 @@ export default {
                 .attr('width', this.$refs.grid.clientWidth);
             svg.selectAll('line').remove();
 
+            // lines are drawn in RWU
             svg.selectAll('.vertical')
-                .data(d3.range(1, this.$refs.grid.clientWidth / this.gridResolution))
+                .data(d3.range(1, this.$refs.grid.clientWidth / this.xResolution))
                 .enter().append('line')
                 .attr('class', 'vertical')
-                .attr('x1', (d) => { return this.scaleX(d * this.gridResolution); })
-                .attr('y1', 0)
-                .attr('x2', (d) => { return this.scaleX(d * this.gridResolution); })
+                .attr('x1', (d) => { return this.scaleX(d * this.xResolution); })
+                .attr('y1', this.min_y)
+                .attr('x2', (d) => { return this.scaleX(d * this.xResolution); })
                 .attr('y2', this.scaleY(this.$refs.grid.clientHeight));
 
             svg.selectAll('.horizontal')
-                .data(d3.range(1, this.$refs.grid.clientHeight / this.gridResolution))
+                .data(d3.range(1, this.$refs.grid.clientHeight / this.yResolution))
                 .enter().append('line')
                 .attr('class', 'horizontal')
-                .attr('x1', 0)
-                .attr('y1', (d) => { return this.scaleY(d * this.gridResolution); })
+                .attr('x1', this.min_x)
+                .attr('y1', (d) => { return this.scaleY(d * this.yResolution); })
                 .attr('x2', this.scaleX(this.$refs.grid.clientWidth))
-                .attr('y2', (d) => { return this.scaleY(d * this.gridResolution); });
+                .attr('y2', (d) => { return this.scaleY(d * this.yResolution); });
         }
     }
 }
@@ -206,6 +288,9 @@ export default {
         .horizontal, .vertical {
             fill: gray;
         }
+    }
+    #overlay {
+        position: absolute;
     }
 }
 </style>

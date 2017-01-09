@@ -7,29 +7,17 @@
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 export default {
-    // project
-    'config': {
-        'units': 'ft',
-        'language': 'EN-US',
-        'north_axis': 0
+    setMinX: function(state, payload) {
+        state.view.min_x = payload.min_x;
     },
-    'grid': {
-        'visible': true,
-        'x_spacing': true,
-        'y_spacing': true,
-        'x_offset': true,
-        'y_offset': true
+    setMinY: function(state, payload) {
+        state.view.min_y = payload.min_y;
     },
-    'view': {
-        'min_x': 0,
-        'min_y': 0,
-        'max_x': 1000,
-        'max_y': 1000
+    setMaxX: function(state, payload) {
+        state.view.max_x = payload.max_x;
     },
-    'map': {
-        'visible': false,
-        'latitude': null,
-        'longitude': null,
-        'elevation': 0
+    setMaxY: function(state, payload) {
+        state.view.max_y = payload.max_y;
     }
+
 };
