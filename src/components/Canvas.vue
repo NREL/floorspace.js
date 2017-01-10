@@ -147,7 +147,7 @@ export default {
             d3.select('#canvas svg').append("path")
                 .datum(this.points)
                 .attr("fill", "none")
-                .attr("stroke-width", "1")
+                .attr('stroke-width', this.scaleX(this.scaleY(1)) - this.min_y - this.min_x)
                 .attr("d", line)
                 // prevent overlapping the points - screws up click events
                 .lower();
@@ -167,7 +167,7 @@ export default {
                     });
                     return pointsString;
                 })
-                .attr("stroke-width", "1");
+                .attr('stroke-width', this.scaleX(this.scaleY(0.5)) - this.min_y - this.min_x);
 
             //remove expired points and guidelines
             d3.selectAll("#canvas path").remove();
@@ -209,11 +209,13 @@ export default {
                 .attr('width', this.$refs.grid.clientWidth);
             svg.selectAll('line').remove();
 
+            console.log(this.scaleX(1), this.scaleX(1))
             // lines are drawn in RWU
             svg.selectAll('.vertical')
                 .data(d3.range(1, this.$refs.grid.clientWidth / this.x_spacing))
                 .enter().append('line')
                 .attr('class', 'vertical')
+                .attr('stroke-width', this.scaleX(1) - this.min_x)
                 .attr('x1', (d) => { return this.scaleX(d * this.x_spacing); })
                 .attr('y1', this.min_y)
                 .attr('x2', (d) => { return this.scaleX(d * this.x_spacing); })
@@ -223,6 +225,7 @@ export default {
                 .data(d3.range(1, this.$refs.grid.clientHeight / this.y_spacing))
                 .enter().append('line')
                 .attr('class', 'horizontal')
+                .attr('stroke-width', this.scaleY(1) - this.min_y)
                 .attr('x1', this.min_x)
                 .attr('y1', (d) => { return this.scaleY(d * this.y_spacing); })
                 .attr('x2', this.scaleX(this.$refs.grid.clientWidth))

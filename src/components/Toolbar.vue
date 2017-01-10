@@ -15,28 +15,28 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
             <div class="input-number">
                 <label>min_x</label>
-                <input v-model.number="min_x">
+                <input v-model.number.lazy="min_x">
             </div>
             <div class="input-number">
                 <label>min_y</label>
-                <input v-model.number="min_y">
+                <input v-model.number.lazy="min_y">
             </div>
             <div class="input-number">
                 <label>max_x</label>
-                <input v-model.number="max_x">
+                <input v-model.number.lazy="max_x">
             </div>
             <div class="input-number">
                 <label>max_y</label>
-                <input v-model.number="max_y">
+                <input v-model.number.lazy="max_y">
             </div>
 
             <div class="input-number">
                 <label>x_spacing</label>
-                <input v-model.number="x_spacing">
+                <input v-model.number.lazy="x_spacing">
             </div>
             <div class="input-number">
                 <label>y_spacing</label>
-                <input v-model.number="y_spacing">
+                <input v-model.number.lazy="y_spacing">
             </div>
 
             <div class="input-select" id="drawing-mode">
@@ -71,7 +71,7 @@ export default {
         // spacing between gridlines, measured in RWU
         x_spacing: {
             get() {
-                return this.$store.state.grid.x_spacing;
+                return this.$store.state.grid.x_spacing + ' ' + this.$store.state.config.units;
             },
             set(newValue) {
                 this.$store.commit('setGridXSpacing', {
@@ -81,7 +81,7 @@ export default {
         },
         y_spacing: {
             get() {
-                return this.$store.state.grid.y_spacing;
+                return this.$store.state.grid.y_spacing + ' ' + this.$store.state.config.units;
             },
             set(newValue) {
                 this.$store.commit('setGridYSpacing', {
@@ -93,17 +93,17 @@ export default {
         // mix_x, min_y, max_x, and max_y are the grid dimensions in real world units
         min_x: {
             get() {
-                return this.$store.state.view.min_x;
+                return this.$store.state.view.min_x + ' ' + this.$store.state.config.units;
             },
             set(newValue) {
                 this.$store.commit('setViewMinX', {
-                    min_x: newValue
+                    min_x: parseFloat(newValue)
                 });
             }
         },
         min_y: {
             get() {
-                return this.$store.state.view.min_y;
+                return this.$store.state.view.min_y + ' ' + this.$store.state.config.units;
             },
             set(newValue) {
                 this.$store.commit('setViewMinY', {
@@ -113,7 +113,7 @@ export default {
         },
         max_x: {
             get() {
-                return this.$store.state.view.max_x;
+                return this.$store.state.view.max_x + ' ' + this.$store.state.config.units;
             },
             set(newValue) {
                 this.$store.commit('setViewMaxX', {
@@ -123,7 +123,7 @@ export default {
         },
         max_y: {
             get() {
-                return this.$store.state.view.max_y;
+                return this.$store.state.view.max_y + ' ' + this.$store.state.config.units;
             },
             set(newValue) {
                 this.$store.commit('setViewMaxY', {

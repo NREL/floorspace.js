@@ -22,7 +22,7 @@ export default {
     },
     // state.config.north_axis
     setConfigNorthAxis: function(state, payload) {
-        state.config.north_axis = parseInt(payload.north_axis) ? payload.north_axis : state.config.north_axis;
+        state.config.north_axis = parseFloat(payload.north_axis) ? payload.north_axis : state.config.north_axis;
     },
 
     // GRID
@@ -33,21 +33,41 @@ export default {
 
     // state.grid.x_spacing
     setGridXSpacing: function(state, payload) {
-        state.grid.x_spacing = parseInt(payload.x_spacing) ? payload.x_spacing : state.grid.x_spacing;
+        const xSpacing = parseFloat(payload.x_spacing),
+            isInt = !isNaN(parseFloat(payload.x_spacing)), // check that the value is a number
+            fitsView = xSpacing < state.view.max_x - state.view.min_x, // check that the proposed width of a grid square is smaller than the width of the full view
+            exceedsMinimumScale = xSpacing > 1;// check that the proposed grid square width is larger that the system minimum
+
+        state.grid.x_spacing = isInt && fitsView && exceedsMinimumScale ? xSpacing : state.grid.x_spacing;
     },
     // state.grid.y_spacing
     setGridYSpacing: function(state, payload) {
-        state.grid.y_spacing = parseInt(payload.y_spacing) ? payload.y_spacing : state.grid.y_spacing;
+        const ySpacing = parseFloat(payload.y_spacing),
+            isInt = !isNaN(parseFloat(payload.y_spacing)), // check that the value is a number
+            fitsView = ySpacing < state.view.max_y - state.view.min_y, // check that the proposed width of a grid square is smaller than the width of the full view
+            exceedsMinimumScale = ySpacing > 1;// check that the proposed grid square width is larger that the system minimum
+
+        state.grid.y_spacing = isInt && fitsView && exceedsMinimumScale ? ySpacing : state.grid.y_spacing;
     },
 
     // VIEW
     // state.view.min_x
     setViewMinX: function(state, payload) {
-        state.view.min_x = payload.min_x < state.view.max_x ? payload.min_x : state.view.min_x;
+        const minX = parseFloat(payload.min_x),
+            isInt = !isNaN(parseFloat(payload.min_x)), // check that the value is a number
+            lessThanMaxX = minX < state.view.max_x; // check that the proposed min x of of the view is smaller than the max x
+
+
+        state.view.min_x = isInt && lessThanMaxX ? minX : state.view.min_x;
     },
     // state.view.min_y
     setViewMinY: function(state, payload) {
-        state.view.min_y = payload.min_y < state.view.max_y ? payload.min_y : state.view.min_y;
+        const minY = parseFloat(payload.min_y),
+            isInt = !isNaN(parseFloat(payload.min_y)), // check that the value is a number
+            lessThanMaxY = minY < state.view.max_y; // check that the proposed min x of of the view is smaller than the max x
+
+
+        state.view.min_y = isInt && lessThanMaxY ? minY : state.view.min_y;
     },
     // state.view.max_x
     setViewMaxX: function(state, payload) {
