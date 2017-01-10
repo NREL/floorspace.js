@@ -111,6 +111,7 @@ export default {
                 .attr('cy', (d, i) => {
                     return d.y;
                 })
+                .attr('vector-effect', 'non-scaling-stroke')
                 .attr('rx', this.scaleX(2) - this.min_x)
                 .attr('ry', this.scaleY(2) - this.min_y);
 
@@ -133,6 +134,7 @@ export default {
                 })
                 // styles for the first point in the polygon
                 .classed('origin', true)
+                .attr('vector-effect', 'non-scaling-stroke')
                 .attr('rx', this.scaleX(7) - this.min_x)
                 .attr('ry', this.scaleY(7) - this.min_y);
         },
@@ -147,7 +149,7 @@ export default {
             d3.select('#canvas svg').append("path")
                 .datum(this.points)
                 .attr("fill", "none")
-                .attr('stroke-width', this.scaleX(this.scaleY(1)) - this.min_y - this.min_x)
+                .attr('vector-effect', 'non-scaling-stroke')
                 .attr("d", line)
                 // prevent overlapping the points - screws up click events
                 .lower();
@@ -167,7 +169,7 @@ export default {
                     });
                     return pointsString;
                 })
-                .attr('stroke-width', this.scaleX(this.scaleY(0.5)) - this.min_y - this.min_x);
+                .attr('vector-effect', 'non-scaling-stroke');
 
             //remove expired points and guidelines
             d3.selectAll("#canvas path").remove();
@@ -209,7 +211,6 @@ export default {
                 .attr('width', this.$refs.grid.clientWidth);
             svg.selectAll('line').remove();
 
-            console.log(this.scaleX(1), this.scaleX(1))
             // lines are drawn in RWU
             svg.selectAll('.vertical')
                 .data(d3.range(1, this.$refs.grid.clientWidth / this.x_spacing))
