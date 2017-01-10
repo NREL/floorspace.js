@@ -5,7 +5,7 @@ export default function initializeDefaultState(state) {
     const storyId = factory.generateId();
     const geometryId = factory.generateId();
 
-    state.application.currentSelection.story_id = storyId;
+    state.application.currentSelections.story_id = storyId;
 
     state.geometry.push({
         'id': geometryId,

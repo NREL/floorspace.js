@@ -26,13 +26,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             {{ currentSpace.name }}
         </span>
 
-        <svg id="new-item" height="50" viewBox="0 0 256 256" width="50" xmlns="http://www.w3.org/2000/svg">
+        <svg @click="addItem" id="new-item" height="50" viewBox="0 0 256 256" width="50" xmlns="http://www.w3.org/2000/svg">
             <path d="M208 122h-74V48c0-3.534-2.466-6.4-6-6.4s-6 2.866-6 6.4v74H48c-3.534 0-6.4 2.466-6.4 6s2.866 6 6.4 6h74v74c0 3.534 2.466 6.4 6 6.4s6-2.866 6-6.4v-74h74c3.534 0 6.4-2.466 6.4-6s-2.866-6-6.4-6z"/>
         </svg>
     </section>
 
-    <div v-for="item in navItems" :class="currentItem === item ? 'active' : ''" @click="currentItem = item">
-        {{ item.name }}
+    <div v-for="item in (tab === 'spaces' ? spaces : stories)" :key="item.id" :class="currentItem === item ? 'active' : ''" @click="selectItem(item)">
+        {{ item.name }}<-
     </div>
 </nav>
 </template>
@@ -43,38 +43,79 @@ export default {
     data() {
         var data =  {
             tab: 'stories',
-            selectedItem: '',
-            searchTerm: '',
-            currentStory: this.$store.state.stories[0],
-            currentSpace: this.$store.state.spaces[0]
+            searchTerm: ''
         };
         return data;
     },
     computed: {
-        navItems: function() {
+        items () {
             return this.$store.state[this.tab];
         },
         stories () {
             return this.$store.state.stories;
         },
         spaces () {
-            return this.$store.state.spaces;
+            return this.currentStory.spaces;
+        },
+        currentStory: {
+            get () {
+                return this.$store.state.stories.find((s) => {
+                    return s.id === this.$store.state.application.currentSelections.story_id;
+                })
+            },
+            set (item) {
+                this.$store.commit('setCurrentSelectionsStoryId', {
+                    'story_id': item.id
+                });
+            }
+        },
+        currentSpace: {
+            get () {
+                return this.currentStory.spaces.find((s) => {
+                    return s.id === this.$store.state.application.currentSelections.space_id;
+                })
+            },
+            set (item) {
+                this.$store.commit('setCurrentSelectionsSpaceId', {
+                    'space_id': item.id
+                });
+            }
         },
         currentItem: {
             // defaults to first item
-            get: function() {
+            get () {
                 if (this.tab === 'stories') {
                     return this.currentStory;
                 } else if (this.tab === 'spaces') {
                     return this.currentSpace;
                 }
             },
-            set: function (item) {
+            set (item) {
                 if (this.tab === 'stories') {
                     this.currentStory = this.currentStory === item ? null : item;
                 } else if (this.tab === 'spaces') {
                     this.currentSpace = this.currentSpace === item ? null : item;
                 }
+            }
+        }
+    },
+    methods: {
+        addItem () {
+            if (this.tab === 'stories') {
+                this.$store.commit('initStory');
+            } else if (this.tab === 'spaces') {
+                this.$store.commit('initSpace');
+            }
+        },
+        selectItem (item) {
+            if (this.tab === 'stories') {
+                this.$store.commit('setCurrentSelectionsStoryId', {
+                    'story_id': item.id
+                });
+            } else if (this.tab === 'spaces') {
+                this.$store.commit('setCurrentSelectionsSpaceId', {
+                    'space_id': item.id
+                });
             }
         }
     }
@@ -88,23 +129,7 @@ export default {
     background-color: $gray-medium-dark;
     border-right: 1px solid $gray-darkest;
     font-size: 0.75rem;
-    #breadcrumbs, div {
-        align-items: center;
-        display: flex;
-        height: 2.5rem;
-        padding: 0 1rem;
-    }
-    #breadcrumbs {
-        background-color: $gray-medium-light;
-        border-bottom: 1px solid $gray-medium-dark;
-        svg {
-            margin: 0 0rem 0 .5rem;
-            width: .5rem;
-            path {
-                fill: $gray-medium-dark;
-            }
-        }
-    }
+
     #tabs {
         border-bottom: 1px solid $gray-darkest;
         display: flex;
@@ -117,13 +142,35 @@ export default {
         }
     }
 
-    #new-item {
-        path {
-            fill: $gray-light;
-        }
-    }
     .active {
         background-color: $gray-medium-light;
     }
+
+    #breadcrumbs, div {
+        align-items: center;
+        display: flex;
+        height: 2.5rem;
+        padding: 0 1rem;
+    }
+
+    #breadcrumbs {
+        background-color: $gray-medium-light;
+        border-bottom: 1px solid $gray-medium-dark;
+        svg {
+            margin: 0 0rem 0 .5rem;
+            width: .5rem;
+            path {
+                fill: $gray-medium-dark;
+            }
+        }
+        #new-item {
+            width: 1.5rem;
+            >path {
+                fill: $gray-light;
+            }
+        }
+    }
+
+
 }
 </style>

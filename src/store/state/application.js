@@ -8,8 +8,9 @@
 
 export default {
     'application': {
-        'currentSelection': {
-            'story_id': null
+        'currentSelections': {
+            'story_id': null,
+            'space_id': null
         },
         'scale': {
             'x': null,

@@ -13,7 +13,7 @@ export default {
     createFaceFromPoints: function(state, payload) {
         // look up the geometry for the current story
         const story = state.stories.find((s) => {
-            return s.id === state.application.currentSelection.story_id;
+            return s.id === state.application.currentSelections.story_id;
         });
 
         const geometry = state.geometry.find((g) => {
@@ -32,7 +32,7 @@ export default {
 
         faceVertices.forEach((v, i) => {
             const v2 = faceVertices.length > i + 1 ? faceVertices[i + 1] : faceVertices[0];
-            const edge = new factory.Edge(v, v2);
+            const edge = new factory.Edge(v.id, v2.id);
             geometry.edges.push(edge);
             faceEdges.push(edge);
         });

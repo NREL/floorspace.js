@@ -6,72 +6,18 @@
 // (4) Other than as required in clauses (1) and (2), distributions in any form of modifications or other derivative works may not use the "OpenStudio" trademark, "OS", "os", or any other confusingly similar designation without specific prior written permission from Alliance for Sustainable Energy, LLC.
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-export default {
-    // models
-    'stories': [{
-        'id': null,
-        'handle': null,
-        'name': null,
-        'below_floor_plenum_height': 0,
-        'floor_to_ceiling_height': 0,
-        'multiplier': 0,
-        'images': [], // image ids
-        'geometry': null, // geometry id
-        'spaces': [], // space ids
-        'windows': [{
-            'window': null,
-            'vertex': null
-        }]
-    }],
-    'spaces': [{
-        'id': null,
-        'handle': null,
-        'name': null,
-        'face': null, // face id
-        'building_unit': null, // building_unit id
-        'thermal_zone': null, // thermal_zone id
-        'space_type': null, // space_type id
-        'construction_set': null, // construction_set id
-        'daylighting_controls': [{
-            'daylighting_control': null,
-            'vertex': null
-        }]
-    }],
+import factory from './../utils/factory'
 
-    // lib
-    'building_units': [{
-        'id': null,
-        'handle': null,
-        'name': null
-    }],
-    'thermal_zones': [{
-        'id': null,
-        'handle': null,
-        'name': null
-    }],
-    'space_types': [{
-        'id': null,
-        'handle': null,
-        'name': null
-    }],
-    'construction_sets': [{
-        'id': null,
-        'handle': null,
-        'name': null
-    }],
-    'constructions': [{
-        'id': null,
-        'handle': null,
-        'name': null
-    }],
-    'windows': [{
-        'id': null,
-        'handle': null,
-        'name': null
-    }],
-    'daylighting_controls': [{
-        'id': null,
-        'handle': null,
-        'name': null
-    }]
+export default {
+    initStory: function(state, payload) {
+        const story = new factory.Story();
+        state.stories.push(story);
+    },
+    initSpace: function(state, payload) {
+        const story = state.stories.find((s) => {
+            return s.id === state.application.currentSelections.story_id;
+        });
+        const space = new factory.Space();
+        story.spaces.push(space);
+    }
 };

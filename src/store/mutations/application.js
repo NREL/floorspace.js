@@ -7,9 +7,31 @@
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 export default {
+    // CURRENTSELECTIONS
+    // state.application.currentSelections.story_id
+    setCurrentSelectionsStoryId: function(state, payload) {
+        const story = state.stories.find((s) => {
+            return s.id === payload.story_id;
+        });
+        state.application.currentSelections.story_id = payload.story_id;
+    },
+    // state.application.currentSelections.space_id
+    setCurrentSelectionsSpaceId: function(state, payload) {
+        const story = state.stories.find((s) => {
+            return s.id === state.application.currentSelections.story_id;
+        });
+        const space = story.spaces.find((s) => {
+            return s.id === payload.space_id;
+        });
+
+        state.application.currentSelections.space_id = payload.space_id
+    },
+    // SCALE
+    //state.application.scale.x
     setScaleX: function(state, payload) {
         state.application.scale.x = payload.scaleX;
     },
+    //state.application.scale.y
     setScaleY: function(state, payload) {
         state.application.scale.y = payload.scaleY;
     }

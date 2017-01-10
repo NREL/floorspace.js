@@ -17,23 +17,22 @@ export default {
         'multiplier': 0,
         'images': [], // image ids
         'geometry_id': null, // geometry id
-        'spaces': [], // space ids
+        'spaces': [{
+            'id': null,
+            'handle': null,
+            'name': null,
+            'face_id': null, // face_id
+            'building_unit': null, // building_unit id
+            'thermal_zone': null, // thermal_zone id
+            'space_type': null, // space_type id
+            'construction_set': null, // construction_set id
+            'daylighting_controls': [{
+                'daylighting_control': null,
+                'vertex': null
+            }]
+        }], // space ids
         'windows': [{
             'window': null,
-            'vertex': null
-        }]
-    }*/],
-    'spaces': [/*{
-        'id': null,
-        'handle': null,
-        'name': null,
-        'face': null, // face id
-        'building_unit': null, // building_unit id
-        'thermal_zone': null, // thermal_zone id
-        'space_type': null, // space_type id
-        'construction_set': null, // construction_set id
-        'daylighting_controls': [{
-            'daylighting_control': null,
             'vertex': null
         }]
     }*/],
