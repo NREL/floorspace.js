@@ -19,5 +19,22 @@ export default {
         });
         const space = new factory.Space();
         story.spaces.push(space);
+    },
+
+    //TODO: validate
+    updateStoryWithData: function(state, payload) {
+        const story = state.stories.find((s) => {
+            return s.id === payload.id;
+        });
+        story.name = payload.name || story.name;
+    },
+    updateSpaceWithData: function(state, payload) {
+        const story = state.stories.find((s) => {
+            return s.id === state.application.currentSelections.story_id;
+        });
+        const space = story.spaces.find((s) => {
+            return s.id === payload.id;
+        });
+        space.name = payload.name || space.name;
     }
 };

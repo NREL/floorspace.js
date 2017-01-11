@@ -21,7 +21,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <span v-if="currentStory">
             {{ currentStory.name }}
         </span>
-        <span v-if="currentStory && currentSpace">{{currentSpace}}
+        <span v-if="currentStory && currentSpace">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path d="M.5 0v14l11-7-11-7z"/></svg>
             {{ currentSpace.name }}
         </span>
@@ -33,6 +33,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
     <div v-for="item in (tab === 'spaces' ? spaces : stories)" :key="item.id" :class="currentItem === item ? 'active' : ''" @click="selectItem(item)">
         {{ item.name }}<-
+
+            <div class="input-text">
+                <input @input="setName(item)" v-model="item.name">
+            </div>
     </div>
 </nav>
 </template>
@@ -48,10 +52,7 @@ export default {
         return data;
     },
     computed: {
-        items () {
-            return this.$store.state[this.tab];
-        },
-        stories () {
+        stories() {
             return this.$store.state.stories;
         },
         spaces () {
@@ -82,30 +83,21 @@ export default {
             }
         },
         currentItem: {
-            // defaults to first item
             get () {
-                if (this.tab === 'stories') {
-                    return this.currentStory;
-                } else if (this.tab === 'spaces') {
-                    return this.currentSpace;
-                }
+                return this.tab === 'stories' ? this.currentStory : this.currentSpace;
             },
             set (item) {
                 if (this.tab === 'stories') {
-                    this.currentStory = this.currentStory === item ? null : item;
+                    this.currentStory = item;
                 } else if (this.tab === 'spaces') {
-                    this.currentSpace = this.currentSpace === item ? null : item;
+                    this.currentSpace = item;
                 }
             }
         }
     },
     methods: {
         addItem () {
-            if (this.tab === 'stories') {
-                this.$store.commit('initStory');
-            } else if (this.tab === 'spaces') {
-                this.$store.commit('initSpace');
-            }
+            this.$store.commit(this.tab === 'stories' ? 'initStory' : 'initSpace' );
         },
         selectItem (item) {
             if (this.tab === 'stories') {
@@ -117,6 +109,12 @@ export default {
                     'space_id': item.id
                 });
             }
+        },
+        setName(item) {
+            this.$store.commit(this.tab === 'stories' ? 'updateStoryWithData' : 'updateSpaceWithData', {
+                'id': item.id,
+                'name': item.name
+            });
         }
     }
 }
