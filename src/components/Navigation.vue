@@ -6,7 +6,6 @@ Redistribution and use in source and binary forms, with or without modification,
 (4) Other than as required in clauses (1) and (2), distributions in any form of modifications or other derivative works may not use the "OpenStudio" trademark, "OS", "os", or any other confusingly similar designation without specific prior written permission from Alliance for Sustainable Energy, LLC.
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 
-
 <template>
 <nav id="navigation">
     <div class="input-text">
@@ -34,7 +33,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
     <div v-for="item in (tab === 'spaces' ? spaces : stories)" :key="item.id" :class="(currentSpace === item || currentStory === item ) ? 'active' : ''" @click="selectItem(item)">
         <div class="input-text">
-            <input @input="setName(item)" v-model="item.name">
+            <!-- we must use this special binding to avoid mutating data in the store directly -->
+            <input @input="setName(item.id, $event.target.value)" :value="item.name">
         </div>
     </div>
 
@@ -45,11 +45,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 export default {
     name: 'navigation',
     data() {
-        var data =  {
+        return {
             tab: 'stories',
             searchTerm: ''
         };
-        return data;
     },
     computed: {
         // all stories, spaces only for the currently selected story
@@ -88,10 +87,10 @@ export default {
                 this.currentSpace = item;
             }
         },
-        setName(item) {
+        setName (itemID, name) {
             this.$store.commit(this.tab === 'stories' ? 'updateStoryWithData' : 'updateSpaceWithData', {
-                'id': item.id,
-                'name': item.name
+                'id': itemID,
+                'name': name
             });
         }
     }
@@ -147,7 +146,5 @@ export default {
             }
         }
     }
-
-
 }
 </style>
