@@ -17,7 +17,7 @@ import geometryMutations from './mutations/geometry'
 import modelsMutations from './mutations/models'
 
 // // getters
-// import applicationGetters from './getters/application'
+import applicationGetters from './getters/application'
 // import projectGetters from './getters/project'
 // import geometryGetters from './getters/geometry'
 // import modelsGetters from './getters/models'
@@ -45,13 +45,13 @@ const store = new Vuex.Store({
         ...projectMutations,
         ...geometryMutations,
         ...modelsMutations
+    },
+    getters: {
+        ...applicationGetters//,
+        // ...projectGetters,
+        // ...geometryGetters,
+        // ...modelsGetters
     }//,
-    // getters: {
-    //     ...applicationGetters,
-    //     ...projectGetters,
-    //     ...geometryGetters,
-    //     ...modelsGetters
-    // },
     // actions: {
     //     ...applicationActions,
     //     ...projectActions,

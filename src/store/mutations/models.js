@@ -11,6 +11,7 @@ import factory from './../utils/factory'
 export default {
     initStory: function(state, payload) {
         const story = new factory.Story();
+        story.name = 'Story ' + (state.stories.length + 1);
         state.stories.push(story);
     },
     initSpace: function(state, payload) {
@@ -18,6 +19,7 @@ export default {
             return s.id === state.application.currentSelections.story_id;
         });
         const space = new factory.Space();
+        space.name = 'Space ' + (story.spaces.length + 1);
         story.spaces.push(space);
     },
 

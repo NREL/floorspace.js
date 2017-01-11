@@ -17,11 +17,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <span :class="tab === 'stories' ? 'active' : ''" @click="tab = 'stories'">Stories</span>
         <span :class="tab === 'spaces' ? 'active' : ''" @click="tab = 'spaces'">Spaces</span>
     </section>
+
     <section id="breadcrumbs" v-show="currentStory || currentSpace">
-        <span v-if="currentStory">
-            {{ currentStory.name }}
-        </span>
-        <span v-if="currentStory && currentSpace">
+        <span>{{ currentStory.name }}</span>
+        <span v-if="currentSpace">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path d="M.5 0v14l11-7-11-7z"/></svg>
             {{ currentSpace.name }}
         </span>
@@ -31,13 +30,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </svg>
     </section>
 
-    <div v-for="item in (tab === 'spaces' ? spaces : stories)" :key="item.id" :class="currentItem === item ? 'active' : ''" @click="selectItem(item)">
-        {{ item.name }}<-
-
-            <div class="input-text">
-                <input @input="setName(item)" v-model="item.name">
-            </div>
+    <div v-for="item in (tab === 'spaces' ? spaces : stories)" :key="item.id" :class="(currentSpace === item || currentStory === item ) ? 'active' : ''" @click="selectItem(item)">
+        <div class="input-text">
+            <input @input="setName(item)" v-model="item.name">
+        </div>
     </div>
+
 </nav>
 </template>
 
@@ -52,62 +50,40 @@ export default {
         return data;
     },
     computed: {
-        stories() {
-            return this.$store.state.stories;
-        },
-        spaces () {
-            return this.currentStory.spaces;
-        },
+        // all stories, spaces only for the currently selected story
+        stories() { return this.$store.state.stories; },
+        spaces () { return this.currentStory.spaces; },
+
+        // currently selected story - this is always set
         currentStory: {
-            get () {
-                return this.$store.state.stories.find((s) => {
-                    return s.id === this.$store.state.application.currentSelections.story_id;
-                })
-            },
+            get () { return this.$store.getters.currentStory; },
             set (item) {
                 this.$store.commit('setCurrentSelectionsStoryId', {
                     'story_id': item.id
                 });
             }
         },
+        // currently selected space, may not be set
         currentSpace: {
-            get () {
-                return this.currentStory.spaces.find((s) => {
-                    return s.id === this.$store.state.application.currentSelections.space_id;
-                })
-            },
+            get () { return this.$store.getters.currentSpace; },
             set (item) {
                 this.$store.commit('setCurrentSelectionsSpaceId', {
                     'space_id': item.id
                 });
-            }
-        },
-        currentItem: {
-            get () {
-                return this.tab === 'stories' ? this.currentStory : this.currentSpace;
-            },
-            set (item) {
-                if (this.tab === 'stories') {
-                    this.currentStory = item;
-                } else if (this.tab === 'spaces') {
-                    this.currentSpace = item;
-                }
             }
         }
     },
     methods: {
+        // initialize an empty story or space depending on the selected tab
         addItem () {
             this.$store.commit(this.tab === 'stories' ? 'initStory' : 'initSpace' );
         },
+        // update the currentStory or currentSpace
         selectItem (item) {
             if (this.tab === 'stories') {
-                this.$store.commit('setCurrentSelectionsStoryId', {
-                    'story_id': item.id
-                });
+                this.currentStory = item;
             } else if (this.tab === 'spaces') {
-                this.$store.commit('setCurrentSelectionsSpaceId', {
-                    'space_id': item.id
-                });
+                this.currentSpace = item;
             }
         },
         setName(item) {

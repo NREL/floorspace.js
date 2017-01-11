@@ -7,27 +7,70 @@
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 export default {
-    // project
-    'config': {
-        'units': 'ft',
-        'language': 'EN-US',
-        'north_axis': 0
-    },
-    'grid': {
-        'visible': true,
-        'x_spacing': 50,
-        'y_spacing': 50
-    },
-    'view': {
-        'min_x': 0,
-        'min_y': 0,
-        'max_x': 1000,
-        'max_y': 1000
-    },
-    'map': {
-        'visible': false,
-        'latitude': null,
-        'longitude': null,
-        'elevation': 0
-    }
+    // models
+    'stories': [/*{
+        'id': null,
+        'handle': null,
+        'name': null,
+        'below_floor_plenum_height': 0,
+        'floor_to_ceiling_height': 0,
+        'multiplier': 0,
+        'images': [], // image ids
+        'geometry_id': null, // geometry id
+        'spaces': [{
+            'id': null,
+            'handle': null,
+            'name': null,
+            'face_id': null, // face_id
+            'building_unit': null, // building_unit id
+            'thermal_zone': null, // thermal_zone id
+            'space_type': null, // space_type id
+            'construction_set': null, // construction_set id
+            'daylighting_controls': [{
+                'daylighting_control': null,
+                'vertex': null
+            }]
+        }], // space ids
+        'windows': [{
+            'window': null,
+            'vertex': null
+        }]
+    }*/],
+
+    // lib
+    'building_units': [{
+        'id': null,
+        'handle': null,
+        'name': null
+    }],
+    'thermal_zones': [{
+        'id': null,
+        'handle': null,
+        'name': null
+    }],
+    'space_types': [{
+        'id': null,
+        'handle': null,
+        'name': null
+    }],
+    'construction_sets': [{
+        'id': null,
+        'handle': null,
+        'name': null
+    }],
+    'constructions': [{
+        'id': null,
+        'handle': null,
+        'name': null
+    }],
+    'windows': [{
+        'id': null,
+        'handle': null,
+        'name': null
+    }],
+    'daylighting_controls': [{
+        'id': null,
+        'handle': null,
+        'name': null
+    }]
 };
