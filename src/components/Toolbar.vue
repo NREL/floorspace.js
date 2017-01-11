@@ -8,11 +8,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
     <nav id="toolbar">
-        <section class="tools">
-            tools
+        <section v-if="mode==='Space'" id="space-tools" class="tools">
+            <a @click="">polygon</a>
         </section>
-        <section class="settings">
+        <section v-else class="tools">
+            <a>{{ mode }}</a>
+        </section>
 
+        <section class="settings">
             <div class="input-number">
                 <label>min_x</label>
                 <input v-model.number.lazy="min_x">
@@ -48,7 +51,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                     <path d="M.5 0v14l11-7-11-7z" transform="translate(13) rotate(90)"></path>
                 </svg>
             </div>
-
         </section>
 
     </nav>
@@ -58,16 +60,18 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 export default {
     name: 'toolbar',
     data: function() {
-        var data =  {
-            modes: ['Space', 'Select', 'Rectangle', 'Polygon', 'Place Component', 'Apply Property', 'Scale'],
-            scale: '100' + '%',
-            mode: null
-        };
-        data.mode = data.modes[0];
-        return data;
+        return {};
     },
     computed: {
-
+        modes () { return this.$store.state.application.modes; },
+        mode: {
+            get () { return this.$store.state.application.currentSelections.mode; },
+            set (newValue) {
+                this.$store.commit('setCurrentSelectionsMode', {
+                    mode: newValue
+                });
+            }
+        },
         // spacing between gridlines, measured in RWU
         x_spacing: {
             get() {

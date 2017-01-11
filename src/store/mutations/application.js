@@ -26,6 +26,12 @@ export default {
 
         state.application.currentSelections.space_id = payload.space_id
     },
+    setCurrentSelectionsMode: function(state, payload) {
+        const mode = state.application.modes.find((m) => {
+            return m === payload.mode;
+        });
+        state.application.currentSelections.mode = mode || state.application.currentSelections.mode;
+    },
     // SCALE
     //state.application.scale.x
     setScaleX: function(state, payload) {

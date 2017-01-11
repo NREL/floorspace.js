@@ -10,8 +10,13 @@ export default {
     'application': {
         'currentSelections': {
             'story_id': null,
-            'space_id': null
+            'space_id': null,
+            'mode': 'Space',
+            'tool': null,
+            'face': null
         },
+        'modes': ['Space', 'Select', 'Rectangle', 'Polygon', 'Place Component', 'Apply Property', 'Scale'],
+
         'scale': {
             'x': null,
             'y': null
