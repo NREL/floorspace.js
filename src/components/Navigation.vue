@@ -19,10 +19,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     </section>
 
     <section id="breadcrumbs" v-show="currentStory || currentSpace">
-        <span>{{ currentStory.name }}</span>
-        <span v-if="currentSpace">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path d="M.5 0v14l11-7-11-7z"/></svg>
-            {{ currentSpace.name }}
+        <span>
+            {{ currentStory.name }}
+            <template v-if="currentSpace">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path d="M.5 0v14l11-7-11-7z"/></svg>
+                {{ currentSpace.name }}
+            </template>
         </span>
 
         <svg @click="addItem" id="new-item" height="50" viewBox="0 0 256 256" width="50" xmlns="http://www.w3.org/2000/svg">
@@ -123,6 +125,7 @@ export default {
     #breadcrumbs, div {
         align-items: center;
         display: flex;
+        justify-content: space-between;
         height: 2.5rem;
         padding: 0 1rem;
     }
@@ -131,7 +134,7 @@ export default {
         background-color: $gray-medium-light;
         border-bottom: 1px solid $gray-medium-dark;
         svg {
-            margin: 0 0rem 0 .5rem;
+            margin: 0 .25rem;
             width: .5rem;
             path {
                 fill: $gray-medium-dark;
