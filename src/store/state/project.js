@@ -15,8 +15,8 @@ export default {
     },
     'grid': {
         'visible': true,
-        'x_spacing': 10,
-        'y_spacing': 10
+        'x_spacing': 100,
+        'y_spacing': 100
     },
     'view': {
         'min_x': 0,

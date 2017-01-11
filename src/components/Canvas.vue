@@ -18,49 +18,11 @@ export default {
     name: 'canvas',
     data: function() {
         return {
-            // array of polygons drawn - going to be synced with navigation and displayed
-            polygons: [],
-            // space being drawn
-            points: []
+            polygons: [], // array of polygons drawn
+            points: [] // points for the polygon currently being drawn
         };
     },
-    computed: {
-        // scales are used to translate pixel values obtained by clicking the grid into real world units used to map points to the grid
-        scaleX () {
-            return this.$store.state.application.scale.x;
-        },
-        scaleY () {
-            return this.$store.state.application.scale.y;
-        },
-        // the spacing in RWU between gridlines
-        x_spacing () {
-            return this.$store.state.grid.x_spacing;
-        },
-        y_spacing () {
-            return this.$store.state.grid.y_spacing;
-        },
-
-        // mix_x, min_y, max_x, and max_y are the grid dimensions in real world units
-        min_x() {
-            return this.$store.state.view.min_x;
-        },
-        min_y() {
-            return this.$store.state.view.min_y;
-        },
-        max_x() {
-            return this.$store.state.view.max_x;
-        },
-        max_y() {
-            return this.$store.state.view.max_y;
-        },
-        viewbox: function() {
-            return this.$store.state.view.min_x + ' ' +
-                this.$store.state.view.min_y + ' ' +
-                (this.$store.state.view.max_x - this.$store.state.view.min_x ) + ' ' +
-                (this.$store.state.view.max_y - this.$store.state.view.min_y);
-        }
-    },
-    // if the window changes size, redraw the grid
+    // recalculate and draw the grid when the window resizes
     mounted: function() {
         this.drawGrid();
         window.addEventListener('resize', this.drawGrid);
@@ -68,31 +30,44 @@ export default {
     beforeDestroy: function () {
         window.removeEventListener('resize', this.drawGrid)
     },
-    watch: {
-        // if the real world unit dimensions or scales of the grid are altered, redraw it
+    computed: {
+        // scale functions translate the pixel coordinates of a location on the screen into RWU coordinates to use within the SVG's grid system
+        scaleX () { return this.$store.state.application.scale.x; },
+        scaleY () { return this.$store.state.application.scale.y; },
+
+        // the spacing in RWU between gridlines - one square in the grid will be x_spacing x y_spacing
+        x_spacing () { return this.$store.state.grid.x_spacing; },
+        y_spacing () { return this.$store.state.grid.y_spacing; },
+
+        // mix_x, min_y, max_x, and max_y bound the portion of the canvas (in RWU) that is currently visible to the user
+        min_x() { return this.$store.state.view.min_x; },
+        min_y() { return this.$store.state.view.min_y; },
+        max_x() { return this.$store.state.view.max_x; },
+        max_y() { return this.$store.state.view.max_y; },
+
+        // SVG viewbox is the portion of the svg grid (in RWU) that is currently visible to the user given the min_x, min_y, max_x, and max_y boundaries
         viewbox: function() {
-            this.drawGrid();
-        },
-        x_spacing: function() {
-            this.drawGrid();
-        },
-        y_spacing: function() {
-            this.drawGrid();
-        },
-        // when a space is added, draw all polygons
+            return this.$store.state.view.min_x + ' ' + // x
+                this.$store.state.view.min_y + ' ' + // y
+                (this.$store.state.view.max_x - this.$store.state.view.min_x ) + ' ' + // width
+                (this.$store.state.view.max_y - this.$store.state.view.min_y); // height
+        }
+    },
+    watch: {
+        // if the  dimensions or spacing of the grid is altered, redraw it
+        viewbox () { this.drawGrid(); },
+        x_spacing () { this.drawGrid(); },
+        y_spacing () { this.drawGrid(); },
+
         polygons: function() { this.drawPolygons(); },
-        // when a point is added, draw all points
         points: function() { this.drawPoints(); }
     },
     methods: {
         addPoint: function(e) {
-            var x = round(Math.max(2, Math.min(this.$refs.grid.clientWidth - 2, e.offsetX)), this.x_spacing),
-                y = round(Math.max(2, Math.min(this.$refs.grid.clientHeight - 2, e.offsetY)), this.y_spacing);
-
             // the point is stored in RWU
             this.points.push({
-                x: this.scaleX(x),
-                y: this.scaleY(y)
+                x: round(this.scaleX(e.offsetX), this.x_spacing),
+                y: round(this.scaleY(e.offsetY), this.y_spacing)
             });
 
             function round(p, n) {
@@ -105,15 +80,11 @@ export default {
             d3.select('#canvas svg')
                 .selectAll('ellipse').data(this.points)
                 .enter().append('ellipse')
-                .attr('cx', (d, i) => {
-                    return d.x;
-                })
-                .attr('cy', (d, i) => {
-                    return d.y;
-                })
-                .attr('vector-effect', 'non-scaling-stroke')
+                .attr('cx', (d, i) => { return d.x; })
+                .attr('cy', (d, i) => { return d.y; })
                 .attr('rx', this.scaleX(2) - this.min_x)
-                .attr('ry', this.scaleY(2) - this.min_y);
+                .attr('ry', this.scaleY(2) - this.min_y)
+                .attr('vector-effect', 'non-scaling-stroke');
 
             //connect the points with a guideline
             this.drawPolygonEdges();
@@ -121,9 +92,10 @@ export default {
             // set a click listener for the first point in the polynomial, when it is clicked close the shape
             d3.select('#canvas svg').select('ellipse')
                 .on('click', () => {
-                    // create the shape - triggers this.drawPolygons()
+                    // create the polygon - triggers this.drawPolygons()
                     this.polygons.push({ points: this.points });
 
+                    // create a face in the data store from the points
                     this.$store.commit('createFaceFromPoints', {
                         points: this.points
                     });
@@ -132,11 +104,10 @@ export default {
                     d3.event.stopPropagation();
                     this.points = [];
                 })
-                // styles for the first point in the polygon
-                .classed('origin', true)
-                .attr('vector-effect', 'non-scaling-stroke')
                 .attr('rx', this.scaleX(7) - this.min_x)
-                .attr('ry', this.scaleY(7) - this.min_y);
+                .attr('ry', this.scaleY(7) - this.min_y)
+                .classed('origin', true) // apply custom CSS for origin of polygons
+                .attr('vector-effect', 'non-scaling-stroke');
         },
         drawPolygonEdges: function() {
             // remove expired paths
@@ -175,24 +146,8 @@ export default {
             d3.selectAll("#canvas path").remove();
             d3.selectAll('#canvas ellipse').remove();
         },
-        drawRects: function(e) {
-            d3.select('#canvas svg').selectAll('rect')
-                .data(this.rects).enter()
-                .append('rect')
-                .attr('x', (d, i) => {
-                    return d.origin.x;
-                })
-                .attr('y', (d, i) => {
-                    return d.origin.y;
-                })
-                .attr('width', (d, i) => {
-                    return d.size.width;
-                })
-                .attr('height', (d, i) => {
-                    return d.size.height;
-                });
-        },
         drawGrid: function() {
+            // update scales with new grid boundaries
             this.$store.commit('setScaleX', {
                 scaleX: d3.scaleLinear()
                     .domain([0, this.$refs.grid.clientWidth])
@@ -205,37 +160,35 @@ export default {
                     .range([this.$store.state.view.min_y, this.$store.state.view.max_y])
             });
 
-            // draw the grid
-            var svg = d3.select('#canvas svg')
-                .attr('height', this.$refs.grid.clientHeight)
-                .attr('width', this.$refs.grid.clientWidth);
+            // redraw the grid
+            var svg = d3.select('#canvas svg');
             svg.selectAll('line').remove();
 
             // lines are drawn in RWU
             svg.selectAll('.vertical')
-                .data(d3.range(1, this.$refs.grid.clientWidth / this.x_spacing))
+                .data(d3.range(0, (this.$store.state.view.max_x - this.$store.state.view.min_x) / this.x_spacing))
                 .enter().append('line')
-                .attr('class', 'vertical')
-                .attr('stroke-width', this.scaleX(1) - this.min_x)
-                .attr('x1', (d) => { return this.scaleX(d * this.x_spacing); })
+                .attr('x1', (d) => { return d * this.x_spacing + this.$store.state.view.min_x; })
+                .attr('x2', (d) => { return d * this.x_spacing + this.$store.state.view.min_x; })
                 .attr('y1', this.min_y)
-                .attr('x2', (d) => { return this.scaleX(d * this.x_spacing); })
-                .attr('y2', this.scaleY(this.$refs.grid.clientHeight));
+                .attr('y2', this.scaleY(this.$refs.grid.clientHeight))
+                .attr('class', 'vertical')
+                .attr('vector-effect', 'non-scaling-stroke');
 
             svg.selectAll('.horizontal')
-                .data(d3.range(1, this.$refs.grid.clientHeight / this.y_spacing))
+                .data(d3.range(1, (this.$store.state.view.max_y - this.$store.state.view.min_y) / this.y_spacing))
                 .enter().append('line')
-                .attr('class', 'horizontal')
-                .attr('stroke-width', this.scaleY(1) - this.min_y)
                 .attr('x1', this.min_x)
-                .attr('y1', (d) => { return this.scaleY(d * this.y_spacing); })
                 .attr('x2', this.scaleX(this.$refs.grid.clientWidth))
-                .attr('y2', (d) => { return this.scaleY(d * this.y_spacing); });
+                .attr('y1', (d) => { return d * this.y_spacing + this.$store.state.view.min_y; })
+                .attr('y2', (d) => { return d * this.y_spacing + this.$store.state.view.min_y; })
+                .attr('class', 'horizontal')
+                .attr('vector-effect', 'non-scaling-stroke');
+
+            d3.selectAll('.vertical, .horizontal').lower();
         }
     }
 }
-
-
 
 </script>
 <style lang="scss" scoped>
@@ -252,3 +205,21 @@ export default {
     }
 }
 </style>
+
+<!-- drawRects: function(e) {
+    d3.select('#canvas svg').selectAll('rect')
+        .data(this.rects).enter()
+        .append('rect')
+        .attr('x', (d, i) => {
+            return d.origin.x;
+        })
+        .attr('y', (d, i) => {
+            return d.origin.y;
+        })
+        .attr('width', (d, i) => {
+            return d.size.width;
+        })
+        .attr('height', (d, i) => {
+            return d.size.height;
+        });
+}, -->
