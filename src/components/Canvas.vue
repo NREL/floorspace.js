@@ -59,11 +59,11 @@ export default {
         x_spacing () { this.drawGrid(); },
         y_spacing () { this.drawGrid(); },
 
-        polygons: function() { this.drawPolygons(); },
-        points: function() { this.drawPoints(); }
+        polygons () { this.drawPolygons(); },
+        points () { this.drawPoints(); }
     },
     methods: {
-        addPoint: function(e) {
+        addPoint (e) {
             // the point is stored in RWU
             this.points.push({
                 x: round(this.scaleX(e.offsetX), this.x_spacing),
@@ -75,7 +75,7 @@ export default {
             }
         },
 
-        drawPoints: function() {
+        drawPoints () {
             // draw new points
             d3.select('#canvas svg')
                 .selectAll('ellipse').data(this.points)

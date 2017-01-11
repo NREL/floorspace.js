@@ -20,6 +20,10 @@ export default {
             return g.id === story.geometry_id;
         });
 
+        const space = story.spaces.find((s) => {
+            return s.id ===  state.application.currentSelections.space_id;
+        });
+
         // build arrays of the vertices and edges associated with the face being created
         var faceVertices = [],
             faceEdges = [];
@@ -43,7 +47,8 @@ export default {
                 reverse: false // TODO: implement a check for existing edges using the same vertices
             };
         });
-
-        geometry.faces.push(new factory.Face(edgeRefs));
+        const face = new factory.Face(edgeRefs);
+        geometry.faces.push(face);
+        space.face_id = face.id;
     }
 };

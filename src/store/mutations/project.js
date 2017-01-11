@@ -57,7 +57,6 @@ export default {
             isInt = !isNaN(parseFloat(payload.min_x)), // check that the value is a number
             lessThanMaxX = minX < state.view.max_x; // check that the proposed min x of of the view is smaller than the max x
 
-
         state.view.min_x = isInt && lessThanMaxX ? minX : state.view.min_x;
     },
     // state.view.min_y
@@ -65,7 +64,6 @@ export default {
         const minY = parseFloat(payload.min_y),
             isInt = !isNaN(parseFloat(payload.min_y)), // check that the value is a number
             lessThanMaxY = minY < state.view.max_y; // check that the proposed min x of of the view is smaller than the max x
-
 
         state.view.min_y = isInt && lessThanMaxY ? minY : state.view.min_y;
     },
