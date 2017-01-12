@@ -18,5 +18,11 @@ export default {
         return getters.currentStory.spaces.find((s) => {
             return s.id === state.application.currentSelections.space_id;
         })
+    },
+    // the geometry on the currentStory
+    currentStoryGeometry: (state, getters) => {
+        return state.geometry.find((g) => {
+            return g.id === getters.currentStory.geometry_id;
+        })
     }
 };
