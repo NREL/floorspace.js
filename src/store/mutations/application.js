@@ -14,8 +14,8 @@ export default {
             return s.id === payload.story_id;
         });
         if (story) {
-             state.application.currentSelections.story_id = payload.story_id;
-             state.application.currentSelections.space_id = null;
+            state.application.currentSelections.story_id = payload.story_id;
+            state.application.currentSelections.space_id = null;
         }
     },
     // state.application.currentSelections.space_id

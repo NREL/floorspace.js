@@ -7,22 +7,81 @@
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import factory from './../utils/factory'
+import store from './../index'
 
 export default {
-    // payload - points array
+    /*
+    * Create a new face associated with the currentSpace
+    */
     createFaceFromPoints: function(state, payload) {
-        // look up the geometry for the current story
-        const story = state.stories.find((s) => {
-            return s.id === state.application.currentSelections.story_id;
-        });
+        const geometry = store.getters.currentStoryGeometry;
+        const space = store.getters.currentSpace;
 
-        const geometry = state.geometry.find((g) => {
-            return g.id === story.geometry_id;
-        });
+        // if the space already had an associated face, destroy it
+        // TODO: the logic required to delete a face is complex, store it in a method somewhere
+        if (space.face_id) {
+            const oldFace = geometry.faces.find((f) => {
+                return f.id === space.face_id;
+            });
 
-        const space = story.spaces.find((s) => {
-            return s.id ===  state.application.currentSelections.space_id;
-        });
+            // destroy edges belonging to the face unless they are referenced by another face
+            var isShared;
+            oldFace.edges.forEach((edgeRef) => {
+                isShared = false;
+                geometry.faces.forEach((f) => {
+                    // only test other faces for reference to the edge
+                    if (oldFace === f) { return; }
+                    isShared = f.edges.find((e) => {
+                        return e.edge_id === edgeRef.edge_id;
+                    }) || isShared;
+                });
+
+                // edge is not shared with another face, destroy it and its vertices unless they are shared with edges on other faces
+                if (!isShared) {
+                    
+                    var p1Shared = false,
+                        p2Shared = false;
+
+                    const oldEdge = geometry.edges.find((e) => {
+                        return e.id === edgeRef.edge_id;
+                    });
+
+                    // loop through each edge reference on each face
+                    geometry.faces.forEach((f) => {
+                        // only test other faces for reference to the vertex
+                        if (oldFace === f) { return; }
+
+                        // lookup the edge object for each edge reference
+                        f.edges.forEach((eR) => {
+                            const e = geometry.edges.find((e) => {
+                                return e.id === edgeRef.edge_id;
+                            });
+                            p1Shared = (e.p1 === oldEdge.p1 || e.p2 === oldEdge.p1) ? true : p1Shared;
+                            p1Shared = (e.p1 === oldEdge.p2 || e.p2 === oldEdge.p2) ? true : p1Shared;
+                        });
+                    });
+                    if (!p1Shared) {
+                        geometry.vertices.splice(geometry.vertices.findIndex((v) => {
+                            return v.id === oldEdge.p1;
+                        }), 1);
+                    }
+                    if (!p2Shared) {
+                        geometry.vertices.splice(geometry.vertices.findIndex((v) => {
+                            return v.id === oldEdge.p2;
+                        }), 1);
+                    }
+
+                    // destroy the edge
+                    geometry.edges.splice(geometry.edges.findIndex((e) => {
+                        return e.id === space.face_id;
+                    }), 1);
+                }
+            });
+
+            geometry.faces.splice(geometry.faces.findIndex((f) => {
+                return f.id === space.face_id;
+            }), 1);
+        }
 
         // build arrays of the vertices and edges associated with the face being created
         var faceVertices = [],
