@@ -38,7 +38,7 @@ export default {
 
                 // edge is not shared with another face, destroy it and its vertices unless they are shared with edges on other faces
                 if (!isShared) {
-                    
+
                     var p1Shared = false,
                         p2Shared = false;
 
@@ -56,6 +56,7 @@ export default {
                             const e = geometry.edges.find((e) => {
                                 return e.id === edgeRef.edge_id;
                             });
+
                             p1Shared = (e.p1 === oldEdge.p1 || e.p2 === oldEdge.p1) ? true : p1Shared;
                             p1Shared = (e.p1 === oldEdge.p2 || e.p2 === oldEdge.p2) ? true : p1Shared;
                         });
@@ -73,7 +74,7 @@ export default {
 
                     // destroy the edge
                     geometry.edges.splice(geometry.edges.findIndex((e) => {
-                        return e.id === space.face_id;
+                        return e.id === edgeRef.edge_id;
                     }), 1);
                 }
             });
