@@ -34,30 +34,28 @@ export default {
     },
     computed: {
         currentSpace () { return this.$store.getters.currentSpace; },
-        // could we compute polygons from the store?
+
         polygons () {
-            return this.$store.getters.currentStoryGeometry.faces.map((face) => {
-
-                var vertexIds = face.edges.map((edgeRef) => {
-                    var edge = this.$store.getters.currentStoryGeometry.edges.find((e) => {
-                        return e.id === edgeRef.edge_id;
-                    });
-
-                    if (edgeRef.reverse) {
-                        return edge.p2;
-                    } else {
-                        return edge.p1;
-                    }
-                });
-
+            // map all faces for the current story to polygons
+            var polygons =  this.$store.getters.currentStoryGeometry.faces.map((face) => {
+                // obtain a set of vertices for each face by taking the first vertex from each edge (direction matters here)
                 return {
-                    points: vertexIds.map((vId) => {
+                    face_id: face.id,
+                    points: face.edges.map((edgeRef) => {
+                        // look up the edge referenced by the face
+                        const edge = this.$store.getters.currentStoryGeometry.edges.find((e) => {
+                            return e.id === edgeRef.edge_id;
+                        });
+                        // look up the vertex associated with p1 unless the edge reference on the face is reversed
+                        const vertexId = edgeRef.reverse ? edge.p2 : edge.p1;
                         return this.$store.getters.currentStoryGeometry.vertices.find((v) => {
-                            return v.id === vId;
+                            return v.id === vertexId;
                         })
                     })
                 }
             });
+            
+            return polygons;
         },
 
         // scale functions translate the pixel coordinates of a location on the screen into RWU coordinates to use within the SVG's grid system
@@ -88,6 +86,7 @@ export default {
         x_spacing () { this.drawGrid(); },
         y_spacing () { this.drawGrid(); },
 
+        currentSpace() { this.drawPolygons(); },
         polygons () { this.drawPolygons(); },
         points () { this.drawPoints(); }
     },

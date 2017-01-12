@@ -30,5 +30,10 @@
         fill: $primary;
         fill-opacity: 0.25;
         stroke: $secondary;
+        &.currentSpace {
+            fill: green;
+            stroke: green;
+
+        }
     }
 }

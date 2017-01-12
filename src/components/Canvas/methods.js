@@ -1,7 +1,7 @@
 var d3 = require('d3');
 export default {
     addPoint (e) {
-        console.log(this.faces);
+        if (!this.currentSpace) { return; }
         // the point is stored in RWU
         this.points.push({
             x: round(this.scaleX(e.offsetX), this.x_spacing),
@@ -65,6 +65,8 @@ export default {
         d3.selectAll('.vertical, .horizontal').lower();
     },
     drawPolygons: function() {
+        // destroy old polygons
+        d3.select('#canvas svg').selectAll('polygon').remove();
         // draw a polygon for each space
         d3.select('#canvas svg').selectAll('polygon')
             .data(this.polygons).enter()
@@ -75,6 +77,9 @@ export default {
                     pointsString += (p.x + ',' + p.y + ' ');
                 });
                 return pointsString;
+            })
+            .attr('class', (d, i) => {
+                return d.face_id === this.currentSpace.face_id ? "currentSpace" : "null";
             })
             .attr('vector-effect', 'non-scaling-stroke');
 
