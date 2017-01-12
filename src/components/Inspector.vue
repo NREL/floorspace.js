@@ -9,6 +9,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
 <section id="inspector">
     <h1>Inspector</h1>
+    <h2>Current Space</h2>
+    <ul>
+        <li v-for="(value, key) in currentSpace"> {{key}}: {{value || 'none'}} </li>
+    </ul>
 </section>
 </template>
 
@@ -18,6 +22,9 @@ export default {
     data() {
         return {
         }
+    },
+    computed: {
+        currentSpace () { return this.$store.getters.currentSpace; }
     }
 }
 </script>

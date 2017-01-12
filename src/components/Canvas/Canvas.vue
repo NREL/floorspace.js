@@ -8,7 +8,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
 <div id="canvas">
-    currentSpace: {{ currentSpace }}
     <svg ref="grid" @click="addPoint" :viewBox="viewbox" preserveAspectRatio="none"></svg>
 </div>
 </template>
@@ -54,7 +53,7 @@ export default {
                     })
                 }
             });
-            
+
             return polygons;
         },
 
