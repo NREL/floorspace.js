@@ -8,6 +8,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
 <div id="canvas">
+    currentSpace: {{ currentSpace }}
     <svg ref="grid" @click="addPoint" :viewBox="viewbox" preserveAspectRatio="none"></svg>
 </div>
 </template>
@@ -32,6 +33,7 @@ export default {
         window.removeEventListener('resize', this.drawGrid)
     },
     computed: {
+        currentSpace () { return this.$store.getters.currentSpace; },
         // could we compute polygons from the store?
         polygons () {
             return this.$store.getters.currentStoryGeometry.faces.map((face) => {

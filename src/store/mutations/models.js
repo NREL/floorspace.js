@@ -12,7 +12,12 @@ export default {
     initStory: function(state, payload) {
         const story = new factory.Story();
         story.name = 'Story ' + (state.stories.length + 1);
+
+        const geometry = new factory.Geometry();
+        story.geometry_id = geometry.id;
+
         state.stories.push(story);
+        state.geometry.push(geometry);
     },
     initSpace: function(state, payload) {
         const story = state.stories.find((s) => {

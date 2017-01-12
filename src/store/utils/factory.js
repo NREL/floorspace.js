@@ -25,6 +25,14 @@ export default {
             edges: edges
         }
     },
+    Geometry: function() {
+        return {
+            'id': generateId(),
+            'vertices': [],
+            'edges': [],
+            'faces': []
+        }
+    },
     Story: function() {
         return {
             id: generateId(),
