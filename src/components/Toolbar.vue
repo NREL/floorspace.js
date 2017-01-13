@@ -54,13 +54,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 </template>
 
 <script>
+import { mapState } from 'vuex'
 export default {
     name: 'toolbar',
     data: function() {
         return {};
     },
     computed: {
-        modes () { return this.$store.state.application.modes; },
+        ...mapState({ modes: state => state.application.modes }),
         mode: {
             get () { return this.$store.state.application.currentSelections.mode; },
             set (newValue) {

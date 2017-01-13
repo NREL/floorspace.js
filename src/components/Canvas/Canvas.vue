@@ -14,7 +14,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <script>
 import methods from './methods'
-
+import { mapGetters, mapState } from 'vuex'
 export default {
     name: 'canvas',
     data: function() {
@@ -32,11 +32,33 @@ export default {
         window.removeEventListener('resize', this.drawGrid)
     },
     computed: {
-        currentSpace () { return this.$store.getters.currentSpace; },
+        ...mapGetters(['currentSpace']),
+        ...mapState({
+            // scale functions translate the pixel coordinates of a location on the screen into RWU coordinates to use within the SVG's grid system
+            scaleX: state => state.application.scale.x,
+            scaleY: state => state.application.scale.y,
 
+            // the spacing in RWU between gridlines - one square in the grid will be x_spacing x y_spacing
+            x_spacing: state => state.grid.x_spacing,
+            y_spacing: state => state.grid.y_spacing,
+
+            // mix_x, min_y, max_x, and max_y bound the portion of the canvas (in RWU) that is currently visible to the user
+            min_x: state => state.view.min_x,
+            min_y: state => state.view.min_y,
+            max_x: state => state.view.max_x,
+            max_y: state => state.view.max_y,
+
+            // SVG viewbox is the portion of the svg grid (in RWU) that is currently visible to the user given the min_x, min_y, max_x, and max_y boundaries
+            viewbox: state => {
+                return state.view.min_x + ' ' + // x
+                state.view.min_y + ' ' + // y
+                (state.view.max_x - state.view.min_x) + ' ' + // width
+                (state.view.max_y - state.view.min_y); // height
+            }
+        }),
+        // map all faces for the current story to polygons
         polygons () {
-            // map all faces for the current story to polygons
-            var polygons =  this.$store.getters.currentStoryGeometry.faces.map((face) => {
+            return this.$store.getters.currentStoryGeometry.faces.map((face) => {
                 // obtain a set of vertices for each face by taking the first vertex from each edge (direction matters here)
                 return {
                     face_id: face.id,
@@ -53,31 +75,7 @@ export default {
                     })
                 }
             });
-
-            return polygons;
         },
-
-        // scale functions translate the pixel coordinates of a location on the screen into RWU coordinates to use within the SVG's grid system
-        scaleX () { return this.$store.state.application.scale.x; },
-        scaleY () { return this.$store.state.application.scale.y; },
-
-        // the spacing in RWU between gridlines - one square in the grid will be x_spacing x y_spacing
-        x_spacing () { return this.$store.state.grid.x_spacing; },
-        y_spacing () { return this.$store.state.grid.y_spacing; },
-
-        // mix_x, min_y, max_x, and max_y bound the portion of the canvas (in RWU) that is currently visible to the user
-        min_x () { return this.$store.state.view.min_x; },
-        min_y () { return this.$store.state.view.min_y; },
-        max_x () { return this.$store.state.view.max_x; },
-        max_y () { return this.$store.state.view.max_y; },
-
-        // SVG viewbox is the portion of the svg grid (in RWU) that is currently visible to the user given the min_x, min_y, max_x, and max_y boundaries
-        viewbox: function() {
-            return this.$store.state.view.min_x + ' ' + // x
-                this.$store.state.view.min_y + ' ' + // y
-                (this.$store.state.view.max_x - this.$store.state.view.min_x ) + ' ' + // width
-                (this.$store.state.view.max_y - this.$store.state.view.min_y); // height
-        }
     },
     watch: {
         // if the  dimensions or spacing of the grid is altered, redraw it

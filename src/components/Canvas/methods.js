@@ -109,8 +109,8 @@ export default {
         svg.selectAll('.vertical')
             .data(d3.range(0, (this.$store.state.view.max_x - this.$store.state.view.min_x) / this.x_spacing))
             .enter().append('line')
-            .attr('x1', (d) => { return d * this.x_spacing + this.$store.state.view.min_x; })
-            .attr('x2', (d) => { return d * this.x_spacing + this.$store.state.view.min_x; })
+            .attr('x1', (d) => { return d * this.x_spacing; })
+            .attr('x2', (d) => { return d * this.x_spacing; })
             .attr('y1', this.min_y)
             .attr('y2', this.scaleY(this.$refs.grid.clientHeight))
             .attr('class', 'vertical')
@@ -121,8 +121,8 @@ export default {
             .enter().append('line')
             .attr('x1', this.min_x)
             .attr('x2', this.scaleX(this.$refs.grid.clientWidth))
-            .attr('y1', (d) => { return d * this.y_spacing + this.$store.state.view.min_y; })
-            .attr('y2', (d) => { return d * this.y_spacing + this.$store.state.view.min_y; })
+            .attr('y1', (d) => { return d * this.y_spacing; })
+            .attr('y2', (d) => { return d * this.y_spacing; })
             .attr('class', 'horizontal')
             .attr('vector-effect', 'non-scaling-stroke');
 

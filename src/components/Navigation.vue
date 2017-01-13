@@ -37,6 +37,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 </template>
 
 <script>
+import { mapState } from 'vuex'
 export default {
     name: 'navigation',
     data() {
@@ -46,7 +47,7 @@ export default {
     },
     computed: {
         // all stories, spaces only for the currently selected story
-        stories() { return this.$store.state.stories; },
+        ...mapState(['stories']), //  stories() { return this.$store.state.stories; },
         spaces () { return this.currentStory.spaces; },
 
         // currently selected story - this is always set

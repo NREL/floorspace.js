@@ -41,6 +41,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 export default {
     name: 'inspector',
     data() {
@@ -54,8 +55,7 @@ export default {
         }
     },
     computed: {
-        currentStory () { return this.$store.getters.currentStory; },
-        currentSpace () { return this.$store.getters.currentSpace; }
+        ...mapGetters(['currentStory', 'currentSpace'])
     }
 }
 </script>

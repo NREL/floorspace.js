@@ -19,8 +19,8 @@ export default {
         'y_spacing': 50
     },
     'view': {
-        'min_x': 0,
-        'min_y': 0,
+        'min_x': 100,
+        'min_y': 100,
         'max_x': 1000,
         'max_y': 1000
     },
