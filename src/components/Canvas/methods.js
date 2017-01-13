@@ -107,7 +107,7 @@ export default {
 
         // lines are drawn in RWU
         svg.selectAll('.vertical')
-            .data(d3.range(0, (this.$store.state.view.max_x - this.$store.state.view.min_x) / this.x_spacing))
+            .data(d3.range(this.$store.state.view.min_x / this.x_spacing, this.$store.state.view.max_x / this.x_spacing))
             .enter().append('line')
             .attr('x1', (d) => { return d * this.x_spacing; })
             .attr('x2', (d) => { return d * this.x_spacing; })
@@ -117,7 +117,7 @@ export default {
             .attr('vector-effect', 'non-scaling-stroke');
 
         svg.selectAll('.horizontal')
-            .data(d3.range(1, (this.$store.state.view.max_y - this.$store.state.view.min_y) / this.y_spacing))
+            .data(d3.range(this.$store.state.view.min_y / this.y_spacing, this.$store.state.view.max_y / this.y_spacing))
             .enter().append('line')
             .attr('x1', this.min_x)
             .attr('x2', this.scaleX(this.$refs.grid.clientWidth))
