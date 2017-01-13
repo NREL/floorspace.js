@@ -44,14 +44,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 export default {
     name: 'inspector',
     data() {
-        return {
-            immutableStoryProperties: ['id', 'handle', 'spaces', 'images', 'geometry_id', 'windows'],
-            immutableSpaceProperties: ['id', 'handle', 'face_id', 'daylighting_controls'],
-        }
+        return {}
     },
     methods: {
         updatecurrentStory (key, event) {
-            console.log(key, event.target.value);
             var payload = { id: this.$store.state.application.currentSelections.story_id };
             payload[key] = event.target.value;
             this.$store.commit('updateStoryWithData', payload);

@@ -8,10 +8,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
 <nav id="navigation">
-    <div class="input-text">
-        <input v-model="searchTerm" placeholder="Search">
-    </div>
-
     <section id="tabs">
         <span :class="tab === 'stories' ? 'active' : ''" @click="tab = 'stories'">Stories</span>
         <span :class="tab === 'spaces' ? 'active' : ''" @click="tab = 'spaces'">Spaces</span>
@@ -33,10 +29,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
     <section id="list">
         <div v-for="item in (tab === 'spaces' ? spaces : stories)" :key="item.id" :class="(currentSpace === item || currentStory === item ) ? 'active' : ''" @click="selectItem(item)">
-            <div class="input-text">
-                <!-- we must use this special binding to avoid mutating data in the store directly -->
-                <input @input="setName(item.id, $event.target.value)" :value="item.name">
-            </div>
+            {{item.name}}
         </div>
     </section>
 
@@ -48,8 +41,7 @@ export default {
     name: 'navigation',
     data() {
         return {
-            tab: 'stories',
-            searchTerm: ''
+            tab: 'stories'
         };
     },
     computed: {
@@ -128,13 +120,17 @@ export default {
         align-items: center;
         display: flex;
         justify-content: space-between;
-        height: 2.5rem;
         padding: 0 1rem;
+    }
+
+    div {
+        height: 2rem;
     }
 
     #breadcrumbs {
         background-color: $gray-medium-light;
         border-bottom: 1px solid $gray-medium-dark;
+        height: 2.5rem;
         svg {
             margin: 0 .25rem;
             width: .5rem;
@@ -151,7 +147,7 @@ export default {
     }
     #list {
         overflow: scroll;
-        height: calc(100% - 6.75rem);
+        height: calc(100% - 4.25rem);
     }
 }
 </style>
