@@ -11,12 +11,12 @@
 #canvas svg {
     // points
     ellipse {
-        fill: $secondary;
-        stroke: $secondary;
+        fill: $primary;
+        stroke: $primary;
         &.origin {
             fill: none;
             &:hover {
-                fill: $secondary;
+                fill: $primary;
             }
         }
     }
@@ -29,11 +29,10 @@
     polygon, rect, path {
         fill: $primary;
         fill-opacity: 0.25;
-        stroke: $secondary;
+        stroke: $primary;
         &.currentSpace {
-            fill: green;
-            stroke: green;
-
+            fill: $secondary;
+            stroke: $secondary;
         }
     }
 }
