@@ -1,41 +1,9 @@
-const generateId = (function idFactory() {
-    var id = 0;
-    return () => id++
-})();
+import helpers from './helpers'
 
 export default {
-    generateId: generateId,
-    Vertex: function(x, y) {
-        return {
-            id: generateId(),
-            x: x,
-            y: y
-        }
-    },
-    Edge: function(p1, p2) {
-        return {
-            id: generateId(),
-            p1: p1,
-            p2: p2
-        }
-    },
-    Face: function(edges) {
-        return {
-            id: generateId(),
-            edges: edges
-        }
-    },
-    Geometry: function() {
-        return {
-            'id': generateId(),
-            'vertices': [],
-            'edges': [],
-            'faces': []
-        }
-    },
     Story: function() {
         return {
-            id: generateId(),
+            id: helpers.generateId(),
             name: null,
             geometry_id: null, // geometry id
             images: [], // image ids
@@ -49,7 +17,7 @@ export default {
     },
     Space: function() {
         return {
-            id: generateId(),
+            id: helpers.generateId(),
             name: null,
             face_id: null, // face_id
             daylighting_controls: [],

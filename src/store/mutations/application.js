@@ -10,6 +10,7 @@ export default {
     // CURRENTSELECTIONS
     // state.application.currentSelections.story_id
     setCurrentSelectionsStoryId: function(state, payload) {
+         
         const story = state.stories.find((s) => {
             return s.id === payload.story_id;
         });

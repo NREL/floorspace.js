@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 Vue.use(Vuex);
 
-import factory from './utils/factory'
+import factory from './factory/index'
 
 // state
 import application from './state/application'

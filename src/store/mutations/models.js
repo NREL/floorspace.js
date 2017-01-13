@@ -6,7 +6,7 @@
 // (4) Other than as required in clauses (1) and (2), distributions in any form of modifications or other derivative works may not use the "OpenStudio" trademark, "OS", "os", or any other confusingly similar designation without specific prior written permission from Alliance for Sustainable Energy, LLC.
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import factory from './../utils/factory'
+import factory from './../factory/index'
 
 export default {
     initStory: function(state, payload) {
@@ -34,9 +34,9 @@ export default {
             return s.id === payload.id;
         });
         story.name = payload.name || story.name;
-        story.below_floor_plenum_height = 'below_floor_plenum_height' in payload && !isNaN(parseFloat(payload.below_floor_plenum_height)) ? payload.below_floor_plenum_height : story.below_floor_plenum_height;
-        story.floor_to_ceiling_height = 'floor_to_ceiling_height' in payload && !isNaN(parseFloat(payload.floor_to_ceiling_height)) ? payload.floor_to_ceiling_height : story.floor_to_ceiling_height;
-        story.multiplier = 'multiplier' in payload && !isNaN(parseFloat(payload.multiplier)) ? payload.multiplier : story.multiplier;
+        story.below_floor_plenum_height = 'below_floor_plenum_height' in payload && !isNaN(parseFloat(payload.below_floor_plenum_height)) ? parseFloat(payload.below_floor_plenum_height) : story.below_floor_plenum_height;
+        story.floor_to_ceiling_height = 'floor_to_ceiling_height' in payload && !isNaN(parseFloat(payload.floor_to_ceiling_height)) ? parseFloat(payload.floor_to_ceiling_height) : story.floor_to_ceiling_height;
+        story.multiplier = 'multiplier' in payload && !isNaN(parseInt(payload.multiplier)) ? parseInt(payload.multiplier) : story.multiplier;
 
     },
     updateSpaceWithData: function(state, payload) {

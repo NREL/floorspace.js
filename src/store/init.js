@@ -1,9 +1,10 @@
-import factory from './utils/factory'
+import factory from './factory/index'
+import helpers from './factory/helpers'
 
 export default function initializeDefaultState(state) {
     // initialize app with a story
-    const storyId = factory.generateId();
-    const geometryId = factory.generateId();
+    const storyId = helpers.generateId();
+    const geometryId = helpers.generateId();
 
     state.application.currentSelections.story_id = storyId;
 
