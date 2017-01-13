@@ -39,6 +39,7 @@ import init from './init'
 init(state);
 
 const store = new Vuex.Store({
+    strict: process.env.NODE_ENV !== 'production',
     state: state,
     mutations: {
         ...applicationMutations,

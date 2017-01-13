@@ -8,11 +8,35 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
 <section id="inspector">
-    <h1>Inspector</h1>
-    <h2>Current Space</h2>
-    <ul>
-        <li v-for="(value, key) in currentSpace"> {{key}}: {{value || 'none'}} </li>
-    </ul>
+    <h3>Current Story</h3>
+
+    <div class="input-text">
+        <label>name</label>
+        <input :value="currentStory.name" @input="updatecurrentStory('name', $event)">
+    </div>
+
+    <div class="input-text">
+        <label>below_floor_plenum_height</label>
+        <input :value="currentStory.below_floor_plenum_height" @input="updatecurrentStory('below_floor_plenum_height', $event)">
+    </div>
+
+    <div class="input-text">
+        <label>floor_to_ceiling_height</label>
+        <input :value="currentStory.floor_to_ceiling_height" @input="updatecurrentStory('floor_to_ceiling_height', $event)">
+    </div>
+
+    <div class="input-text">
+        <label>multiplier</label>
+        <input :value="currentStory.multiplier" @input="updatecurrentStory('multiplier', $event)">
+    </div>
+
+    <h3>Current Space</h3>
+
+    <div class="input-text" v-for="(value, key) in currentSpace">
+        <label>{{key}}</label>
+        <input :value="value" @input="updatecurrentStory(key, $event)" readonly="true">
+    </div>
+
 </section>
 </template>
 
@@ -21,9 +45,20 @@ export default {
     name: 'inspector',
     data() {
         return {
+            immutableStoryProperties: ['id', 'handle', 'spaces', 'images', 'geometry_id', 'windows'],
+            immutableSpaceProperties: ['id', 'handle', 'face_id', 'daylighting_controls'],
+        }
+    },
+    methods: {
+        updatecurrentStory (key, event) {
+            console.log(key, event.target.value);
+            var payload = { id: this.$store.state.application.currentSelections.story_id };
+            payload[key] = event.target.value;
+            this.$store.commit('updateStoryWithData', payload);
         }
     },
     computed: {
+        currentStory () { return this.$store.getters.currentStory; },
         currentSpace () { return this.$store.getters.currentSpace; }
     }
 }
@@ -32,8 +67,12 @@ export default {
 <style lang="scss" scoped>
 @import "./../scss/config";
     #inspector {
-        background-color: $gray-dark;
+        background-color: $gray-medium;
         border-left: 1px solid $gray-darkest;
+        overflow: scroll;
         padding: 0 2rem;
+        div {
+            margin: 1rem 0;
+        }
     }
 </style>

@@ -31,12 +31,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </svg>
     </section>
 
-    <div v-for="item in (tab === 'spaces' ? spaces : stories)" :key="item.id" :class="(currentSpace === item || currentStory === item ) ? 'active' : ''" @click="selectItem(item)">
-        <div class="input-text">
-            <!-- we must use this special binding to avoid mutating data in the store directly -->
-            <input @input="setName(item.id, $event.target.value)" :value="item.name">
+    <section id="list">
+        <div v-for="item in (tab === 'spaces' ? spaces : stories)" :key="item.id" :class="(currentSpace === item || currentStory === item ) ? 'active' : ''" @click="selectItem(item)">
+            <div class="input-text">
+                <!-- we must use this special binding to avoid mutating data in the store directly -->
+                <input @input="setName(item.id, $event.target.value)" :value="item.name">
+            </div>
         </div>
-    </div>
+    </section>
 
 </nav>
 </template>
@@ -108,6 +110,7 @@ export default {
     #tabs {
         border-bottom: 1px solid $gray-darkest;
         display: flex;
+        height: 1.75rem;
         font-size: 0.625rem;
         span {
             border-right: 1px solid $gray-darkest;
@@ -145,6 +148,10 @@ export default {
                 fill: $gray-light;
             }
         }
+    }
+    #list {
+        overflow: scroll;
+        height: calc(100% - 6.75rem);
     }
 }
 </style>

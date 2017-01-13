@@ -8,10 +8,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
     <nav id="toolbar">
-        <section v-if="mode==='Space'" id="space-tools" class="tools">
-            <a @click="">polygon</a>
-        </section>
-        <section v-else class="tools">
+        <section class="tools">
             <a>{{ mode }}</a>
         </section>
 

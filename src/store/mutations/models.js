@@ -34,6 +34,10 @@ export default {
             return s.id === payload.id;
         });
         story.name = payload.name || story.name;
+        story.below_floor_plenum_height = 'below_floor_plenum_height' in payload && !isNaN(parseFloat(payload.below_floor_plenum_height)) ? payload.below_floor_plenum_height : story.below_floor_plenum_height;
+        story.floor_to_ceiling_height = 'floor_to_ceiling_height' in payload && !isNaN(parseFloat(payload.floor_to_ceiling_height)) ? payload.floor_to_ceiling_height : story.floor_to_ceiling_height;
+        story.multiplier = 'multiplier' in payload && !isNaN(parseFloat(payload.multiplier)) ? payload.multiplier : story.multiplier;
+
     },
     updateSpaceWithData: function(state, payload) {
         const story = state.stories.find((s) => {
