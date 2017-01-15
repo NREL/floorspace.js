@@ -51,11 +51,14 @@ export default {
         updatecurrentStory (key, event) {
             var payload = { id: this.$store.state.application.currentSelections.story_id };
             payload[key] = event.target.value;
-            this.$store.commit('updateStoryWithData', payload);
+            this.$store.commit('models/updateStoryWithData', payload);
         }
     },
     computed: {
-        ...mapGetters(['currentStory', 'currentSpace'])
+        ...mapGetters({
+            currentStory: 'application/currentStory',
+            currentSpace: 'application/currentSpace'
+        })
     }
 }
 </script>

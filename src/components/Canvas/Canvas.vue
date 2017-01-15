@@ -32,44 +32,46 @@ export default {
         window.removeEventListener('resize', this.drawGrid)
     },
     computed: {
-        ...mapGetters(['currentSpace']),
+        ...mapGetters({
+            'currentSpace': 'application/currentSpace'
+        }),
         ...mapState({
             // scale functions translate the pixel coordinates of a location on the screen into RWU coordinates to use within the SVG's grid system
             scaleX: state => state.application.scale.x,
             scaleY: state => state.application.scale.y,
 
             // the spacing in RWU between gridlines - one square in the grid will be x_spacing x y_spacing
-            x_spacing: state => state.grid.x_spacing,
-            y_spacing: state => state.grid.y_spacing,
+            x_spacing: state => state.project.grid.x_spacing,
+            y_spacing: state => state.project.grid.y_spacing,
 
             // mix_x, min_y, max_x, and max_y bound the portion of the canvas (in RWU) that is currently visible to the user
-            min_x: state => state.view.min_x,
-            min_y: state => state.view.min_y,
-            max_x: state => state.view.max_x,
-            max_y: state => state.view.max_y,
+            min_x: state => state.project.view.min_x,
+            min_y: state => state.project.view.min_y,
+            max_x: state => state.project.view.max_x,
+            max_y: state => state.project.view.max_y,
 
             // SVG viewbox is the portion of the svg grid (in RWU) that is currently visible to the user given the min_x, min_y, max_x, and max_y boundaries
             viewbox: state => {
-                return state.view.min_x + ' ' + // x
-                state.view.min_y + ' ' + // y
-                (state.view.max_x - state.view.min_x) + ' ' + // width
-                (state.view.max_y - state.view.min_y); // height
+                return state.project.view.min_x + ' ' + // x
+                state.project.view.min_y + ' ' + // y
+                (state.project.view.max_x - state.project.view.min_x) + ' ' + // width
+                (state.project.view.max_y - state.project.view.min_y); // height
             }
         }),
         // map all faces for the current story to polygons
         polygons () {
-            return this.$store.getters.currentStoryGeometry.faces.map((face) => {
+            return this.$store.getters['application/currentStoryGeometry'].faces.map((face) => {
                 // obtain a set of vertices for each face by taking the first vertex from each edge (direction matters here)
                 return {
                     face_id: face.id,
                     points: face.edges.map((edgeRef) => {
                         // look up the edge referenced by the face
-                        const edge = this.$store.getters.currentStoryGeometry.edges.find((e) => {
+                        const edge = this.$store.getters['application/currentStoryGeometry'].edges.find((e) => {
                             return e.id === edgeRef.edge_id;
                         });
                         // look up the vertex associated with p1 unless the edge reference on the face is reversed
                         const vertexId = edgeRef.reverse ? edge.p2 : edge.p1;
-                        return this.$store.getters.currentStoryGeometry.vertices.find((v) => {
+                        return this.$store.getters['application/currentStoryGeometry'].vertices.find((v) => {
                             return v.id === vertexId;
                         })
                     })

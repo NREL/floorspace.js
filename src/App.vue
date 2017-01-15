@@ -17,6 +17,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 </template>
 
 <script>
+import factory from './store/factory/index.js'
+
 // this import order is important, if the grid is loaded before the other elements or after the toolbar, it ends up warped
 import Navigation from './components/Navigation'
 import Inspector from './components/Inspector'
@@ -30,6 +32,25 @@ export default {
         'navigation': Navigation,
         'toolbar': Toolbar,
         'inspector': Inspector
+    },
+    beforeCreate () {
+        // create a default story, set as current story
+        this.$store.commit('models/initStory');
+        this.$store.commit('application/setCurrentSelectionsStoryId', {
+            'story_id': this.$store.state.models.stories[0].id
+        });
+        // create associated geometry
+        this.$store.dispatch('geometry/initGeometry', {
+            'story_id': this.$store.state.application.currentSelections.story_id
+        });
+
+        // create a space, set as current space
+        this.$store.dispatch('models/initSpace', {
+            'story_id': this.$store.state.application.currentSelections.story_id
+        });
+        this.$store.commit('application/setCurrentSelectionsSpaceId', {
+            'space_id': this.$store.getters['application/currentStory']['spaces'][0].id
+        });
     }
 }
 </script>

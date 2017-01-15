@@ -47,23 +47,23 @@ export default {
     },
     computed: {
         // all stories, spaces only for the currently selected story
-        ...mapState(['stories']), //  stories() { return this.$store.state.stories; },
+        ...mapState({ 'stories': 'models/stories' }), //  stories() { return this.$store.state.models.stories; },
         spaces () { return this.currentStory.spaces; },
 
         // currently selected story - this is always set
         currentStory: {
-            get () { return this.$store.getters.currentStory; },
+            get () { return this.$store.getters['application/currentStory']; },
             set (item) {
-                this.$store.commit('setCurrentSelectionsStoryId', {
+                this.$store.commit('application/setCurrentSelectionsStoryId', {
                     'story_id': item.id
                 });
             }
         },
         // currently selected space, may not be set
         currentSpace: {
-            get () { return this.$store.getters.currentSpace; },
+            get () { return this.$store.getters['application/currentSpace']; },
             set (item) {
-                this.$store.commit('setCurrentSelectionsSpaceId', {
+                this.$store.commit('application/setCurrentSelectionsSpaceId', {
                     'space_id': item.id
                 });
             }
@@ -72,7 +72,17 @@ export default {
     methods: {
         // initialize an empty story or space depending on the selected tab
         addItem () {
-            this.$store.commit(this.tab === 'stories' ? 'initStory' : 'initSpace' );
+            if (this.tab === 'stories') {
+                // this.$store.commit('models/initStory');
+                // // create associated geometry
+                // this.$store.dispatch('geometry/initGeometry', {
+                //     'story_id': this.$store.state.application.currentSelections.story_id
+                // });
+            } else {
+                this.$store.dispatch('models/initSpace', {
+                    story_id: this.$store.getters['application/currentStory'].id
+                });
+            }
         },
         // update the currentStory or currentSpace
         selectItem (item) {
@@ -83,7 +93,7 @@ export default {
             }
         },
         setName (itemID, name) {
-            this.$store.commit(this.tab === 'stories' ? 'updateStoryWithData' : 'updateSpaceWithData', {
+            this.$store.commit(this.tab === 'stories' ? 'models/updateStoryWithData' : 'models/updateSpaceWithData', {
                 'id': itemID,
                 'name': name
             });

@@ -73,7 +73,7 @@ export default {
         // spacing between gridlines, measured in RWU
         x_spacing: {
             get() {
-                return this.$store.state.grid.x_spacing + ' ' + this.$store.state.config.units;
+                return this.$store.state.project.config.x_spacing + ' ' + this.$store.state.project.config.units;
             },
             set(newValue) {
                 this.$store.commit('setGridXSpacing', {
@@ -83,7 +83,7 @@ export default {
         },
         y_spacing: {
             get() {
-                return this.$store.state.grid.y_spacing + ' ' + this.$store.state.config.units;
+                return this.$store.state.project.config.y_spacing + ' ' + this.$store.state.project.config.units;
             },
             set(newValue) {
                 this.$store.commit('setGridYSpacing', {
@@ -95,7 +95,7 @@ export default {
         // mix_x, min_y, max_x, and max_y are the grid dimensions in real world units
         min_x: {
             get() {
-                return this.$store.state.view.min_x + ' ' + this.$store.state.config.units;
+                return this.$store.state.project.view.min_x + ' ' + this.$store.state.project.config.units;
             },
             set(newValue) {
                 this.$store.commit('setViewMinX', {
@@ -105,7 +105,7 @@ export default {
         },
         min_y: {
             get() {
-                return this.$store.state.view.min_y + ' ' + this.$store.state.config.units;
+                return this.$store.state.project.view.min_y + ' ' + this.$store.state.project.config.units;
             },
             set(newValue) {
                 this.$store.commit('setViewMinY', {
@@ -115,7 +115,7 @@ export default {
         },
         max_x: {
             get() {
-                return this.$store.state.view.max_x + ' ' + this.$store.state.config.units;
+                return this.$store.state.project.view.max_x + ' ' + this.$store.state.project.config.units;
             },
             set(newValue) {
                 this.$store.commit('setViewMaxX', {
@@ -125,7 +125,7 @@ export default {
         },
         max_y: {
             get() {
-                return this.$store.state.view.max_y + ' ' + this.$store.state.config.units;
+                return this.$store.state.project.view.max_y + ' ' + this.$store.state.project.config.units;
             },
             set(newValue) {
                 this.$store.commit('setViewMaxY', {

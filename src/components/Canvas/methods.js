@@ -32,7 +32,7 @@ export default {
             .on('click', () => {
                 // create the polygon - triggers this.drawPolygons()
                 // create a face in the data store from the points
-                this.$store.commit('createFaceFromPoints', {
+                this.$store.dispatch('geometry/createFaceFromPoints', {
                     points: this.points
                 });
 
@@ -89,16 +89,16 @@ export default {
     },
     drawGrid: function() {
         // update scales with new grid boundaries
-        this.$store.commit('setScaleX', {
+        this.$store.commit('application/setScaleX', {
             scaleX: d3.scaleLinear()
                 .domain([0, this.$refs.grid.clientWidth])
-                .range([this.$store.state.view.min_x, this.$store.state.view.max_x])
+                .range([this.$store.state.project.view.min_x, this.$store.state.project.view.max_x])
         });
 
-        this.$store.commit('setScaleY', {
+        this.$store.commit('application/setScaleY', {
             scaleY: d3.scaleLinear()
                 .domain([0, this.$refs.grid.clientHeight])
-                .range([this.$store.state.view.min_y, this.$store.state.view.max_y])
+                .range([this.$store.state.project.view.min_y, this.$store.state.project.view.max_y])
         });
 
         // redraw the grid
@@ -107,7 +107,7 @@ export default {
 
         // lines are drawn in RWU
         svg.selectAll('.vertical')
-            .data(d3.range(this.$store.state.view.min_x / this.x_spacing, this.$store.state.view.max_x / this.x_spacing))
+            .data(d3.range(this.$store.state.project.view.min_x / this.x_spacing, this.$store.state.project.view.max_x / this.x_spacing))
             .enter().append('line')
             .attr('x1', (d) => { return d * this.x_spacing; })
             .attr('x2', (d) => { return d * this.x_spacing; })
@@ -117,7 +117,7 @@ export default {
             .attr('vector-effect', 'non-scaling-stroke');
 
         svg.selectAll('.horizontal')
-            .data(d3.range(this.$store.state.view.min_y / this.y_spacing, this.$store.state.view.max_y / this.y_spacing))
+            .data(d3.range(this.$store.state.project.view.min_y / this.y_spacing, this.$store.state.project.view.max_y / this.y_spacing))
             .enter().append('line')
             .attr('x1', this.min_x)
             .attr('x2', this.scaleX(this.$refs.grid.clientWidth))
