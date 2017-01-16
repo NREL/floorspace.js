@@ -42,7 +42,7 @@ export default {
     },
     actions: {
         initStory (context) {
-            // create and save the story
+            // create and save the story, set as current story
             const story = new factory.Story();
             story.name = 'Story ' + (context.state.stories.length + 1);
             context.commit('initStory', {
@@ -51,7 +51,8 @@ export default {
             context.dispatch('application/setCurrentStory', {
                 'story': story
             }, { root: true });
-            // create and save a default space for the story
+
+            // create and save a default space for the story, set as current space
             const space = new factory.Space();
             space.name = 'Space 1';
             context.commit('initSpace', {
@@ -66,11 +67,8 @@ export default {
             context.dispatch('geometry/initGeometry', {
                 story: story
             }, { root: true });
-
-            return story;
         },
-        // initialize a new space
-        // must update the associated story to reference the new space
+        // initialize a new space on a story
         initSpace (context, payload) {
             const space = new factory.Space();
             space.name = 'Space ' + (payload.story.spaces.length + 1);
@@ -78,6 +76,18 @@ export default {
                 story: payload.story,
                 space: space
             });
+        },
+        // validate and update simple properties on the story, other actions will be used to add images, spaces, and windows to a story
+        updateStoryWithData (context, payload) {
+            const validatedPayload = { story: payload.story };
+            const validator = new Validator(payload, validatedPayload);
+
+            validator.validateLength('name', 1);
+            validator.validateFloat('below_floor_plenum_height');
+            validator.validateFloat('floor_to_ceiling_height');
+            validator.validateInt('multiplier');
+
+            context.commit('updateStoryWithData', validator.validatedPayload);
         }
     },
     mutations: {
@@ -85,19 +95,23 @@ export default {
         initStory (state, payload) {
             state.stories.push(payload.story);
         },
-        // initialize a new space
-        // must update the associated story to reference the new space
+        // initialize a new space on a story
         initSpace (state, payload) {
             payload.story.spaces.push(payload.space);
         },
-
-        //TODO: validate
         updateStoryWithData (state, payload) {
-            payload.story.name = payload.name || payload.story.name;
-            payload.story.geometry_id = 'geometry_id' in payload && !isNaN(parseFloat(payload.geometry_id)) ? parseFloat(payload.geometry_id) : payload.story.geometry_id;
-            payload.story.below_floor_plenum_height = 'below_floor_plenum_height' in payload && !isNaN(parseFloat(payload.below_floor_plenum_height)) ? parseFloat(payload.below_floor_plenum_height) : payload.story.below_floor_plenum_height;
-            payload.story.floor_to_ceiling_height = 'floor_to_ceiling_height' in payload && !isNaN(parseFloat(payload.floor_to_ceiling_height)) ? parseFloat(payload.floor_to_ceiling_height) : payload.story.floor_to_ceiling_height;
-            payload.story.multiplier = 'multiplier' in payload && !isNaN(parseInt(payload.multiplier)) ? parseInt(payload.multiplier) : payload.story.multiplier;
+            if ('name' in payload) {
+                payload.story.name = payload.name;
+            }
+            if ('below_floor_plenum_height' in payload) {
+                payload.story.below_floor_plenum_height = payload.below_floor_plenum_height;
+            }
+            if ('floor_to_ceiling_height' in payload) {
+                payload.story.floor_to_ceiling_height = payload.floor_to_ceiling_height;
+            }
+            if ('multiplier' in payload) {
+                payload.story.multiplier = payload.multiplier;
+            }
         },
         updateSpaceWithData (state, payload) {
             const story = state.stories.find((s) => {
@@ -110,4 +124,25 @@ export default {
         }
     },
     getters: {}
+}
+
+function Validator (payload, validatedPayload) {
+    return {
+        validatedPayload: validatedPayload,
+        validateLength (key, minLength = 0) {
+            if (key in payload && payload[key].length >= minLength) {
+                validatedPayload[key] = payload[key];
+            }
+        },
+        validateFloat (key) {
+            if (key in payload && !isNaN(parseFloat(payload[key]))) {
+                validatedPayload[key] = parseFloat(payload[key]);
+            }
+        },
+        validateInt (key) {
+            if (key in payload && !isNaN(parseInt(payload[key]))) {
+                validatedPayload[key] = parseInt(payload[key]);
+            }
+        }
+    }
 }

@@ -9,29 +9,27 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
 <section id="inspector">
     <h3>Current Story</h3>
-
     <div class="input-text">
         <label>name</label>
-        <input :value="currentStory.name" @input="updatecurrentStory('name', $event)">
+        <input :value="currentStory.name" @change="updatecurrentStory('name', $event)">
     </div>
 
     <div class="input-text">
         <label>below_floor_plenum_height</label>
-        <input :value="currentStory.below_floor_plenum_height" @input="updatecurrentStory('below_floor_plenum_height', $event)">
+        <input :value="currentStory.below_floor_plenum_height" @change="updatecurrentStory('below_floor_plenum_height', $event)">
     </div>
 
     <div class="input-text">
         <label>floor_to_ceiling_height</label>
-        <input :value="currentStory.floor_to_ceiling_height" @input="updatecurrentStory('floor_to_ceiling_height', $event)">
+        <input :value="currentStory.floor_to_ceiling_height" @change="updatecurrentStory('floor_to_ceiling_height', $event)">
     </div>
 
     <div class="input-text">
         <label>multiplier</label>
-        <input :value="currentStory.multiplier" @input="updatecurrentStory('multiplier', $event)">
+        <input :value="currentStory.multiplier" @change="updatecurrentStory('multiplier', $event)">
     </div>
 
     <h3>Current Space</h3>
-
     <div class="input-text" v-for="(value, key) in currentSpace">
         <label>{{key}}</label>
         <input :value="value" @input="updatecurrentStory(key, $event)" readonly="true">
@@ -51,7 +49,9 @@ export default {
         updatecurrentStory (key, event) {
             var payload = { story: this.$store.state.application.currentSelections.story };
             payload[key] = event.target.value;
-            this.$store.commit('models/updateStoryWithData', payload);
+            // required to prevent input field value from containing incorrect data
+            event.target.value = this.$store.state.application.currentSelections.story[key];
+            this.$store.dispatch('models/updateStoryWithData', payload);
         }
     },
     computed: {

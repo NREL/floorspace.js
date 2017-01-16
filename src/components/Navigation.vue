@@ -89,12 +89,6 @@ export default {
             } else if (this.tab === 'spaces') {
                 this.currentSpace = item;
             }
-        },
-        setName (itemID, name) {
-            // this.$store.commit(this.tab === 'stories' ? 'models/updateStoryWithData' : 'models/updateSpaceWithData', {
-            //     'id': itemID,
-            //     'name': name
-            // });
         }
     }
 }
