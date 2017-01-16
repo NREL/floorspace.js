@@ -52,19 +52,19 @@ export default {
 
         // currently selected story - this is always set
         currentStory: {
-            get () { return this.$store.getters['application/currentStory']; },
+            get () { return this.$store.state.application.currentSelections.story; },
             set (item) {
-                this.$store.commit('application/setCurrentSelectionsStoryId', {
-                    'story_id': item.id
+                this.$store.dispatch('application/setCurrentStory', {
+                    'story': item
                 });
             }
         },
         // currently selected space, may not be set
         currentSpace: {
-            get () { return this.$store.getters['application/currentSpace']; },
+            get () { return this.$store.state.application.currentSelections.space; },
             set (item) {
-                this.$store.commit('application/setCurrentSelectionsSpaceId', {
-                    'space_id': item.id
+                this.$store.dispatch('application/setCurrentSpace', {
+                    'space': item
                 });
             }
         }
@@ -73,6 +73,7 @@ export default {
         // initialize an empty story or space depending on the selected tab
         addItem () {
             if (this.tab === 'stories') {
+
                 // this.$store.commit('models/initStory');
                 // // create associated geometry
                 // this.$store.dispatch('geometry/initGeometry', {
@@ -80,7 +81,7 @@ export default {
                 // });
             } else {
                 this.$store.dispatch('models/initSpace', {
-                    story_id: this.$store.getters['application/currentStory'].id
+                    story_id: this.$store.state.application.currentSelections.story
                 });
             }
         },
@@ -93,10 +94,10 @@ export default {
             }
         },
         setName (itemID, name) {
-            this.$store.commit(this.tab === 'stories' ? 'models/updateStoryWithData' : 'models/updateSpaceWithData', {
-                'id': itemID,
-                'name': name
-            });
+            // this.$store.commit(this.tab === 'stories' ? 'models/updateStoryWithData' : 'models/updateSpaceWithData', {
+            //     'id': itemID,
+            //     'name': name
+            // });
         }
     }
 }

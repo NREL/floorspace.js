@@ -41,7 +41,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapState } from 'vuex'
 export default {
     name: 'inspector',
     data() {
@@ -49,15 +49,15 @@ export default {
     },
     methods: {
         updatecurrentStory (key, event) {
-            var payload = { id: this.$store.state.application.currentSelections.story_id };
+            var payload = { story: this.$store.state.application.currentSelections.story };
             payload[key] = event.target.value;
             this.$store.commit('models/updateStoryWithData', payload);
         }
     },
     computed: {
-        ...mapGetters({
-            currentStory: 'application/currentStory',
-            currentSpace: 'application/currentSpace'
+        ...mapState({
+            currentStory: state => state.application.currentSelections.story,
+            currentSpace: state => state.application.currentSelections.space
         })
     }
 }

@@ -1,4 +1,5 @@
 import factory from './../../factory/index.js'
+
 export default {
     namespaced: true,
     state: {

@@ -30,10 +30,10 @@ export default {
             const geometry_id = context.state[context.state.length - 1].id;
 
             // update the story with the geometry object
-            context.commit('models/updateStoryWithData', {
-                id: context.rootState.application.currentSelections.story_id,
-                geometry_id: geometry_id
-            }, {'root': true})
+            // context.commit('models/updateStoryWithData', {
+            //     story: context.rootState.application.currentSelections.story,
+            //     geometry_id: geometry_id
+            // }, {'root': true})
         },
         // this action destroys a face and all related geometric entities which are not referenced by other faces
         destroyFace (context, payload) {
@@ -112,7 +112,7 @@ export default {
         createFaceFromPoints (context, payload) {
             // geometry and space for the current story
             const geometry = context.rootGetters['application/currentStoryGeometry'];
-            const space = context.rootGetters['application/currentSpace'];
+            const space = context.rootState.application.currentSelections.space;
 
             // if the space already had an associated face, destroy it
             if (space.face_id) {

@@ -89,13 +89,13 @@ export default {
     },
     drawGrid: function() {
         // update scales with new grid boundaries
-        this.$store.commit('application/setScaleX', {
+        this.$store.dispatch('application/setScaleX', {
             scaleX: d3.scaleLinear()
                 .domain([0, this.$refs.grid.clientWidth])
                 .range([this.$store.state.project.view.min_x, this.$store.state.project.view.max_x])
         });
 
-        this.$store.commit('application/setScaleY', {
+        this.$store.dispatch('application/setScaleY', {
             scaleY: d3.scaleLinear()
                 .domain([0, this.$refs.grid.clientHeight])
                 .range([this.$store.state.project.view.min_y, this.$store.state.project.view.max_y])

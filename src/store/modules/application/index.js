@@ -3,13 +3,13 @@ import factory from './../../factory/index.js'
 export default {
     namespaced: true,
     state: {
-        // models currently being edited and active tools
         currentSelections: {
-            story_id: null,
-            space_id: null,
+            // models currently being edited
+            story: null,
+            space: null,
+            // active tools
             mode: 'Space',
-            tool: null,
-            face: null
+            tool: null
         },
         // TODO: drawing modes may need to be moved into the component as local state
         modes: ['Space', 'Select', 'Rectangle', 'Polygon', 'Place Component', 'Apply Property', 'Scale'],
@@ -19,39 +19,57 @@ export default {
             y: null
         }
     },
+    actions: {
+        setCurrentStory (context, payload) {
+            // check that story exists
+            if (~context.rootState.models.stories.indexOf(payload.story)) {
+                context.commit('setCurrentSelectionsStoryId', payload);
+            }
+        },
+        setCurrentSpace (context, payload) {
+            // check that space exists on the current story
+            if (~context.state.currentSelections.story.spaces.indexOf(payload.space)) {
+                context.commit('setCurrentSelectionsSpaceId', payload);
+            }
+        },
+        setRenderMode (context, payload) {
+            // check that mode exists
+            if (~context.state.modes.indexOf(payload.mode)) {
+                context.commit('setCurrentSelectionsMode', payload);
+            }
+        },
+        // update d3 scaling functions
+        setScaleX (context, payload) { context.commit('setScaleX', payload); },
+        setScaleY (context, payload) { context.commit('setScaleY', payload); }
+    },
     mutations: {
         // CURRENTSELECTIONS
-        // state.currentSelections.story_id
-        setCurrentSelectionsStoryId: function(state, payload) {
-            state.currentSelections.story_id = payload.story_id;
-            state.currentSelections.space_id = null;
+        // set current story selection, clear current space selection
+        setCurrentSelectionsStoryId (state, payload) {
+            state.currentSelections.story = payload.story;
+            state.currentSelections.space = null;
         },
-        // state.currentSelections.space_id
-        setCurrentSelectionsSpaceId: function(state, payload) {
-            state.currentSelections.space_id = payload.space_id
+        // set current space selection
+        setCurrentSelectionsSpaceId (state, payload) {
+            state.currentSelections.space = payload.space
         },
-        setCurrentSelectionsMode: function(state, payload) {
-            const mode = state.modes.find((m) => {
-                return m === payload.mode;
-            });
-            state.currentSelections.mode = mode || state.currentSelections.mode;
+        setCurrentSelectionsMode (state, payload) {
+           state.currentSelections.mode = payload.mode;
         },
         // SCALE
-        //state.scale.x
-        setScaleX: function(state, payload) {
+        setScaleX (state, payload) {
             state.scale.x = payload.scaleX;
         },
-        //state.scale.y
-        setScaleY: function(state, payload) {
+        setScaleY (state, payload) {
             state.scale.y = payload.scaleY;
         }
     },
     getters: {
         // the story with the currentSelections.story_id
         currentStory: (state, getters, rootState) => {
-            return rootState.models.stories.find((s) => {
-                return s.id === state.currentSelections.story_id;
-            })
+            // return rootState.models.stories.find((s) => {
+            //     return s.id === state.currentSelections.story_id;
+            // })
         },
         // the space on the currentStory with the currentSelections.space_id
         currentSpace: (state, getters, rootState) => {
@@ -62,8 +80,8 @@ export default {
         // the geometry on the currentStory
         currentStoryGeometry: (state, getters, rootState) => {
             return rootState.geometry.find((g) => {
-                return g.id === getters.currentStory.geometry_id;
-            })
+                return g.id === state.currentSelections.story.geometry_id;
+            });
         }
     }
 }

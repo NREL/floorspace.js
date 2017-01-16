@@ -65,7 +65,7 @@ export default {
         mode: {
             get () { return this.$store.state.application.currentSelections.mode; },
             set (newValue) {
-                this.$store.commit('setCurrentSelectionsMode', {
+                this.$store.dispatch('setRenderMode', {
                     mode: newValue
                 });
             }

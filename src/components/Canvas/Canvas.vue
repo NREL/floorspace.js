@@ -14,7 +14,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <script>
 import methods from './methods'
-import { mapGetters, mapState } from 'vuex'
+import { mapState } from 'vuex'
 export default {
     name: 'canvas',
     data: function() {
@@ -32,10 +32,9 @@ export default {
         window.removeEventListener('resize', this.drawGrid)
     },
     computed: {
-        ...mapGetters({
-            'currentSpace': 'application/currentSpace'
-        }),
         ...mapState({
+            
+            'currentSpace': 'application/currentSelections/space',
             // scale functions translate the pixel coordinates of a location on the screen into RWU coordinates to use within the SVG's grid system
             scaleX: state => state.application.scale.x,
             scaleY: state => state.application.scale.y,

@@ -35,9 +35,9 @@ export default {
     },
     beforeCreate () {
         // create a default story, set as current story
-        this.$store.commit('models/initStory');
-        this.$store.commit('application/setCurrentSelectionsStoryId', {
-            'story_id': this.$store.state.models.stories[0].id
+        this.$store.dispatch('models/initStory');
+        this.$store.dispatch('application/setCurrentStory', {
+            'story': this.$store.state.models.stories[0]
         });
         // create associated geometry
         this.$store.dispatch('geometry/initGeometry', {
@@ -48,8 +48,8 @@ export default {
         this.$store.dispatch('models/initSpace', {
             'story_id': this.$store.state.application.currentSelections.story_id
         });
-        this.$store.commit('application/setCurrentSelectionsSpaceId', {
-            'space_id': this.$store.getters['application/currentStory']['spaces'][0].id
+        this.$store.dispatch('application/setCurrentSpace', {
+            'space': this.$store.state.application.currentSelections.story.spaces[0]
         });
     }
 }
