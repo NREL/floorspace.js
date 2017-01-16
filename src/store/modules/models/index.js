@@ -88,6 +88,14 @@ export default {
             validator.validateInt('multiplier');
 
             context.commit('updateStoryWithData', validator.validatedPayload);
+        },
+        // validate and update simple properties on the space
+        updateSpaceWithData (context, payload) {
+            const validatedPayload = { space: payload.space };
+            const validator = new Validator(payload, validatedPayload);
+
+            validator.validateLength('name', 1);
+            context.commit('updateSpaceWithData', validator.validatedPayload);
         }
     },
     mutations: {
@@ -114,13 +122,9 @@ export default {
             }
         },
         updateSpaceWithData (state, payload) {
-            const story = state.stories.find((s) => {
-                return s.id === state.application.currentSelections.story_id;
-            });
-            const space = story.spaces.find((s) => {
-                return s.id === payload.id;
-            });
-            space.name = payload.name || space.name;
+            if ('name' in payload) {
+                payload.space.name = payload.name;
+            }
         }
     },
     getters: {}

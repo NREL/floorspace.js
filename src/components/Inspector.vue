@@ -30,9 +30,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     </div>
 
     <h3>Current Space</h3>
-    <div class="input-text" v-for="(value, key) in currentSpace">
-        <label>{{key}}</label>
-        <input :value="value" @input="updatecurrentStory(key, $event)" readonly="true">
+    <div class="input-text">
+        <label>name</label>
+        <input :value="currentSpace.name" @change="updatecurrentSpace('name', $event)">
     </div>
 
 </section>
@@ -47,11 +47,18 @@ export default {
     },
     methods: {
         updatecurrentStory (key, event) {
-            var payload = { story: this.$store.state.application.currentSelections.story };
+            var payload = { story: this.currentStory };
             payload[key] = event.target.value;
             // required to prevent input field value from containing incorrect data
-            event.target.value = this.$store.state.application.currentSelections.story[key];
+            event.target.value = this.currentStory[key];
             this.$store.dispatch('models/updateStoryWithData', payload);
+        },
+        updatecurrentSpace (key, event) {
+            var payload = { space: this.currentSpace };
+            payload[key] = event.target.value;
+            // required to prevent input field value from containing incorrect data
+            event.target.value = this.currentSpace[key];
+            this.$store.dispatch('models/updateSpaceWithData', payload);
         }
     },
     computed: {
