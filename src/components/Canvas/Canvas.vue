@@ -17,24 +17,23 @@ import methods from './methods'
 import { mapState } from 'vuex'
 export default {
     name: 'canvas',
-    data: function() {
+    data () {
         return {
-            //polygons: [], // array of polygons drawn
             points: [] // points for the polygon currently being drawn
         };
     },
     // recalculate and draw the grid when the window resizes
-    mounted: function() {
+    mounted () {
         this.drawGrid();
         window.addEventListener('resize', this.drawGrid);
     },
-    beforeDestroy: function () {
+    beforeDestroy () {
         window.removeEventListener('resize', this.drawGrid)
     },
     computed: {
         ...mapState({
-            
-            'currentSpace': 'application/currentSelections/space',
+            currentSpace: state => state.application.currentSelections.space,
+
             // scale functions translate the pixel coordinates of a location on the screen into RWU coordinates to use within the SVG's grid system
             scaleX: state => state.application.scale.x,
             scaleY: state => state.application.scale.y,

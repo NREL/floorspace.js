@@ -3,79 +3,92 @@ import factory from './../../factory/index.js'
 export default {
     namespaced: true,
     state: {
-        'stories': [/*{
-            'id': null,
-            'handle': null,
-            'name': null,
-            'below_floor_plenum_height': 0,
-            'floor_to_ceiling_height': 0,
-            'multiplier': 0,
-            'images': [], // image ids
-            'geometry_id': null, // geometry id
-            'spaces': [{
-                'id': null,
-                'handle': null,
-                'name': null,
-                'face_id': null, // face_id
-                'building_unit': null, // building_unit id
-                'thermal_zone': null, // thermal_zone id
-                'space_type': null, // space_type id
-                'construction_set': null, // construction_set id
-                'daylighting_controls': [{
-                    'daylighting_control': null,
-                    'vertex': null
-                }]
+        stories: [/*{
+            id: null,
+            name: null,
+            geometry_id: null,
+            images: [],
+            handle: null,
+            below_floor_plenum_height: 0,
+            floor_to_ceiling_height: 0,
+            multiplier: 0,
+            spaces: [{
+                id: null,
+                name: null,
+                handle: null
+                face_id: null,
+                daylighting_control_refs: [{
+                    daylighting_control_id: null,
+                    vertex_id: null
+                }],
+                building_unit_id: null,
+                thermal_zone_id: null,
+                space_type_id: null,
+                construction_set_id: null
             }],
-            'windows': [{
-                'window': null,
-                'vertex': null
+            windows: [{
+                window_id: null,
+                vertex_id: null
             }]
         }*/],
         // lib
-        'building_units': [],
-        'thermal_zones': [],
-        'space_types': [],
-        'construction_sets': [],
-        'constructions': [],
-        'windows': [],
-        'daylighting_controls': []
+        building_units: [],
+        thermal_zones: [],
+        space_types: [],
+        construction_sets: [],
+        constructions: [],
+        windows: [],
+        daylighting_controls: []
     },
     actions: {
         initStory (context) {
-            context.commit('initStory');
-            // TODO: return id in promise
-            context.dispatch('geometry/initGeometry', {}, {root: true});
-
-            context.commit('updateStoryWithData', {
-                story: context.state.stories[context.state.stories.length - 1],
-                geometry_id: context.rootState.geometry[context.rootState.geometry.length - 1].id
+            // create and save the story
+            const story = new factory.Story();
+            story.name = 'Story ' + (context.state.stories.length + 1);
+            context.commit('initStory', {
+                story: story
             });
+            context.dispatch('application/setCurrentStory', {
+                'story': story
+            }, { root: true });
+            // create and save a default space for the story
+            const space = new factory.Space();
+            space.name = 'Space 1';
+            context.commit('initSpace', {
+                story: story,
+                space: space
+            });
+            context.dispatch('application/setCurrentSpace', {
+                'space': space
+            }, { root: true });
+
+            // create a geometry object for the story
+            context.dispatch('geometry/initGeometry', {
+                story: story
+            }, { root: true });
+
+            return story;
         },
         // initialize a new space
         // must update the associated story to reference the new space
-        initSpace: function(context, payload) {
-            // const story = context.state.stories.find((s) => {
-            //     return s.id === payload.story_id;
-            // });
-            // context.commit('initSpace', {
-            //     story: story
-            // });
+        initSpace (context, payload) {
+            const space = new factory.Space();
+            space.name = 'Space ' + (payload.story.spaces.length + 1);
+            context.commit('initSpace', {
+                story: payload.story,
+                space: space
+            });
         }
     },
     mutations: {
-        // initialize a new story
-        // must initialize an associated geometry object - possibly in component logic
+        // store a new story
         initStory (state, payload) {
-            const story = new factory.Story();
-            story.name = 'Story ' + (state.stories.length + 1);
-            state.stories.push(story);
+            state.stories.push(payload.story);
         },
         // initialize a new space
         // must update the associated story to reference the new space
         initSpace (state, payload) {
-            // const space = new factory.Space();
-            // space.name = 'Space ' + (payload.story.spaces.length + 1);
-            // payload.story.spaces.push(space);
+            payload.story.spaces.push(payload.space);
         },
 
         //TODO: validate

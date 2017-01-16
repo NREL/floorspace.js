@@ -26,14 +26,7 @@ export default {
         // initialize a new geometry object for a story
         initGeometry (context, payload) {
             // create the geometry object
-            context.commit('initGeometry');
-            const geometry_id = context.state[context.state.length - 1].id;
-
-            // update the story with the geometry object
-            // context.commit('models/updateStoryWithData', {
-            //     story: context.rootState.application.currentSelections.story,
-            //     geometry_id: geometry_id
-            // }, {'root': true})
+            context.commit('initGeometry', payload);
         },
         // this action destroys a face and all related geometric entities which are not referenced by other faces
         destroyFace (context, payload) {
@@ -136,6 +129,7 @@ export default {
         initGeometry (state, payload) {
             const geometry = new factory.Geometry();
             state.push(geometry);
+            payload.story.geometry_id = geometry.id;
         },
         createVertex (state, payload) {
             state.geometry.vertices.splice(state.geometry.vertices.findIndex((v) => {

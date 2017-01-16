@@ -47,7 +47,9 @@ export default {
     },
     computed: {
         // all stories, spaces only for the currently selected story
-        ...mapState({ 'stories': 'models/stories' }), //  stories() { return this.$store.state.models.stories; },
+        ...mapState({
+            stories: state => state.models.stories
+        }), //  stories() { return this.$store.state.models.stories; },
         spaces () { return this.currentStory.spaces; },
 
         // currently selected story - this is always set
@@ -73,15 +75,10 @@ export default {
         // initialize an empty story or space depending on the selected tab
         addItem () {
             if (this.tab === 'stories') {
-
-                // this.$store.commit('models/initStory');
-                // // create associated geometry
-                // this.$store.dispatch('geometry/initGeometry', {
-                //     'story_id': this.$store.state.application.currentSelections.story_id
-                // });
+                this.$store.dispatch('models/initStory');
             } else {
                 this.$store.dispatch('models/initSpace', {
-                    story_id: this.$store.state.application.currentSelections.story
+                    story: this.$store.state.application.currentSelections.story
                 });
             }
         },

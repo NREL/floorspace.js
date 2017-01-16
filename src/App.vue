@@ -36,21 +36,6 @@ export default {
     beforeCreate () {
         // create a default story, set as current story
         this.$store.dispatch('models/initStory');
-        this.$store.dispatch('application/setCurrentStory', {
-            'story': this.$store.state.models.stories[0]
-        });
-        // create associated geometry
-        this.$store.dispatch('geometry/initGeometry', {
-            'story_id': this.$store.state.application.currentSelections.story_id
-        });
-
-        // create a space, set as current space
-        this.$store.dispatch('models/initSpace', {
-            'story_id': this.$store.state.application.currentSelections.story_id
-        });
-        this.$store.dispatch('application/setCurrentSpace', {
-            'space': this.$store.state.application.currentSelections.story.spaces[0]
-        });
     }
 }
 </script>
