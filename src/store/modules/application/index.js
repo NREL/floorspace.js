@@ -23,19 +23,19 @@ export default {
         setCurrentStory (context, payload) {
             // check that story exists
             if (~context.rootState.models.stories.indexOf(payload.story)) {
-                context.commit('setCurrentSelectionsStoryId', payload);
+                context.commit('setCurrentStory', payload);
             }
         },
         setCurrentSpace (context, payload) {
             // check that space exists on the current story
             if (~context.state.currentSelections.story.spaces.indexOf(payload.space)) {
-                context.commit('setCurrentSelectionsSpaceId', payload);
+                context.commit('setCurrentSpace', payload);
             }
         },
         setRenderMode (context, payload) {
             // check that mode exists
             if (~context.state.modes.indexOf(payload.mode)) {
-                context.commit('setCurrentSelectionsMode', payload);
+                context.commit('setRenderMode', payload);
             }
         },
         // update d3 scaling functions
@@ -45,15 +45,16 @@ export default {
     mutations: {
         // CURRENTSELECTIONS
         // set current story selection, clear current space selection
-        setCurrentSelectionsStoryId (state, payload) {
+        setCurrentStory (state, payload) {
             state.currentSelections.story = payload.story;
             state.currentSelections.space = null;
         },
         // set current space selection
-        setCurrentSelectionsSpaceId (state, payload) {
+        setCurrentSpace (state, payload) {
             state.currentSelections.space = payload.space
         },
-        setCurrentSelectionsMode (state, payload) {
+        // set current canvas rendering mode
+        setRenderMode (state, payload) {
            state.currentSelections.mode = payload.mode;
         },
         // SCALE
@@ -65,18 +66,6 @@ export default {
         }
     },
     getters: {
-        // the story with the currentSelections.story_id
-        currentStory: (state, getters, rootState) => {
-            // return rootState.models.stories.find((s) => {
-            //     return s.id === state.currentSelections.story_id;
-            // })
-        },
-        // the space on the currentStory with the currentSelections.space_id
-        currentSpace: (state, getters, rootState) => {
-            return getters.currentStory.spaces.find((s) => {
-                return s.id === state.currentSelections.space_id;
-            })
-        },
         // the geometry on the currentStory
         currentStoryGeometry: (state, getters, rootState) => {
             return rootState.geometry.find((g) => {
