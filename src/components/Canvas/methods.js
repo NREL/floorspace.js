@@ -14,13 +14,10 @@ export default {
         y = round(this.scaleY(e.offsetY) - yAdjustment, this.y_spacing) + yAdjustment;
 
         if (this.currentMode === 'Rectangle') {
-
+            this.buildRectangle({ x: x, y: y });
         } else if (this.currentMode === 'Polygon') {
             // the point is stored in RWU
-            this.points.push({
-                x: x,
-                y: y
-            });
+            this.points.push({ x: x, y: y });
         }
 
         function round (point, spacing) {
@@ -31,7 +28,22 @@ export default {
             }
         }
     },
-
+    buildRectangle (point) {
+        if (this.points.length) {
+            // close the rectangle
+            this.$store.dispatch('geometry/createFaceFromPoints', {
+                points: [
+                    { x: this.points[0].x, y: this.points[0].y },
+                    { x: point.x, y: this.points[0].y },
+                    { x: point.x, y: point.y },
+                    { x: this.points[0].x, y: point.y }
+                ]
+            });
+            this.points = [];
+        } else {
+            this.points.push(point);
+        }
+    },
     drawPoints () {
         d3.selectAll("#canvas ellipse").remove();
         // draw new points
