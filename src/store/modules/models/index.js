@@ -80,7 +80,7 @@ export default {
         // validate and update simple properties on the story, other actions will be used to add images, spaces, and windows to a story
         updateStoryWithData (context, payload) {
             const validatedPayload = { story: payload.story };
-            const validator = new Validator(payload, validatedPayload);
+            const validator = new factory.Validator(payload, validatedPayload);
 
             validator.validateLength('name', 1);
             validator.validateFloat('below_floor_plenum_height');
@@ -92,7 +92,7 @@ export default {
         // validate and update simple properties on the space
         updateSpaceWithData (context, payload) {
             const validatedPayload = { space: payload.space };
-            const validator = new Validator(payload, validatedPayload);
+            const validator = new factory.Validator(payload, validatedPayload);
 
             validator.validateLength('name', 1);
             context.commit('updateSpaceWithData', validator.validatedPayload);
@@ -128,25 +128,4 @@ export default {
         }
     },
     getters: {}
-}
-
-function Validator (payload, validatedPayload) {
-    return {
-        validatedPayload: validatedPayload,
-        validateLength (key, minLength = 0) {
-            if (key in payload && payload[key].length >= minLength) {
-                validatedPayload[key] = payload[key];
-            }
-        },
-        validateFloat (key) {
-            if (key in payload && !isNaN(parseFloat(payload[key]))) {
-                validatedPayload[key] = parseFloat(payload[key]);
-            }
-        },
-        validateInt (key) {
-            if (key in payload && !isNaN(parseInt(payload[key]))) {
-                validatedPayload[key] = parseInt(payload[key]);
-            }
-        }
-    }
 }

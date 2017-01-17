@@ -1,3 +1,4 @@
+import factory from './../../factory/index.js'
 // the application state
 export default {
     namespaced: true,

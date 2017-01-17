@@ -26,11 +26,11 @@ export default {
         // initialize a new geometry object for a story
         initGeometry (context, payload) {
             // create the geometry object
+            payload.geometry = new factory.Geometry();
             context.commit('initGeometry', payload);
         },
         // this action destroys a face and all related geometric entities which are not referenced by other faces
         destroyFace (context, payload) {
-
             const geometry = payload.geometry;
             const space = payload.space;
 
@@ -127,20 +127,11 @@ export default {
         // initialize a new geometry object
         // must update the associated story to reference the geometry
         initGeometry (state, payload) {
-            const geometry = new factory.Geometry();
-            state.push(geometry);
-            payload.story.geometry_id = geometry.id;
+            state.push(payload.geometry);
+            payload.story.geometry_id = payload.geometry.id;
         },
-        createVertex (state, payload) {
-            state.geometry.vertices.splice(state.geometry.vertices.findIndex((v) => {
-                return v.id === payload.vertex_id;
-            }), 1);
-        },
-        createEdge (state, payload) {
-            state.geometry.edges.splice(state.geometry.edges.findIndex((e) => {
-                return e.id === payload.edge_id;
-            }), 1);
-        },
+        createVertex (state, payload) { },
+        createEdge (state, payload) { },
         createFace (state, payload) {
             // geometry and space for the current story
             const geometry = payload.geometry;
