@@ -46,29 +46,18 @@ export default {
         };
     },
     computed: {
-        // all stories, spaces only for the currently selected story
-        ...mapState({
-            stories: state => state.models.stories
-        }), //  stories() { return this.$store.state.models.stories; },
+        // all stories
+        ...mapState({ stories: state => state.models.stories }),
+        // spaces for the currently selected story
         spaces () { return this.currentStory.spaces; },
 
-        // currently selected story - this is always set
         currentStory: {
             get () { return this.$store.state.application.currentSelections.story; },
-            set (item) {
-                this.$store.dispatch('application/setCurrentStory', {
-                    'story': item
-                });
-            }
+            set (item) { this.$store.dispatch('application/setCurrentStory', { 'story': item }); }
         },
-        // currently selected space, may not be set
         currentSpace: {
             get () { return this.$store.state.application.currentSelections.space; },
-            set (item) {
-                this.$store.dispatch('application/setCurrentSpace', {
-                    'space': item
-                });
-            }
+            set (item) { this.$store.dispatch('application/setCurrentSpace', { 'space': item }); }
         }
     },
     methods: {

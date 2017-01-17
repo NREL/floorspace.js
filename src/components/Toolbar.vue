@@ -71,82 +71,38 @@ export default {
         ...mapState({ modes: state => state.application.modes }),
         gridVisible: {
             get () { return this.$store.state.project.grid.visible; },
-            set (newValue) {
-                this.$store.dispatch('project/setGridVisible', {
-                    visible: newValue
-                });
-            }
+            set (val) { this.$store.dispatch('project/setGridVisible', { visible: val }); }
         },
         mode: {
             get () { return this.$store.state.application.currentSelections.mode; },
-            set (newValue) {
-                this.$store.dispatch('application/setRenderMode', {
-                    mode: newValue
-                });
-            }
+            set (val) { this.$store.dispatch('application/setRenderMode', { mode: val }); }
         },
         // spacing between gridlines, measured in RWU
         x_spacing: {
-            get() {
-                return this.$store.state.project.grid.x_spacing + ' ' + this.$store.state.project.config.units;
-            },
-            set(newValue) {
-                this.$store.dispatch('project/setGridXSpacing', {
-                    x_spacing: newValue
-                });
-            }
+            get () { return this.$store.state.project.grid.x_spacing + ' ' + this.$store.state.project.config.units; },
+            set (val) { this.$store.dispatch('project/setGridXSpacing', { x_spacing: val }); }
         },
         y_spacing: {
-            get() {
-                return this.$store.state.project.grid.y_spacing + ' ' + this.$store.state.project.config.units;
-            },
-            set(newValue) {
-                this.$store.dispatch('project/setGridYSpacing', {
-                    y_spacing: newValue
-                });
-            }
+            get () { return this.$store.state.project.grid.y_spacing + ' ' + this.$store.state.project.config.units; },
+            set (val) { this.$store.dispatch('project/setGridYSpacing', { y_spacing: val }); }
         },
 
         // mix_x, min_y, max_x, and max_y are the grid dimensions in real world units
         min_x: {
-            get() {
-                return this.$store.state.project.view.min_x + ' ' + this.$store.state.project.config.units;
-            },
-            set(newValue) {
-                this.$store.dispatch('project/setViewMinX', {
-                    min_x: parseFloat(newValue)
-                });
-            }
+            get () { return this.$store.state.project.view.min_x + ' ' + this.$store.state.project.config.units; },
+            set (val) { this.$store.dispatch('project/setViewMinX', { min_x: parseFloat(val) }); }
         },
         min_y: {
-            get() {
-                return this.$store.state.project.view.min_y + ' ' + this.$store.state.project.config.units;
-            },
-            set(newValue) {
-                this.$store.dispatch('project/setViewMinY', {
-                    min_y: newValue
-                });
-            }
+            get () { return this.$store.state.project.view.min_y + ' ' + this.$store.state.project.config.units; },
+            set(val) { this.$store.dispatch('project/setViewMinY', { min_y: val }); }
         },
         max_x: {
-            get() {
-                return this.$store.state.project.view.max_x + ' ' + this.$store.state.project.config.units;
-            },
-            set(newValue) {
-                this.$store.dispatch('project/setViewMaxX', {
-                    max_x: newValue
-                });
-            }
+            get () { return this.$store.state.project.view.max_x + ' ' + this.$store.state.project.config.units; },
+            set (val) { this.$store.dispatch('project/setViewMaxX', { max_x: val }); }
         },
         max_y: {
-            get() {
-                return this.$store.state.project.view.max_y + ' ' + this.$store.state.project.config.units;
-            },
-            set(newValue) {
-                this.$store.dispatch('project/setViewMaxY', {
-                    max_y: newValue
-                });
-            }
+            get () { return this.$store.state.project.view.max_y + ' ' + this.$store.state.project.config.units;  },
+            set (val) { this.$store.dispatch('project/setViewMaxY', { max_y: val  }); }
         }
     }
 }
@@ -174,7 +130,6 @@ export default {
 
         >div {
             margin: 0 1rem 0 0;
-
             &#drawing-mode {
                 right: 5rem;
                 position: absolute;
@@ -182,9 +137,7 @@ export default {
                     width: 8.5rem;
                 }
             }
-
         }
-
     }
 }
 </style>

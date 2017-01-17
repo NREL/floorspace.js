@@ -19,9 +19,7 @@ export default {
     name: 'canvas',
     data () {
         return {
-            points: [], // points for the polygon currently being drawn
-            rectangleOrigin: null,
-
+            points: [] // points for the polygon currently being drawn
         };
     },
     // recalculate and draw the grid when the window resizes
@@ -86,11 +84,7 @@ export default {
     watch: {
         gridVisible () { this.drawGrid(); },
         // reset points if drawing mode changes
-        currentMode () {
-            this.rectangleOrigin = null;
-            this.points = [];
-
-        },
+        currentMode () { this.points = []; },
         // if the  dimensions or spacing of the grid is altered, redraw it
         viewbox () {
             this.drawGrid();
