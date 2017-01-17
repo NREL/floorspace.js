@@ -79,7 +79,10 @@ export default {
     },
     watch: {
         // if the  dimensions or spacing of the grid is altered, redraw it
-        viewbox () { this.drawGrid(); },
+        viewbox () {
+            this.drawGrid();
+            this.drawPoints();
+        },
         x_spacing () { this.drawGrid(); },
         y_spacing () { this.drawGrid(); },
 

@@ -3,13 +3,21 @@ export default {
     addPoint (e) {
         if (!this.currentSpace) { return; }
         // the point is stored in RWU
+        // subtract min % spacing to account for offsets created by adjusted minimums
+        var xAdjustment = this.min_x % this.x_spacing,
+            yAdjustment = this.min_y % this.y_spacing;
+
         this.points.push({
-            x: round(this.scaleX(e.offsetX), this.x_spacing),
-            y: round(this.scaleY(e.offsetY), this.y_spacing)
+            x: round(this.scaleX(e.offsetX) - xAdjustment, this.x_spacing) + xAdjustment,
+            y: round(this.scaleY(e.offsetY) - yAdjustment, this.y_spacing) + yAdjustment
         });
 
-        function round(p, n) {
-            return p % n < n / 2 ? p - (p % n) : p + n - (p % n);
+        function round (point, spacing) {
+            if (point % spacing < spacing / 2) {
+                return point - (point % spacing);
+            } else {
+                return point + spacing - (point % spacing);
+            }
         }
     },
 

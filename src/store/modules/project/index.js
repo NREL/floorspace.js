@@ -79,8 +79,8 @@ export default {
         setViewMinY (context, payload) {
             const validator = new factory.Validator(payload);
             validator.validateInt('min_y');
-            // check that the proposed min_x is smaller than the max_x
-            validator.validateMax('min_y', context.state.view.min_y);
+            // check that the proposed min_y is smaller than the max_y
+            validator.validateMax('min_y', context.state.view.max_y);
             context.commit('setViewMinY', validator.validatedPayload);
         },
 
