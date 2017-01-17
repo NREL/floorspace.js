@@ -1,5 +1,6 @@
 var d3 = require('d3');
 export default {
+    // handle a click on the canvas
     addPoint (e) {
         // subtract min % spacing to account for grid rounding offsets created by adjusted minimums
         const xAdjustment = this.min_x % this.x_spacing,
@@ -13,9 +14,18 @@ export default {
         x = round(this.scaleX(e.offsetX) - xAdjustment, this.x_spacing) + xAdjustment;
         y = round(this.scaleY(e.offsetY) - yAdjustment, this.y_spacing) + yAdjustment;
 
-        if (this.currentMode === 'Rectangle') {
-            this.buildRectangle({ x: x, y: y });
-        } else if (this.currentMode === 'Polygon') {
+        if (this.currentMode === 'Rectangle' && this.points.length) {
+            // close the rectangle
+            this.$store.dispatch('geometry/createFaceFromPoints', {
+                points: [
+                    { x: this.points[0].x, y: this.points[0].y },
+                    { x: x, y: this.points[0].y },
+                    { x: x, y: y },
+                    { x: this.points[0].x, y: y }
+                ]
+            });
+            this.points = [];
+        } else {
             // the point is stored in RWU
             this.points.push({ x: x, y: y });
         }
@@ -28,22 +38,7 @@ export default {
             }
         }
     },
-    buildRectangle (point) {
-        if (this.points.length) {
-            // close the rectangle
-            this.$store.dispatch('geometry/createFaceFromPoints', {
-                points: [
-                    { x: this.points[0].x, y: this.points[0].y },
-                    { x: point.x, y: this.points[0].y },
-                    { x: point.x, y: point.y },
-                    { x: this.points[0].x, y: point.y }
-                ]
-            });
-            this.points = [];
-        } else {
-            this.points.push(point);
-        }
-    },
+
     drawPoints () {
         d3.selectAll("#canvas ellipse").remove();
         // draw new points
@@ -56,7 +51,7 @@ export default {
             .attr('ry', this.scaleY(2) - this.min_y)
             .attr('vector-effect', 'non-scaling-stroke');
 
-        //connect the points with a guideline
+        // connect the points with a guideline
         this.drawPolygonEdges();
 
         // set a click listener for the first point in the polynomial, when it is clicked close the shape
@@ -77,7 +72,7 @@ export default {
             .classed('origin', true) // apply custom CSS for origin of polygons
             .attr('vector-effect', 'non-scaling-stroke');
     },
-    drawPolygonEdges: function() {
+    drawPolygonEdges () {
         // remove expired paths
         d3.selectAll("#canvas path").remove();
 
@@ -96,7 +91,7 @@ export default {
         // keep grid lines under polygon edges
         d3.selectAll('.vertical, .horizontal').lower();
     },
-    drawPolygons: function() {
+    drawPolygons () {
         // destroy old polygons
         d3.select('#canvas svg').selectAll('polygon').remove();
         // draw a polygon for each space
@@ -119,7 +114,7 @@ export default {
         d3.selectAll("#canvas path").remove();
         d3.selectAll('#canvas ellipse').remove();
     },
-    drawGrid: function() {
+    drawGrid () {
         // update scales with new grid boundaries
         this.$store.dispatch('application/setScaleX', {
             scaleX: d3.scaleLinear()
