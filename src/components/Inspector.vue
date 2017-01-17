@@ -34,7 +34,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <label>name</label>
         <input :value="currentSpace.name" @change="updatecurrentSpace('name', $event)">
     </div>
-
 </section>
 </template>
 

@@ -65,7 +65,7 @@ export default {
         mode: {
             get () { return this.$store.state.application.currentSelections.mode; },
             set (newValue) {
-                this.$store.dispatch('setRenderMode', {
+                this.$store.dispatch('application/setRenderMode', {
                     mode: newValue
                 });
             }
@@ -73,20 +73,20 @@ export default {
         // spacing between gridlines, measured in RWU
         x_spacing: {
             get() {
-                return this.$store.state.project.config.x_spacing + ' ' + this.$store.state.project.config.units;
+                return this.$store.state.project.grid.x_spacing + ' ' + this.$store.state.project.config.units;
             },
             set(newValue) {
-                this.$store.commit('setGridXSpacing', {
+                this.$store.dispatch('project/setGridXSpacing', {
                     x_spacing: newValue
                 });
             }
         },
         y_spacing: {
             get() {
-                return this.$store.state.project.config.y_spacing + ' ' + this.$store.state.project.config.units;
+                return this.$store.state.project.grid.y_spacing + ' ' + this.$store.state.project.config.units;
             },
             set(newValue) {
-                this.$store.commit('setGridYSpacing', {
+                this.$store.dispatch('project/setGridYSpacing', {
                     y_spacing: newValue
                 });
             }
@@ -98,7 +98,7 @@ export default {
                 return this.$store.state.project.view.min_x + ' ' + this.$store.state.project.config.units;
             },
             set(newValue) {
-                this.$store.commit('setViewMinX', {
+                this.$store.dispatch('project/setViewMinX', {
                     min_x: parseFloat(newValue)
                 });
             }
@@ -108,7 +108,7 @@ export default {
                 return this.$store.state.project.view.min_y + ' ' + this.$store.state.project.config.units;
             },
             set(newValue) {
-                this.$store.commit('setViewMinY', {
+                this.$store.dispatch('project/setViewMinY', {
                     min_y: newValue
                 });
             }
@@ -118,7 +118,7 @@ export default {
                 return this.$store.state.project.view.max_x + ' ' + this.$store.state.project.config.units;
             },
             set(newValue) {
-                this.$store.commit('setViewMaxX', {
+                this.$store.dispatch('project/setViewMaxX', {
                     max_x: newValue
                 });
             }
@@ -128,7 +128,7 @@ export default {
                 return this.$store.state.project.view.max_y + ' ' + this.$store.state.project.config.units;
             },
             set(newValue) {
-                this.$store.commit('setViewMaxY', {
+                this.$store.dispatch('project/setViewMaxY', {
                     max_y: newValue
                 });
             }
