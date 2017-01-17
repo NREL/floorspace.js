@@ -25,7 +25,7 @@ export default {
                 ]
             });
             this.points = [];
-        } else {
+        } else if (this.currentMode === 'Rectangle' || this.currentMode === 'Polygon') {
             // the point is stored in RWU
             this.points.push({ x: x, y: y });
         }

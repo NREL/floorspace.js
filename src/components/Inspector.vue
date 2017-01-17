@@ -65,7 +65,7 @@ export default {
             currentStory: state => state.application.currentSelections.story,
             currentSpace: state => state.application.currentSelections.space
         })
-    }
+    },
 }
 </script>
 

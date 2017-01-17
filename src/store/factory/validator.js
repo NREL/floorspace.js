@@ -1,6 +1,8 @@
 /*
-* The validator builds a validatedPayload object containing all key/vals
-* from the original payload which have not been marked invalid
+* The validator builds a validatedPayload object containing all key/vals that have validation run on them
+* which have not been marked invalid
+* To add key value pairs to the validatedPayload without actually calling a validation method on them
+* provide a validatedPayload argument to the Validator constructor
 */
 export default function Validator (payload, validatedPayload = {}) {
     // if a key fails validation, it will be blacklisted so that it is not added to the validatedPayload on a later validation call
