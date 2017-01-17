@@ -8,7 +8,7 @@ export default {
             story: null,
             space: null,
             // active tools
-            mode: 'Space',
+            mode: 'Polygon',
             tool: null
         },
         // TODO: drawing modes may need to be moved into the component as local state

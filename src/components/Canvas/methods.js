@@ -1,16 +1,27 @@
 var d3 = require('d3');
 export default {
     addPoint (e) {
-        if (!this.currentSpace) { return; }
-        // the point is stored in RWU
-        // subtract min % spacing to account for offsets created by adjusted minimums
-        var xAdjustment = this.min_x % this.x_spacing,
+        // subtract min % spacing to account for grid rounding offsets created by adjusted minimums
+        const xAdjustment = this.min_x % this.x_spacing,
             yAdjustment = this.min_y % this.y_spacing;
 
-        this.points.push({
-            x: round(this.scaleX(e.offsetX) - xAdjustment, this.x_spacing) + xAdjustment,
-            y: round(this.scaleY(e.offsetY) - yAdjustment, this.y_spacing) + yAdjustment
-        });
+        // obtain RWU coordinates of click event
+        var x = this.scaleX(e.offsetX),
+            y = this.scaleY(e.offsetY);
+
+        // round point to nearest gridline, account for the offset created by setting a min_x/min_y
+        x = round(this.scaleX(e.offsetX) - xAdjustment, this.x_spacing) + xAdjustment;
+        y = round(this.scaleY(e.offsetY) - yAdjustment, this.y_spacing) + yAdjustment;
+
+        if (this.currentMode === 'Rectangle') {
+
+        } else if (this.currentMode === 'Polygon') {
+            // the point is stored in RWU
+            this.points.push({
+                x: x,
+                y: y
+            });
+        }
 
         function round (point, spacing) {
             if (point % spacing < spacing / 2) {
@@ -22,6 +33,7 @@ export default {
     },
 
     drawPoints () {
+        d3.selectAll("#canvas ellipse").remove();
         // draw new points
         d3.select('#canvas svg')
             .selectAll('ellipse').data(this.points)
@@ -100,13 +112,13 @@ export default {
         this.$store.dispatch('application/setScaleX', {
             scaleX: d3.scaleLinear()
                 .domain([0, this.$refs.grid.clientWidth])
-                .range([this.$store.state.project.view.min_x, this.$store.state.project.view.max_x])
+                .range([this.min_x, this.max_x])
         });
 
         this.$store.dispatch('application/setScaleY', {
             scaleY: d3.scaleLinear()
                 .domain([0, this.$refs.grid.clientHeight])
-                .range([this.$store.state.project.view.min_y, this.$store.state.project.view.max_y])
+                .range([this.min_y, this.max_y])
         });
 
         // redraw the grid
@@ -115,7 +127,7 @@ export default {
 
         // lines are drawn in RWU
         svg.selectAll('.vertical')
-            .data(d3.range(this.$store.state.project.view.min_x / this.x_spacing, this.$store.state.project.view.max_x / this.x_spacing))
+            .data(d3.range(this.min_x / this.x_spacing, this.max_x / this.x_spacing))
             .enter().append('line')
             .attr('x1', (d) => { return d * this.x_spacing; })
             .attr('x2', (d) => { return d * this.x_spacing; })
@@ -125,7 +137,7 @@ export default {
             .attr('vector-effect', 'non-scaling-stroke');
 
         svg.selectAll('.horizontal')
-            .data(d3.range(this.$store.state.project.view.min_y / this.y_spacing, this.$store.state.project.view.max_y / this.y_spacing))
+            .data(d3.range(this.min_y / this.y_spacing, this.max_y / this.y_spacing))
             .enter().append('line')
             .attr('x1', this.min_x)
             .attr('x2', this.scaleX(this.$refs.grid.clientWidth))

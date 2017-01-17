@@ -19,7 +19,9 @@ export default {
     name: 'canvas',
     data () {
         return {
-            points: [] // points for the polygon currently being drawn
+            points: [], // points for the polygon currently being drawn
+            rectangleOrigin: null,
+
         };
     },
     // recalculate and draw the grid when the window resizes
@@ -32,6 +34,8 @@ export default {
     },
     computed: {
         ...mapState({
+            currentMode: state => state.application.currentSelections.mode,
+
             currentSpace: state => state.application.currentSelections.space,
 
             // scale functions translate the pixel coordinates of a location on the screen into RWU coordinates to use within the SVG's grid system
@@ -78,6 +82,12 @@ export default {
         },
     },
     watch: {
+        // reset points if drawing mode changes
+        currentMode () {
+            this.rectangleOrigin = null;
+            this.points = [];
+            
+        },
         // if the  dimensions or spacing of the grid is altered, redraw it
         viewbox () {
             this.drawGrid();
