@@ -10,12 +10,14 @@ export default {
         var x = this.scaleX(e.offsetX),
             y = this.scaleY(e.offsetY);
 
-        // round point to nearest gridline, account for the offset created by setting a min_x/min_y
-        x = round(this.scaleX(e.offsetX) - xAdjustment, this.x_spacing) + xAdjustment;
-        y = round(this.scaleY(e.offsetY) - yAdjustment, this.y_spacing) + yAdjustment;
+        // round point to nearest gridline if the grid is visible
+        if (this.gridVisible) {
+            x = round(this.scaleX(e.offsetX) - xAdjustment, this.x_spacing) + xAdjustment;
+            y = round(this.scaleY(e.offsetY) - yAdjustment, this.y_spacing) + yAdjustment;
+        }
 
         if (this.currentMode === 'Rectangle' && this.points.length) {
-            // close the rectangle
+            // if a rectangle is in progress, close the rectangle and convert it to a polygon
             this.$store.dispatch('geometry/createFaceFromPoints', {
                 points: [
                     { x: this.points[0].x, y: this.points[0].y },
@@ -24,9 +26,10 @@ export default {
                     { x: this.points[0].x, y: y }
                 ]
             });
+            // clear the points in progress
             this.points = [];
         } else if (this.currentMode === 'Rectangle' || this.currentMode === 'Polygon') {
-            // the point is stored in RWU
+            // store the point
             this.points.push({ x: x, y: y });
         }
 
@@ -40,8 +43,10 @@ export default {
     },
 
     drawPoints () {
-        d3.selectAll("#canvas ellipse").remove();
-        // draw new points
+        // remove expired points
+        d3.selectAll('#canvas ellipse').remove();
+
+        // draw points
         d3.select('#canvas svg')
             .selectAll('ellipse').data(this.points)
             .enter().append('ellipse')
@@ -54,15 +59,14 @@ export default {
         // connect the points with a guideline
         this.drawPolygonEdges();
 
-        // set a click listener for the first point in the polynomial, when it is clicked close the shape
+        // Polygon Origin
         d3.select('#canvas svg').select('ellipse')
+            // set a click listener for the first point in the polygon, when it is clicked close the shape
             .on('click', () => {
-                // create the polygon - triggers this.drawPolygons()
                 // create a face in the data store from the points
                 this.$store.dispatch('geometry/createFaceFromPoints', {
                     points: this.points
                 });
-
                 // clear points, prevent a new point from being created by this click event
                 d3.event.stopPropagation();
                 this.points = [];
@@ -74,44 +78,44 @@ export default {
     },
     drawPolygonEdges () {
         // remove expired paths
-        d3.selectAll("#canvas path").remove();
+        d3.selectAll('#canvas path').remove();
 
-        var line = d3.line()
-            .x((d) => { return d.x; })
-            .y((d) => { return d.y; });
-
-        d3.select('#canvas svg').append("path")
+        // draw edges
+        d3.select('#canvas svg').append('path')
             .datum(this.points)
-            .attr("fill", "none")
+            .attr('fill', 'none')
             .attr('vector-effect', 'non-scaling-stroke')
-            .attr("d", line)
-            // prevent overlapping the points - screws up click events
+            .attr('d', d3.line()
+                .x((d) => { return d.x; })
+                .y((d) => { return d.y; }))
+            // prevent edges from overlapping points - interferes with click events
             .lower();
 
         // keep grid lines under polygon edges
         d3.selectAll('.vertical, .horizontal').lower();
     },
     drawPolygons () {
-        // destroy old polygons
+        // remove expired polygons
         d3.select('#canvas svg').selectAll('polygon').remove();
-        // draw a polygon for each space
+
+        // draw polygons
         d3.select('#canvas svg').selectAll('polygon')
             .data(this.polygons).enter()
             .append('polygon')
             .attr('points', (d, i) => {
-                var pointsString = "";
+                var pointsString = '';
                 d.points.forEach((p) => {
                     pointsString += (p.x + ',' + p.y + ' ');
                 });
                 return pointsString;
             })
             .attr('class', (d, i) => {
-                return d.face_id === this.currentSpace.face_id ? "currentSpace" : "null";
+                if (d.face_id === this.currentSpace.face_id) { return 'currentSpace'; }
             })
             .attr('vector-effect', 'non-scaling-stroke');
 
-        //remove expired points and guidelines
-        d3.selectAll("#canvas path").remove();
+        // remove expired points and guidelines
+        d3.selectAll('#canvas path').remove();
         d3.selectAll('#canvas ellipse').remove();
     },
     drawGrid () {
@@ -128,9 +132,11 @@ export default {
                 .range([this.min_y, this.max_y])
         });
 
-        // redraw the grid
         var svg = d3.select('#canvas svg');
         svg.selectAll('line').remove();
+
+        // redraw the grid if the grid is visible
+        if (!this.$store.state.project.grid.visible) { return }
 
         // lines are drawn in RWU
         svg.selectAll('.vertical')

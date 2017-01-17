@@ -48,6 +48,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                     <path d="M.5 0v14l11-7-11-7z" transform="translate(13) rotate(90)"></path>
                 </svg>
             </div>
+
+
+            <div class="input-checkbox">
+                <label>grid</label>
+                <input type="checkbox" v-model="gridVisible">
+            </div>
+
         </section>
 
     </nav>
@@ -62,6 +69,14 @@ export default {
     },
     computed: {
         ...mapState({ modes: state => state.application.modes }),
+        gridVisible: {
+            get () { return this.$store.state.project.grid.visible; },
+            set (newValue) {
+                this.$store.dispatch('project/setGridVisible', {
+                    visible: newValue
+                });
+            }
+        },
         mode: {
             get () { return this.$store.state.application.currentSelections.mode; },
             set (newValue) {

@@ -34,6 +34,8 @@ export default {
     },
     computed: {
         ...mapState({
+            gridVisible: state => state.project.grid.visible,
+
             currentMode: state => state.application.currentSelections.mode,
 
             currentSpace: state => state.application.currentSelections.space,
@@ -82,11 +84,12 @@ export default {
         },
     },
     watch: {
+        gridVisible () { this.drawGrid(); },
         // reset points if drawing mode changes
         currentMode () {
             this.rectangleOrigin = null;
             this.points = [];
-            
+
         },
         // if the  dimensions or spacing of the grid is altered, redraw it
         viewbox () {
