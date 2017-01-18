@@ -136,7 +136,7 @@ export default {
         svg.selectAll('line').remove();
 
         // redraw the grid if the grid is visible
-        if (!this.$store.state.project.grid.visible) { return }
+        if (!this.$store.state.project.grid.visible) { return; }
 
         // lines are drawn in RWU
         svg.selectAll('.vertical')
@@ -160,22 +160,19 @@ export default {
             .attr('vector-effect', 'non-scaling-stroke');
 
         d3.selectAll('.vertical, .horizontal').lower();
-    }
+    },
+
+    // these were going to be getters on the store, but we need the point payload
+    // return the set of vertices within the tolerance zone of a location
+    snappingVertices (point) {
+        this.$store.getters['application/currentStoryGeometry'].vertices.filter((v) => {
+
+        });
+    },
+    // return the set of edges within the tolerance zone of a location
+    snappingEdges (point) {
+        this.$store.getters['application/currentStoryGeometry'].edges.filter((e) => {
+
+        });
+    },
 }
-// drawRects: function(e) {
-//     d3.select('#canvas svg').selectAll('rect')
-//         .data(this.rects).enter()
-//         .append('rect')
-//         .attr('x', (d, i) => {
-//             return d.origin.x;
-//         })
-//         .attr('y', (d, i) => {
-//             return d.origin.y;
-//         })
-//         .attr('width', (d, i) => {
-//             return d.size.width;
-//         })
-//         .attr('height', (d, i) => {
-//             return d.size.height;
-//         });
-// }

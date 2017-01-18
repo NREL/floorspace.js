@@ -53,7 +53,6 @@ export default {
 
                 // edge is not shared with another face, destroy it and its vertices unless they are shared with edges on other faces
                 if (!isShared) {
-
                     var p1Shared = false,
                         p2Shared = false;
 

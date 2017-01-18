@@ -32,11 +32,9 @@ export default {
     },
     computed: {
         ...mapState({
-            gridVisible: state => state.project.grid.visible,
-
-            currentMode: state => state.application.currentSelections.mode,
-
             currentSpace: state => state.application.currentSelections.space,
+            gridVisible: state => state.project.grid.visible,
+            currentMode: state => state.application.currentSelections.mode,
 
             // scale functions translate the pixel coordinates of a location on the screen into RWU coordinates to use within the SVG's grid system
             scaleX: state => state.application.scale.x,

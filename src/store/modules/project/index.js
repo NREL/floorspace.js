@@ -156,51 +156,12 @@ export default {
             }
         }
     },
-    getters: {}
-}
-
-function Validator (payload, validatedPayload) {
-    // if a key fails validation, it will be blacklisted so that it is not added to the validatedPayload on a later validation call
-    const invalidKeys = [];
-    return {
-        validatedPayload: validatedPayload,
-        // NOT  inclusive
-        validateMin (key, min = 0) {
-            if (!(key in payload) || invalidKeys.indexOf(key) !== -1) { return; }
-            if (payload[key] > min) {
-                validatedPayload[key] = payload[key];
-            } else {
-                delete validatedPayload[key];
-                invalidKeys.push(key);
-            }
+    getters: {
+        snapToleranceX (state, getters, rootState, rootGetters) {
+            return state.view.max_x - state.view.min_x;
         },
-        // NOT  inclusive
-        validateMax (key, max = 0) {
-            if (!(key in payload) || invalidKeys.indexOf(key) !== -1) { return; }
-            if (key in payload && payload[key] < max) {
-                validatedPayload[key] = payload[key];
-            } else {
-                delete validatedPayload[key];
-                invalidKeys.push(key);
-            }
-        },
-        validateFloat (key) {
-            if (!(key in payload) || invalidKeys.indexOf(key) !== -1) { return; }
-            if (key in payload && !isNaN(parseFloat(payload[key]))) {
-                validatedPayload[key] = parseFloat(payload[key]);
-            } else {
-                delete validatedPayload[key];
-                invalidKeys.push(key);
-            }
-        },
-        validateInt (key) {
-            if (!(key in payload) || invalidKeys.indexOf(key) !== -1) { return; }
-            if (key in payload && !isNaN(parseInt(payload[key]))) {
-                validatedPayload[key] = parseInt(payload[key]);
-            } else {
-                delete validatedPayload[key];
-                invalidKeys.push(key);
-            }
+        snapToleranceY (state, getters, rootState, rootGetters) {
+            return state.view.max_y - state.view.min_y;
         }
     }
 }
