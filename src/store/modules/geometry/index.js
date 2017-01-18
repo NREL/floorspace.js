@@ -29,6 +29,7 @@ export default {
             payload.geometry = new factory.Geometry();
             context.commit('initGeometry', payload);
         },
+        // TODO: PREVENT DELETING SHARED VERTICES
         // this action destroys a face and all related geometric entities which are not referenced by other faces
         destroyFace (context, payload) {
             const geometry = payload.geometry;
@@ -141,13 +142,20 @@ export default {
                 faceEdges = [];
 
             payload.points.forEach((p, i) => {
-                const vertex = new factory.Vertex(p.x, p.y);
-                geometry.vertices.push(vertex);
+                var vertex;
+                // snapped points already have a vertex id, set a reference to the existing vertex
+                if (p.id) {
+                    vertex = geometry.vertices.find((v) => { return v.id === p.id; });
+                } else {
+                    vertex = new factory.Vertex(p.x, p.y);
+                    geometry.vertices.push(vertex);
+                }
                 faceVertices.push(vertex);
             });
 
             faceVertices.forEach((v, i) => {
                 const v2 = faceVertices.length > i + 1 ? faceVertices[i + 1] : faceVertices[0];
+                // TODO: check for duplicates
                 const edge = new factory.Edge(v.id, v2.id);
                 geometry.edges.push(edge);
                 faceEdges.push(edge);

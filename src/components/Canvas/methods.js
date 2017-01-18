@@ -7,30 +7,44 @@ export default {
             yAdjustment = this.min_y % this.y_spacing;
 
         // obtain RWU coordinates of click event
-        var x = this.scaleX(e.offsetX),
-            y = this.scaleY(e.offsetY);
+        var point = {
+            x: this.scaleX(e.offsetX),
+            y: this.scaleY(e.offsetY)
+        };
 
-        // round point to nearest gridline if the grid is visible
-        if (this.gridVisible) {
-            x = round(this.scaleX(e.offsetX) - xAdjustment, this.x_spacing) + xAdjustment;
-            y = round(this.scaleY(e.offsetY) - yAdjustment, this.y_spacing) + yAdjustment;
+        var vertex = this.snappingVertex(point);
+        if (vertex) {
+            // the point will have an id property and be a copy of an existing vertex
+            // data store wil handle this by saving a reference to the existing vertex on the new face
+            point = vertex;
+            console.log(vertex);
+        } else if (this.gridVisible) {
+            // round point to nearest gridline if the grid is visible
+            point.x = round(this.scaleX(e.offsetX) - xAdjustment, this.x_spacing) + xAdjustment;
+            point.y = round(this.scaleY(e.offsetY) - yAdjustment, this.y_spacing) + yAdjustment;
         }
 
         if (this.currentMode === 'Rectangle' && this.points.length) {
             // if a rectangle is in progress, close the rectangle and convert it to a polygon
             this.$store.dispatch('geometry/createFaceFromPoints', {
                 points: [
-                    { x: this.points[0].x, y: this.points[0].y },
-                    { x: x, y: this.points[0].y },
-                    { x: x, y: y },
-                    { x: this.points[0].x, y: y }
+                    this.points[0],
+                    {
+                        x: point.x,
+                        y: this.points[0].y
+                    },
+                    point,
+                    {
+                        x: this.points[0].x,
+                        y: point.y
+                    }
                 ]
             });
             // clear the points in progress
             this.points = [];
         } else if (this.currentMode === 'Rectangle' || this.currentMode === 'Polygon') {
             // store the point
-            this.points.push({ x: x, y: y });
+            this.points.push(point);
         }
 
         function round (point, spacing) {
@@ -105,6 +119,7 @@ export default {
             .attr('points', (d, i) => {
                 var pointsString = '';
                 d.points.forEach((p) => {
+                    if (!p) {debugger}
                     pointsString += (p.x + ',' + p.y + ' ');
                 });
                 return pointsString;
@@ -162,17 +177,19 @@ export default {
         d3.selectAll('.vertical, .horizontal').lower();
     },
 
-    // these were going to be getters on the store, but we need the point payload
     // return the set of vertices within the tolerance zone of a location
-    snappingVertices (point) {
-        this.$store.getters['application/currentStoryGeometry'].vertices.filter((v) => {
-
-        });
+    // DO NOT include vertices from the geometry for the current space
+    snappingVertex (point) {
+        return this.$store.getters['application/currentStoryGeometry'].vertices.filter((v) => {
+            const dx = Math.abs(v.x - point.x),
+                dy = Math.abs(v.y - point.y);
+            return (dx < this.$store.getters['project/snapToleranceX'] && dy < this.$store.getters['project/snapToleranceY']);
+        })[0];
     },
     // return the set of edges within the tolerance zone of a location
     snappingEdges (point) {
         this.$store.getters['application/currentStoryGeometry'].edges.filter((e) => {
 
         });
-    },
+    }
 }

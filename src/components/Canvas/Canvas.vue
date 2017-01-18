@@ -71,9 +71,11 @@ export default {
                         });
                         // look up the vertex associated with p1 unless the edge reference on the face is reversed
                         const vertexId = edgeRef.reverse ? edge.p2 : edge.p1;
-                        return this.$store.getters['application/currentStoryGeometry'].vertices.find((v) => {
+                        var vert = this.$store.getters['application/currentStoryGeometry'].vertices.find((v) => {
                             return v.id === vertexId;
-                        })
+                        });
+                        if (!vert) {debugger}
+                        return vert;
                     })
                 }
             });

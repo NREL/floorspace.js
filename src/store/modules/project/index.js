@@ -158,10 +158,10 @@ export default {
     },
     getters: {
         snapToleranceX (state, getters, rootState, rootGetters) {
-            return state.view.max_x - state.view.min_x;
+            return Math.abs(state.view.max_x - state.view.min_x) * 0.1;
         },
         snapToleranceY (state, getters, rootState, rootGetters) {
-            return state.view.max_y - state.view.min_y;
+            return Math.abs(state.view.max_y - state.view.min_y) * 0.1;
         }
     }
 }
