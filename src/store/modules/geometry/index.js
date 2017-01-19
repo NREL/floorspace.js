@@ -64,7 +64,7 @@ export default {
                     // loop through each edge reference on each face
                     geometry.faces.forEach((f) => {
                         // only test other faces for reference to the vertex
-                        if (expiredFace === f) { return; }
+                        // if (expiredFace === f) { return; }
 
                         // lookup the edge object for each edge reference
                         f.edges.forEach((eR) => {
@@ -133,32 +133,23 @@ export default {
         createVertex (state, payload) { },
         createEdge (state, payload) { },
         createFace (state, payload) {
-            // geometry and space for the current story
-            const geometry = payload.geometry;
-            const space = payload.space;
-
             // build arrays of the vertices and edges associated with the face being created
-            var faceVertices = [],
-                faceEdges = [];
-
-            payload.points.forEach((p, i) => {
-                var vertex;
-                // snapped points already have a vertex id, set a reference to the existing vertex
-                if (p.id) {
-                    vertex = geometry.vertices.find((v) => { return v.id === p.id; });
+            const faceVertices = payload.points.map((p, i) => {
+                // snapped points already have a vertex id, set a reference to the existing vertex if it is not deleted
+                if (p.id && payload.geometry.vertices.find((v) => { return v.id === p.id; })) {
+                    return payload.geometry.vertices.find((v) => { return v.id === p.id; });
                 } else {
-                    vertex = new factory.Vertex(p.x, p.y);
-                    geometry.vertices.push(vertex);
+                    var vertex = new factory.Vertex(p.x, p.y);
+                    payload.geometry.vertices.push(vertex);
+                    return vertex;
                 }
-                faceVertices.push(vertex);
             });
-
-            faceVertices.forEach((v, i) => {
+            const faceEdges = faceVertices.map((v, i) => {
                 const v2 = faceVertices.length > i + 1 ? faceVertices[i + 1] : faceVertices[0];
                 // TODO: check for duplicates
                 const edge = new factory.Edge(v.id, v2.id);
-                geometry.edges.push(edge);
-                faceEdges.push(edge);
+                payload.geometry.edges.push(edge);
+                return edge;
             });
 
             const edgeRefs = faceEdges.map((e, i) => {
@@ -168,8 +159,8 @@ export default {
                 };
             });
             const face = new factory.Face(edgeRefs);
-            geometry.faces.push(face);
-            space.face_id = face.id;
+            payload.geometry.faces.push(face);
+            payload.space.face_id = face.id;
         },
 
         destroyVertex (state, payload) {
