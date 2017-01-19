@@ -141,8 +141,12 @@ export default {
             const faceVertices = payload.points.map((p, i) => {
                 // snapped points already have a vertex id, set a reference to the existing vertex if it is not deleted
                 if (p.id && payload.geometry.vertices.find((v) => { return v.id === p.id; })) {
-                    return payload.geometry.vertices.find((v) => { return v.id === p.id; });
+                    return {
+                        ...payload.geometry.vertices.find((v) => { return v.id === p.id; }),
+                        shared: true // mark the vertex as being shared, this will be used during shared edge lookup
+                    };
                 } else {
+                    // create a new vertex with the point coordinates
                     var vertex = new factory.Vertex(p.x, p.y);
                     payload.geometry.vertices.push(vertex);
                     return vertex;
@@ -150,7 +154,16 @@ export default {
             });
             const faceEdges = faceVertices.map((v, i) => {
                 const v2 = faceVertices.length > i + 1 ? faceVertices[i + 1] : faceVertices[0];
-                // TODO: check for duplicates
+
+                // if the vertex is shared between two faces, check to see if the entire edge is shared
+                if (v.shared) {
+                    // find the shared edge if it exists
+                    var sharedEdge = payload.geometry.edges.find((e) => {
+                        return (e.p1 === v.id && e.p2 === v2.id) || (e.p2 === v.id && e.p1 === v2.id);
+                    });
+                    if (sharedEdge) { return sharedEdge; }
+                }
+
                 const edge = new factory.Edge(v.id, v2.id);
                 payload.geometry.edges.push(edge);
                 return edge;
