@@ -130,8 +130,12 @@ export default {
             state.push(payload.geometry);
             payload.story.geometry_id = payload.geometry.id;
         },
-        createVertex (state, payload) { },
-        createEdge (state, payload) { },
+        createVertex (state, payload) {
+            payload.geometry.vertices.push(payload.vertex);
+        },
+        createEdge (state, payload) {
+            payload.geometry.edges.push(payload.edge);
+        },
         createFace (state, payload) {
             // build arrays of the vertices and edges associated with the face being created
             const faceVertices = payload.points.map((p, i) => {
@@ -164,20 +168,17 @@ export default {
         },
 
         destroyVertex (state, payload) {
-            const geometry = payload.geometry;
-            geometry.vertices.splice(geometry.vertices.findIndex((v) => {
+            payload.geometry.vertices.splice(payload.geometry.vertices.findIndex((v) => {
                 return v.id === payload.vertex_id;
             }), 1);
         },
         destroyEdge (state, payload) {
-            const geometry = payload.geometry;
-            geometry.edges.splice(geometry.edges.findIndex((e) => {
+            payload.geometry.edges.splice(payload.geometry.edges.findIndex((e) => {
                 return e.id === payload.edge_id;
             }), 1);
         },
         destroyFace (state, payload) {
-            const geometry = payload.geometry;
-            geometry.faces.splice(geometry.faces.findIndex((f) => {
+            payload.geometry.faces.splice(payload.geometry.faces.findIndex((f) => {
                 return f.id === payload.face_id;
             }), 1);
         }
