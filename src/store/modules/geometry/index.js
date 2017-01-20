@@ -29,77 +29,45 @@ const geometry = {
             payload.geometry = new factory.Geometry();
             context.commit('initGeometry', payload);
         },
-        // TODO: PREVENT DELETING SHARED VERTICES
-        // this action destroys a face and all related geometric entities which are not referenced by other faces
+
         destroyFace (context, payload) {
             const geometry = payload.geometry;
             const space = payload.space;
+            const expFace = geometry.faces.find((face) => { return face.id === space.face_id; })
 
-            // the face to delete
-            const expiredFace = geometry.faces.find((f) => {
-                return f.id === space.face_id;
+            // delete associated vertices
+            // filter edges referenced by only the face being destroyed so that no shared edges are destroyed
+            var expVertices = helpers.verticesforFace(expFace, geometry);
+            // filter edges referenced by only the face being destroyed so that no shared edges are destroyed
+            expVertices = expVertices.filter((vertex) => {
+                return helpers.facesForVertex(vertex.id, geometry).length === 1;
             });
 
-            // destroy edges belonging to the face unless they are referenced by another face
-            var isShared;
-            expiredFace.edges.forEach((edgeRef) => {
-                isShared = false;
-                geometry.faces.forEach((f) => {
-                    // only test other faces for reference to the edge
-                    if (expiredFace === f) { return; }
-                    isShared = f.edges.find((e) => {
-                        return e.edge_id === edgeRef.edge_id;
-                    }) || isShared;
+            expVertices.forEach((vertex) => {
+                context.commit('destroyVertex', {
+                    geometry: geometry,
+                    vertex_id: vertex.id
                 });
-
-                // edge is not shared with another face, destroy it and its vertices unless they are shared with edges on other faces
-                if (!isShared) {
-                    var p1Shared = false,
-                        p2Shared = false;
-
-                    const expiredEdge = geometry.edges.find((e) => {
-                        return e.id === edgeRef.edge_id;
-                    });
-
-                    // loop through each edge reference on each face
-                    geometry.faces.forEach((f) => {
-                        // only test other faces for reference to the vertex
-                        // if (expiredFace === f) { return; }
-
-                        // lookup the edge object for each edge reference
-                        f.edges.forEach((eR) => {
-                            const e = geometry.edges.find((e) => {
-                                return e.id === edgeRef.edge_id;
-                            });
-
-                            p1Shared = (e.p1 === expiredEdge.p1 || e.p2 === expiredEdge.p1) ? true : p1Shared;
-                            p1Shared = (e.p1 === expiredEdge.p2 || e.p2 === expiredEdge.p2) ? true : p1Shared;
-                        });
-                    });
-                    if (!p1Shared) {
-                        context.commit('destroyVertex', {
-                            geometry: geometry,
-                            'vertex_id': expiredEdge.p1
-                        });
-                    }
-                    if (!p2Shared) {
-                        context.commit('destroyVertex', {
-                            geometry: geometry,
-                            'vertex_id': expiredEdge.p2
-                        });
-                    }
-
-                    // destroy the edge
-                    context.commit('destroyEdge', {
-                        geometry: geometry,
-                        'edge_id': edgeRef.edge_id
-                    });
-                }
             });
-            // destroy the face
+
+            // delete associated edges
+            var expEdgeRefs = expFace.edges;
+            // filter edges referenced by only the face being destroyed so that no shared edges are destroyed
+            expEdgeRefs = expEdgeRefs.filter((edgeRef) => {
+                return helpers.facesForEdge(edgeRef.edge_id, geometry).length === 1;
+            });
+
+            expEdgeRefs.forEach((edgeRef) => {
+                context.commit('destroyEdge', {
+                    geometry: geometry,
+                    edge_id: edgeRef.edge_id
+                });
+            });
+
             context.commit('destroyFace', {
                 geometry: geometry,
-                space: space
+                space: space,
+                face_id: expFace.id
             });
         },
         createFaceFromPoints (context, payload) {
