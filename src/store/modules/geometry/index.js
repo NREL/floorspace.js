@@ -198,3 +198,27 @@ export default {
     },
     getters: {}
 }
+
+const helpers = {
+    // the vertices referenced by the edges of a face
+    verticesforFace (face, geometry) {
+        const vertices = [];
+        face.edges.forEach((edgeRef, i) => {
+            const edge = geometry.edges.find((edge) => { return edge.id === edgeRef.edge_id; });
+            // each vertex will be referenced by two connected edges, so we only store p1
+            const vertex = geometry.vertices.find((vertex) => { return vertex.id === edge.p1; });
+            vertices.push(vertex);
+        });
+        return vertices;
+    },
+    // the edges with references to a vertex
+    edgesForVertex (vertex_id, geometry) {
+        return geometry.edges.filter((edge, i) => {
+            return (edge.p1 === vertex_id || edge.p2 === vertex_id);
+        });
+    },
+    // the faces with references to a vertex
+    facesForVertex (vertex_id, geometry) {
+
+    }
+}

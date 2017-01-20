@@ -102,10 +102,10 @@ describe('mutations', () => {
         });
 
         // check that edge was created and saved
-        expect(geometryState[0].vertices.length).to.equal(points.length);
-        expect(geometryState[0].edges.length).to.equal(points.length);
-        expect(geometryState[0].faces.length).to.equal(1);
-        expect(space.face_id).to.equal(geometryState[0].faces[0].id);
+        expect(geometry.vertices.length).to.equal(points.length);
+        expect(geometry.edges.length).to.equal(points.length);
+        expect(geometry.faces.length).to.equal(1);
+        expect(space.face_id).to.equal(geometry.faces[0].id);
     });
 
     it('createFace with shared vertex', () => {
@@ -132,7 +132,7 @@ describe('mutations', () => {
         });
 
         // swap out the first point in the points array with a reference to an existing vertex
-        points[0] = geometryState[0].vertices[0];
+        points[0] = geometry.vertices[0];
 
         // create new face with two points and a shared vertex
         Geometry.mutations.createFace(geometryState, {
@@ -142,9 +142,48 @@ describe('mutations', () => {
         });
 
         // check that there are no duplicate points
-        expect(geometryState[0].vertices.length).to.equal((points.length * 2) - 1);
-        expect(geometryState[0].edges.length).to.equal(points.length * 2);
-        expect(geometryState[0].faces.length).to.equal(2);
+        expect(geometry.vertices.length).to.equal((points.length * 2) - 1);
+        expect(geometry.edges.length).to.equal(points.length * 2);
+        expect(geometry.faces.length).to.equal(2);
     });
-    it('createFace with shared edge', () => {});
+
+    it('createFace with shared edge', () => {
+        const geometryState = [];
+        const geometry = new factory.Geometry();
+
+        // initialize the state
+        Geometry.mutations.initGeometry(geometryState, {
+            geometry: geometry,
+            story: new factory.Story()
+        });
+
+        var points = [
+            { x: 0, y: 0 },
+            { x: 50, y: 50 },
+            { x: 50, y: 0 }
+        ];
+
+        // create first face with three points
+        Geometry.mutations.createFace(geometryState, {
+            geometry: geometry,
+            points: points,
+            space: new factory.Space()
+        });
+
+        // swap out the first point in the points array with a reference to an existing vertex
+        points[0] = geometry.vertices[0];
+        points[1] = geometry.vertices[1];
+
+        // create new face with two points and a shared vertex
+        Geometry.mutations.createFace(geometryState, {
+            geometry: geometry,
+            points: points,
+            space: new factory.Space()
+        });
+
+        // check that there are no duplicate points
+        expect(geometry.vertices.length).to.equal((points.length * 2) - 2);
+        expect(geometry.edges.length).to.equal((points.length * 2) - 1);
+        expect(geometry.faces.length).to.equal(2);
+    });
 });
