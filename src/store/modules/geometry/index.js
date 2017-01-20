@@ -1,5 +1,5 @@
 import factory from './../../factory/index.js'
-export default {
+const geometry = {
     namespaced: true,
     // each story owns a geometry object with a unique set of vertices, edges, and faces
     state: [/*{
@@ -99,7 +99,7 @@ export default {
             // destroy the face
             context.commit('destroyFace', {
                 geometry: geometry,
-                'face_id': space.face_id
+                space: space
             });
         },
         createFaceFromPoints (context, payload) {
@@ -111,8 +111,7 @@ export default {
             if (space.face_id) {
                 context.dispatch('destroyFace', {
                     'geometry': geometry,
-                    'space': space,
-                    'face_id': space.face_id
+                    'space': space
                 });
             }
 
@@ -192,8 +191,9 @@ export default {
         },
         destroyFace (state, payload) {
             payload.geometry.faces.splice(payload.geometry.faces.findIndex((f) => {
-                return f.id === payload.face_id;
+                return f.id === payload.space.face_id;
             }), 1);
+            payload.space.face_id = null;
         }
     },
     getters: {}
@@ -213,12 +213,27 @@ const helpers = {
     },
     // the edges with references to a vertex
     edgesForVertex (vertex_id, geometry) {
-        return geometry.edges.filter((edge, i) => {
+        return geometry.edges.filter((edge) => {
             return (edge.p1 === vertex_id || edge.p2 === vertex_id);
         });
     },
     // the faces with references to a vertex
     facesForVertex (vertex_id, geometry) {
-
+        return geometry.faces.filter((face) => {
+            return face.edges.find((edgeRef) => {
+                const edge = geometry.edges.find((edge) => { return edge.id === edgeRef.edge_id; });
+                return (edge.p1 === vertex_id || edge.p2 === vertex_id);
+            });
+        });
+    },
+    // the faces with references to an edge
+    facesForEdge (edge_id, geometry) {
+        console.log('facesForEdge: ', edge_id, JSON.stringify(geometry,4));
+        return geometry.faces.filter((face) => {
+            return face.edges.find((edgeRef) => {
+                return edgeRef.edge_id === edge_id;
+            });
+        });
     }
-}
+};
+export { geometry, helpers }

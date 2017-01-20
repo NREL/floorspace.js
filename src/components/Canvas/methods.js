@@ -17,7 +17,6 @@ export default {
             // the point will have an id property and be a copy of an existing vertex
             // data store wil handle this by saving a reference to the existing vertex on the new face
             point = vertex;
-            console.log(vertex);
         } else if (this.gridVisible) {
             // round point to nearest gridline if the grid is visible
             point.x = round(this.scaleX(e.offsetX) - xAdjustment, this.x_spacing) + xAdjustment;
