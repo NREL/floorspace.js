@@ -128,7 +128,10 @@ const geometry = {
                     var sharedEdge = payload.geometry.edges.find((e) => {
                         return (e.p1 === v.id && e.p2 === v2.id) || (e.p2 === v.id && e.p1 === v2.id);
                     });
-                    if (sharedEdge) { return sharedEdge; }
+                    if (sharedEdge) {
+                        sharedEdge.reverse = sharedEdge.p1 !== v.id;
+                        return sharedEdge;
+                    }
                 }
 
                 const edge = new factory.Edge(v.id, v2.id);
@@ -196,7 +199,6 @@ const helpers = {
     },
     // the faces with references to an edge
     facesForEdge (edge_id, geometry) {
-        console.log('facesForEdge: ', edge_id, JSON.stringify(geometry,4));
         return geometry.faces.filter((face) => {
             return face.edges.find((edgeRef) => {
                 return edgeRef.edge_id === edge_id;
