@@ -22,9 +22,20 @@ describe('actions', () => {
     });
 
     it('createFaceFromPoints', () => {
+
+        const geometry = new factory.Geometry();
+        const space = new factory.Space();
+        const story = new factory.Story();
+        story.geometry_id = geometry.id;
+        story.spaces.push(space);
         testAction(Geometry.actions.createFaceFromPoints, {}, {}, [{
             type: 'createFace',
-            testPayload (payload) { }
+            testPayload (payload) {
+
+                expect(payload.geometry)
+                expect(payload.points)
+                expect(payload.space)
+            }
         }])
     });
 });
