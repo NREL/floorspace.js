@@ -178,7 +178,7 @@ describe('mutations', () => {
         expect(geometry.faces.length).to.equal(2);
     });
 
-    it('createFace with shared edge', () => {
+    it('createFace with shared edge that is reversed', () => {
         // initialize the state
         const geometryState = [];
         const geometry = new factory.Geometry();
@@ -187,13 +187,13 @@ describe('mutations', () => {
             story: new factory.Story()
         });
 
-        // set of points for the first face
+        // set of points for the first face, drawn clockwise
         // there are no ids on points so the store will create a brand new vertex for each one
         const f1points = [
             { x: 0, y: 0 },
-            { x: 0, y: 50 },
+            { x: 50, y: 0 },
             { x: 50, y: 50 },
-            { x: 50, y: 0 }
+            { x: 0, y: 50 }
         ];
         const space1 = new factory.Space();
 
@@ -206,19 +206,22 @@ describe('mutations', () => {
         // check that the face has been given a reference to the new face
         expect(space1.face_id).to.equal(geometry.faces[0].id);
 
+        // second face is also clockwise so the shared edge is reversed
         const f2points = [
             { x: 0, y: 50 },
-            { x: 0, y: 100 },
+            { x: 50, y: 50 },
             { x: 50, y: 100 },
-            { x: 50, y: 50 }
+            { x: 0, y: 100 }
         ];
-        // look up the vertex with the same coordinates as the first (shared) point
-        const sharedVertex1 = geometry.vertices.find((v) => { return (v.x === f2points[0].x && v.y === f2points[0].y); })
-        const sharedVertex2 = geometry.vertices.find((v) => { return (v.x === f2points[3].x && v.y === f2points[3].y); })
 
-        // add an vertex ids to the first and fourths shared points so that they will be saved as a shared reference to the existing vertex
-        f2points[0].id = sharedVertex1.id;
-        f2points[3].id = sharedVertex2.id;
+        // set vertex id on points with the same coordinates as an exisitng vertex so that they will be saved as a shared reference to that vertex
+        f2points.forEach((p) => {
+            geometry.vertices.forEach((v) => {
+                if (p.x === v.x && p.y === v.y) {
+                    p.id = v.id;
+                }
+            });
+        });
 
         // create new face with a shared vertex
         const space2 = new factory.Space();
@@ -230,19 +233,100 @@ describe('mutations', () => {
         // check that the face has been given a reference to the new face
         expect(space2.face_id).to.equal(geometry.faces[1].id);
 
+        // look up the shared vertices
+        const sharedVertices = geometry.vertices.filter((v) => {
+            return helpers.facesForVertex(v.id, geometry).length === 2;
+        })
         // check that there are two shared vertices
-        expect(helpers.facesForVertex(sharedVertex1.id, geometry).length).to.equal(2);
-        expect(helpers.facesForVertex(sharedVertex2.id, geometry).length).to.equal(2);
+        expect(sharedVertices.length).to.equal(2);
 
-        // look up the edge with a reference to both of the shared vertices
-        const v1edges = helpers.edgesForVertex(sharedVertex1.id, geometry);
-        const v2edges = helpers.edgesForVertex(sharedVertex2.id, geometry);
-        const sharedEdge = v1edges.find((edge) => {
-            return ~v2edges.indexOf(edge);
+        // look up the shared edges
+        const sharedEdges = geometry.edges.filter((e) => {
+            return helpers.facesForEdge(e.id, geometry).length === 2;
+        })
+        // check that there are two shared edges
+        expect(sharedEdges.length).to.equal(1);
+
+        // check that the shared edge is reversed
+        expect(sharedEdges[0].reverse).to.equal(true);
+
+        // check that the expected number of vertices, edges, and faces exist
+        expect(geometry.vertices.length).to.equal((f2points.length + f1points.length) - 2);
+        expect(geometry.edges.length).to.equal((f2points.length * 2) - 1);
+        expect(geometry.faces.length).to.equal(2);
+    });
+
+    it('createFace with shared edge that is not reversed', () => {
+        // initialize the state
+        const geometryState = [];
+        const geometry = new factory.Geometry();
+        Geometry.mutations.initGeometry(geometryState, {
+            geometry: geometry,
+            story: new factory.Story()
         });
 
-        // check that two faces are referencing the shared edge
-        expect(helpers.facesForEdge(sharedEdge.id, geometry).length).to.equal(2);
+        // set of points for the first face, drawn clockwise
+        // there are no ids on points so the store will create a brand new vertex for each one
+        const f1points = [
+            { x: 0, y: 0 },
+            { x: 50, y: 0 },
+            { x: 50, y: 50 },
+            { x: 0, y: 50 }
+        ];
+        const space1 = new factory.Space();
+
+        // create the first face from regular points
+        Geometry.mutations.createFace(geometryState, {
+            geometry: geometry,
+            points: f1points,
+            space: space1
+        });
+        // check that the face has been given a reference to the new face
+        expect(space1.face_id).to.equal(geometry.faces[0].id);
+
+        // second face is counter clockwise so the shared edge is not reversed
+        const f2points = [
+            { x: 0, y: 50 },
+            { x: 0, y: 100 },
+            { x: 50, y: 100 },
+            { x: 50, y: 50 }
+        ];
+
+        // set vertex id on points with the same coordinates as an exisitng vertex so that they will be saved as a shared reference to that vertex
+        f2points.forEach((p) => {
+            geometry.vertices.forEach((v) => {
+                if (p.x === v.x && p.y === v.y) {
+                    p.id = v.id;
+                }
+            });
+        });
+
+        // create new face with a shared vertex
+        const space2 = new factory.Space();
+        Geometry.mutations.createFace(geometryState, {
+            geometry: geometry,
+            points: f2points,
+            space: space2
+        });
+        // check that the face has been given a reference to the new face
+        expect(space2.face_id).to.equal(geometry.faces[1].id);
+
+        // look up the shared vertices
+        const sharedVertices = geometry.vertices.filter((v) => {
+            return helpers.facesForVertex(v.id, geometry).length === 2;
+        })
+        // check that there are two shared vertices
+        expect(sharedVertices.length).to.equal(2);
+
+        // look up the shared edges
+        const sharedEdges = geometry.edges.filter((e) => {
+            return helpers.facesForEdge(e.id, geometry).length === 2;
+        })
+        // check that there are two shared edges
+        expect(sharedEdges.length).to.equal(1);
+
+        // check that the shared edge is reversed
+        expect(sharedEdges[0].reverse).to.equal(false);
 
         // check that the expected number of vertices, edges, and faces exist
         expect(geometry.vertices.length).to.equal((f2points.length + f1points.length) - 2);
