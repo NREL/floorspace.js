@@ -18,23 +18,79 @@ describe('actions', () => {
                 expect(payload.geometry.edges).to.be.an('array');
                 expect(payload.geometry.faces).to.be.an('array');
             }
-        }])
+        }], [])
     });
 
-    it('createFaceFromPoints', () => {
-
+    it('createFaceFromPoints on a space with no existing face', () => {
         const geometry = new factory.Geometry();
         const space = new factory.Space();
-        const story = new factory.Story();
-        story.geometry_id = geometry.id;
-        story.spaces.push(space);
-        testAction(Geometry.actions.createFaceFromPoints, {}, {}, [{
+        var context = {
+            rootGetters: { 'application/currentStoryGeometry': geometry },
+            rootState: {
+                application: {
+                    currentSelections: { space: space }
+                }
+            }
+        };
+
+        const points = [
+            { x: 0, y: 0 },
+            { x: 0, y: 50 },
+            { x: 50, y: 50 },
+            { x: 50, y: 0 }
+        ];
+
+        testAction(Geometry.actions.createFaceFromPoints, {
+            geometry: geometry,
+            space: space,
+            points: points
+        }, context, [{
             type: 'createFace',
             testPayload (payload) {
+                expect(payload.geometry).to.equal(geometry);
+                expect(payload.points).to.equal(points);
+                expect(payload.space).to.equal(space);
+            }
+        }], [])
+    });
 
-                expect(payload.geometry)
-                expect(payload.points)
-                expect(payload.space)
+    it('createFaceFromPoints on a space with an existing face', () => {
+        const geometry = new factory.Geometry();
+        const space = new factory.Space();
+        space.face_id = 1;
+
+        var context = {
+            rootGetters: { 'application/currentStoryGeometry': geometry },
+            rootState: {
+                application: {
+                    currentSelections: { space: space }
+                }
+            }
+        };
+
+        const points = [
+            { x: 0, y: 0 },
+            { x: 0, y: 50 },
+            { x: 50, y: 50 },
+            { x: 50, y: 0 }
+        ];
+
+        testAction(Geometry.actions.createFaceFromPoints, {
+            geometry: geometry,
+            space: space,
+            points: points
+        }, context, [{
+            type: 'createFace',
+            testPayload (payload) {
+                expect(payload.geometry).to.equal(geometry);
+                expect(payload.points).to.equal(points);
+                expect(payload.space).to.equal(space);
+            }
+        }], [{
+            type: 'destroyFace',
+            testPayload (payload) {
+                expect(payload.geometry).to.equal(geometry);
+                expect(payload.space).to.equal(space);
             }
         }])
     });
