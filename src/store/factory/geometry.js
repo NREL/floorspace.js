@@ -18,7 +18,7 @@ export default {
     Face: function(edgeRefs) {
         return {
             id: helpers.generateId(),
-            edges: edgeRefs
+            edgeRefs: edgeRefs
         }
     },
     Geometry: function() {

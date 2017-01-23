@@ -16,7 +16,7 @@ const geometry = {
         }],
         faces: [{
             id: null,
-            edges: [{
+            edgeRefs: [{
                 edge_id: null,
                 reverse: false
             }]
@@ -37,9 +37,7 @@ const geometry = {
 
             // delete associated vertices
             // filter edges referenced by only the face being destroyed so that no shared edges are destroyed
-            var expVertices = helpers.verticesforFace(expFace, geometry);
-            // filter edges referenced by only the face being destroyed so that no shared edges are destroyed
-            expVertices = expVertices.filter((vertex) => {
+            var expVertices = helpers.verticesforFace(expFace, geometry).filter((vertex) => {
                 return helpers.facesForVertex(vertex.id, geometry).length === 1;
             });
 
