@@ -1,5 +1,29 @@
 var d3 = require('d3');
 export default {
+    calcSnap (e) {
+        console.log(e);
+        // obtain RWU coordinates of click event
+        var point = {
+            x: this.scaleX(e.offsetX),
+            y: this.scaleY(e.offsetY)
+        };
+
+        var vertex = this.snappingVertex(point);
+            d3.selectAll('#canvas .snap').remove();
+        if (vertex) {
+
+            // draw points
+            d3.select('#canvas svg')
+                .append('ellipse')
+                .attr('cx', vertex.x)
+                .attr('cy', vertex.y)
+                .attr('rx', this.scaleX(3) - this.min_x)
+                .attr('ry', this.scaleY(3) - this.min_y)
+                .classed('snap', true)
+                .attr('vector-effect', 'non-scaling-stroke');
+            console.log(vertex);
+        }
+    },
     // handle a click on the canvas
     addPoint (e) {
         // subtract min % spacing to account for grid rounding offsets created by adjusted minimums
@@ -177,13 +201,25 @@ export default {
     },
 
     // return the set of vertices within the tolerance zone of a location
-    // DO NOT include vertices from the geometry for the current space
+    // TODO: filter closest
     snappingVertex (point) {
-        return this.$store.getters['application/currentStoryGeometry'].vertices.filter((v) => {
+        const snappingCandidates = this.$store.getters['application/currentStoryGeometry'].vertices.filter((v) => {
             const dx = Math.abs(v.x - point.x),
                 dy = Math.abs(v.y - point.y);
             return (dx < this.$store.getters['project/snapToleranceX'] && dy < this.$store.getters['project/snapToleranceY']);
-        })[0];
+        });
+
+        if (snappingCandidates.length > 1) {
+            return snappingCandidates.reduce((a, b) => {
+                const aDx = Math.abs(a.x - point.x),
+                    aDy = Math.abs(a.y - point.y),
+                    bDx = Math.abs(b.x - point.x),
+                    bDy = Math.abs(b.y - point.y);
+                return aDx * aDy <= bDx * bDy ? a : b;
+            });
+        }
+
+        return snappingCandidates[0];
     },
     // return the set of edges within the tolerance zone of a location
     snappingEdges (point) {

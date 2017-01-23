@@ -26,9 +26,12 @@ export default {
     mounted () {
         this.drawGrid();
         window.addEventListener('resize', this.drawGrid);
+        window.addEventListener('mousemove', this.calcSnap);
+
     },
     beforeDestroy () {
-        window.removeEventListener('resize', this.drawGrid)
+        window.removeEventListener('resize', this.drawGrid);
+        window.removeEventListener('mousemove', this.calcSnap);
     },
     computed: {
         ...mapState({

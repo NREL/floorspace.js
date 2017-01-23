@@ -20,6 +20,9 @@
                 fill: $primary;
             }
         }
+        &.snap {
+            fill: blue;
+        }
     }
     // gridlines
     line.horizontal, line.vertical {
