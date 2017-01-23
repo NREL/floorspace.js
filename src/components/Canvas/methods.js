@@ -255,13 +255,13 @@ export default {
                 v2 = geometry.vertices.find((v) => { return v.id === e.v2; });
 
             const edgeResult = pDistance(point.x, point.y, v1.x, v1.y, v2.x, v2.y);
-            return {
+            return edgeResult ? {
                 dist: edgeResult.dist,
                 scalar: edgeResult.scalar,
                 edge: e,
                 v1: v1,
                 v2: v2
-            };
+            } : null;
 
             function pDistance (x, y, x1, y1, x2, y2) {
                 var A = x - x1;
@@ -299,7 +299,7 @@ export default {
                 };
             }
         }).filter((eR) => {
-            return eR.dist < this.$store.getters['project/snapToleranceX'];
+            return eR && eR.dist < this.$store.getters['project/snapToleranceX'];
         });
         if (snappingCandidates.length > 1) {
             return snappingCandidates.reduce((a, b) => {
