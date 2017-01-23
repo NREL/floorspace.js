@@ -51,7 +51,7 @@ const geometry = {
             });
 
             // delete associated edges
-            var expEdgeRefs = expFace.edges;
+            var expEdgeRefs = expFace.edgeRefs;
             // filter edges referenced by only the face being destroyed so that no shared edges are destroyed
             expEdgeRefs = expEdgeRefs.filter((edgeRef) => {
                 return helpers.facesForEdge(edgeRef.edge_id, geometry).length === 1;
@@ -174,7 +174,7 @@ const helpers = {
     // the vertices referenced by the edges of a face
     verticesforFace (face, geometry) {
         const vertices = [];
-        face.edges.forEach((edgeRef, i) => {
+        face.edgeRefs.forEach((edgeRef, i) => {
             const edge = geometry.edges.find((edge) => { return edge.id === edgeRef.edge_id; });
             // each vertex will be referenced by two connected edges, so we only store p1
             const vertex = geometry.vertices.find((vertex) => { return vertex.id === edge.p1; });
@@ -191,7 +191,7 @@ const helpers = {
     // the faces with references to a vertex
     facesForVertex (vertex_id, geometry) {
         return geometry.faces.filter((face) => {
-            return face.edges.find((edgeRef) => {
+            return face.edgeRefs.find((edgeRef) => {
                 const edge = geometry.edges.find((edge) => { return edge.id === edgeRef.edge_id; });
                 return (edge.p1 === vertex_id || edge.p2 === vertex_id);
             });
@@ -200,7 +200,7 @@ const helpers = {
     // the faces with references to an edge
     facesForEdge (edge_id, geometry) {
         return geometry.faces.filter((face) => {
-            return face.edges.find((edgeRef) => {
+            return face.edgeRefs.find((edgeRef) => {
                 return edgeRef.edge_id === edge_id;
             });
         });

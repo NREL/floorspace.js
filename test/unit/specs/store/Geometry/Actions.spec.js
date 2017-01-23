@@ -247,7 +247,7 @@ describe('actions', () => {
             });
         });
 
-        face1.edges.map((edgeRef) => {
+        face1.edgeRefs.map((edgeRef) => {
             return geometry.edges.find((edge) => {
                 return edge.id === edgeRef.edge_id;
             });
@@ -351,7 +351,7 @@ describe('actions', () => {
             });
         });
 
-        face1.edges.map((edgeRef) => {
+        face1.edgeRefs.map((edgeRef) => {
             return geometry.edges.find((edge) => {
                 return edge.id === edgeRef.edge_id;
             });

@@ -64,7 +64,7 @@ export default {
                 // obtain a set of vertices for each face by taking the first vertex from each edge (direction matters here)
                 return {
                     face_id: face.id,
-                    points: face.edges.map((edgeRef) => {
+                    points: face.edgeRefs.map((edgeRef) => {
                         // look up the edge referenced by the face
                         const edge = this.$store.getters['application/currentStoryGeometry'].edges.find((e) => {
                             return e.id === edgeRef.edge_id;
