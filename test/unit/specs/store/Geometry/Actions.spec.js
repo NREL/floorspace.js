@@ -111,8 +111,8 @@ describe('actions', () => {
         // give each edge a reference to two vertices, store a reference to each edge on the face
         const edgeRefs = [];
         for (var i = 0; i < geometry.edges.length; i++) {
-            geometry.edges[i].p1 = geometry.vertices[i].id;
-            geometry.edges[i].p2 = i + 1 < geometry.edges.length ? geometry.vertices[i + 1].id : 0;
+            geometry.edges[i].v1 = geometry.vertices[i].id;
+            geometry.edges[i].v2 = i + 1 < geometry.edges.length ? geometry.vertices[i + 1].id : 0;
 
             edgeRefs.push({
                 edge_id: geometry.edges[i].id,
@@ -191,8 +191,8 @@ describe('actions', () => {
         const space1 = new factory.Space();
         // give each edge a reference to two vertices, store a reference to each edge on the face
         for (var i = 0; i < 4; i++) {
-            geometry.edges[i].p1 = geometry.vertices[i].id;
-            geometry.edges[i].p2 = i < 3 ? geometry.vertices[i + 1].id : geometry.vertices[0].id;
+            geometry.edges[i].v1 = geometry.vertices[i].id;
+            geometry.edges[i].v2 = i < 3 ? geometry.vertices[i + 1].id : geometry.vertices[0].id;
 
             edgeRefs.push({
                 edge_id: geometry.edges[i].id,
@@ -209,8 +209,8 @@ describe('actions', () => {
         // give each edge a reference to two vertices, store a reference to each edge on the face
         edgeRefs = [];
         for (var i = 4; i < 8; i++) {
-            geometry.edges[i].p1 = geometry.vertices[i - 1].id;
-            geometry.edges[i].p2 = i < 7 ? geometry.vertices[i].id : geometry.vertices[3].id; // space2 will share a reference to geometry.vertices[3]
+            geometry.edges[i].v1 = geometry.vertices[i - 1].id;
+            geometry.edges[i].v2 = i < 7 ? geometry.vertices[i].id : geometry.vertices[3].id; // space2 will share a reference to geometry.vertices[3]
 
             edgeRefs.push({
                 edge_id: geometry.edges[i].id,
@@ -295,8 +295,8 @@ describe('actions', () => {
         const space1 = new factory.Space();
         // give each edge a reference to two vertices, store a reference to each edge on the face
         for (var i = 0; i < 4; i++) {
-            geometry.edges[i].p1 = geometry.vertices[i].id;
-            geometry.edges[i].p2 = i < 3 ? geometry.vertices[i + 1].id : geometry.vertices[0].id;
+            geometry.edges[i].v1 = geometry.vertices[i].id;
+            geometry.edges[i].v2 = i < 3 ? geometry.vertices[i + 1].id : geometry.vertices[0].id;
 
             edgeRefs.push({
                 edge_id: geometry.edges[i].id,
@@ -313,8 +313,8 @@ describe('actions', () => {
         // give each edge a reference to two vertices, store a reference to each edge on the face
         edgeRefs = [];
         for (var i = 3; i < 7; i++) {
-            geometry.edges[i].p1 = geometry.vertices[i].id;
-            geometry.edges[i].p2 = i < 6 ? geometry.vertices[i + 1].id : geometry.vertices[2].id; // space2 will share a reference to geometry.vertices[3]
+            geometry.edges[i].v1 = geometry.vertices[i].id;
+            geometry.edges[i].v2 = i < 6 ? geometry.vertices[i + 1].id : geometry.vertices[2].id; // space2 will share a reference to geometry.vertices[3]
 
             edgeRefs.push({
                 edge_id: geometry.edges[i].id,

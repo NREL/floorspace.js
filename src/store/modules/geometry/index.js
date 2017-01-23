@@ -11,8 +11,8 @@ const geometry = {
         }],
         edges: [{
             id: null,
-            p1: null,
-            p2: null
+            v1: null,
+            v2: null
         }],
         faces: [{
             id: null,
@@ -124,10 +124,10 @@ const geometry = {
                 if (v.shared) {
                     // find the shared edge if it exists
                     var sharedEdge = payload.geometry.edges.find((e) => {
-                        return (e.p1 === v.id && e.p2 === v2.id) || (e.p2 === v.id && e.p1 === v2.id);
+                        return (e.v1 === v.id && e.v2 === v2.id) || (e.v2 === v.id && e.v1 === v2.id);
                     });
                     if (sharedEdge) {
-                        sharedEdge.reverse = sharedEdge.p1 !== v.id;
+                        sharedEdge.reverse = sharedEdge.v1 !== v.id;
                         return sharedEdge;
                     }
                 }
@@ -174,8 +174,8 @@ const helpers = {
         const vertices = [];
         face.edgeRefs.forEach((edgeRef, i) => {
             const edge = geometry.edges.find((edge) => { return edge.id === edgeRef.edge_id; });
-            // each vertex will be referenced by two connected edges, so we only store p1
-            const vertex = geometry.vertices.find((vertex) => { return vertex.id === edge.p1; });
+            // each vertex will be referenced by two connected edges, so we only store v1
+            const vertex = geometry.vertices.find((vertex) => { return vertex.id === edge.v1; });
             vertices.push(vertex);
         });
         return vertices;
@@ -183,7 +183,7 @@ const helpers = {
     // the edges with references to a vertex
     edgesForVertex (vertex_id, geometry) {
         return geometry.edges.filter((edge) => {
-            return (edge.p1 === vertex_id || edge.p2 === vertex_id);
+            return (edge.v1 === vertex_id || edge.v2 === vertex_id);
         });
     },
     // the faces with references to a vertex
@@ -191,7 +191,7 @@ const helpers = {
         return geometry.faces.filter((face) => {
             return face.edgeRefs.find((edgeRef) => {
                 const edge = geometry.edges.find((edge) => { return edge.id === edgeRef.edge_id; });
-                return (edge.p1 === vertex_id || edge.p2 === vertex_id);
+                return (edge.v1 === vertex_id || edge.v2 === vertex_id);
             });
         });
     },

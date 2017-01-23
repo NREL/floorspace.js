@@ -8,11 +8,11 @@ export default {
             y: y
         }
     },
-    Edge: function(p1, p2) {
+    Edge: function(v1, v2) {
         return {
             id: helpers.generateId(),
-            p1: p1,
-            p2: p2
+            v1: v1,
+            v2: v2
         }
     },
     Face: function(edgeRefs) {
