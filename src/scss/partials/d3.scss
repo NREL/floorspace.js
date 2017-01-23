@@ -21,12 +21,17 @@
             }
         }
         &.snap {
+            stroke: blue;
             fill: blue;
         }
     }
     // gridlines
     line.horizontal, line.vertical {
         stroke: $gray-medium-dark;
+    }
+    line.snap {
+        stroke: blue;
+        fill: blue;
     }
 
     // shapes

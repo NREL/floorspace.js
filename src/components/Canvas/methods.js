@@ -2,26 +2,42 @@ var d3 = require('d3');
 export default {
     calcSnap (e) {
         console.log(e);
+        d3.selectAll('#canvas .snap').remove();
+
         // obtain RWU coordinates of click event
         var point = {
             x: this.scaleX(e.offsetX),
             y: this.scaleY(e.offsetY)
         };
 
-        var vertex = this.snappingVertex(point);
-            d3.selectAll('#canvas .snap').remove();
+        const vertex = this.snappingVertex(point);
         if (vertex) {
-
-            // draw points
             d3.select('#canvas svg')
                 .append('ellipse')
                 .attr('cx', vertex.x)
                 .attr('cy', vertex.y)
-                .attr('rx', this.scaleX(3) - this.min_x)
-                .attr('ry', this.scaleY(3) - this.min_y)
+                .attr('rx', this.scaleX(5) - this.min_x)
+                .attr('ry', this.scaleY(5) - this.min_y)
                 .classed('snap', true)
                 .attr('vector-effect', 'non-scaling-stroke');
-            console.log(vertex);
+            return;
+        }
+
+        const edge = this.snappingEdge(point);
+        if (edge) {
+            const geometry = this.$store.getters['application/currentStoryGeometry'],
+                v1 = geometry.vertices.find((v) => { return v.id === edge.v1; }),
+                v2 = geometry.vertices.find((v) => { return v.id === edge.v2; });
+
+            d3.select('#canvas svg')
+                .append('line')
+                .attr('x1', v1.x)
+                .attr('y1', v1.y)
+                .attr('x2', v2.x)
+                .attr('y2', v2.y)
+                .attr('stroke-width', 3)
+                .classed('snap', true)
+                .attr('vector-effect', 'non-scaling-stroke');
         }
     },
     // handle a click on the canvas
@@ -222,9 +238,44 @@ export default {
         return snappingCandidates[0];
     },
     // return the set of edges within the tolerance zone of a location
-    snappingEdges (point) {
-        this.$store.getters['application/currentStoryGeometry'].edges.filter((e) => {
+    snappingEdge (point) {
+        const geometry = this.$store.getters['application/currentStoryGeometry'];
+        // find the shortest distance between a point and a line segment
+        return geometry.edges.filter((e) => {
+            const v1 = geometry.vertices.find((v) => { return v.id === e.v1; }),
+                v2 = geometry.vertices.find((v) => { return v.id === e.v2; });
 
-        });
+            return pDistance(point.x, point.y, v1.x, v1.y, v2.x, v2.y) < 25;
+
+            function pDistance (x, y, x1, y1, x2, y2) {
+                var A = x - x1;
+                var B = y - y1;
+                var C = x2 - x1;
+                var D = y2 - y1;
+
+                var dot = A * C + B * D;
+                var len_sq = C * C + D * D;
+                var param = -1;
+                if (len_sq !== 0) {
+                    param = dot / len_sq;
+                }
+                var xx, yy;
+
+                if (param < 0) {
+                    xx = x1;
+                    yy = y1;
+                } else if (param > 1) {
+                    xx = x2;
+                    yy = y2;
+                } else {
+                    xx = x1 + param * C;
+                    yy = y1 + param * D;
+                }
+
+                var dx = x - xx;
+                var dy = y - yy;
+                return Math.sqrt(dx * dx + dy * dy);
+            }
+        })[0];
     }
 }
