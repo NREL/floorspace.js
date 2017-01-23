@@ -1,7 +1,6 @@
 var d3 = require('d3');
 export default {
     calcSnap (e) {
-        console.log(e);
         d3.selectAll('#canvas .snap').remove();
 
         // obtain RWU coordinates of click event
@@ -23,19 +22,24 @@ export default {
             return;
         }
 
-        const edge = this.snappingEdge(point);
-        if (edge) {
-            const geometry = this.$store.getters['application/currentStoryGeometry'],
-                v1 = geometry.vertices.find((v) => { return v.id === edge.v1; }),
-                v2 = geometry.vertices.find((v) => { return v.id === edge.v2; });
-
+        const snappingEdge = this.snappingEdge(point);
+        if (snappingEdge) {
             d3.select('#canvas svg')
                 .append('line')
-                .attr('x1', v1.x)
-                .attr('y1', v1.y)
-                .attr('x2', v2.x)
-                .attr('y2', v2.y)
-                .attr('stroke-width', 3)
+                .attr('x1', snappingEdge.v1.x)
+                .attr('y1', snappingEdge.v1.y)
+                .attr('x2', snappingEdge.v2.x)
+                .attr('y2', snappingEdge.v2.y)
+                .attr('stroke-width', 1)
+                .classed('snap', true)
+                .attr('vector-effect', 'non-scaling-stroke');
+
+            d3.select('#canvas svg')
+                .append('ellipse')
+                .attr('cx', snappingEdge.scalar.x)
+                .attr('cy', snappingEdge.scalar.y)
+                .attr('rx', this.scaleX(2) - this.min_x)
+                .attr('ry', this.scaleY(2) - this.min_y)
                 .classed('snap', true)
                 .attr('vector-effect', 'non-scaling-stroke');
         }
@@ -53,10 +57,15 @@ export default {
         };
 
         var vertex = this.snappingVertex(point);
+        var edge = this.snappingEdge(point);
         if (vertex) {
             // the point will have an id property and be a copy of an existing vertex
             // data store wil handle this by saving a reference to the existing vertex on the new face
             point = vertex;
+        } else if (edge) {
+            // the point will have an id property and be a copy of an existing vertex
+            // data store wil handle this by saving a reference to the existing vertex on the new face
+            point = edge.scalar;
         } else if (this.gridVisible) {
             // round point to nearest gridline if the grid is visible
             point.x = round(this.scaleX(e.offsetX) - xAdjustment, this.x_spacing) + xAdjustment;
@@ -241,11 +250,18 @@ export default {
     snappingEdge (point) {
         const geometry = this.$store.getters['application/currentStoryGeometry'];
         // find the shortest distance between a point and a line segment
-        return geometry.edges.filter((e) => {
+        const snappingCandidates = geometry.edges.map((e) => {
             const v1 = geometry.vertices.find((v) => { return v.id === e.v1; }),
                 v2 = geometry.vertices.find((v) => { return v.id === e.v2; });
 
-            return pDistance(point.x, point.y, v1.x, v1.y, v2.x, v2.y) < 25;
+            const edgeResult = pDistance(point.x, point.y, v1.x, v1.y, v2.x, v2.y);
+            return {
+                dist: edgeResult.dist,
+                scalar: edgeResult.scalar,
+                edge: e,
+                v1: v1,
+                v2: v2
+            };
 
             function pDistance (x, y, x1, y1, x2, y2) {
                 var A = x - x1;
@@ -254,14 +270,14 @@ export default {
                 var D = y2 - y1;
 
                 var dot = A * C + B * D;
-                var len_sq = C * C + D * D;
-                var param = -1;
-                if (len_sq !== 0) {
-                    param = dot / len_sq;
+                var lenSq = C * C + D * D;
+                if (!lenSq) {
+                    return;
                 }
+                var param = dot / lenSq;
                 var xx, yy;
 
-                if (param < 0) {
+                if (param <= 0) {
                     xx = x1;
                     yy = y1;
                 } else if (param > 1) {
@@ -274,8 +290,23 @@ export default {
 
                 var dx = x - xx;
                 var dy = y - yy;
-                return Math.sqrt(dx * dx + dy * dy);
+                return {
+                    dist: Math.sqrt(dx * dx + dy * dy),
+                    scalar: {
+                        x: xx,
+                        y: yy
+                    }
+                };
             }
-        })[0];
+        }).filter((eR) => {
+            return eR.dist < this.$store.getters['project/snapToleranceX'];
+        });
+        if (snappingCandidates.length > 1) {
+            return snappingCandidates.reduce((a, b) => {
+                return a.dist <= b.dist ? a : b;
+            });
+        }
+
+        return snappingCandidates[0];
     }
 }
