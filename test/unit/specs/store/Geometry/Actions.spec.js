@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { geometry as Geometry } from '../../../../../src/store/modules/geometry/index.js'
+import { geometry as Geometry, helpers } from '../../../../../src/store/modules/geometry/index.js'
 import factory from '../../../../../src/store/factory/index.js'
 import testAction from '../helpers/testAction.js'
 
@@ -94,4 +94,185 @@ describe('actions', () => {
             }
         }])
     });
+
+    it('destroyFace with no shared edges or vertices', () => {
+        // initialize the state
+        const geometry = new factory.Geometry();
+        const space = new factory.Space();
+
+        // create vertices and edges for the face, store on geometry
+        for (var i = 0; i < 4; i++) {
+            const vertex = new factory.Vertex();
+            const edge = new factory.Edge();
+            geometry.vertices.push(vertex);
+            geometry.edges.push(edge);
+        }
+
+        // give each edge a reference to two vertices, store a reference to each edge on the face
+        const edgeRefs = [];
+        for (var i = 0; i < geometry.edges.length; i++) {
+            geometry.edges[i].p1 = geometry.vertices[i].id;
+            geometry.edges[i].p2 = i + 1 < geometry.edges.length ? geometry.vertices[i + 1].id : 0;
+
+            edgeRefs.push({
+                edge_id: geometry.edges[i].id,
+                reverse: false
+            });
+        }
+
+        // initialize face with edge references, store face on geometry and give space a reference to the face
+        const face = new factory.Face(edgeRefs);
+        geometry.faces.push(face);
+        space.face_id = face.id;
+
+        // mock context
+        var context = {
+            state: [geometry],
+            rootGetters: { 'application/currentStoryGeometry': geometry },
+            rootState: {
+                application: {
+                    currentSelections: { space: space }
+                }
+            }
+        };
+
+        // mutations expected
+        var expectedMutations = [];
+        geometry.vertices.forEach((vertex) => {
+            expectedMutations.push({
+                type: 'destroyVertex',
+                testPayload (payload) {
+                    expect(payload.geometry).to.equal(geometry);
+                    expect(payload.vertex_id).to.equal(vertex.id);
+                }
+            });
+        });
+        geometry.edges.forEach((edge) => {
+            expectedMutations.push({
+                type: 'destroyEdge',
+                testPayload (payload) {
+                    expect(payload.geometry).to.equal(geometry);
+                    expect(payload.edge_id).to.equal(edge.id);
+                }
+            });
+        });
+
+        expectedMutations.push({
+            type: 'destroyFace',
+            testPayload (payload) {
+                expect(payload.geometry).to.equal(geometry);
+                expect(payload.face_id).to.equal(face.id);
+            }
+        });
+
+        testAction(Geometry.actions.destroyFace, {
+            geometry: geometry,
+            space: space
+        }, context, expectedMutations)
+    });
+
+    it('destroyFace with a shared vertex', () => {
+        // initialize the state
+        const geometry = new factory.Geometry();
+
+        // create 7 vertices and 8 edges since one vertex is shared, store on geometry
+        for (var i = 0; i < 7; i++) {
+            const vertex = new factory.Vertex();
+            geometry.vertices.push(vertex);
+            const edge = new factory.Edge();
+            geometry.edges.push(edge);
+        }
+        const edge = new factory.Edge();
+        geometry.edges.push(edge);
+
+        var edgeRefs = [];
+
+        // face 1
+        const space1 = new factory.Space();
+        // give each edge a reference to two vertices, store a reference to each edge on the face
+        for (var i = 0; i < 4; i++) {
+            geometry.edges[i].p1 = geometry.vertices[i].id;
+            geometry.edges[i].p2 = i < 3 ? geometry.vertices[i + 1].id : geometry.vertices[0].id;
+
+            edgeRefs.push({
+                edge_id: geometry.edges[i].id,
+                reverse: false
+            });
+        }
+
+        // initialize face with edge references, store face on geometry and give space a reference to the face
+        const face1 = new factory.Face(edgeRefs);
+        geometry.faces.push(face1);
+        space1.face_id = face1.id;
+
+        const space2 = new factory.Space();
+        // give each edge a reference to two vertices, store a reference to each edge on the face
+        edgeRefs = [];
+        for (var i = 4; i < 8; i++) {
+            geometry.edges[i].p1 = geometry.vertices[i - 1].id;
+            geometry.edges[i].p2 = i < 7 ? geometry.vertices[i].id : geometry.vertices[3].id; // space2 will share a reference to geometry.vertices[3]
+
+            edgeRefs.push({
+                edge_id: geometry.edges[i].id,
+                reverse: false
+            });
+        }
+
+        // initialize face with edge references, store face on geometry and give space a reference to the face
+        const face2 = new factory.Face(edgeRefs);
+        geometry.faces.push(face2);
+        space2.face_id = face2.id;
+
+        // mock context
+        var context = {
+            state: [geometry],
+            rootGetters: { 'application/currentStoryGeometry': geometry },
+            rootState: {
+                application: {
+                    currentSelections: { space: space1 }
+                }
+            }
+        };
+
+        // mutations expected
+        var expectedMutations = [];
+        helpers.verticesforFace(face1, geometry).forEach((vertex, i) => {
+            if (helpers.facesForVertex(vertex.id, geometry).length === 2) { return; }
+            expectedMutations.push({
+                type: 'destroyVertex',
+                testPayload (payload) {
+                    expect(payload.geometry).to.equal(geometry);
+                    expect(payload.vertex_id).to.equal(vertex.id);
+                }
+            });
+        });
+
+        face1.edges.map((edgeRef) => {
+            return geometry.edges.find((edge) => {
+                return edge.id === edgeRef.edge_id;
+            });
+        }).forEach((edge) => {
+            expectedMutations.push({
+                type: 'destroyEdge',
+                testPayload (payload) {
+                    expect(payload.geometry).to.equal(geometry);
+                    expect(payload.edge_id).to.equal(edge.id);
+                }
+            });
+        });
+
+        expectedMutations.push({
+            type: 'destroyFace',
+            testPayload (payload) {
+                expect(payload.geometry).to.equal(geometry);
+                expect(payload.face_id).to.equal(face1.id);
+            }
+        });
+
+        testAction(Geometry.actions.destroyFace, {
+            geometry: geometry,
+            space: space1
+        }, context, expectedMutations);
+    });
+    // it('destroyFace with a shared edge', () => {});
 });

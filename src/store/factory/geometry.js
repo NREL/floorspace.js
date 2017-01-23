@@ -15,10 +15,10 @@ export default {
             p2: p2
         }
     },
-    Face: function(edges) {
+    Face: function(edgeRefs) {
         return {
             id: helpers.generateId(),
-            edges: edges
+            edges: edgeRefs
         }
     },
     Geometry: function() {
