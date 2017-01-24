@@ -4,7 +4,7 @@
 // state - the state of the store you want to test the action with
 // expectedMutations - the mutations that the action should trigger in order - these can contain a type and tests for their payloads
 // expectedActions - the actions that the action should trigger in order - these can contain a type and tests for their payloads
-export default function testAction (action, payload, context, expectedMutations, expectedActions = []) {
+export default function testAction (action, payload, context, expectedMutations, expectedActions) {
     var mutationCount = 0,
         actionCount = 0;
     const mockedContext = Object.assign(context, {

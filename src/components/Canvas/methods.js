@@ -264,40 +264,71 @@ export default {
             } : null;
 
             function pDistance (x, y, x1, y1, x2, y2) {
-                var A = x - x1;
-                var B = y - y1;
-                var C = x2 - x1;
-                var D = y2 - y1;
+                 
+                // slope of line segment
+                var ms = (y2 - y1) / (x2 - x1);
+                // slope of projection
+                var mp = -1 / ms;
 
-                var dot = A * C + B * D;
-                var lenSq = C * C + D * D;
-                if (!lenSq) {
-                    return;
-                }
-                var param = dot / lenSq;
-                var xx, yy;
+                // b for segment
+                var bs = y1 - (ms * x1);
 
-                if (param <= 0) {
-                    xx = x1;
-                    yy = y1;
-                } else if (param > 1) {
-                    xx = x2;
-                    yy = y2;
-                } else {
-                    xx = x1 + param * C;
-                    yy = y1 + param * D;
-                }
+                // b for projection
+                var bp = y - (mp * x);
 
-                var dx = x - xx;
-                var dy = y - yy;
+                // segment: y = ms * x + bs
+                // projection: y = mp * x + bp
+                // the actual projection point
+                var px = (bp - bs) / (ms - mp);
+                var py = (mp * px) + bp;
+
+                console.log("the projection point:", px, py);
+                var dx = x - px;
+                var dy = y - py;
                 return {
                     dist: Math.sqrt(dx * dx + dy * dy),
                     scalar: {
-                        x: xx,
-                        y: yy
+                        x: px,
+                        y: py
                     }
                 };
             }
+
+            // function pDistance (x, y, x1, y1, x2, y2) {
+            //     var A = x - x1;
+            //     var B = y - y1;
+            //     var C = x2 - x1;
+            //     var D = y2 - y1;
+            //
+            //     var dot = A * C + B * D;
+            //     var lenSq = C * C + D * D;
+            //     if (!lenSq) {
+            //         return;
+            //     }
+            //     var param = dot / lenSq;
+            //     var xx, yy;
+            //
+            //     if (param <= 0) {
+            //         xx = x1;
+            //         yy = y1;
+            //     } else if (param > 1) {
+            //         xx = x2;
+            //         yy = y2;
+            //     } else {
+            //         xx = x1 + param * C;
+            //         yy = y1 + param * D;
+            //     }
+            //
+            //     var dx = x - xx;
+            //     var dy = y - yy;
+            //     return {
+            //         dist: Math.sqrt(dx * dx + dy * dy),
+            //         scalar: {
+            //             x: xx,
+            //             y: yy
+            //         }
+            //     };
+            // }
         }).filter((eR) => {
             return eR && eR.dist < this.$store.getters['project/snapToleranceX'];
         });
