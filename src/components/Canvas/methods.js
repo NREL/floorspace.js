@@ -264,32 +264,39 @@ export default {
             } : null;
 
             function pDistance (x, y, x1, y1, x2, y2) {
-                 
-                // slope of line segment
-                var ms = (y2 - y1) / (x2 - x1);
-                // slope of projection
-                var mp = -1 / ms;
+                var A = x - x1;
+                var B = y - y1;
+                var C = x2 - x1;
+                var D = y2 - y1;
 
-                // b for segment
-                var bs = y1 - (ms * x1);
+                var dot = A * C + B * D;
+                var lenSq = C * C + D * D;
+                if (!lenSq) {
+                    throw "no length";
+                    return;
+                }
+                var param = dot / lenSq;
+                var xx, yy;
 
-                // b for projection
-                var bp = y - (mp * x);
+                if (param <= 0) {
+                    xx = x1;
+                    yy = y1;
+                } else if (param > 1) {
+                    xx = x2;
+                    yy = y2;
+                } else {
+                    xx = x1 + param * C;
+                    yy = y1 + param * D;
+                }
 
-                // segment: y = ms * x + bs
-                // projection: y = mp * x + bp
-                // the actual projection point
-                var px = (bp - bs) / (ms - mp);
-                var py = (mp * px) + bp;
+                var dx = x - xx;
+                var dy = y - yy;
 
-                console.log("the projection point:", px, py);
-                var dx = x - px;
-                var dy = y - py;
                 return {
                     dist: Math.sqrt(dx * dx + dy * dy),
                     scalar: {
-                        x: px,
-                        y: py
+                        x: xx,
+                        y: yy
                     }
                 };
             }
