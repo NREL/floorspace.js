@@ -248,7 +248,13 @@ describe('mutations', () => {
         expect(sharedEdges.length).to.equal(1);
 
         // check that the shared edge is reversed
-        expect(sharedEdges[0].reverse).to.equal(true);
+        const sharedEdgeRef = geometry.faces.find((face) => {
+            return face.id === space2.face_id;
+        }).edgeRefs.find((edgeRef) => {
+            return edgeRef.edge_id === sharedEdges[0].id;
+        })
+        console.log(sharedEdgeRef);
+        expect(sharedEdgeRef.reverse).to.equal(true);
 
         // check that the expected number of vertices, edges, and faces exist
         expect(geometry.vertices.length).to.equal((f2points.length + f1points.length) - 2);

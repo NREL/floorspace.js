@@ -30,6 +30,19 @@ const geometry = {
             context.commit('initGeometry', payload);
         },
 
+        splitEdge (context, payload) {
+            const faces = helpers.facesForEdge(payload.edge.id, context.state.geometry);
+            faces.forEach((face) => {
+                const edgeRef = face.edgeRefs.find((edgeRef) => {
+                    edgeRef.edge_id === payload.edge.id;
+                });
+                if (edgeRef.reverse) {
+
+                }
+                
+            });
+        },
+
         destroyFace (context, payload) {
             const geometry = payload.geometry;
             const space = payload.space;
@@ -80,6 +93,16 @@ const geometry = {
                     'space': space
                 });
             }
+            payload.points.forEach((p, i) => {
+                // when a point is snapped to an edge, this property will be set on the point
+                if (p.splittingEdge) {
+                    this.$store.dispatch('geometry/splitEdge', {
+                        point: { x: p.x, y: p.y},
+                        edge: edge.edge
+                    });
+                }
+            });
+
 
             context.commit('createFace', {
                 ...payload,
@@ -117,6 +140,7 @@ const geometry = {
                     return vertex;
                 }
             });
+            const reverseEdgeIndices = [];
             const faceEdges = faceVertices.map((v, i) => {
                 const v2 = faceVertices.length > i + 1 ? faceVertices[i + 1] : faceVertices[0];
 
@@ -126,8 +150,9 @@ const geometry = {
                     var sharedEdge = payload.geometry.edges.find((e) => {
                         return (e.v1 === v.id && e.v2 === v2.id) || (e.v2 === v.id && e.v1 === v2.id);
                     });
-                    if (sharedEdge) {
-                        sharedEdge.reverse = sharedEdge.v1 !== v.id;
+                    // track the indexes of edges which are reversed for use during face edgeRef creation
+                    if (sharedEdge && sharedEdge.v1 !== v.id) {
+                        reverseEdgeIndices.push(i);
                         return sharedEdge;
                     }
                 }
@@ -140,12 +165,17 @@ const geometry = {
             const edgeRefs = faceEdges.map((e, i) => {
                 return {
                     edge_id: e.id,
-                    reverse: false // TODO: implement a check for existing edges using the same vertices
+                    reverse: reverseEdgeIndices.indexOf(i) === -1 ? false : true // false // TODO: implement a check for existing edges using the same vertices
                 };
             });
+
             const face = new factory.Face(edgeRefs);
             payload.geometry.faces.push(face);
             payload.space.face_id = face.id;
+        },
+
+        splitEdge (state, payload) {
+            // look up edge
         },
 
         destroyVertex (state, payload) {

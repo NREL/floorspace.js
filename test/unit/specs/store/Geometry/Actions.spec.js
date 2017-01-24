@@ -18,7 +18,7 @@ describe('actions', () => {
                 expect(payload.geometry.edges).to.be.an('array');
                 expect(payload.geometry.faces).to.be.an('array');
             }
-        }], [])
+        }], []);
     });
 
     it('createFaceFromPoints on a space with no existing face', () => {
@@ -379,4 +379,79 @@ describe('actions', () => {
             space: space1
         }, context, expectedMutations);
     });
+
+    // it('splitEdge with a point on the edge', () => {
+    //     const splitPoint = {
+    //         x: 25,
+    //         y: 50
+    //     };
+    //     // geometry.edges[1] will be split
+    //     const points = [
+    //         { x: 0, y: 0 },
+    //         { x: 0, y: 50 },
+    //         { x: 50, y: 50 },
+    //         { x: 50, y: 0 }
+    //     ];
+    //
+    //     // initialize the state
+    //     const geometry = new factory.Geometry();
+    //     const space = new factory.Space();
+    //
+    //     // create vertices and edges for the face, store on geometry
+    //     for (var i = 0; i < 4; i++) {
+    //         const vertex = new factory.Vertex();
+    //         vertex.x = points[i].x;
+    //         vertex.y = points[i].y;
+    //         const edge = new factory.Edge();
+    //         geometry.vertices.push(vertex);
+    //         geometry.edges.push(edge);
+    //     }
+    //
+    //     // give each edge a reference to two vertices, store a reference to each edge on the face
+    //     const edgeRefs = [];
+    //     for (var i = 0; i < geometry.edges.length; i++) {
+    //         geometry.edges[i].v1 = geometry.vertices[i].id;
+    //         geometry.edges[i].v2 = i + 1 < geometry.edges.length ? geometry.vertices[i + 1].id : 0;
+    //
+    //         edgeRefs.push({
+    //             edge_id: geometry.edges[i].id,
+    //             reverse: false
+    //         });
+    //     }
+    //
+    //     // initialize face with edge references, store face on geometry and give space a reference to the face
+    //     const face = new factory.Face(edgeRefs);
+    //     geometry.faces.push(face);
+    //     space.face_id = face.id;
+    //
+    //     testAction(Geometry.actions.splitEdge, {
+    //         point: splitPoint,
+    //         edge: geometry.edges[1]
+    //     }, {}, [{
+    //         type: 'splitEdge',
+    //         testPayload (payload) {
+    //             expect(payload.geometry).to.equal(geometry);
+    //             expect(payload.face).to.equal(face);
+    //
+    //             expect(payload.expEdge).to.equal(geometry.edges[1]);
+    //
+    //             const expEdgeRef = helpers.facesForEdge(payload.expEdge.id, geometry)[0].edgeRefs.find((edgeRef) => {
+    //                 return edgeRef.edge_id === payload.expEdge.id;
+    //             });
+    //             if (expEdgeRef.reverse) {
+    //
+    //             }
+    //
+    //
+    //
+    //
+    //             const e1v1 = geometry.vertices.find((v) => { return payload.e1.v1 === v.id; })
+    //             const e1v2 = geometry.vertices.find((v) => { return payload.e1.v2 === v.id; })
+    //             expect(e1v1.id).to.equal(payload.expEdge.v1);
+    //             expect(e1v2.x).to.equal(payload.expEdge.v1);
+    //         }
+    //     }], [])
+    // });
+
+    // it('fail to splitEdge with a point not on the edge', () => {});
 });

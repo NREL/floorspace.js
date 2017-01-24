@@ -66,6 +66,9 @@ export default {
             // the point will have an id property and be a copy of an existing vertex
             // data store wil handle this by saving a reference to the existing vertex on the new face
             point = edge.scalar;
+            // mark the point so that the edge will be split on face creation
+            point.splittingEdge = edge.edge;
+            
         } else if (this.gridVisible) {
             // round point to nearest gridline if the grid is visible
             point.x = round(this.scaleX(e.offsetX) - xAdjustment, this.x_spacing) + xAdjustment;
@@ -300,42 +303,6 @@ export default {
                     }
                 };
             }
-
-            // function pDistance (x, y, x1, y1, x2, y2) {
-            //     var A = x - x1;
-            //     var B = y - y1;
-            //     var C = x2 - x1;
-            //     var D = y2 - y1;
-            //
-            //     var dot = A * C + B * D;
-            //     var lenSq = C * C + D * D;
-            //     if (!lenSq) {
-            //         return;
-            //     }
-            //     var param = dot / lenSq;
-            //     var xx, yy;
-            //
-            //     if (param <= 0) {
-            //         xx = x1;
-            //         yy = y1;
-            //     } else if (param > 1) {
-            //         xx = x2;
-            //         yy = y2;
-            //     } else {
-            //         xx = x1 + param * C;
-            //         yy = y1 + param * D;
-            //     }
-            //
-            //     var dx = x - xx;
-            //     var dy = y - yy;
-            //     return {
-            //         dist: Math.sqrt(dx * dx + dy * dy),
-            //         scalar: {
-            //             x: xx,
-            //             y: yy
-            //         }
-            //     };
-            // }
         }).filter((eR) => {
             return eR && eR.dist < this.$store.getters['project/snapToleranceX'];
         });
