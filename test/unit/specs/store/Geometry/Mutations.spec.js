@@ -1,14 +1,16 @@
 import { expect } from 'chai'
-import { geometry as Geometry, helpers } from '../../../../../src/store/modules/geometry/index.js'
-import factory from '../../../../../src/store/factory/index.js'
+import Geometry from '../../../../../src/store/modules/geometry/index.js'
+import helpers from '../../../../../src/store/modules/geometry/helpers.js'
+import geometryFactory from '../../../../../src/store/modules/geometry/factory.js'
+import modelFactory from '../../../../../src/store/modules/models/factory.js'
 
 describe('mutations', () => {
     it('initGeometry', () => {
         // mock state
         const geometryState = [];
         // create a geometry object for a story
-        const geometry = new factory.Geometry();
-        const story = new factory.Story();
+        const geometry = new geometryFactory.Geometry();
+        const story = new modelFactory.Story();
         Geometry.mutations.initGeometry(geometryState, {
             geometry: geometry,
             story: story
@@ -27,14 +29,14 @@ describe('mutations', () => {
     it('createVertex and destroyVertex', () => {
         // initialize the state
         const geometryState = [];
-        const geometry = new factory.Geometry();
+        const geometry = new geometryFactory.Geometry();
         Geometry.mutations.initGeometry(geometryState, {
             geometry: geometry,
-            story: new factory.Story()
+            story: new modelFactory.Story()
         });
 
         // create a vertex
-        const vertex = new factory.Vertex();
+        const vertex = new geometryFactory.Vertex();
         Geometry.mutations.createVertex(geometryState, {
             geometry: geometry,
             vertex: vertex
@@ -54,14 +56,14 @@ describe('mutations', () => {
     it('createEdge and destroyEdge', () => {
         // initialize the state
         const geometryState = [];
-        const geometry = new factory.Geometry();
+        const geometry = new geometryFactory.Geometry();
         Geometry.mutations.initGeometry(geometryState, {
             geometry: geometry,
-            story: new factory.Story()
+            story: new modelFactory.Story()
         });
 
         // create an edge
-        const edge = new factory.Edge();
+        const edge = new geometryFactory.Edge();
         Geometry.mutations.createEdge(geometryState, {
             geometry: geometry,
             edge: edge
@@ -81,11 +83,11 @@ describe('mutations', () => {
     it('createFace with no shared geometry, destroyFace', () => {
         // initialize the state
         const geometryState = [];
-        const geometry = new factory.Geometry();
-        const space = new factory.Space();
+        const geometry = new geometryFactory.Geometry();
+        const space = new modelFactory.Space();
         Geometry.mutations.initGeometry(geometryState, {
             geometry: geometry,
-            story: new factory.Story()
+            story: new modelFactory.Story()
         });
 
         // set of points for the new face
@@ -122,10 +124,10 @@ describe('mutations', () => {
     it('createFace with shared vertex', () => {
         // initialize the state
         const geometryState = [];
-        const geometry = new factory.Geometry();
+        const geometry = new geometryFactory.Geometry();
         Geometry.mutations.initGeometry(geometryState, {
             geometry: geometry,
-            story: new factory.Story()
+            story: new modelFactory.Story()
         });
 
         // set of points for the first face
@@ -136,7 +138,7 @@ describe('mutations', () => {
             { x: 50, y: 50 },
             { x: 50, y: 0 }
         ];
-        const space1 = new factory.Space();
+        const space1 = new modelFactory.Space();
 
         // create the first face from regular points
         Geometry.mutations.createFace(geometryState, {
@@ -160,7 +162,7 @@ describe('mutations', () => {
         f2points[0].id = sharedVertex.id;
 
         // create new face with a shared vertex
-        const space2 = new factory.Space();
+        const space2 = new modelFactory.Space();
         Geometry.mutations.createFace(geometryState, {
             geometry: geometry,
             points: f2points,
@@ -181,10 +183,10 @@ describe('mutations', () => {
     it('createFace with shared edge that is reversed', () => {
         // initialize the state
         const geometryState = [];
-        const geometry = new factory.Geometry();
+        const geometry = new geometryFactory.Geometry();
         Geometry.mutations.initGeometry(geometryState, {
             geometry: geometry,
-            story: new factory.Story()
+            story: new modelFactory.Story()
         });
 
         // set of points for the first face, drawn clockwise
@@ -195,7 +197,7 @@ describe('mutations', () => {
             { x: 50, y: 50 },
             { x: 0, y: 50 }
         ];
-        const space1 = new factory.Space();
+        const space1 = new modelFactory.Space();
 
         // create the first face from regular points
         Geometry.mutations.createFace(geometryState, {
@@ -224,7 +226,7 @@ describe('mutations', () => {
         });
 
         // create new face with a shared vertex
-        const space2 = new factory.Space();
+        const space2 = new modelFactory.Space();
         Geometry.mutations.createFace(geometryState, {
             geometry: geometry,
             points: f2points,
@@ -265,10 +267,10 @@ describe('mutations', () => {
     it('createFace with shared edge that is not reversed', () => {
         // initialize the state
         const geometryState = [];
-        const geometry = new factory.Geometry();
+        const geometry = new geometryFactory.Geometry();
         Geometry.mutations.initGeometry(geometryState, {
             geometry: geometry,
-            story: new factory.Story()
+            story: new modelFactory.Story()
         });
 
         // set of points for the first face, drawn clockwise
@@ -279,7 +281,7 @@ describe('mutations', () => {
             { x: 50, y: 50 },
             { x: 0, y: 50 }
         ];
-        const space1 = new factory.Space();
+        const space1 = new modelFactory.Space();
 
         // create the first face from regular points
         Geometry.mutations.createFace(geometryState, {
@@ -308,7 +310,7 @@ describe('mutations', () => {
         });
 
         // create new face with a shared vertex
-        const space2 = new factory.Space();
+        const space2 = new modelFactory.Space();
         Geometry.mutations.createFace(geometryState, {
             geometry: geometry,
             points: f2points,
@@ -332,7 +334,13 @@ describe('mutations', () => {
         expect(sharedEdges.length).to.equal(1);
 
         // check that the shared edge is reversed
-        expect(sharedEdges[0].reverse).to.equal(false);
+        const sharedEdgeRef = geometry.faces.find((face) => {
+            return face.id === space2.face_id;
+        }).edgeRefs.find((edgeRef) => {
+            return edgeRef.edge_id === sharedEdges[0].id;
+        })
+
+        expect(sharedEdgeRef.reverse).to.equal(false);
 
         // check that the expected number of vertices, edges, and faces exist
         expect(geometry.vertices.length).to.equal((f2points.length + f1points.length) - 2);

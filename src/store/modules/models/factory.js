@@ -1,9 +1,9 @@
-import helpers from './helpers'
+import generateId from './../../utilities/generateId'
 
 export default {
     Story: function() {
         return {
-            id: helpers.generateId(),
+            id: generateId(),
             name: null,
             handle: null,
             geometry_id: null,
@@ -17,7 +17,7 @@ export default {
     },
     Space: function() {
         return {
-            id: helpers.generateId(),
+            id: generateId(),
             name: null,
             handle: null,
             face_id: null,

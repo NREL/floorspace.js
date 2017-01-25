@@ -1,29 +1,29 @@
-import helpers from './helpers'
+import generateId from './../../utilities/generateId'
 
 export default {
-    Vertex: function(x, y) {
+    Vertex (x, y) {
         return {
-            id: helpers.generateId(),
+            id: generateId(),
             x: x,
             y: y
         }
     },
-    Edge: function(v1, v2) {
+    Edge (v1, v2) {
         return {
-            id: helpers.generateId(),
+            id: generateId(),
             v1: v1,
             v2: v2
         }
     },
-    Face: function(edgeRefs) {
+    Face (edgeRefs) {
         return {
-            id: helpers.generateId(),
+            id: generateId(),
             edgeRefs: edgeRefs
         }
     },
-    Geometry: function() {
+    Geometry () {
         return {
-            'id': helpers.generateId(),
+            'id': generateId(),
             'vertices': [],
             'edges': [],
             'faces': []

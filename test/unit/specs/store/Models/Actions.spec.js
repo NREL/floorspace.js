@@ -1,7 +1,6 @@
 import { expect } from 'chai'
 import Models from '../../../../../src/store/modules/models/index.js'
-import factory from '../../../../../src/store/factory/index.js'
-import testAction from '../helpers/testAction.js'
+import testAction from '../helpers/testAction.js' 
 
 describe('actions', () => {
     it('initStory', () => {

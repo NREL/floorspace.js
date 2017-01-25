@@ -1,11 +1,13 @@
 import { expect } from 'chai'
-import { geometry as Geometry, helpers } from '../../../../../src/store/modules/geometry/index.js'
-import factory from '../../../../../src/store/factory/index.js'
+import Geometry from '../../../../../src/store/modules/geometry/index.js'
+import helpers from '../../../../../src/store/modules/geometry/helpers.js'
+import geometryFactory from '../../../../../src/store/modules/geometry/factory.js'
+import modelFactory from '../../../../../src/store/modules/models/factory.js'
 import testAction from '../helpers/testAction.js'
 
-describe('actions', () => {
+describe('geometry actions', () => {
     it('initGeometry', () => {
-        const story = new factory.Story();
+        const story = new modelFactory.Story();
         testAction(Geometry.actions.initGeometry, {
             story: story
         }, {}, [{
@@ -22,8 +24,8 @@ describe('actions', () => {
     });
 
     it('createFaceFromPoints on a space with no existing face', () => {
-        const geometry = new factory.Geometry();
-        const space = new factory.Space();
+        const geometry = new geometryFactory.Geometry();
+        const space = new modelFactory.Space();
         var context = {
             rootGetters: { 'application/currentStoryGeometry': geometry },
             rootState: {
@@ -55,8 +57,8 @@ describe('actions', () => {
     });
 
     it('createFaceFromPoints on a space with an existing face', () => {
-        const geometry = new factory.Geometry();
-        const space = new factory.Space();
+        const geometry = new geometryFactory.Geometry();
+        const space = new modelFactory.Space();
         space.face_id = 1;
 
         var context = {
@@ -97,13 +99,13 @@ describe('actions', () => {
 
     it('destroyFace with no shared edges or vertices', () => {
         // initialize the state
-        const geometry = new factory.Geometry();
-        const space = new factory.Space();
+        const geometry = new geometryFactory.Geometry();
+        const space = new modelFactory.Space();
 
         // create vertices and edges for the face, store on geometry
         for (var i = 0; i < 4; i++) {
-            const vertex = new factory.Vertex();
-            const edge = new factory.Edge();
+            const vertex = new geometryFactory.Vertex();
+            const edge = new geometryFactory.Edge();
             geometry.vertices.push(vertex);
             geometry.edges.push(edge);
         }
@@ -121,7 +123,7 @@ describe('actions', () => {
         }
 
         // initialize face with edge references, store face on geometry and give space a reference to the face
-        const face = new factory.Face(edgeRefs);
+        const face = new geometryFactory.Face(edgeRefs);
         geometry.faces.push(face);
         space.face_id = face.id;
 
@@ -173,22 +175,22 @@ describe('actions', () => {
 
     it('destroyFace with a shared vertex', () => {
         // initialize the state
-        const geometry = new factory.Geometry();
+        const geometry = new geometryFactory.Geometry();
 
         // create 7 vertices and 8 edges since one vertex is shared, store on geometry
         for (var i = 0; i < 7; i++) {
-            const vertex = new factory.Vertex();
+            const vertex = new geometryFactory.Vertex();
             geometry.vertices.push(vertex);
-            const edge = new factory.Edge();
+            const edge = new geometryFactory.Edge();
             geometry.edges.push(edge);
         }
-        const edge = new factory.Edge();
+        const edge = new geometryFactory.Edge();
         geometry.edges.push(edge);
 
         var edgeRefs = [];
 
         // face 1
-        const space1 = new factory.Space();
+        const space1 = new modelFactory.Space();
         // give each edge a reference to two vertices, store a reference to each edge on the face
         for (var i = 0; i < 4; i++) {
             geometry.edges[i].v1 = geometry.vertices[i].id;
@@ -201,11 +203,11 @@ describe('actions', () => {
         }
 
         // initialize face with edge references, store face on geometry and give space a reference to the face
-        const face1 = new factory.Face(edgeRefs);
+        const face1 = new geometryFactory.Face(edgeRefs);
         geometry.faces.push(face1);
         space1.face_id = face1.id;
 
-        const space2 = new factory.Space();
+        const space2 = new modelFactory.Space();
         // give each edge a reference to two vertices, store a reference to each edge on the face
         edgeRefs = [];
         for (var i = 4; i < 8; i++) {
@@ -219,7 +221,7 @@ describe('actions', () => {
         }
 
         // initialize face with edge references, store face on geometry and give space a reference to the face
-        const face2 = new factory.Face(edgeRefs);
+        const face2 = new geometryFactory.Face(edgeRefs);
         geometry.faces.push(face2);
         space2.face_id = face2.id;
 
@@ -277,22 +279,22 @@ describe('actions', () => {
 
     it('destroyFace with a shared edge', () => {
         // initialize the state
-        const geometry = new factory.Geometry();
+        const geometry = new geometryFactory.Geometry();
 
         // create 6 vertices and 7 edges since two vertices and one edge are shared, store on geometry
         for (var i = 0; i < 7; i++) {
-            const vertex = new factory.Vertex();
+            const vertex = new geometryFactory.Vertex();
             geometry.vertices.push(vertex);
-            const edge = new factory.Edge();
+            const edge = new geometryFactory.Edge();
             geometry.edges.push(edge);
         }
-        const edge = new factory.Edge();
+        const edge = new geometryFactory.Edge();
         geometry.edges.push(edge);
 
         var edgeRefs = [];
 
         // face 1
-        const space1 = new factory.Space();
+        const space1 = new modelFactory.Space();
         // give each edge a reference to two vertices, store a reference to each edge on the face
         for (var i = 0; i < 4; i++) {
             geometry.edges[i].v1 = geometry.vertices[i].id;
@@ -305,11 +307,11 @@ describe('actions', () => {
         }
 
         // initialize face with edge references, store face on geometry and give space a reference to the face
-        const face1 = new factory.Face(edgeRefs);
+        const face1 = new geometryFactory.Face(edgeRefs);
         geometry.faces.push(face1);
         space1.face_id = face1.id;
 
-        const space2 = new factory.Space();
+        const space2 = new modelFactory.Space();
         // give each edge a reference to two vertices, store a reference to each edge on the face
         edgeRefs = [];
         for (var i = 3; i < 7; i++) {
@@ -323,7 +325,7 @@ describe('actions', () => {
         }
 
         // initialize face with edge references, store face on geometry and give space a reference to the face
-        const face2 = new factory.Face(edgeRefs);
+        const face2 = new geometryFactory.Face(edgeRefs);
         geometry.faces.push(face2);
         space2.face_id = face2.id;
 
@@ -394,15 +396,15 @@ describe('actions', () => {
     //     ];
     //
     //     // initialize the state
-    //     const geometry = new factory.Geometry();
-    //     const space = new factory.Space();
+    //     const geometry = new geometryFactory.Geometry();
+    //     const space = new modelFactory.Space();
     //
     //     // create vertices and edges for the face, store on geometry
     //     for (var i = 0; i < 4; i++) {
-    //         const vertex = new factory.Vertex();
+    //         const vertex = new geometryFactory.Vertex();
     //         vertex.x = points[i].x;
     //         vertex.y = points[i].y;
-    //         const edge = new factory.Edge();
+    //         const edge = new geometryFactory.Edge();
     //         geometry.vertices.push(vertex);
     //         geometry.edges.push(edge);
     //     }
@@ -420,7 +422,7 @@ describe('actions', () => {
     //     }
     //
     //     // initialize face with edge references, store face on geometry and give space a reference to the face
-    //     const face = new factory.Face(edgeRefs);
+    //     const face = new geometryFactory.Face(edgeRefs);
     //     geometry.faces.push(face);
     //     space.face_id = face.id;
     //

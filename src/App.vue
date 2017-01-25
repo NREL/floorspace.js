@@ -17,7 +17,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 </template>
 
 <script>
-import factory from './store/factory/index.js'
 
 // this import order is important, if the grid is loaded before the other elements or after the toolbar, it ends up warped
 import Navigation from './components/Navigation'
