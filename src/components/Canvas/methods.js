@@ -3,11 +3,21 @@ export default {
     calcSnap (e) {
         d3.selectAll('#canvas .snap').remove();
 
-        // obtain RWU coordinates of click event
-        var point = {
-            x: this.scaleX(e.offsetX),
-            y: this.scaleY(e.offsetY)
-        };
+        var point;
+        // TODO: is there a way around this?
+        // handle event registering on wrong container
+        if (e.clientX === e.offsetX) {
+            point = {
+                x: this.scaleX(e.offsetX - this.$refs.grid.getBoundingClientRect().left),
+                y: this.scaleY(e.offsetY - this.$refs.grid.getBoundingClientRect().top)
+            };
+        } else {
+            // obtain RWU coordinates of click event
+            point = {
+                x: this.scaleX(e.offsetX),
+                y: this.scaleY(e.offsetY)
+            };
+        }
 
         const vertex = this.snappingVertex(point);
         if (vertex) {
