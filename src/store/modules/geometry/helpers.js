@@ -1,4 +1,4 @@
-export default {
+const helpers =  {
     vertexForId (vertex_id, geometry) {
         return geometry.vertices.find((vertex) => { return vertex.id === vertex_id; });
     },
@@ -8,7 +8,11 @@ export default {
     faceForId (face_id, geometry) {
         return geometry.faces.find((face) => { return face.id === face_id; });
     },
-    edgesForFace () {},
+    edgesForFace (face, geometry) {
+        return face.edgeRefs.map((edgeRef) => {
+            return geometry.edges.find((edge) => { return edge.id === edgeRef.edge_id; });
+        });
+    },
     // the vertices referenced by the edges of a face
     verticesforFace (face, geometry) {
         const vertices = [];
@@ -44,3 +48,29 @@ export default {
         });
     }
 }
+helpers.prettyPrintFace = (face, geometry) => {
+    console.log('face: ', JSON.stringify(face));
+    console.log('edges: ', JSON.stringify(helpers.edgesForFace(face, geometry)));
+    console.log('vertices: ', JSON.stringify(helpers.verticesforFace(face, geometry)));
+}
+
+// TODO: add reverse logic
+helpers.sortEdgesByPolarAngle = (face, geometry) => {
+    const avgX = helpers.verticesforFace(face, geometry).reduce((sum, v) => {
+        return sum + v.x;
+    }, 0) / helpers.verticesforFace(face, geometry).length;
+
+    const avgY = helpers.verticesforFace(face, geometry).reduce((sum, v) => {
+        return sum + v.y;
+    }, 0) / helpers.verticesforFace(face, geometry).length;
+
+    face.edgeRefs.sort((aRef, bRef) => {
+        const aEdge = helpers.edgeForId(aRef.edge_id, geometry),
+            bEdge = helpers.edgeForId(bRef.edge_id, geometry),
+            // use the leading vertex for the edge based on reverse value
+            aV = helpers.vertexForId(aRef.reverse ? aEdge.v2 : aEdge.v1, geometry),
+            bV = helpers.vertexForId(bRef.reverse ? bEdge.v2 : bEdge.v1, geometry);
+        return Math.atan2(aV.x - avgX, aV.y - avgY) > Math.atan2(bV.x - avgX, bV.y - avgY);
+    });
+}
+export default helpers;

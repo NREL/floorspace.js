@@ -9,16 +9,104 @@ export default {
         context.commit('initGeometry', payload);
     },
 
-    splitEdge (context, payload) {
-        const faces = helpers.facesForEdge(payload.edge.id, context.state.geometry);
-        faces.forEach((face) => {
-            const edgeRef = face.edgeRefs.find((edgeRef) => {
-                edgeRef.edge_id === payload.edge.id;
-            });
-            if (edgeRef.reverse) {
+    createFaceFromPoints (context, payload) {
+        // geometry and space for the current story
+        const geometry = context.rootGetters['application/currentStoryGeometry'];
+        const space = context.rootState.application.currentSelections.space;
 
+        // if the space already had an associated face, destroy it
+        if (space.face_id) {
+            context.dispatch('destroyFace', {
+                'geometry': geometry,
+                'space': space
+            });
+        }
+
+        // create the new face
+        context.commit('createFace', {
+            ...payload,
+            'geometry': geometry,
+            'space': space
+        });
+
+        // split any edges that the new face shares with existing faces
+        payload.points.forEach((p, i) => {
+            // when a point is snapped to an edge, this property will be set on the point
+            if (p.splittingEdge) {
+                context.dispatch('splitEdge', {
+                    // the vertex that was created where the edge will be split
+                    vertex: geometry.vertices.find((v) => { return v.x === p.x && v.y === p.y; }),
+                    edge: p.splittingEdge
+                });
             }
         });
+    },
+    splitEdge (context, payload) {
+        const geometry = context.rootGetters['application/currentStoryGeometry'];
+
+        // TODO: figure out reverse/order logic
+        // convert the splitting edge into two new edges
+        var edge1, edge2;
+        // splittingEdge.v1 -> midpoint
+        edge1 = geometry.edges.find((e) => {
+            return e.v1 === payload.edge.v1 && e.v2 === payload.vertex.id ||
+                e.v2 === payload.edge.v1 && e.v1 === payload.vertex.id;
+        });
+        if (!edge1) {
+            edge1 = new factory.Edge();
+            edge1.v1 = payload.edge.v1;
+            edge1.v2 = payload.vertex.id;
+            context.commit('createEdge', {
+                geometry: geometry,
+                edge: edge1
+            });
+        }
+        // midpoint -> splittingEdge.v2
+        edge2 = geometry.edges.find((e) => {
+            return e.v1 === payload.edge.v2 && e.v2 === payload.vertex.id ||
+                e.v2 === payload.edge.v2 && e.v1 === payload.vertex.id;
+        });
+        if (!edge2) {
+            edge2 = new factory.Edge();
+            edge2.v1 = payload.vertex.id;
+            edge2.v2 = payload.edge.v2;
+            context.commit('createEdge', {
+                geometry: geometry,
+                edge: edge2
+            });
+        }
+
+        // look up faces referencing the edge being split
+        const affectedFaces = helpers.facesForEdge(payload.edge.id, geometry);
+
+        affectedFaces.forEach((face) => {
+            context.commit('createEdgeRef', {
+                face: face,
+                edgeRef: {
+                    edge_id: edge1.id,
+                    reverse: false
+                }
+            });
+            context.commit('createEdgeRef', {
+                face: face,
+                edgeRef: {
+                    edge_id: edge2.id,
+                    reverse: false
+                }
+            });
+        });
+
+        // remove references to the edge being split
+        context.commit('destroyEdge', {
+            geometry: geometry,
+            edge_id: payload.edge.id
+        });
+
+        context.commit('sortEdgesByPolarAngle', {
+            face: affectedFaces[0],
+            geometry: geometry
+        });
+        helpers.prettyPrintFace(affectedFaces[0], geometry);
     },
 
     destroyFace (context, payload) {
@@ -59,33 +147,4 @@ export default {
             face_id: expFace.id
         });
     },
-    createFaceFromPoints (context, payload) {
-        // geometry and space for the current story
-        const geometry = context.rootGetters['application/currentStoryGeometry'];
-        const space = context.rootState.application.currentSelections.space;
-
-        // if the space already had an associated face, destroy it
-        if (space.face_id) {
-            context.dispatch('destroyFace', {
-                'geometry': geometry,
-                'space': space
-            });
-        }
-        // payload.points.forEach((p, i) => {
-        //     // when a point is snapped to an edge, this property will be set on the point
-        //     if (p.splittingEdge) {
-        //         this.$store.dispatch('geometry/splitEdge', {
-        //             point: { x: p.x, y: p.y},
-        //             edge: edge.edge
-        //         });
-        //     }
-        // });
-
-
-        context.commit('createFace', {
-            ...payload,
-            'geometry': geometry,
-            'space': space
-        });
-    }
 }

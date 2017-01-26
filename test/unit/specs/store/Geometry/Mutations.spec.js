@@ -71,6 +71,16 @@ describe('mutations', () => {
         // check that edge was created and saved
         expect(geometry.edges.length).to.equal(1);
 
+        // create a face referencing the edge
+        const face = new geometryFactory.Face([{
+            edge_id: edge.id,
+            reverse: false
+        }]);
+        geometry.faces.push(face);
+
+        // check that edge reference was created and saved
+        expect(face.edgeRefs.length).to.equal(1);
+
         // destroy the edge
         Geometry.mutations.destroyEdge(geometryState, {
             geometry: geometry,
@@ -78,6 +88,9 @@ describe('mutations', () => {
         });
         // check that the edge was destroyed
         expect(geometry.edges.length).to.equal(0);
+
+        // check that edge reference on face was destroyed
+        expect(face.edgeRefs.length).to.equal(0);
     });
 
     it('createFace with no shared geometry, destroyFace', () => {
@@ -254,8 +267,7 @@ describe('mutations', () => {
             return face.id === space2.face_id;
         }).edgeRefs.find((edgeRef) => {
             return edgeRef.edge_id === sharedEdges[0].id;
-        })
-        console.log(sharedEdgeRef);
+        });
         expect(sharedEdgeRef.reverse).to.equal(true);
 
         // check that the expected number of vertices, edges, and faces exist

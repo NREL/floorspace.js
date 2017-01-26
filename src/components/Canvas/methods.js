@@ -68,7 +68,7 @@ export default {
             point = edge.scalar;
             // mark the point so that the edge will be split on face creation
             point.splittingEdge = edge.edge;
-            
+
         } else if (this.gridVisible) {
             // round point to nearest gridline if the grid is visible
             point.x = round(this.scaleX(e.offsetX) - xAdjustment, this.x_spacing) + xAdjustment;

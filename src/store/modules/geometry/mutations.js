@@ -1,6 +1,11 @@
 import factory from './factory.js'
+import helpers from './helpers.js'
 
 export default {
+    sortEdgesByPolarAngle (state, payload) {
+        helpers.sortEdgesByPolarAngle(payload.face, payload.geometry);
+    },
+
     // initialize a new geometry object
     // must update the associated story to reference the geometry
     initGeometry (state, payload) {
@@ -12,6 +17,9 @@ export default {
     },
     createEdge (state, payload) {
         payload.geometry.edges.push(payload.edge);
+    },
+    createEdgeRef (state, payload) {
+        payload.face.edgeRefs.push(payload.edgeRef);
     },
     createFace (state, payload) {
         // build arrays of the vertices and edges associated with the face being created
@@ -65,16 +73,19 @@ export default {
         payload.space.face_id = face.id;
     },
 
-    splitEdge (state, payload) {
-        // look up edge
-    },
-
     destroyVertex (state, payload) {
         payload.geometry.vertices.splice(payload.geometry.vertices.findIndex((v) => {
             return v.id === payload.vertex_id;
         }), 1);
     },
     destroyEdge (state, payload) {
+        helpers.facesForEdge(payload.edge_id, payload.geometry).forEach((face) => {
+            // remove references to the edge being destroyed
+            face.edgeRefs.splice(face.edgeRefs.findIndex((edgeRef) => {
+                return edgeRef.edge_id === payload.edge_id;
+            }), 1);
+        });
+
         payload.geometry.edges.splice(payload.geometry.edges.findIndex((e) => {
             return e.id === payload.edge_id;
         }), 1);
