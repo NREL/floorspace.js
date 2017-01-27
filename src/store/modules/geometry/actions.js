@@ -96,17 +96,19 @@ export default {
             });
         });
 
+        // if the face which was originally snapped to still exists, normalize its edges
+        if (affectedFaces[0]) {
+            context.commit('sortEdgesByPolarAngle', {
+                face: affectedFaces[0],
+                geometry: geometry
+            });
+            helpers.prettyPrintFace(affectedFaces[0], geometry);
+        }
         // remove references to the edge being split
         context.commit('destroyEdge', {
             geometry: geometry,
             edge_id: payload.edge.id
         });
-
-        context.commit('sortEdgesByPolarAngle', {
-            face: affectedFaces[0],
-            geometry: geometry
-        });
-        helpers.prettyPrintFace(affectedFaces[0], geometry);
     },
 
     destroyFace (context, payload) {
@@ -146,5 +148,5 @@ export default {
             space: space,
             face_id: expFace.id
         });
-    },
+    }
 }
