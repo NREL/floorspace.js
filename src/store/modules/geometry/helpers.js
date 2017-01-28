@@ -64,6 +64,18 @@ helpers.sortEdgesByPolarAngle = (face, geometry) => {
         return sum + v.y;
     }, 0) / helpers.verticesforFace(face, geometry).length;
 
+    // set reverse
+    face.edgeRefs.forEach((edgeRef, i) => {
+        const prevEdge = helpers.edgeForId(face.edgeRefs[i > 0 ? i - 1 : face.edgeRefs.length - 1].edge_id, geometry),
+            edge = helpers.edgeForId(edgeRef.edge_id, geometry);//,
+            // v1 = helpers.vertexForId(edge.v1, geometry),
+            // v2 = helpers.vertexForId(edge.v2, geometry);
+
+
+        edgeRef.reverse = edge.v1 !== prevEdge.v2;
+        // Math.atan2(v1.x - avgX, v1.y - avgY) > Math.atan2(v2.x - avgX, v2.y - avgY);
+    });
+
     face.edgeRefs.sort((aRef, bRef) => {
         const aEdge = helpers.edgeForId(aRef.edge_id, geometry),
             bEdge = helpers.edgeForId(bRef.edge_id, geometry),

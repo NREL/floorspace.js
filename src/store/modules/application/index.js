@@ -10,6 +10,7 @@ export default {
             // models currently being edited
             story: null,
             space: null,
+
             // active tools
             mode: 'Polygon',
             tool: null

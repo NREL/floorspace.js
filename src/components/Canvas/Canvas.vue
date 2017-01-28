@@ -64,7 +64,7 @@ export default {
         // map all faces for the current story to polygons
         polygons () {
             return this.$store.getters['application/currentStoryGeometry'].faces.map((face) => {
-                // obtain a set of vertices for each face by taking the first vertex from each edge (direction matters here)
+                console.log("face.id:", face.id);
                 return {
                     face_id: face.id,
                     points: face.edgeRefs.map((edgeRef) => {
@@ -74,9 +74,11 @@ export default {
                         });
                         // look up the vertex associated with v1 unless the edge reference on the face is reversed
                         const vertexId = edgeRef.reverse ? edge.v2 : edge.v1;
-                        return this.$store.getters['application/currentStoryGeometry'].vertices.find((v) => {
+                        const vertex =  this.$store.getters['application/currentStoryGeometry'].vertices.find((v) => {
                             return v.id === vertexId;
                         });
+                        console.log('(' + vertex.x + ',' + vertex.y + ')')
+                        return vertex;
                     })
                 };
             });

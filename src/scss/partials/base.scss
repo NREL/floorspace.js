@@ -22,6 +22,9 @@ html, body {
     }
     a {
         color: $primary;
+        &:hover {
+            cursor: pointer;
+        }
     }
 }
 

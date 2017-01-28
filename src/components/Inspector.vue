@@ -8,43 +8,90 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
 <section id="inspector">
-    <h3>Current Story</h3>
-    <div class="input-text">
-        <label>name</label>
-        <input :value="currentStory.name" @change="updatecurrentStory('name', $event)">
+
+    <h3 @click="geometryInspector = !geometryInspector"><a>All Geometry</a></h3>
+    <div v-if="geometryInspector">
+        id: {{ currentStoryGeometry.id }}
+
+        <div v-for="face in currentStoryGeometry.faces">
+            <h3>Face {{ face.id }} {{currentSelectionsFace && currentSelectionsFace.id === face.id ? "(current)" : ""}}</h3>
+            <div v-for="edgeRef in face.edgeRefs">
+                <br>reverse: {{ edgeRef.reverse }}
+                <br>edge: {{ edgeForId(edgeRef.edge_id) }}
+                <br>v1 ({{ edgeForId(edgeRef.edge_id).v1 }}): {{'(' + vertexForId(edgeForId(edgeRef.edge_id).v1).x + ',' + vertexForId(edgeForId(edgeRef.edge_id).v1).y + ')' }} {{ polarAngleForVertex(vertexForId(edgeForId(edgeRef.edge_id).v1), face) }}
+                <br>v2 ({{ edgeForId(edgeRef.edge_id).v2 }}): {{'(' + vertexForId(edgeForId(edgeRef.edge_id).v2).x + ',' + vertexForId(edgeForId(edgeRef.edge_id).v2).y + ')' }} {{ polarAngleForVertex(vertexForId(edgeForId(edgeRef.edge_id).v2), face) }}
+            </div>
+        </div>
     </div>
 
-    <div class="input-text">
-        <label>below_floor_plenum_height</label>
-        <input :value="currentStory.below_floor_plenum_height" @change="updatecurrentStory('below_floor_plenum_height', $event)">
+    <h3 @click="storyInspector = !storyInspector"><a>Current Story</a></h3>
+    <div v-if="storyInspector">
+        <div class="input-text">
+            <label>name</label>
+            <input :value="currentStory.name" @change="updatecurrentStory('name', $event)">
+        </div>
+
+        <div class="input-text">
+            <label>below_floor_plenum_height</label>
+            <input :value="currentStory.below_floor_plenum_height" @change="updatecurrentStory('below_floor_plenum_height', $event)">
+        </div>
+
+        <div class="input-text">
+            <label>floor_to_ceiling_height</label>
+            <input :value="currentStory.floor_to_ceiling_height" @change="updatecurrentStory('floor_to_ceiling_height', $event)">
+        </div>
+
+        <div class="input-text">
+            <label>multiplier</label>
+            <input :value="currentStory.multiplier" @change="updatecurrentStory('multiplier', $event)">
+        </div>
     </div>
 
-    <div class="input-text">
-        <label>floor_to_ceiling_height</label>
-        <input :value="currentStory.floor_to_ceiling_height" @change="updatecurrentStory('floor_to_ceiling_height', $event)">
+    <h3 @click="spaceInspector = !spaceInspector"><a>Current Space</a></h3>
+    <div v-if="spaceInspector">
+        <div class="input-text">
+            <label>name</label>
+            <input :value="currentSpace.name" @change="updatecurrentSpace('name', $event)">
+        </div>
     </div>
 
-    <div class="input-text">
-        <label>multiplier</label>
-        <input :value="currentStory.multiplier" @change="updatecurrentStory('multiplier', $event)">
-    </div>
-
-    <h3>Current Space</h3>
-    <div class="input-text">
-        <label>name</label>
-        <input :value="currentSpace.name" @change="updatecurrentSpace('name', $event)">
-    </div>
 </section>
 </template>
 
 <script>
+
 import { mapState } from 'vuex'
+import helpers from './../store/modules/geometry/helpers'
+
 export default {
     name: 'inspector',
     data() {
-        return {}
+        return {
+            geometryInspector: true,
+            storyInspector: false,
+            spaceInspector: false
+        }
     },
     methods: {
+        edgeForId (edge_id) { return helpers.edgeForId(edge_id, this.currentStoryGeometry); },
+        vertexForId (vertex_id) {
+            const vertex = helpers.vertexForId(vertex_id, this.currentStoryGeometry);
+            return vertex;
+        },
+        polarAngleForVertex (vertex, face) {
+            const geometry = this.currentStoryGeometry;
+
+            const avgX = helpers.verticesforFace(face, geometry).reduce((sum, v) => {
+                return sum + v.x;
+            }, 0) / helpers.verticesforFace(face, geometry).length;
+
+            const avgY = helpers.verticesforFace(face, geometry).reduce((sum, v) => {
+                return sum + v.y;
+            }, 0) / helpers.verticesforFace(face, geometry).length;
+
+            // Math.atan2(v1.x - avgX, v1.y - avgY) > Math.atan2(v2.x - avgX, v2.y - avgY);
+            return Math.atan2(vertex.x - avgX, vertex.y - avgY)
+        },
         updatecurrentStory (key, event) {
             var payload = { story: this.currentStory };
             payload[key] = event.target.value;
@@ -61,6 +108,8 @@ export default {
         }
     },
     computed: {
+        currentSelectionsFace () { return this.$store.getters['application/currentSelectionsFace']; },
+        currentStoryGeometry () { return this.$store.getters['application/currentStoryGeometry']; },
         ...mapState({
             currentStory: state => state.application.currentSelections.story,
             currentSpace: state => state.application.currentSelections.space

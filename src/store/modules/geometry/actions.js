@@ -102,7 +102,6 @@ export default {
                 face: affectedFaces[0],
                 geometry: geometry
             });
-            helpers.prettyPrintFace(affectedFaces[0], geometry);
         }
         // remove references to the edge being split
         context.commit('destroyEdge', {
