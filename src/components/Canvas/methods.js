@@ -2,7 +2,7 @@ var d3 = require('d3');
 export default {
     calcSnap (e) {
         d3.selectAll('#canvas .snap').remove();
-
+        // TODO: HANDLE NEGATIVE COORDS
         var point;
         // TODO: is there a way around this?
         // handle event registering on wrong container
@@ -107,7 +107,7 @@ export default {
             // store the point
             this.points.push(point);
         }
-
+        // TODO: handle negatives
         function round (point, spacing) {
             if (point % spacing < spacing / 2) {
                 return point - (point % spacing);

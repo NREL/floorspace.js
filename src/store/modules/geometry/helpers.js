@@ -67,12 +67,13 @@ helpers.sortEdgesByPolarAngle = (face, geometry) => {
     // set reverse
     face.edgeRefs.forEach((edgeRef, i) => {
         const prevEdge = helpers.edgeForId(face.edgeRefs[i > 0 ? i - 1 : face.edgeRefs.length - 1].edge_id, geometry),
-            edge = helpers.edgeForId(edgeRef.edge_id, geometry);//,
-            // v1 = helpers.vertexForId(edge.v1, geometry),
-            // v2 = helpers.vertexForId(edge.v2, geometry);
+            edge = helpers.edgeForId(edgeRef.edge_id, geometry),
+            v1 = helpers.vertexForId(edge.v1, geometry),
+            v2 = helpers.vertexForId(edge.v2, geometry),
+            v1Angle = -1 / Math.atan2(v1.y - avgY, v1.x - avgX),
+            v2Angle = -1 / Math.atan2(v2.y - avgY, v2.x - avgX);
 
-
-        edgeRef.reverse = edge.v1 !== prevEdge.v2;
+        edgeRef.reverse = v1Angle < v2Angle;
         // Math.atan2(v1.x - avgX, v1.y - avgY) > Math.atan2(v2.x - avgX, v2.y - avgY);
     });
 
@@ -80,9 +81,11 @@ helpers.sortEdgesByPolarAngle = (face, geometry) => {
         const aEdge = helpers.edgeForId(aRef.edge_id, geometry),
             bEdge = helpers.edgeForId(bRef.edge_id, geometry),
             // use the leading vertex for the edge based on reverse value
-            aV = helpers.vertexForId(aRef.reverse ? aEdge.v2 : aEdge.v1, geometry),
-            bV = helpers.vertexForId(bRef.reverse ? bEdge.v2 : bEdge.v1, geometry);
-        return Math.atan2(aV.x - avgX, aV.y - avgY) > Math.atan2(bV.x - avgX, bV.y - avgY);
+            aV = helpers.vertexForId(!aRef.reverse ? aEdge.v2 : aEdge.v1, geometry),
+            bV = helpers.vertexForId(!bRef.reverse ? bEdge.v2 : bEdge.v1, geometry),
+            aVAngle = -1 / Math.atan2(aV.y - avgY, aV.x - avgX),
+            bVAngle = -1 / Math.atan2(bV.y - avgY, bV.x - avgX);
+        return aVAngle < bVAngle;
     });
 }
 export default helpers;

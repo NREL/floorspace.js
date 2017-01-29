@@ -90,7 +90,7 @@ export default {
             }, 0) / helpers.verticesforFace(face, geometry).length;
 
             // Math.atan2(v1.x - avgX, v1.y - avgY) > Math.atan2(v2.x - avgX, v2.y - avgY);
-            return Math.atan2(vertex.x - avgX, vertex.y - avgY)
+            return -1 / Math.atan2(vertex.y - avgY, vertex.x - avgX);
         },
         updatecurrentStory (key, event) {
             var payload = { story: this.currentStory };
