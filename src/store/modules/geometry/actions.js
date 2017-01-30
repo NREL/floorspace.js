@@ -46,16 +46,29 @@ export default {
 
         // TODO: figure out reverse/order logic
         // convert the splitting edge into two new edges
-        var edge1, edge2;
         // splittingEdge.v1 -> midpoint
+        var edge1,
+            // midpoint -> splittingEdge.v2
+            edge2,
+            edge1Reverse,
+            edge2Reverse;
+
+        // if an edge exists with vertices at splittingEdge.v1 and the midpoint, reuse it
         edge1 = geometry.edges.find((e) => {
-            return e.v1 === payload.edge.v1 && e.v2 === payload.vertex.id ||
-                e.v2 === payload.edge.v1 && e.v1 === payload.vertex.id;
+            if (e.v1 === payload.edge.v1 && e.v2 === payload.vertex.id) {
+                edge1Reverse = false;
+                return true;
+            } else if (e.v2 === payload.edge.v1 && e.v1 === payload.vertex.id) {
+                edge1Reverse = true;
+                return true;
+            }
         });
+        // create an edge with vertices at splittingEdge.v1 and the midpoint if it doesn't already exist
         if (!edge1) {
             edge1 = new factory.Edge();
             edge1.v1 = payload.edge.v1;
             edge1.v2 = payload.vertex.id;
+            edge1Reverse = false;
             context.commit('createEdge', {
                 geometry: geometry,
                 edge: edge1
@@ -63,13 +76,19 @@ export default {
         }
         // midpoint -> splittingEdge.v2
         edge2 = geometry.edges.find((e) => {
-            return e.v1 === payload.edge.v2 && e.v2 === payload.vertex.id ||
-                e.v2 === payload.edge.v2 && e.v1 === payload.vertex.id;
+            if (e.v2 === payload.edge.v2 && e.v1 === payload.vertex.id) {
+                edge2Reverse = false;
+                return true;
+            } else if (e.v1 === payload.edge.v2 && e.v2 === payload.vertex.id) {
+                edge2Reverse = true;
+                return true;
+            }
         });
         if (!edge2) {
             edge2 = new factory.Edge();
             edge2.v1 = payload.vertex.id;
             edge2.v2 = payload.edge.v2;
+            edge2Reverse = false;
             context.commit('createEdge', {
                 geometry: geometry,
                 edge: edge2
@@ -84,14 +103,14 @@ export default {
                 face: face,
                 edgeRef: {
                     edge_id: edge1.id,
-                    reverse: false
+                    reverse: edge1Reverse
                 }
             });
             context.commit('createEdgeRef', {
                 face: face,
                 edgeRef: {
                     edge_id: edge2.id,
-                    reverse: false
+                    reverse: edge2Reverse
                 }
             });
         });
@@ -102,13 +121,13 @@ export default {
             edge_id: payload.edge.id
         });
 
-                // if the face which was originally snapped to still exists, normalize its edges
-                if (affectedFaces[0]) {
-                    context.commit('sortEdgesByPolarAngle', {
-                        face: affectedFaces[0],
-                        geometry: geometry
-                    });
-                }
+        // if the face which was originally snapped to still exists, normalize its edges
+        if (affectedFaces[0]) {
+            context.commit('normalizeEdges', {
+                face: affectedFaces[0],
+                geometry: geometry
+            });
+        }
     },
 
     destroyFace (context, payload) {

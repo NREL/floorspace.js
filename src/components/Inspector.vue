@@ -16,10 +16,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <div v-for="face in currentStoryGeometry.faces">
             <h3>Face {{ face.id }} {{currentSelectionsFace && currentSelectionsFace.id === face.id ? "(current)" : ""}}</h3>
             <div v-for="edgeRef in face.edgeRefs">
-                <br>reverse: {{ edgeRef.reverse }}
-                <br>edge: {{ edgeForId(edgeRef.edge_id) }}
-                <br>v1 ({{ edgeForId(edgeRef.edge_id).v1 }}): {{'(' + vertexForId(edgeForId(edgeRef.edge_id).v1).x + ',' + vertexForId(edgeForId(edgeRef.edge_id).v1).y + ')' }} {{ polarAngleForVertex(vertexForId(edgeForId(edgeRef.edge_id).v1), face) }}
-                <br>v2 ({{ edgeForId(edgeRef.edge_id).v2 }}): {{'(' + vertexForId(edgeForId(edgeRef.edge_id).v2).x + ',' + vertexForId(edgeForId(edgeRef.edge_id).v2).y + ')' }} {{ polarAngleForVertex(vertexForId(edgeForId(edgeRef.edge_id).v2), face) }}
+                <br>edge: {{ edgeRef.edge_id }}, reverse: {{ edgeRef.reverse }}
+                <br>startpoint: {{ startpoint(edgeRef) }}
+                <br>endpoint: {{ endpoint(edgeRef) }}
             </div>
         </div>
     </div>
@@ -73,24 +72,30 @@ export default {
         }
     },
     methods: {
+        startpoint (edgeRef) {
+            const edge = this.edgeForId(edgeRef.edge_id);
+            if (edgeRef.reverse) {
+                const vertex = this.vertexForId(edge.v2);
+                return 'v2 ' + vertex.id + ' (' + vertex.x + ',' + vertex.y + ')';
+            } else {
+                const vertex = this.vertexForId(edge.v1);
+                return 'v1 ' + vertex.id + ' (' + vertex.x + ',' + vertex.y + ')';
+            }
+        },
+        endpoint (edgeRef) {
+            const edge = this.edgeForId(edgeRef.edge_id);
+            if (!edgeRef.reverse) {
+                const vertex = this.vertexForId(edge.v2);
+                return 'v2 ' + vertex.id + ' (' + vertex.x + ',' + vertex.y + ')';
+            } else {
+                const vertex = this.vertexForId(edge.v1);
+                return 'v1 ' + vertex.id + ' (' + vertex.x + ',' + vertex.y + ')';
+            }
+        },
         edgeForId (edge_id) { return helpers.edgeForId(edge_id, this.currentStoryGeometry); },
         vertexForId (vertex_id) {
             const vertex = helpers.vertexForId(vertex_id, this.currentStoryGeometry);
             return vertex;
-        },
-        polarAngleForVertex (vertex, face) {
-            const geometry = this.currentStoryGeometry;
-
-            const avgX = helpers.verticesforFace(face, geometry).reduce((sum, v) => {
-                return sum + v.x;
-            }, 0) / helpers.verticesforFace(face, geometry).length;
-
-            const avgY = helpers.verticesforFace(face, geometry).reduce((sum, v) => {
-                return sum + v.y;
-            }, 0) / helpers.verticesforFace(face, geometry).length;
-
-            // Math.atan2(v1.x - avgX, v1.y - avgY) > Math.atan2(v2.x - avgX, v2.y - avgY);
-            return -1 / Math.atan2(vertex.y - avgY, vertex.x - avgX);
         },
         updatecurrentStory (key, event) {
             var payload = { story: this.currentStory };

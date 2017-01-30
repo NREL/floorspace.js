@@ -2,8 +2,8 @@ import factory from './factory.js'
 import helpers from './helpers.js'
 
 export default {
-    sortEdgesByPolarAngle (state, payload) {
-        helpers.sortEdgesByPolarAngle(payload.face, payload.geometry);
+    normalizeEdges (state, payload) {
+        payload.face.edgeRefs = helpers.normalizedEdges(payload.face, payload.geometry);
     },
 
     // initialize a new geometry object

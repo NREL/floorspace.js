@@ -64,7 +64,6 @@ export default {
         // map all faces for the current story to polygons
         polygons () {
             return this.$store.getters['application/currentStoryGeometry'].faces.map((face) => {
-                console.log("face.id:", face.id);
                 return {
                     face_id: face.id,
                     points: face.edgeRefs.map((edgeRef) => {
@@ -77,7 +76,6 @@ export default {
                         const vertex =  this.$store.getters['application/currentStoryGeometry'].vertices.find((v) => {
                             return v.id === vertexId;
                         });
-                        console.log('(' + vertex.x + ',' + vertex.y + ')')
                         return vertex;
                     })
                 };
