@@ -47,12 +47,13 @@ const helpers = {
             });
         });
     }
-}
+};
+
 helpers.prettyPrintFace = (face, geometry) => {
     console.log('face: ', JSON.stringify(face));
     console.log('edges: ', JSON.stringify(helpers.edgesForFace(face, geometry)));
     console.log('vertices: ', JSON.stringify(helpers.verticesforFace(face, geometry)));
-}
+};
 
 helpers.normalizedEdges = (face, geometry) => {
     // initialize the set with the first edge, we assume the reverse property is correctly set for this one
@@ -90,40 +91,6 @@ helpers.normalizedEdges = (face, geometry) => {
         normalizedEdgeRefs.push(nextEdgeRef);
     }
     return normalizedEdgeRefs;
-}
+};
 
-// TODO: add reverse logic
-helpers.sortEdgesByPolarAngle = (face, geometry) => {
-    const avgX = helpers.verticesforFace(face, geometry).reduce((sum, v) => {
-        return sum + v.x;
-    }, 0) / helpers.verticesforFace(face, geometry).length;
-
-    const avgY = helpers.verticesforFace(face, geometry).reduce((sum, v) => {
-        return sum + v.y;
-    }, 0) / helpers.verticesforFace(face, geometry).length;
-
-    // set reverse
-    face.edgeRefs.forEach((edgeRef, i) => {
-        const prevEdge = helpers.edgeForId(face.edgeRefs[i > 0 ? i - 1 : face.edgeRefs.length - 1].edge_id, geometry),
-            edge = helpers.edgeForId(edgeRef.edge_id, geometry),
-            v1 = helpers.vertexForId(edge.v1, geometry),
-            v2 = helpers.vertexForId(edge.v2, geometry),
-            v1Angle = -1 / Math.atan2(v1.y - avgY, v1.x - avgX),
-            v2Angle = -1 / Math.atan2(v2.y - avgY, v2.x - avgX);
-
-        edgeRef.reverse = v1Angle < v2Angle;
-        // Math.atan2(v1.x - avgX, v1.y - avgY) > Math.atan2(v2.x - avgX, v2.y - avgY);
-    });
-
-    face.edgeRefs.sort((aRef, bRef) => {
-        const aEdge = helpers.edgeForId(aRef.edge_id, geometry),
-            bEdge = helpers.edgeForId(bRef.edge_id, geometry),
-            // use the leading vertex for the edge based on reverse value
-            aV = helpers.vertexForId(!aRef.reverse ? aEdge.v2 : aEdge.v1, geometry),
-            bV = helpers.vertexForId(!bRef.reverse ? bEdge.v2 : bEdge.v1, geometry),
-            aVAngle = -1 / Math.atan2(aV.y - avgY, aV.x - avgX),
-            bVAngle = -1 / Math.atan2(bV.y - avgY, bV.x - avgX);
-        return aVAngle < bVAngle;
-    });
-}
 export default helpers;

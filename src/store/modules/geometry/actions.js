@@ -32,7 +32,8 @@ export default {
         // split any edges that the new face shares with existing faces
         payload.points.forEach((p, i) => {
             // when a point is snapped to an edge, this property will be set on the point
-            if (p.splittingEdge) {
+            // make sure the edge being split still exists and wasn't destroyed in the earlier 'destroyFace' dispatch
+            if (p.splittingEdge && ~geometry.edges.indexOf(p.splittingEdge)) {
                 context.dispatch('splitEdge', {
                     // the vertex that was created where the edge will be split
                     vertex: geometry.vertices.find((v) => { return v.x === p.x && v.y === p.y; }),
@@ -41,25 +42,17 @@ export default {
             }
         });
     },
+
+    // convert the splitting edge into two new edges
     splitEdge (context, payload) {
         const geometry = context.rootGetters['application/currentStoryGeometry'];
 
-        // TODO: figure out reverse/order logic
-        // convert the splitting edge into two new edges
         // splittingEdge.v1 -> midpoint
-        var edge1,
-            // midpoint -> splittingEdge.v2
-            edge2,
-            edge1Reverse,
-            edge2Reverse;
-
         // if an edge exists with vertices at splittingEdge.v1 and the midpoint, reuse it
-        edge1 = geometry.edges.find((e) => {
+        var edge1 = geometry.edges.find((e) => {
             if (e.v1 === payload.edge.v1 && e.v2 === payload.vertex.id) {
-                edge1Reverse = false;
                 return true;
             } else if (e.v2 === payload.edge.v1 && e.v1 === payload.vertex.id) {
-                edge1Reverse = true;
                 return true;
             }
         });
@@ -68,19 +61,17 @@ export default {
             edge1 = new factory.Edge();
             edge1.v1 = payload.edge.v1;
             edge1.v2 = payload.vertex.id;
-            edge1Reverse = false;
             context.commit('createEdge', {
                 geometry: geometry,
                 edge: edge1
             });
         }
+
         // midpoint -> splittingEdge.v2
-        edge2 = geometry.edges.find((e) => {
+        var edge2 = geometry.edges.find((e) => {
             if (e.v2 === payload.edge.v2 && e.v1 === payload.vertex.id) {
-                edge2Reverse = false;
                 return true;
             } else if (e.v1 === payload.edge.v2 && e.v2 === payload.vertex.id) {
-                edge2Reverse = true;
                 return true;
             }
         });
@@ -88,7 +79,6 @@ export default {
             edge2 = new factory.Edge();
             edge2.v1 = payload.vertex.id;
             edge2.v2 = payload.edge.v2;
-            edge2Reverse = false;
             context.commit('createEdge', {
                 geometry: geometry,
                 edge: edge2
@@ -103,14 +93,14 @@ export default {
                 face: face,
                 edgeRef: {
                     edge_id: edge1.id,
-                    reverse: edge1Reverse
+                    reverse: false
                 }
             });
             context.commit('createEdgeRef', {
                 face: face,
                 edgeRef: {
                     edge_id: edge2.id,
-                    reverse: edge2Reverse
+                    reverse: false
                 }
             });
         });
@@ -121,13 +111,13 @@ export default {
             edge_id: payload.edge.id
         });
 
-        // if the face which was originally snapped to still exists, normalize its edges
-        if (affectedFaces[0]) {
+        // if the faces which were originally snapped to still exist, normalize their edges
+        affectedFaces.forEach((affectedFace) => {
             context.commit('normalizeEdges', {
-                face: affectedFaces[0],
+                face: affectedFace,
                 geometry: geometry
             });
-        }
+        });
     },
 
     destroyFace (context, payload) {
