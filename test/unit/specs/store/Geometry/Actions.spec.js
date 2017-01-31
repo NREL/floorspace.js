@@ -59,6 +59,7 @@ describe('geometry actions', () => {
     it('createFaceFromPoints on a space with an existing face', () => {
         const geometry = new geometryFactory.Geometry();
         const space = new modelFactory.Space();
+        // mock existing face
         space.face_id = 1;
 
         var context = {
@@ -94,7 +95,7 @@ describe('geometry actions', () => {
                 expect(payload.geometry).to.equal(geometry);
                 expect(payload.space).to.equal(space);
             }
-        }])
+        }]);
     });
 
     it('destroyFace with no shared edges or vertices', () => {
@@ -170,7 +171,7 @@ describe('geometry actions', () => {
         testAction(Geometry.actions.destroyFace, {
             geometry: geometry,
             space: space
-        }, context, expectedMutations)
+        }, context, expectedMutations, []);
     });
 
     it('destroyFace with a shared vertex', () => {
@@ -274,7 +275,7 @@ describe('geometry actions', () => {
         testAction(Geometry.actions.destroyFace, {
             geometry: geometry,
             space: space1
-        }, context, expectedMutations);
+        }, context, expectedMutations, []);
     });
 
     it('destroyFace with a shared edge', () => {
@@ -379,7 +380,7 @@ describe('geometry actions', () => {
         testAction(Geometry.actions.destroyFace, {
             geometry: geometry,
             space: space1
-        }, context, expectedMutations);
+        }, context, expectedMutations, []);
     });
 
     it('splitEdge with a point on the edge', () => {
@@ -479,8 +480,72 @@ describe('geometry actions', () => {
                     expect(payload.face).to.equal(face);
                 }
             }
-        ], [])
+        ], []);
     });
 
-    // it('fail to splitEdge with a point not on the edge', () => {});
+    it('createFaceFromPoints by snapping to another face at one point', () => {
+        const geometry = new geometryFactory.Geometry();
+        const space = new modelFactory.Space();
+
+        var context = {
+            rootGetters: { 'application/currentStoryGeometry': geometry },
+            rootState: {
+                application: {
+                    currentSelections: { space: space }
+                }
+            }
+        };
+
+        // create existing face to snap against
+        const points = [
+            { x: 0, y: 0 },
+            { x: 0, y: 50 },
+            { x: 50, y: 50 },
+            { x: 50, y: 0 }
+        ];
+        geometry.vertices = points.map((p) => { return new geometryFactory.Vertex(p.x, p.y); });
+        for (var i = 0; i < geometry.vertices.length; i++) {
+            geometry.edges.push(new geometryFactory.Edge(geometry.vertices[i], geometry.vertices[i < geometry.vertices.length - 1 ? i + i : 0]));
+        }
+        const face = new geometryFactory.Face(geometry.edges.map((edge) => {
+            return {
+                edge_id: edge.id,
+                reverse: false
+            };
+        }));
+
+        // points for new face
+        const newPoints = [
+            { x: 50, y: 0 },
+            { x: 50, y: 25, splittingEdge: geometry.edges[2] },
+            { x: 75, y: 25 },
+            { x: 75, y: 0 }
+        ];
+
+        newPoints.forEach((p) => { geometry.vertices.push(new geometryFactory.Vertex(p.x, p.y)); });
+
+        testAction(Geometry.actions.createFaceFromPoints, {
+            geometry: geometry,
+            space: space,
+            points: newPoints
+        }, context, [{
+            type: 'createFace',
+            testPayload (payload) {
+                expect(payload.geometry).to.equal(geometry);
+                expect(payload.points).to.equal(newPoints);
+                expect(payload.space).to.equal(space);
+            }
+        }], [{
+            type: 'splitEdge',
+            testPayload (payload) {
+                expect(payload.vertex.x).to.equal(50);
+                expect(payload.vertex.y).to.equal(25);
+                expect(payload.edge).to.equal(geometry.edges[2]);
+            }
+        }]);
+    });
+
+    it('createFaceFromPoints by snapping to another face at two points', () => {
+
+    });
 });

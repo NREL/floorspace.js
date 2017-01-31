@@ -39,4 +39,6 @@ export default function testAction (action, payload, context, expectedMutations,
     });
     // call the action with mocked store and arguments
     action(mockedContext, payload);
+    expect(mutationCount).to.equal(expectedMutations.length);
+    expect(actionCount).to.equal(expectedActions.length);
 }

@@ -48,15 +48,10 @@ export default {
         const geometry = context.rootGetters['application/currentStoryGeometry'];
 
         // splittingEdge.v1 -> midpoint
-        // if an edge exists with vertices at splittingEdge.v1 and the midpoint, reuse it
+        // prevent duplicate edges
         var edge1 = geometry.edges.find((e) => {
-            if (e.v1 === payload.edge.v1 && e.v2 === payload.vertex.id) {
-                return true;
-            } else if (e.v2 === payload.edge.v1 && e.v1 === payload.vertex.id) {
-                return true;
-            }
+            return (e.v1 === payload.edge.v1 && e.v2 === payload.vertex.id) || (e.v2 === payload.edge.v1 && e.v1 === payload.vertex.id);
         });
-        // create an edge with vertices at splittingEdge.v1 and the midpoint if it doesn't already exist
         if (!edge1) {
             edge1 = new factory.Edge();
             edge1.v1 = payload.edge.v1;
@@ -68,12 +63,9 @@ export default {
         }
 
         // midpoint -> splittingEdge.v2
+        // prevent duplicate edges
         var edge2 = geometry.edges.find((e) => {
-            if (e.v2 === payload.edge.v2 && e.v1 === payload.vertex.id) {
-                return true;
-            } else if (e.v1 === payload.edge.v2 && e.v2 === payload.vertex.id) {
-                return true;
-            }
+            return (e.v2 === payload.edge.v2 && e.v1 === payload.vertex.id) || (e.v1 === payload.edge.v2 && e.v2 === payload.vertex.id);
         });
         if (!edge2) {
             edge2 = new factory.Edge();
@@ -85,9 +77,11 @@ export default {
             });
         }
 
+        // TODO: it will be impossible for multiple faces to be referecing the same edge (with the same two vertices)
+        // once we prevent overlapping faces, so this code wont be needed
+
         // look up faces referencing the edge being split
         const affectedFaces = helpers.facesForEdge(payload.edge.id, geometry);
-
         affectedFaces.forEach((face) => {
             context.commit('createEdgeRef', {
                 face: face,
