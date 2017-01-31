@@ -14,8 +14,11 @@ export default {
         const geometry = context.rootGetters['application/currentStoryGeometry'];
         const space = context.rootState.application.currentSelections.space;
 
-        // if the space already had an associated face, destroy it
+        // if the space already had an associated face
         if (space.face_id) {
+            // if the new face intersects the existing face, use their union
+            
+            // destroy it if the new face doesn't intersect it
             context.dispatch('destroyFace', {
                 'geometry': geometry,
                 'space': space

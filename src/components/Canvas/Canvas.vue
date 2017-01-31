@@ -73,10 +73,9 @@ export default {
                         });
                         // look up the vertex associated with v1 unless the edge reference on the face is reversed
                         const vertexId = edgeRef.reverse ? edge.v2 : edge.v1;
-                        const vertex =  this.$store.getters['application/currentStoryGeometry'].vertices.find((v) => {
+                        return this.$store.getters['application/currentStoryGeometry'].vertices.find((v) => {
                             return v.id === vertexId;
                         });
-                        return vertex;
                     })
                 };
             });
@@ -86,6 +85,10 @@ export default {
         gridVisible () { this.drawGrid(); },
         // reset points if drawing mode changes
         currentMode () { this.points = []; },
+        currentSpace() {
+            this.points = [];
+            this.drawPolygons();
+        },
         // if the  dimensions or spacing of the grid is altered, redraw it
         viewbox () {
             this.drawGrid();
@@ -93,8 +96,6 @@ export default {
         },
         x_spacing () { this.drawGrid(); },
         y_spacing () { this.drawGrid(); },
-
-        currentSpace() { this.drawPolygons(); },
         polygons () { this.drawPolygons(); },
         points () { this.drawPoints(); }
     },
