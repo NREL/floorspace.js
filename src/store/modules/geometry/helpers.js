@@ -36,13 +36,18 @@ const helpers = {
             });
         });
     },
-    unionOfFaces (face1, face2, geometry) {
+    unionOfFaces (face1, paths, geometry) {
         const cpr = new ClipperLib.Clipper(),
             // TODO: if there are holes, just pass them in as additional subject/clip paths
-            subj_paths = [this.verticesforFace(face1, geometry)],
-            clip_paths = [this.verticesforFace(face2, geometry)];
+            subj_paths = JSON.parse(JSON.stringify([this.verticesforFace(face1, geometry)])),
+            clip_paths = JSON.parse(JSON.stringify([paths.slice()])); // [this.verticesforFace(face2, geometry)];
         console.log(JSON.stringify(subj_paths));
         console.log(JSON.stringify(clip_paths));
+
+        // TODO: this scaling feature could be useful for snapping
+        var scale = 100000;
+        ClipperLib.JS.ScaleUpPaths(subj_paths, scale);
+        ClipperLib.JS.ScaleUpPaths(clip_paths, scale);
 
         cpr.AddPaths(subj_paths, ClipperLib.PolyType.ptSubject, true);  // true means closed path
         cpr.AddPaths(clip_paths, ClipperLib.PolyType.ptClip, true);
@@ -51,7 +56,7 @@ const helpers = {
         cpr.Execute(ClipperLib.ClipType.ctUnion, solution_paths, ClipperLib.PolyFillType.pftNonZero, ClipperLib.PolyFillType.pftNonZero);
 
         console.log(JSON.stringify(solution_paths));
-        return solution_paths[0].map((p) => { return {x: p.X, y: p.Y}; });
+        return solution_paths[0].map((p) => { return {x: p.X / scale, y: p.Y / scale}; });
     },
 
     /*
