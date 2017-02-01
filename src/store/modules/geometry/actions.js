@@ -16,8 +16,10 @@ export default {
 
         // if the space already had an associated face
         if (space.face_id) {
-            // if the new face intersects the existing face, use their union
-            
+            // use the union if the new face intersects the existing face
+            debugger;
+            // use the union if the new face is snapped to the existing face
+
             // destroy it if the new face doesn't intersect it
             context.dispatch('destroyFace', {
                 'geometry': geometry,

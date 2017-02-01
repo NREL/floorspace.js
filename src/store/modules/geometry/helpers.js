@@ -1,4 +1,51 @@
+import ClipperLib from 'js-clipper'
+var cpr = new ClipperLib.Clipper();
+
 const helpers = {
+    clipperPathToSvgPath (paths, scale) {
+        var svgpath = '', i, j;
+        if (!scale) {
+            scale = 1;
+        }
+
+        for (i = 0; i < paths.length; i++) {
+            for (j = 0; j < paths[i].length; j++) {
+                if (!j) {
+                    svgpath += 'M';
+                } else {
+                    svgpath += 'L';
+                }
+
+                svgpath += (paths[i][j].X / scale) + ', ' + (paths[i][j].Y / scale);
+            }
+            svgpath += 'Z';
+        }
+
+        if (svgpath === '') {
+            svgpath = 'M0,0';
+        }
+        return svgpath;
+    },
+    faceToClipperPath (face, geometry) {
+        return face.edgeRefs.map((edgeRef) => {
+            // look up the edge referenced by the face
+            const edge = geometry.edges.find((e) => {
+                return e.id === edgeRef.edge_id;
+            });
+            // look up the vertex associated with v1 unless the edge reference on the face is reversed
+            const vertexId = edgeRef.reverse ? edge.v2 : edge.v1;
+            const vertex = geometry.vertices.find((v) => {
+                return v.id === vertexId;
+            });
+            return {
+                X: vertex.x,
+                Y: vertex.y
+            };
+        });
+    },
+    unionOfFaces (face1, face2, geometry) {
+
+    },
     vertexForId (vertex_id, geometry) {
         return geometry.vertices.find((vertex) => { return vertex.id === vertex_id; });
     },
