@@ -1,22 +1,18 @@
 import ClipperLib from 'js-clipper'
-var cpr = new ClipperLib.Clipper();
 
 const helpers = {
-    clipperPathToSvgPath (paths, scale) {
-        var svgpath = '', i, j;
-        if (!scale) {
-            scale = 1;
-        }
-
-        for (i = 0; i < paths.length; i++) {
-            for (j = 0; j < paths[i].length; j++) {
-                if (!j) {
-                    svgpath += 'M';
-                } else {
-                    svgpath += 'L';
-                }
-
-                svgpath += (paths[i][j].X / scale) + ', ' + (paths[i][j].Y / scale);
+    /*
+    * clipper helpers
+    */
+    // convert a set of clipper vertices to an SVG path string
+    clipperPathToSvgPath (paths) {
+        var svgpath = '';
+        // loop through each polygon
+        for (var i = 0; i < paths.length; i++) {
+            // loop through each vertex
+            for (var j = 0; j < paths[i].length; j++) {
+                svgpath += j ? 'L' : 'M';
+                svgpath += paths[i][j].X + ', ' + paths[i][j].Y;
             }
             svgpath += 'Z';
         }
@@ -26,6 +22,7 @@ const helpers = {
         }
         return svgpath;
     },
+    // obtain a set of ordered vertices for the face
     faceToClipperPath (face, geometry) {
         return face.edgeRefs.map((edgeRef) => {
             // look up the edge referenced by the face
@@ -34,18 +31,32 @@ const helpers = {
             });
             // look up the vertex associated with v1 unless the edge reference on the face is reversed
             const vertexId = edgeRef.reverse ? edge.v2 : edge.v1;
-            const vertex = geometry.vertices.find((v) => {
+            return geometry.vertices.find((v) => {
                 return v.id === vertexId;
             });
-            return {
-                X: vertex.x,
-                Y: vertex.y
-            };
         });
     },
     unionOfFaces (face1, face2, geometry) {
+        const cpr = new ClipperLib.Clipper(),
+            // TODO: if there are holes, just pass them in as additional subject/clip paths
+            subj_paths = [this.verticesforFace(face1, geometry)],
+            clip_paths = [this.verticesforFace(face2, geometry)];
+        console.log(JSON.stringify(subj_paths));
+        console.log(JSON.stringify(clip_paths));
 
+        cpr.AddPaths(subj_paths, ClipperLib.PolyType.ptSubject, true);  // true means closed path
+        cpr.AddPaths(clip_paths, ClipperLib.PolyType.ptClip, true);
+
+        var solution_paths = new ClipperLib.Paths();
+        cpr.Execute(ClipperLib.ClipType.ctUnion, solution_paths, ClipperLib.PolyFillType.pftNonZero, ClipperLib.PolyFillType.pftNonZero);
+
+        console.log(JSON.stringify(solution_paths));
+        return solution_paths[0].map((p) => { return {x: p.X, y: p.Y}; });
     },
+
+    /*
+    * lookup helpers
+    */
     vertexForId (vertex_id, geometry) {
         return geometry.vertices.find((vertex) => { return vertex.id === vertex_id; });
     },
@@ -93,51 +104,47 @@ const helpers = {
                 return edgeRef.edge_id === edge_id;
             });
         });
+    },
+    /*
+    * run through all edges on a face, sort them, and set the reverse property logically
+    */
+    normalizedEdges (face, geometry) {
+        // initialize the set with the first edge, we assume the reverse property is correctly set for this one
+        // TODO: how do we know the startpoint for the first edge?
+        const normalizedEdgeRefs = [];
+        normalizedEdgeRefs.push(face.edgeRefs[0]);
+
+        // there will be exactly two edges on the face referencing each vertex
+        for (var i = 0; i < face.edgeRefs.length - 1; i++) {
+            const currentEdgeRef = normalizedEdgeRefs[i];
+            const currentEdge = this.edgeForId(currentEdgeRef.edge_id, geometry);
+
+            // each edgeref's edge will have a startpoint and an endpoint, v1 or v2 depending on the reverse property
+            // edge.startpoint = edgeref.reverse ? edge.v2 : edge.v1;
+            const currentEdgeEndpoint = currentEdgeRef.reverse ? currentEdge.v1 : currentEdge.v2;
+
+            var nextEdgeRefIsReversed;
+            // look up the other edge with a reference to the endpoitnt on the current edge
+            const nextEdgeRef = face.edgeRefs.find((edgeRef) => {
+                // the current edge will also have a reference to the current edge endpoint, don't return that one
+                if (edgeRef.edge_id === currentEdge.id) { return; }
+
+                const nextEdge = this.edgeForId(edgeRef.edge_id, geometry);
+                if (nextEdge.v1 === currentEdgeEndpoint) {
+                    nextEdgeRefIsReversed = false;
+                    return true;
+                } else if (nextEdge.v2 === currentEdgeEndpoint) {
+                    nextEdgeRefIsReversed = true;
+                    return true;
+                }
+            });
+            // set the reverse property on the next edge depending on whether its v1 or v2 references the endpoint of the current edge
+            // we want the startpoint of the next edge to be the endpoint of the currentEdge
+            nextEdgeRef.reverse = nextEdgeRefIsReversed;
+            normalizedEdgeRefs.push(nextEdgeRef);
+        }
+        return normalizedEdgeRefs;
     }
-};
-
-helpers.prettyPrintFace = (face, geometry) => {
-    console.log('face: ', JSON.stringify(face));
-    console.log('edges: ', JSON.stringify(helpers.edgesForFace(face, geometry)));
-    console.log('vertices: ', JSON.stringify(helpers.verticesforFace(face, geometry)));
-};
-
-helpers.normalizedEdges = (face, geometry) => {
-    // initialize the set with the first edge, we assume the reverse property is correctly set for this one
-    // TODO: how do we know the startpoint for the first edge?
-    const normalizedEdgeRefs = [];
-    normalizedEdgeRefs.push(face.edgeRefs[0]);
-
-    // there will be exactly two edges on the face referencing each vertex
-    for (var i = 0; i < face.edgeRefs.length - 1; i++) {
-        const currentEdgeRef = normalizedEdgeRefs[i];
-        const currentEdge = helpers.edgeForId(currentEdgeRef.edge_id, geometry);
-
-        // each edgeref's edge will have a startpoint and an endpoint, v1 or v2 depending on the reverse property
-        // edge.startpoint = edgeref.reverse ? edge.v2 : edge.v1;
-        const currentEdgeEndpoint = currentEdgeRef.reverse ? currentEdge.v1 : currentEdge.v2;
-
-        var nextEdgeRefIsReversed;
-        // look up the other edge with a reference to the endpoitnt on the current edge
-        const nextEdgeRef = face.edgeRefs.find((edgeRef) => {
-            // the current edge will also have a reference to the current edge endpoint, don't return that one
-            if (edgeRef.edge_id === currentEdge.id) { return; }
-
-            const nextEdge = helpers.edgeForId(edgeRef.edge_id, geometry);
-            if (nextEdge.v1 === currentEdgeEndpoint) {
-                nextEdgeRefIsReversed = false;
-                return true;
-            } else if (nextEdge.v2 === currentEdgeEndpoint) {
-                nextEdgeRefIsReversed = true;
-                return true;
-            }
-        });
-        // set the reverse property on the next edge depending on whether its v1 or v2 references the endpoint of the current edge
-        // we want the startpoint of the next edge to be the endpoint of the currentEdge
-        nextEdgeRef.reverse = nextEdgeRefIsReversed;
-        normalizedEdgeRefs.push(nextEdgeRef);
-    }
-    return normalizedEdgeRefs;
 };
 
 export default helpers;

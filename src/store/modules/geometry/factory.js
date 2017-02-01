@@ -5,7 +5,9 @@ export default {
         return {
             id: generateId(),
             x: x,
-            y: y
+            y: y,
+            get X () { return this.x; },
+            get Y () { return this.y; }
         }
     },
     Edge (v1, v2) {

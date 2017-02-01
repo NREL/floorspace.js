@@ -16,8 +16,19 @@ export default {
 
         // if the space already had an associated face
         if (space.face_id) {
+            // original face
+            const originalFace = helpers.faceForId(space.face_id, geometry);
+            // create the new face
+            context.commit('createFace', {
+                'points': payload.points,
+                'geometry': geometry,
+                'space': space
+            });
+            // original face
+            const newFace = helpers.faceForId(space.face_id, geometry);
             // use the union if the new face intersects the existing face
-            debugger;
+            const unionPoints = helpers.unionOfFaces(originalFace, newFace, geometry);
+
             // use the union if the new face is snapped to the existing face
 
             // destroy it if the new face doesn't intersect it
@@ -25,6 +36,13 @@ export default {
                 'geometry': geometry,
                 'space': space
             });
+            // create the new face
+            context.commit('createFace', {
+                'points': unionPoints,
+                'geometry': geometry,
+                'space': space
+            });
+            return;
         }
 
         // create the new face
@@ -118,7 +136,7 @@ export default {
             });
         });
     },
-
+    // TODO: why does this take a space and not a face?
     destroyFace (context, payload) {
         const geometry = payload.geometry;
         const space = payload.space;
