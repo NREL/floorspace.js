@@ -14,16 +14,17 @@ export default {
         const geometry = context.rootGetters['application/currentStoryGeometry'];
         const space = context.rootState.application.currentSelections.space;
 
+        var points = payload.points;
+
         // if the space already had an associated face
         if (space.face_id) {
             // original face
             const originalFace = helpers.faceForId(space.face_id, geometry);
             const clipperPaths = payload.points.map((p) => { return { X: p.x, Y: p.y }; })
-            var newPoints = payload.points;
 
             // use the union if the new face intersects the existing face
             if (helpers.intersectionOfFaces(originalFace, clipperPaths, geometry)) {
-                newPoints = helpers.unionOfFaces(originalFace, clipperPaths, geometry);
+                points = helpers.unionOfFaces(originalFace, clipperPaths, geometry);
             }
 
             // TODO: handle negatives
@@ -34,19 +35,11 @@ export default {
                 'geometry': geometry,
                 'space': space
             });
-
-            // create the new face
-            context.commit('createFace', {
-                'points': newPoints,
-                'geometry': geometry,
-                'space': space
-            });
-            return;
         }
 
         // create the new face
         context.commit('createFace', {
-            ...payload,
+            'points': points,
             'geometry': geometry,
             'space': space
         });
