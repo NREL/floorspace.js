@@ -63,20 +63,20 @@ const helpers = {
                     x: p.X / this.clipScale(),
                     y: p.Y / this.clipScale()
                 };
-            })
+            });
         }
     },
     unionOfFaces (face1, paths, geometry) {
         const cpr = this.initClip(face1, paths, geometry)
         var union = new ClipperLib.Paths();
-        cpr.Execute(ClipperLib.ClipType.ctUnion, union, ClipperLib.PolyFillType.pftPositive, ClipperLib.PolyFillType.pftPositive);
+        cpr.Execute(ClipperLib.ClipType.ctUnion, union, ClipperLib.PolyFillType.pftEvenOdd, ClipperLib.PolyFillType.pftEvenOdd);
         if (union.length && union[0].length) {
             return union[0].map((p) => {
                 return {
                     x: p.X / this.clipScale(),
                     y: p.Y / this.clipScale()
                 };
-            })
+            });
         }
     },
 

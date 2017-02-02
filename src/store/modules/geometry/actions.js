@@ -20,12 +20,14 @@ export default {
             const originalFace = helpers.faceForId(space.face_id, geometry);
             const clipperPaths = payload.points.map((p) => { return { X: p.x, Y: p.y }; })
             var newPoints = payload.points;
+
             // use the union if the new face intersects the existing face
             if (helpers.intersectionOfFaces(originalFace, clipperPaths, geometry)) {
                 newPoints = helpers.unionOfFaces(originalFace, clipperPaths, geometry);
             }
 
-            // use the union if the new face is snapped to the existing face
+            // TODO: handle negatives
+            // TODO: use the union if the new face is snapped to the existing face
 
             // destroy it if the new face doesn't intersect it
             context.dispatch('destroyFace', {

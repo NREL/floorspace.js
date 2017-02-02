@@ -16,7 +16,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <div v-for="face in currentStoryGeometry.faces">
             <h3>Face {{ face.id }} {{currentSelectionsFace && currentSelectionsFace.id === face.id ? "(current)" : ""}}</h3>
             <div v-for="edgeRef in face.edgeRefs">
-                <br>edge: {{ edgeRef.edge_id }}, reverse: {{ edgeRef.reverse }}
+                <br>edge: {{ edgeRef.edge_id }}, reverse: {{ edgeRef.reverse }}, shared: {{ edgeForId(edgeRef.edge_id).isShared(currentStoryGeometry) }}
                 <br>startpoint: {{ startpoint(edgeRef) }}
                 <br>endpoint: {{ endpoint(edgeRef) }}
             </div>

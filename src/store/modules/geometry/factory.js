@@ -1,4 +1,5 @@
 import generateId from './../../utilities/generateId'
+import helpers from './helpers'
 
 export default {
     Vertex (x, y) {
@@ -14,7 +15,8 @@ export default {
         return {
             id: generateId(),
             v1: v1,
-            v2: v2
+            v2: v2,
+            isShared (geometry) { return helpers.facesForEdge(this.id, geometry).length > 1; }
         }
     },
     Face (edgeRefs) {
