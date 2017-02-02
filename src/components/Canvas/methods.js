@@ -4,15 +4,14 @@ export default {
         d3.selectAll('#canvas .snap').remove();
         // TODO: HANDLE NEGATIVE COORDS
         var point;
-        // TODO: is there a way around this?
-        // handle event registering on wrong container
         if (e.clientX === e.offsetX) {
+            // when the user hovers over certain SVG child nodes, event locations are incorrect
+            // adjust the offset value by the position of the canvas
             point = {
                 x: this.scaleX(e.offsetX - this.$refs.grid.getBoundingClientRect().left),
                 y: this.scaleY(e.offsetY - this.$refs.grid.getBoundingClientRect().top)
             };
         } else {
-            // obtain RWU coordinates of click event
             point = {
                 x: this.scaleX(e.offsetX),
                 y: this.scaleY(e.offsetY)
@@ -107,13 +106,20 @@ export default {
             // store the point
             this.points.push(point);
         }
-        // TODO: handle negatives
+        
         function round (point, spacing) {
+            var result,
+                sign = point < 0 ? -1 : 1;
+            point = Math.abs(point);
             if (point % spacing < spacing / 2) {
-                return point - (point % spacing);
+                result = point - (point % spacing);
             } else {
-                return point + spacing - (point % spacing);
+                result = point + spacing - (point % spacing);
             }
+            // handle negatives
+            result *= sign;
+            // floating point precision
+            return Math.round(result * 10000000000000) / 10000000000000;
         }
     },
 
