@@ -36,45 +36,48 @@ const helpers = {
             });
         });
     },
-    intersectionOfFaces (face1, paths, geometry) {
+    clipScale () {
+        // TODO: this scaling feature could be useful for snapping, could calculate based on grid settings
+        return 100000;
+    },
+    initClip (face1, paths, geometry) {
         const cpr = new ClipperLib.Clipper(),
-            // TODO: if there are holes, just pass them in as additional subject/clip paths
+            // TODO: when we add support for holes, pass them in as additional subject/clip paths
             subj_paths = JSON.parse(JSON.stringify([this.verticesforFace(face1, geometry)])),
-            clip_paths = JSON.parse(JSON.stringify([paths.slice()])); // [this.verticesforFace(face2, geometry)];
+            clip_paths = JSON.parse(JSON.stringify([paths.slice()]));
 
-        // TODO: this scaling feature could be useful for snapping
-        var scale = 100000;
-        ClipperLib.JS.ScaleUpPaths(subj_paths, scale);
-        ClipperLib.JS.ScaleUpPaths(clip_paths, scale);
+        ClipperLib.JS.ScaleUpPaths(subj_paths, this.clipScale());
+        ClipperLib.JS.ScaleUpPaths(clip_paths, this.clipScale());
 
         cpr.AddPaths(subj_paths, ClipperLib.PolyType.ptSubject, true);
         cpr.AddPaths(clip_paths, ClipperLib.PolyType.ptClip, true);
-
-
+        return cpr;
+    },
+    intersectionOfFaces (face1, paths, geometry) {
+        const cpr = this.initClip(face1, paths, geometry)
         var intersection = new ClipperLib.Paths();
         cpr.Execute(ClipperLib.ClipType.ctIntersection, intersection, ClipperLib.PolyFillType.pftEvenOdd, ClipperLib.PolyFillType.pftEvenOdd);
-        return intersection[0] && intersection[0].length ? intersection[0].map((p) => { return {x: p.X / scale, y: p.Y / scale}; }) : null;
+        if (intersection.length && intersection[0].length) {
+            return intersection[0].map((p) => {
+                return {
+                    x: p.X / this.clipScale(),
+                    y: p.Y / this.clipScale()
+                };
+            })
+        }
     },
     unionOfFaces (face1, paths, geometry) {
-        const cprUnion = new ClipperLib.Clipper(),
-            //cprIntersection = new ClipperLib.Clipper(),
-            // TODO: if there are holes, just pass them in as additional subject/clip paths
-            subj_paths = JSON.parse(JSON.stringify([this.verticesforFace(face1, geometry)])),
-            clip_paths = JSON.parse(JSON.stringify([paths.slice()])); // [this.verticesforFace(face2, geometry)];
-            console.log(subj_paths[0]);
-            console.log(clip_paths[0]);
-
-        // TODO: this scaling feature could be useful for snapping
-        var scale = 100000;
-        ClipperLib.JS.ScaleUpPaths(subj_paths, scale);
-        ClipperLib.JS.ScaleUpPaths(clip_paths, scale);
-
-        cprUnion.AddPaths(subj_paths, ClipperLib.PolyType.ptSubject, true);
-        cprUnion.AddPaths(clip_paths, ClipperLib.PolyType.ptClip, true);
-
-        var union = new ClipperLib.Paths(); cprUnion.Execute(ClipperLib.ClipType.ctUnion, union, ClipperLib.PolyFillType.pftPositive, ClipperLib.PolyFillType.pftPositive);
-
-        return union[0] && union[0].length ? union[0].map((p) => { return {x: p.X / scale, y: p.Y / scale}; }) : null;
+        const cpr = this.initClip(face1, paths, geometry)
+        var union = new ClipperLib.Paths();
+        cpr.Execute(ClipperLib.ClipType.ctUnion, union, ClipperLib.PolyFillType.pftPositive, ClipperLib.PolyFillType.pftPositive);
+        if (union.length && union[0].length) {
+            return union[0].map((p) => {
+                return {
+                    x: p.X / this.clipScale(),
+                    y: p.Y / this.clipScale()
+                };
+            })
+        }
     },
 
     /*
