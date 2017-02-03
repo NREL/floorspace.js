@@ -4,40 +4,8 @@ const helpers = {
     /*
     * clipper helpers
     */
-    // convert a set of clipper vertices to an SVG path string
-    clipperPathToSvgPath (paths) {
-        var svgpath = '';
-        // loop through each polygon
-        for (var i = 0; i < paths.length; i++) {
-            // loop through each vertex
-            for (var j = 0; j < paths[i].length; j++) {
-                svgpath += j ? 'L' : 'M';
-                svgpath += paths[i][j].X + ', ' + paths[i][j].Y;
-            }
-            svgpath += 'Z';
-        }
-
-        if (svgpath === '') {
-            svgpath = 'M0,0';
-        }
-        return svgpath;
-    },
-    // obtain a set of ordered vertices for the face
-    faceToClipperPath (face, geometry) {
-        return face.edgeRefs.map((edgeRef) => {
-            // look up the edge referenced by the face
-            const edge = geometry.edges.find((e) => {
-                return e.id === edgeRef.edge_id;
-            });
-            // look up the vertex associated with v1 unless the edge reference on the face is reversed
-            const vertexId = edgeRef.reverse ? edge.v2 : edge.v1;
-            return geometry.vertices.find((v) => {
-                return v.id === vertexId;
-            });
-        });
-    },
     clipScale () {
-        // TODO: this scaling feature could be useful for snapping, could calculate based on grid settings
+        // TODO: this scaling feature could be useful for snapping, could calculate based on grid settings but we'd need to add an offset...
         return 100000;
     },
     initClip (face1, paths, geometry) {
@@ -111,20 +79,17 @@ const helpers = {
     // by face
     edgesForFace (face, geometry) {
         return face.edgeRefs.map((edgeRef) => {
-            return geometry.edges.find((edge) => { return edge.id === edgeRef.edge_id; });
+            return this.edgeForId(edgeRef.edge_id, geometry);
         });
     },
     verticesforFace (face, geometry) {
         return face.edgeRefs.map((edgeRef) => {
             // look up the edge referenced by the face
-            const edge = geometry.edges.find((e) => {
-                return e.id === edgeRef.edge_id;
-            });
+            const edge = this.edgeForId(edgeRef.edge_id, geometry);
+
             // look up the vertex associated with v1 unless the edge reference on the face is reversed
             const vertexId = edgeRef.reverse ? edge.v2 : edge.v1;
-            return geometry.vertices.find((v) => {
-                return v.id === vertexId;
-            });
+            return this.vertexForId(vertexId, geometry);
         });
     },
     edgesForVertex (vertex_id, geometry) {
@@ -132,11 +97,16 @@ const helpers = {
             return (edge.v1 === vertex_id || edge.v2 === vertex_id);
         });
     },
+    // find a vertex with certain coordinates
+    vertexWithXY () {},
+    // find an edge referencing two vertices
+    edgeWithVertices (startpoint, endpoint, geometry) {},
+
     // find a face
     facesForVertex (vertex_id, geometry) {
         return geometry.faces.filter((face) => {
             return face.edgeRefs.find((edgeRef) => {
-                const edge = geometry.edges.find((edge) => { return edge.id === edgeRef.edge_id; });
+                const edge = this.edgeForId(edgeRef.edge_id, geometry);
                 return (edge.v1 === vertex_id || edge.v2 === vertex_id);
             });
         });

@@ -26,9 +26,9 @@ export default {
         // build arrays of the vertices and edges associated with the face being created
         const faceVertices = payload.points.map((p, i) => {
             // snapped points already have a vertex id, set a reference to the existing vertex if it is not deleted
-            if (p.id && payload.geometry.vertices.find((v) => { return v.id === p.id; })) {
+            if (p.id && helpers.vertexForId(p.id, payload.geometry)) {
                 return {
-                    ...payload.geometry.vertices.find((v) => { return v.id === p.id; }),
+                    ...helpers.vertexForId(p.id, payload.geometry),
                     shared: true // mark the vertex as being shared, this will be used during shared edge lookup
                 };
             } else {

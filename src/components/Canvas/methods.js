@@ -1,8 +1,9 @@
-var d3 = require('d3');
+const d3 = require('d3');
+import helpers from './../../store/modules/geometry/helpers.js'
+
 export default {
     calcSnap (e) {
         d3.selectAll('#canvas .snap').remove();
-        // TODO: HANDLE NEGATIVE COORDS
         var point;
         if (e.clientX === e.offsetX) {
             // when the user hovers over certain SVG child nodes, event locations are incorrect
@@ -270,8 +271,8 @@ export default {
         const geometry = this.$store.getters['application/currentStoryGeometry'];
         // find the shortest distance between a point and a line segment
         const snappingCandidates = geometry.edges.map((e) => {
-            const v1 = geometry.vertices.find((v) => { return v.id === e.v1; }),
-                v2 = geometry.vertices.find((v) => { return v.id === e.v2; });
+            const v1 = helpers.vertexForId(e.v1, geometry),
+                v2 = helpers.vertexForId(e.v2, geometry);
 
             const edgeResult = pDistance(point.x, point.y, v1.x, v1.y, v2.x, v2.y);
             return edgeResult ? {

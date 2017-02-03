@@ -56,11 +56,9 @@ describe('geometry actions', () => {
         }], [])
     });
 
-    it('createFaceFromPoints on a space with an existing face', () => {
+    it('createFaceFromPoints on a space with an existing face, no intersection or shared edge between new and existing face', () => {
         const geometry = new geometryFactory.Geometry();
         const space = new modelFactory.Space();
-        // mock existing face
-        space.face_id = 1;
 
         var context = {
             rootGetters: { 'application/currentStoryGeometry': geometry },
@@ -71,22 +69,54 @@ describe('geometry actions', () => {
             }
         };
 
-        const points = [
+        const existingFacePoints = [
             { x: 0, y: 0 },
             { x: 0, y: 50 },
             { x: 50, y: 50 },
             { x: 50, y: 0 }
         ];
 
+        // create vertices and edges for the face, store on geometry
+        for (var i = 0; i < 4; i++) {
+            const vertex = new geometryFactory.Vertex(existingFacePoints[i].x, existingFacePoints[i].y);
+            const edge = new geometryFactory.Edge();
+            geometry.vertices.push(vertex);
+            geometry.edges.push(edge);
+        }
+
+        // give each edge a reference to two vertices, store a reference to each edge on the face
+        const edgeRefs = [];
+        for (var i = 0; i < geometry.edges.length; i++) {
+            geometry.edges[i].v1 = geometry.vertices[i].id;
+            geometry.edges[i].v2 = i + 1 < geometry.edges.length ? geometry.vertices[i + 1].id : 0;
+
+            edgeRefs.push({
+                edge_id: geometry.edges[i].id,
+                reverse: false
+            });
+        }
+
+        // initialize face with edge references, store face on geometry and give space a reference to the face
+        const existingFace = new geometryFactory.Face(edgeRefs);
+        geometry.faces.push(existingFace);
+        space.face_id = existingFace.id;
+
+        const newPoints = [
+            { x: 100, y: 100 },
+            { x: 100, y: 150 },
+            { x: 150, y: 150 },
+            { x: 150, y: 100 }
+        ];
+
         testAction(Geometry.actions.createFaceFromPoints, {
             geometry: geometry,
             space: space,
-            points: points
+            points: newPoints
         }, context, [{
             type: 'createFace',
             testPayload (payload) {
                 expect(payload.geometry).to.equal(geometry);
-                expect(payload.points).to.equal(points);
+                expect(payload.points).to.equal(newPoints);
                 expect(payload.space).to.equal(space);
             }
         }], [{
@@ -96,6 +126,85 @@ describe('geometry actions', () => {
                 expect(payload.space).to.equal(space);
             }
         }]);
+    });
+
+    it('createFaceFromPoints on a space with an existing face, use union because there is an intersection between new and existing face', () => {
+        const geometry = new geometryFactory.Geometry();
+        const space = new modelFactory.Space();
+
+        var context = {
+            rootGetters: { 'application/currentStoryGeometry': geometry },
+            rootState: {
+                application: {
+                    currentSelections: { space: space }
+                }
+            }
+        };
+
+        const existingFacePoints = [
+            { x: 0, y: 0 },
+            { x: 0, y: 50 },
+            { x: 50, y: 50 },
+            { x: 50, y: 0 }
+        ];
+
+        // create vertices and edges for the face, store on geometry
+        for (var i = 0; i < 4; i++) {
+            const vertex = new geometryFactory.Vertex(existingFacePoints[i].x, existingFacePoints[i].y);
+            const edge = new geometryFactory.Edge();
+            geometry.vertices.push(vertex);
+            geometry.edges.push(edge);
+        }
+
+        // give each edge a reference to two vertices, store a reference to each edge on the face
+        const edgeRefs = [];
+        for (var i = 0; i < geometry.edges.length; i++) {
+            geometry.edges[i].v1 = geometry.vertices[i].id;
+            geometry.edges[i].v2 = i + 1 < geometry.edges.length ? geometry.vertices[i + 1].id : 0;
+
+            edgeRefs.push({
+                edge_id: geometry.edges[i].id,
+                reverse: false
+            });
+        }
+
+        // initialize face with edge references, store face on geometry and give space a reference to the face
+        const existingFace = new geometryFactory.Face(edgeRefs);
+        geometry.faces.push(existingFace);
+        space.face_id = existingFace.id;
+
+        const newPoints = [
+            { x: 25, y: 25 },
+            { x: 25, y: 75 },
+            { x: 75, y: 75 },
+            { x: 75, y: 25 }
+        ];
+
+        testAction(Geometry.actions.createFaceFromPoints, {
+            geometry: geometry,
+            space: space,
+            points: newPoints
+        }, context, [{
+            type: 'createFace',
+            testPayload (payload) {
+                const clipperPaths = newPoints.map((p) => { return { X: p.x, Y: p.y }; })
+                expect(helpers.intersectionOfFaces(existingFace, clipperPaths, geometry)).to.be.ok;
+                expect(payload.points).to.deep.equal(helpers.unionOfFaces(existingFace, clipperPaths, geometry));
+
+                expect(payload.geometry).to.equal(geometry);
+                expect(payload.space).to.equal(space);
+            }
+        }], [{
+            type: 'destroyFace',
+            testPayload (payload) {
+                expect(payload.geometry).to.equal(geometry);
+                expect(payload.space).to.equal(space);
+            }
+        }]);
+    });
+
+    it('createFaceFromPoints on a space with an existing face, use union because there is a shared edge between new and existing face', () => {
+        //
     });
 
     it('destroyFace with no shared edges or vertices', () => {

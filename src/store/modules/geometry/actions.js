@@ -27,6 +27,7 @@ export default {
             // use the union of the new and existing faces if the new face intersects the existing face
             if (helpers.intersectionOfFaces(existingFace, clipperPaths, geometry)) {
                 points = helpers.unionOfFaces(existingFace, clipperPaths, geometry);
+                console.log("do a union",  payload.points, points);
             }
 
             // TODO: use the union if the new face is snapped to the existing face
@@ -51,7 +52,7 @@ export default {
             // make sure the edge being split still exists and wasn't destroyed in the earlier 'destroyFace' dispatch
             if (p.splittingEdge && ~geometry.edges.indexOf(p.splittingEdge)) {
                 context.dispatch('splitEdge', {
-                    // the vertex that was created where the edge will be split
+                    // the vertex that was created where the edge will be split - look up by location
                     vertex: geometry.vertices.find((v) => { return v.x === p.x && v.y === p.y; }),
                     edge: p.splittingEdge
                 });
@@ -133,7 +134,7 @@ export default {
     destroyFace (context, payload) {
         const geometry = payload.geometry;
         const space = payload.space;
-        const expFace = geometry.faces.find((face) => { return face.id === space.face_id; })
+        const expFace = helpers.faceForId(space.face_id, geometry);
 
         // delete associated vertices
         // filter edges referenced by only the face being destroyed so that no shared edges are destroyed
