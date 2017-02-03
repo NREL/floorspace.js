@@ -10,35 +10,35 @@ export default {
     },
 
     createFaceFromPoints (context, payload) {
-        helpers.hasSnappingEdge();
         // geometry and space for the current story
         const geometry = context.rootGetters['application/currentStoryGeometry'];
         const space = context.rootState.application.currentSelections.space;
 
+        // set of points to translate to vertices when creating the new face
         var points = payload.points;
 
-        // if the space already had an associated face
+        // if the space already had an associated face, run through set operations
         if (space.face_id) {
-            // original face
-            const originalFace = helpers.faceForId(space.face_id, geometry);
-            const clipperPaths = payload.points.map((p) => { return { X: p.x, Y: p.y }; })
+            // existing face
+            const existingFace = helpers.faceForId(space.face_id, geometry),
+                // translate points to clipper's path format
+                clipperPaths = payload.points.map((p) => { return { X: p.x, Y: p.y }; })
 
-            // use the union if the new face intersects the existing face
-            if (helpers.intersectionOfFaces(originalFace, clipperPaths, geometry)) {
-                points = helpers.unionOfFaces(originalFace, clipperPaths, geometry);
+            // use the union of the new and existing faces if the new face intersects the existing face
+            if (helpers.intersectionOfFaces(existingFace, clipperPaths, geometry)) {
+                points = helpers.unionOfFaces(existingFace, clipperPaths, geometry);
             }
 
-            // TODO: handle negatives
             // TODO: use the union if the new face is snapped to the existing face
 
-            // destroy it if the new face doesn't intersect it
+            // destroy the existing face
             context.dispatch('destroyFace', {
                 'geometry': geometry,
                 'space': space
             });
         }
 
-        // create the new face
+        // create the new face from the new points or the union of the new points and the points for the existing face
         context.commit('createFace', {
             'points': points,
             'geometry': geometry,
@@ -129,6 +129,7 @@ export default {
             });
         });
     },
+
     destroyFace (context, payload) {
         const geometry = payload.geometry;
         const space = payload.space;
