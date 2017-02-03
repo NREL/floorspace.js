@@ -10,6 +10,7 @@ export default {
     },
 
     createFaceFromPoints (context, payload) {
+        helpers.hasSnappingEdge();
         // geometry and space for the current story
         const geometry = context.rootGetters['application/currentStoryGeometry'];
         const space = context.rootState.application.currentSelections.space;

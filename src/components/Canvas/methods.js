@@ -106,7 +106,7 @@ export default {
             // store the point
             this.points.push(point);
         }
-        
+
         function round (point, spacing) {
             var result,
                 sign = point < 0 ? -1 : 1;
@@ -291,7 +291,6 @@ export default {
                 var dot = A * C + B * D;
                 var lenSq = C * C + D * D;
                 if (!lenSq) {
-                    throw "no length";
                     return;
                 }
                 var param = dot / lenSq;

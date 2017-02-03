@@ -79,10 +79,26 @@ const helpers = {
             });
         }
     },
+    combineFacesByEdge (face1, face2) {
+        /*
+        * given two faces with a shared edge, destroy the shared edge
+        * and create a single larger face
+        */
+    },
+    hasSnappingEdge ( ) {
+        debugger
+        var poly = [{X:10,Y:10},{X:50,Y:50},{X:10,Y:10}];
+        var pt = new ClipperLib.IntPoint(50,50);
+        var inpoly = ClipperLib.Clipper.PointInPolygon(pt, poly);
+    },
+    hasSnappingVertex (point, geometry) {
+
+    },
 
     /*
     * lookup helpers
     */
+    // by id
     vertexForId (vertex_id, geometry) {
         return geometry.vertices.find((vertex) => { return vertex.id === vertex_id; });
     },
@@ -92,29 +108,31 @@ const helpers = {
     faceForId (face_id, geometry) {
         return geometry.faces.find((face) => { return face.id === face_id; });
     },
+    // by face
     edgesForFace (face, geometry) {
         return face.edgeRefs.map((edgeRef) => {
             return geometry.edges.find((edge) => { return edge.id === edgeRef.edge_id; });
         });
     },
-    // the vertices referenced by the edges of a face
     verticesforFace (face, geometry) {
-        const vertices = [];
-        face.edgeRefs.forEach((edgeRef, i) => {
-            const edge = geometry.edges.find((edge) => { return edge.id === edgeRef.edge_id; });
-            // each vertex will be referenced by two connected edges, so we only store v1
-            const vertex = geometry.vertices.find((vertex) => { return vertex.id === edge.v1; });
-            vertices.push(vertex);
+        return face.edgeRefs.map((edgeRef) => {
+            // look up the edge referenced by the face
+            const edge = geometry.edges.find((e) => {
+                return e.id === edgeRef.edge_id;
+            });
+            // look up the vertex associated with v1 unless the edge reference on the face is reversed
+            const vertexId = edgeRef.reverse ? edge.v2 : edge.v1;
+            return geometry.vertices.find((v) => {
+                return v.id === vertexId;
+            });
         });
-        return vertices;
     },
-    // the edges with references to a vertex
     edgesForVertex (vertex_id, geometry) {
         return geometry.edges.filter((edge) => {
             return (edge.v1 === vertex_id || edge.v2 === vertex_id);
         });
     },
-    // the faces with references to a vertex
+    // find a face
     facesForVertex (vertex_id, geometry) {
         return geometry.faces.filter((face) => {
             return face.edgeRefs.find((edgeRef) => {
@@ -123,7 +141,6 @@ const helpers = {
             });
         });
     },
-    // the faces with references to an edge
     facesForEdge (edge_id, geometry) {
         return geometry.faces.filter((face) => {
             return face.edgeRefs.find((edgeRef) => {
