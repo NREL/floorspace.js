@@ -27,14 +27,9 @@ export default {
             // use the union of the new and existing faces if the new face intersects the existing face
             if (helpers.intersectionOfFaces(existingFace, clipperPaths, geometry)) {
                 points = helpers.unionOfFaces(existingFace, clipperPaths, geometry);
-                console.log("do a union",  payload.points, points);
-                // check if one of the vertices created by clipper should snap to an edge
-                payload.points.forEach((p) => {
-                    p.snappingEdge = helpers.snappingEdgeForPoint(p, geometry);
-                });
             }
 
-            // TODO: use the union if the new face is snapped to the existing face
+            // TODO: use the union if the new face has an edge snapped to the existing face
 
             // destroy the existing face
             context.dispatch('destroyFace', {

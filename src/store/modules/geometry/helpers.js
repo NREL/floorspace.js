@@ -61,7 +61,7 @@ const helpers = {
             return this.projectToEdge(point, v1, v2).dist === 0;
         });
     },
-    // check if any existing edges have vertices which are on the testEdge
+    // check if any existing edges on existing faces have vertices which are on the testEdge being created for a new face
     snappingEdgeForEdge (testEdge, geometry) {
         const testEdgeV1 = this.vertexForId(testEdge.v1, geometry),
             testEdgeV2 = this.vertexForId(testEdge.v2, geometry);
@@ -69,10 +69,11 @@ const helpers = {
         return geometry.edges.filter((edge) => {
             const v1 = this.vertexForId(edge.v1, geometry),
                 v2 = this.vertexForId(edge.v2, geometry);
-            // shared vertex exists??
-            if (testEdgeV1 === v1 || testEdgeV1 === v2 || testEdgeV2 === v1 || testEdgeV2 === v2 ) { return; }
 
-            return this.projectToEdge(testEdgeV1, v1, v2).dist === 0 || this.projectToEdge(testEdgeV2, v1, v2).dist === 0;
+            // shared vertex exists??
+           // if (testEdgeV1 === v1 || testEdgeV1 === v2 || testEdgeV2 === v1 || testEdgeV2 === v2 ) { return; }
+
+            return this.projectToEdge(testEdgeV1, v1, v2).dist === 0 && this.projectToEdge(testEdgeV2, v1, v2).dist === 0;
         });
     },
     hasSnappingVertex (point, geometry) {

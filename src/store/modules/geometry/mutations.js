@@ -23,48 +23,48 @@ export default {
         payload.face.edgeRefs.push(payload.edgeRef);
     },
     createFace (state, payload) {
-        // build arrays of the vertices and edges associated with the face being created
+        // build array of new and shared vertices for the face
         const faceVertices = payload.points.map((p, i) => {
             // snapped points already have a vertex id, set a reference to the existing vertex if it is not deleted
             if (p.id && helpers.vertexForId(p.id, payload.geometry)) {
-                return {
-                    ...helpers.vertexForId(p.id, payload.geometry),
-                    shared: true // mark the vertex as being shared, this will be used during shared edge lookup
-                };
+                return helpers.vertexForId(p.id, payload.geometry);
             } else {
-                // create a new vertex with the point coordinates
-                var vertex = new factory.Vertex(p.x, p.y);
+                // create and store a new vertex with the point's coordinates
+                const vertex = new factory.Vertex(p.x, p.y);
                 payload.geometry.vertices.push(vertex);
                 return vertex;
             }
         });
-        const reverseEdgeIndices = [];
-        const faceEdges = faceVertices.map((v, i) => {
-            const v2 = faceVertices.length > i + 1 ? faceVertices[i + 1] : faceVertices[0];
-            // if the vertex is shared between two faces, check to see if the entire edge is shared
-            if (v.shared) {
-                // find the shared edge if it exists
-                var sharedEdge = payload.geometry.edges.find((e) => {
-                    return (e.v1 === v.id && e.v2 === v2.id) || (e.v2 === v.id && e.v1 === v2.id);
-                });
 
-                if (sharedEdge) {
-                    // track the indexes of edges which are reversed for use during face edgeRef creation
-                    if (sharedEdge.v1 !== v.id) {
-                        reverseEdgeIndices.push(i);
-                    }
-                    return sharedEdge;
+
+        // track the indexes of shared edges which will be reversed on the new face (we don't want to directly mutate the edge object with a marker value)
+        const reverseEdgeIndices = [];
+
+        // build array of new and shared edges for the face from the vertices
+        const faceEdges = faceVertices.map((v1, i) => {
+            // v2 is either the next vertex in the faceVertices array, or the first vertex in the array when the face is being closed
+            const v2 = i < faceVertices.length - 1 ? faceVertices[i + 1] : faceVertices[0];
+
+            // check if an edge referencing the two vertices for the edge being created already exists
+            var sharedEdge = payload.geometry.edges.find((e) => {
+                return (e.v1 === v1.id && e.v2 === v2.id) || (e.v2 === v1.id && e.v1 === v2.id);
+            });
+
+            if (sharedEdge) {
+                // if a shared edge exists, check if its direction matches the edge direction required for the face being created
+                if (sharedEdge.v1 !== v1.id) {
+                    // track the indexes of shared edges which will be reversed on the new face
+                    reverseEdgeIndices.push(i);
                 }
+                return sharedEdge;
             }
 
-            const edge = new factory.Edge(v.id, v2.id);
-
-            // if the new edge contains any vertices for existing edges, snap the new edge and set a reference to the existing edge
-            // TODO: all this logic needs to be moved into an action
-            console.log("!!! ", edge, helpers.snappingEdgeForEdge(edge, payload.geometry));
+            // TODO: if the new edge contains any vertices for existing edges, snap the new edge and set a reference to the existing edge
 
 
 
+            // create and store a new edge with the vertices
+            const edge = new factory.Edge(v1.id, v2.id);
             payload.geometry.edges.push(edge);
             return edge;
         });
@@ -72,11 +72,17 @@ export default {
         const edgeRefs = faceEdges.map((e, i) => {
             return {
                 edge_id: e.id,
-                reverse: reverseEdgeIndices.indexOf(i) === -1 ? false : true // false // TODO: implement a check for existing edges using the same vertices
+                reverse: ~reverseEdgeIndices.indexOf(i) ? true : false
             };
         });
 
-        const face = new factory.Face(edgeRefs);
+        // create and store a new face with references to the edges
+        const face = new factory.Face(faceEdges.map((e, i) => {
+            return {
+                edge_id: e.id,
+                reverse: ~reverseEdgeIndices.indexOf(i) ? true : false
+            };
+        }));
         payload.geometry.faces.push(face);
         payload.space.face_id = face.id;
     },
