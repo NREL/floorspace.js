@@ -58,6 +58,13 @@ export default {
             }
 
             const edge = new factory.Edge(v.id, v2.id);
+
+            // if the new edge contains any vertices for existing edges, snap the new edge and set a reference to the existing edge
+            // TODO: all this logic needs to be moved into an action
+            console.log("!!! ", edge, helpers.snappingEdgeForEdge(edge, payload.geometry));
+
+
+
             payload.geometry.edges.push(edge);
             return edge;
         });

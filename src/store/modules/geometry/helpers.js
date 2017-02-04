@@ -53,11 +53,27 @@ const helpers = {
         * and create a single larger face
         */
     },
-    hasSnappingEdge ( ) {
-        debugger
-        var poly = [{X:10,Y:10},{X:50,Y:50},{X:10,Y:10}];
-        var pt = new ClipperLib.IntPoint(50,50);
-        var inpoly = ClipperLib.Clipper.PointInPolygon(pt, poly);
+    // check if a point is being created ON an existing edge
+    snappingEdgeForPoint (point, geometry) {
+        return geometry.edges.filter((edge) => {
+            const v1 = this.vertexForId(edge.v1, geometry),
+                v2 = this.vertexForId(edge.v2, geometry);
+            return this.projectToEdge(point, v1, v2).dist === 0;
+        });
+    },
+    // check if any existing edges have vertices which are on the testEdge
+    snappingEdgeForEdge (testEdge, geometry) {
+        const testEdgeV1 = this.vertexForId(testEdge.v1, geometry),
+            testEdgeV2 = this.vertexForId(testEdge.v2, geometry);
+
+        return geometry.edges.filter((edge) => {
+            const v1 = this.vertexForId(edge.v1, geometry),
+                v2 = this.vertexForId(edge.v2, geometry);
+            // shared vertex exists??
+            if (testEdgeV1 === v1 || testEdgeV1 === v2 || testEdgeV2 === v1 || testEdgeV2 === v2 ) { return; }
+
+            return this.projectToEdge(testEdgeV1, v1, v2).dist === 0 || this.projectToEdge(testEdgeV2, v1, v2).dist === 0;
+        });
     },
     hasSnappingVertex (point, geometry) {
 
@@ -117,6 +133,47 @@ const helpers = {
                 return edgeRef.edge_id === edge_id;
             });
         });
+    },
+
+    projectToEdge (point, v1, v2) {
+        const x = point.x,
+            y = point.y,
+            x1 = v1.x,
+            y1 = v1.y,
+            x2 = v2.x,
+            y2 = v2.y,
+            A = x - x1,
+            B = y - y1,
+            C = x2 - x1,
+            D = y2 - y1,
+            dot = A * C + B * D,
+            lenSq = C * C + D * D;
+
+        if (!lenSq) { return; }
+        const param = dot / lenSq;
+        var xProjection, yProjection;
+
+        if (param <= 0) {
+            xProjection = x1;
+            yProjection = y1;
+        } else if (param > 1) {
+            xProjection = x2;
+            yProjection = y2;
+        } else {
+            xProjection = x1 + param * C;
+            yProjection = y1 + param * D;
+        }
+
+        const dx = x - xProjection,
+            dy = y - yProjection;
+
+        return {
+            dist: Math.sqrt(dx * dx + dy * dy),
+            scalar: {
+                x: xProjection,
+                y: yProjection
+            }
+        };
     },
     /*
     * run through all edges on a face, sort them, and set the reverse property logically

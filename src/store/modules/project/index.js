@@ -17,8 +17,8 @@ export default {
             y_spacing: 1
         },
         view: {
-            min_x: -10,
-            min_y: -10,
+            min_x: 0,
+            min_y: 0,
             max_x: 10,
             max_y: 10
         },

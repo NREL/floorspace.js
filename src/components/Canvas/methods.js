@@ -187,7 +187,6 @@ export default {
             .attr('points', (d, i) => {
                 var pointsString = '';
                 d.points.forEach((p) => {
-                    if (!p) {debugger}
                     pointsString += (p.x + ',' + p.y + ' ');
                 });
                 return pointsString;
@@ -246,12 +245,11 @@ export default {
     },
 
     // return the set of vertices within the tolerance zone of a location
-    // TODO: filter closest
     snappingVertex (point) {
         const snappingCandidates = this.$store.getters['application/currentStoryGeometry'].vertices.filter((v) => {
             const dx = Math.abs(v.x - point.x),
                 dy = Math.abs(v.y - point.y);
-            return (dx < this.$store.getters['project/snapToleranceX'] && dy < this.$store.getters['project/snapToleranceY']);
+            return (dx < this.$store.getters['project/snapTolerance'] && dy < this.$store.getters['project/snapTolerance']);
         });
 
         if (snappingCandidates.length > 1) {
@@ -266,15 +264,16 @@ export default {
 
         return snappingCandidates[0];
     },
-    // return the set of edges within the tolerance zone of a location
+    // find the closest edge within the tolerance zone of a point
     snappingEdge (point) {
         const geometry = this.$store.getters['application/currentStoryGeometry'];
-        // find the shortest distance between a point and a line segment
+
+        // find the edges within the tolerance zone of a location
         const snappingCandidates = geometry.edges.map((e) => {
             const v1 = helpers.vertexForId(e.v1, geometry),
                 v2 = helpers.vertexForId(e.v2, geometry);
 
-            const edgeResult = pDistance(point.x, point.y, v1.x, v1.y, v2.x, v2.y);
+            const edgeResult = helpers.projectToEdge(point, v1, v2);
             return edgeResult ? {
                 dist: edgeResult.dist,
                 scalar: edgeResult.scalar,
@@ -282,45 +281,8 @@ export default {
                 v1: v1,
                 v2: v2
             } : null;
-
-            function pDistance (x, y, x1, y1, x2, y2) {
-                var A = x - x1;
-                var B = y - y1;
-                var C = x2 - x1;
-                var D = y2 - y1;
-
-                var dot = A * C + B * D;
-                var lenSq = C * C + D * D;
-                if (!lenSq) {
-                    return;
-                }
-                var param = dot / lenSq;
-                var xx, yy;
-
-                if (param <= 0) {
-                    xx = x1;
-                    yy = y1;
-                } else if (param > 1) {
-                    xx = x2;
-                    yy = y2;
-                } else {
-                    xx = x1 + param * C;
-                    yy = y1 + param * D;
-                }
-
-                var dx = x - xx;
-                var dy = y - yy;
-
-                return {
-                    dist: Math.sqrt(dx * dx + dy * dy),
-                    scalar: {
-                        x: xx,
-                        y: yy
-                    }
-                };
-            }
         }).filter((eR) => {
-            return eR && eR.dist < this.$store.getters['project/snapToleranceX'];
+            return eR && eR.dist < this.$store.getters['project/snapTolerance'];
         });
         if (snappingCandidates.length > 1) {
             return snappingCandidates.reduce((a, b) => {
