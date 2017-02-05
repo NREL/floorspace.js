@@ -38,15 +38,83 @@ export default {
             });
         }
 
-        // create the new face from the new points or the union of the new points and the points for the existing face
-        context.commit('createFace', {
-            'points': points,
-            'geometry': geometry,
-            'space': space
+        // build array of new and shared vertices for the face
+        const faceVertices = points.map((p, i) => {
+            // snapped points already have a vertex id, set a reference to the existing vertex if it is not deleted
+            if (p.id && helpers.vertexForId(p.id, geometry)) {
+                return helpers.vertexForId(p.id, geometry);
+            } else {
+                // create and store a new vertex with the point's coordinates
+                const vertex = new factory.Vertex(p.x, p.y);
+                context.commit('createVertex', {
+                    vertex: vertex,
+                    geometry: geometry
+                });
+                return vertex;
+            }
         });
 
+        // track the indexes of shared edges which will be reversed on the new face (we don't want to directly mutate the edge object with a marker value)
+        const reverseEdgeIndices = [];
+
+        // build array of new and shared edges for the face from the vertices
+        const faceEdges = faceVertices.map((v1, i) => {
+            // v2 is either the next vertex in the faceVertices array, or the first vertex in the array when the face is being closed
+            const v2 = i < faceVertices.length - 1 ? faceVertices[i + 1] : faceVertices[0];
+
+            // check if an edge referencing the two vertices for the edge being created already exists
+            var sharedEdge = geometry.edges.find((e) => {
+                return (e.v1 === v1.id && e.v2 === v2.id) || (e.v2 === v1.id && e.v1 === v2.id);
+            });
+
+            if (sharedEdge) {
+                // if a shared edge exists, check if its direction matches the edge direction required for the face being created
+                if (sharedEdge.v1 !== v1.id) {
+                    // track the indexes of shared edges which will be reversed on the new face
+                    reverseEdgeIndices.push(i);
+                }
+                return sharedEdge;
+            }
+
+            // TODO: if the new edge contains any vertices for existing edges, snap the new edge and set a reference to the existing edge
+
+            // create and store a new edge with the vertices
+            const edge = new factory.Edge(v1.id, v2.id);
+            context.commit('createEdge', {
+                edge: edge,
+                geometry: geometry
+            });
+            return edge;
+        });
+
+        const edgeRefs = faceEdges.map((e, i) => {
+            return {
+                edge_id: e.id,
+                reverse: ~reverseEdgeIndices.indexOf(i) ? true : false
+            };
+        });
+
+        // create and store a new face with references to the edges
+        const face = new factory.Face(faceEdges.map((e, i) => {
+            return {
+                edge_id: e.id,
+                reverse: ~reverseEdgeIndices.indexOf(i) ? true : false
+            };
+        }));
+        context.commit('createFace', {
+            space: space,
+            face: face,
+            geometry: geometry
+        });
+        // TODO: maybe a model mutation for this?
+        // payload.space.face_id = face.id;
+
+
+
+
+
         // split any edges that the new face shares with existing faces
-        payload.points.forEach((p, i) => {
+        points.forEach((p, i) => {
             // when a point is snapped to an edge, this property will be set on the point
             // make sure the edge being split still exists and wasn't destroyed in the earlier 'destroyFace' dispatch
             if (p.splittingEdge && ~geometry.edges.indexOf(p.splittingEdge)) {
