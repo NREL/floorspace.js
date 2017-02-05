@@ -62,7 +62,7 @@ const helpers = {
         });
     },
     // check if any existing edges on existing faces have vertices which are on the testEdge being created for a new face
-    divideAdjacentEdges (geometry) {
+    splitSharedEdges (geometry) {
         geometry.edges.forEach((edge) => {
             const edgeV1 = this.vertexForId(edge.v1, geometry),
                 edgeV2 = this.vertexForId(edge.v2, geometry);
@@ -70,8 +70,11 @@ const helpers = {
             // look up all vertices directly ON the edge, ignoring the edge's endpoints
             const splittingVertices = geometry.vertices.filter((vertex) => {
                 if (edgeV1 === vertex || edgeV2 === vertex) { return; }
+                console.log("edge", JSON.stringify(edge), "vertex", JSON.stringify(vertex), this.projectToEdge(vertex, edgeV1, edgeV2).dist);
                 return this.projectToEdge(vertex, edgeV1, edgeV2).dist === 0;
             });
+            console.log(splittingVertices);
+            return splittingVertices;
 
             // split the edge at each vertex that is touching it
             splittingVertices.forEach((vertex) => {
@@ -81,24 +84,34 @@ const helpers = {
             });
         });
     },
-    // check if any existing edges on existing faces have vertices which are on the testEdge being created for a new face
-    snappingEdgeForEdge (testEdge, geometry) {
-        const testEdgeV1 = this.vertexForId(testEdge.v1, geometry),
-            testEdgeV2 = this.vertexForId(testEdge.v2, geometry);
+    verticesOnEdge (edge, geometry) {
+        const edgeV1 = this.vertexForId(edge.v1, geometry),
+            edgeV2 = this.vertexForId(edge.v2, geometry);
 
-        return geometry.edges.filter((edge) => {
-            const v1 = this.vertexForId(edge.v1, geometry),
-                v2 = this.vertexForId(edge.v2, geometry);
+        // look up all vertices directly ON the edge, ignoring the edge's endpoints
+        return geometry.vertices.filter((vertex) => {
+            if (edgeV1 === vertex || edgeV2 === vertex) { return; }
 
-            // shared vertex exists??
-           // if (testEdgeV1 === v1 || testEdgeV1 === v2 || testEdgeV2 === v1 || testEdgeV2 === v2 ) { return; }
 
-            return this.projectToEdge(testEdgeV1, v1, v2).dist === 0 && this.projectToEdge(testEdgeV2, v1, v2).dist === 0;
+            console.log("edge", JSON.stringify(edge), "vertex", JSON.stringify(vertex), this.projectToEdge(vertex, edgeV1, edgeV2).dist);
+            return this.projectToEdge(vertex, edgeV1, edgeV2).dist === 0;
         });
     },
-    hasSnappingVertex (point, geometry) {
+    // check if any existing edges on existing faces have vertices which are on the testEdge being created for a new face
+    splitSharedEdges (geometry) {
+        geometry.edges.forEach((edge) => {
+            // look up all vertices directly ON the edge, ignoring the edge's endpoints
+            const splittingVertices = verticesOnEdge(edge, geometry);
 
+            // split the edge at each vertex that is touching it
+            splittingVertices.forEach((vertex) => {
+                // if an edge already exists connecting the two vertices, use it
+                // edgeV1 -> vertex
+                // vertex -> edgeV2
+            });
+        });
     },
+
 
     /*
     * lookup helpers
@@ -225,10 +238,12 @@ const helpers = {
                     return true;
                 }
             });
+            // prevent direct mutation of state
+            const nextEdgeRefCopy = JSON.parse(JSON.stringify(nextEdgeRef));
             // set the reverse property on the next edge depending on whether its v1 or v2 references the endpoint of the current edge
             // we want the startpoint of the next edge to be the endpoint of the currentEdge
-            nextEdgeRef.reverse = reverse;
-            normalizedEdgeRefs.push(nextEdgeRef);
+            nextEdgeRefCopy.reverse = reverse;
+            normalizedEdgeRefs.push(nextEdgeRefCopy);
         }
         return normalizedEdgeRefs;
     }

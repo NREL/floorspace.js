@@ -1,9 +1,8 @@
-import factory from './factory.js'
 import helpers from './helpers.js'
 
 export default {
-    normalizeEdges (state, payload) {
-        payload.face.edgeRefs = helpers.normalizedEdges(payload.face, payload.geometry);
+    setEdgeRefsForFace (state, payload) {
+        payload.face.edgeRefs = payload.edgeRefs;
     },
 
     initGeometry (state, payload) {

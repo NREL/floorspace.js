@@ -188,9 +188,10 @@ export default {
 
         // if the faces which were originally snapped to still exist, normalize their edges
         affectedFaces.forEach((affectedFace) => {
-            context.commit('normalizeEdges', {
+            const normalizeEdges = helpers.normalizedEdges(affectedFace, geometry);
+            context.commit('setEdgeRefsForFace', {
                 face: affectedFace,
-                geometry: geometry
+                edgeRefs: normalizeEdges
             });
         });
     },
