@@ -6,9 +6,6 @@ export default {
         payload.face.edgeRefs = helpers.normalizedEdges(payload.face, payload.geometry);
     },
 
-    // initialize a new geometry object
-    // must update the associated story to reference the geometry
-    // all validation and duplicate checking must be done in the action
     initGeometry (state, payload) {
         state.push(payload.geometry);
         payload.story.geometry_id = payload.geometry.id;

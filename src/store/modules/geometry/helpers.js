@@ -62,6 +62,26 @@ const helpers = {
         });
     },
     // check if any existing edges on existing faces have vertices which are on the testEdge being created for a new face
+    divideAdjacentEdges (geometry) {
+        geometry.edges.forEach((edge) => {
+            const edgeV1 = this.vertexForId(edge.v1, geometry),
+                edgeV2 = this.vertexForId(edge.v2, geometry);
+
+            // look up all vertices directly ON the edge, ignoring the edge's endpoints
+            const splittingVertices = geometry.vertices.filter((vertex) => {
+                if (edgeV1 === vertex || edgeV2 === vertex) { return; }
+                return this.projectToEdge(vertex, edgeV1, edgeV2).dist === 0;
+            });
+
+            // split the edge at each vertex that is touching it
+            splittingVertices.forEach((vertex) => {
+                // if an edge already exists connecting the two vertices, use it
+                // edgeV1 -> vertex
+                // vertex -> edgeV2
+            });
+        });
+    },
+    // check if any existing edges on existing faces have vertices which are on the testEdge being created for a new face
     snappingEdgeForEdge (testEdge, geometry) {
         const testEdgeV1 = this.vertexForId(testEdge.v1, geometry),
             testEdgeV2 = this.vertexForId(testEdge.v2, geometry);
@@ -178,40 +198,36 @@ const helpers = {
     },
     /*
     * run through all edges on a face, sort them, and set the reverse property logically
+    * this actually mutates faces, call it from a
     */
     normalizedEdges (face, geometry) {
         // initialize the set with the first edge, we assume the reverse property is correctly set for this one
-        // TODO: how do we know the startpoint for the first edge?
         const normalizedEdgeRefs = [];
         normalizedEdgeRefs.push(face.edgeRefs[0]);
 
         // there will be exactly two edges on the face referencing each vertex
         for (var i = 0; i < face.edgeRefs.length - 1; i++) {
-            const currentEdgeRef = normalizedEdgeRefs[i];
-            const currentEdge = this.edgeForId(currentEdgeRef.edge_id, geometry);
+            const currentEdgeRef = normalizedEdgeRefs[i],
+                currentEdge = this.edgeForId(currentEdgeRef.edge_id, geometry),
 
-            // each edgeref's edge will have a startpoint and an endpoint, v1 or v2 depending on the reverse property
-            // edge.startpoint = edgeref.reverse ? edge.v2 : edge.v1;
-            const currentEdgeEndpoint = currentEdgeRef.reverse ? currentEdge.v1 : currentEdge.v2;
+                // each edgeref's edge will have a startpoint and an endpoint, v1 or v2 depending on the reverse property
+                currentEdgeEndpoint = currentEdgeRef.reverse ? currentEdge.v1 : currentEdge.v2;
 
-            var nextEdgeRefIsReversed;
-            // look up the other edge with a reference to the endpoitnt on the current edge
+            var reverse;
+            // find the next edge by looking up the second edge with a reference to the endpoint of the current edge
             const nextEdgeRef = face.edgeRefs.find((edgeRef) => {
-                // the current edge will also have a reference to the current edge endpoint, don't return that one
+                // skip current edge
                 if (edgeRef.edge_id === currentEdge.id) { return; }
 
                 const nextEdge = this.edgeForId(edgeRef.edge_id, geometry);
-                if (nextEdge.v1 === currentEdgeEndpoint) {
-                    nextEdgeRefIsReversed = false;
-                    return true;
-                } else if (nextEdge.v2 === currentEdgeEndpoint) {
-                    nextEdgeRefIsReversed = true;
+                if (nextEdge.v1 === currentEdgeEndpoint || nextEdge.v2 === currentEdgeEndpoint) {
+                    reverse = nextEdge.v1 === currentEdgeEndpoint ? false : true;
                     return true;
                 }
             });
             // set the reverse property on the next edge depending on whether its v1 or v2 references the endpoint of the current edge
             // we want the startpoint of the next edge to be the endpoint of the currentEdge
-            nextEdgeRef.reverse = nextEdgeRefIsReversed;
+            nextEdgeRef.reverse = reverse;
             normalizedEdgeRefs.push(nextEdgeRef);
         }
         return normalizedEdgeRefs;

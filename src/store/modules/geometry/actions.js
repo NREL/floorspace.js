@@ -109,10 +109,7 @@ export default {
         // TODO: maybe a model mutation for this?
         // payload.space.face_id = face.id;
 
-
-
-
-
+        // edge splitting logic for an explicit split (edge turned blue when point was drawn)
         // split any edges that the new face shares with existing faces
         points.forEach((p, i) => {
             // when a point is snapped to an edge, this property will be set on the point
