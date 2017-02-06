@@ -61,28 +61,6 @@ const helpers = {
             return this.projectToEdge(point, v1, v2).dist === 0;
         });
     },
-    // check if any existing edges on existing faces have vertices which are on the testEdge being created for a new face
-    splitSharedEdges (geometry) {
-        geometry.edges.forEach((edge) => {
-            const edgeV1 = this.vertexForId(edge.v1, geometry),
-                edgeV2 = this.vertexForId(edge.v2, geometry);
-
-            // look up all vertices directly ON the edge, ignoring the edge's endpoints
-            const splittingVertices = geometry.vertices.filter((vertex) => {
-                if (edgeV1 === vertex || edgeV2 === vertex) { return; }
-                return this.projectToEdge(vertex, edgeV1, edgeV2).dist === 0;
-            });
-
-            return splittingVertices;
-
-            // split the edge at each vertex that is touching it
-            splittingVertices.forEach((vertex) => {
-                // if an edge already exists connecting the two vertices, use it
-                // edgeV1 -> vertex
-                // vertex -> edgeV2
-            });
-        });
-    },
     verticesOnEdge (edge, geometry) {
         const edgeV1 = this.vertexForId(edge.v1, geometry),
             edgeV2 = this.vertexForId(edge.v2, geometry);
@@ -93,21 +71,6 @@ const helpers = {
             return this.projectToEdge(vertex, edgeV1, edgeV2).dist === 0;
         });
     },
-    // check if any existing edges on existing faces have vertices which are on the testEdge being created for a new face
-    splitSharedEdges (geometry) {
-        geometry.edges.forEach((edge) => {
-            // look up all vertices directly ON the edge, ignoring the edge's endpoints
-            const splittingVertices = verticesOnEdge(edge, geometry);
-
-            // split the edge at each vertex that is touching it
-            splittingVertices.forEach((vertex) => {
-                // if an edge already exists connecting the two vertices, use it
-                // edgeV1 -> vertex
-                // vertex -> edgeV2
-            });
-        });
-    },
-
 
     /*
     * lookup helpers
@@ -143,6 +106,7 @@ const helpers = {
             return (edge.v1 === vertex_id || edge.v2 === vertex_id);
         });
     },
+
     // find a vertex with certain coordinates
     vertexWithXY () {},
     // find an edge referencing two vertices
@@ -204,6 +168,7 @@ const helpers = {
             }
         };
     },
+
     /*
     * run through all edges on a face, sort them, and set the reverse property logically
     * this actually mutates faces, call it from a
