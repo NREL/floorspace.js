@@ -70,10 +70,9 @@ const helpers = {
             // look up all vertices directly ON the edge, ignoring the edge's endpoints
             const splittingVertices = geometry.vertices.filter((vertex) => {
                 if (edgeV1 === vertex || edgeV2 === vertex) { return; }
-                console.log("edge", JSON.stringify(edge), "vertex", JSON.stringify(vertex), this.projectToEdge(vertex, edgeV1, edgeV2).dist);
                 return this.projectToEdge(vertex, edgeV1, edgeV2).dist === 0;
             });
-            console.log(splittingVertices);
+
             return splittingVertices;
 
             // split the edge at each vertex that is touching it

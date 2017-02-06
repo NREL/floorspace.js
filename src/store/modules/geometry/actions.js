@@ -122,19 +122,18 @@ export default {
             }
         });
 
-        geometry.edges.forEach((edge) => {
-            // TODO: if the new edge contains any vertices for existing edges, snap the new edge and set a reference to the existing edge
-            helpers.verticesOnEdge(edge, geometry).forEach((splittingVertex) => {
-//                if ( !~geometry.edges.indexOf(edge) ||  !~geometry.vertices.indexOf(splittingVertex) ) { return; }
-                console.log("splitEdge", edge, splittingVertex);
-                context.dispatch('splitEdge', {
-                    // the vertex that was created where the edge will be split - look up by location
-                    vertex: splittingVertex,
-                    edge: edge
+        (function splitEdges () {
+            geometry.edges.forEach((edge) => {
+                // vertices dividing the current edge
+                helpers.verticesOnEdge(edge, geometry).forEach((splittingVertex) => {
+                    context.dispatch('splitEdge', {
+                        vertex: splittingVertex,
+                        edge: edge
+                    });
+                    splitEdges();
                 });
             });
-
-        });
+        })();
     },
 
     // convert the splitting edge into two new edges
