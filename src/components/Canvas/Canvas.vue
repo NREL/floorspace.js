@@ -72,6 +72,10 @@ export default {
                             return e.id === edgeRef.edge_id;
                         });
                         // look up the vertex associated with v1 unless the edge reference on the face is reversed
+                        if (!edge) {
+                            // TODO: dangling edgeref, find out where the edge is getting dumped
+                            debugger;
+                        }
                         const vertexId = edgeRef.reverse ? edge.v2 : edge.v1;
                         return this.$store.getters['application/currentStoryGeometry'].vertices.find((v) => {
                             return v.id === vertexId;

@@ -76,14 +76,13 @@ export default {
                 return sharedEdge;
             }
 
-            // TODO: if the new edge contains any vertices for existing edges, snap the new edge and set a reference to the existing edge
-
             // create and store a new edge with the vertices
             const edge = new factory.Edge(v1.id, v2.id);
             context.commit('createEdge', {
                 edge: edge,
                 geometry: geometry
             });
+
             return edge;
         });
 
@@ -121,6 +120,20 @@ export default {
                     edge: p.splittingEdge
                 });
             }
+        });
+
+        geometry.edges.forEach((edge) => {
+            // TODO: if the new edge contains any vertices for existing edges, snap the new edge and set a reference to the existing edge
+            helpers.verticesOnEdge(edge, geometry).forEach((splittingVertex) => {
+//                if ( !~geometry.edges.indexOf(edge) ||  !~geometry.vertices.indexOf(splittingVertex) ) { return; }
+                console.log("splitEdge", edge, splittingVertex);
+                context.dispatch('splitEdge', {
+                    // the vertex that was created where the edge will be split - look up by location
+                    vertex: splittingVertex,
+                    edge: edge
+                });
+            });
+
         });
     },
 

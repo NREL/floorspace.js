@@ -91,9 +91,6 @@ const helpers = {
         // look up all vertices directly ON the edge, ignoring the edge's endpoints
         return geometry.vertices.filter((vertex) => {
             if (edgeV1 === vertex || edgeV2 === vertex) { return; }
-
-
-            console.log("edge", JSON.stringify(edge), "vertex", JSON.stringify(vertex), this.projectToEdge(vertex, edgeV1, edgeV2).dist);
             return this.projectToEdge(vertex, edgeV1, edgeV2).dist === 0;
         });
     },
@@ -181,9 +178,8 @@ const helpers = {
             C = x2 - x1,
             D = y2 - y1,
             dot = A * C + B * D,
-            lenSq = C * C + D * D;
+            lenSq = (C * C + D * D) || 2;
 
-        if (!lenSq) { return; }
         const param = dot / lenSq;
         var xProjection, yProjection;
 
