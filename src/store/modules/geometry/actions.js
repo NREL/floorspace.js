@@ -22,7 +22,7 @@ export default {
             // existing face
             const existingFace = helpers.faceForId(space.face_id, geometry),
                 // translate points to clipper's path format
-                clipperPaths = payload.points.map((p) => { return { X: p.x, Y: p.y }; })
+                clipperPaths = points.map((p) => { return { X: p.x, Y: p.y }; })
 
             // use the union of the new and existing faces if the new face intersects the existing face
             if (helpers.intersectionOfFaces(existingFace, clipperPaths, geometry)) {
@@ -105,8 +105,6 @@ export default {
             face: face,
             geometry: geometry
         });
-        // TODO: maybe a model mutation for this?
-        // payload.space.face_id = face.id;
 
         // edge splitting logic for an explicit split (edge turned blue when point was drawn)
         // split any edges that the new face shares with existing faces
@@ -122,6 +120,7 @@ export default {
             }
         });
 
+        // loop through all edges and divide them at any non endpoint vertices they contain
         (function splitEdges () {
             geometry.edges.forEach((edge) => {
                 // vertices dividing the current edge
