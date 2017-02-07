@@ -124,18 +124,15 @@ export default {
         });
 
         // loop through all edges and divide them at any non endpoint vertices they contain
-        (function splitEdges () {
-            geometry.edges.forEach((edge) => {
-                // vertices dividing the current edge
-                helpers.verticesOnEdge(edge, geometry).forEach((splittingVertex) => {
-                    context.dispatch('splitEdge', {
-                        vertex: splittingVertex,
-                        edge: edge
-                    });
-                    splitEdges();
+        geometry.edges.forEach((edge) => {
+            // vertices dividing the current edge
+            helpers.verticesOnEdge(edge, geometry).forEach((splittingVertex) => {
+                context.dispatch('splitEdge', {
+                    vertex: splittingVertex,
+                    edge: edge
                 });
             });
-        })();
+        });
     },
 
     // convert the splitting edge into two new edges
