@@ -27,7 +27,7 @@ export default function testAction (action, payload, context, expectedMutations,
             const expectedMutation = expectedMutations[mutationCount];
 
             // check for the correct type
-            expect(expectedMutation.type).to.equal(type);
+            expect(type).to.equal(expectedMutation.type);
 
             // check for the correct payload
             if (mutationPayload) {

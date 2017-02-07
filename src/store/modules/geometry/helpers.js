@@ -64,7 +64,7 @@ const helpers = {
     verticesOnEdge (edge, geometry) {
         const edgeV1 = this.vertexForId(edge.v1, geometry),
             edgeV2 = this.vertexForId(edge.v2, geometry);
-            
+
         // look up all vertices directly ON the edge, ignoring the edge's endpoints
         return geometry.vertices.filter((vertex) => {
             if (edgeV1 === vertex || edgeV2 === vertex) { return; }
