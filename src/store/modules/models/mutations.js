@@ -25,5 +25,8 @@ export default {
         if ('name' in payload) {
             payload.space.name = payload.name;
         }
+        if ('face_id' in payload) {
+            payload.space.face_id = payload.face_id;
+        }
     }
 }

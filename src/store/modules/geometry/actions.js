@@ -101,10 +101,13 @@ export default {
             };
         }));
         context.commit('createFace', {
-            space: space,
             face: face,
             geometry: geometry
         });
+        context.commit('models/updateSpaceWithData', {
+            space: space,
+            face_id: face.id
+        }, { root: true });
 
         // edge splitting logic for an explicit split (edge turned blue when point was drawn)
         // split any edges that the new face shares with existing faces

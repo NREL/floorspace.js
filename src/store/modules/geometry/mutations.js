@@ -20,7 +20,6 @@ export default {
     },
     createFace (state, payload) {
         payload.geometry.faces.push(payload.face);
-        payload.space.face_id = payload.face.id;
     },
 
     destroyVertex (state, payload) {
@@ -44,6 +43,7 @@ export default {
         payload.geometry.faces.splice(payload.geometry.faces.findIndex((f) => {
             return f.id === payload.space.face_id;
         }), 1);
+        
         payload.space.face_id = null;
     }
 }
