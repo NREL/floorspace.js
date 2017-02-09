@@ -126,10 +126,8 @@ export default {
         function splittingVertices () {
             var ct = 0;
             geometry.edges.forEach((edge) => {
-                const verticesOnEdge = helpers.verticesOnEdge(edge, geometry);
                 ct += helpers.verticesOnEdge(edge, geometry).length;
             });
-            console.log(geometry.edges.length, ct);
             return ct;
         }
         var splitcount = splittingVertices();
@@ -147,13 +145,9 @@ export default {
             splitcount = splittingVertices();
         }
 
-
-
-
         // if the faces which were originally snapped to still exist, normalize their edges
         geometry.faces.forEach((affectedFace) => {
             const normalizeEdges = helpers.normalizedEdges(affectedFace, geometry);
-            console.log(helpers.dc(affectedFace), helpers.dc(normalizeEdges));
             context.commit('setEdgeRefsForFace', {
                 face: affectedFace,
                 edgeRefs: normalizeEdges
