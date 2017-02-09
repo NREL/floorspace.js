@@ -194,6 +194,10 @@ const helpers = {
 
                 const nextEdge = this.edgeForId(edgeRef.edge_id, geometry);
                 if (nextEdge.v1 === currentEdgeEndpoint || nextEdge.v2 === currentEdgeEndpoint) {
+                    if (normalizedEdgeRefs.map(eR => eR.edge_id).indexOf(nextEdge.id) !== -1) {
+                        debugger
+                        return
+                    }
                     reverse = nextEdge.v1 === currentEdgeEndpoint ? false : true;
                     return true;
                 }

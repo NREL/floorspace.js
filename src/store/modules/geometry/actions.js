@@ -16,6 +16,7 @@ export default {
 
         // set of points to translate to vertices when creating the new face
         var points = payload.points;
+        if (payload.points.length < 3) { return; }
 
         // if the space already had an associated face, run through set operations
         if (space.face_id) {

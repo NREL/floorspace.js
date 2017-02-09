@@ -28,13 +28,6 @@ export default {
         }), 1);
     },
     destroyEdge (state, payload) {
-        helpers.facesForEdge(payload.edge_id, payload.geometry).forEach((face) => {
-            // remove references to the edge being destroyed
-            face.edgeRefs.splice(face.edgeRefs.findIndex((edgeRef) => {
-                return edgeRef.edge_id === payload.edge_id;
-            }), 1);
-        });
-
         payload.geometry.edges.splice(payload.geometry.edges.findIndex((e) => {
             return e.id === payload.edge_id;
         }), 1);
