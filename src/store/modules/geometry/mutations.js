@@ -39,11 +39,16 @@ export default {
             return e.id === payload.edge_id;
         }), 1);
     },
+    destroyEdgeRef (state, payload) {
+        payload.face.edgeRefs.splice(payload.face.edgeRefs.findIndex((edgeRef) => {
+            return edgeRef.edge_id === payload.edge_id;
+        }), 1);
+    },
     destroyFace (state, payload) {
         payload.geometry.faces.splice(payload.geometry.faces.findIndex((f) => {
             return f.id === payload.space.face_id;
         }), 1);
-        
+
         payload.space.face_id = null;
     }
 }

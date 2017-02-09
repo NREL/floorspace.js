@@ -123,14 +123,40 @@ export default {
             }
         });
 
-        // loop through all edges and divide them at any non endpoint vertices they contain
-        geometry.edges.forEach((edge) => {
-            // vertices dividing the current edge
-            helpers.verticesOnEdge(edge, geometry).forEach((splittingVertex) => {
-                context.dispatch('splitEdge', {
-                    vertex: splittingVertex,
-                    edge: edge
+        function splittingVertices () {
+            var ct = 0;
+            geometry.edges.forEach((edge) => {
+                const verticesOnEdge = helpers.verticesOnEdge(edge, geometry);
+                ct += helpers.verticesOnEdge(edge, geometry).length;
+            });
+            console.log(geometry.edges.length, ct);
+            return ct;
+        }
+        var splitcount = splittingVertices();
+        while (splitcount) {
+            // loop through all edges and divide them at any non endpoint vertices they contain
+            geometry.edges.forEach((edge) => {
+                // vertices dividing the current edge
+                helpers.verticesOnEdge(edge, geometry).forEach((splittingVertex) => {
+                    context.dispatch('splitEdge', {
+                        vertex: splittingVertex,
+                        edge: edge
+                    });
                 });
+            });
+            splitcount = splittingVertices();
+        }
+
+
+
+
+        // if the faces which were originally snapped to still exist, normalize their edges
+        geometry.faces.forEach((affectedFace) => {
+            const normalizeEdges = helpers.normalizedEdges(affectedFace, geometry);
+            console.log(helpers.dc(affectedFace), helpers.dc(normalizeEdges));
+            context.commit('setEdgeRefsForFace', {
+                face: affectedFace,
+                edgeRefs: normalizeEdges
             });
         });
     },
@@ -189,54 +215,44 @@ export default {
                     reverse: false
                 }
             });
+
+            // remove references to the edge being split
+            context.commit('destroyEdgeRef', {
+                edge_id: payload.edge.id,
+                face: face
+            });
         });
 
         // remove references to the edge being split
-        context.commit('destroyEdge', {
+        context.dispatch('destroyEdge', {
             geometry: geometry,
             edge_id: payload.edge.id
-        });
-
-        // if the faces which were originally snapped to still exist, normalize their edges
-        affectedFaces.forEach((affectedFace) => {
-            const normalizeEdges = helpers.normalizedEdges(affectedFace, geometry);
-            context.commit('setEdgeRefsForFace', {
-                face: affectedFace,
-                edgeRefs: normalizeEdges
-            });
         });
     },
 
     destroyFace (context, payload) {
-        const geometry = payload.geometry;
-        const space = payload.space;
-        const expFace = helpers.faceForId(space.face_id, geometry);
+        const geometry = payload.geometry,
+            space = payload.space,
+            expFace = helpers.faceForId(space.face_id, geometry);
 
-        // delete associated vertices
-        // filter edges referenced by only the face being destroyed so that no shared edges are destroyed
-        var expVertices = helpers.verticesforFace(expFace, geometry).filter((vertex) => {
-            return helpers.facesForVertex(vertex.id, geometry).length === 1;
-        });
-
-        expVertices.forEach((vertex) => {
-            context.commit('destroyVertex', {
-                geometry: geometry,
-                vertex_id: vertex.id
+        // filter vertices referenced by only the face being destroyed so that no shared edges are destroyed
+        const expVertices = helpers.verticesforFace(expFace, geometry).filter((vertex) => {
+            var facesForVertex = helpers.facesForVertex(vertex.id, geometry);
+            helpers.edgesForVertex(vertex.id, geometry).forEach((edge) => {
+                helpers.facesForEdge(edge.id, geometry).forEach((face) => {
+                    if (facesForVertex.map(f => f.id).indexOf(face.id) === -1) {
+                        console.log(face.id);
+                        facesForVertex.push(face.id);
+                    }
+                });
             });
+
+            return helpers.facesForVertex(vertex.id, geometry).length === 1 && helpers.edgesForVertex(vertex.id, geometry).length === 2;
         });
 
-        // delete associated edges
-        var expEdgeRefs = expFace.edgeRefs;
         // filter edges referenced by only the face being destroyed so that no shared edges are destroyed
-        expEdgeRefs = expEdgeRefs.filter((edgeRef) => {
+        const expEdgeRefs = expFace.edgeRefs.filter((edgeRef) => {
             return helpers.facesForEdge(edgeRef.edge_id, geometry).length === 1;
-        });
-
-        expEdgeRefs.forEach((edgeRef) => {
-            context.commit('destroyEdge', {
-                geometry: geometry,
-                edge_id: edgeRef.edge_id
-            });
         });
 
         context.commit('destroyFace', {
@@ -244,5 +260,46 @@ export default {
             space: space,
             face_id: expFace.id
         });
+
+        // delete associated edges
+        expEdgeRefs.forEach((edgeRef) => {
+            context.dispatch('destroyEdge', {
+                geometry: geometry,
+                edge_id: edgeRef.edge_id
+            });
+        });
+
+        // delete associated vertices
+        expVertices.forEach((vertex) => {
+            context.dispatch('destroyVertex', {
+                geometry: geometry,
+                vertex_id: vertex.id
+            });
+        });
+    },
+
+    destroyVertex (context, payload) {
+        const edgesForVertex = helpers.edgesForVertex(payload.vertex_id, payload.geometry);
+        if (edgesForVertex.length) {
+            debugger
+            console.error("Attempting to delete vertex " + payload.vertex_id + " referenced by edges: ", helpers.dc(edgesForVertex));
+            //throw "Attempting to delete vertex " + payload.vertex_id + " referenced by edges^ ";
+        }
+        context.commit('destroyVertex', {
+            geometry: payload.geometry,
+            vertex_id: payload.vertex_id
+        });
+    },
+    destroyEdge (context, payload) {
+        const facesForEdge = helpers.facesForEdge(payload.edge_id, payload.geometry);
+        if (facesForEdge.length) {
+            console.error("Attempting to delete edge " + payload.edge_id + " referenced by faces: ", helpers.dc(facesForEdge));
+            //throw "Attempting to delete edge " + payload.edge_id + " referenced by faces^";
+        }
+        context.commit('destroyEdge', {
+            geometry: payload.geometry,
+            edge_id: payload.edge_id
+        });
     }
+
 }

@@ -67,7 +67,7 @@ const helpers = {
 
         // look up all vertices directly ON the edge, ignoring the edge's endpoints
         return geometry.vertices.filter((vertex) => {
-            if (edgeV1 === vertex || edgeV2 === vertex) { return; }
+            if ((edgeV1.x === vertex.x && edgeV1.y === vertex.y) || (edgeV2.x === vertex.x && edgeV2.y === vertex.y)) { return; }
             return this.projectToEdge(vertex, edgeV1, edgeV2).dist === 0;
         });
     },
@@ -198,6 +198,7 @@ const helpers = {
                     return true;
                 }
             });
+            if (!nextEdgeRef) { debugger; }
             // prevent direct mutation of state
             const nextEdgeRefCopy = JSON.parse(JSON.stringify(nextEdgeRef));
             // set the reverse property on the next edge depending on whether its v1 or v2 references the endpoint of the current edge
@@ -206,7 +207,11 @@ const helpers = {
             normalizedEdgeRefs.push(nextEdgeRefCopy);
         }
         return normalizedEdgeRefs;
+    },
+    dc (data) {
+        return JSON.parse(JSON.stringify(data));
     }
+
 };
 
 export default helpers;

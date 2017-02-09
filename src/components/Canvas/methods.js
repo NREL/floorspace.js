@@ -273,6 +273,8 @@ export default {
             const v1 = helpers.vertexForId(e.v1, geometry),
                 v2 = helpers.vertexForId(e.v2, geometry);
 
+            if (!v1 || !v2) { debugger; }
+            
             const edgeResult = helpers.projectToEdge(point, v1, v2);
             return edgeResult ? {
                 dist: edgeResult.dist,
