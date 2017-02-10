@@ -41,7 +41,7 @@ export default {
         payload.geometry.faces.splice(payload.geometry.faces.findIndex((f) => {
             return f.id === payload.space.face_id;
         }), 1);
-
+        console.log("destroying face: ", payload.space.face_id, "for space: ", payload.space.id);
         payload.space.face_id = null;
     }
 }

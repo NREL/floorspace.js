@@ -8,11 +8,11 @@ const helpers = {
         // TODO: this scaling feature could be useful for snapping, could calculate based on grid settings but we'd need to add an offset...
         return 100000;
     },
-    initClip (face1, paths, geometry) {
+    initClip (f1Paths, f2Paths, geometry) {
         const cpr = new ClipperLib.Clipper(),
             // TODO: when we add support for holes, pass them in as additional subject/clip paths
-            subj_paths = JSON.parse(JSON.stringify([this.verticesforFace(face1, geometry)])),
-            clip_paths = JSON.parse(JSON.stringify([paths.slice()]));
+            subj_paths = JSON.parse(JSON.stringify([f1Paths.slice()])),
+            clip_paths = JSON.parse(JSON.stringify([f2Paths.slice()]));
 
         ClipperLib.JS.ScaleUpPaths(subj_paths, this.clipScale());
         ClipperLib.JS.ScaleUpPaths(clip_paths, this.clipScale());
@@ -21,8 +21,21 @@ const helpers = {
         cpr.AddPaths(clip_paths, ClipperLib.PolyType.ptClip, true);
         return cpr;
     },
-    intersectionOfFaces (face1, paths, geometry) {
-        const cpr = this.initClip(face1, paths, geometry)
+    differenceOfFaces (f1Paths, f2Paths, geometry) {
+        const cpr = this.initClip(f1Paths, f2Paths, geometry)
+        var difference = new ClipperLib.Paths();
+        cpr.Execute(ClipperLib.ClipType.ctDifference, difference, ClipperLib.PolyFillType.pftEvenOdd, ClipperLib.PolyFillType.pftEvenOdd);
+        if (difference.length && difference[0].length) {
+            return difference[0].map((p) => {
+                return {
+                    x: p.X / this.clipScale(),
+                    y: p.Y / this.clipScale()
+                };
+            });
+        }
+    },
+    intersectionOfFaces (f1Paths, f2Paths, geometry) {
+        const cpr = this.initClip(f1Paths, f2Paths, geometry)
         var intersection = new ClipperLib.Paths();
         cpr.Execute(ClipperLib.ClipType.ctIntersection, intersection, ClipperLib.PolyFillType.pftEvenOdd, ClipperLib.PolyFillType.pftEvenOdd);
         if (intersection.length && intersection[0].length) {
@@ -34,8 +47,8 @@ const helpers = {
             });
         }
     },
-    unionOfFaces (face1, paths, geometry) {
-        const cpr = this.initClip(face1, paths, geometry)
+    unionOfFaces (f1Paths, f2Paths, geometry) {
+        const cpr = this.initClip(f1Paths, f2Paths, geometry)
         var union = new ClipperLib.Paths();
         cpr.Execute(ClipperLib.ClipType.ctUnion, union, ClipperLib.PolyFillType.pftEvenOdd, ClipperLib.PolyFillType.pftEvenOdd);
         if (union.length && union[0].length) {
@@ -53,14 +66,6 @@ const helpers = {
         * and create a single larger face
         */
     },
-    // check if a point is being created ON an existing edge
-    snappingEdgeForPoint (point, geometry) {
-        return geometry.edges.filter((edge) => {
-            const v1 = this.vertexForId(edge.v1, geometry),
-                v2 = this.vertexForId(edge.v2, geometry);
-            return this.projectToEdge(point, v1, v2).dist === 0;
-        });
-    },
     verticesOnEdge (edge, geometry) {
         const edgeV1 = this.vertexForId(edge.v1, geometry),
             edgeV2 = this.vertexForId(edge.v2, geometry);
@@ -68,7 +73,7 @@ const helpers = {
         // look up all vertices directly ON the edge, ignoring the edge's endpoints
         return geometry.vertices.filter((vertex) => {
             if ((edgeV1.x === vertex.x && edgeV1.y === vertex.y) || (edgeV2.x === vertex.x && edgeV2.y === vertex.y)) { return; }
-            return this.projectToEdge(vertex, edgeV1, edgeV2).dist === 0;
+            return this.projectToEdge(vertex, edgeV1, edgeV2).dist <= 1 / this.clipScale();
         });
     },
 
@@ -91,7 +96,7 @@ const helpers = {
             return this.edgeForId(edgeRef.edge_id, geometry);
         });
     },
-    verticesforFace (face, geometry) {
+    verticesForFace (face, geometry) {
         return face.edgeRefs.map((edgeRef) => {
             // look up the edge referenced by the face
             const edge = this.edgeForId(edgeRef.edge_id, geometry);
@@ -195,8 +200,8 @@ const helpers = {
                 const nextEdge = this.edgeForId(edgeRef.edge_id, geometry);
                 if (nextEdge.v1 === currentEdgeEndpoint || nextEdge.v2 === currentEdgeEndpoint) {
                     if (normalizedEdgeRefs.map(eR => eR.edge_id).indexOf(nextEdge.id) !== -1) {
-                        debugger
-                        return
+                        debugger;
+                        return;
                     }
                     reverse = nextEdge.v1 === currentEdgeEndpoint ? false : true;
                     return true;

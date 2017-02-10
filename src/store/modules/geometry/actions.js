@@ -18,16 +18,16 @@ export default {
         var points = payload.points;
         if (payload.points.length < 3) { return; }
 
+        // translate points to clipper's path format
+        const clipperPaths = points.map((p) => { return { X: p.x, Y: p.y }; })
         // if the space already had an associated face, run through set operations
         if (space.face_id) {
             // existing face
-            const existingFace = helpers.faceForId(space.face_id, geometry),
-                // translate points to clipper's path format
-                clipperPaths = points.map((p) => { return { X: p.x, Y: p.y }; })
+            const existingFace = helpers.faceForId(space.face_id, geometry);
 
             // use the union of the new and existing faces if the new face intersects the existing face
-            if (helpers.intersectionOfFaces(existingFace, clipperPaths, geometry)) {
-                points = helpers.unionOfFaces(existingFace, clipperPaths, geometry);
+            if (helpers.intersectionOfFaces(helpers.verticesForFace(existingFace, geometry), clipperPaths, geometry)) {
+                points = helpers.unionOfFaces(helpers.verticesForFace(existingFace, geometry), clipperPaths, geometry);
             }
 
             // TODO: use the union if the new face has an edge snapped to the existing face
@@ -38,6 +38,31 @@ export default {
                 'space': space
             });
         }
+
+        // check if the new face intersects any existing faces
+        geometry.faces.forEach((existingFace) => {
+            const existingFaceVertices = helpers.verticesForFace(existingFace, geometry),
+                overlap = helpers.intersectionOfFaces(existingFaceVertices, clipperPaths, geometry);
+            if (overlap) {
+                const affectedSpace = context.rootState.application.currentSelections.story.spaces.find((space) => {
+                    return space.face_id === existingFace.id;
+                });
+                if (!affectedSpace) { debugger; }
+                // destroy the existing face
+                context.dispatch('destroyFace', {
+                    'geometry': geometry,
+                    // look up the story associated with the face being updated
+                    'space': affectedSpace
+                });
+                const differenceOfFaces = helpers.differenceOfFaces(existingFaceVertices, clipperPaths, geometry);
+                if (differenceOfFaces) {
+                    context.dispatch('createFaceFromPoints', {
+                        'geometry': geometry,
+                        'points': differenceOfFaces
+                    });
+                }
+            }
+        })
 
         // build array of new and shared vertices for the face
         const faceVertices = points.map((p, i) => {
@@ -231,17 +256,7 @@ export default {
             expFace = helpers.faceForId(space.face_id, geometry);
 
         // filter vertices referenced by only the face being destroyed so that no shared edges are destroyed
-        const expVertices = helpers.verticesforFace(expFace, geometry).filter((vertex) => {
-            var facesForVertex = helpers.facesForVertex(vertex.id, geometry);
-            helpers.edgesForVertex(vertex.id, geometry).forEach((edge) => {
-                helpers.facesForEdge(edge.id, geometry).forEach((face) => {
-                    if (facesForVertex.map(f => f.id).indexOf(face.id) === -1) {
-                        console.log(face.id);
-                        facesForVertex.push(face.id);
-                    }
-                });
-            });
-
+        const expVertices = helpers.verticesForFace(expFace, geometry).filter((vertex) => {
             return helpers.facesForVertex(vertex.id, geometry).length === 1 && helpers.edgesForVertex(vertex.id, geometry).length === 2;
         });
 
@@ -276,7 +291,6 @@ export default {
     destroyVertex (context, payload) {
         const edgesForVertex = helpers.edgesForVertex(payload.vertex_id, payload.geometry);
         if (edgesForVertex.length) {
-            debugger
             console.error("Attempting to delete vertex " + payload.vertex_id + " referenced by edges: ", helpers.dc(edgesForVertex));
             //throw "Attempting to delete vertex " + payload.vertex_id + " referenced by edges^ ";
         }

@@ -1,4 +1,5 @@
 import factory from './factory.js'
+import Validator from './../../utilities/validator.js'
 
 export default {
     initStory (context) {
@@ -40,7 +41,7 @@ export default {
     // validate and update simple properties on the story, other actions will be used to add images, spaces, and windows to a story
     updateStoryWithData (context, payload) {
         const validatedPayload = { story: payload.story };
-        const validator = new factory.Validator(payload, validatedPayload);
+        const validator = new Validator(payload, validatedPayload);
 
         validator.validateLength('name', 1);
         validator.validateFloat('below_floor_plenum_height');
@@ -52,7 +53,7 @@ export default {
     // validate and update simple properties on the space
     updateSpaceWithData (context, payload) {
         const validatedPayload = { space: payload.space };
-        const validator = new factory.Validator(payload, validatedPayload);
+        const validator = new Validator(payload, validatedPayload);
 
         validator.validateLength('name', 1);
         context.commit('updateSpaceWithData', validator.validatedPayload);
