@@ -88,6 +88,7 @@ export default {
         if (this.currentMode === 'Rectangle' && this.points.length) {
             // if a rectangle is in progress, close the rectangle and convert it to a polygon
             this.$store.dispatch('geometry/createFaceFromPoints', {
+                space: this.currentSpace,
                 points: [
                     this.points[0],
                     {
@@ -147,6 +148,7 @@ export default {
             .on('click', () => {
                 // create a face in the data store from the points
                 this.$store.dispatch('geometry/createFaceFromPoints', {
+                    space: this.currentSpace,
                     points: this.points
                 });
                 // clear points, prevent a new point from being created by this click event
@@ -274,7 +276,7 @@ export default {
                 v2 = helpers.vertexForId(e.v2, geometry);
 
             if (!v1 || !v2) { debugger; }
-            
+
             const edgeResult = helpers.projectToEdge(point, v1, v2);
             return edgeResult ? {
                 dist: edgeResult.dist,

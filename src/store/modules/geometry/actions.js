@@ -12,7 +12,7 @@ export default {
     createFaceFromPoints (context, payload) {
         // geometry and space for the current story
         const geometry = context.rootGetters['application/currentStoryGeometry'];
-        const space = context.rootState.application.currentSelections.space;
+        const space = payload.space;
 
         // set of points to translate to vertices when creating the new face
         var points = payload.points;
@@ -47,7 +47,6 @@ export default {
                 const affectedSpace = context.rootState.application.currentSelections.story.spaces.find((space) => {
                     return space.face_id === existingFace.id;
                 });
-                if (!affectedSpace) { debugger; }
                 // destroy the existing face
                 context.dispatch('destroyFace', {
                     'geometry': geometry,
@@ -57,6 +56,7 @@ export default {
                 const differenceOfFaces = helpers.differenceOfFaces(existingFaceVertices, clipperPaths, geometry);
                 if (differenceOfFaces) {
                     context.dispatch('createFaceFromPoints', {
+                        'space': affectedSpace,
                         'geometry': geometry,
                         'points': differenceOfFaces
                     });
