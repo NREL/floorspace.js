@@ -21,6 +21,9 @@ const helpers = {
         cpr.AddPaths(clip_paths, ClipperLib.PolyType.ptClip, true);
         return cpr;
     },
+    areaOfFace (paths) {
+        return ClipperLib.JS.AreaOfPolygon(paths);
+    },
     differenceOfFaces (f1Paths, f2Paths, geometry) {
         const cpr = this.initClip(f1Paths, f2Paths, geometry)
         var difference = new ClipperLib.Paths();
@@ -198,12 +201,17 @@ const helpers = {
                 if (edgeRef.edge_id === currentEdge.id) { return; }
 
                 const nextEdge = this.edgeForId(edgeRef.edge_id, geometry);
-                if (nextEdge.v1 === currentEdgeEndpoint || nextEdge.v2 === currentEdgeEndpoint) {
+                const currentEdgeEndpointVertex = this.vertexForId(currentEdgeEndpoint, geometry),
+                    nextEdgeVertex1 = this.vertexForId(nextEdge.v1, geometry),
+                    nextEdgeVertex2 = this.vertexForId(nextEdge.v2, geometry);
+
+                if ((nextEdgeVertex1.x === currentEdgeEndpointVertex.x && nextEdgeVertex1.y === currentEdgeEndpointVertex.y) ||
+                    (nextEdgeVertex2.x === currentEdgeEndpointVertex.x && nextEdgeVertex2.y === currentEdgeEndpointVertex.y)) {
                     if (normalizedEdgeRefs.map(eR => eR.edge_id).indexOf(nextEdge.id) !== -1) {
                         debugger;
                         return;
                     }
-                    reverse = nextEdge.v1 === currentEdgeEndpoint ? false : true;
+                    reverse = (nextEdgeVertex1.x === currentEdgeEndpointVertex.x && nextEdgeVertex1.y === currentEdgeEndpointVertex.y) ? false : true;
                     return true;
                 }
             });

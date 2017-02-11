@@ -19,7 +19,9 @@ export default {
         if (payload.points.length < 3) { return; }
 
         // translate points to clipper's path format
-        const clipperPaths = points.map((p) => { return { X: p.x, Y: p.y }; })
+        const clipperPaths = points.map((p) => { return { X: p.x, Y: p.y }; });
+        if (helpers.areaOfFace(clipperPaths) === 0) { return; }
+
         // if the space already had an associated face, run through set operations
         if (space.face_id) {
             // existing face
@@ -38,6 +40,7 @@ export default {
                 'space': space
             });
         }
+        // TODO: check that the face being created doesn't intersect itself
 
         // check if the new face intersects any existing faces
         geometry.faces.forEach((existingFace) => {
@@ -62,7 +65,7 @@ export default {
                     });
                 }
             }
-        })
+        });
 
         // build array of new and shared vertices for the face
         const faceVertices = points.map((p, i) => {
@@ -157,6 +160,7 @@ export default {
             return ct;
         }
         var splitcount = splittingVertices();
+        // TODO: fix infinite loop on self intersecting polygon shapes
         while (splitcount) {
             // loop through all edges and divide them at any non endpoint vertices they contain
             geometry.edges.forEach((edge) => {
@@ -244,10 +248,12 @@ export default {
         });
 
         // remove references to the edge being split
-        context.dispatch('destroyEdge', {
-            geometry: geometry,
-            edge_id: payload.edge.id
-        });
+        if (helpers.facesForEdge(payload.edge.id, geometry).length === 1) {
+            context.dispatch('destroyEdge', {
+                geometry: geometry,
+                edge_id: payload.edge.id
+            });
+        }
     },
 
     destroyFace (context, payload) {
@@ -291,8 +297,8 @@ export default {
     destroyVertex (context, payload) {
         const edgesForVertex = helpers.edgesForVertex(payload.vertex_id, payload.geometry);
         if (edgesForVertex.length) {
-            console.error("Attempting to delete vertex " + payload.vertex_id + " referenced by edges: ", helpers.dc(edgesForVertex));
-            //throw "Attempting to delete vertex " + payload.vertex_id + " referenced by edges^ ";
+            console.error('Attempting to delete vertex ' + payload.vertex_id + ' referenced by edges: ', helpers.dc(edgesForVertex));
+            throw new Error();
         }
         context.commit('destroyVertex', {
             geometry: payload.geometry,
@@ -302,8 +308,8 @@ export default {
     destroyEdge (context, payload) {
         const facesForEdge = helpers.facesForEdge(payload.edge_id, payload.geometry);
         if (facesForEdge.length) {
-            console.error("Attempting to delete edge " + payload.edge_id + " referenced by faces: ", helpers.dc(facesForEdge));
-            //throw "Attempting to delete edge " + payload.edge_id + " referenced by faces^";
+            console.error('Attempting to delete edge ' + payload.edge_id + ' referenced by faces: ', helpers.dc(facesForEdge));
+            throw new Error();
         }
         context.commit('destroyEdge', {
             geometry: payload.geometry,
