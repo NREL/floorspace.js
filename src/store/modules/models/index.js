@@ -6,19 +6,18 @@ export default {
     state: {
         stories: [/*{
             id: null,
+            handle: null,
             name: null,
             geometry_id: null,
-            images: [],
-            handle: null,
             below_floor_plenum_height: 0,
             floor_to_ceiling_height: 0,
             multiplier: 0,
             spaces: [{
                 id: null,
                 name: null,
-                handle: null
+                handle: null,
                 face_id: null,
-                daylighting_control_refs: [{
+                daylighting_controls: [{
                     daylighting_control_id: null,
                     vertex_id: null
                 }],
@@ -30,7 +29,12 @@ export default {
             windows: [{
                 window_id: null,
                 vertex_id: null
-            }]
+            }],
+            shading: [{
+                name: null,
+                face_id: null
+            }],
+            image_ids: []
         }*/],
         // lib
         building_units: [],

@@ -9,7 +9,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
     <nav id="toolbar">
         <section class="tools">
-            <a>{{ mode }}</a>
         </section>
 
         <section class="settings">
@@ -39,6 +38,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 <input v-model.number.lazy="y_spacing">
             </div>
 
+            <button @click="exportData" id="export">Export</button>
+
             <div class="input-select" id="drawing-mode">
                 <label>mode</label>
                 <select v-model="mode">
@@ -66,6 +67,13 @@ export default {
     name: 'toolbar',
     data: function() {
         return {};
+    },
+    methods: {
+        exportData () {
+            const data = this.$store.getters['exportData'];
+            console.log(data);
+            return data;
+        }
     },
     computed: {
         ...mapState({ modes: state => state.application.modes }),
@@ -126,6 +134,15 @@ export default {
             div:first-child {
                 margin-left: 5rem;
             }
+        }
+        #export {
+            background-color: $gray-dark;
+            border: 1px solid $primary;
+            border-radius: 0.35rem;
+            color: $gray-light;
+            height: 2rem;
+            outline: none;
+            padding: 0 .75rem;
         }
 
         >div {

@@ -1,0 +1,113 @@
+{
+    "project": {
+        "config": {
+            "units": "ft",
+            "language": "EN-US",
+            "north_axis": 0
+        },
+        "grid": {
+            "visible": true,
+            "x_spacing": 1,
+            "y_spacing": 1
+        },
+        "view": {
+            "min_x": 0,
+            "min_y": 0,
+            "max_x": 10,
+            "max_y": 10
+        },
+        "map": {
+            "visible": false,
+            "latitude": null,
+            "longitude": null,
+            "elevation": 0
+        }
+    },
+    "stories": [{
+        "id": 0,
+        "handle": "",
+        "name": "",
+        "below_floor_plenum_height": 0,
+        "floor_to_ceiling_height": 0,
+        "multiplier": 0,
+        "geometry_id": "",
+        "spaces": [{
+            "id": 0,
+            "handle": "",
+            "name": "",
+            "face_id": "",
+            "building_unit_id": "",
+            "thermal_zone_id": "",
+            "space_type": "",
+            "construction_set_id": "",
+            "daylighting_controls": [{
+                "daylighting_control_id": "",
+                "vertex_id": ""
+            }]
+        }],
+        "shading": [{
+            "name": "",
+            "face_id": ""
+        }],
+        "windows": [{
+            "window_id": "",
+            "vertex_id": ""
+        }],
+        "image_ids": []
+    }],
+    "geometry": [{
+        "id": 0,
+        "vertices": [{
+            "id": 0,
+            "x": 0,
+            "y": 0,
+            "edge_ids": []
+        }],
+        "edges": [{
+            "id": 0,
+            "vertex_ids": [],
+            "face_ids": []
+        }],
+        "faces": [{
+            "id": 0,
+            "edge_ids": [],
+            "edge_order": []
+        }]
+    }],
+    "images": [{
+        "id": 0
+    }],
+    "building_units": [{
+        "id": 0,
+        "name": "",
+        "face_id": ""
+    }],
+    "thermal_zones": [{
+        "id": 0,
+        "name": "",
+        "face_id": ""
+    }],
+    "space_types": [{
+        "id": 0,
+        "name": "",
+        "face_id": ""
+    }],
+    "constructions": [{
+        "id": 0,
+        "handle": "",
+        "name": ""
+    }],
+    "construction_sets": [{
+        "id": 0,
+        "handle": "",
+        "name": ""
+    }],
+    "windows": [{
+        "id": 0,
+        "name": ""
+    }],
+    "daylighting_controls": [{
+        "id": 0,
+        "name": ""
+    }]
+}
