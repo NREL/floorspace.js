@@ -125,6 +125,9 @@ export default {
             };
         }));
 
+        const normalizedEdges = helpers.normalizedEdges(face, currentStoryGeometry);
+        face.edgeRefs = normalizedEdges;
+
         context.commit('createFace', {
             face: face,
             geometry: currentStoryGeometry
@@ -134,20 +137,6 @@ export default {
             space: payload.space,
             face_id: face.id
         }, { root: true });
-
-        // edge splitting logic for an explicit split (edge turned blue when point was drawn)
-        // split any edges that the new face shares with existing faces
-        points.forEach((p, i) => {
-            // when a point is snapped to an edge, this property will be set on the point
-            // make sure the edge being split still exists and wasn't destroyed in the earlier 'destroyFace' dispatch
-            if (p.splittingEdge && ~currentStoryGeometry.edges.indexOf(p.splittingEdge)) {
-                context.dispatch('splitEdge', {
-                    // the vertex that was created where the edge will be split - look up by location
-                    vertex: currentStoryGeometry.vertices.find((v) => { return v.x === p.x && v.y === p.y; }),
-                    edge: p.splittingEdge
-                });
-            }
-        });
 
         function splittingVertices () {
             var ct = 0;
@@ -245,7 +234,7 @@ export default {
         });
 
         // remove references to the edge being split
-        if (helpers.facesForEdge(payload.edge.id, geometry).length === 1) {
+        if (helpers.facesForEdge(payload.edge.id, geometry).length < 2) {
             context.dispatch('destroyEdge', {
                 geometry: geometry,
                 edge_id: payload.edge.id
