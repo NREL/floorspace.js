@@ -1,113 +1,382 @@
 {
-    "project": {
-        "config": {
-            "units": "ft",
-            "language": "EN-US",
-            "north_axis": 0
+    "project":{
+        "config":{
+            "units":"ft",
+            "language":"EN-US",
+            "north_axis":0
         },
-        "grid": {
-            "visible": true,
-            "x_spacing": 1,
-            "y_spacing": 1
+        "grid":{
+            "visible":true,
+            "x_spacing":5,
+            "y_spacing":5
         },
-        "view": {
-            "min_x": 0,
-            "min_y": 0,
-            "max_x": 10,
-            "max_y": 10
+        "view":{
+            "min_x":0,
+            "min_y":0,
+            "max_x":20,
+            "max_y":20
         },
-        "map": {
-            "visible": false,
-            "latitude": null,
-            "longitude": null,
-            "elevation": 0
+        "map":{
+            "visible":false,
+            "latitude":null,
+            "longitude":null,
+            "elevation":0
         }
     },
-    "stories": [{
-        "id": 0,
-        "handle": "",
-        "name": "",
-        "below_floor_plenum_height": 0,
-        "floor_to_ceiling_height": 0,
-        "multiplier": 0,
-        "geometry_id": "",
-        "spaces": [{
-            "id": 0,
-            "handle": "",
-            "name": "",
-            "face_id": "",
-            "building_unit_id": "",
-            "thermal_zone_id": "",
-            "space_type": "",
-            "construction_set_id": "",
-            "daylighting_controls": [{
-                "daylighting_control_id": "",
-                "vertex_id": ""
-            }]
-        }],
-        "shading": [{
-            "name": "",
-            "face_id": ""
-        }],
-        "windows": [{
-            "window_id": "",
-            "vertex_id": ""
-        }],
-        "image_ids": []
-    }],
-    "geometry": [{
-        "id": 0,
-        "vertices": [{
-            "id": 0,
-            "x": 0,
-            "y": 0,
-            "edge_ids": []
-        }],
-        "edges": [{
-            "id": 0,
-            "vertex_ids": [],
-            "face_ids": []
-        }],
-        "faces": [{
-            "id": 0,
-            "edge_ids": [],
-            "edge_order": []
-        }]
-    }],
-    "images": [{
-        "id": 0
-    }],
-    "building_units": [{
-        "id": 0,
-        "name": "",
-        "face_id": ""
-    }],
-    "thermal_zones": [{
-        "id": 0,
-        "name": "",
-        "face_id": ""
-    }],
-    "space_types": [{
-        "id": 0,
-        "name": "",
-        "face_id": ""
-    }],
-    "constructions": [{
-        "id": 0,
-        "handle": "",
-        "name": ""
-    }],
-    "construction_sets": [{
-        "id": 0,
-        "handle": "",
-        "name": ""
-    }],
-    "windows": [{
-        "id": 0,
-        "name": ""
-    }],
-    "daylighting_controls": [{
-        "id": 0,
-        "name": ""
-    }]
+    "geometry":[
+        {
+            "id":3,
+            "vertices":[
+                {
+                    "id":"4",
+                    "x":2,
+                    "y":2,
+                    "edge_ids":[
+                        "8",
+                        "11"
+                    ]
+                },
+                {
+                    "id":"5",
+                    "x":4,
+                    "y":2,
+                    "edge_ids":[
+                        "8",
+                        "9"
+                    ]
+                },
+                {
+                    "id":"6",
+                    "x":4,
+                    "y":8,
+                    "edge_ids":[
+                        "9",
+                        "10",
+                        "24"
+                    ]
+                },
+                {
+                    "id":"7",
+                    "x":2,
+                    "y":8,
+                    "edge_ids":[
+                        "10",
+                        "11",
+                        "25"
+                    ]
+                },
+                {
+                    "id":"14",
+                    "x":1,
+                    "y":8,
+                    "edge_ids":[
+                        "21",
+                        "25"
+                    ]
+                },
+                {
+                    "id":"15",
+                    "x":6,
+                    "y":8,
+                    "edge_ids":[
+                        "19",
+                        "24"
+                    ]
+                },
+                {
+                    "id":"16",
+                    "x":6,
+                    "y":9,
+                    "edge_ids":[
+                        "19",
+                        "20"
+                    ]
+                },
+                {
+                    "id":"17",
+                    "x":1,
+                    "y":9,
+                    "edge_ids":[
+                        "20",
+                        "21"
+                    ]
+                }
+            ],
+            "edges":[
+                {
+                    "id":"8",
+                    "vertex_ids":[
+                        "4",
+                        "5"
+                    ],
+                    "face_ids":[
+                        "12"
+                    ]
+                },
+                {
+                    "id":"9",
+                    "vertex_ids":[
+                        "5",
+                        "6"
+                    ],
+                    "face_ids":[
+                        "12"
+                    ]
+                },
+                {
+                    "id":"10",
+                    "vertex_ids":[
+                        "6",
+                        "7"
+                    ],
+                    "face_ids":[
+                        "12",
+                        "22"
+                    ]
+                },
+                {
+                    "id":"11",
+                    "vertex_ids":[
+                        "7",
+                        "4"
+                    ],
+                    "face_ids":[
+                        "12"
+                    ]
+                },
+                {
+                    "id":"19",
+                    "vertex_ids":[
+                        "15",
+                        "16"
+                    ],
+                    "face_ids":[
+                        "22"
+                    ]
+                },
+                {
+                    "id":"20",
+                    "vertex_ids":[
+                        "16",
+                        "17"
+                    ],
+                    "face_ids":[
+                        "22"
+                    ]
+                },
+                {
+                    "id":"21",
+                    "vertex_ids":[
+                        "17",
+                        "14"
+                    ],
+                    "face_ids":[
+                        "22"
+                    ]
+                },
+                {
+                    "id":"24",
+                    "vertex_ids":[
+                        "6",
+                        "15"
+                    ],
+                    "face_ids":[
+                        "22"
+                    ]
+                },
+                {
+                    "id":"25",
+                    "vertex_ids":[
+                        "14",
+                        "7"
+                    ],
+                    "face_ids":[
+                        "22"
+                    ]
+                }
+            ],
+            "faces":[
+                {
+                    "id":"12",
+                    "edge_ids":[
+                        "8",
+                        "9",
+                        "10",
+                        "11"
+                    ],
+                    "edge_order":[
+                        1,
+                        1,
+                        1,
+                        1
+                    ]
+                },
+                {
+                    "id":"22",
+                    "edge_ids":[
+                        "19",
+                        "20",
+                        "21",
+                        "25",
+                        "10",
+                        "24"
+                    ],
+                    "edge_order":[
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        1
+                    ]
+                }
+            ]
+        }
+    ],
+    "stories":[
+        {
+            "id":"1",
+            "handle":null,
+            "name":"Story 1",
+            "geometry_id":"3",
+            "below_floor_plenum_height":0,
+            "floor_to_ceiling_height":0,
+            "multiplier":0,
+            "spaces":[
+                {
+                    "id":"2",
+                    "name":"Space 1",
+                    "handle":null,
+                    "face_id":"12",
+                    "daylighting_controls":[
+
+                    ],
+                    "building_unit_id":null,
+                    "thermal_zone_id":null,
+                    "space_type_id":null,
+                    "construction_set_id":null
+                },
+                {
+                    "id":"13",
+                    "name":"Space 2",
+                    "handle":null,
+                    "face_id":"22",
+                    "daylighting_controls":[
+
+                    ],
+                    "building_unit_id":null,
+                    "thermal_zone_id":null,
+                    "space_type_id":null,
+                    "construction_set_id":null
+                }
+            ],
+            "windows":[
+
+            ],
+            "shading":[
+
+            ],
+            "image_ids":[
+
+            ]
+        },
+        {
+            "id":"27",
+            "handle":null,
+            "name":"Story 2",
+            "geometry_id":"29",
+            "below_floor_plenum_height":0,
+            "floor_to_ceiling_height":0,
+            "multiplier":0,
+            "spaces":[
+                {
+                    "id":"28",
+                    "name":"Space 1",
+                    "handle":null,
+                    "face_id":"38",
+                    "daylighting_controls":[
+
+                    ],
+                    "building_unit_id":null,
+                    "thermal_zone_id":null,
+                    "space_type_id":null,
+                    "construction_set_id":null
+                },
+                {
+                    "id":"39",
+                    "name":"Space 2",
+                    "handle":null,
+                    "face_id":"48",
+                    "daylighting_controls":[
+
+                    ],
+                    "building_unit_id":null,
+                    "thermal_zone_id":null,
+                    "space_type_id":null,
+                    "construction_set_id":null
+                }
+            ],
+            "windows":[
+
+            ],
+            "shading":[
+
+            ],
+            "image_ids":[
+
+            ]
+        }
+    ],
+    "images":[
+        {
+            "id":0
+        }
+    ],
+    "building_units":[
+        {
+            "id":"0",
+            "name":"",
+            "face_id":""
+        }
+    ],
+    "thermal_zones":[
+        {
+            "id":"0",
+            "name":"",
+            "face_id":""
+        }
+    ],
+    "space_types":[
+        {
+            "id":"0",
+            "name":"",
+            "face_id":""
+        }
+    ],
+    "constructions":[
+        {
+            "id":"0",
+            "handle":"",
+            "name":""
+        }
+    ],
+    "construction_sets":[
+        {
+            "id":"0",
+            "handle":"",
+            "name":""
+        }
+    ],
+    "windows":[
+        {
+            "id":"0",
+            "name":""
+        }
+    ],
+    "daylighting_controls":[
+        {
+            "id":"0",
+            "name":""
+        }
+    ]
 }
