@@ -19,7 +19,6 @@ export default {
 
         // validation - a face must have at least 3 vertices and area
         if (payload.points.length < 3 || ! helpers.areaOfFace(clipperPaths)) { return; }
-        // TODO: check that the face being created doesn't intersect itself
 
         /*
         * if the space already has an existing face, destroy it
@@ -29,9 +28,14 @@ export default {
             const existingFace = helpers.faceForId(payload.space.face_id, currentStoryGeometry),
                 existingFaceVertices = helpers.verticesForFace(existingFace, currentStoryGeometry);
 
-            context.dispatch('destroyFace', {
+            context.commit('models/updateSpaceWithData', {
+                space: payload.space,
+                face_id: null
+            }, { root: true });
+
+            context.dispatch('destroyFaceAndDescendents', {
                 geometry: currentStoryGeometry,
-                space: payload.space
+                face: existingFace
             });
 
             if (helpers.intersectionOfFaces(existingFaceVertices, clipperPaths, currentStoryGeometry)) {
@@ -53,9 +57,15 @@ export default {
                 const affectedSpace = context.rootState.application.currentSelections.story.spaces.find((space) => {
                     return space.face_id === existingFace.id;
                 });
-                context.dispatch('destroyFace', {
+
+                context.commit('models/updateSpaceWithData', {
+                    space: affectedSpace,
+                    face_id: null
+                }, { root: true });
+
+                context.dispatch('destroyFaceAndDescendents', {
                     geometry: currentStoryGeometry,
-                    space: affectedSpace
+                    face: existingFace
                 });
 
                 const differenceOfFaces = helpers.differenceOfFaces(existingFaceVertices, clipperPaths, currentStoryGeometry);
@@ -87,7 +97,11 @@ export default {
             }
         });
 
-        // track the indexes of shared edges which will be reversed on the new face (we don't want to directly mutate the edge object with a marker value)
+        /*
+        * track the indexes of shared edges which will be reversed on the new face
+        * we don't want to directly mutate the edge object with a marker value
+        * TODO: consider running a deep copy instead?
+        */
         const reverseEdgeIndices = [];
 
         // build an array of edges for the face based on the set of vertices
@@ -149,9 +163,15 @@ export default {
             for (var j = 0; j < edgeVertices.length; j++) {
                 const edgeVertex = edgeVertices[j];
                 if (verticesForFace.indexOf(edgeVertex) !== -1) {
-                    context.dispatch('destroyFace', {
+
+                    context.commit('models/updateSpaceWithData', {
+                        space: payload.space,
+                        face_id: null
+                    }, { root: true });
+
+                    context.dispatch('destroyFaceAndDescendents', {
                         geometry: currentStoryGeometry,
-                        space: payload.space
+                        face: face
                     });
                     return;
                 }
@@ -163,9 +183,14 @@ export default {
                     return v.id === vertex.id;
                 }).length > 1;
                 if (hasDuplicateVertices) {
-                    context.dispatch('destroyFace', {
+                    context.commit('models/updateSpaceWithData', {
+                        space: payload.space,
+                        face_id: null
+                    }, { root: true });
+
+                    context.dispatch('destroyFaceAndDescendents', {
                         geometry: currentStoryGeometry,
-                        space: payload.space
+                        face: face
                     });
                     return;
                 }
@@ -278,10 +303,9 @@ export default {
         }
     },
 
-    destroyFace (context, payload) {
+    destroyFaceAndDescendents (context, payload) {
         const geometry = payload.geometry,
-            space = payload.space,
-            expFace = helpers.faceForId(space.face_id, geometry);
+            expFace = payload.face;
 
         // filter vertices referenced by only the face being destroyed so that no shared edges are destroyed
         const expVertices = helpers.verticesForFace(expFace, geometry).filter((vertex) => {
@@ -293,9 +317,8 @@ export default {
             return helpers.facesForEdge(edgeRef.edge_id, geometry).length === 1;
         });
 
-        context.commit('destroyFace', {
+        context.dispatch('destroyFace', {
             geometry: geometry,
-            space: space,
             face_id: expFace.id
         });
 
@@ -313,6 +336,20 @@ export default {
                 geometry: geometry,
                 vertex_id: vertex.id
             });
+        });
+    },
+
+    destroyFace (context, payload) {
+        const faceSpace = context.rootState.application.currentSelections.story.spaces.find((space) => {
+            return space.face_id === payload.face_id;
+        });
+        if (faceSpace) {
+            console.error('Attempting to delete face ' + payload.face_id + ' referenced by space: ', helpers.dc(faceSpace));
+            throw new Error();
+        }
+        context.commit('destroyFace', {
+            geometry: payload.geometry,
+            face_id: payload.face_id
         });
     },
 
