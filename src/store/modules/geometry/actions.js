@@ -125,9 +125,6 @@ export default {
             };
         }));
 
-        const normalizedEdges = helpers.normalizedEdges(face, currentStoryGeometry);
-        face.edgeRefs = normalizedEdges;
-
         context.commit('createFace', {
             face: face,
             geometry: currentStoryGeometry
@@ -137,6 +134,45 @@ export default {
             space: payload.space,
             face_id: face.id
         }, { root: true });
+
+
+        /*
+        * Check that the face doesn't intersect itself
+        * TODO: prevent duplicate vertex refs on the same face
+        */
+        const edgesForFace = helpers.edgesForFace(face, currentStoryGeometry);
+        for (var i = 0; i < edgesForFace.length; i++) {
+            const edge = edgesForFace[i],
+                verticesForFace = helpers.verticesForFace(face, currentStoryGeometry),
+                edgeVertices = helpers.verticesOnEdge(edge, currentStoryGeometry);
+
+            for (var j = 0; j < edgeVertices.length; j++) {
+                const edgeVertex = edgeVertices[j];
+                if (verticesForFace.indexOf(edgeVertex) !== -1) {
+                    context.dispatch('destroyFace', {
+                        geometry: currentStoryGeometry,
+                        space: payload.space
+                    });
+                    return;
+                }
+            }
+
+            for (var j = 0; j < verticesForFace.length; j++) {
+                const vertex = verticesForFace[j];
+                const hasDuplicateVertices = verticesForFace.filter((v) => {
+                    return v.id === vertex.id;
+                }).length > 1;
+                if (hasDuplicateVertices) {
+                    context.dispatch('destroyFace', {
+                        geometry: currentStoryGeometry,
+                        space: payload.space
+                    });
+                    return;
+                }
+            }
+
+        }
+
 
         function splittingVertices () {
             var ct = 0;
