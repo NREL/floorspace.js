@@ -139,17 +139,6 @@ export default {
             };
         }));
 
-        context.commit('createFace', {
-            face: face,
-            geometry: currentStoryGeometry
-        });
-
-        context.commit('models/updateSpaceWithData', {
-            space: payload.space,
-            face_id: face.id
-        }, { root: true });
-
-
         /*
         * Check that the face doesn't intersect itself
         * TODO: prevent duplicate vertex refs on the same face
@@ -160,15 +149,22 @@ export default {
                 verticesForFace = helpers.verticesForFace(face, currentStoryGeometry),
                 edgeVertices = helpers.verticesOnEdge(edge, currentStoryGeometry);
 
+            // check for duplicate edges
+            const duplicates = edgesForFace.filter((e) => {
+                if (e.id === edge.id) { return; }
+                return (e.v1 === edge.v1 && e.v2 === edge.v2) || (e.v2 === edge.v1 && e.v1 === edge.v2);
+            });
+            if (duplicates.length) {
+                context.dispatch('destroyFaceAndDescendents', {
+                    geometry: currentStoryGeometry,
+                    face: face
+                });
+                return;
+            }
+
             for (var j = 0; j < edgeVertices.length; j++) {
                 const edgeVertex = edgeVertices[j];
                 if (verticesForFace.indexOf(edgeVertex) !== -1) {
-
-                    context.commit('models/updateSpaceWithData', {
-                        space: payload.space,
-                        face_id: null
-                    }, { root: true });
-
                     context.dispatch('destroyFaceAndDescendents', {
                         geometry: currentStoryGeometry,
                         face: face
@@ -183,11 +179,6 @@ export default {
                     return v.id === vertex.id;
                 }).length > 1;
                 if (hasDuplicateVertices) {
-                    context.commit('models/updateSpaceWithData', {
-                        space: payload.space,
-                        face_id: null
-                    }, { root: true });
-
                     context.dispatch('destroyFaceAndDescendents', {
                         geometry: currentStoryGeometry,
                         face: face
@@ -195,8 +186,18 @@ export default {
                     return;
                 }
             }
-
         }
+
+        context.commit('createFace', {
+            face: face,
+            geometry: currentStoryGeometry
+        });
+
+        context.commit('models/updateSpaceWithData', {
+            space: payload.space,
+            face_id: face.id
+        }, { root: true });
+
 
 
         function splittingVertices () {
@@ -306,15 +307,15 @@ export default {
     destroyFaceAndDescendents (context, payload) {
         const geometry = payload.geometry,
             expFace = payload.face;
-
+ 
         // filter vertices referenced by only the face being destroyed so that no shared edges are destroyed
         const expVertices = helpers.verticesForFace(expFace, geometry).filter((vertex) => {
-            return helpers.facesForVertex(vertex.id, geometry).length === 1 && helpers.edgesForVertex(vertex.id, geometry).length === 2;
+            return helpers.facesForVertex(vertex.id, geometry).length < 2;
         });
 
         // filter edges referenced by only the face being destroyed so that no shared edges are destroyed
         const expEdgeRefs = expFace.edgeRefs.filter((edgeRef) => {
-            return helpers.facesForEdge(edgeRef.edge_id, geometry).length === 1;
+            return helpers.facesForEdge(edgeRef.edge_id, geometry).length < 2;
         });
 
         context.dispatch('destroyFace', {

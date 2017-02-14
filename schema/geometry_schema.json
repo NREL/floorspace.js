@@ -4,16 +4,24 @@
 	"type": "object",
 	"properties": {
 		"project": {
-			"type": "object"
+			"type": "object",
+			"properties": {
+				"grid": {
+					"type": "object"
+				},
+				"view": {
+					"type": "object"
+				},
+				"map": {
+					"type": "object"
+				}
+			}
 		},
-		"grid": {
-			"type": "object"
-		},
-		"view": {
-			"type": "object"
-		},
-		"map": {
-			"type": "object"
+		"geometry": {
+			"type": "array",
+			"items": {
+				"$ref": "#/definitions/Geometry"
+			}
 		},
 		"stories": {
 			"type": "array",
@@ -48,12 +56,21 @@
 						"type": "string"
 					},
 					"handle": {
-						"type": "string"
+						"type": [
+							"string",
+							"null"
+						]
 					},
 					"name": {
-						"type": "string"
+						"type": [
+							"string",
+							"null"
+						]
 					}
-				}
+				},
+				"required": [
+					"id"
+				]
 			}
 		},
 		"construction_sets": {
@@ -97,7 +114,12 @@
 						"$ref": "#/definitions/Face"
 					}
 				}
-			}
+			},
+			"required": [
+				"vertices",
+				"edges",
+				"faces"
+			]
 		},
 		"Vertex": {
 			"type": "object",
@@ -111,13 +133,19 @@
 				"y": {
 					"type": "number"
 				},
-				"edges": {
+				"edge_ids": {
 					"type": "array",
 					"items": {
 						"type": "string"
 					}
 				}
-			}
+			},
+			"required": [
+				"id",
+				"x",
+				"y",
+				"edge_ids"
+			]
 		},
 		"Edge": {
 			"type": "object",
@@ -125,23 +153,29 @@
 				"id": {
 					"type": "string"
 				},
-				"vertices": {
+				"vertex_ids": {
 					"type": "array",
+					"minItems": 2,
+					"maxItems": 2,
+					"uniqueItems": true,
 					"items": {
-						"type": "string",
-						"minLength": 2,
-						"maxLength": 2
+						"type": "string"
 					}
 				},
-				"faces": {
+				"face_ids": {
 					"type": "array",
+					"minItems": 1,
+					"maxItems": 2,
 					"items": {
-						"type": "string",
-						"minLength": 2,
-						"maxLength": 2
+						"type": "string"
 					}
 				}
-			}
+			},
+			"required": [
+				"id",
+				"vertex_ids",
+				"face_ids"
+			]
 		},
 		"Face": {
 			"type": "object",
@@ -149,7 +183,7 @@
 				"id": {
 					"type": "string"
 				},
-				"edges": {
+				"edge_ids": {
 					"type": "array",
 					"minItems": 3,
 					"items": {
@@ -167,7 +201,12 @@
 						]
 					}
 				}
-			}
+			},
+			"required": [
+				"id",
+				"edge_ids",
+				"edge_order"
+			]
 		},
 		"Building": {
 			"type": "object",
@@ -187,13 +226,19 @@
 					"type": "string"
 				},
 				"handle": {
-					"type": "string"
+					"type": [
+						"string",
+						"null"
+					]
 				},
 				"name": {
-					"type": "string"
+					"type": [
+						"string",
+						"null"
+					]
 				},
-				"geometry": {
-					"$ref": "#/definitions/Geometry"
+				"geometry_id": {
+					"type": "string"
 				},
 				"images": {
 					"type": "array"
@@ -215,16 +260,24 @@
 					"items": {
 						"type": "object",
 						"properties": {
-							"window": {
+							"window_id": {
 								"type": "string"
 							},
-							"vertex": {
+							"vertex_id": {
 								"type": "string"
 							}
-						}
+						},
+						"required": [
+							"window_id",
+							"vertex_id"
+						]
 					}
 				}
-			}
+			},
+			"required": [
+				"id",
+				"geometry_id"
+			]
 		},
 		"Space": {
 			"type": "object",
@@ -233,41 +286,67 @@
 					"type": "string"
 				},
 				"handle": {
-					"type": "string"
+					"type": [
+						"string",
+						"null"
+					]
 				},
 				"name": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"face_id": {
 					"type": "string"
 				},
-				"face": {
-					"type": "string"
+				"building_unit_id": {
+					"type": [
+						"string",
+						"null"
+					]
 				},
-				"building_unit": {
-					"type": "string"
+				"thermal_zone_id": {
+					"type": [
+						"string",
+						"null"
+					]
 				},
-				"thermal_zone": {
-					"type": "string"
+				"space_type_id": {
+					"type": [
+						"string",
+						"null"
+					]
 				},
-				"space_type": {
-					"type": "string"
-				},
-				"construction_set": {
-					"type": "string"
+				"construction_set_id": {
+					"type": [
+						"string",
+						"null"
+					]
 				},
 				"daylighting_controls": {
 					"type": "array",
 					"items": {
 						"type": "object",
 						"properties": {
-							"daylighting_control": {
+							"daylighting_control_id": {
 								"type": "string"
 							},
-							"vertex": {
+							"vertex_id": {
 								"type": "string"
 							}
-						}
+						},
+						"required": [
+							"daylighting_control_id",
+							"vertex_id"
+						]
 					}
 				}
-			}
+			},
+			"required": [
+				"id",
+				"face_id"
+			]
 		},
 		"Shading": {
 			"type": "object",
@@ -276,12 +355,19 @@
 					"type": "string"
 				},
 				"name": {
-					"type": "string"
+					"type": [
+						"string",
+						"null"
+					]
 				},
-				"face": {
+				"face_id": {
 					"type": "string"
 				}
-			}
+			},
+			"required": [
+				"id",
+				"face_id"
+			]
 		},
 		"ThermalZone": {
 			"type": "object",
@@ -290,12 +376,21 @@
 					"type": "string"
 				},
 				"handle": {
-					"type": "string"
+					"type": [
+						"string",
+						"null"
+					]
 				},
 				"name": {
-					"type": "string"
+					"type": [
+						"string",
+						"null"
+					]
 				}
-			}
+			},
+			"required": [
+				"id"
+			]
 		},
 		"SpaceType": {
 			"type": "object",
@@ -304,12 +399,21 @@
 					"type": "string"
 				},
 				"handle": {
-					"type": "string"
+					"type": [
+						"string",
+						"null"
+					]
 				},
 				"name": {
-					"type": "string"
+					"type": [
+						"string",
+						"null"
+					]
 				}
-			}
+			},
+			"required": [
+				"id"
+			]
 		},
 		"BuildingUnit": {
 			"type": "object",
@@ -318,12 +422,21 @@
 					"type": "string"
 				},
 				"handle": {
-					"type": "number"
+					"type": [
+						"string",
+						"null"
+					]
 				},
 				"name": {
-					"type": "string"
+					"type": [
+						"string",
+						"null"
+					]
 				}
-			}
+			},
+			"required": [
+				"id"
+			]
 		},
 		"ConstructionSet": {
 			"type": "object",
@@ -332,12 +445,21 @@
 					"type": "string"
 				},
 				"handle": {
-					"type": "string"
+					"type": [
+						"string",
+						"null"
+					]
 				},
 				"name": {
-					"type": "string"
+					"type": [
+						"string",
+						"null"
+					]
 				}
-			}
+			},
+			"required": [
+				"id"
+			]
 		},
 		"Window": {
 			"type": "object",
@@ -346,9 +468,15 @@
 					"type": "string"
 				},
 				"name": {
-					"type": "string"
+					"type": [
+						"string",
+						"null"
+					]
 				}
-			}
+			},
+			"required": [
+				"id"
+			]
 		},
 		"DaylightingControl": {
 			"type": "object",
@@ -357,9 +485,15 @@
 					"type": "string"
 				},
 				"name": {
-					"type": "string"
+					"type": [
+						"string",
+						"null"
+					]
 				}
-			}
+			},
+			"required": [
+				"id"
+			]
 		}
 	}
 }
