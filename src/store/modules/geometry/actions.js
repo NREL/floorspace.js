@@ -4,9 +4,10 @@ import helpers from './helpers'
 export default {
     // initialize a new geometry object for a story
     initGeometry (context, payload) {
-        // create the geometry object
-        payload.geometry = new factory.Geometry();
-        context.commit('initGeometry', payload);
+        context.commit('initGeometry', {
+            geometry: new factory.Geometry(),
+            story: payload.story
+        });
     },
 
     createFaceFromPoints (context, payload) {
@@ -148,7 +149,6 @@ export default {
             const edge = edgesForFace[i],
                 verticesForFace = helpers.verticesForFace(face, currentStoryGeometry),
                 edgeVertices = helpers.verticesOnEdge(edge, currentStoryGeometry);
-
             // check for duplicate edges
             const duplicates = edgesForFace.filter((e) => {
                 if (e.id === edge.id) { return; }
@@ -307,7 +307,7 @@ export default {
     destroyFaceAndDescendents (context, payload) {
         const geometry = payload.geometry,
             expFace = payload.face;
- 
+
         // filter vertices referenced by only the face being destroyed so that no shared edges are destroyed
         const expVertices = helpers.verticesForFace(expFace, geometry).filter((vertex) => {
             return helpers.facesForVertex(vertex.id, geometry).length < 2;
