@@ -57,5 +57,13 @@ export default {
 
         validator.validateLength('name', 1);
         context.commit('updateSpaceWithData', validator.validatedPayload);
+    },
+    createImageForStory (context, payload) {
+        const image = new factory.Image(payload.src);
+        context.commit('initImage', { image: image });
+        context.commit('updateStoryWithData', {
+            story: payload.story,
+            image_id: image.id
+        });
     }
 }

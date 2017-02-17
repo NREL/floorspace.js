@@ -26,6 +26,7 @@ export default {
             visible: false,
             latitude: null,
             longitude: null,
+            zoom: null,
             elevation: 0
         }
     },

@@ -6,44 +6,44 @@ import geometryFactory from '../../../../../src/store/modules/geometry/factory.j
 import modelFactory from '../../../../../src/store/modules/models/factory.js'
 import testAction from '../helpers/testAction.js'
 //testAction (store, actionName, context, payload, expectedMutations, expectedActions)
-describe('geometry actions', () => {
-    it('initGeometry', () => {
-        // local state for the module, context.rootState and context.state share a reference to this
-        const geometryState = [];
-        const store = Geometry,
-            actionName = 'initGeometry',
-            payload = {},
-            context = {
-                rootGetters: {},
-                rootState: {
-                    application: { currentSelections: {} },
-                    geometry: geometryState
-                },
-                state: geometryState
-            },
-            expectedMutations = [],
-            expectedActions = [];
-
-        const story = new modelFactory.Story();
-        payload.story = story;
-
-        expectedMutations.push({
-            type: 'initGeometry',
-            testMutation (mpl) {
-                expect(mpl.story).to.equal(story);
-                expect(mpl.geometry.id).to.be.a('number');
-                expect(mpl.geometry.vertices).to.be.an('array');
-                expect(mpl.geometry.edges).to.be.an('array');
-                expect(mpl.geometry.faces).to.be.an('array');
-
-                return () => {
-                    expect(context.state[0]).to.equal(mpl.geometry);
-                };
-            }
-
-        });
-        testAction(store, actionName, context, payload, expectedMutations, expectedActions);
-    });
+//describe('geometry actions', () => {
+    // it('initGeometry', () => {
+    //     // local state for the module, context.rootState and context.state share a reference to this
+    //     const geometryState = [];
+    //     const store = Geometry,
+    //         actionName = 'initGeometry',
+    //         payload = {},
+    //         context = {
+    //             rootGetters: {},
+    //             rootState: {
+    //                 application: { currentSelections: {} },
+    //                 geometry: geometryState
+    //             },
+    //             state: geometryState
+    //         },
+    //         expectedMutations = [],
+    //         expectedActions = [];
+    //
+    //     const story = new modelFactory.Story();
+    //     payload.story = story;
+    //
+    //     expectedMutations.push({
+    //         type: 'initGeometry',
+    //         testMutation (mpl) {
+    //             expect(mpl.story).to.equal(story);
+    //             expect(mpl.geometry.id).to.be.a('number');
+    //             expect(mpl.geometry.vertices).to.be.an('array');
+    //             expect(mpl.geometry.edges).to.be.an('array');
+    //             expect(mpl.geometry.faces).to.be.an('array');
+    //
+    //             return () => {
+    //                 expect(context.state[0]).to.equal(mpl.geometry);
+    //             };
+    //         }
+    //
+    //     });
+    //     testAction(store, actionName, context, payload, expectedMutations, expectedActions);
+    // });
 
 
 

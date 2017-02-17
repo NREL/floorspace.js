@@ -34,9 +34,10 @@ export default {
                 name: null,
                 face_id: null
             }],
-            image_ids: []
+            image_id: null
         }*/],
         // lib
+        images: [],
         building_units: [],
         thermal_zones: [],
         space_types: [],

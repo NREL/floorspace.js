@@ -1,9 +1,15 @@
-// arguments:
-// action - the actual action function
-// actionPayload - the payload object to call the action function with
-// state - the state of the store you want to test the action with
-// expectedMutations - the mutations that the action should trigger in order - these can contain a type and tests for their payloads
-// expectedActions - the actions that the action should trigger in order - these can contain a type and tests for their payloads
+import Geometry from '../../../../../src/store/modules/geometry/index.js'
+import Models from '../../../../../src/store/modules/models/index.js'
+import Application from '../../../../../src/store/modules/application/index.js'
+import Project from '../../../../../src/store/modules/project/index.js'
+
+const moduleMap = {
+    geometry: Geometry,
+    models: Models,
+    application: Application,
+    project: Project
+};
+
 export default function testAction (store, actionName, context, payload, expectedMutations, expectedActions) {
     var mutationCount = 0,
         actionCount = 0;
@@ -14,13 +20,11 @@ export default function testAction (store, actionName, context, payload, expecte
             expect(expectedAction, 'An unexpected action ' + type + ' was commited').to.be.ok;
 
             // check for the correct type
-            expect(expectedAction.type, 'incorrect mutation type: ' + type).to.equal(type);
+            expect(expectedAction.type, 'incorrect action type: ' + type).to.equal(type);
 
             // check for the correct payload
-            if (actionPayload) {
-                expectedAction.testPayload(actionPayload);
-            }
-
+            expectedAction.testAction(actionPayload);
+           // testAction(store, type, this, actionPayload);
             actionCount++;
         },
         commit (type, mutationPayload, options) {
@@ -34,7 +38,11 @@ export default function testAction (store, actionName, context, payload, expecte
             // check for the correct payload
             const testSideEffects = expectedMutation.testMutation(mutationPayload);
             if (options && options.root) {
-                // TODO: commit on rootstate?
+                const storeModule = type.split("/")[0];
+                const mutationName = type.split("/")[1];
+
+                moduleMap[storeModule].mutations[mutationName](context.rootState, mutationPayload);
+                testSideEffects();
             } else {
                 // run the mutation
                 store.mutations[type](context.state, mutationPayload);
@@ -47,6 +55,6 @@ export default function testAction (store, actionName, context, payload, expecte
     });
     // call the action with mocked store and arguments
     store.actions[actionName](mockedContext, payload);
-    expect(mutationCount).to.equal(expectedMutations.length);
-    expect(actionCount).to.equal(expectedActions.length);
+    expect(mutationCount, "The wrong number of mutations was committed by the " + actionName + " action").to.equal(expectedMutations.length);
+    expect(actionCount, "The wrong number of actions was dispatched by the " + actionName + " action").to.equal(expectedActions.length);
 }

@@ -7,6 +7,11 @@ export default {
     initSpace (state, payload) {
         payload.story.spaces.push(payload.space);
     },
+    // store a new image
+    initImage (state, payload) {
+        state.images.push(payload.image);
+    },
+
     updateStoryWithData (state, payload) {
         if ('name' in payload) {
             payload.story.name = payload.name;
@@ -19,6 +24,9 @@ export default {
         }
         if ('multiplier' in payload) {
             payload.story.multiplier = payload.multiplier;
+        }
+        if ('image_id' in payload) {
+            payload.story.image_id = payload.image_id;
         }
     },
     updateSpaceWithData (state, payload) {

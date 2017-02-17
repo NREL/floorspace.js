@@ -62,3 +62,13 @@
         }
     }
 }
+
+button {
+    background-color: $gray-dark;
+    border: 1px solid $gray-medium-light;
+    border-radius: 0.35rem;
+    color: $gray-light;
+    height: 2rem;
+    outline: none;
+    padding: 0 .75rem;
+}

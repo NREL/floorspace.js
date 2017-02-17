@@ -9,6 +9,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
     <nav id="toolbar">
         <section class="tools">
+            <button @click="importImage" id="import">Import Background</button>
         </section>
 
         <section class="settings">
@@ -73,6 +74,9 @@ export default {
             const data = this.$store.getters['exportData'];
             console.log(data);
             return data;
+        },
+        importImage () {
+            this.$emit('importImage');
         }
     },
     computed: {
@@ -135,14 +139,8 @@ export default {
                 margin-left: 5rem;
             }
         }
-        #export {
-            background-color: $gray-dark;
+        button #export {
             border: 1px solid $primary;
-            border-radius: 0.35rem;
-            color: $gray-light;
-            height: 2rem;
-            outline: none;
-            padding: 0 .75rem;
         }
 
         >div {

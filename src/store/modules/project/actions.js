@@ -17,9 +17,9 @@ export default {
         validator.validateFloat('north_axis');
         context.commit('setNorthAxis', validator.validatedPayload);
     },
-    setGridVisible (context, payload) {
+    setMapVisible (context, payload) {
         if (typeof payload.visible === 'boolean') {
-            context.commit('setGridVisible', payload);
+            context.commit('setMapVisible', payload);
         }
     },
 
@@ -70,5 +70,27 @@ export default {
         // check that the proposed max_y is greater than the min_y
         validator.validateMin('max_y', context.state.view.min_y);
         context.commit('setViewMaxY', validator.validatedPayload);
+    },
+
+    setMapLatitude (context, payload) {
+        const validator = new Validator(payload);
+        validator.validateFloat('latitude');
+        validator.validateMax('latitude', 180);
+        validator.validateMin('latitude', -180);
+        context.commit('setMapLatitude', validator.validatedPayload);
+    },
+
+    setMapLongitude (context, payload) {
+        const validator = new Validator(payload);
+        validator.validateFloat('longitude');
+        validator.validateMax('longitude', 180);
+        validator.validateMin('longitude', -180);
+        context.commit('setMapLongitude', validator.validatedPayload);
+    },
+
+    setMapZoom (context, payload) {
+        const validator = new Validator(payload);
+        validator.validateFloat('zoom');
+        context.commit('setMapZoom', validator.validatedPayload);
     }
 }

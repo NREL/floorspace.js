@@ -203,6 +203,8 @@ export default {
         d3.selectAll('#canvas ellipse').remove();
     },
     drawGrid () {
+        this.$refs.grid.style.backgroundImage = "url('" + (this.mapVisible ? this.mapUrl : this.backgroundSrc) + "')";
+
         // update scales with new grid boundaries
         this.$store.dispatch('application/setScaleX', {
             scaleX: d3.scaleLinear()

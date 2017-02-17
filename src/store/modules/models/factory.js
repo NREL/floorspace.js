@@ -13,7 +13,7 @@ export default {
             spaces: [],
             windows: [],
             shading: [],
-            image_ids: []
+            image_id: null
         }
     },
     Space: function () {
@@ -28,5 +28,11 @@ export default {
             space_type_id: null,
             construction_set_id: null
         };
+    },
+    Image: function (src) {
+        return {
+            id: generateId(),
+            src: src
+        }
     }
 }
