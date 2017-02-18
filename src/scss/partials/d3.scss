@@ -27,8 +27,8 @@
     }
     // gridlines
     line.horizontal, line.vertical {
-        stroke: $gray-medium-dark;
-        opacity: .5;
+        stroke: $gray-medium-light;
+        opacity: .25;
     }
     line.snap {
         stroke: blue;
@@ -38,7 +38,7 @@
     // shapes
     polygon, rect, path {
         fill: $primary;
-        fill-opacity: 0.25;
+        fill-opacity: 0.5;
         stroke: $primary;
         &.currentSpace {
             fill: $secondary;

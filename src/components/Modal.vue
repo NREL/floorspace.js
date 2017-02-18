@@ -126,7 +126,7 @@ export default {
         padding: 1rem;
         position: fixed;
         top: 50%;
-        transform: translate(-50%, calc(-50% - 5rem));
+        transform: translate(-50%, -50%);
         width: 25rem;
         #close {
             position: absolute;
