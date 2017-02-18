@@ -10,6 +10,7 @@ export default {
             below_floor_plenum_height: 0,
             floor_to_ceiling_height: 0,
             multiplier: 0,
+            imageVisible: false,
             spaces: [],
             windows: [],
             shading: [],

@@ -56,6 +56,15 @@ export default function Validator (payload, validatedPayload = {}) {
                 delete validatedPayload[key];
                 invalidKeys.push(key);
             }
+        },
+        validateBoolean (key) {
+            if (!(key in payload) || invalidKeys.indexOf(key) !== -1) { return; }
+            if (key in payload) {
+                validatedPayload[key] = !!(payload[key]);
+            } else {
+                delete validatedPayload[key];
+                invalidKeys.push(key);
+            }
         }
     }
 }

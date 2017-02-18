@@ -69,6 +69,9 @@ export default {
 
             images: state => state.models.images
         }),
+        imageVisible () {
+            return this.currentStory.imageVisible;
+        },
         mapUrl () {
             return "https://maps.googleapis.com/maps/api/staticmap?center=" + this.latitude + "," + this.longitude + "&zoom=" + this.zoom + "&size=600x300&key=AIzaSyBHevuNXeCuPXkiV3hq-pFKZSdSFLX6kF0"
         },

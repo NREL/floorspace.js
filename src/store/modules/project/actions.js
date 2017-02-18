@@ -22,6 +22,11 @@ export default {
             context.commit('setMapVisible', payload);
         }
     },
+    setGridVisible (context, payload) {
+        if (typeof payload.visible === 'boolean') {
+            context.commit('setGridVisible', payload);
+        }
+    },
 
     // state.grid.x_spacing
     setGridXSpacing (context, payload) {

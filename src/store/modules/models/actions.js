@@ -47,6 +47,7 @@ export default {
         validator.validateFloat('below_floor_plenum_height');
         validator.validateFloat('floor_to_ceiling_height');
         validator.validateInt('multiplier');
+        validator.validateBoolean('imageVisible');
 
         context.commit('updateStoryWithData', validator.validatedPayload);
     },

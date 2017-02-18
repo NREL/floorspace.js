@@ -28,6 +28,7 @@
     // gridlines
     line.horizontal, line.vertical {
         stroke: $gray-medium-dark;
+        opacity: .5;
     }
     line.snap {
         stroke: blue;

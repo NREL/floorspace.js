@@ -28,6 +28,9 @@ export default {
         if ('image_id' in payload) {
             payload.story.image_id = payload.image_id;
         }
+        if ('imageVisible' in payload) {
+            payload.story.imageVisible = payload.imageVisible;
+        }
     },
     updateSpaceWithData (state, payload) {
         if ('name' in payload) {

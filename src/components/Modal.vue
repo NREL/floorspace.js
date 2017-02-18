@@ -9,26 +9,40 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
 <aside id="modal">
     <h2>Set Background</h2>
-    <p>Enter the map coordinates for the area you'd like to display, or upload a custom image.</p>
-    <div id="coordinates">
-        <div class="input-number">
-            <label>latitude</label>
-            <input v-model.number.lazy="latitude">
-        </div>
-        <div class="input-number">
-            <label>longitude</label>
-            <input v-model.number.lazy="longitude">
-        </div>
-
-        <div class="input-number">
-            <label>zoom</label>
-            <input v-model.number.lazy="zoom">
-        </div>
+    <svg @click="$emit('close')" id="close" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+        <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
+    </svg>
+    <div id="mode">
+        <button @click="setBackground('map')" :class="mapVisible ? 'active' : ''">Map</button>
+        <button @click="setBackground('image')" :class="imageVisible ? 'active' : ''">Image</button>
+        <button @click="setBackground()"  :class="!mapVisible && !imageVisible ? 'active' : ''">None</button>
     </div>
-    <input ref="fileInput" @change="uploadImage" type="file"/>
-    <button @click="$refs.fileInput.click()">Upload Image</button>
-    <button @click="mapVisible = !mapVisible" id="import">{{mapVisible ? "Hide Map" : "Show Map"}}</button>
 
+    <template v-if="mapVisible">
+        <span>Enter the map coordinates for the area you'd like to display.</span>
+        <div id="coordinates">
+
+            <div class="input-number">
+                <label>latitude</label>
+                <input v-model.number.lazy="latitude">
+            </div>
+            <div class="input-number">
+                <label>longitude</label>
+                <input v-model.number.lazy="longitude">
+            </div>
+
+            <div class="input-number">
+                <label>zoom</label>
+                <input v-model.number.lazy="zoom">
+            </div>
+        </div>
+    </template>
+
+    <template v-if="imageVisible">
+        <span>Upload a custom image for this story.</span>
+        <input ref="fileInput" @change="uploadImage" type="file"/>
+        <button @click="$refs.fileInput.click()" id="uploadImage">Upload an Image</button>
+    </template>
 </aside>
 </template>
 
@@ -40,6 +54,19 @@ import helpers from './../store/modules/geometry/helpers'
 export default {
     name: 'modal',
     methods: {
+        setBackground (mode) {
+            if (mode === 'map') {
+                this.mapVisible = true;
+                this.imageVisible = false;
+            } else if (mode === 'image') {
+                this.mapVisible = false;
+                this.imageVisible = true;
+            } else {
+                this.mapVisible = false;
+                this.imageVisible = false;
+            }
+        },
+
         uploadImage (event) {
             const file = event.target.files[0],
                 reader = new FileReader();
@@ -58,10 +85,19 @@ export default {
     computed: {
         ...mapState({
             currentStory: state => state.application.currentSelections.story,
+            images: state => state.models.images,
         }),
         mapVisible: {
             get () { return this.$store.state.project.map.visible; },
             set (val) { this.$store.dispatch('project/setMapVisible', { visible: val }); }
+        },
+        imageVisible: {
+            get () { return this.currentStory.imageVisible; },
+            set (val) { this.$store.dispatch('models/updateStoryWithData', {
+                    story: this.currentStory,
+                    imageVisible: val
+                });
+            }
         },
         latitude: {
             get () { return this.$store.state.project.map.latitude; },
@@ -83,16 +119,46 @@ export default {
 @import "./../scss/config";
     #modal {
         background-color: $gray-dark;
-        border: 2px solid $primary;
+        border: 2px solid $gray-medium;
         border-radius: 1rem;
         left: 50%;
+        min-height: 10rem;
         padding: 1rem;
         position: fixed;
         top: 50%;
         transform: translate(-50%, calc(-50% - 5rem));
         width: 25rem;
+        #close {
+            position: absolute;
+            height: 1.5rem;
+            top: 1rem;
+            right: 1rem;
+            width: 1.5rem;
+            path {
+                fill: $primary;
+            }
+        }
         #coordinates {
             display: flex;
+            margin: 1rem 0 1rem -1rem;
+        }
+        #mode {
+            display: flex;
+            margin-bottom: 1rem;
+            button {
+                margin-right: .5rem;
+                &.active {
+                    border: 1px solid $primary;
+                }
+            }
+        }
+        span {
+            display: block;
+
+        }
+        button#uploadImage {
+            border: 1px solid #bbc3c7;
+            display: block;
             margin-bottom: 1rem;
         }
         input {
