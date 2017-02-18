@@ -106,6 +106,7 @@ export default {
     watch: {
         gridVisible () { this.drawGrid(); },
         mapVisible () { this.drawGrid(); },
+        imageVisible () { this.drawGrid(); },
         mapUrl () { this.drawGrid(); },
         backgroundSrc () { this.drawGrid(); },
 

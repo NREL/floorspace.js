@@ -66,5 +66,11 @@ export default {
             story: payload.story,
             image_id: image.id
         });
+    },
+    createObjectWithType (context, payload) {
+        context.commit('initObject', {
+            type: payload.type,
+            object: payload.object
+        });
     }
 }

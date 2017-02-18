@@ -34,6 +34,53 @@ export default {
         return {
             id: generateId(),
             src: src
-        }
+        };
+    },
+    BuildingUnit: function (name) {
+        return {
+            id: generateId(),
+            name: name,
+            face_id: null
+        };
+    },
+    ThermalZone: function (name) {
+        return {
+            id: generateId(),
+            name: name,
+            face_id: null
+        };
+    },
+    SpaceType: function (name) {
+        return {
+            id: generateId(),
+            name: name,
+            face_id: null
+        };
+    },
+    Construction: function (name) {
+        return {
+            id: generateId(),
+            name: name,
+            handle: null
+        };
+    },
+    ConstructionSet: function (name) {
+        return {
+            id: generateId(),
+            name: name,
+            handle: null
+        };
+    },
+    Window: function (name) {
+        return {
+            id: generateId(),
+            name: name
+        };
+    },
+    DaylightingControl: function (name) {
+        return {
+            id: generateId(),
+            name: name
+        };
     }
 }

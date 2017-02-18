@@ -37,15 +37,17 @@ export default {
             }],
             image_id: null
         }*/],
-        // lib
         images: [],
-        building_units: [],
-        thermal_zones: [],
-        space_types: [],
-        construction_sets: [],
-        constructions: [],
-        windows: [],
-        daylighting_controls: []
+        // lib
+        library: {
+            building_units: [],
+            thermal_zones: [],
+            space_types: [],
+            construction_sets: [],
+            constructions: [],
+            windows: [],
+            daylighting_controls: []
+        }
     },
     actions: actions,
     mutations: mutations,

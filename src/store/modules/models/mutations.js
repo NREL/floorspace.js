@@ -11,7 +11,9 @@ export default {
     initImage (state, payload) {
         state.images.push(payload.image);
     },
-
+    initObject (state, payload) {
+        state.library[payload.type].push(payload.object);
+    },
     updateStoryWithData (state, payload) {
         if ('name' in payload) {
             payload.story.name = payload.name;

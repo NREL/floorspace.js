@@ -14,6 +14,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <modal v-if="modalVisible" @close="modalVisible = false"></modal>
             <inspector></inspector>
         </main>
+        <library></library>
     </div>
 </template>
 
@@ -25,6 +26,7 @@ import Inspector from './components/Inspector'
 import Canvas from './components/Canvas/Canvas'
 import Toolbar from './components/Toolbar'
 import Modal from './components/Modal'
+import Library from './components/Library'
 
 export default {
     name: 'app',
@@ -35,6 +37,7 @@ export default {
     },
     components: {
         'canvas-view': Canvas,
+        'library': Library,
         'navigation': Navigation,
         'toolbar': Toolbar,
         'inspector': Inspector,

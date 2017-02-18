@@ -129,6 +129,7 @@ export default {
         width: 100%;
         &.tools {
             background-color: $gray-medium-dark;
+            padding:0 2.5rem;
         }
         &.settings {
             background-color: $gray-medium-light;

@@ -16,7 +16,8 @@ export default function exportData (state, getters) {
 
 const lib = {
     'images': [{
-        'id': 0
+        'id': 0,
+        'src': ""
     }],
     'building_units': [{
         'id': 0,

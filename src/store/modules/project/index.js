@@ -24,9 +24,9 @@ export default {
         },
         map: {
             visible: false,
-            latitude: null,
-            longitude: null,
-            zoom: null,
+            latitude: 39.7653,
+            longitude: -104.9863,
+            zoom: 18,
             elevation: 0
         }
     },
