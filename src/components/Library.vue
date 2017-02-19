@@ -10,11 +10,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
 <section id='library'>
     <header>
         <h1>Object Library</h1>
-        <button @click='createObject()' id='import'>New Object</button>
     </header>
 
     <form>
-        <div class='input-select' id='typeSelect'>
+        <div class='input-select'>
             <label>Type</label>
             <select v-model='displayType'>
                 <option v-for='(objects, type) in library'>{{ displayTypeForType(type) }}</option>
@@ -39,7 +38,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
             </div>
         </div>
 
-        <button @click.prevent='addField()' id='import'>Add Field</button>
+        <button @click.prevent='addField()'>Add Field</button>
+        <button @click.prevent='createObject()'>Save</button>
     </form>
     <ul>
         <li v-for='object in objects'>{{object}}</li>
@@ -134,25 +134,13 @@ export default {
     overflow: scroll;
     padding: 0 2.5rem;
     position: relative;
-    header {
-        align-items: center;
-        display: flex;
-        button {
-            margin-left: 1rem;
-        }
-        #typeSelect{
-            margin-left: auto;
-            & > select {
-                width: 8.5rem;
-            }
-        }
-    }
+
     form {
         .input-select select {
             width: 10rem;
         }
         .input-text {
-            margin-top: 1rem;
+            margin: .5rem 0;
         }
     }
 }

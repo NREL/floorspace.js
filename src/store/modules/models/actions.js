@@ -38,6 +38,19 @@ export default {
             space: space
         });
     },
+
+    destroySpace (context, payload) {
+        context.commit('destroySpace', {
+            space: payload.space,
+            story: payload.story
+        });
+    },
+
+    destroyStory (context, payload) {
+        context.commit('destroyStory', {
+            story: payload.story
+        });
+    },
     // validate and update simple properties on the story, other actions will be used to add images, spaces, and windows to a story
     updateStoryWithData (context, payload) {
         const validatedPayload = { story: payload.story };

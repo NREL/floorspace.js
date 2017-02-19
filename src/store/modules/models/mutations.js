@@ -14,6 +14,18 @@ export default {
     initObject (state, payload) {
         state.library[payload.type].push(payload.object);
     },
+
+    destroySpace (state, payload) {
+        payload.story.spaces.splice(payload.story.spaces.findIndex((s) => {
+            return s.id === payload.space.id;
+        }), 1);
+    },
+    destroyStory (state, payload) {
+        state.stories.splice(state.stories.findIndex((s) => {
+            return s.id === payload.story.id;
+        }), 1);
+    },
+
     updateStoryWithData (state, payload) {
         if ('name' in payload) {
             payload.story.name = payload.name;

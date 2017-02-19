@@ -10,6 +10,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     <nav id="toolbar">
         <section class="tools">
             <button @click="$emit('importImage')" id="import">Import Background</button>
+
+            <button @click="exportData" id="export">Export Model</button>
         </section>
 
         <section class="settings">
@@ -39,7 +41,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 <input v-model.number.lazy="y_spacing">
             </div>
 
-            <button @click="exportData" id="export">Export</button>
+            <div class="input-checkbox">
+                <label>grid</label>
+                <input type="checkbox" v-model="gridVisible">
+            </div>
 
             <div class="input-select" id="drawing-mode">
                 <label>mode</label>
@@ -50,13 +55,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                     <path d="M.5 0v14l11-7-11-7z" transform="translate(13) rotate(90)"></path>
                 </svg>
             </div>
-
-
-            <div class="input-checkbox">
-                <label>grid</label>
-                <input type="checkbox" v-model="gridVisible">
-            </div>
-
         </section>
 
     </nav>
@@ -126,19 +124,23 @@ export default {
         align-items: center;
         display: flex;
         height: 2.5rem;
-        width: 100%;
         &.tools {
             background-color: $gray-medium-dark;
             padding:0 2.5rem;
+            #export {
+                border: 1px solid $primary;
+                position: absolute;
+                right: 2.5rem;
+            }
         }
         &.settings {
             background-color: $gray-medium-light;
             div:first-child {
                 margin-left: 5rem;
             }
-        }
-        button #export {
-            border: 1px solid $primary;
+            .input-checkbox, .input-number {
+                margin-left: 1rem;
+            }
         }
 
         >div {

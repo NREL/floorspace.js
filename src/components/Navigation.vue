@@ -30,6 +30,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     <section id="list">
         <div v-for="item in (tab === 'spaces' ? spaces : stories)" :key="item.id" :class="(currentSpace === item || currentStory === item ) ? 'active' : ''" @click="selectItem(item)">
             {{item.name}}
+            <svg @click="destroyItem()" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
+            </svg>
         </div>
     </section>
 
@@ -71,6 +74,18 @@ export default {
                 });
             }
         },
+        destroyItem () {
+            if (this.tab === 'stories') {
+                this.$store.dispatch('models/destroyStory', {
+                    story: this.$store.state.application.currentSelections.story
+                });
+            } else {
+                this.$store.dispatch('models/destroySpace', {
+                    space: this.$store.state.application.currentSelections.space,
+                    story: this.$store.state.application.currentSelections.story
+                });
+            }
+        },
         // update the currentStory or currentSpace
         selectItem (item) {
             if (this.tab === 'stories') {
@@ -106,6 +121,12 @@ export default {
 
     .active {
         background-color: $gray-medium-light;
+        svg {
+            height: 1rem;
+            path {
+                fill: $gray-light;
+            }
+        }
     }
 
     #breadcrumbs, div {
@@ -120,14 +141,13 @@ export default {
     }
 
     #breadcrumbs {
-        background-color: $gray-medium-light;
-        border-bottom: 1px solid $gray-medium-dark;
+        background-color: $gray-medium-dark;
         height: 2.5rem;
         svg {
             margin: 0 .25rem;
             width: .5rem;
             path {
-                fill: $gray-medium-dark;
+                fill: $gray-medium-light;
             }
         }
         #new-item {

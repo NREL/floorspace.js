@@ -7,42 +7,46 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 
 <template>
-<aside id="modal">
-    <h2>Set Background</h2>
-    <svg @click="$emit('close')" id="close" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-        <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
-    </svg>
-    <div id="mode">
-        <button @click="setBackground('map')" :class="mapVisible ? 'active' : ''">Map</button>
-        <button @click="setBackground('image')" :class="imageVisible ? 'active' : ''">Image</button>
-        <button @click="setBackground()"  :class="!mapVisible && !imageVisible ? 'active' : ''">None</button>
+<aside>
+    <div id="overlay">
     </div>
-
-    <template v-if="mapVisible">
-        <span>Enter the map coordinates for the area you'd like to display.</span>
-        <div id="coordinates">
-
-            <div class="input-number">
-                <label>latitude</label>
-                <input v-model.number.lazy="latitude">
-            </div>
-            <div class="input-number">
-                <label>longitude</label>
-                <input v-model.number.lazy="longitude">
-            </div>
-
-            <div class="input-number">
-                <label>zoom</label>
-                <input v-model.number.lazy="zoom">
-            </div>
+    <div id="modal">
+        <h2>Set Background</h2>
+        <svg @click="$emit('close')" id="close" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+            <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
+        </svg>
+        <div id="mode">
+            <button @click="setBackground('map')" :class="mapVisible ? 'active' : ''">Map</button>
+            <button @click="setBackground('image')" :class="imageVisible ? 'active' : ''">Image</button>
+            <button @click="setBackground()"  :class="!mapVisible && !imageVisible ? 'active' : ''">None</button>
         </div>
-    </template>
 
-    <template v-if="imageVisible">
-        <span>Upload a custom image for this story.</span>
-        <input ref="fileInput" @change="uploadImage" type="file"/>
-        <button @click="$refs.fileInput.click()" id="uploadImage">Upload an Image</button>
-    </template>
+        <template v-if="mapVisible">
+            <span>Enter the map coordinates for the area you'd like to display.</span>
+            <div id="coordinates">
+
+                <div class="input-number">
+                    <label>latitude</label>
+                    <input v-model.number.lazy="latitude">
+                </div>
+                <div class="input-number">
+                    <label>longitude</label>
+                    <input v-model.number.lazy="longitude">
+                </div>
+
+                <div class="input-number">
+                    <label>zoom</label>
+                    <input v-model.number.lazy="zoom">
+                </div>
+            </div>
+        </template>
+
+        <template v-if="imageVisible">
+            <span>Upload a custom image for this story.</span>
+            <input ref="fileInput" @change="uploadImage" type="file"/>
+            <button @click="$refs.fileInput.click()" id="uploadImage">Upload an Image</button>
+        </template>
+    </div>
 </aside>
 </template>
 
@@ -117,6 +121,16 @@ export default {
 
 <style lang="scss" scoped>
 @import "./../scss/config";
+    #overlay {
+        background-color: $gray-dark;
+        height: 100vh;
+        left: 0;
+        opacity: 0.5;
+        position: absolute;
+        top: 0;
+        width: 100%;
+        z-index: 1;
+    }
     #modal {
         background-color: $gray-dark;
         border: 2px solid $gray-medium;
@@ -128,6 +142,7 @@ export default {
         top: 50%;
         transform: translate(-50%, -50%);
         width: 25rem;
+        z-index: 2;
         #close {
             position: absolute;
             height: 1.5rem;
@@ -140,7 +155,10 @@ export default {
         }
         #coordinates {
             display: flex;
-            margin: 1rem 0 1rem -1rem;
+            margin: 1rem 0 1rem 0;
+            .input-number {
+                margin-right: 1rem;
+            }
         }
         #mode {
             display: flex;
