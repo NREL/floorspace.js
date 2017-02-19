@@ -28,15 +28,15 @@
         -webkit-appearance: none;
     }
 }
-
+.input-text input {
+    width: 15rem;
+}
 // reusable number inputs
 .input-number input {
     width: 2.5rem;
 }
 
-.input-text input {
-    width: 100%;
-}
+
 
 
 // reusable select inputs
