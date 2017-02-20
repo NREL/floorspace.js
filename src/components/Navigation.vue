@@ -131,19 +131,20 @@ export default {
         }
     }
 
-    #breadcrumbs, div {
+    #breadcrumbs, #list > div {
         align-items: center;
         display: flex;
         justify-content: space-between;
         padding: 0 1rem;
     }
 
-    div {
+    #list >div  {
         height: 2rem;
     }
 
     #breadcrumbs {
         background-color: $gray-medium-dark;
+        border-bottom: 1px solid $gray-darkest;
         height: 2.5rem;
         svg {
             margin: 0 .25rem;

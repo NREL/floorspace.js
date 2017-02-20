@@ -9,7 +9,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
     <nav id="toolbar">
         <section class="tools">
-            <button @click="$emit('importImage')" id="import">Import Background</button>
+            <button @click="$emit('setBackground')" id="import">Import Background</button>
+            <button @click="$emit('createObject')">Create Object</button>
 
             <button @click="exportData" id="export">Export Model</button>
         </section>
@@ -126,6 +127,9 @@ export default {
         &.tools {
             background-color: $gray-medium-dark;
             padding:0 2.5rem;
+            > button {
+                margin-right: 1rem;
+            }
             #export {
                 border: 1px solid $primary;
                 position: absolute;

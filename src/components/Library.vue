@@ -8,42 +8,23 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
 
 <template>
 <section id='library'>
-    <header>
-        <h1>Object Library</h1>
-    </header>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Data</th>
+            </tr>
+        </thead>
 
-    <form>
-        <div class='input-select'>
-            <label>Type</label>
-            <select v-model='displayType'>
-                <option v-for='(objects, type) in library'>{{ displayTypeForType(type) }}</option>
-            </select>
-            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
-                <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
-            </svg>
-        </div>
-
-        <div class='input-text'>
-            <label>name</label>
-            <input v-model='objectName'>
-        </div>
-
-        <div v-for='field in fields'>
-            <div class='input-text'>
-                <label>Label</label>
-                <input v-model='field.label'>
-
-                <label>Value</label>
-                <input v-model='field.value'>
-            </div>
-        </div>
-
-        <button @click.prevent='addField()'>Add Field</button>
-        <button @click.prevent='createObject()'>Save</button>
-    </form>
-    <ul>
-        <li v-for='object in objects'>{{object}}</li>
-    </ul>
+        <tbody>
+            <tr v-for='object in objects'>
+                <td>{{object.id}}</td>
+                <td>{{object.name}}</td>
+                <td>{{object}}</td>
+            </tr>
+        </tbody>
+    </table>
 
 </section>
 </template>
