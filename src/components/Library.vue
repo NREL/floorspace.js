@@ -31,7 +31,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
         </thead>
 
         <tbody>
-            <tr v-for='object in objects'>
+            <tr v-for='object in objects' @click="currentObject = object" :class="currentObject === object ? 'active' : ''">
 
                 <td v-for="column in columns">
                     <span>{{object.hasOwnProperty(column) ? object[column] : '--'}}</span>
@@ -82,6 +82,7 @@ export default {
     name: 'library',
     data() {
         return {
+            currentObject: null,
             displayType: null,
             objectName: null,
             fields: []
@@ -164,6 +165,9 @@ export default {
             height: 2rem;
             &:nth-of-type(odd) {
                 background-color: $gray-medium-dark;
+            }
+            &.active {
+                color: $primary;
             }
         }
         thead tr, tbody tr {

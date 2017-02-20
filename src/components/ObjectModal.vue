@@ -92,6 +92,7 @@ export default {
     },
     mounted () {
         this.displayType = this.displayTypeForType(Object.keys(this.library)[0]);
+        this.objectName = this.displayType + ' ' + (this.library[this.typeForDisplayType(this.displayType)].length + 1);
     },
     computed: {
         ...mapState({
@@ -131,6 +132,9 @@ export default {
 
     .modal {
         form {
+            input, select {
+                border: 1px solid $gray-light;
+            }
             .input-select {
                 width: 10rem;
             }
@@ -148,16 +152,8 @@ export default {
                 margin-right: 1rem;
                 width: 3rem;
             }
-            :nth-child(2) {
+            :last-child {
                 flex-grow: 2;
-            }
-        }
-        input, select {
-            border: 1px solid $gray-light;
-            &[type="file"] {
-                height: 0;
-                visibility: hidden;
-                width: 0;
             }
         }
     }
