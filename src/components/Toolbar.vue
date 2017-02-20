@@ -119,7 +119,6 @@ export default {
 @import "./../scss/config";
 
 #toolbar {
-    border-bottom: 1px solid $gray-darkest;
     section {
         align-items: center;
         display: flex;

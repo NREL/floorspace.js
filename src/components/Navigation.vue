@@ -22,9 +22,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             </template>
         </span>
 
-        <svg @click="addItem" id="new-item" height="50" viewBox="0 0 256 256" width="50" xmlns="http://www.w3.org/2000/svg">
-            <path d="M208 122h-74V48c0-3.534-2.466-6.4-6-6.4s-6 2.866-6 6.4v74H48c-3.534 0-6.4 2.466-6.4 6s2.866 6 6.4 6h74v74c0 3.534 2.466 6.4 6 6.4s6-2.866 6-6.4v-74h74c3.534 0 6.4-2.466 6.4-6s-2.866-6-6.4-6z"/>
-        </svg>
+        <button @click="addItem" id="new-item" height="50" viewBox="0 0 256 256" width="50" xmlns="http://www.w3.org/2000/svg">
+        New {{tab === 'stories' ? 'Story' : 'Space'}}</button>
     </section>
 
     <section id="list">
@@ -75,15 +74,17 @@ export default {
             }
         },
         destroyItem () {
-            if (this.tab === 'stories') {
+            if (this.tab === 'stories' && this.stories.length > 1) {
                 this.$store.dispatch('models/destroyStory', {
                     story: this.$store.state.application.currentSelections.story
                 });
-            } else {
+                this.currentStory = this.stories[0];
+            } else if (this.tab === 'spaces' && this.spaces.length > 1) {
                 this.$store.dispatch('models/destroySpace', {
                     space: this.$store.state.application.currentSelections.space,
                     story: this.$store.state.application.currentSelections.story
                 });
+                this.currentSpace = this.spaces[0];
             }
         },
         // update the currentStory or currentSpace
@@ -108,6 +109,7 @@ export default {
 
     #tabs {
         border-bottom: 1px solid $gray-darkest;
+        border-top: 1px solid $gray-darkest;
         display: flex;
         height: 1.75rem;
         font-size: 0.625rem;
@@ -148,12 +150,6 @@ export default {
             width: .5rem;
             path {
                 fill: $gray-medium-light;
-            }
-        }
-        #new-item {
-            width: 1.5rem;
-            >path {
-                fill: $gray-light;
             }
         }
     }

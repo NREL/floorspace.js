@@ -44,6 +44,11 @@ export default {
             space: payload.space,
             story: payload.story
         });
+        // when a space is destroyed, destroy its associated geometry on the story
+        context.dispatch('geometry/destroyFaceAndDescendents', {
+            face: context.rootGetters['application/currentStoryGeometry'].faces.find(f => f.id === payload.space.face_id),
+            geometry: context.rootGetters['application/currentStoryGeometry']
+        }, { root: true });
     },
 
     destroyStory (context, payload) {
