@@ -8,11 +8,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
 <aside>
-    <div id="overlay">
+    <div class="overlay">
     </div>
-    <div id="modal">
+    <div class="modal">
         <h2>New Object</h2>
-        <svg @click="$emit('close')" id="close" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+        <svg @click="$emit('close')" class="close" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
             <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
         </svg>
         <form>
@@ -30,14 +30,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 <label>name</label>
                 <input v-model='objectName'>
             </div>
-
+            <h4>Additional Fields</h4>
             <div v-for='field in fields'>
-                <div class='input-text'>
-                    <label>Label</label>
-                    <input v-model='field.label'>
-
-                    <label>Value</label>
-                    <input v-model='field.value'>
+                <div class='input-text additional-field '>
+                    <input v-model='field.label' placeholder="Label">
+                    <input v-model='field.value'  placeholder="Value">
                 </div>
             </div>
 
@@ -131,47 +128,30 @@ export default {
 
 <style lang="scss" scoped>
 @import "./../scss/config";
-    #overlay {
-        background-color: $gray-dark;
-        height: 100vh;
-        left: 0;
-        opacity: 0.5;
-        position: absolute;
-        top: 0;
-        width: 100%;
-        z-index: 1;
-    }
-    #modal {
-        background-color: $gray-dark;
-        border: 2px solid $gray-medium;
-        border-radius: 1rem;
-        left: 50%;
-        min-height: 10rem;
-        padding: 1rem;
-        position: fixed;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        width: 25rem;
-        z-index: 2;
-        #close {
-            position: absolute;
-            height: 1.5rem;
-            top: 1rem;
-            right: 1rem;
-            width: 1.5rem;
-            path {
-                fill: $primary;
-            }
-        }
+
+    .modal {
         form {
-            .input-select select {
+            .input-select {
                 width: 10rem;
             }
             .input-text {
                 margin: .5rem 0;
             }
         }
-
+        .additional-field {
+            display: flex;
+            input {
+                border: 1px solid $gray-medium;
+            }
+            :first-child {
+                background-color: $gray-darkest;
+                margin-right: 1rem;
+                width: 3rem;
+            }
+            :nth-child(2) {
+                flex-grow: 2;
+            }
+        }
         input, select {
             border: 1px solid $gray-light;
             &[type="file"] {

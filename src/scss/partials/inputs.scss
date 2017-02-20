@@ -41,15 +41,18 @@
 
 // reusable select inputs
 .input-select {
+    align-items: center;
+    display: flex;
     position: relative;
+    
     select {
         background-color: $gray-dark;
         border: 0;
         color: $gray-light;
+        flex-grow: 2;
         height: 2rem;
         padding: 0 .75rem;
         -webkit-appearance: none;
-        width: 4rem;
     }
 
     svg {

@@ -149,11 +149,9 @@ export default {
         >div {
             margin: 0 1rem 0 0;
             &#drawing-mode {
-                right: 5rem;
                 position: absolute;
-                > select {
-                    width: 8.5rem;
-                }
+                right: 5rem;
+                width: 8.5rem
             }
         }
     }

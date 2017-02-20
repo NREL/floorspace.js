@@ -8,20 +8,34 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
 
 <template>
 <section id='library'>
+    <header>
+        <h1>Object Library</h1>
+        <div class='input-select'>
+            <label>Type</label>
+            <select v-model='displayType'>
+                <option v-for='(objects, type) in library'>{{ displayTypeForType(type) }}</option>
+            </select>
+            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
+                <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
+            </svg>
+        </div>
+    </header>
+
     <table class="table">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Data</th>
+                <th v-for="column in columns">
+                    <span>{{column}}</span>
+                </th>
             </tr>
         </thead>
 
         <tbody>
             <tr v-for='object in objects'>
-                <td>{{object.id}}</td>
-                <td>{{object.name}}</td>
-                <td>{{object}}</td>
+
+                <td v-for="column in columns">
+                    <span>{{object.hasOwnProperty(column) ? object[column] : '--'}}</span>
+                </td>
             </tr>
         </tbody>
     </table>
@@ -81,7 +95,16 @@ export default {
             library: state => state.models.library
         }),
         objects () {
-            return this.library[this.typeForDisplayType(this.displayType)];
+            return this.library[this.typeForDisplayType(this.displayType)] || [];
+        },
+        columns () {
+            const columns = [];
+            this.objects.forEach((o) => {
+                Object.keys(o).forEach((k) => {
+                    if (!~columns.indexOf(k)) { columns.push(k); }
+                })
+            });
+            return columns;
         }
     },
     methods: {
@@ -111,17 +134,49 @@ export default {
 <style lang='scss' scoped>
 @import './../scss/config';
 #library {
-    background-color: $gray-medium-light;
+    background-color: $gray-darkest;
+    border-top: 1px solid $gray-medium;
     overflow: scroll;
-    padding: 0 2.5rem;
     position: relative;
-
-    form {
-        .input-select select {
+    header {
+        display: flex;
+        padding: 0 2.5rem;
+        h1 {
+            flex-grow: 3;
+        }
+        .input-select {
+            float: right;
+            margin-right: 2.5rem;
             width: 10rem;
         }
-        .input-text {
-            margin: .5rem 0;
+    }
+
+    table {
+        border-spacing: 0;
+        width: 100%;
+        thead tr {
+            height: 3rem;
+            th {
+                border-bottom: 2px solid $gray-medium-light;
+            }
+        }
+        tbody tr {
+            height: 2rem;
+            &:nth-of-type(odd) {
+                background-color: $gray-medium-dark;
+            }
+        }
+        thead tr, tbody tr {
+            th, td {
+                text-align: left;
+                padding: 0 1rem;
+                &:first-child {
+                    padding-left: 2.5rem;
+                }
+                &:last-child {
+                    flex-grow: 2;
+                }
+            }
         }
     }
 }
