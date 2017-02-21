@@ -25,30 +25,31 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     </section>
 
     <section v-if="tab === 'attributes'" id="list">
-        <h3>Story</h3>
+        <h3>{{currentStory.name}}</h3>
+
+        <label>name</label>
         <div class="input-text">
-            <label>name</label>
             <input :value="currentStory.name" @change="updatecurrentStory('name', $event)">
         </div>
 
+        <label>below_floor_plenum_height</label>
         <div class="input-text">
-            <label>below_floor_plenum_height</label>
             <input :value="currentStory.below_floor_plenum_height" @change="updatecurrentStory('below_floor_plenum_height', $event)">
         </div>
 
+        <label>floor_to_ceiling_height</label>
         <div class="input-text">
-            <label>floor_to_ceiling_height</label>
             <input :value="currentStory.floor_to_ceiling_height" @change="updatecurrentStory('floor_to_ceiling_height', $event)">
         </div>
 
+        <label>multiplier</label>
         <div class="input-text">
-            <label>multiplier</label>
             <input :value="currentStory.multiplier" @change="updatecurrentStory('multiplier', $event)">
         </div>
 
         <h3>Space</h3>
+        <label>name</label>
         <div class="input-text">
-            <label>name</label>
             <input :value="currentSpace.name" @change="updatecurrentSpace('name', $event)">
         </div>
     </section>
@@ -66,8 +67,7 @@ export default {
         return {
             tab: 'geometry',
             geometryInspector: true,
-            storyInspector: false,
-            spaceInspector: false
+            storyInspector: false
         }
     },
     methods: {
@@ -141,21 +141,36 @@ export default {
                 padding: .5rem;
                 text-transform: uppercase;
             }
-        }
-
-        .active {
-            color: $primary;
+            .active {
+                background-color: $gray-medium-light;
+                svg {
+                    height: 1rem;
+                    path {
+                        fill: $gray-lightest;
+                    }
+                }
+            }
         }
 
         #list {
             font-size: .85rem;
             height: calc(100% - 2rem);
             overflow: scroll;
+            padding: 1rem;
+
+            .active {
+                color: $primary;
+            }
             h3 {
-                margin-bottom: 0;
+                margin: 0 0 .5rem 0;
+            }
+            label {
+                font-size: 0.625rem;
+                text-transform: uppercase;
+
             }
             & > div {
-                padding: 0 1rem;
+                padding: .5rem 0rem 1rem 0rem;
             }
         }
     }
