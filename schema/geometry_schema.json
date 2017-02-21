@@ -17,12 +17,6 @@
 				}
 			}
 		},
-		"geometry": {
-			"type": "array",
-			"items": {
-				"$ref": "#/definitions/Geometry"
-			}
-		},
 		"stories": {
 			"type": "array",
 			"items": {
@@ -208,17 +202,6 @@
 				"edge_order"
 			]
 		},
-		"Building": {
-			"type": "object",
-			"properties": {
-				"id": {
-					"type": "string"
-				},
-				"name": {
-					"type": "string"
-				}
-			}
-		},
 		"Story": {
 			"type": "object",
 			"properties": {
@@ -237,8 +220,11 @@
 						"null"
 					]
 				},
-				"geometry_id": {
-					"type": "string"
+				"geometry": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/Geometry"
+					}
 				},
 				"images": {
 					"type": "array"
@@ -275,8 +261,7 @@
 				}
 			},
 			"required": [
-				"id",
-				"geometry_id"
+				"id"
 			]
 		},
 		"Space": {
