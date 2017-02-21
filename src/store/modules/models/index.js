@@ -12,6 +12,7 @@ export default {
             below_floor_plenum_height: 0,
             floor_to_ceiling_height: 0,
             multiplier: 0,
+            imageVisible: false,
             spaces: [{
                 id: null,
                 name: null,
@@ -34,16 +35,19 @@ export default {
                 name: null,
                 face_id: null
             }],
-            image_ids: []
+            image_id: null
         }*/],
+        images: [],
         // lib
-        building_units: [],
-        thermal_zones: [],
-        space_types: [],
-        construction_sets: [],
-        constructions: [],
-        windows: [],
-        daylighting_controls: []
+        library: {
+            building_units: [],
+            thermal_zones: [],
+            space_types: [],
+            construction_sets: [],
+            constructions: [],
+            windows: [],
+            daylighting_controls: []
+        }
     },
     actions: actions,
     mutations: mutations,

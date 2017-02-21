@@ -130,7 +130,7 @@ export default {
 <style lang="scss" scoped>
 @import "./../scss/config";
     #inspector {
-        background-color: $gray-medium;
+        background-color: $gray-medium-dark;
         border-left: 1px solid $gray-darkest;
         overflow: scroll;
         padding: 0 2rem;

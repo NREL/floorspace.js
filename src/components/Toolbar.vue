@@ -9,6 +9,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
     <nav id="toolbar">
         <section class="tools">
+            <button @click="$emit('setBackground')" id="import">Import Background</button>
+            <button @click="$emit('createObject')">Create Object</button>
+
+            <button @click="exportData" id="export">Export Model</button>
         </section>
 
         <section class="settings">
@@ -38,7 +42,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 <input v-model.number.lazy="y_spacing">
             </div>
 
-            <button @click="exportData" id="export">Export</button>
+            <div class="input-checkbox">
+                <label>grid</label>
+                <input type="checkbox" v-model="gridVisible">
+            </div>
 
             <div class="input-select" id="drawing-mode">
                 <label>mode</label>
@@ -49,13 +56,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                     <path d="M.5 0v14l11-7-11-7z" transform="translate(13) rotate(90)"></path>
                 </svg>
             </div>
-
-
-            <div class="input-checkbox">
-                <label>grid</label>
-                <input type="checkbox" v-model="gridVisible">
-            </div>
-
         </section>
 
     </nav>
@@ -120,39 +120,38 @@ export default {
 @import "./../scss/config";
 
 #toolbar {
-    border-bottom: 1px solid $gray-darkest;
     section {
         align-items: center;
         display: flex;
         height: 2.5rem;
-        width: 100%;
         &.tools {
             background-color: $gray-medium-dark;
+            padding:0 2.5rem;
+            > button {
+                margin-right: 1rem;
+            }
+            #export {
+                border: 1px solid $primary;
+                position: absolute;
+                right: 2.5rem;
+            }
         }
         &.settings {
             background-color: $gray-medium-light;
             div:first-child {
                 margin-left: 5rem;
             }
-        }
-        #export {
-            background-color: $gray-dark;
-            border: 1px solid $primary;
-            border-radius: 0.35rem;
-            color: $gray-light;
-            height: 2rem;
-            outline: none;
-            padding: 0 .75rem;
+            .input-checkbox, .input-number {
+                margin-left: 1rem;
+            }
         }
 
         >div {
             margin: 0 1rem 0 0;
             &#drawing-mode {
-                right: 5rem;
                 position: absolute;
-                > select {
-                    width: 8.5rem;
-                }
+                right: 5rem;
+                width: 8.5rem
             }
         }
     }

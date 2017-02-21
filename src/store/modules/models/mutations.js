@@ -7,6 +7,25 @@ export default {
     initSpace (state, payload) {
         payload.story.spaces.push(payload.space);
     },
+    // store a new image
+    initImage (state, payload) {
+        state.images.push(payload.image);
+    },
+    initObject (state, payload) {
+        state.library[payload.type].push(payload.object);
+    },
+
+    destroySpace (state, payload) {
+        payload.story.spaces.splice(payload.story.spaces.findIndex((s) => {
+            return s.id === payload.space.id;
+        }), 1);
+    },
+    destroyStory (state, payload) {
+        state.stories.splice(state.stories.findIndex((s) => {
+            return s.id === payload.story.id;
+        }), 1);
+    },
+
     updateStoryWithData (state, payload) {
         if ('name' in payload) {
             payload.story.name = payload.name;
@@ -19,6 +38,12 @@ export default {
         }
         if ('multiplier' in payload) {
             payload.story.multiplier = payload.multiplier;
+        }
+        if ('image_id' in payload) {
+            payload.story.image_id = payload.image_id;
+        }
+        if ('imageVisible' in payload) {
+            payload.story.imageVisible = payload.imageVisible;
         }
     },
     updateSpaceWithData (state, payload) {

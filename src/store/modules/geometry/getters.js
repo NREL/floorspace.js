@@ -8,12 +8,11 @@ export default {
             geometry.vertices = geometry.vertices.map((vertex) => {
                 return {
                     id: vertex.id,
-                    x: vertex.x,
-                    y: vertex.y,
+                    x: Number(vertex.x),
+                    y: Number(vertex.y),
                     edge_ids: helpers.edgesForVertex(vertex.id, geometry).map(e => e.id)
                 };
             });
-
 
             geometry.edges = geometry.edges.map((edge) => {
                 return {
@@ -24,11 +23,10 @@ export default {
             });
 
             geometry.faces = geometry.faces.map((face) => {
-
                 return {
                     id: face.id,
                     edge_ids: face.edgeRefs.map(eR => eR.edge_id),
-                    edge_order: face.edgeRefs.map(eR => eR.reverse ? 0 : 1),
+                    edge_order: face.edgeRefs.map(eR => eR.reverse ? 0 : 1)
                 };
             });
         });

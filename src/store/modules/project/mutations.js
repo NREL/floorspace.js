@@ -53,5 +53,29 @@ export default {
         if ('max_y' in payload) {
             state.view.max_y = payload.max_y;
         }
+    },
+
+    // MAP
+    setMapVisible (state, payload) {
+        if ('visible' in payload) {
+            state.map.visible = payload.visible;
+        }
+    },
+
+    setMapLatitude (state, payload) {
+        if ('latitude' in payload) {
+            state.map.latitude = payload.latitude;
+        }
+    },
+
+    setMapLongitude (state, payload) {
+        if ('longitude' in payload) {
+            state.map.longitude = payload.longitude;
+        }
+    },
+    setMapZoom (state, payload) {
+        if ('zoom' in payload) {
+            state.map.zoom = payload.zoom;
+        }
     }
 }

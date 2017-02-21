@@ -10,7 +10,7 @@
 .input-select, .input-number, .input-text, .input-checkbox {
     label {
         font-size: 0.625rem;
-        margin: 0 .5rem 0 1rem;
+        margin: 0 .5rem 0 0;
         text-transform: uppercase;
     }
 }
@@ -28,28 +28,31 @@
         -webkit-appearance: none;
     }
 }
-
+.input-text input {
+    width: 15rem;
+}
 // reusable number inputs
 .input-number input {
     width: 2.5rem;
 }
 
-.input-text input {
-    width: 100%;
-}
+
 
 
 // reusable select inputs
 .input-select {
+    align-items: center;
+    display: flex;
     position: relative;
+    
     select {
         background-color: $gray-dark;
         border: 0;
         color: $gray-light;
+        flex-grow: 2;
         height: 2rem;
         padding: 0 .75rem;
         -webkit-appearance: none;
-        width: 4rem;
     }
 
     svg {
@@ -61,4 +64,14 @@
             fill: $gray-medium-light;
         }
     }
+}
+
+button {
+    background-color: $gray-dark;
+    border: 1px solid $gray-medium-light;
+    border-radius: 0.35rem;
+    color: $gray-light;
+    height: 2rem;
+    outline: none;
+    padding: 0 .75rem;
 }

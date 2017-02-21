@@ -3,6 +3,9 @@ export default {
         // check that story exists
         if (~context.rootState.models.stories.indexOf(payload.story)) {
             context.commit('setCurrentStory', payload);
+            if (payload.story.imageVisible) {
+                context.dispatch('project/setMapVisible', { visible: false }, { root: true });
+            }
         }
     },
     setCurrentSpace (context, payload) {

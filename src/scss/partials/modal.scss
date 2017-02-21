@@ -1,0 +1,33 @@
+.overlay {
+    background-color: $gray-dark;
+    height: 100vh;
+    left: 0;
+    opacity: 0.5;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    z-index: 1;
+}
+.modal {
+    background-color: $gray-dark;
+    border: 2px solid $gray-medium;
+    border-radius: 1rem;
+    left: 50%;
+    min-height: 10rem;
+    padding: 1rem;
+    position: fixed;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 25rem;
+    z-index: 2;
+    svg.close {
+        position: absolute;
+        height: 1.5rem;
+        top: 1rem;
+        right: 1rem;
+        width: 1.5rem;
+        path {
+            fill: $primary;
+        }
+    }
+}

@@ -10,10 +10,11 @@ export default {
             below_floor_plenum_height: 0,
             floor_to_ceiling_height: 0,
             multiplier: 0,
+            imageVisible: false,
             spaces: [],
             windows: [],
             shading: [],
-            image_ids: []
+            image_id: null
         }
     },
     Space: function () {
@@ -27,6 +28,59 @@ export default {
             thermal_zone_id: null,
             space_type_id: null,
             construction_set_id: null
+        };
+    },
+    Image: function (src) {
+        return {
+            id: generateId(),
+            src: src
+        };
+    },
+    BuildingUnit: function (name) {
+        return {
+            id: generateId(),
+            name: name,
+            face_id: null
+        };
+    },
+    ThermalZone: function (name) {
+        return {
+            id: generateId(),
+            name: name,
+            face_id: null
+        };
+    },
+    SpaceType: function (name) {
+        return {
+            id: generateId(),
+            name: name,
+            face_id: null
+        };
+    },
+    Construction: function (name) {
+        return {
+            id: generateId(),
+            name: name,
+            handle: null
+        };
+    },
+    ConstructionSet: function (name) {
+        return {
+            id: generateId(),
+            name: name,
+            handle: null
+        };
+    },
+    Window: function (name) {
+        return {
+            id: generateId(),
+            name: name
+        };
+    },
+    DaylightingControl: function (name) {
+        return {
+            id: generateId(),
+            name: name
         };
     }
 }

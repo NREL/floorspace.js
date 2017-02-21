@@ -36,7 +36,9 @@ export default {
     computed: {
         ...mapState({
             currentSpace: state => state.application.currentSelections.space,
+            currentStory: state => state.application.currentSelections.story,
             gridVisible: state => state.project.grid.visible,
+            mapVisible: state => state.project.map.visible,
             currentMode: state => state.application.currentSelections.mode,
 
             // scale functions translate the pixel coordinates of a location on the screen into RWU coordinates to use within the SVG's grid system
@@ -59,8 +61,24 @@ export default {
                 state.project.view.min_y + ' ' + // y
                 (state.project.view.max_x - state.project.view.min_x) + ' ' + // width
                 (state.project.view.max_y - state.project.view.min_y); // height
-            }
+            },
+
+            latitude: state => state.project.map.latitude,
+            longitude: state => state.project.map.longitude,
+            zoom: state => state.project.map.zoom,
+
+            images: state => state.models.images
         }),
+        imageVisible () {
+            return this.currentStory.imageVisible;
+        },
+        mapUrl () {
+            return "https://maps.googleapis.com/maps/api/staticmap?center=" + this.latitude + "," + this.longitude + "&zoom=" + this.zoom + "&size=600x300&key=AIzaSyBHevuNXeCuPXkiV3hq-pFKZSdSFLX6kF0"
+        },
+        backgroundSrc () {
+            const image = this.images.find(image => image.id === this.currentStory.image_id);
+            return image ? image.src : "";
+        },
         // map all faces for the current story to polygons
         polygons () {
             return this.$store.getters['application/currentStoryGeometry'].faces.map((face) => {
@@ -87,6 +105,11 @@ export default {
     },
     watch: {
         gridVisible () { this.drawGrid(); },
+        mapVisible () { this.drawGrid(); },
+        imageVisible () { this.drawGrid(); },
+        mapUrl () { this.drawGrid(); },
+        backgroundSrc () { this.drawGrid(); },
+
         // reset points if drawing mode changes
         currentMode () { this.points = []; },
         currentSpace() {
@@ -113,6 +136,8 @@ export default {
 #canvas {
     background-color: $gray-darkest;
     svg {
+        background-size: cover;
+        background-repeat: no-repeat;
         height: 100%;
         width: 100%;
         .horizontal, .vertical {

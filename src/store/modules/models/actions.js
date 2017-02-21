@@ -38,6 +38,24 @@ export default {
             space: space
         });
     },
+
+    destroySpace (context, payload) {
+        context.commit('destroySpace', {
+            space: payload.space,
+            story: payload.story
+        });
+        // when a space is destroyed, destroy its associated geometry on the story
+        context.dispatch('geometry/destroyFaceAndDescendents', {
+            face: context.rootGetters['application/currentStoryGeometry'].faces.find(f => f.id === payload.space.face_id),
+            geometry: context.rootGetters['application/currentStoryGeometry']
+        }, { root: true });
+    },
+
+    destroyStory (context, payload) {
+        context.commit('destroyStory', {
+            story: payload.story
+        });
+    },
     // validate and update simple properties on the story, other actions will be used to add images, spaces, and windows to a story
     updateStoryWithData (context, payload) {
         const validatedPayload = { story: payload.story };
@@ -47,6 +65,7 @@ export default {
         validator.validateFloat('below_floor_plenum_height');
         validator.validateFloat('floor_to_ceiling_height');
         validator.validateInt('multiplier');
+        validator.validateBoolean('imageVisible');
 
         context.commit('updateStoryWithData', validator.validatedPayload);
     },
@@ -57,5 +76,19 @@ export default {
 
         validator.validateLength('name', 1);
         context.commit('updateSpaceWithData', validator.validatedPayload);
+    },
+    createImageForStory (context, payload) {
+        const image = new factory.Image(payload.src);
+        context.commit('initImage', { image: image });
+        context.commit('updateStoryWithData', {
+            story: payload.story,
+            image_id: image.id
+        });
+    },
+    createObjectWithType (context, payload) {
+        context.commit('initObject', {
+            type: payload.type,
+            object: payload.object
+        });
     }
 }

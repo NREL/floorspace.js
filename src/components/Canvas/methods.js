@@ -203,6 +203,14 @@ export default {
         d3.selectAll('#canvas ellipse').remove();
     },
     drawGrid () {
+        var url = "";
+        if (this.currentStory.imageVisible) {
+            url = this.backgroundSrc;
+        } else if (this.mapVisible) {
+            url = this.mapUrl;
+        }
+        this.$refs.grid.style.backgroundImage = "url('" + url + "')";
+
         // update scales with new grid boundaries
         this.$store.dispatch('application/setScaleX', {
             scaleX: d3.scaleLinear()

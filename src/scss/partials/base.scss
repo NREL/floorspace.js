@@ -45,16 +45,5 @@ main {
 
     #canvas {
         background-color: $gray-darkest;
-        svg {
-            polygon, rect, path {
-                fill: $primary;
-                fill-opacity: 0.25;
-                stroke: $primary;
-            }
-            circle, line {
-                fill: $primary;
-                stroke: $primary;
-            }
-        }
     }
 }

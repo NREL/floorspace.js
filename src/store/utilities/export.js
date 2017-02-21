@@ -1,17 +1,23 @@
 export default function exportData (state, getters) {
-    const exportObject = {
+    var exportObject = {
         project: state.project,
-        geometry: getters['geometry/exportData'],
         stories: state.models.stories,
         ...lib
     };
-
-    return JSON.parse(JSON.stringify(exportObject));
+    const geometrySets = getters['geometry/exportData']
+    exportObject = JSON.parse(JSON.stringify(exportObject));
+    exportObject.stories.forEach((story) => {
+        story.geometry = geometrySets.find((geometry) => { return geometry.id === story.geometry_id; });
+        delete story.geometry_id;
+    });
+    formatObject(exportObject);
+    return exportObject;
 }
 
 const lib = {
     'images': [{
-        'id': 0
+        'id': 0,
+        'src': ""
     }],
     'building_units': [{
         'id': 0,
@@ -30,12 +36,12 @@ const lib = {
     }],
     'constructions': [{
         'id': 0,
-        'handle': '',
+        'handle': null,
         'name': ''
     }],
     'construction_sets': [{
         'id': 0,
-        'handle': '',
+        'handle': null,
         'name': ''
     }],
     'windows': [{
@@ -47,3 +53,19 @@ const lib = {
         'name': ''
     }]
 };
+
+function formatObject(obj) {
+    for (var key in obj) {
+        // coerce all numeric ids to strings
+        if ((key === "id" || ~key.indexOf("_id")) && typeof obj[key] === "number") {
+            obj[key] = String(obj[key]);
+        }
+        if (~key.indexOf("_ids") && typeof obj[key] === "object") {
+            obj[key] = obj[key].map(id => String(id));
+        }
+        // recurse
+        if (obj[key] !== null && typeof obj[key] === "object") {
+            formatObject(obj[key]);
+        }
+    }
+}

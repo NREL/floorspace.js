@@ -22,14 +22,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             </template>
         </span>
 
-        <svg @click="addItem" id="new-item" height="50" viewBox="0 0 256 256" width="50" xmlns="http://www.w3.org/2000/svg">
-            <path d="M208 122h-74V48c0-3.534-2.466-6.4-6-6.4s-6 2.866-6 6.4v74H48c-3.534 0-6.4 2.466-6.4 6s2.866 6 6.4 6h74v74c0 3.534 2.466 6.4 6 6.4s6-2.866 6-6.4v-74h74c3.534 0 6.4-2.466 6.4-6s-2.866-6-6.4-6z"/>
-        </svg>
+        <button @click="addItem" id="new-item" height="50" viewBox="0 0 256 256" width="50" xmlns="http://www.w3.org/2000/svg">
+        New {{tab === 'stories' ? 'Story' : 'Space'}}</button>
     </section>
 
     <section id="list">
         <div v-for="item in (tab === 'spaces' ? spaces : stories)" :key="item.id" :class="(currentSpace === item || currentStory === item ) ? 'active' : ''" @click="selectItem(item)">
             {{item.name}}
+            <svg @click="destroyItem()" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
+            </svg>
         </div>
     </section>
 
@@ -71,6 +73,20 @@ export default {
                 });
             }
         },
+        destroyItem () {
+            if (this.tab === 'stories' && this.stories.length > 1) {
+                this.$store.dispatch('models/destroyStory', {
+                    story: this.$store.state.application.currentSelections.story
+                });
+                this.currentStory = this.stories[0];
+            } else if (this.tab === 'spaces' && this.spaces.length > 1) {
+                this.$store.dispatch('models/destroySpace', {
+                    space: this.$store.state.application.currentSelections.space,
+                    story: this.$store.state.application.currentSelections.story
+                });
+                this.currentSpace = this.spaces[0];
+            }
+        },
         // update the currentStory or currentSpace
         selectItem (item) {
             if (this.tab === 'stories') {
@@ -93,6 +109,7 @@ export default {
 
     #tabs {
         border-bottom: 1px solid $gray-darkest;
+        border-top: 1px solid $gray-darkest;
         display: flex;
         height: 1.75rem;
         font-size: 0.625rem;
@@ -106,34 +123,34 @@ export default {
 
     .active {
         background-color: $gray-medium-light;
+        svg {
+            height: 1rem;
+            path {
+                fill: $gray-light;
+            }
+        }
     }
 
-    #breadcrumbs, div {
+    #breadcrumbs, #list > div {
         align-items: center;
         display: flex;
         justify-content: space-between;
         padding: 0 1rem;
     }
 
-    div {
+    #list >div  {
         height: 2rem;
     }
 
     #breadcrumbs {
-        background-color: $gray-medium-light;
-        border-bottom: 1px solid $gray-medium-dark;
+        background-color: $gray-medium-dark;
+        border-bottom: 1px solid $gray-darkest;
         height: 2.5rem;
         svg {
             margin: 0 .25rem;
             width: .5rem;
             path {
-                fill: $gray-medium-dark;
-            }
-        }
-        #new-item {
-            width: 1.5rem;
-            >path {
-                fill: $gray-light;
+                fill: $gray-medium-light;
             }
         }
     }

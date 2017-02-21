@@ -209,7 +209,7 @@ const helpers = {
                     (nextEdgeVertex2.x === currentEdgeEndpointVertex.x && nextEdgeVertex2.y === currentEdgeEndpointVertex.y)) {
                     if (normalizedEdgeRefs.map(eR => eR.edge_id).indexOf(nextEdge.id) !== -1) {
                         console.log(nextEdge.id);
-                        debugger;
+                        // debugger;
                         return;
                     }
                     reverse = (nextEdgeVertex1.x === currentEdgeEndpointVertex.x && nextEdgeVertex1.y === currentEdgeEndpointVertex.y) ? false : true;

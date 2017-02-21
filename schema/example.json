@@ -276,9 +276,7 @@
             "shading":[
 
             ],
-            "image_ids":[
-
-            ]
+            "image_id":0
         },
         {
             "id":"27",
@@ -322,9 +320,7 @@
             "shading":[
 
             ],
-            "image_ids":[
-
-            ]
+            "image_id":0
         }
     ],
     "images":[
