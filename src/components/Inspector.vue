@@ -8,24 +8,24 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
 <section id="inspector">
+    <section id="tabs">
+        <span :class="tab === 'attributes' ? 'active' : ''" @click="tab = 'attributes'">Attributes</span>
+        <span :class="tab === 'geometry' ? 'active' : ''" @click="tab = 'geometry'">Geometry</span>
+    </section>
 
-    <h3 @click="geometryInspector = !geometryInspector"><a>All Geometry</a></h3>
-    <div v-if="geometryInspector">
-        id: {{ currentStoryGeometry.id }}
-
+    <section v-if="tab === 'geometry'" id="list">
         <div v-for="face in currentStoryGeometry.faces">
-            <h3>Face {{ face.id }} {{currentSelectionsFace && currentSelectionsFace.id === face.id ? "(current)" : ""}}</h3>
+            <h3 :class="currentSelectionsFace && currentSelectionsFace.id === face.id ? 'active' : ''">Face {{face.id}}</h3>
             <div v-for="edgeRef in face.edgeRefs">
-                verticesOnEdge: {{containedVertices(edgeForId(edgeRef.edge_id))}}
-                <br>edge: {{ edgeRef.edge_id }}, reverse: {{ edgeRef.reverse }}, shared: {{ edgeForId(edgeRef.edge_id).isShared(currentStoryGeometry) }}
-                <br>startpoint: {{ startpoint(edgeRef) }}
-                <br>endpoint: {{ endpoint(edgeRef) }}
+                <br>edge {{ edgeRef.edge_id }} {{ edgeRef.reverse ? 'reversed ' : '' }} {{ edgeForId(edgeRef.edge_id).isShared(currentStoryGeometry) ? 'shared' : '' }}
+                <br>startpoint {{ startpoint(edgeRef) }}
+                <br>endpoint {{ endpoint(edgeRef) }}
             </div>
         </div>
-    </div>
+    </section>
 
-    <h3 @click="storyInspector = !storyInspector"><a>Current Story</a></h3>
-    <div v-if="storyInspector">
+    <section v-if="tab === 'attributes'" id="list">
+        <h3>Story</h3>
         <div class="input-text">
             <label>name</label>
             <input :value="currentStory.name" @change="updatecurrentStory('name', $event)">
@@ -45,16 +45,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <label>multiplier</label>
             <input :value="currentStory.multiplier" @change="updatecurrentStory('multiplier', $event)">
         </div>
-    </div>
 
-    <h3 @click="spaceInspector = !spaceInspector"><a>Current Space</a></h3>
-    <div v-if="spaceInspector">
+        <h3>Space</h3>
         <div class="input-text">
             <label>name</label>
             <input :value="currentSpace.name" @change="updatecurrentSpace('name', $event)">
         </div>
-    </div>
-
+    </section>
 </section>
 </template>
 
@@ -67,15 +64,14 @@ export default {
     name: 'inspector',
     data() {
         return {
+            tab: 'geometry',
             geometryInspector: true,
             storyInspector: false,
             spaceInspector: false
         }
     },
     methods: {
-        containedVertices (edge) {
-            return helpers.verticesOnEdge(edge, this.currentStoryGeometry);
-        },
+        verticesOnEdge (edge) { return helpers.verticesOnEdge(edge, this.currentStoryGeometry); },
         startpoint (edgeRef) {
             const edge = this.edgeForId(edgeRef.edge_id);
             if (edgeRef.reverse) {
@@ -90,10 +86,10 @@ export default {
             const edge = this.edgeForId(edgeRef.edge_id);
             if (!edgeRef.reverse) {
                 const vertex = this.vertexForId(edge.v2);
-                return 'v2 ' + vertex.id + ' (' + vertex.x + ',' + vertex.y + ')';
+                return vertex.id + ' (v2) ' + ' (' + vertex.x + ',' + vertex.y + ')';
             } else {
                 const vertex = this.vertexForId(edge.v1);
-                return 'v1 ' + vertex.id + ' (' + vertex.x + ',' + vertex.y + ')';
+                return vertex.id + ' (v1) ' + ' (' + vertex.x + ',' + vertex.y + ')';
             }
         },
         edgeForId (edge_id) { return helpers.edgeForId(edge_id, this.currentStoryGeometry); },
@@ -133,9 +129,34 @@ export default {
         background-color: $gray-medium-dark;
         border-left: 1px solid $gray-darkest;
         overflow: scroll;
-        padding: 0 2rem;
-        div {
-            margin: 1rem 0;
+        #tabs {
+            border-bottom: 1px solid $gray-darkest;
+            border-top: 1px solid $gray-darkest;
+            display: flex;
+            height: 1.75rem;
+            font-size: 0.625rem;
+            span {
+                border-right: 1px solid $gray-darkest;
+                display: inline-block;
+                padding: .5rem;
+                text-transform: uppercase;
+            }
+        }
+
+        .active {
+            color: $primary;
+        }
+
+        #list {
+            font-size: .85rem;
+            height: calc(100% - 2rem);
+            overflow: scroll;
+            h3 {
+                margin-bottom: 0;
+            }
+            & > div {
+                padding: 0 1rem;
+            }
         }
     }
 </style>
