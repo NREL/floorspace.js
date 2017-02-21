@@ -7,6 +7,10 @@ export default {
     initSpace (state, payload) {
         payload.story.spaces.push(payload.space);
     },
+    // initialize a new shading on a story
+    initShading (state, payload) {
+        payload.story.shading.push(payload.shading);
+    },
     // store a new image
     initImage (state, payload) {
         state.images.push(payload.image);
@@ -18,6 +22,11 @@ export default {
     destroySpace (state, payload) {
         payload.story.spaces.splice(payload.story.spaces.findIndex((s) => {
             return s.id === payload.space.id;
+        }), 1);
+    },
+    destroyShading (state, payload) {
+        payload.story.shading.splice(payload.story.shading.findIndex((s) => {
+            return s.id === payload.shading.id;
         }), 1);
     },
     destroyStory (state, payload) {
@@ -52,6 +61,14 @@ export default {
         }
         if ('face_id' in payload) {
             payload.space.face_id = payload.face_id;
+        }
+    },
+    updateShadingWithData (state, payload) {
+        if ('name' in payload) {
+            payload.shading.name = payload.name;
+        }
+        if ('face_id' in payload) {
+            payload.shading.face_id = payload.face_id;
         }
     }
 }

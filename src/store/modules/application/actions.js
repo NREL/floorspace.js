@@ -14,6 +14,12 @@ export default {
             context.commit('setCurrentSpace', payload);
         }
     },
+    setCurrentShading (context, payload) {
+        // check that space exists on the current story
+        if (~context.state.currentSelections.story.shading.indexOf(payload.shading)) {
+            context.commit('setCurrentShading', payload);
+        }
+    },
     setRenderMode (context, payload) {
         // check that mode exists
         if (~context.state.modes.indexOf(payload.mode)) {

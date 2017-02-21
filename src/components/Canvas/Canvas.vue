@@ -36,6 +36,7 @@ export default {
     computed: {
         ...mapState({
             currentSpace: state => state.application.currentSelections.space,
+            currentShading: state => state.application.currentSelections.space,
             currentStory: state => state.application.currentSelections.story,
             gridVisible: state => state.project.grid.visible,
             mapVisible: state => state.project.map.visible,
