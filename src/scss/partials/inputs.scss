@@ -22,7 +22,7 @@
         background-color: $gray-dark;
         border: 0;
         border-radius: 0.35rem;
-        color: $gray-light;
+        color: $gray-lightest;
         height: 2rem;
         padding: 0 .75rem;
         -webkit-appearance: none;
@@ -48,7 +48,7 @@
     select {
         background-color: $gray-dark;
         border: 0;
-        color: $gray-light;
+        color: $gray-lightest;
         flex-grow: 2;
         height: 2rem;
         padding: 0 .75rem;
@@ -70,7 +70,7 @@ button {
     background-color: $gray-dark;
     border: 1px solid $gray-medium-light;
     border-radius: 0.35rem;
-    color: $gray-light;
+    color: $gray-lightest;
     height: 2rem;
     outline: none;
     padding: 0 .75rem;

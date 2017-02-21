@@ -8,13 +8,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
 <aside>
-    <div class="overlay">
-    </div>
+    <div @click="$emit('close')" class="overlay"></div>
     <div class="modal">
-        <h2>New Object</h2>
-        <svg @click="$emit('close')" class="close" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-            <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
-        </svg>
+        <header>
+            <h2>New Object</h2>
+            <svg @click="$emit('close')" class="close" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
+            </svg>
+        </header>
         <form>
             <div class='input-select'>
                 <label>Type</label>
@@ -30,17 +31,22 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 <label>name</label>
                 <input v-model='objectName'>
             </div>
-            <h4>Additional Fields</h4>
+
+            <div id="add-field">
+                <h4>Additional Fields</h4>
+                <button @click.prevent='addField()'>Add Field</button>
+            </div>
+
             <div v-for='field in fields'>
                 <div class='input-text additional-field '>
                     <input v-model='field.label' placeholder="Label">
                     <input v-model='field.value'  placeholder="Value">
                 </div>
             </div>
-
-            <button @click.prevent='addField()'>Add Field</button>
-            <button @click.prevent='createObject()'>Save</button>
         </form>
+        <footer>
+            <button @click='createObject()'>Save</button>
+        </footer>
     </div>
 </aside>
 </template>
@@ -132,11 +138,18 @@ export default {
 
     .modal {
         form {
-            input, select {
-                border: 1px solid $gray-light;
+            #add-field {
+                align-items: center;
+                display: flex;
+                height: 2rem;
+                justify-content: space-between;
+                margin: 1rem 0;
             }
             .input-select {
-                width: 10rem;
+                width: 15rem;
+                label {
+                    width: 1.75rem;
+                }
             }
             .input-text {
                 margin: .5rem 0;
@@ -148,7 +161,6 @@ export default {
                 border: 1px solid $gray-medium;
             }
             :first-child {
-                background-color: $gray-darkest;
                 margin-right: 1rem;
                 width: 3rem;
             }

@@ -126,7 +126,7 @@ export default {
         svg {
             height: 1rem;
             path {
-                fill: $gray-light;
+                fill: $gray-lightest;
             }
         }
     }

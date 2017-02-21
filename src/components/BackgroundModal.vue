@@ -8,44 +8,49 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
 <aside>
-    <div class="overlay">
+    <div @click="$emit('close')" class="overlay">
     </div>
     <div class="modal">
-        <h2>Set Background</h2>
-        <svg @click="$emit('close')" class="close" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-            <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
-        </svg>
-        <div id="mode">
-            <button @click="setBackground('map')" :class="mapVisible ? 'active' : ''">Map</button>
-            <button @click="setBackground('image')" :class="imageVisible ? 'active' : ''">Image</button>
-            <button @click="setBackground()"  :class="!mapVisible && !imageVisible ? 'active' : ''">None</button>
-        </div>
-
-        <template v-if="mapVisible">
-            <span>Enter the map coordinates for the area you'd like to display.</span>
-            <div id="coordinates">
-
-                <div class="input-number">
-                    <label>latitude</label>
-                    <input v-model.number.lazy="latitude">
-                </div>
-                <div class="input-number">
-                    <label>longitude</label>
-                    <input v-model.number.lazy="longitude">
-                </div>
-
-                <div class="input-number">
-                    <label>zoom</label>
-                    <input v-model.number.lazy="zoom">
-                </div>
+        <header>
+            <h2>Set Background</h2>
+            <svg @click="$emit('close')" class="close" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
+            </svg>
+        </header>
+        <form>
+            <div id="mode">
+                <button @click.prevent="setBackground('map')" :class="mapVisible ? 'active' : ''">Map</button>
+                <button @click.prevent="setBackground('image')" :class="imageVisible ? 'active' : ''">Image</button>
+                <button @click.prevent="setBackground()"  :class="!mapVisible && !imageVisible ? 'active' : ''">None</button>
             </div>
-        </template>
 
-        <template v-if="imageVisible">
-            <span>Upload a custom image for this story.</span>
-            <input ref="fileInput" @change="uploadImage" type="file"/>
-            <button @click="$refs.fileInput.click()" id="uploadImage">Upload an Image</button>
-        </template>
+            <template v-if="mapVisible">
+                <p>Enter the map coordinates for the area you'd like to display.</p>
+                <div id="coordinates">
+
+                    <div class="input-number">
+                        <label>latitude</label>
+                        <input v-model.number.lazy="latitude">
+                    </div>
+                    <div class="input-number">
+                        <label>longitude</label>
+                        <input v-model.number.lazy="longitude">
+                    </div>
+
+                    <div class="input-number">
+                        <label>zoom</label>
+                        <input v-model.number.lazy="zoom">
+                    </div>
+                </div>
+            </template>
+
+            <template v-if="imageVisible">
+                <p>Upload a custom image for this story.</p>
+                <input ref="fileInput" @change="uploadImage" type="file"/>
+                <button @click.prevent="$refs.fileInput.click()">Upload an Image</button>
+            </template>
+        </form>
+
     </div>
 </aside>
 </template>
@@ -125,10 +130,14 @@ export default {
     .modal {
 
         #coordinates {
-            display: flex;
-            margin: 1rem 0 1rem 0;
             .input-number {
-                margin-right: 1rem;
+                margin: .5rem 0;
+                label {
+                    width: 3.5rem;
+                }
+                input {
+                    width: 5rem;
+                }
             }
         }
         #mode {
@@ -141,19 +150,12 @@ export default {
                 }
             }
         }
-        span {
-            display: block;
 
-        }
-        button#uploadImage {
-            border: 1px solid #bbc3c7;
-            display: block;
-            margin-bottom: 1rem;
-        }
         input {
-            border: 1px solid $gray-light;
             &[type="file"] {
+                border: 1px solid $gray-lightest;
                 height: 0;
+                position: absolute;
                 visibility: hidden;
                 width: 0;
             }

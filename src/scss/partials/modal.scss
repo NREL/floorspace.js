@@ -1,33 +1,62 @@
 .overlay {
-    background-color: $gray-dark;
+    background-color: $gray-darkest;
     height: 100vh;
     left: 0;
-    opacity: 0.5;
+    opacity: .5;
     position: absolute;
     top: 0;
     width: 100%;
     z-index: 1;
 }
 .modal {
-    background-color: $gray-dark;
-    border: 2px solid $gray-medium;
+    background-color: $gray-medium;
+    border: 1px solid $gray-medium-light;
     border-radius: 1rem;
     left: 50%;
     min-height: 10rem;
-    padding: 1rem;
     position: fixed;
     top: 50%;
     transform: translate(-50%, -50%);
     width: 25rem;
     z-index: 2;
-    svg.close {
-        position: absolute;
-        height: 1.5rem;
-        top: 1rem;
-        right: 1rem;
-        width: 1.5rem;
-        path {
-            fill: $primary;
+    header {
+        padding: .5rem;
+        text-align: center;
+        background-color: $gray-dark;
+        border-radius: .9rem .9rem 0 0;
+        h2 {
+            display: inline;
+            font-size: .7rem;
+            text-transform: uppercase;
+        }
+        svg.close {
+            position: absolute;
+            height: 1.25rem;
+            top: .5rem;
+            right: .5rem;
+            width: 1.5rem;
+            path {
+                fill: $primary;
+            }
+        }
+    }
+
+    form {
+        padding: 1rem;
+        label {
+            color: $gray-light;
+        }
+    }
+
+    footer {
+        background-color: $gray-dark;
+        border-radius: 0 0 .9rem .9rem;
+        padding: .5rem;
+        text-align: right;
+        button {
+            &:last-child {
+                border-color: $primary;
+            }
         }
     }
 }
