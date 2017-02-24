@@ -31,14 +31,14 @@ export default {
             scene: null,
             camera: null,
 
-            fov: 25
+            fov: 50
         };
     },
     // recalculate and draw the grid when the window resizes
     mounted () {
         this.scene = new THREE.Scene();
-        this.camera = new THREE.PerspectiveCamera( this.fov, this.$refs.canvas.offsetWidth / this.$refs.canvas.offsetHeight, 0.1, 10 );
-		this.camera.position.z = 5;
+        this.camera = new THREE.PerspectiveCamera( this.fov, this.$refs.canvas.offsetWidth / this.$refs.canvas.offsetHeight, 0.1, 100 );
+		this.camera.position.z = 50;
         this.renderer = new THREE.WebGLRenderer();
         this.renderer.setSize( this.$refs.canvas.offsetWidth, this.$refs.canvas.offsetHeight );
         this.$refs.canvas.appendChild( this.renderer.domElement );
@@ -49,14 +49,16 @@ export default {
         ...mapState({
             currentSpace: state => state.application.currentSelections.space,
             currentStory: state => state.application.currentSelections.story
-        })
-    },
-    methods: {
-        renderGeometry () {
+        }),
+        cubes () {
+            return this.$store.getters['application/currentStoryGeometry'].faces.map((face) => {
+                const height = 0,
+                    width = 0,
+                    depth = (height + width) / 2;
 
-			for ( var i = 0; i < 2; i ++ ) {
-                var geometry = new THREE.BoxGeometry(Math.random(),Math.random(),Math.random()),
+                var geometry = new THREE.BoxGeometry(height, width, depth),
                     cube = new THREE.Object3D();
+
                 cube.add(new THREE.LineSegments(
                     geometry,
                     new THREE.LineBasicMaterial({
@@ -86,17 +88,111 @@ export default {
 
                 cube.rotation.y = Math.random() * 2 * Math.PI;
                 cube.rotation.z = Math.random() * 2 * Math.PI;
-                this.scene.add(cube);
+                return;
+            });
+        },
+    },
+    methods: {
+        renderCube () {
+            // draw a cube
+			for ( var i = 0; i < 1; i ++ ) {
+                var geometry = new THREE.BoxGeometry(Math.random(),Math.random(),Math.random()),
+                    cube = new THREE.Object3D();
+                cube.add(new THREE.LineSegments(
+                    geometry,
+                    new THREE.LineBasicMaterial({
+                        color: Math.random() * 0xffffff,
+                        transparent: true,
+                        opacity: 0.5
+                    })
+                ));
 
+                cube.add(new THREE.Mesh(
+                    geometry,
+                    new THREE.MeshPhongMaterial({
+                    transparent: true,
+                    opacity: 0.5,
+                        color: Math.random() * 0xffffff,
+                        emissive: Math.random() * 0xffffff
+                    })
+                ));
+
+                cube.scale.x = .5;
+                cube.scale.y = .5;
+                cube.scale.z = .5;
+                cube.position.x = Math.random();
+				cube.position.y = Math.random();
+				cube.position.z = Math.random();
+
+                cube.rotation.y = Math.random() * 2 * Math.PI;
+                cube.rotation.z = Math.random() * 2 * Math.PI;
+                this.scene.add(cube);
 			}
 
-    		var render = () => {
-    			requestAnimationFrame( render );
+            var render = () => {
+                cube.rotation.y += .05;
+                cube.rotation.x += .05;
+                requestAnimationFrame( render );
+                this.renderer.render(this.scene, this.camera);
+            }
 
-    			this.renderer.render(this.scene, this.camera);
-    		};
+            render();
+        },
+        renderGeometry () {
+            var geometry = new THREE.Geometry();
 
-    		render();
+
+            var length = 10, width = 10;
+
+            var shape = new THREE.Shape();
+            shape.moveTo( 0,0 );
+            shape.lineTo( 0, width );
+            shape.lineTo( length, width );
+            shape.lineTo( length, 0 );
+            shape.lineTo( 0, 0 );
+
+            var extrudeSettings = {
+            	amount: 30,
+            	bevelSize: 0
+            };
+
+            var geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
+            var material = new THREE.MeshPhongMaterial({
+                    transparent: true,
+                    opacity: 0.5,
+                    color: Math.random() * 0xffffff,
+                    emissive: Math.random() * 0xffffff
+                })
+
+            new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+
+            var object = new THREE.Mesh(
+                geometry, new THREE.MeshPhongMaterial({
+                    transparent: true,
+                    opacity: 0.5,
+                    color: Math.random() * 0xffffff,
+                    emissive: Math.random() * 0xffffff,
+                    //wireframe:true
+                }));
+            object.add(new THREE.LineSegments(
+                geometry, new THREE.LineBasicMaterial({
+                    color: Math.random() * 0xffffff,
+                    transparent: true,
+                    opacity: 1
+                })
+            ));
+
+            this.scene.add(object);
+            var render = () => {
+                object.rotation.y += .01;
+                object.rotation.x += .01;
+                object.rotation.z += .01;
+
+                requestAnimationFrame( render );
+                this.renderer.render(this.scene, this.camera);
+            }
+
+            render();
         }
     },
     watch: {
