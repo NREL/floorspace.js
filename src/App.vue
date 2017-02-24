@@ -12,7 +12,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <navigation></navigation>
 
             <view-3d v-if="mode==='3d'"></view-3d>
-            <canvas-view v-else></canvas-view>
+            <canvas-view v-if="mode!=='3d'"></canvas-view>
 
             <background-modal v-if="backgroundModalVisible" @close="backgroundModalVisible = false"></background-modal>
             <object-modal v-if="objectModalVisible" @close="objectModalVisible = false"></object-modal>

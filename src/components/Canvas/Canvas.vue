@@ -25,6 +25,7 @@ export default {
     // recalculate and draw the grid when the window resizes
     mounted () {
         this.drawGrid();
+        this.drawPolygons();
         window.addEventListener('resize', this.drawGrid);
         this.$refs.grid.addEventListener('mousemove', this.calcSnap);
 
@@ -113,7 +114,9 @@ export default {
         backgroundSrc () { this.drawGrid(); },
 
         // reset points if drawing mode changes
-        currentMode () { this.points = []; },
+        currentMode () {
+            this.points = [];
+        },
         currentSpace() {
             this.points = [];
             this.drawPolygons();
