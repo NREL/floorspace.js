@@ -50,45 +50,36 @@ export default {
             currentSpace: state => state.application.currentSelections.space,
             currentStory: state => state.application.currentSelections.story
         }),
-        cubes () {
+        polygons () {
+            return [{
+                face_id: 1,
+                points: [
+                    {"id":4,"x":1,"y":2,"X":1,"Y":2},
+                    {"id":5,"x":3,"y":9,"X":3,"Y":9},
+                    {"id":6,"x":6,"y":7,"X":6,"Y":7},
+                    {"id":7,"x":6,"y":2,"X":6,"Y":2},
+                    {"id":8,"x":4,"y":3,"X":4,"Y":3}
+                ]
+            }];
             return this.$store.getters['application/currentStoryGeometry'].faces.map((face) => {
-                const height = 0,
-                    width = 0,
-                    depth = (height + width) / 2;
-
-                var geometry = new THREE.BoxGeometry(height, width, depth),
-                    cube = new THREE.Object3D();
-
-                cube.add(new THREE.LineSegments(
-                    geometry,
-                    new THREE.LineBasicMaterial({
-                        color: Math.random() * 0xffffff,
-                        transparent: true,
-                        opacity: 0.5
+                return {
+                    face_id: face.id,
+                    points: face.edgeRefs.map((edgeRef) => {
+                        // look up the edge referenced by the face
+                        const edge = this.$store.getters['application/currentStoryGeometry'].edges.find((e) => {
+                            return e.id === edgeRef.edge_id;
+                        });
+                        // look up the vertex associated with v1 unless the edge reference on the face is reversed
+                        if (!edge) {
+                            // TODO: dangling edgeref, find out where the edge is getting dumped
+                            debugger;
+                        }
+                        const vertexId = edgeRef.reverse ? edge.v2 : edge.v1;
+                        return this.$store.getters['application/currentStoryGeometry'].vertices.find((v) => {
+                            return v.id === vertexId;
+                        });
                     })
-                ));
-
-                cube.add(new THREE.Mesh(
-                    geometry,
-                    new THREE.MeshPhongMaterial({
-                    transparent: true,
-                    opacity: 0.5,
-                        color: Math.random() * 0xffffff,
-                        emissive: Math.random() * 0xffffff
-                        // side: THREE.DoubleSide,
-                        // shading: THREE.FlatShading
-                    })
-                ));
-                cube.scale.x = .5;
-                cube.scale.y = .5;
-                cube.scale.z = .5;
-                cube.position.x = Math.random();
-				cube.position.y = Math.random();
-				cube.position.z = Math.random();
-
-                cube.rotation.y = Math.random() * 2 * Math.PI;
-                cube.rotation.z = Math.random() * 2 * Math.PI;
-                return;
+                };
             });
         },
     },
@@ -139,60 +130,52 @@ export default {
             render();
         },
         renderGeometry () {
-            var geometry = new THREE.Geometry();
+            this.polygons.forEach((polygon) => {
+                var shape = new THREE.Shape();
+                shape.moveTo( polygon.points[0].x, polygon.points[0].y );
+
+                polygon.points.forEach((point) => {
+                    shape.lineTo(point.x, point.y);
+                });
+
+                var geometry = new THREE.ExtrudeGeometry(shape, {
+                   amount: 10,
+                   bevelSize: 0
+                });
+
+                var material = new THREE.MeshPhongMaterial({
+                        transparent: true,
+                        opacity: 0.5,
+                        color: Math.random() * 0xffffff,
+                        emissive: Math.random() * 0xffffff
+                    })
+
+                new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+
+                var object = new THREE.Mesh(
+                    geometry, new THREE.MeshPhongMaterial({
+                        transparent: true,
+                        opacity: 0.5,
+                        color: Math.random() * 0xffffff,
+                        emissive: Math.random() * 0xffffff,
+                        //wireframe:true
+                    }));
+                this.scene.add(object);
+                var render = () => {
+                    object.rotation.y += .01;
+                    object.rotation.x += .01;
+                    object.rotation.z += .01;
+
+                    requestAnimationFrame( render );
+                    this.renderer.render(this.scene, this.camera);
+                }
+
+                render();
+
+            })
 
 
-            var length = 10, width = 10;
 
-            var shape = new THREE.Shape();
-            shape.moveTo( 0,0 );
-            shape.lineTo( 0, width );
-            shape.lineTo( length, width );
-            shape.lineTo( length, 0 );
-            shape.lineTo( 0, 0 );
-
-            var extrudeSettings = {
-            	amount: 30,
-            	bevelSize: 0
-            };
-
-            var geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
-            var material = new THREE.MeshPhongMaterial({
-                    transparent: true,
-                    opacity: 0.5,
-                    color: Math.random() * 0xffffff,
-                    emissive: Math.random() * 0xffffff
-                })
-
-            new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-
-            var object = new THREE.Mesh(
-                geometry, new THREE.MeshPhongMaterial({
-                    transparent: true,
-                    opacity: 0.5,
-                    color: Math.random() * 0xffffff,
-                    emissive: Math.random() * 0xffffff,
-                    //wireframe:true
-                }));
-            object.add(new THREE.LineSegments(
-                geometry, new THREE.LineBasicMaterial({
-                    color: Math.random() * 0xffffff,
-                    transparent: true,
-                    opacity: 1
-                })
-            ));
-
-            this.scene.add(object);
-            var render = () => {
-                object.rotation.y += .01;
-                object.rotation.x += .01;
-                object.rotation.z += .01;
-
-                requestAnimationFrame( render );
-                this.renderer.render(this.scene, this.camera);
-            }
-
-            render();
         }
     },
     watch: {

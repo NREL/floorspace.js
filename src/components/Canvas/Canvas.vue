@@ -81,7 +81,7 @@ export default {
         },
         // map all faces for the current story to polygons
         polygons () {
-            return this.$store.getters['application/currentStoryGeometry'].faces.map((face) => {
+            var polygons =  this.$store.getters['application/currentStoryGeometry'].faces.map((face) => {
                 return {
                     face_id: face.id,
                     points: face.edgeRefs.map((edgeRef) => {
@@ -101,6 +101,8 @@ export default {
                     })
                 };
             });
+            console.log(JSON.stringify(polygons));
+            return polygons;
         },
     },
     watch: {
