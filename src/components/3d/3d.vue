@@ -9,15 +9,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
     <div ref="canvas" id="canvas">
 
-        <div class='input-number'>
-            <label>name</label>
-            <input v-model='fov' type="number">
-        </div>
-
-        <div class='input-number'>
-            <label>name</label>
-            <input v-model='zPosition' type="number">
-        </div>
 
     </div>
 </template>
@@ -33,17 +24,14 @@ export default {
         return {
             scene: null,
             camera: null,
-            controls: null,
-
-            zPosition: 50,
-            fov: 50
+            controls: null
         };
     },
     // recalculate and draw the grid when the window resizes
     mounted () {
         // camera
         this.camera = new THREE.PerspectiveCamera( this.fov, this.$refs.canvas.offsetWidth / this.$refs.canvas.offsetHeight, .1, 1000000 );
-		this.camera.position.z = 20;
+	    this.camera.position.z = 15;
 
         // renderer
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -68,8 +56,8 @@ export default {
         this.scene.add( light );
 
         // controls
-        this.controls = new THREE.TrackballControls( this.camera );
-        this.controls.rotateSpeed = 1.0;
+        this.controls = new THREE.TrackballControls( this.camera, this.$refs.canvas );
+        this.controls.rotateSpeed = 10.0;
         this.controls.zoomSpeed = 1.2;
         this.controls.panSpeed = 0.8;
         this.controls.noZoom = false;
@@ -98,6 +86,18 @@ export default {
             currentSpace: state => state.application.currentSelections.space,
             currentStory: state => state.application.currentSelections.story
         }),
+        zoom: {
+            get () { return this.$store.state.project.view.zoom; },
+            set (val) { this.$store.dispatch('project/setZoom', { zoom: val }); }
+        },
+        fov: {
+            get () { return this.$store.state.project.view.fov; },
+            set (val) { this.$store.dispatch('project/setFov', { fov: val }); }
+        },
+        filmOffset: {
+            get () { return this.$store.state.project.view.filmOffset; },
+            set (val) { this.$store.dispatch('project/setFilmOffset', { filmOffset: val }); }
+        },
         polygons () {
             return this.$store.getters['application/currentStoryGeometry'].faces.map((face) => {
                 return {
@@ -159,12 +159,17 @@ export default {
 		}
     },
     watch: {
-        fov () {
-            this.camera.fov = this.fov;
+        filmOffset () {
+            this.camera.filmOffset = this.filmOffset;
             this.camera.updateProjectionMatrix();
         },
-        zPosition () {
-            this.camera.position.z = this.zPosition;
+        // 0 to 1?
+        zoom () {
+            this.camera.zoom = this.zoom;
+            this.camera.updateProjectionMatrix();
+        },
+        fov () {
+            this.camera.fov = this.fov;
             this.camera.updateProjectionMatrix();
         },
         polygons () {

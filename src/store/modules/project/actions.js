@@ -77,6 +77,16 @@ export default {
         context.commit('setViewMaxY', validator.validatedPayload);
     },
 
+    setFov (context, payload) {
+        context.commit('setFov', payload);
+    },
+    setZoom (context, payload) {
+        context.commit('setZoom', payload);
+    },
+    setFilmOffset (context, payload) {
+        context.commit('setFilmOffset', payload);
+    },
+
     setMapLatitude (context, payload) {
         const validator = new Validator(payload);
         validator.validateFloat('latitude');

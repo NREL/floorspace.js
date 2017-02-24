@@ -55,6 +55,22 @@ export default {
         }
     },
 
+    setFov (state, payload) {
+        if ('fov' in payload) {
+            state.view.fov = payload.fov;
+        }
+    },
+    setZoom (state, payload) {
+        if ('zoom' in payload) {
+            state.view.zoom = payload.zoom;
+        }
+    },
+    setFilmOffset (state, payload) {
+        if ('filmOffset' in payload) {
+            state.view.filmOffset = payload.filmOffset;
+        }
+    },
+
     // MAP
     setMapVisible (state, payload) {
         if ('visible' in payload) {

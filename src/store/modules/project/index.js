@@ -17,10 +17,15 @@ export default {
             y_spacing: 1
         },
         view: {
+            // drawing canvas
             min_x: 0,
             min_y: 0,
             max_x: 10,
-            max_y: 10
+            max_y: 10,
+            // 3d view
+            filmOffset: 0,
+            fov: 75,
+            zoom: 1
         },
         map: {
             visible: false,
