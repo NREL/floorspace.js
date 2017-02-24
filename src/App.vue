@@ -10,7 +10,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <toolbar @setBackground="showModal('background')" @createObject="showModal('object')"></toolbar>
         <main>
             <navigation></navigation>
-            <canvas-view></canvas-view>
+
+            <view-3d v-if="mode==='3d'"></view-3d>
+            <canvas-view v-else></canvas-view>
+
             <background-modal v-if="backgroundModalVisible" @close="backgroundModalVisible = false"></background-modal>
             <object-modal v-if="objectModalVisible" @close="objectModalVisible = false"></object-modal>
             <inspector></inspector>
@@ -24,11 +27,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 // this import order is important, if the grid is loaded before the other elements or after the toolbar, it ends up warped
 import Navigation from './components/Navigation'
 import Inspector from './components/Inspector'
-import Canvas from './components/3d/3d'
+import Canvas from './components/Canvas/Canvas'
+import View3d from './components/3d/3d'
 import Toolbar from './components/Toolbar'
 import BackgroundModal from './components/BackgroundModal'
 import ObjectModal from './components/ObjectModal'
 import Library from './components/Library'
+
+import { mapState } from 'vuex'
 
 export default {
     name: 'app',
@@ -53,8 +59,12 @@ export default {
             }
         }
     },
+    computed: {
+        ...mapState({ mode: state => state.application.currentSelections.mode })
+    },
     components: {
         'canvas-view': Canvas,
+        'view-3d': View3d,
         'library': Library,
         'navigation': Navigation,
         'toolbar': Toolbar,

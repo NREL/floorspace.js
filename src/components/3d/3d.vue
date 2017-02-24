@@ -21,7 +21,6 @@ const THREE = require('three');
 import TrackballControls from './TrackballControls';
 import DragControls from './DragControls';
 
-
 import { mapState } from 'vuex'
 export default {
     name: 'canvas3d',

@@ -16,7 +16,7 @@ export default {
             tool: null
         },
         // TODO: drawing modes may need to be moved into the component as local state
-        modes: ['Rectangle', 'Polygon', 'Place Component', 'Apply Property'],
+        modes: ['Rectangle', 'Polygon', 'Place Component', 'Apply Property', '3d'],
         // d3 scale functions translate the pixel coordinates of a location on the screen into RWU coordinates to use within the SVG's grid system
         scale: {
             x: null,
