@@ -102,7 +102,7 @@ export default {
         },
         mode: {
             get () { return this.$store.state.application.currentSelections.mode; },
-            set (val) { this.$store.dispatch('application/setRenderMode', { mode: val }); }
+            set (val) { this.$store.dispatch('application/setsetApplicationMode', { mode: val }); }
         },
         // spacing between gridlines, measured in RWU
         x_spacing: {

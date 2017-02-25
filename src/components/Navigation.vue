@@ -128,6 +128,8 @@ export default {
                 this.currentStory = item;
             } else if (this.tab === 'spaces') {
                 this.currentSpace = item;
+            } else if (this.tab === 'shading') {
+                this.currentShading = item;
             }
         }
     }
