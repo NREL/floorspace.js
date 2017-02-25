@@ -1,23 +1,13 @@
 export default {
-    // CURRENTSELECTIONS
-    // set current story selection, clear current space selection
-    setCurrentStory (state, payload) {
-        state.currentSelections.story = payload.story;
-        state.currentSelections.space = payload.story.spaces[0];
-    },
-    // set current space selection
-    setCurrentSpace (state, payload) {
-        state.currentSelections.space = payload.space;
-    },
-    // set current canvas rendering mode
-    setRenderMode (state, payload) {
-        state.currentSelections.mode = payload.mode;
-    },
-    // SCALE
-    setScaleX (state, payload) {
-        state.scale.x = payload.scaleX;
-    },
-    setScaleY (state, payload) {
-        state.scale.y = payload.scaleY;
-    }
+    // current selections
+    setCurrentStory (state, payload) { state.currentSelections.story = payload.story; },
+    setCurrentSpace (state, payload) { state.currentSelections.space = payload.space; },
+    setCurrentShading (state, payload) { state.currentSelections.shading = payload.shading; },
+
+    // editor rendering/drawing mode
+    setsetApplicationMode (state, payload) { state.currentSelections.mode = payload.mode; },
+
+    // d3 scaling functions
+    setScaleX (state, payload) { state.scale.x = payload.scaleX; },
+    setScaleY (state, payload) { state.scale.y = payload.scaleY; }
 }

@@ -2,31 +2,71 @@ export default {
     setCurrentStory (context, payload) {
         // check that story exists
         if (~context.rootState.models.stories.indexOf(payload.story)) {
-            context.commit('setCurrentStory', payload);
+            context.commit('setCurrentStory', {
+                story: payload.story
+            });
+
+            // update project grid background settings based on story configuration
             if (payload.story.imageVisible) {
                 context.dispatch('project/setMapVisible', { visible: false }, { root: true });
             }
+
+            // clear the current shading and space
+            context.commit('setCurrentShading', {
+                shading: payload.shading
+            });
+            context.commit('setCurrentSpace', {
+                space: null
+            });
         }
     },
+
     setCurrentSpace (context, payload) {
-        // check that space exists on the current story
+        // check that space belongs to the current story
         if (~context.state.currentSelections.story.spaces.indexOf(payload.space)) {
-            context.commit('setCurrentSpace', payload);
+            context.commit('setCurrentSpace', {
+                space: payload.space
+            });
+
+            // clear the current shading
+            context.commit('setCurrentShading', {
+                shading: payload.shading
+            });
         }
     },
+
     setCurrentShading (context, payload) {
-        // check that space exists on the current story
+        // check that shading belongs to the current story
         if (~context.state.currentSelections.story.shading.indexOf(payload.shading)) {
-            context.commit('setCurrentShading', payload);
+            context.commit('setCurrentShading', {
+                shading: payload.shading
+            });
+
+            // clear the currentSpace
+            context.commit('setCurrentSpace', {
+                space: null
+            });
         }
     },
-    setRenderMode (context, payload) {
-        // check that mode exists
+
+    setApplicationMode (context, payload) {
+        // check that the requested rendering mode exists
         if (~context.state.modes.indexOf(payload.mode)) {
-            context.commit('setRenderMode', payload);
+            context.commit('setsetApplicationMode', {
+                mode: payload.mode
+            });
         }
     },
-    // update d3 scaling functions
-    setScaleX (context, payload) { context.commit('setScaleX', payload); },
-    setScaleY (context, payload) { context.commit('setScaleY', payload); }
+
+    // update d3's scaling functions
+    setScaleX (context, payload) {
+        context.commit('setScaleX', {
+            scaleX: payload.scaleX
+        });
+    },
+    setScaleY (context, payload) {
+        context.commit('setScaleY', {
+            scaleY: payload.scaleY
+        });
+    }
 }
