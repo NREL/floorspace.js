@@ -8,8 +8,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
     <div ref="canvas" id="canvas">
-
-
     </div>
 </template>
 
@@ -29,6 +27,7 @@ export default {
     },
     // recalculate and draw the grid when the window resizes
     mounted () {
+        console.log(this.xBounds);
         // camera
         this.camera = new THREE.PerspectiveCamera( this.fov, this.$refs.canvas.offsetWidth / this.$refs.canvas.offsetHeight, .1, 1000000 );
 	    this.camera.position.z = 15;
@@ -107,11 +106,6 @@ export default {
                         const edge = this.$store.getters['application/currentStoryGeometry'].edges.find((e) => {
                             return e.id === edgeRef.edge_id;
                         });
-                        // look up the vertex associated with v1 unless the edge reference on the face is reversed
-                        if (!edge) {
-                            // TODO: dangling edgeref, find out where the edge is getting dumped
-                            debugger;
-                        }
                         const vertexId = edgeRef.reverse ? edge.v2 : edge.v1;
                         return this.$store.getters['application/currentStoryGeometry'].vertices.find((v) => {
                             return v.id === vertexId;
@@ -119,6 +113,24 @@ export default {
                     })
                 };
             });
+        },
+        vertices () {
+            const vertices = [];
+            this.$store.getters['application/currentStoryGeometry'].faces.forEach((face) => {
+                face.edgeRefs.forEach((edgeRef) => {
+                    // look up the edge referenced by the face
+                    const edge = this.$store.getters['application/currentStoryGeometry'].edges.find((e) => {
+                        return e.id === edgeRef.edge_id;
+                    });
+                    // look up the vertex associated with v1 unless the edge reference on the face is reversed
+                    const vertexId = edgeRef.reverse ? edge.v2 : edge.v1;
+                    const vertex = this.$store.getters['application/currentStoryGeometry'].vertices.find((v) => {
+                        return v.id === vertexId;
+                    });
+                    vertices.push(vertex);
+                })
+            });
+            return vertices;
         },
     },
     methods: {
@@ -131,7 +143,7 @@ export default {
                 polygon.points.forEach( p => shape.lineTo(p.x, p.y));
 
                 const geometry = new THREE.ExtrudeGeometry(shape, {
-                   amount: 3,
+                   amount: 1,
                    bevelEnabled: false
                 });
 
@@ -143,12 +155,6 @@ export default {
                         color: Math.random() * 0xffffff
                     }
                 ));
-                // const lineSegments = new THREE.LineSegments( geometry,
-                //     new THREE.LineBasicMaterial({
-                //         color: Math.random() * 0xffffff
-                //     })
-                // );
-                // mesh.add(lineSegments);
                 this.scene.add(mesh);
             });
         },

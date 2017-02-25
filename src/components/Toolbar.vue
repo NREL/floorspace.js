@@ -52,17 +52,17 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <template v-if="mode==='3d'">
                 <div class="input-number">
                     <label>Field Of View</label>
-                    <input v-model.number.lazy="fov">
+                    <input v-model.number="fov">
                 </div>
 
                 <div class="input-number">
                     <label>Film Offset</label>
-                    <input v-model.number.lazy="filmOffset">
+                    <input v-model.number="filmOffset">
                 </div>
 
                 <div class="input-number">
                     <label>Zoom</label>
-                    <input v-model.number.lazy="zoom">
+                    <input v-model.number="zoom">
                 </div>
             </template>
 
