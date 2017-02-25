@@ -30,6 +30,14 @@ export default {
             construction_set_id: null
         };
     },
+    Shading: function () {
+        return {
+            id: generateId(),
+            name: null,
+            handle: null,
+            face_id: null
+        };
+    },
     Image: function (src) {
         return {
             id: generateId(),

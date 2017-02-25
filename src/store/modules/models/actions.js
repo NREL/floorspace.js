@@ -38,6 +38,14 @@ export default {
             space: space
         });
     },
+    initShading (context, payload) {
+        const shading = new factory.Shading();
+        shading.name = 'Shading ' + (payload.story.shading.length + 1);
+        context.commit('initShading', {
+            story: payload.story,
+            shading: shading
+        });
+    },
 
     destroySpace (context, payload) {
         context.commit('destroySpace', {
@@ -76,6 +84,14 @@ export default {
 
         validator.validateLength('name', 1);
         context.commit('updateSpaceWithData', validator.validatedPayload);
+    },
+    // validate and update simple properties on the space
+    updateShadingWithData (context, payload) {
+        const validatedPayload = { space: payload.shading };
+        const validator = new Validator(payload, validatedPayload);
+
+        validator.validateLength('name', 1);
+        context.commit('updateShadingWithData', validator.validatedPayload);
     },
     createImageForStory (context, payload) {
         const image = new factory.Image(payload.src);

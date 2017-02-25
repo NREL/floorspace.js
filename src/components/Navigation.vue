@@ -11,23 +11,24 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     <section id="tabs">
         <span :class="tab === 'stories' ? 'active' : ''" @click="tab = 'stories'">Stories</span>
         <span :class="tab === 'spaces' ? 'active' : ''" @click="tab = 'spaces'">Spaces</span>
+        <span :class="tab === 'shading' ? 'active' : ''" @click="tab = 'shading'">Shading</span>
     </section>
 
-    <section id="breadcrumbs" v-show="currentStory || currentSpace">
+    <section id="breadcrumbs">
         <span>
             {{ currentStory.name }}
-            <template v-if="currentSpace">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path d="M.5 0v14l11-7-11-7z"/></svg>
-                {{ currentSpace.name }}
-            </template>
+
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path d="M.5 0v14l11-7-11-7z"/></svg>
+            {{ tab === 'shading' ? currentShading.name : currentSpace.name }}
         </span>
 
         <button @click="addItem" id="new-item" height="50" viewBox="0 0 256 256" width="50" xmlns="http://www.w3.org/2000/svg">
-        New {{tab === 'stories' ? 'Story' : 'Space'}}</button>
+            New {{displayType}}
+        </button>
     </section>
 
     <section id="list">
-        <div v-for="item in (tab === 'spaces' ? spaces : stories)" :key="item.id" :class="(currentSpace === item || currentStory === item ) ? 'active' : ''" @click="selectItem(item)">
+        <div v-for="item in items" :key="item.id" :class="(currentSpace === item || currentStory === item || currentShading === item) ? 'active' : ''" @click="selectItem(item)">
             {{item.name}}
             <svg @click="destroyItem()" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
                 <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
@@ -52,6 +53,26 @@ export default {
         ...mapState({ stories: state => state.models.stories }),
         // spaces for the currently selected story
         spaces () { return this.currentStory.spaces; },
+        // shading for the currently selected story
+        shading () { return this.currentStory.shading; },
+        items () {
+            if (this.tab === 'stories') {
+                return this.stories;
+            } else if (this.tab === 'spaces') {
+                return this.spaces;
+            } else if (this.tab === 'shading') {
+                return this.shading;
+            }
+        },
+        displayType () {
+            if (this.tab === 'stories') {
+                return "Story";
+            } else if (this.tab === 'spaces') {
+                return "Space";
+            } else if (this.tab === 'shading') {
+                return "Shading";
+            }
+        },
 
         currentStory: {
             get () { return this.$store.state.application.currentSelections.story; },
@@ -60,15 +81,23 @@ export default {
         currentSpace: {
             get () { return this.$store.state.application.currentSelections.space; },
             set (item) { this.$store.dispatch('application/setCurrentSpace', { 'space': item }); }
+        },
+        currentShading: {
+            get () { return this.$store.state.application.currentSelections.shading || {}; },
+            set (item) { this.$store.dispatch('application/setCurrentShading', { 'shading': item }); }
         }
     },
     methods: {
-        // initialize an empty story or space depending on the selected tab
+        // initialize an empty story, space, or shading depending on the selected tab
         addItem () {
             if (this.tab === 'stories') {
                 this.$store.dispatch('models/initStory');
-            } else {
+            } else if (this.tab === 'spaces') {
                 this.$store.dispatch('models/initSpace', {
+                    story: this.$store.state.application.currentSelections.story
+                });
+            } else if (this.tab === 'shading') {
+                this.$store.dispatch('models/initShading', {
                     story: this.$store.state.application.currentSelections.story
                 });
             }
@@ -85,6 +114,12 @@ export default {
                     story: this.$store.state.application.currentSelections.story
                 });
                 this.currentSpace = this.spaces[0];
+            } else if (this.tab === 'shading' && this.shading.length > 1) {
+                this.$store.dispatch('models/destroyShading', {
+                    shading: this.$store.state.application.currentSelections.shading,
+                    story: this.$store.state.application.currentSelections.story
+                });
+
             }
         },
         // update the currentStory or currentSpace
