@@ -27,7 +27,6 @@ export default {
     },
     // recalculate and draw the grid when the window resizes
     mounted () {
-        console.log(this.xBounds);
         // camera
         this.camera = new THREE.PerspectiveCamera( this.fov, this.$refs.canvas.offsetWidth / this.$refs.canvas.offsetHeight, .1, 1000000 );
 	    this.camera.position.z = 15;
@@ -73,16 +72,15 @@ export default {
 
         // handle resize
         window.addEventListener('resize', this.resizeCanvas);
-
         this.renderGeometry();
     },
     beforeDestroy () {
         window.removeEventListener('resize', this.resizeCanvas);
-        // this.$refs.grid.removeEventListener('mousemove', this.calcSnap);
     },
     computed: {
         ...mapState({
             currentSpace: state => state.application.currentSelections.space,
+            currentShading: state => state.application.currentSelections.shading,
             currentStory: state => state.application.currentSelections.story
         }),
         zoom: {
@@ -137,6 +135,7 @@ export default {
         renderGeometry () {
             const objects = [];
             this.polygons.forEach((polygon) => {
+                console.log(polygon);
                 const shape = new THREE.Shape();
                 // begining at origin, connect all vertices
                 shape.moveTo( polygon.points[0].x, polygon.points[0].y );
@@ -146,13 +145,16 @@ export default {
                    amount: 1,
                    bevelEnabled: false
                 });
+                var color;
+                if (this.currentSpace && polygon.face_id === this.currentSpace.face_id) { color = 0x6AAC15; }
+                if (this.currentShading && polygon.face_id === this.currentShading.face_id) { color = 0x6AAC15; }
 
                 const mesh = new THREE.Mesh( geometry,
-                    new THREE.MeshPhongMaterial({
+                    new THREE.MeshLambertMaterial({
                         transparent: true,
                         opacity: 0.5,
                         side: THREE.DoubleSide,
-                        color: Math.random() * 0xffffff
+                        color: color || 0xDF5236// Math.random() * 0xffffff
                     }
                 ));
                 this.scene.add(mesh);
