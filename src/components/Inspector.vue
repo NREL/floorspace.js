@@ -126,7 +126,7 @@ export default {
             var payload = { shading: this.currentShading };
             payload[key] = event.target.value;
             // required to prevent input field value from containing incorrect data
-            event.target.value = this.currentSpace[key];
+            event.target.value = this.currentShading[key];
             this.$store.dispatch('models/updateShadingWithData', payload);
         }
     },

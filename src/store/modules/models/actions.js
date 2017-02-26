@@ -89,7 +89,7 @@ export default {
     },
 
     updateSpaceWithData (context, payload) {
-        const space = context.rootGetters['application/currentStory'].spaces.find(s => s.id === payload.space.id),
+        const space = context.rootState.application.currentSelections.story.spaces.find(s => s.id === payload.space.id),
             validProperties = Object.keys(space),
             cleanedPayload = {};
 
@@ -106,7 +106,7 @@ export default {
     },
 
     updateShadingWithData (context, payload) {
-        const shading = context.rootGetters['application/currentStory'].shading.find(s => s.id === payload.shading.id),
+        const shading = context.rootState.application.currentSelections.story.shading.find(s => s.id === payload.shading.id),
             validProperties = Object.keys(shading),
             cleanedPayload = {};
 
