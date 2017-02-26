@@ -47,7 +47,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <input :value="currentStory.multiplier" @change="updatecurrentStory('multiplier', $event)">
         </div>
 
-        <button @click.prevent='addWindow()'>Add Window</button>
+        <!-- <button @click="assignObject('windows', currentStory)">Add Window</button> -->
 
         <template v-if="currentSpace">
             <h3>Space</h3>
@@ -56,7 +56,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 <input :value="currentSpace.name" @change="updatecurrentSpace('name', $event)">
             </div>
 
-            <button @click="assignObject('daylighting_controls', currentSpace)">Add daylighting_controls</button>
+            <!-- <button @click="assignObject('daylighting_controls', currentSpace)">Add daylighting_controls</button> -->
             <button @click="assignObject('building_units', currentSpace)">Add building_unit_id</button>
             <button @click="assignObject('thermal_zones', currentSpace)">Add thermal_zone_id</button>
             <button @click="assignObject('space_types', currentSpace)">Add space_type_id</button>

@@ -58,10 +58,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <script>
 
 import { mapState } from 'vuex'
-import helpers from './../store/modules/geometry/helpers'
+import helpers from './../../store/modules/geometry/helpers'
 
 export default {
-    name: 'modal',
+    name: 'backgroundModal',
     methods: {
         setBackground (mode) {
             if (mode === 'map') {
@@ -125,7 +125,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "./../scss/config";
+@import "./../../scss/config";
 
     .modal {
 

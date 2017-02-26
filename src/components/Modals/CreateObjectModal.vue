@@ -11,31 +11,41 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     <div @click="$emit('close')" class="overlay"></div>
     <div class="modal">
         <header>
-            <h2>Select a {{ displayType }} to assign to {{ target.name }}</h2>
+            <h2>New Object</h2>
             <svg @click="$emit('close')" class="close" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
                 <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
             </svg>
         </header>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th v-for="column in columns">
-                        <span>{{column}}</span>
-                    </th>
-                </tr>
-            </thead>
+        <form>
+            <div class='input-select'>
+                <label>Type</label>
+                <select v-model='displayType'>
+                    <option v-for='(objects, type) in library'>{{ displayTypeForType(type) }}</option>
+                </select>
+                <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
+                    <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
+                </svg>
+            </div>
 
-            <tbody>
-                <tr v-for='object in objects' @click="currentObject = object" :class="currentObject === object ? 'active' : ''">
+            <div class='input-text'>
+                <label>name</label>
+                <input v-model='objectName'>
+            </div>
 
-                    <td v-for="column in columns">
-                        <span>{{object.hasOwnProperty(column) ? object[column] : '--'}}</span>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+            <div id="add-field">
+                <h4>Additional Fields</h4>
+                <button @click.prevent='addField()'>Add Field</button>
+            </div>
+
+            <div v-for='field in fields'>
+                <div class='input-text additional-field '>
+                    <input v-model='field.label' placeholder="Label">
+                    <input v-model='field.value'  placeholder="Value">
+                </div>
+            </div>
+        </form>
         <footer>
-            <button @click='selectObject()'>Save</button>
+            <button @click='createObject()'>Save</button>
         </footer>
     </div>
 </aside>
@@ -44,7 +54,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <script>
 
 import { mapState } from 'vuex'
-import factory from './../store/modules/models/factory'
+import factory from './../../store/modules/models/factory'
 
 const map = {
     building_units: {
@@ -78,43 +88,85 @@ const map = {
 };
 
 export default {
-    name: 'library',
-    props: ['type', 'target'],
+    name: 'createObjectModal',
     data() {
         return {
-            currentObject: null
+            displayType: null,
+            objectName: null,
+            fields: []
         };
     },
     mounted () {
+        this.displayType = this.displayTypeForType(Object.keys(this.library)[0]);
+        this.objectName = this.displayType + ' ' + (this.library[this.typeForDisplayType(this.displayType)].length + 1);
     },
     computed: {
         ...mapState({
             library: state => state.models.library
         }),
         objects () {
-            return this.library[this.type];
-        },
-        displayType () { return map[this.type].displayName; },
-
-        columns () {
-            const columns = [];
-            this.objects.forEach((o) => {
-                Object.keys(o).forEach((k) => {
-                    if (!~columns.indexOf(k)) { columns.push(k); }
-                })
-            });
-            return columns;
+            return this.library[this.typeForDisplayType(this.displayType)];
         }
     },
     methods: {
-        selectObject () {
-
+        displayTypeForType (type) { return map[type].displayName; },
+        typeForDisplayType (displayType) { return Object.keys(map).find(k => map[k].displayName === this.displayType); },
+        addField () {
+            this.fields.push({
+                label: '',
+                value: ''
+            });
+        },
+        createObject () {
+            const type = this.typeForDisplayType(this.displayType);
+            var newObject = new map[type].create(this.objectName);
+            this.fields.forEach((field) => {
+                newObject[field.label] = field.value;
+            })
+            this.$store.dispatch('models/createObjectWithType', {
+                type: type,
+                object: newObject
+            });
+            this.$emit('close');
         }
     }
 }
 </script>
 
 <style lang="scss" scoped>
-@import "./../scss/config";
+@import "./../../scss/config";
 
+    .modal {
+        form {
+            #add-field {
+                align-items: center;
+                display: flex;
+                height: 2rem;
+                justify-content: space-between;
+                margin: 1rem 0;
+            }
+            .input-select {
+                width: 15rem;
+                label {
+                    width: 1.75rem;
+                }
+            }
+            .input-text {
+                margin: .5rem 0;
+            }
+        }
+        .additional-field {
+            display: flex;
+            input {
+                border: 1px solid $gray-medium;
+            }
+            :first-child {
+                margin-right: 1rem;
+                width: 3rem;
+            }
+            :last-child {
+                flex-grow: 2;
+            }
+        }
+    }
 </style>

@@ -31,10 +31,10 @@ import Inspector from './components/Inspector'
 import Canvas from './components/Canvas/Canvas'
 import View3d from './components/3d/3d'
 import Toolbar from './components/Toolbar'
-import BackgroundModal from './components/BackgroundModal'
-import AssignObjectModal from './components/AssignObjectModal'
-import CreateObjectModal from './components/CreateObjectModal'
 import Library from './components/Library'
+import BackgroundModal from './components/Modals/BackgroundModal'
+import AssignObjectModal from './components/Modals/AssignObjectModal'
+import CreateObjectModal from './components/Modals/CreateObjectModal'
 
 import { mapState } from 'vuex'
 

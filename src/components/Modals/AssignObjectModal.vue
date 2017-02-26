@@ -11,41 +11,31 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     <div @click="$emit('close')" class="overlay"></div>
     <div class="modal">
         <header>
-            <h2>New Object</h2>
+            <h2>Select a {{ displayType }} to assign to {{ target.name }}</h2>
             <svg @click="$emit('close')" class="close" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
                 <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
             </svg>
         </header>
-        <form>
-            <div class='input-select'>
-                <label>Type</label>
-                <select v-model='displayType'>
-                    <option v-for='(objects, type) in library'>{{ displayTypeForType(type) }}</option>
-                </select>
-                <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
-                    <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
-                </svg>
-            </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th v-for="column in columns">
+                        <span>{{column}}</span>
+                    </th>
+                </tr>
+            </thead>
 
-            <div class='input-text'>
-                <label>name</label>
-                <input v-model='objectName'>
-            </div>
+            <tbody>
+                <tr v-for='object in objects' @click="currentObject = object" :class="currentObject === object ? 'active' : ''">
 
-            <div id="add-field">
-                <h4>Additional Fields</h4>
-                <button @click.prevent='addField()'>Add Field</button>
-            </div>
-
-            <div v-for='field in fields'>
-                <div class='input-text additional-field '>
-                    <input v-model='field.label' placeholder="Label">
-                    <input v-model='field.value'  placeholder="Value">
-                </div>
-            </div>
-        </form>
+                    <td v-for="column in columns">
+                        <span>{{object.hasOwnProperty(column) ? object[column] : '--'}}</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
         <footer>
-            <button @click='createObject()'>Save</button>
+            <button @click='assignObjectToTarget()'>Save</button>
         </footer>
     </div>
 </aside>
@@ -54,23 +44,27 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <script>
 
 import { mapState } from 'vuex'
-import factory from './../store/modules/models/factory'
+import factory from './../../store/modules/models/factory'
 
 const map = {
     building_units: {
         displayName: 'Building Unit',
+        propName: 'building_unit_id',
         create: factory.BuildingUnit
     },
     thermal_zones: {
         displayName: 'Thermal Zone',
+        propName: 'thermal_zone_id',
         create: factory.ThermalZone
     },
     space_types: {
         displayName: 'Space Type',
+        propName: 'space_type_id',
         create: factory.SpaceType
     },
     construction_sets: {
         displayName: 'Construction Set',
+        propName: 'construction_set_id',
         create: factory.ConstructionSet
     },
     constructions: {
@@ -88,85 +82,89 @@ const map = {
 };
 
 export default {
-    name: 'library',
+    name: 'assignObjectModal',
+    props: ['type', 'target'],
     data() {
         return {
-            displayType: null,
-            objectName: null,
-            fields: []
+            currentObject: null
         };
     },
     mounted () {
-        this.displayType = this.displayTypeForType(Object.keys(this.library)[0]);
-        this.objectName = this.displayType + ' ' + (this.library[this.typeForDisplayType(this.displayType)].length + 1);
     },
     computed: {
         ...mapState({
-            library: state => state.models.library
+            library: state => state.models.library,
+            currentStory: state => state.application.currentSelections.story,
+            currentSpace: state => state.application.currentSelections.space,
+            currentShading: state => state.application.currentSelections.shading
         }),
         objects () {
-            return this.library[this.typeForDisplayType(this.displayType)];
+            return this.library[this.type];
+        },
+        displayType () { return map[this.type].displayName; },
+
+        columns () {
+            const columns = [];
+            this.objects.forEach((o) => {
+                Object.keys(o).forEach((k) => {
+                    if (!~columns.indexOf(k)) { columns.push(k); }
+                })
+            });
+            return columns;
         }
     },
     methods: {
-        displayTypeForType (type) { return map[type].displayName; },
-        typeForDisplayType (displayType) { return Object.keys(map).find(k => map[k].displayName === this.displayType); },
-        addField () {
-            this.fields.push({
-                label: '',
-                value: ''
-            });
-        },
-        createObject () {
-            const type = this.typeForDisplayType(this.displayType);
-            var newObject = new map[type].create(this.objectName);
-            this.fields.forEach((field) => {
-                newObject[field.label] = field.value;
-            })
-            this.$store.dispatch('models/createObjectWithType', {
-                type: type,
-                object: newObject
-            });
-            this.$emit('close');
+        assignObjectToTarget () {
+            if (this.target === this.currentStory) {
+                var payload = { story: this.currentStory };
+                payload[map[this.type].propName] = this.currentObject.id;
+                this.$store.dispatch('models/updateStoryWithData', payload);
+            } else if (this.target === this.currentSpace) {
+                var payload = { space: this.currentSpace };
+                payload[map[this.type].propName] = this.currentObject.id;
+                this.$store.dispatch('models/updateSpaceWithData', payload);
+            } else if (this.target === this.currentShading) {
+                var payload = { shading: this.currentShading };
+                payload[map[this.type].propName] = this.currentObject.id;
+                this.$store.dispatch('models/updateShadingWithData', payload);
+            }
         }
     }
 }
 </script>
 
 <style lang="scss" scoped>
-@import "./../scss/config";
-
-    .modal {
-        form {
-            #add-field {
-                align-items: center;
-                display: flex;
-                height: 2rem;
-                justify-content: space-between;
-                margin: 1rem 0;
-            }
-            .input-select {
-                width: 15rem;
-                label {
-                    width: 1.75rem;
-                }
-            }
-            .input-text {
-                margin: .5rem 0;
-            }
+@import "./../../scss/config";
+table {
+    border-spacing: 0;
+    width: 100%;
+    thead tr {
+        height: 3rem;
+        th {
+            border-bottom: 2px solid $gray-medium-light;
         }
-        .additional-field {
-            display: flex;
-            input {
-                border: 1px solid $gray-medium;
+    }
+    tbody tr {
+        height: 2rem;
+        &:nth-of-type(odd) {
+            background-color: $gray-medium-dark;
+        }
+        &.active {
+            color: $primary;
+        }
+    }
+    thead tr, tbody tr {
+        th, td {
+            text-align: left;
+            padding: 0 1rem;
+            &:first-child {
+                padding-left: 2.5rem;
             }
-            :first-child {
-                margin-right: 1rem;
-                width: 3rem;
-            }
-            :last-child {
+            &:last-child {
                 flex-grow: 2;
             }
         }
     }
+}
+
 </style>
