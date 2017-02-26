@@ -40,7 +40,7 @@
         fill: $primary;
         fill-opacity: 0.5;
         stroke: $primary;
-        &.currentSpace {
+        &.currentSpace, &.currentShading {
             fill: $secondary;
             stroke: $secondary;
         }

@@ -47,11 +47,22 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <input :value="currentStory.multiplier" @change="updatecurrentStory('multiplier', $event)">
         </div>
 
-        <h3>Space</h3>
-        <label>name</label>
-        <div class="input-text">
-            <input :value="currentSpace.name" @change="updatecurrentSpace('name', $event)">
-        </div>
+        <template v-if="currentSpace">
+            <h3>Space</h3>
+            <label>name</label>
+            <div class="input-text">
+                <input :value="currentSpace.name" @change="updatecurrentSpace('name', $event)">
+            </div>
+        </template>
+
+        <template v-if="currentShading">
+            <h3>Shading</h3>
+            <label>name</label>
+            <div class="input-text">
+                <input :value="currentShading.name" @change="updatecurrentShading('name', $event)">
+            </div>
+        </template>
+
     </section>
 </section>
 </template>
@@ -110,6 +121,13 @@ export default {
             // required to prevent input field value from containing incorrect data
             event.target.value = this.currentSpace[key];
             this.$store.dispatch('models/updateSpaceWithData', payload);
+        },
+        updatecurrentShading (key, event) {
+            var payload = { shading: this.currentShading };
+            payload[key] = event.target.value;
+            // required to prevent input field value from containing incorrect data
+            event.target.value = this.currentSpace[key];
+            this.$store.dispatch('models/updateShadingWithData', payload);
         }
     },
     computed: {
@@ -117,7 +135,8 @@ export default {
         currentStoryGeometry () { return this.$store.getters['application/currentStoryGeometry']; },
         ...mapState({
             currentStory: state => state.application.currentSelections.story,
-            currentSpace: state => state.application.currentSelections.space
+            currentSpace: state => state.application.currentSelections.space,
+            currentShading: state => state.application.currentSelections.shading
         })
     },
 }

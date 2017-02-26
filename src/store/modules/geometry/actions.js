@@ -14,6 +14,8 @@ export default {
         // set of points to translate to vertices when creating the new face
         var points = payload.points;
 
+        const target = payload.space || payload.shading;
+
         const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'],
             // translate points to clipper's path format
             clipperPaths = points.map((p) => { return { X: p.x, Y: p.y }; });
@@ -25,14 +27,21 @@ export default {
         * if the space already has an existing face, destroy it
         * create a face from the union of the new face and existing face if they intersect or share an edge
         */
-        if (payload.space.face_id) {
-            const existingFace = helpers.faceForId(payload.space.face_id, currentStoryGeometry),
+        if (target.face_id) {
+            const existingFace = helpers.faceForId(target.face_id, currentStoryGeometry),
                 existingFaceVertices = helpers.verticesForFace(existingFace, currentStoryGeometry);
 
-            context.commit('models/updateSpaceWithData', {
-                space: payload.space,
-                face_id: null
-            }, { root: true });
+            if (payload.space) {
+                context.commit('models/updateSpaceWithData', {
+                    space: target,
+                    face_id: null
+                }, { root: true });
+            } else if (payload.shading) {
+                context.commit('models/updateShadingWithData', {
+                    shading: target,
+                    face_id: null
+                }, { root: true });
+            }
 
             context.dispatch('destroyFaceAndDescendents', {
                 geometry: currentStoryGeometry,
@@ -193,12 +202,17 @@ export default {
             geometry: currentStoryGeometry
         });
 
-        context.commit('models/updateSpaceWithData', {
-            space: payload.space,
-            face_id: face.id
-        }, { root: true });
-
-
+        if (payload.space) {
+            context.commit('models/updateSpaceWithData', {
+                space: target,
+                face_id: face.id
+            }, { root: true });
+        } else if (payload.shading) {
+            context.commit('models/updateShadingWithData', {
+                shading: target,
+                face_id: face.id
+            }, { root: true });
+        }
 
         function splittingVertices () {
             var ct = 0;

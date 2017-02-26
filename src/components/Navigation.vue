@@ -17,9 +17,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     <section id="breadcrumbs">
         <span>
             {{ currentStory.name }}
-
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path d="M.5 0v14l11-7-11-7z"/></svg>
-            {{ tab === 'shading' ? currentShading.name : currentSpace.name }}
+            <template v-if="(tab === 'shading' && currentShading) || (tab === 'spaces' && currentSpace)">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path d="M.5 0v14l11-7-11-7z"/></svg>
+                {{ tab === 'shading' ? currentShading.name : currentSpace.name }}
+            </template>
         </span>
 
         <button @click="addItem" id="new-item" height="50" viewBox="0 0 256 256" width="50" xmlns="http://www.w3.org/2000/svg">
@@ -83,7 +84,7 @@ export default {
             set (item) { this.$store.dispatch('application/setCurrentSpace', { 'space': item }); }
         },
         currentShading: {
-            get () { return this.$store.state.application.currentSelections.shading || {}; },
+            get () { return this.$store.state.application.currentSelections.shading; },
             set (item) { this.$store.dispatch('application/setCurrentShading', { 'shading': item }); }
         }
     },

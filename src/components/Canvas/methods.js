@@ -56,6 +56,7 @@ export default {
     },
     // handle a click on the canvas
     addPoint (e) {
+        if (!this.currentSpace && !this.currentShading) { return; }
         // subtract min % spacing to account for grid rounding offsets created by adjusted minimums
         const xAdjustment = this.min_x % this.x_spacing,
             yAdjustment = this.min_y % this.y_spacing;
@@ -86,9 +87,7 @@ export default {
         }
 
         if (this.currentMode === 'Rectangle' && this.points.length) {
-            // if a rectangle is in progress, close the rectangle and convert it to a polygon
-            this.$store.dispatch('geometry/createFaceFromPoints', {
-                space: this.currentSpace,
+            const payload = {
                 points: [
                     this.points[0],
                     {
@@ -101,7 +100,15 @@ export default {
                         y: point.y
                     }
                 ]
-            });
+            }
+
+            if (this.currentSpace) {
+                payload.space = this.currentSpace;
+            } else if (this.currentShading) {
+                payload.shading = this.currentShading;
+            }
+            // if a rectangle is in progress, close the rectangle and convert it to a polygon
+            this.$store.dispatch('geometry/createFaceFromPoints', payload);
             // clear the points in progress
             this.points = [];
         } else if (this.currentMode === 'Rectangle' || this.currentMode === 'Polygon') {
@@ -146,11 +153,16 @@ export default {
         d3.select('#canvas svg').select('ellipse')
             // set a click listener for the first point in the polygon, when it is clicked close the shape
             .on('click', () => {
-                // create a face in the data store from the points
-                this.$store.dispatch('geometry/createFaceFromPoints', {
-                    space: this.currentSpace,
+                const payload = {
                     points: this.points
-                });
+                };
+                if (this.currentSpace) {
+                    payload.space = this.currentSpace;
+                } else if (this.currentShading) {
+                    payload.shading = this.currentShading;
+                }
+                // create a face in the data store from the points
+                this.$store.dispatch('geometry/createFaceFromPoints', payload);
                 // clear points, prevent a new point from being created by this click event
                 d3.event.stopPropagation();
                 this.points = [];
@@ -194,7 +206,8 @@ export default {
                 return pointsString;
             })
             .attr('class', (d, i) => {
-                if (d.face_id === this.currentSpace.face_id) { return 'currentSpace'; }
+                if (this.currentSpace && d.face_id === this.currentSpace.face_id) { return 'currentSpace'; }
+                if (this.currentShading && d.face_id === this.currentShading.face_id) { return 'currentShading'; }
             })
             .attr('vector-effect', 'non-scaling-stroke');
 

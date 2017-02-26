@@ -14,6 +14,7 @@ export default {
             spaces: [],
             windows: [],
             shading: [],
+            image_ids: [],
             image_id: null
         }
     },

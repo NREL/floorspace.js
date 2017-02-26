@@ -103,7 +103,6 @@ export default {
                     })
                 };
             });
-            console.log(JSON.stringify(polygons));
             return polygons;
         },
     },
