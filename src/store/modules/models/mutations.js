@@ -40,13 +40,13 @@ export default {
     },
     updateSpaceWithData (state, payload) {
         const space = payload.space;
-        delete payload.space;
         Object.assign(space, payload);
+        delete space.space;
     },
 
     updateShadingWithData (state, payload) {
         const shading = payload.shading;
-        delete payload.shading;
         Object.assign(shading, payload);
+        delete shading.shading;
     }
 }

@@ -68,23 +68,48 @@ export default {
                     return space.face_id === existingFace.id;
                 });
 
-                context.commit('models/updateSpaceWithData', {
-                    space: affectedSpace,
-                    face_id: null
-                }, { root: true });
+                if (affectedSpace) {
+                    context.commit('models/updateSpaceWithData', {
+                        space: affectedSpace,
+                        face_id: null
+                    }, { root: true });
 
-                context.dispatch('destroyFaceAndDescendents', {
-                    geometry: currentStoryGeometry,
-                    face: existingFace
-                });
-
-                const differenceOfFaces = helpers.differenceOfFaces(existingFaceVertices, clipperPaths, currentStoryGeometry);
-                if (differenceOfFaces) {
-                    context.dispatch('createFaceFromPoints', {
-                        'space': affectedSpace,
-                        'geometry': currentStoryGeometry,
-                        'points': differenceOfFaces
+                    context.dispatch('destroyFaceAndDescendents', {
+                        geometry: currentStoryGeometry,
+                        face: existingFace
                     });
+
+                    const differenceOfFaces = helpers.differenceOfFaces(existingFaceVertices, clipperPaths, currentStoryGeometry);
+                    if (differenceOfFaces) {
+                        context.dispatch('createFaceFromPoints', {
+                            'space': affectedSpace,
+                            'geometry': currentStoryGeometry,
+                            'points': differenceOfFaces
+                        });
+                    }
+                } else {
+                    const affectedShading = context.rootState.application.currentSelections.story.shading.find((shading) => {
+                        return shading.face_id === existingFace.id;
+                    });
+
+                    context.commit('models/updateShadingWithData', {
+                        shading: affectedShading,
+                        face_id: null
+                    }, { root: true });
+
+                    context.dispatch('destroyFaceAndDescendents', {
+                        geometry: currentStoryGeometry,
+                        face: existingFace
+                    });
+
+                    const differenceOfFaces = helpers.differenceOfFaces(existingFaceVertices, clipperPaths, currentStoryGeometry);
+                    if (differenceOfFaces) {
+                        context.dispatch('createFaceFromPoints', {
+                            shading: affectedShading,
+                            geometry: currentStoryGeometry,
+                            points: differenceOfFaces
+                        });
+                    }
                 }
             }
         });
