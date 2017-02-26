@@ -56,11 +56,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 <input :value="currentSpace.name" @change="updatecurrentSpace('name', $event)">
             </div>
 
-            <button @click="$emit('assignObject', 'daylighting_controls')">Add daylighting_controls</button>
-            <button @click="$emit('assignObject', 'building_units')">Add building_unit_id</button>
-            <button @click="$emit('assignObject', 'thermal_zones')">Add thermal_zone_id</button>
-            <button @click="$emit('assignObject', 'space_types')">Add space_type_id</button>
-            <button @click="$emit('assignObject', 'construction_sets')">Add construction_set_id</button>
+            <button @click="assignObject('daylighting_controls', currentSpace)">Add daylighting_controls</button>
+            <button @click="assignObject('building_units', currentSpace)">Add building_unit_id</button>
+            <button @click="assignObject('thermal_zones', currentSpace)">Add thermal_zone_id</button>
+            <button @click="assignObject('space_types', currentSpace)">Add space_type_id</button>
+            <button @click="assignObject('construction_sets', currentSpace)">Add construction_set_id</button>
         </template>
 
         <template v-if="currentShading">
@@ -136,6 +136,12 @@ export default {
             // required to prevent input field value from containing incorrect data
             event.target.value = this.currentShading[key];
             this.$store.dispatch('models/updateShadingWithData', payload);
+        },
+        assignObject (type, target) {
+            this.$emit('assignObject', {
+                type: type,
+                target: target
+            });
         }
     },
     computed: {

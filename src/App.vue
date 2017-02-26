@@ -15,7 +15,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <canvas-view v-if="mode!=='3d'"></canvas-view>
 
             <background-modal v-if="backgroundModalVisible" @close="backgroundModalVisible = false"></background-modal>
-            <assign-object-modal :type="assignObjectType" v-if="assignObjectModalVisible" @close="assignObjectModalVisible = false"></assign-object-modal>
+            <assign-object-modal :type="assignObjectType" :target="assignObjectTarget" v-if="assignObjectModalVisible" @close="assignObjectModalVisible = false"></assign-object-modal>
             <create-object-modal v-if="createObjectModalVisible" @close="createObjectModalVisible = false"></create-object-modal>
             <inspector @assignObject="showModal('assign-object', $event)"></inspector>
         </main>
@@ -45,7 +45,8 @@ export default {
             backgroundModalVisible: false,
             createObjectModalVisible: false,
             assignObjectModalVisible: false,
-            assignObjectType: null
+            assignObjectType: null,
+            assignObjectTarget: null
         }
     },
     beforeCreate () {
@@ -66,7 +67,8 @@ export default {
                 this.backgroundModalVisible = false;
                 this.createObjectModalVisible = false;
                 this.assignObjectModalVisible = true;
-                this.assignObjectType = eventData;
+                this.assignObjectType = eventData.type;
+                this.assignObjectTarget = eventData.target;
             }
         }
     },
