@@ -7,7 +7,7 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 <template>
     <div id="app">
-        <toolbar @setBackground="showModal('background')" @createObject="showModal('object')"></toolbar>
+        <toolbar @setBackground="showModal('background')" @createObject="showModal('create-object')"></toolbar>
         <main>
             <navigation></navigation>
 
@@ -15,8 +15,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <canvas-view v-if="mode!=='3d'"></canvas-view>
 
             <background-modal v-if="backgroundModalVisible" @close="backgroundModalVisible = false"></background-modal>
-            <object-modal v-if="objectModalVisible" @close="objectModalVisible = false"></object-modal>
-            <inspector></inspector>
+            <assign-object-modal :type="assignObjectType" v-if="assignObjectModalVisible" @close="assignObjectModalVisible = false"></assign-object-modal>
+            <create-object-modal v-if="createObjectModalVisible" @close="createObjectModalVisible = false"></create-object-modal>
+            <inspector @assignObject="showModal('assign-object', $event)"></inspector>
         </main>
         <library></library>
     </div>
@@ -31,7 +32,8 @@ import Canvas from './components/Canvas/Canvas'
 import View3d from './components/3d/3d'
 import Toolbar from './components/Toolbar'
 import BackgroundModal from './components/BackgroundModal'
-import ObjectModal from './components/ObjectModal'
+import AssignObjectModal from './components/AssignObjectModal'
+import CreateObjectModal from './components/CreateObjectModal'
 import Library from './components/Library'
 
 import { mapState } from 'vuex'
@@ -41,7 +43,9 @@ export default {
     data () {
         return {
             backgroundModalVisible: false,
-            objectModalVisible: false
+            createObjectModalVisible: false,
+            assignObjectModalVisible: false,
+            assignObjectType: null
         }
     },
     beforeCreate () {
@@ -49,13 +53,20 @@ export default {
         this.$store.dispatch('models/initStory');
     },
     methods: {
-        showModal (type) {
+        showModal (type, eventData) {
             if (type === 'background') {
                 this.backgroundModalVisible = true;
-                this.objectModalVisible = false;
-            } else if (type === 'object') {
+                this.createObjectModalVisible = false;
+                this.assignObjectModalVisible = false;
+            } else if (type === 'create-object') {
                 this.backgroundModalVisible = false;
-                this.objectModalVisible = true;
+                this.createObjectModalVisible = true;
+                this.assignObjectModalVisible = false;
+            } else if (type === 'assign-object') {
+                this.backgroundModalVisible = false;
+                this.createObjectModalVisible = false;
+                this.assignObjectModalVisible = true;
+                this.assignObjectType = eventData;
             }
         }
     },
@@ -70,7 +81,8 @@ export default {
         'toolbar': Toolbar,
         'inspector': Inspector,
         'background-modal': BackgroundModal,
-        'object-modal': ObjectModal
+        'assign-object-modal': AssignObjectModal,
+        'create-object-modal': CreateObjectModal
     }
 }
 </script>
