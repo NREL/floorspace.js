@@ -64,6 +64,15 @@ export default {
         this.controls.staticMoving = true;
         this.controls.dynamicDampingFactor = 0.3;
 
+        const planeGeometry = new THREE.PlaneGeometry( 100, 100, 32 ),
+            planeMesh = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial({
+                color: 0xFFFFFF,
+                opacity: 0.5,
+                side: THREE.DoubleSide,
+                transparent: true
+            }));
+        this.scene.add(planeMesh);
+
 		const animate = () => {
 			requestAnimationFrame( animate );
 			this.controls.update();
@@ -136,60 +145,53 @@ export default {
         renderGeometry () {
             const objects = [];
             this.polygons.forEach((polygon) => {
-                console.log(polygon);
-                const shape = new THREE.Shape();
+                const faceShape = new THREE.Shape();
                 // begining at origin, connect all vertices
-                shape.moveTo( polygon.points[0].x, polygon.points[0].y );
-                polygon.points.forEach( p => shape.lineTo(p.x, p.y));
+                faceShape.moveTo( polygon.points[0].x, polygon.points[0].y );
+                polygon.points.forEach( p => faceShape.lineTo(p.x, p.y));
 
-                const geometry = new THREE.ExtrudeGeometry(shape, {
+                const extrudedFaceGeometry = new THREE.ExtrudeGeometry(faceShape, {
                    amount: 1,
                    bevelEnabled: false
                 });
+
                 var color;
                 if (this.currentSpace && polygon.face_id === this.currentSpace.face_id) { color = 0x6AAC15; }
                 if (this.currentShading && polygon.face_id === this.currentShading.face_id) { color = 0x6AAC15; }
 
-                const mesh = new THREE.Mesh( geometry,
-                    new THREE.MeshLambertMaterial({
-                        transparent: true,
-                        opacity: 0.5,
-                        side: THREE.DoubleSide,
-                        color: color || 0xDF5236// Math.random() * 0xffffff
-                    }
-                ));
-                console.log(geometry);
-                const avg = { x: 0, y: 0, z: 3} ;
-                for (var i = 0; i < geometry.vertices.length; i++) {
-                    avg.x += geometry.vertices[i].x;
-                    avg.y += geometry.vertices[i].y;
-                    // avg.z += geometry.vertices[i].z;
+                // const mesh = new THREE.Mesh(extrudedFaceGeometry,
+                //     new THREE.MeshLambertMaterial({
+                //         transparent: true,
+                //         opacity: 0.5,
+                //         side: THREE.DoubleSide,
+                //         color: color || 0xDF5236
+                //     }
+                // ));
+                // this.scene.add(mesh);
+
+                const centerpoint = {
+                    x: 0,
+                    y: 0,
+                    z: 3 // TODO: set based on desired roof height
+                };
+                for (var i = 0; i < extrudedFaceGeometry.vertices.length; i++) {
+                    centerpoint.x += extrudedFaceGeometry.vertices[i].x;
+                    centerpoint.y += extrudedFaceGeometry.vertices[i].y;
                 }
+                centerpoint.x /= extrudedFaceGeometry.vertices.length;
+                centerpoint.y /= extrudedFaceGeometry.vertices.length;
 
-                avg.x /= geometry.vertices.length;
-                avg.y /= geometry.vertices.length;
-                // avg.z /= geometry.vertices.length;
+				extrudedFaceGeometry.vertices.push(new THREE.Vector3(centerpoint.x, centerpoint.y, centerpoint.z));
 
-				geometry.vertices.push(new THREE.Vector3(avg.x, avg.y, avg.z));
-
-				var convexMesh = new THREE.Mesh(new THREE.ConvexGeometry(geometry.vertices), new THREE.MeshLambertMaterial({
+				var convexHullMesh = new THREE.Mesh(new THREE.ConvexGeometry(extrudedFaceGeometry.vertices), new THREE.MeshLambertMaterial({
 					color: color || 0xDF5236,
 					opacity: 0.5,
                     side: THREE.DoubleSide,
 					transparent: true
 				}));
-				convexMesh.renderOrder = 0;
-                this.scene.add(convexMesh);
-                // this.scene.add(mesh);
-                var planeGeometry = new THREE.PlaneGeometry( 100, 100, 32 );
-                var material = new THREE.MeshBasicMaterial({
-                    color: 0xFFFFFF,
-                    opacity: 0.5,
-                    side: THREE.DoubleSide,
-                    transparent: true
-                });
-                var plane = new THREE.Mesh( planeGeometry, material );
-                this.scene.add( plane );
+
+                this.scene.add(convexHullMesh);
+
             });
         },
         resizeCanvas () {
