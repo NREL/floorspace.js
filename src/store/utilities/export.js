@@ -2,7 +2,8 @@ export default function exportData (state, getters) {
     var exportObject = {
         project: state.project,
         stories: state.models.stories,
-        ...lib
+        library: state.models.library,
+        images: state.models.images
     };
     const geometrySets = getters['geometry/exportData']
     exportObject = JSON.parse(JSON.stringify(exportObject));

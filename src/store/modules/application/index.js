@@ -12,7 +12,7 @@ export default {
             shading: null,
 
             // current application mode
-            mode: 'Polygon'
+            mode: 'Rectangle'
         },
         modes: ['Rectangle', 'Polygon', 'Place Component', 'Apply Property', '3d'],
         // d3 scale functions translate screen pixel coordinates into RWU values to use within the SVG's grid system

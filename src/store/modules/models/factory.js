@@ -48,36 +48,31 @@ export default {
     BuildingUnit: function (name) {
         return {
             id: generateId(),
-            name: name,
-            face_id: null
+            name: name
         };
     },
     ThermalZone: function (name) {
         return {
             id: generateId(),
-            name: name,
-            face_id: null
+            name: name
         };
     },
     SpaceType: function (name) {
         return {
             id: generateId(),
-            name: name,
-            face_id: null
+            name: name
         };
     },
     Construction: function (name) {
         return {
             id: generateId(),
-            name: name,
-            handle: null
+            name: name
         };
     },
     ConstructionSet: function (name) {
         return {
             id: generateId(),
-            name: name,
-            handle: null
+            name: name
         };
     },
     Window: function (name) {
