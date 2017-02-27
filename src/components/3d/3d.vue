@@ -13,7 +13,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <script>
 const THREE = require('three');
-import TrackballControls from './TrackballControls';
+import OrbitControls from './OrbitControls';
 import ConvexGeometry from './ConvexGeometry';
 
 import { mapState } from 'vuex'
@@ -55,23 +55,22 @@ export default {
         this.scene.add( light );
 
         // controls
-        this.controls = new THREE.TrackballControls( this.camera, this.$refs.canvas );
-        this.controls.rotateSpeed = 10.0;
-        this.controls.zoomSpeed = 1.2;
-        this.controls.panSpeed = 0.8;
-        this.controls.noZoom = false;
-        this.controls.noPan = false;
-        this.controls.staticMoving = true;
-        this.controls.dynamicDampingFactor = 0.3;
+        this.camera.up = new THREE.Vector3(0, 0, 1);
+        this.controls = new THREE.OrbitControls( this.camera, this.renderer.domElement );
+        this.controls.minDistance = 20;
+        this.controls.maxDistance = 50;
+        this.controls.maxPolarAngle = (Math.PI / 2) - .01 ;
 
-        const planeGeometry = new THREE.PlaneGeometry( 100, 100, 32 ),
-            planeMesh = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial({
-                color: 0xFFFFFF,
-                opacity: 0.5,
-                side: THREE.DoubleSide,
-                transparent: true
+
+
+        const planeGeometry = new THREE.PlaneGeometry( 200, 200, 2, 2);
+        // use only the first quadrant of the plane
+        planeGeometry.faces = planeGeometry.faces.slice(2,4);
+        const planeMesh = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial({
+                color: 0x24292c
             }));
         this.scene.add(planeMesh);
+        this.scene.add(new THREE.AxisHelper(100));
 
 		const animate = () => {
 			requestAnimationFrame( animate );
