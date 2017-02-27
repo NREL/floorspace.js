@@ -26,7 +26,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             </thead>
 
             <tbody>
-                <tr v-for='object in objects' @click="currentObject = object" :class="currentObject === object ? 'active' : ''">
+                <tr v-for='object in objects' @click="currentObject = currentObject === object ? null : object" :class="currentObject === object ? 'active' : ''">
 
                     <td v-for="column in columns">
                         <span>{{object.hasOwnProperty(column) ? object[column] : '--'}}</span>
@@ -35,7 +35,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             </tbody>
         </table>
         <footer>
-            <button @click='assignObjectToTarget()'>Save</button>
+            <button @click='assignObjectToTarget()' :class="currentObject ? 'active' : 'disabled'" id="saveAssignment">Save</button>
         </footer>
     </div>
 </aside>
@@ -115,6 +115,8 @@ export default {
     },
     methods: {
         assignObjectToTarget () {
+            if (!this.currentObject) { return; }
+
             if (this.target === this.currentStory) {
                 var payload = { story: this.currentStory };
                 payload[map[this.type].propName] = this.currentObject.id;
@@ -128,6 +130,7 @@ export default {
                 payload[map[this.type].propName] = this.currentObject.id;
                 this.$store.dispatch('models/updateShadingWithData', payload);
             }
+            this.$emit('close');
         }
     }
 }
@@ -164,6 +167,15 @@ table {
                 flex-grow: 2;
             }
         }
+    }
+}
+button#saveAssignment {
+    &.disabled {
+        border-color: $gray-medium-light;
+        cursor: default;
+    }
+    &.active {
+        border-color: $primary;
     }
 }
 

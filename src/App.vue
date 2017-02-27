@@ -13,11 +13,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
             <view-3d v-if="mode==='3d'"></view-3d>
             <canvas-view v-if="mode!=='3d'"></canvas-view>
+            <inspector @assignObject="showModal('assign-object', $event)"></inspector>
 
             <background-modal v-if="backgroundModalVisible" @close="backgroundModalVisible = false"></background-modal>
             <assign-object-modal :type="assignObjectType" :target="assignObjectTarget" v-if="assignObjectModalVisible" @close="assignObjectModalVisible = false"></assign-object-modal>
             <create-object-modal v-if="createObjectModalVisible" @close="createObjectModalVisible = false"></create-object-modal>
-            <inspector @assignObject="showModal('assign-object', $event)"></inspector>
+
         </main>
         <library></library>
     </div>
@@ -52,6 +53,12 @@ export default {
     beforeCreate () {
         // create a default story, set as current story
         this.$store.dispatch('models/initStory');
+        this.$store.dispatch('models/initSpace', {
+            story: this.$store.state.application.currentSelections.story
+        });
+        this.$store.dispatch('application/setCurrentSpace', {
+            space:  this.$store.state.application.currentSelections.story.spaces[0]
+        });
     },
     methods: {
         showModal (type, eventData) {
