@@ -14,6 +14,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <script>
 const THREE = require('three');
 import TrackballControls from './TrackballControls';
+import ConvexGeometry from './ConvexGeometry';
 
 import { mapState } from 'vuex'
 export default {
@@ -157,7 +158,29 @@ export default {
                         color: color || 0xDF5236// Math.random() * 0xffffff
                     }
                 ));
-                this.scene.add(mesh);
+                console.log(geometry);
+                const avg = { x: 0, y: 0, z: 3} ;
+                for (var i = 0; i < geometry.vertices.length; i++) {
+                    avg.x += geometry.vertices[i].x;
+                    avg.y += geometry.vertices[i].y;
+                    // avg.z += geometry.vertices[i].z;
+                }
+
+                avg.x /= geometry.vertices.length;
+                avg.y /= geometry.vertices.length;
+                // avg.z /= geometry.vertices.length;
+
+				geometry.vertices.push(new THREE.Vector3(avg.x, avg.y, avg.z));
+
+				var convexMesh = new THREE.Mesh(new THREE.ConvexGeometry(geometry.vertices), new THREE.MeshLambertMaterial({
+					color: color || 0xDF5236,
+					opacity: 0.5,
+                    side: THREE.DoubleSide,
+					transparent: true
+				}));
+				convexMesh.renderOrder = 0;
+                this.scene.add(convexMesh);
+                // this.scene.add(mesh);
             });
         },
         resizeCanvas () {
