@@ -15,7 +15,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     </section>
 
     <section id="breadcrumbs">
-        <span>
+        <span @click="clearSpaceAndShading">
             {{ currentStory.name }}
             <template v-if="(tab === 'shading' && currentShading) || (tab === 'spaces' && currentSpace)">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path d="M.5 0v14l11-7-11-7z"/></svg>
@@ -31,7 +31,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     <section id="list">
         <div v-for="item in items" :key="item.id" :class="(currentSpace === item || currentStory === item || currentShading === item) ? 'active' : ''" @click="selectItem(item)">
             {{item.name}}
-            <svg @click="destroyItem()" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+            <svg @click="destroyItem" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
                 <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
             </svg>
         </div>
@@ -46,8 +46,17 @@ export default {
     name: 'navigation',
     data() {
         return {
-            tab: 'stories'
+            tab: null
         };
+    },
+    mounted () {
+        if (this.currentSpace) {
+            this.tab = 'spaces';
+        } else if (this.currentShading) {
+            this.tab = 'shading';
+        } else {
+            this.tab = 'stories';
+        }
     },
     computed: {
         // all stories
@@ -102,6 +111,8 @@ export default {
                     story: this.$store.state.application.currentSelections.story
                 });
             }
+
+            this.selectItem(this.items[this.items.length - 1]);
         },
         destroyItem () {
             if (this.tab === 'stories' && this.stories.length > 1) {
@@ -123,15 +134,19 @@ export default {
 
             }
         },
-        // update the currentStory or currentSpace
         selectItem (item) {
             if (this.tab === 'stories') {
                 this.currentStory = item;
             } else if (this.tab === 'spaces') {
-                this.currentSpace = item;
+                this.currentSpace = (this.currentSpace && this.currentSpace.id === item.id) ? null : item;
             } else if (this.tab === 'shading') {
-                this.currentShading = item;
+                this.currentShading = (this.currentShading && this.currentShading.id === item.id) ? null : item;
             }
+        },
+        clearSpaceAndShading () {
+            this.currentShading = null;
+            this.currentSpace = null;
+
         }
     }
 }

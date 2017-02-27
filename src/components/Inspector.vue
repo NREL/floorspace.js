@@ -10,44 +10,45 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <section id="inspector">
     <section id="tabs">
         <span :class="tab === 'attributes' ? 'active' : ''" @click="tab = 'attributes'">Attributes</span>
+        <span :class="tab === 'components' ? 'active' : ''" @click="tab = 'components'">Components</span>
         <span :class="tab === 'geometry' ? 'active' : ''" @click="tab = 'geometry'">Geometry</span>
     </section>
 
-    <section v-if="tab === 'geometry'" id="list">
-        <div v-for="face in currentStoryGeometry.faces">
+    <section v-if="tab === 'geometry'" id="geometry-list">
+        <div v-for="face in currentStoryGeometry.faces" class="alternating">
             <h3 :class="currentSelectionsFace && currentSelectionsFace.id === face.id ? 'active' : ''">Face {{face.id}}</h3>
             <div v-for="edgeRef in face.edgeRefs">
-                <br>edge {{ edgeRef.edge_id }} {{ edgeRef.reverse ? 'reversed ' : '' }} {{ edgeForId(edgeRef.edge_id).isShared(currentStoryGeometry) ? 'shared' : '' }}
+                edge {{ edgeRef.edge_id }} {{ edgeRef.reverse ? 'reversed ' : '' }} {{ edgeForId(edgeRef.edge_id).isShared(currentStoryGeometry) ? 'shared' : '' }}
                 <br>startpoint {{ startpoint(edgeRef) }}
                 <br>endpoint {{ endpoint(edgeRef) }}
             </div>
         </div>
     </section>
 
-    <section v-if="tab === 'attributes'" id="list">
-        <h3>{{currentStory.name}}</h3>
+    <section v-if="tab === 'attributes'" id="attributes-list">
+        <template v-if="!currentSpace && !currentShading">
+            <h3>{{currentStory.name}}</h3>
 
-        <label>name</label>
-        <div class="input-text">
-            <input :value="currentStory.name" @change="updatecurrentStory('name', $event)">
-        </div>
+            <label>name</label>
+            <div class="input-text">
+                <input :value="currentStory.name" @change="updatecurrentStory('name', $event)">
+            </div>
 
-        <label>below_floor_plenum_height</label>
-        <div class="input-text">
-            <input :value="currentStory.below_floor_plenum_height" @change="updatecurrentStory('below_floor_plenum_height', $event)">
-        </div>
+            <label>below_floor_plenum_height</label>
+            <div class="input-text">
+                <input :value="currentStory.below_floor_plenum_height" @change="updatecurrentStory('below_floor_plenum_height', $event)">
+            </div>
 
-        <label>floor_to_ceiling_height</label>
-        <div class="input-text">
-            <input :value="currentStory.floor_to_ceiling_height" @change="updatecurrentStory('floor_to_ceiling_height', $event)">
-        </div>
+            <label>floor_to_ceiling_height</label>
+            <div class="input-text">
+                <input :value="currentStory.floor_to_ceiling_height" @change="updatecurrentStory('floor_to_ceiling_height', $event)">
+            </div>
 
-        <label>multiplier</label>
-        <div class="input-text">
-            <input :value="currentStory.multiplier" @change="updatecurrentStory('multiplier', $event)">
-        </div>
-
-        <!-- <button @click="assignObject('windows', currentStory)">Add Window</button> -->
+            <label>multiplier</label>
+            <div class="input-text">
+                <input :value="currentStory.multiplier" @change="updatecurrentStory('multiplier', $event)">
+            </div>
+        </template>
 
         <template v-if="currentSpace">
             <h3>Space</h3>
@@ -55,12 +56,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <div class="input-text">
                 <input :value="currentSpace.name" @change="updatecurrentSpace('name', $event)">
             </div>
-
-            <!-- <button @click="assignObject('daylighting_controls', currentSpace)">Add daylighting_controls</button> -->
-            <button @click="assignObject('building_units', currentSpace)">Add building_unit_id</button>
-            <button @click="assignObject('thermal_zones', currentSpace)">Add thermal_zone_id</button>
-            <button @click="assignObject('space_types', currentSpace)">Add space_type_id</button>
-            <button @click="assignObject('construction_sets', currentSpace)">Add construction_set_id</button>
         </template>
 
         <template v-if="currentShading">
@@ -70,7 +65,57 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 <input :value="currentShading.name" @change="updatecurrentShading('name', $event)">
             </div>
         </template>
+    </section>
 
+    <section v-if="tab === 'components'" id="components-list">
+        <template v-if="!currentSpace && !currentShading">
+            <h3>{{ currentStory.name }}</h3>
+            <button @click="assignObject('windows', currentStory)">Add Window</button>
+        </template>
+
+        <template v-if="currentSpace">
+            <h3>{{ currentSpace.name }}</h3>
+            <div class="alternating">
+                <div>
+                    <h4>{{ displayTypeForType('daylighting_controls') }}</h4>
+                    <span v-for="item in currentSpace.daylighting_controls">{{ item }}</span>
+                    <button @click="assignObject('daylighting_controls', currentSpace)">Add daylighting_controls</button>
+                </div>
+                <div>
+                    <h4>{{ displayTypeForType('building_units') }}</h4>
+                    <p v-for="(val, key) in getComponent(currentSpace.building_unit_id, 'building_units')">
+                        {{ key }}: {{ val }}
+                    </p>
+                    <button @click="assignObject('building_units', currentSpace)">Add {{ displayTypeForType('building_units') }}</button>
+                </div>
+                <div>
+                    <h4>{{ displayTypeForType('thermal_zones') }}</h4>
+                    <p v-for="(val, key) in getComponent(currentSpace.thermal_zone_id, 'thermal_zones')">
+                        {{ key }}: {{ val }}
+                    </p>
+                    <button @click="assignObject('thermal_zones', currentSpace)">Add {{ displayTypeForType('thermal_zones') }}</button>
+                </div>
+                <div>
+                    <h4>{{ displayTypeForType('space_types') }}</h4>
+                    <p v-for="(val, key) in getComponent(currentSpace.building_unit_id, 'space_types')">
+                        {{ key }}: {{ val }}
+                    </p>
+                    <button @click="assignObject('space_types', currentSpace)">Add {{ displayTypeForType('space_types') }}</button>
+                </div>
+                <div>
+                    <h4>{{ displayTypeForType('construction_sets') }}</h4>
+                    <p v-for="(val, key) in getComponent(currentSpace.construction_set_id, 'construction_sets')">
+                        {{ key }}: {{ val }}
+                    </p>
+                    <button @click="assignObject('construction_sets', currentSpace)">Add {{ displayTypeForType('construction_sets') }}</button>
+                </div>
+            </div>
+
+        </template>
+
+        <template v-if="currentShading">
+            <h3>{{ currentShading.name }}</h3>
+        </template>
     </section>
 </section>
 </template>
@@ -79,18 +124,42 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 import { mapState } from 'vuex'
 import helpers from './../store/modules/geometry/helpers'
+const map = {
+    building_units: {
+        displayName: 'Building Unit'
+    },
+    thermal_zones: {
+        displayName: 'Thermal Zone'
+    },
+    space_types: {
+        displayName: 'Space Type'
+    },
+    construction_sets: {
+        displayName: 'Construction Set'
+    },
+    constructions: {
+        displayName: 'Construction'
+    },
+    windows: {
+        displayName: 'Window'
+    },
+    daylighting_controls: {
+        displayName: 'Daylighting Control'
+    }
+};
 
 export default {
     name: 'inspector',
     data() {
         return {
-            tab: 'geometry',
+            tab: 'attributes',
             geometryInspector: true,
             storyInspector: false
         }
     },
     methods: {
-        verticesOnEdge (edge) { return helpers.verticesOnEdge(edge, this.currentStoryGeometry); },
+        getComponent (id, type) { return this.library[type].find(c => c.id === id); },
+        displayTypeForType (type) { return map[type].displayName; },
         startpoint (edgeRef) {
             const edge = this.edgeForId(edgeRef.edge_id);
             if (edgeRef.reverse) {
@@ -150,7 +219,9 @@ export default {
         ...mapState({
             currentStory: state => state.application.currentSelections.story,
             currentSpace: state => state.application.currentSelections.space,
-            currentShading: state => state.application.currentSelections.shading
+            currentShading: state => state.application.currentSelections.shading,
+
+            library: state => state.models.library
         })
     },
 }
@@ -185,26 +256,27 @@ export default {
             }
         }
 
-        #list {
+        #attributes-list, #geometry-list, #components-list {
             font-size: .85rem;
             height: calc(100% - 2rem);
             overflow: scroll;
-            padding: 1rem;
 
-            .active {
-                color: $primary;
-            }
-            h3 {
-                margin: 0 0 .5rem 0;
-            }
-            label {
-                font-size: 0.625rem;
-                text-transform: uppercase;
-
-            }
-            & > div {
-                padding: .5rem 0rem 1rem 0rem;
+            .alternating > div {
+                padding: .5rem 1rem;
+                &:nth-of-type(odd) {
+                    background-color: $gray-medium-light;
+                }
             }
         }
+
+        #attributes-list {
+            padding: 0 1rem;
+            .alternating > div {
+                padding: 0;
+            }
+        }
+
+
+
     }
 </style>

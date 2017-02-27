@@ -129,6 +129,11 @@ export default {
             });
             this.$emit('close');
         }
+    },
+    watch: {
+        displayType () {
+            this.objectName = this.displayType + ' ' + (this.library[this.typeForDisplayType(this.displayType)].length + 1);
+        }
     }
 }
 </script>
