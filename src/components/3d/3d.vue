@@ -181,6 +181,15 @@ export default {
 				convexMesh.renderOrder = 0;
                 this.scene.add(convexMesh);
                 // this.scene.add(mesh);
+                var planeGeometry = new THREE.PlaneGeometry( 100, 100, 32 );
+                var material = new THREE.MeshBasicMaterial({
+                    color: 0xFFFFFF,
+                    opacity: 0.5,
+                    side: THREE.DoubleSide,
+                    transparent: true
+                });
+                var plane = new THREE.Mesh( planeGeometry, material );
+                this.scene.add( plane );
             });
         },
         resizeCanvas () {
