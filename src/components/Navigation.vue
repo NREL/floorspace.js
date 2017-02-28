@@ -8,7 +8,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
 <nav id="navigation">
-    <section id="tabs">
+    <section class="tabs">
         <span :class="tab === 'stories' ? 'active' : ''" @click="tab = 'stories'">Stories</span>
         <span :class="tab === 'spaces' ? 'active' : ''" @click="tab = 'spaces'">Spaces</span>
         <span :class="tab === 'shading' ? 'active' : ''" @click="tab = 'shading'">Shading</span>
@@ -160,30 +160,6 @@ export default {
     border-right: 1px solid $gray-darkest;
     font-size: 0.75rem;
 
-    #tabs {
-        border-bottom: 1px solid $gray-darkest;
-        border-top: 1px solid $gray-darkest;
-        display: flex;
-        height: 1.75rem;
-        font-size: 0.625rem;
-        span {
-            border-right: 1px solid $gray-darkest;
-            display: inline-block;
-            padding: .5rem;
-            text-transform: uppercase;
-        }
-    }
-
-    .active {
-        background-color: $gray-medium-light;
-        svg {
-            height: 1rem;
-            path {
-                fill: $gray-lightest;
-            }
-        }
-    }
-
     #breadcrumbs, #list > div {
         align-items: center;
         display: flex;
@@ -191,14 +167,31 @@ export default {
         padding: 0 1rem;
     }
 
-    #list >div  {
-        height: 2rem;
+    #list {
+        overflow: scroll;
+        height: calc(100% - 4.25rem);
+        > div  {
+            cursor: pointer;
+            height: 2rem;
+            &.active {
+                background-color: $gray-medium-light;
+                svg {
+                    height: 1rem;
+                    path {
+                        fill: $gray-lightest;
+                    }
+                }
+            }
+        }
     }
 
     #breadcrumbs {
         background-color: $gray-medium-dark;
         border-bottom: 1px solid $gray-darkest;
         height: 2.5rem;
+        span {
+            cursor: pointer;
+        }
         svg {
             margin: 0 .25rem;
             width: .5rem;
@@ -207,9 +200,6 @@ export default {
             }
         }
     }
-    #list {
-        overflow: scroll;
-        height: calc(100% - 4.25rem);
-    }
+
 }
 </style>

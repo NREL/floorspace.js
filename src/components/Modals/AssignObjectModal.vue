@@ -27,7 +27,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
             <tbody>
                 <tr v-for='object in objects' @click="currentObject = currentObject === object ? null : object" :class="currentObject === object ? 'active' : ''">
-
                     <td v-for="column in columns">
                         <span>{{object.hasOwnProperty(column) ? object[column] : '--'}}</span>
                     </td>
@@ -119,15 +118,27 @@ export default {
 
             if (this.target === this.currentStory) {
                 var payload = { story: this.currentStory };
-                payload[map[this.type].propName] = this.currentObject.id;
+                if (this.type === 'windows') {
+                    payload.windows = this.currentStory.windows.concat(this.currentObject);
+                } else {
+                    payload[map[this.type].propName] = this.currentObject.id;
+                }
                 this.$store.dispatch('models/updateStoryWithData', payload);
             } else if (this.target === this.currentSpace) {
                 var payload = { space: this.currentSpace };
-                payload[map[this.type].propName] = this.currentObject.id;
+                if (this.type === 'daylighting_controls') {
+                    payload.daylighting_controls = this.currentSpace.daylighting_controls.concat(this.currentObject);
+                } else {
+                    payload[map[this.type].propName] = this.currentObject.id;
+                }
                 this.$store.dispatch('models/updateSpaceWithData', payload);
             } else if (this.target === this.currentShading) {
                 var payload = { shading: this.currentShading };
-                payload[map[this.type].propName] = this.currentObject.id;
+                if (this.type === 'daylighting_controls') {
+                    payload.daylighting_controls = this.currentShading.daylighting_controls.concat(this.currentObject);
+                } else {
+                    payload[map[this.type].propName] = this.currentObject.id;
+                }
                 this.$store.dispatch('models/updateShadingWithData', payload);
             }
             this.$emit('close');

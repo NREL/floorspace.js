@@ -1,0 +1,30 @@
+.tabs {
+    border-bottom: 1px solid $gray-darkest;
+    border-top: 1px solid $gray-darkest;
+    display: flex;
+    height: 1.75rem;
+    font-size: 0.625rem;
+    span {
+        border-right: 1px solid $gray-darkest;
+        cursor: pointer;
+        display: inline-block;
+        padding: .5rem;
+        text-transform: uppercase;
+    }
+    .active {
+        background-color: $gray-medium-light;
+    }
+}
+// #tabs {
+//     border-bottom: 1px solid $gray-darkest;
+//     border-top: 1px solid $gray-darkest;
+//     display: flex;
+//     height: 1.75rem;
+//     font-size: 0.625rem;
+//     span {
+//         border-right: 1px solid $gray-darkest;
+//         display: inline-block;
+//         padding: .5rem;
+//         text-transform: uppercase;
+//     }
+// }

@@ -8,26 +8,39 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
 <section id="inspector">
-    <section id="tabs">
-        <span :class="tab === 'attributes' ? 'active' : ''" @click="tab = 'attributes'">Attributes</span>
-        <span :class="tab === 'components' ? 'active' : ''" @click="tab = 'components'">Components</span>
-        <span :class="tab === 'geometry' ? 'active' : ''" @click="tab = 'geometry'">Geometry</span>
+    <section class="tabs">
+        <span :class="{ active: tab === 'attributes' }" @click="tab = 'attributes'">Attributes</span>
+        <span :class="{ active: tab === 'components' }" @click="tab = 'components'">Components</span>
+        <span :class="{ active: tab === 'geometry' }" @click="tab = 'geometry'">Geometry</span>
     </section>
 
-    <section v-if="tab === 'geometry'" id="geometry-list">
-        <div v-for="face in currentStoryGeometry.faces" class="alternating">
-            <h3 :class="currentSelectionsFace && currentSelectionsFace.id === face.id ? 'active' : ''">Face {{face.id}}</h3>
-            <div v-for="edgeRef in face.edgeRefs">
+    <section v-if="tab === 'geometry'" id="geometry-list" class="list">
+        <template v-if="!currentSpace && !currentShading" v-for="face in currentStoryGeometry.faces">
+            <header>
+                <h3>Face {{face.id}}</h3>
+            </header>
+            <div v-for="edgeRef in face.edgeRefs" class="list-item">
                 edge {{ edgeRef.edge_id }} {{ edgeRef.reverse ? 'reversed ' : '' }} {{ edgeForId(edgeRef.edge_id).isShared(currentStoryGeometry) ? 'shared' : '' }}
                 <br>startpoint {{ startpoint(edgeRef) }}
                 <br>endpoint {{ endpoint(edgeRef) }}
             </div>
-        </div>
+        </template>
+
+        <template v-if="currentSelectionsFace">
+            <header>
+                <h3>Face {{currentSelectionsFace.id}} on {{ currentSpace ? currentSpace.name : currentShading.name }}</h3>
+            </header>
+            <div v-for="edgeRef in currentSelectionsFace.edgeRefs" class="list-item">
+                edge {{ edgeRef.edge_id }} {{ edgeRef.reverse ? 'reversed ' : '' }} {{ edgeForId(edgeRef.edge_id).isShared(currentStoryGeometry) ? 'shared' : '' }}
+                <br>startpoint {{ startpoint(edgeRef) }}
+                <br>endpoint {{ endpoint(edgeRef) }}
+            </div>
+        </template>
     </section>
 
-    <section v-if="tab === 'attributes'" id="attributes-list">
+    <section v-if="tab === 'attributes'" id="attributes-list" class="list">
         <template v-if="!currentSpace && !currentShading">
-            <h3>{{currentStory.name}}</h3>
+            <h3>{{ currentStory.name }}</h3>
 
             <label>name</label>
             <div class="input-text">
@@ -51,7 +64,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </template>
 
         <template v-if="currentSpace">
-            <h3>Space</h3>
+            <h3>{{ currentSpace.name }}</h3>
+
             <label>name</label>
             <div class="input-text">
                 <input :value="currentSpace.name" @change="updatecurrentSpace('name', $event)">
@@ -59,7 +73,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </template>
 
         <template v-if="currentShading">
-            <h3>Shading</h3>
+            <h3>{{ currentShading.name }}</h3>
             <label>name</label>
             <div class="input-text">
                 <input :value="currentShading.name" @change="updatecurrentShading('name', $event)">
@@ -67,48 +81,63 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </template>
     </section>
 
-    <section v-if="tab === 'components'" id="components-list">
+    <section v-if="tab === 'components'" id="components-list" class="list">
         <template v-if="!currentSpace && !currentShading">
-            <h3>{{ currentStory.name }}</h3>
-            <button @click="assignObject('windows', currentStory)">Add Window</button>
+            <header>
+                <h3>{{ currentStory.name }}</h3>
+            </header>
+            <div class="list-item">
+                <h4>Windows</h4>
+                <div v-for="window in currentStory.windows">
+                    <span v-for="(val, key) in window">
+                        {{ key }}: {{ val }}
+                    </span>
+                </div>
+                <button @click="assignObject('windows', currentStory)">Add Window</button>
+            </div>
         </template>
 
         <template v-if="currentSpace">
-            <h3>{{ currentSpace.name }}</h3>
-            <div class="alternating">
-                <div>
-                    <h4>{{ displayTypeForType('daylighting_controls') }}</h4>
-                    <span v-for="item in currentSpace.daylighting_controls">{{ item }}</span>
-                    <button @click="assignObject('daylighting_controls', currentSpace)">Add daylighting_controls</button>
-                </div>
-                <div>
-                    <h4>{{ displayTypeForType('building_units') }}</h4>
-                    <p v-for="(val, key) in getComponent(currentSpace.building_unit_id, 'building_units')">
+            <header>
+                <h3>{{ currentSpace.name }}</h3>
+            </header>
+
+            <div class="list-item">
+                <h4>Daylighting Controls</h4>
+                <div v-for="daylighting_control in currentSpace.daylighting_controls">
+                    <span v-for="(val, key) in daylighting_control">
                         {{ key }}: {{ val }}
-                    </p>
-                    <button @click="assignObject('building_units', currentSpace)">Add {{ displayTypeForType('building_units') }}</button>
+                    </span>
                 </div>
-                <div>
-                    <h4>{{ displayTypeForType('thermal_zones') }}</h4>
-                    <p v-for="(val, key) in getComponent(currentSpace.thermal_zone_id, 'thermal_zones')">
-                        {{ key }}: {{ val }}
-                    </p>
-                    <button @click="assignObject('thermal_zones', currentSpace)">Add {{ displayTypeForType('thermal_zones') }}</button>
-                </div>
-                <div>
-                    <h4>{{ displayTypeForType('space_types') }}</h4>
-                    <p v-for="(val, key) in getComponent(currentSpace.building_unit_id, 'space_types')">
-                        {{ key }}: {{ val }}
-                    </p>
-                    <button @click="assignObject('space_types', currentSpace)">Add {{ displayTypeForType('space_types') }}</button>
-                </div>
-                <div>
-                    <h4>{{ displayTypeForType('construction_sets') }}</h4>
-                    <p v-for="(val, key) in getComponent(currentSpace.construction_set_id, 'construction_sets')">
-                        {{ key }}: {{ val }}
-                    </p>
-                    <button @click="assignObject('construction_sets', currentSpace)">Add {{ displayTypeForType('construction_sets') }}</button>
-                </div>
+                <button @click="assignObject('daylighting_controls', currentSpace)">Add {{ displayTypeForType('daylighting_controls') }}</button>
+            </div>
+            <div class="list-item">
+                <h4>{{ displayTypeForType('building_units') }}</h4>
+                <span v-for="(val, key) in getComponent(currentSpace.building_unit_id, 'building_units')">
+                    {{ key }}: {{ val }}
+                </span>
+                <button @click="assignObject('building_units', currentSpace)">Add {{ displayTypeForType('building_units') }}</button>
+            </div>
+            <div class="list-item">
+                <h4>{{ displayTypeForType('thermal_zones') }}</h4>
+                <span v-for="(val, key) in getComponent(currentSpace.thermal_zone_id, 'thermal_zones')">
+                    {{ key }}: {{ val }}
+                </span>
+                <button @click="assignObject('thermal_zones', currentSpace)">Add {{ displayTypeForType('thermal_zones') }}</button>
+            </div>
+            <div class="list-item">
+                <h4>{{ displayTypeForType('space_types') }}</h4>
+                <span v-for="(val, key) in getComponent(currentSpace.building_unit_id, 'space_types')">
+                    {{ key }}: {{ val }}
+                </span>
+                <button @click="assignObject('space_types', currentSpace)">Add {{ displayTypeForType('space_types') }}</button>
+            </div>
+            <div class="list-item">
+                <h4>{{ displayTypeForType('construction_sets') }}</h4>
+                <span v-for="(val, key) in getComponent(currentSpace.construction_set_id, 'construction_sets')">
+                    {{ key }}: {{ val }}
+                </span>
+                <button @click="assignObject('construction_sets', currentSpace)">Add {{ displayTypeForType('construction_sets') }}</button>
             </div>
 
         </template>
@@ -232,51 +261,54 @@ export default {
     #inspector {
         background-color: $gray-medium-dark;
         border-left: 1px solid $gray-darkest;
-        overflow: scroll;
-        #tabs {
-            border-bottom: 1px solid $gray-darkest;
-            border-top: 1px solid $gray-darkest;
-            display: flex;
-            height: 1.75rem;
-            font-size: 0.625rem;
-            span {
-                border-right: 1px solid $gray-darkest;
-                display: inline-block;
-                padding: .5rem;
-                text-transform: uppercase;
-            }
-            .active {
-                background-color: $gray-medium-light;
-                svg {
-                    height: 1rem;
-                    path {
-                        fill: $gray-lightest;
-                    }
-                }
-            }
-        }
+        font-size: .85rem;
 
-        #attributes-list, #geometry-list, #components-list {
-            font-size: .85rem;
+        .list {
             height: calc(100% - 2rem);
             overflow: scroll;
 
-            .alternating > div {
+            header {
+                background-color: $gray-dark;
+                > h3 {
+                    display: inline-block;
+                    margin: 1rem;
+                }
+            }
+            .list-item {
+                border-top: 1px solid $gray-medium-light;
                 padding: .5rem 1rem;
-                &:nth-of-type(odd) {
-                    background-color: $gray-medium-light;
+
+                span {
+                    display: block;
+                    margin-bottom: .25rem;
+                }
+                button {
+                    margin-top: .5rem;
                 }
             }
         }
 
         #attributes-list {
             padding: 0 1rem;
-            .alternating > div {
-                padding: 0;
+            .input-text {
+                margin: .25rem 0 .5rem 0;
+            }
+            label {
+                font-size: .625rem;
+                text-transform: uppercase;
             }
         }
 
-
-
+        #components-list {
+            .list-item {
+                h4 {
+                    margin: .5rem 0;
+                }
+                div {
+                    border-top: 1px solid $gray-medium-light;
+                    padding: .5rem 0;
+                }
+            }
+        }
     }
 </style>
