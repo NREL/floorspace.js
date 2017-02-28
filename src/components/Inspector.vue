@@ -88,10 +88,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             </header>
             <div class="list-item">
                 <h4>Windows</h4>
-                <div v-for="window in currentStory.windows">
+                <div v-for="(window, index) in currentStory.windows">
                     <span v-for="(val, key) in window">
                         {{ key }}: {{ val }}
                     </span>
+
+                    <svg @click="destroyWindow(index)" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
+                    </svg>
                 </div>
                 <button @click="assignObject('windows', currentStory)">Add Window</button>
             </div>
@@ -104,10 +108,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
             <div class="list-item">
                 <h4>Daylighting Controls</h4>
-                <div v-for="daylighting_control in currentSpace.daylighting_controls">
+                <div v-for="(daylighting_control, index) in currentSpace.daylighting_controls">
                     <span v-for="(val, key) in daylighting_control">
                         {{ key }}: {{ val }}
                     </span>
+
+                    <svg @click="destroyDaylightingControl(index)" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
+                    </svg>
                 </div>
                 <button @click="assignObject('daylighting_controls', currentSpace)">Add {{ displayTypeForType('daylighting_controls') }}</button>
             </div>
@@ -187,6 +195,23 @@ export default {
         }
     },
     methods: {
+        destroyWindow (index) {
+            const windowsCopy = this.currentStory.windows.slice();
+            windowsCopy.splice(index, 1);
+
+            this.$store.dispatch('models/updateStoryWithData', {
+                story: this.currentStory,
+                windows: windowsCopy
+            });
+        },
+        destroyDaylightingControl(index) {
+            const daylightingControlsCopy = this.currentSpace.daylighting_controls.slice();
+            daylightingControlsCopy.splice(index, 1);
+            this.$store.dispatch('models/updateSpaceWithData', {
+                space: this.currentSpace,
+                daylighting_controls: daylightingControlsCopy
+            });
+        },
         getComponent (id, type) { return this.library[type].find(c => c.id === id); },
         displayTypeForType (type) { return map[type].displayName; },
         startpoint (edgeRef) {
@@ -307,6 +332,17 @@ export default {
                 div {
                     border-top: 1px solid $gray-medium-light;
                     padding: .5rem 0;
+                    position: relative;
+                    svg {
+                        cursor: pointer;
+                        height: 1rem;
+                        position: absolute;
+                        right: 0;
+                        top: calc(50% - .5rem);
+                        path {
+                            fill: $gray-lightest;
+                        }
+                    }
                 }
             }
         }
