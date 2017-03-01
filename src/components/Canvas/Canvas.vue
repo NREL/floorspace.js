@@ -27,12 +27,11 @@ export default {
         this.drawGrid();
         this.drawPolygons();
         window.addEventListener('resize', this.drawGrid);
-        this.$refs.grid.addEventListener('mousemove', this.calcSnap);
-
+        this.$refs.grid.addEventListener('mousemove', this.highlightSnapTarget);
     },
     beforeDestroy () {
         window.removeEventListener('resize', this.drawGrid);
-        this.$refs.grid.removeEventListener('mousemove', this.calcSnap);
+        this.$refs.grid.removeEventListener('mousemove', this.highlightSnapTarget);
     },
     computed: {
         ...mapState({
@@ -71,6 +70,7 @@ export default {
 
             images: state => state.models.images
         }),
+        currentStoryGeometry () { return this.$store.getters['application/currentStoryGeometry']; },
         imageVisible () {
             return this.currentStory.imageVisible;
         },

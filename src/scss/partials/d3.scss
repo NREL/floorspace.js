@@ -20,9 +20,9 @@
                 fill: $primary;
             }
         }
-        &.snap {
-            stroke: blue;
-            fill: blue;
+        &.highlight {
+            stroke: #5F34DF;
+            fill: #5F34DF;
         }
     }
     // gridlines
@@ -30,9 +30,9 @@
         stroke: $gray-medium-light;
         opacity: .25;
     }
-    line.snap {
-        stroke: blue;
-        fill: blue;
+    line.highlight {
+        stroke: #5F34DF;
+        fill: #5F34DF;
     }
 
     // shapes
