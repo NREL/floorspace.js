@@ -8,49 +8,50 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
 <div id="canvas">
-    <svg ref="grid" @click="addPoint" :viewBox="viewbox" preserveAspectRatio="none"></svg>
+    <svg ref="grid" @click="addPoint" @mousemove="highlightSnapTarget" :viewBox="viewbox" preserveAspectRatio="none"></svg>
 </div>
 </template>
 
 <script>
 import methods from './methods'
 import { mapState } from 'vuex'
+import helpers from './../../store/modules/geometry/helpers.js'
 export default {
     name: 'canvas',
     data () {
         return {
-            points: [] // points for the polygon currently being drawn
+            points: [] // points for the face currently being drawn
         };
     },
-    // recalculate and draw the grid when the window resizes
     mounted () {
         this.calcScales();
         this.drawGridLines();
         this.setBackground();
         this.drawPolygons();
+
+        // recalculate scales when the window resizes
         window.addEventListener('resize', this.calcScales);
-        this.$refs.grid.addEventListener('mousemove', this.highlightSnapTarget);
     },
     beforeDestroy () {
         window.removeEventListener('resize', this.calcScales);
-        this.$refs.grid.removeEventListener('mousemove', this.highlightSnapTarget);
     },
     computed: {
         ...mapState({
+            currentMode: state => state.application.currentSelections.mode,
+
             currentSpace: state => state.application.currentSelections.space,
             currentShading: state => state.application.currentSelections.shading,
             currentStory: state => state.application.currentSelections.story,
-            gridVisible: state => state.project.grid.visible,
-            mapVisible: state => state.project.map.visible,
-            currentMode: state => state.application.currentSelections.mode,
 
-            // scale functions translate the pixel coordinates of a location on the screen into RWU coordinates to use within the SVG's grid system
-            scaleX: state => state.application.scale.x,
-            scaleY: state => state.application.scale.y,
+            gridVisible: state => state.project.grid.visible,
 
             // the spacing in RWU between gridlines - one square in the grid will be x_spacing x y_spacing
             x_spacing: state => state.project.grid.x_spacing,
             y_spacing: state => state.project.grid.y_spacing,
+
+            // scale functions translate the pixel coordinates of a location on the screen into RWU coordinates to use within the SVG's grid system
+            scaleX: state => state.application.scale.x,
+            scaleY: state => state.application.scale.y,
 
             // mix_x, min_y, max_x, and max_y bound the portion of the canvas (in RWU) that is currently visible to the user and define the viewbox
             min_x: state => state.project.view.min_x,
@@ -66,42 +67,36 @@ export default {
                     (state.project.view.max_y - state.project.view.min_y); // height
             },
 
+            mapVisible: state => state.project.map.visible,
             latitude: state => state.project.map.latitude,
             longitude: state => state.project.map.longitude,
             zoom: state => state.project.map.zoom,
 
+            imageVisible: state => state.application.currentSelections.story.imageVisible,
             images: state => state.models.images
         }),
         currentStoryGeometry () { return this.$store.getters['application/currentStoryGeometry']; },
-        imageVisible () {
-            return this.currentStory.imageVisible;
-        },
         mapUrl () {
-            return "https://maps.googleapis.com/maps/api/staticmap?center=" + this.latitude + "," + this.longitude + "&zoom=" + this.zoom + "&size=600x300&key=AIzaSyBHevuNXeCuPXkiV3hq-pFKZSdSFLX6kF0"
+            return "https://maps.googleapis.com/maps/api/staticmap?center=" +
+                this.latitude + "," + this.longitude + "&zoom=" + this.zoom +
+                "&size=600x300&key=AIzaSyBHevuNXeCuPXkiV3hq-pFKZSdSFLX6kF0"
         },
         backgroundSrc () {
             const image = this.images.find(image => image.id === this.currentStory.image_id);
             return image ? image.src : "";
         },
-        // map all faces for the current story to polygons
+        /*
+        * map all faces for the current story to polygon representations (sets of ordered points) for d3 to render
+        */
         polygons () {
-            return this.$store.getters['application/currentStoryGeometry'].faces.map((face) => {
+            return this.currentStoryGeometry.faces.map((face) => {
                 return {
                     face_id: face.id,
                     points: face.edgeRefs.map((edgeRef) => {
-                        // look up the edge referenced by the face
-                        const edge = this.$store.getters['application/currentStoryGeometry'].edges.find((e) => {
-                            return e.id === edgeRef.edge_id;
-                        });
-                        // look up the vertex associated with v1 unless the edge reference on the face is reversed
-                        if (!edge) {
-                            // TODO: dangling edgeref, find out where the edge is getting dumped
-                            debugger;
-                        }
-                        const vertexId = edgeRef.reverse ? edge.v2 : edge.v1;
-                        return this.$store.getters['application/currentStoryGeometry'].vertices.find((v) => {
-                            return v.id === vertexId;
-                        });
+                        const edge = helpers.edgeForId(edgeRef.edge_id, this.currentStoryGeometry),
+                            // look up the vertex associated with v1 unless the edge reference on the face is reversed
+                            nextVertexId = edgeRef.reverse ? edge.v2 : edge.v1;
+                        return helpers.vertexForId(nextVertexId, this.currentStoryGeometry);
                     })
                 };
             });
@@ -115,7 +110,15 @@ export default {
         mapUrl () { this.setBackground(); },
         backgroundSrc () { this.setBackground(); },
 
+        x_spacing () { this.updateScales(); },
+        y_spacing () { this.updateScales(); },
+        viewbox () {
+            this.updateScales();
+            this.drawPoints();
+        },
+
         currentMode () { this.points = [];},
+
         currentSpace() {
             this.points = [];
             this.drawPolygons();
@@ -124,13 +127,6 @@ export default {
             this.points = [];
             this.drawPolygons();
         },
-        // if the dimensions of the grid are altered, redraw it
-        viewbox () {
-            this.updateScales();
-            this.drawPoints();
-        },
-        x_spacing () { this.updateScales(); },
-        y_spacing () { this.updateScales(); },
         polygons () { this.drawPolygons(); },
         points () { this.drawPoints(); }
     },
@@ -140,7 +136,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 @import "./../../scss/config";
-// we can't style the dynamically created d3 elements here, put those styles in the scss folder
+// styles for dynamically created d3 elements go into src/scss/partials/d3.scss
 #canvas {
     background-color: $gray-darkest;
     svg {
@@ -148,9 +144,6 @@ export default {
         background-repeat: no-repeat;
         height: 100%;
         width: 100%;
-        .horizontal, .vertical {
-            fill: gray;
-        }
     }
 }
 </style>
