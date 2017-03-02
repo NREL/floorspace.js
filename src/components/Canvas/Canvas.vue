@@ -24,13 +24,15 @@ export default {
     },
     // recalculate and draw the grid when the window resizes
     mounted () {
-        this.drawGrid();
+        this.calcScales();
+        this.drawGridLines();
+        this.setBackground();
         this.drawPolygons();
-        window.addEventListener('resize', this.drawGrid);
+        window.addEventListener('resize', this.calcScales);
         this.$refs.grid.addEventListener('mousemove', this.highlightSnapTarget);
     },
     beforeDestroy () {
-        window.removeEventListener('resize', this.drawGrid);
+        window.removeEventListener('resize', this.calcScales);
         this.$refs.grid.removeEventListener('mousemove', this.highlightSnapTarget);
     },
     computed: {
@@ -50,18 +52,18 @@ export default {
             x_spacing: state => state.project.grid.x_spacing,
             y_spacing: state => state.project.grid.y_spacing,
 
-            // mix_x, min_y, max_x, and max_y bound the portion of the canvas (in RWU) that is currently visible to the user
+            // mix_x, min_y, max_x, and max_y bound the portion of the canvas (in RWU) that is currently visible to the user and define the viewbox
             min_x: state => state.project.view.min_x,
             min_y: state => state.project.view.min_y,
             max_x: state => state.project.view.max_x,
             max_y: state => state.project.view.max_y,
 
-            // SVG viewbox is the portion of the svg grid (in RWU) that is currently visible to the user given the min_x, min_y, max_x, and max_y boundaries
+            // SVG viewbox is the portion of the svg grid (in RWU) that is currently visible to the user
             viewbox: state => {
                 return state.project.view.min_x + ' ' + // x
-                state.project.view.min_y + ' ' + // y
-                (state.project.view.max_x - state.project.view.min_x) + ' ' + // width
-                (state.project.view.max_y - state.project.view.min_y); // height
+                    state.project.view.min_y + ' ' + // y
+                    (state.project.view.max_x - state.project.view.min_x) + ' ' + // width
+                    (state.project.view.max_y - state.project.view.min_y); // height
             },
 
             latitude: state => state.project.map.latitude,
@@ -83,7 +85,7 @@ export default {
         },
         // map all faces for the current story to polygons
         polygons () {
-            var polygons =  this.$store.getters['application/currentStoryGeometry'].faces.map((face) => {
+            return this.$store.getters['application/currentStoryGeometry'].faces.map((face) => {
                 return {
                     face_id: face.id,
                     points: face.edgeRefs.map((edgeRef) => {
@@ -103,31 +105,32 @@ export default {
                     })
                 };
             });
-            return polygons;
         },
     },
     watch: {
-        gridVisible () { this.drawGrid(); },
-        mapVisible () { this.drawGrid(); },
-        imageVisible () { this.drawGrid(); },
-        mapUrl () { this.drawGrid(); },
-        backgroundSrc () { this.drawGrid(); },
+        gridVisible () { this.drawGridLines(); },
 
-        // reset points if drawing mode changes
-        currentMode () {
-            this.points = [];
-        },
+        mapVisible () { this.setBackground(); },
+        imageVisible () { this.setBackground(); },
+        mapUrl () { this.setBackground(); },
+        backgroundSrc () { this.setBackground(); },
+
+        currentMode () { this.points = [];},
         currentSpace() {
             this.points = [];
             this.drawPolygons();
         },
-        // if the  dimensions or spacing of the grid is altered, redraw it
+        currentShading() {
+            this.points = [];
+            this.drawPolygons();
+        },
+        // if the dimensions of the grid are altered, redraw it
         viewbox () {
-            this.drawGrid();
+            this.updateScales();
             this.drawPoints();
         },
-        x_spacing () { this.drawGrid(); },
-        y_spacing () { this.drawGrid(); },
+        x_spacing () { this.updateScales(); },
+        y_spacing () { this.updateScales(); },
         polygons () { this.drawPolygons(); },
         points () { this.drawPoints(); }
     },

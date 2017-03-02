@@ -1,7 +1,17 @@
+// OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC. All rights reserved.
+// Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+// (1) Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+// (2) Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+// (3) Neither the name of the copyright holder nor the names of any contributors may be used to endorse or promote products derived from this software without specific prior written permission from the respective party.
+// (4) Other than as required in clauses (1) and (2), distributions in any form of modifications or other derivative works may not use the "OpenStudio" trademark, "OS", "os", or any other confusingly similar designation without specific prior written permission from Alliance for Sustainable Energy, LLC.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 const d3 = require('d3');
 import helpers from './../../store/modules/geometry/helpers.js'
 
 export default {
+    // ****************** USER INTERACTION EVENTS ****************** //
+
     /*
     * adds the 'highlight' class to the snapTarget for a mousemove event
     * called on mousemove events
@@ -10,7 +20,8 @@ export default {
         // unhighlight all edges and vertices
         d3.selectAll('#canvas .highlight').remove();
 
-        const snapTarget = this.findSnapTarget(e);
+        const point = this.getEventRWU(e),
+            snapTarget = this.findSnapTarget(point);
 
         if (snapTarget && snapTarget.type === 'edge') {
             d3.select('#canvas svg')
@@ -44,82 +55,55 @@ export default {
     },
 
     /*
-    * create a point on the canvas
+    * create and store a RWU canvas point
     * called on click events
     */
     addPoint (e) {
-        // if no space or shading is selected, do not allow drawing
+        // if no space or shading is selected, disable drawing
         if (!this.currentSpace && !this.currentShading) { return; }
 
-        // obtain RWU coordinates of click event
-        // mouse coordinates in RWU
-        var point;
+        // translate click event coordinates into RWU
+        var point = this.getEventRWU(e);
 
-        // when the user hovers over certain SVG child nodes, event locations are incorrect
-        if (e.clientX === e.offsetX) {
-            // adjust the incorrect offset value by the position of the canvas
-            point = {
-                x: this.scaleX(e.offsetX - this.$refs.grid.getBoundingClientRect().left),
-                y: this.scaleY(e.offsetY - this.$refs.grid.getBoundingClientRect().top)
-            };
-        } else {
-            point = {
-                x: this.scaleX(e.offsetX),
-                y: this.scaleY(e.offsetY)
-            };
-        }
-
+        /*
+        * check for snapping - if the click happened within the tolerance range of a
+        * vertex: reuse that vertex on the face being created
+        * edge: create a new vertex at the scalar projection from the click location to the edge,
+        *     set a flag to split the edge at the new vertex
+        */
         const snapTarget = this.findSnapTarget(e);
-        if (snapTarget && snapTarget.type === 'vertex') {
-            // the point will have an id property and be a copy of an existing vertex
-            // data store wil handle this by saving a reference to the existing vertex on the new face
-            point = vertex;
-        } else if (snapTarget && snapTarget.type === 'edge') {
-            // the point will have an id property and be a copy of an existing vertex
-            // data store wil handle this by saving a reference to the existing vertex on the new face
-            point = edge.scalar;
-            // mark the point so that the edge will be split on face creation
-            point.splittingEdge = edge.edge;
-
-        } else if (this.gridVisible) {
-
-            // subtract min % spacing to account for grid rounding offsets created by adjusted minimums
+        if (snapTarget) {
+            if (snapTarget.type === 'vertex') {
+                // data store will detect that the new point already has an id value
+                // will save a reference to the existing vertex on the new face instead of creating a new vertex
+                point = snapTarget;
+            } else if (snapTarget.type === 'edge') {
+                // create a vertex on the edge at the location closest to the mouse event (scalar projection)
+                point = snapTarget.scalar;
+                // mark the point so that the edge will be split during face creation
+                point.splittingEdge = snapTarget.edge;
+            }
+        }
+        // if no snapTarget was found and the grid is visible snap to the grid
+        else if (this.gridVisible) {
+            // calculate an offset for the gridlines based on the viewbox min_x and min_y
             const xAdjustment = this.min_x % this.x_spacing,
                 yAdjustment = this.min_y % this.y_spacing;
 
-            // round point to nearest gridline if the grid is visible
+            // round point RWU coordinates to nearest gridline
             point.x = round(this.scaleX(e.offsetX) - xAdjustment, this.x_spacing) + xAdjustment;
             point.y = round(this.scaleY(e.offsetY) - yAdjustment, this.y_spacing) + yAdjustment;
         }
 
-        if (this.currentMode === 'Rectangle' && this.points.length) {
-            const payload = {
-                points: [
-                    this.points[0],
-                    {
-                        x: point.x,
-                        y: this.points[0].y
-                    },
-                    point,
-                    {
-                        x: this.points[0].x,
-                        y: point.y
-                    }
-                ]
-            }
-
-            if (this.currentSpace) {
-                payload.space = this.currentSpace;
-            } else if (this.currentShading) {
-                payload.shading = this.currentShading;
-            }
-            // if a rectangle is in progress, close the rectangle and convert it to a polygon
-            this.$store.dispatch('geometry/createFaceFromPoints', payload);
-            // clear the points in progress
-            this.points = [];
-        } else if (this.currentMode === 'Rectangle' || this.currentMode === 'Polygon') {
+        // if rectangle drawing mode is selected and a point has already been drawn on the canvas, close and save the rectangle
+        if (this.currentMode === 'Rectangle' || this.currentMode === 'Polygon') {
             // store the point
             this.points.push(point);
+        }
+
+        // create a rectangular face if two points have been drawn to the canvas in rectangle mode
+        if (this.currentMode === 'Rectangle' && this.points.length === 2) {
+            this.saveRectuangularFace();
         }
 
         function round (point, spacing) {
@@ -138,6 +122,54 @@ export default {
         }
     },
 
+
+    // ****************** SAVING FACES ****************** //
+    /*
+    * create a rectangular face from the two points on the canvas
+    * save the rectangle as a face for the selected space or shading
+    */
+    saveRectuangularFace () {
+        // infer 4 corners of the rectangle based on the two points that have been drawn
+        const payload = {
+            points: [
+                this.points[0],
+                { x: this.points[1].x, y: this.points[0].y },
+                this.points[1],
+                { x: this.points[0].x, y: this.points[1].y }
+            ]
+        };
+
+        if (this.currentSpace) {
+            payload.space = this.currentSpace;
+        } else if (this.currentShading) {
+            payload.shading = this.currentShading;
+        }
+        this.$store.dispatch('geometry/createFaceFromPoints', payload);
+        this.points = [];
+    },
+
+    /*
+    * create a polygon face from all points on the canvas
+    * save the face for the selected space or shading
+    */
+    savePolygonFace () {
+        const payload = {
+            points: this.points
+        };
+        if (this.currentSpace) {
+            payload.space = this.currentSpace;
+        } else if (this.currentShading) {
+            payload.shading = this.currentShading;
+        }
+        this.$store.dispatch('geometry/createFaceFromPoints', payload);
+        this.points = [];
+    },
+
+
+    // ****************** d3 RENDERING ****************** //
+    /*
+    * render points for the face being created
+    */
     drawPoints () {
         // remove expired points
         d3.selectAll('#canvas ellipse').remove();
@@ -153,32 +185,26 @@ export default {
             .attr('vector-effect', 'non-scaling-stroke');
 
         // connect the points with a guideline
-        this.drawPolygonEdges();
+        this.connectCanvasPoints();
 
-        // Polygon Origin
+        // when the first point in the polygon is clicked, close the shape
         d3.select('#canvas svg').select('ellipse')
-            // set a click listener for the first point in the polygon, when it is clicked close the shape
             .on('click', () => {
-                const payload = {
-                    points: this.points
-                };
-                if (this.currentSpace) {
-                    payload.space = this.currentSpace;
-                } else if (this.currentShading) {
-                    payload.shading = this.currentShading;
-                }
-                // create a face in the data store from the points
-                this.$store.dispatch('geometry/createFaceFromPoints', payload);
-                // clear points, prevent a new point from being created by this click event
+                // store the points in the polygon as a face
+                this.savePolygonFace();
+                // prevent a new point from being created by this click event
                 d3.event.stopPropagation();
-                this.points = [];
             })
             .attr('rx', this.scaleX(7) - this.min_x)
             .attr('ry', this.scaleY(7) - this.min_y)
             .classed('origin', true) // apply custom CSS for origin of polygons
             .attr('vector-effect', 'non-scaling-stroke');
     },
-    drawPolygonEdges () {
+
+    /*
+    * render a line connecting all points for the face being drawn
+    */
+    connectCanvasPoints () {
         // remove expired paths
         d3.selectAll('#canvas path').remove();
 
@@ -196,6 +222,10 @@ export default {
         // keep grid lines under polygon edges
         d3.selectAll('.vertical, .horizontal').lower();
     },
+
+    /*
+    * render saved faces
+    */
     drawPolygons () {
         // remove expired polygons
         d3.select('#canvas svg').selectAll('polygon').remove();
@@ -221,28 +251,11 @@ export default {
         d3.selectAll('#canvas path').remove();
         d3.selectAll('#canvas ellipse').remove();
     },
-    drawGrid () {
-        var url = '';
-        if (this.currentStory.imageVisible) {
-            url = this.backgroundSrc;
-        } else if (this.mapVisible) {
-            url = this.mapUrl;
-        }
-        this.$refs.grid.style.backgroundImage = 'url("' + url + '")';
 
-        // update scales with new grid boundaries
-        this.$store.dispatch('application/setScaleX', {
-            scaleX: d3.scaleLinear()
-                .domain([0, this.$refs.grid.clientWidth])
-                .range([this.min_x, this.max_x])
-        });
-
-        this.$store.dispatch('application/setScaleY', {
-            scaleY: d3.scaleLinear()
-                .domain([0, this.$refs.grid.clientHeight])
-                .range([this.min_y, this.max_y])
-        });
-
+    /*
+    * draw lines over the svg for the grid
+    */
+    drawGridLines () {
         var svg = d3.select('#canvas svg');
         svg.selectAll('line').remove();
 
@@ -274,29 +287,13 @@ export default {
     },
 
 
+    // ****************** SNAPPING TO EXISTING GEOMETRY ****************** //
     /*
-    * finds the closest vertex or edge within the snap tolerance zone of the mouse event
+    * finds the closest vertex or edge within the snap tolerance zone of a point
     */
-    findSnapTarget (e) {
+    findSnapTarget (point) {
         // unhighlight all edges and vertices
         d3.selectAll('#canvas .highlight').remove();
-
-        // mouse coordinates in RWU
-        var point;
-
-        // when the user hovers over certain SVG child nodes, event locations are incorrect
-        if (e.clientX === e.offsetX) {
-            // adjust the incorrect offset value by the position of the canvas
-            point = {
-                x: this.scaleX(e.offsetX - this.$refs.grid.getBoundingClientRect().left),
-                y: this.scaleY(e.offsetY - this.$refs.grid.getBoundingClientRect().top)
-            };
-        } else {
-            point = {
-                x: this.scaleX(e.offsetX),
-                y: this.scaleY(e.offsetY)
-            };
-        }
 
         const snappingVertexData = this.snappingVertexData(point),
             snappingEdgeData = this.snappingEdgeData(point);
@@ -383,5 +380,58 @@ export default {
             nearestEdge.type = 'edge';
             return nearestEdge;
         }
+    },
+
+
+    // ****************** HELPERS ****************** //
+    /*
+    * translates the mouse event coordinates to RWU
+    * adjusts incorrect coordinates caused by svg hover
+    */
+    getEventRWU (e) {
+        // when the user hovers over certain SVG child nodes, event locations are incorrect
+        if (e.clientX === e.offsetX) {
+            // adjust the incorrect offset value by the position of the canvas
+            return {
+                x: this.scaleX(e.offsetX - this.$refs.grid.getBoundingClientRect().left),
+                y: this.scaleY(e.offsetY - this.$refs.grid.getBoundingClientRect().top)
+            };
+        } else {
+            return {
+                x: this.scaleX(e.offsetX),
+                y: this.scaleY(e.offsetY)
+            };
+        }
+    },
+
+    /*
+    * update the background of the svg to be a map, image, or blank
+    */
+    setBackground () {
+        var url = '';
+        if (this.currentStory.imageVisible) {
+            url = this.backgroundSrc;
+        } else if (this.mapVisible) {
+            url = this.mapUrl;
+        }
+        this.$refs.grid.style.backgroundImage = 'url("' + url + '")';
+    },
+
+    /*
+    * generate d3 scaling functions based on the svg viewbox and the pixel size of the svg
+    */
+    calcScales () {
+        // update scales with new grid boundaries
+        this.$store.dispatch('application/setScaleX', {
+            scaleX: d3.scaleLinear()
+                .domain([0, this.$refs.grid.clientWidth])
+                .range([this.min_x, this.max_x])
+        });
+
+        this.$store.dispatch('application/setScaleY', {
+            scaleY: d3.scaleLinear()
+                .domain([0, this.$refs.grid.clientHeight])
+                .range([this.min_y, this.max_y])
+        });
     }
 }
