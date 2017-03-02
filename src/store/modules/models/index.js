@@ -41,27 +41,27 @@ export default {
         // lib
         library: {
             'building_units': [{
-                id: '103',
+                id: '1003',
                 name: 'Building Unit 1'
             }, {
-                id: '104',
+                id: '1004',
                 name: 'Building Unit 2'
             }, {
-                id: '105',
+                id: '1005',
                 name: 'Building Unit 3'
             }],
             'thermal_zones': [{
-                id: '106',
+                id: '1006',
                 name: 'Thermal Zone 1'
             }, {
-                id: '107',
+                id: '1007',
                 name: 'Thermal Zone 2'
             }, {
-                id: '108',
+                id: '1008',
                 name: 'Thermal Zone 3'
             }],
             'space_types': [{
-                id: '109',
+                id: '1009',
                 name: 'Space Type 1'
             }, {
                 id: '1010',

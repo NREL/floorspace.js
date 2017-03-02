@@ -70,6 +70,35 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <div class="input-text">
                 <input :value="currentSpace.name" @change="updatecurrentSpace('name', $event)">
             </div>
+
+            <div class="list-item">
+                <h4>{{ displayTypeForType('building_units') }}</h4>
+                <span v-for="(val, key) in getComponent(currentSpace.building_unit_id, 'building_units')">
+                    {{ key }}: {{ val }}
+                </span>
+                <button @click="assignObject('building_units', currentSpace)">Add {{ displayTypeForType('building_units') }}</button>
+            </div>
+            <div class="list-item">
+                <h4>{{ displayTypeForType('thermal_zones') }}</h4>
+                <span v-for="(val, key) in getComponent(currentSpace.thermal_zone_id, 'thermal_zones')">
+                    {{ key }}: {{ val }}
+                </span>
+                <button @click="assignObject('thermal_zones', currentSpace)">Add {{ displayTypeForType('thermal_zones') }}</button>
+            </div>
+            <div class="list-item">
+                <h4>{{ displayTypeForType('space_types') }}</h4>
+                <span v-for="(val, key) in getComponent(currentSpace.space_type_id, 'space_types')">
+                    {{ key }}: {{ val }}
+                </span>
+                <button @click="assignObject('space_types', currentSpace)">Add {{ displayTypeForType('space_types') }}</button>
+            </div>
+            <div class="list-item">
+                <h4>{{ displayTypeForType('construction_sets') }}</h4>
+                <span v-for="(val, key) in getComponent(currentSpace.construction_set_id, 'construction_sets')">
+                    {{ key }}: {{ val }}
+                </span>
+                <button @click="assignObject('construction_sets', currentSpace)">Add {{ displayTypeForType('construction_sets') }}</button>
+            </div>
         </template>
 
         <template v-if="currentShading">
@@ -119,35 +148,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 </div>
                 <button @click="assignObject('daylighting_controls', currentSpace)">Add {{ displayTypeForType('daylighting_controls') }}</button>
             </div>
-            <div class="list-item">
-                <h4>{{ displayTypeForType('building_units') }}</h4>
-                <span v-for="(val, key) in getComponent(currentSpace.building_unit_id, 'building_units')">
-                    {{ key }}: {{ val }}
-                </span>
-                <button @click="assignObject('building_units', currentSpace)">Add {{ displayTypeForType('building_units') }}</button>
-            </div>
-            <div class="list-item">
-                <h4>{{ displayTypeForType('thermal_zones') }}</h4>
-                <span v-for="(val, key) in getComponent(currentSpace.thermal_zone_id, 'thermal_zones')">
-                    {{ key }}: {{ val }}
-                </span>
-                <button @click="assignObject('thermal_zones', currentSpace)">Add {{ displayTypeForType('thermal_zones') }}</button>
-            </div>
-            <div class="list-item">
-                <h4>{{ displayTypeForType('space_types') }}</h4>
-                <span v-for="(val, key) in getComponent(currentSpace.building_unit_id, 'space_types')">
-                    {{ key }}: {{ val }}
-                </span>
-                <button @click="assignObject('space_types', currentSpace)">Add {{ displayTypeForType('space_types') }}</button>
-            </div>
-            <div class="list-item">
-                <h4>{{ displayTypeForType('construction_sets') }}</h4>
-                <span v-for="(val, key) in getComponent(currentSpace.construction_set_id, 'construction_sets')">
-                    {{ key }}: {{ val }}
-                </span>
-                <button @click="assignObject('construction_sets', currentSpace)">Add {{ displayTypeForType('construction_sets') }}</button>
-            </div>
-
         </template>
 
         <template v-if="currentShading">
@@ -302,7 +302,9 @@ export default {
             .list-item {
                 border-top: 1px solid $gray-medium-light;
                 padding: .5rem 1rem;
-
+                h4 {
+                    margin: .5rem 0;
+                }
                 span {
                     display: block;
                     margin-bottom: .25rem;
@@ -314,34 +316,32 @@ export default {
         }
 
         #attributes-list {
-            padding: 0 1rem;
-            .input-text {
-                margin: .25rem 0 .5rem 0;
+            h3, label {
+                margin-left: 1rem;
             }
             label {
                 font-size: .625rem;
                 text-transform: uppercase;
             }
+            .input-text {
+                margin: .25rem 0 .5rem 0;
+                padding: 0 1rem;
+            }
         }
 
         #components-list {
-            .list-item {
-                h4 {
-                    margin: .5rem 0;
-                }
-                div {
-                    border-top: 1px solid $gray-medium-light;
-                    padding: .5rem 0;
-                    position: relative;
-                    svg {
-                        cursor: pointer;
-                        height: 1rem;
-                        position: absolute;
-                        right: 0;
-                        top: calc(50% - .5rem);
-                        path {
-                            fill: $gray-lightest;
-                        }
+            .list-item > div {
+                border-top: 1px solid $gray-medium-light;
+                padding: .5rem 0;
+                position: relative;
+                svg {
+                    cursor: pointer;
+                    height: 1rem;
+                    position: absolute;
+                    right: 0;
+                    top: calc(50% - .5rem);
+                    path {
+                        fill: $gray-lightest;
                     }
                 }
             }
