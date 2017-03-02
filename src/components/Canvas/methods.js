@@ -71,7 +71,7 @@ export default {
         * edge: create a new vertex at the scalar projection from the click location to the edge,
         *     set a flag to split the edge at the new vertex
         */
-        const snapTarget = this.findSnapTarget(e);
+        const snapTarget = this.findSnapTarget(point);
         if (snapTarget) {
             if (snapTarget.type === 'vertex') {
                 // data store will detect that the new point already has an id value
