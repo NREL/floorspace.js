@@ -117,7 +117,7 @@ export default {
         // mix_x, min_y, max_x, and max_y are the grid dimensions in real world units
         min_x: {
             get () { return this.$store.state.project.view.min_x + ' ' + this.$store.state.project.config.units; },
-            set (val) { this.$store.dispatch('project/setViewMinX', { min_x: parseFloat(val) }); }
+            set (val) { this.$store.dispatch('project/setViewMinX', { min_x: val }); }
         },
         min_y: {
             get () { return this.$store.state.project.view.min_y + ' ' + this.$store.state.project.config.units; },

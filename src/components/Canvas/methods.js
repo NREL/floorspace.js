@@ -38,8 +38,8 @@ export default {
                 .append('ellipse')
                 .attr('cx', snapTarget.scalar.x)
                 .attr('cy', snapTarget.scalar.y)
-                .attr('rx', this.scaleX(2) - this.min_x)
-                .attr('ry', this.scaleY(2) - this.min_y)
+                .attr('rx', this.calcRadius(2, 'x'))
+                .attr('ry', this.calcRadius(2, 'y'))
                 .classed('highlight', true)
                 .attr('vector-effect', 'non-scaling-stroke');
         } else if (snapTarget && snapTarget.type === 'vertex') {
@@ -47,8 +47,8 @@ export default {
                 .append('ellipse')
                 .attr('cx', snapTarget.x)
                 .attr('cy', snapTarget.y)
-                .attr('rx', this.scaleX(5) - this.min_x)
-                .attr('ry', this.scaleY(5) - this.min_y)
+                .attr('rx', this.calcRadius(5, 'x'))
+                .attr('ry', this.calcRadius(5, 'y'))
                 .classed('highlight', true)
                 .attr('vector-effect', 'non-scaling-stroke');
         }
@@ -59,6 +59,8 @@ export default {
     * called on click events
     */
     addPoint (e) {
+        if (this.isDragging) { return; }
+
         // if no space or shading is selected, disable drawing
         if (!this.currentSpace && !this.currentShading) { return; }
 
@@ -180,8 +182,8 @@ export default {
             .enter().append('ellipse')
             .attr('cx', (d, i) => { return d.x; })
             .attr('cy', (d, i) => { return d.y; })
-            .attr('rx', this.scaleX(2) - this.min_x)
-            .attr('ry', this.scaleY(2) - this.min_y)
+            .attr('rx', this.calcRadius(2, 'x'))
+            .attr('ry', this.calcRadius(2, 'y'))
             .attr('vector-effect', 'non-scaling-stroke');
 
         // connect the points with a guideline
@@ -195,8 +197,8 @@ export default {
                 // prevent a new point from being created by this click event
                 d3.event.stopPropagation();
             })
-            .attr('rx', this.scaleX(7) - this.min_x)
-            .attr('ry', this.scaleY(7) - this.min_y)
+            .attr('rx', this.calcRadius(7, 'x'))
+            .attr('ry', this.calcRadius(7, 'y'))
             .classed('origin', true) // apply custom CSS for origin of polygons
             .attr('vector-effect', 'non-scaling-stroke');
     },
@@ -269,7 +271,7 @@ export default {
             .attr('x1', (d) => { return d * this.x_spacing; })
             .attr('x2', (d) => { return d * this.x_spacing; })
             .attr('y1', this.min_y)
-            .attr('y2', this.scaleY(this.$refs.grid.clientHeight))
+            .attr('y2', this.max_y)
             .attr('class', 'vertical')
             .attr('vector-effect', 'non-scaling-stroke');
 
@@ -277,7 +279,7 @@ export default {
             .data(d3.range(this.min_y / this.y_spacing, this.max_y / this.y_spacing))
             .enter().append('line')
             .attr('x1', this.min_x)
-            .attr('x2', this.scaleX(this.$refs.grid.clientWidth))
+            .attr('x2', this.max_x)
             .attr('y1', (d) => { return d * this.y_spacing; })
             .attr('y2', (d) => { return d * this.y_spacing; })
             .attr('class', 'horizontal')
@@ -292,6 +294,8 @@ export default {
     * finds the closest vertex or edge within the snap tolerance zone of a point
     */
     findSnapTarget (point) {
+        if (this.isDragging) { return; }
+
         // unhighlight all edges and vertices
         d3.selectAll('#canvas .highlight').remove();
 
@@ -405,6 +409,20 @@ export default {
     },
 
     /*
+    * calc radius
+    */
+    calcRadius (px, axis) {
+        var min = axis === 'x' ? this.min_x : this.min_y,
+            scale = axis === 'x' ? this.scaleX : this.scaleY;
+
+        var scaledPx = scale(px);
+
+        var diff = scaledPx > min ? scaledPx - min : min - scaledPx;
+        console.log(scaledPx, min);
+        return Math.abs(scaledPx - min);
+    },
+
+    /*
     * update the background of the svg to be a map, image, or blank
     */
     setBackground () {
@@ -421,6 +439,8 @@ export default {
     * generate d3 scaling functions based on the svg viewbox and the pixel size of the svg
     */
     calcScales () {
+        if (this.isDragging) { return; }
+
         // update scales with new grid boundaries
         this.$store.dispatch('application/setScaleX', {
             scaleX: d3.scaleLinear()

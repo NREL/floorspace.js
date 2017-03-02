@@ -8,7 +8,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
 <div id="canvas">
-    <svg ref="grid" @click="addPoint" @mousemove="highlightSnapTarget" :viewBox="viewbox" preserveAspectRatio="none"></svg>
+    <svg ref="grid" @click="addPoint" @mousemove="highlightSnapTarget" :viewBox="viewbox" preserveAspectRatio="none" id="svgcanvas"></svg>
 </div>
 </template>
 
@@ -20,7 +20,8 @@ export default {
     name: 'canvas',
     data () {
         return {
-            points: [] // points for the face currently being drawn
+            points: [], // points for the face currently being drawn
+            isDragging: false // boolean - if a drag event is happening
         };
     },
     mounted () {
@@ -31,6 +32,42 @@ export default {
 
         // recalculate scales when the window resizes
         window.addEventListener('resize', this.calcScales);
+
+        const mousedownHandler = (e) => {
+                this.isDragging = false;
+                this.$refs.grid.addEventListener('mouseup', mouseupHandler);
+                this.$refs.grid.addEventListener('mousemove', mousemoveHandler);
+            },
+            mousemoveHandler = (e) => {
+                if (this.isDragging) {
+                    const dx = this.scaleX(e.movementX),
+                        dy  = this.scaleY(e.movementY);
+                    console.log(e.movementX, dx);
+                    this.min_x -= dx;
+                    this.max_x -= dx;
+                    this.min_y -= dy;
+                    this.max_y -= dy;
+
+                    this.drawGridLines();
+                } else {
+                    this.points = [];
+                    this.isDragging = true;
+                }
+            },
+            mouseupHandler = (e) => {
+                this.$refs.grid.removeEventListener('mousemove', mousemoveHandler);
+                this.$refs.grid.removeEventListener('mouseup', mouseupHandler);
+                if (this.isDragging) {
+                    this.points = [];
+
+                    this.drawGridLines();
+                    this.drawPolygons();
+                    setTimeout(() => {
+                        this.isDragging = false;
+                    })
+                }
+            };
+        this.$refs.grid.addEventListener('mousedown', mousedownHandler);
     },
     beforeDestroy () {
         window.removeEventListener('resize', this.calcScales);
@@ -54,10 +91,10 @@ export default {
             scaleY: state => state.application.scale.y,
 
             // mix_x, min_y, max_x, and max_y bound the portion of the canvas (in RWU) that is currently visible to the user and define the viewbox
-            min_x: state => state.project.view.min_x,
-            min_y: state => state.project.view.min_y,
-            max_x: state => state.project.view.max_x,
-            max_y: state => state.project.view.max_y,
+            // min_x: state => state.project.view.min_x,
+            // min_y: state => state.project.view.min_y,
+            // max_x: state => state.project.view.max_x,
+            // max_y: state => state.project.view.max_y,
 
             // SVG viewbox is the portion of the svg grid (in RWU) that is currently visible to the user
             viewbox: state => {
@@ -75,6 +112,24 @@ export default {
             imageVisible: state => state.application.currentSelections.story.imageVisible,
             images: state => state.models.images
         }),
+        // mix_x, min_y, max_x, and max_y are the grid dimensions in real world units
+        min_x: {
+            get () { return this.$store.state.project.view.min_x; },
+            set (val) { this.$store.dispatch('project/setViewMinX', { min_x: val }); }
+        },
+        min_y: {
+            get () { return this.$store.state.project.view.min_y; },
+            set(val) { this.$store.dispatch('project/setViewMinY', { min_y: val }); }
+        },
+        max_x: {
+            get () { return this.$store.state.project.view.max_x; },
+            set (val) { this.$store.dispatch('project/setViewMaxX', { max_x: val }); }
+        },
+        max_y: {
+            get () { return this.$store.state.project.view.max_y;  },
+            set (val) { this.$store.dispatch('project/setViewMaxY', { max_y: val  }); }
+        },
+
         currentStoryGeometry () { return this.$store.getters['application/currentStoryGeometry']; },
         mapUrl () {
             return "https://maps.googleapis.com/maps/api/staticmap?center=" +
@@ -110,10 +165,11 @@ export default {
         mapUrl () { this.setBackground(); },
         backgroundSrc () { this.setBackground(); },
 
-        x_spacing () { this.updateScales(); },
-        y_spacing () { this.updateScales(); },
+        x_spacing () { this.calcScales(); },
+        y_spacing () { this.calcScales(); },
         viewbox () {
-            this.updateScales();
+            this.calcScales();
+            this.drawGridLines();
             this.drawPoints();
         },
 
@@ -128,7 +184,9 @@ export default {
             this.drawPolygons();
         },
         polygons () { this.drawPolygons(); },
-        points () { this.drawPoints(); }
+        points () {
+            this.drawPoints();
+        }
     },
     methods: methods
 }
