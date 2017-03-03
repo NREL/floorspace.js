@@ -42,7 +42,7 @@ export default {
                 if (this.isDragging) {
                     const dx = this.scaleX(e.movementX),
                         dy  = this.scaleY(e.movementY);
-                    console.log(e.movementX, dx);
+                        
                     this.min_x -= dx;
                     this.max_x -= dx;
                     this.min_y -= dy;

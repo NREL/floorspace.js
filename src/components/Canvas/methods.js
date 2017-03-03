@@ -393,33 +393,31 @@ export default {
     * adjusts incorrect coordinates caused by svg hover
     */
     getEventRWU (e) {
+        var res;
         // when the user hovers over certain SVG child nodes, event locations are incorrect
         if (e.clientX === e.offsetX) {
             // adjust the incorrect offset value by the position of the canvas
-            return {
+            res = {
                 x: this.scaleX(e.offsetX - this.$refs.grid.getBoundingClientRect().left),
                 y: this.scaleY(e.offsetY - this.$refs.grid.getBoundingClientRect().top)
             };
         } else {
-            return {
+            res = {
                 x: this.scaleX(e.offsetX),
                 y: this.scaleY(e.offsetY)
             };
         }
+        // res.x += this.min_x;
+        // res.y += this.min_x;
+        // console.log(res);
+        return res;
     },
 
     /*
     * calc radius
     */
-    calcRadius (px, axis) {
-        var min = axis === 'x' ? this.min_x : this.min_y,
-            scale = axis === 'x' ? this.scaleX : this.scaleY;
-
-        var scaledPx = scale(px);
-
-        var diff = scaledPx > min ? scaledPx - min : min - scaledPx;
-        console.log(scaledPx, min);
-        return Math.abs(scaledPx - min);
+    calcRadius (pxRad, axis) {
+        return axis === 'x' ? this.scaleX(pxRad) : this.scaleY(pxRad);
     },
 
     /*
