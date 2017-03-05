@@ -55,37 +55,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 import { mapState } from 'vuex'
 import factory from './../../store/modules/models/factory'
-
-const map = {
-    building_units: {
-        displayName: 'Building Unit',
-        create: factory.BuildingUnit
-    },
-    thermal_zones: {
-        displayName: 'Thermal Zone',
-        create: factory.ThermalZone
-    },
-    space_types: {
-        displayName: 'Space Type',
-        create: factory.SpaceType
-    },
-    construction_sets: {
-        displayName: 'Construction Set',
-        create: factory.ConstructionSet
-    },
-    constructions: {
-        displayName: 'Construction',
-        create: factory.Construction
-    },
-    windows: {
-        displayName: 'Window',
-        create: factory.Window
-    },
-    daylighting_controls: {
-        displayName: 'Daylighting Control',
-        create: factory.DaylightingControl
-    }
-};
+import helpers from './../../store/modules/models/helpers'
 
 export default {
     name: 'createObjectModal',
@@ -102,15 +72,17 @@ export default {
     },
     computed: {
         ...mapState({
-            library: state => state.models.library
+            library: (state) => {
+                return state.models.library;
+            }
         }),
         objects () {
             return this.library[this.typeForDisplayType(this.displayType)];
         }
     },
     methods: {
-        displayTypeForType (type) { return map[type].displayName; },
-        typeForDisplayType (displayType) { return Object.keys(map).find(k => map[k].displayName === this.displayType); },
+        displayTypeForType (type) { return helpers.map[type].displayName; },
+        typeForDisplayType (displayType) { return Object.keys(helpers.map).find(k => helpers.map[k].displayName === this.displayType); },
         addField () {
             this.fields.push({
                 label: '',
@@ -119,7 +91,7 @@ export default {
         },
         createObject () {
             const type = this.typeForDisplayType(this.displayType);
-            var newObject = new map[type].create(this.objectName);
+            var newObject = new helpers.map[type].init(this.objectName);
             this.fields.forEach((field) => {
                 newObject[field.label] = field.value;
             })

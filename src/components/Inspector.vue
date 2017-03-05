@@ -160,30 +160,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <script>
 
 import { mapState } from 'vuex'
-import helpers from './../store/modules/geometry/helpers'
-const map = {
-    building_units: {
-        displayName: 'Building Unit'
-    },
-    thermal_zones: {
-        displayName: 'Thermal Zone'
-    },
-    space_types: {
-        displayName: 'Space Type'
-    },
-    construction_sets: {
-        displayName: 'Construction Set'
-    },
-    constructions: {
-        displayName: 'Construction'
-    },
-    windows: {
-        displayName: 'Window'
-    },
-    daylighting_controls: {
-        displayName: 'Daylighting Control'
-    }
-};
+import geometryHelpers from './../store/modules/geometry/helpers'
+import modelHelpers from './../store/modules/models/helpers'
 
 export default {
     name: 'inspector',
@@ -213,7 +191,7 @@ export default {
             });
         },
         getComponent (id, type) { return this.library[type].find(c => c.id === id); },
-        displayTypeForType (type) { return map[type].displayName; },
+        displayTypeForType (type) { return modelHelpers.map[type].displayName; },
         startpoint (edgeRef) {
             const edge = this.edgeForId(edgeRef.edge_id);
             if (edgeRef.reverse) {
@@ -234,9 +212,9 @@ export default {
                 return vertex.id + ' (v1) ' + ' (' + vertex.x + ',' + vertex.y + ')';
             }
         },
-        edgeForId (edge_id) { return helpers.edgeForId(edge_id, this.currentStoryGeometry); },
+        edgeForId (edge_id) { return geometryHelpers.edgeForId(edge_id, this.currentStoryGeometry); },
         vertexForId (vertex_id) {
-            const vertex = helpers.vertexForId(vertex_id, this.currentStoryGeometry);
+            const vertex = geometryHelpers.vertexForId(vertex_id, this.currentStoryGeometry);
             return vertex;
         },
         updatecurrentStory (key, event) {

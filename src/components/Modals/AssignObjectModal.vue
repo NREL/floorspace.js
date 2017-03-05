@@ -44,6 +44,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 import { mapState } from 'vuex'
 import factory from './../../store/modules/models/factory'
+import helpers from './../../store/modules/models/helpers'
 
 const map = {
     building_units: {

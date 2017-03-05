@@ -13,7 +13,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
         <div class='input-select'>
             <label>Type</label>
             <select v-model='displayType'>
-                <option v-for='(objects, type) in library'>{{ displayTypeForType(type) }}</option>
+                <option v-for='(objects, type) in libraryObjects'>{{ displayTypeForType(type) }}</option>
             </select>
             <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
                 <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
@@ -46,37 +46,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
 <script>
 import { mapState } from 'vuex'
 import factory from './../store/modules/models/factory'
+import helpers from './../store/modules/models/helpers'
 
-const map = {
-    building_units: {
-        displayName: 'Building Unit',
-        create: factory.BuildingUnit
-    },
-    thermal_zones: {
-        displayName: 'Thermal Zone',
-        create: factory.ThermalZone
-    },
-    space_types: {
-        displayName: 'Space Type',
-        create: factory.SpaceType
-    },
-    construction_sets: {
-        displayName: 'Construction Set',
-        create: factory.ConstructionSet
-    },
-    constructions: {
-        displayName: 'Construction',
-        create: factory.Construction
-    },
-    windows: {
-        displayName: 'Window',
-        create: factory.Window
-    },
-    daylighting_controls: {
-        displayName: 'Daylighting Control',
-        create: factory.DaylightingControl
-    }
-};
 
 export default {
     name: 'library',
@@ -89,14 +60,20 @@ export default {
         };
     },
     mounted () {
-        this.displayType = this.displayTypeForType(Object.keys(this.library)[0]);
+        this.displayType = this.displayTypeForType(Object.keys(this.libraryObjects)[0]);
     },
     computed: {
-        ...mapState({
-            library: state => state.models.library
-        }),
+        libraryObjects () {
+            const lib = JSON.parse(JSON.stringify(this.$store.state.models.library));
+            lib.stories = this.$store.state.models.stories;
+            lib.spaces = [];
+            for (var i = 0; i < this.$store.state.models.stories.length; i++) {
+                lib.spaces.concat(this.$store.state.models.stories[i].spaces);
+            }
+            return lib;
+        },
         objects () {
-            return this.library[this.typeForDisplayType(this.displayType)] || [];
+            return this.libraryObjects[this.typeForDisplayType(this.displayType)] || [];
         },
         columns () {
             const columns = [];
@@ -109,21 +86,21 @@ export default {
         }
     },
     methods: {
-        displayTypeForType (type) { return map[type].displayName; },
-        typeForDisplayType (displayType) { return Object.keys(map).find(k => map[k].displayName === this.displayType); },
+        displayTypeForType (type) { return helpers.map[type].displayName; },
+        typeForDisplayType (displayType) { return Object.keys(helpers.map).find(k => helpers.map[k].displayName === this.displayType); },
         addField () {
             this.fields.push({
                 label: '',
                 value: ''
             });
         },
-        createObject () {
+        initObject () {
             const type = this.typeForDisplayType(this.displayType);
-            var newObject = new map[type].create(this.objectName);
+            var newObject = new helpers.map[type].init(this.objectName);
             this.fields.forEach((field) => {
                 newObject[field.label] = field.value;
             })
-            this.$store.dispatch('models/createObjectWithType', {
+            this.$store.dispatch('models/initObjectWithType', {
                 type: type,
                 object: newObject
             });
