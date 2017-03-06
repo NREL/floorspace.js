@@ -258,7 +258,8 @@ const helpers = {
                     readonly: true,
                     private: false,
                     get (space, state) {
-                        return state.models.library.building_units.find(b => b.id === space.building_unit_id);
+                        const buildingUnit = state.models.library.building_units.find(b => b.id === space.building_unit_id);
+                        return buildingUnit ? buildingUnit.name : null;
                     }
                 },
                 thermal_zone_id: {
@@ -266,7 +267,8 @@ const helpers = {
                     readonly: true,
                     private: false,
                     get (space, state) {
-                        return state.models.library.thermal_zones.find(b => b.id === space.thermal_zone_id);
+                        const thermalZone = state.models.library.thermal_zones.find(b => b.id === space.thermal_zone_id);
+                        return thermalZone ? thermalZone.name : null;
                     }
                 },
                 space_type_id: {
@@ -274,7 +276,8 @@ const helpers = {
                     readonly: true,
                     private: false,
                     get (space, state) {
-                        return state.models.library.space_types.find(s => s.id === space.space_type_id);
+                        const spaceType = state.models.library.space_types.find(s => s.id === space.space_type_id);
+                        return spaceType ? spaceType.name : null;
                     }
                 },
                 construction_set_id: {
@@ -282,11 +285,41 @@ const helpers = {
                     readonly: true,
                     private: false,
                     get (space, state) {
-                        return state.models.library.construction_sets.find(c => c.id === space.construction_set_id);
+                        const constructionSet = state.models.library.construction_sets.find(c => c.id === space.construction_set_id);
+                        return constructionSet ? constructionSet.name : null;
                     }
                 }
             }
         }
+    },
+
+
+
+
+    /*
+    * searches local state's library, stories, and spaces for an object with a given id
+    */
+    libraryObjectWithId (state, id) {
+        var result;
+        // search the library
+        for (var type in state.library) {
+            if (state.library.hasOwnProperty(type) && !result) {
+                const items = state.library[type];
+                result = items.find(i => i.id === id);
+            }
+        }
+        // search stories
+        if (!result) {
+            result = state.stories.find(s => s.id === id);
+        }
+        // search spaces
+        if (!result) {
+            for (var i = 0; i < state.stories.length; i++) {
+                const story = state.stories[i];
+                result = result || story.spaces.find(s => s.id === id);
+            }
+        }
+        return result;
     }
 };
 export default helpers;

@@ -1,5 +1,6 @@
 import factory from './factory.js'
 import Validator from './../../utilities/validator.js'
+import helpers from './helpers.js'
 
 export default {
     initStory (context) {
@@ -120,6 +121,13 @@ export default {
 
         // TODO: validation
         context.commit('updateShadingWithData', cleanedPayload);
+    },
+
+    updateObjectWithData (context, payload) {
+        const object = helpers.libraryObjectWithId(context.state, payload.object.id);
+        payload.object = object;
+        // TODO: validation
+        context.commit('updateObjectWithData', payload);
     },
 
     createImageForStory (context, payload) {

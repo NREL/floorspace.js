@@ -33,8 +33,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
         <tbody>
             <tr v-for='object in objects' @click="currentObject = object" :class="currentObject === object ? 'active' : ''">
                 <td v-for="column in columns">
-                    <span>{{displayValueForKey(object, column)}}</span>
-                    <input :value="displayValueForKey(object, column)" @change="setDisplayValueForKey(object, column)" :readonly="valueForKeyIsReadonly(object, column)">
+                    <input :value="displayValueForKey(object, column)" @change="setDisplayValueForKey(object, column, $event.target.value)" :readonly="valueForKeyIsReadonly(object, column)">
                 </td>
             </tr>
         </tbody>
@@ -98,8 +97,15 @@ export default {
         valueForKeyIsReadonly (object, key) {
             return helpers.valueForKeyIsReadonly(this.type, key);
         },
-        setDisplayValueForKey (object, key) {
-            console.log(object, this.$store.state, this.type, key);
+        setDisplayValueForKey (object, key, value) {
+            console.log('models/updateObjectWithData', {
+                object: object,
+                [key]: value
+            });
+            this.$store.dispatch('models/updateObjectWithData', {
+                object: object,
+                [key]: value
+            });
         },
         addField () {
             this.fields.push({

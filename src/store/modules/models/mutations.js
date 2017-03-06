@@ -48,5 +48,11 @@ export default {
         const shading = payload.shading;
         Object.assign(shading, payload);
         delete shading.shading;
+    },
+
+    updateObjectWithData (state, payload) {
+        const object = payload.object;
+        Object.assign(object, payload);
+        delete object.object;
     }
 }
