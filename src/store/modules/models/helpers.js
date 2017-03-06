@@ -9,7 +9,7 @@ const helpers = {
             // return the displayName or null if the key is private
             return this.map[type].keymap[key].private ? null : this.map[type].keymap[key].displayName;
         } else {
-            // custom user defiend key
+            // custom user defined key
             return key;
         }
     },
@@ -22,6 +22,13 @@ const helpers = {
             return this.map[type].keymap[key] && this.map[type].keymap[key].get(object, state);
         } else {
             return object[key];
+        }
+    },
+    valueForKeyIsReadonly (type, key) {
+        if (this.map[type].keymap[key]) {
+            return this.map[type].keymap[key].readonly;
+        } else {
+            return false;
         }
     },
     /*

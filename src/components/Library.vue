@@ -32,9 +32,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
 
         <tbody>
             <tr v-for='object in objects' @click="currentObject = object" :class="currentObject === object ? 'active' : ''">
-
                 <td v-for="column in columns">
                     <span>{{displayValueForKey(object, column)}}</span>
+                    <input :value="displayValueForKey(object, column)" @change="setDisplayValueForKey(object, column)" :readonly="valueForKeyIsReadonly(object, column)">
                 </td>
             </tr>
         </tbody>
@@ -83,7 +83,6 @@ export default {
                     if (!~columns.indexOf(k) && this.displayNameForKey(k)) { columns.push(k); }
                 })
             });
-            console.log(columns);
             return columns;
         },
         type () {
@@ -94,8 +93,14 @@ export default {
         displayTypeForType (type) { return helpers.map[type].displayName; },
         displayNameForKey (key) { return helpers.displayNameForKey(this.type, key); },
         displayValueForKey (object, key) {
-            console.log(object, key);
-            return helpers.displayValueForKey(object, this.$store.state, this.type, key); },
+            return helpers.displayValueForKey(object, this.$store.state, this.type, key);
+        },
+        valueForKeyIsReadonly (object, key) {
+            return helpers.valueForKeyIsReadonly(this.type, key);
+        },
+        setDisplayValueForKey (object, key) {
+            console.log(object, this.$store.state, this.type, key);
+        },
         addField () {
             this.fields.push({
                 label: '',
@@ -163,6 +168,12 @@ export default {
                 }
                 &:last-child {
                     flex-grow: 2;
+                }
+                input {
+                    background-color: inherit;
+                    border: none;
+                    color: $gray-lightest;
+                    font-size: 1rem;
                 }
             }
         }
