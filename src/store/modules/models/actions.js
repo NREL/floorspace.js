@@ -50,12 +50,14 @@ export default {
             space: payload.space,
             story: payload.story
         });
-
-        // destroy geometry associated with the space
-        context.dispatch('geometry/destroyFaceAndDescendents', {
-            face: context.rootGetters['application/currentStoryGeometry'].faces.find(f => f.id === payload.space.face_id),
-            geometry: context.rootGetters['application/currentStoryGeometry']
-        }, { root: true });
+        const face = context.rootGetters['application/currentStoryGeometry'].faces.find(f => f.id === payload.space.face_id);
+        if (face) {
+            // destroy face associated with the space
+            context.dispatch('geometry/destroyFaceAndDescendents', {
+                face: face,
+                geometry: context.rootGetters['application/currentStoryGeometry']
+            }, { root: true });
+        }
     },
 
     destroyShading (context, payload) {
@@ -65,11 +67,14 @@ export default {
         });
 
         // TODO: update destroyFaceAndDescendents to work with shading
-        // destroy geometry associated with the shading
-        context.dispatch('geometry/destroyFaceAndDescendents', {
-            shading: context.rootGetters['application/currentStoryGeometry'].shading.find(f => f.id === payload.shading.face_id),
-            geometry: context.rootGetters['application/currentStoryGeometry']
-        }, { root: true });
+        const face = context.rootGetters['application/currentStoryGeometry'].faces.find(f => f.id === payload.shading.face_id);
+        if (face) {
+            // destroy face associated with the space
+            context.dispatch('geometry/destroyFaceAndDescendents', {
+                face: face,
+                geometry: context.rootGetters['application/currentStoryGeometry']
+            }, { root: true });
+        }
     },
 
     // this is ONLY for library objects and does not include shading, spaces, or stories

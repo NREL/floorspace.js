@@ -290,6 +290,29 @@ const helpers = {
                     }
                 }
             }
+        },
+        shading: {
+            displayName: 'Shading',
+            keymap: {
+                id: {
+                    displayName: 'ID',
+                    readonly: true,
+                    private: false
+                },
+                name: {
+                    displayName: 'Name',
+                    readonly: false,
+                    private: false
+                },
+                handle: {
+                    readonly: false,
+                    private: true
+                },
+                face_id: {
+                    readonly: false,
+                    private: true
+                }
+            }
         }
     },
 

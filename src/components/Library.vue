@@ -13,7 +13,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
         <div class='input-select'>
             <label>Type</label>
             <select v-model='displayType'>
-                <option v-for='(objects, type) in libraryObjects'>{{ displayTypeForType(type) }}</option>
+                <option v-for='(objects, type) in extendedLibrary'>{{ displayTypeForType(type) }}</option>
             </select>
             <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
                 <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
@@ -27,16 +27,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
                 <th v-for="column in columns">
                     <span>{{displayNameForKey(column)}}</span>
                 </th>
-                <th v-if='type!=="spaces" && type!=="stories" && type!=="shading"' class="destroy"></th>
+                <th v-if='type !== "spaces" && type !== "stories" && type !== "shading"' class="destroy"></th>
             </tr>
         </thead>
 
         <tbody>
-            <tr v-for='object in objects' @click="currentObject = object" :class="currentObject === object ? 'active' : ''">
+            <tr v-for='object in objects'>
                 <td v-for="column in columns">
                     <input :value="displayValueForKey(object, column)" @change="setDisplayValueForKey(object, column, $event.target.value)" :readonly="valueForKeyIsReadonly(object, column)">
                 </td>
-                <td v-if='type!=="spaces" && type!=="stories" && type!=="shading"' class="destroy">
+                <td v-if='type !== "spaces" && type !== "stories" && type !== "shading"' class="destroy">
                     <svg @click="destroyObject" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
                         <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
                     </svg>
@@ -49,8 +49,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
 </template>
 
 <script>
-import { mapState } from 'vuex'
-import factory from './../store/modules/models/factory'
 import helpers from './../store/modules/models/helpers'
 
 
@@ -58,28 +56,38 @@ export default {
     name: 'library',
     data() {
         return {
-            currentObject: null,
-            displayType: null,
-            objectName: null,
-            fields: []
+            displayType: null
         };
     },
     mounted () {
-        this.displayType = this.displayTypeForType(Object.keys(this.libraryObjects)[0]);
+        this.displayType = this.displayTypeForType(Object.keys(this.extendedLibrary)[0]);
     },
     computed: {
-        libraryObjects () {
-            const lib = JSON.parse(JSON.stringify(this.$store.state.models.library));
-            lib.stories = this.$store.state.models.stories;
-            lib.spaces = [];
+        /*
+        * deep copy of the state.models.library extended to include stories, spaces, and shading
+        */
+        extendedLibrary () {
+            // create a deep copy to avoid mutating the store's library
+            const libClone = JSON.parse(JSON.stringify(this.$store.state.models.library));
 
+            var spaces = [],
+            shading = [];
             for (var i = 0; i < this.$store.state.models.stories.length; i++) {
-                lib.spaces = lib.spaces.concat(this.$store.state.models.stories[i].spaces);
+                spaces = spaces.concat(this.$store.state.models.stories[i].spaces);
+                shading = shading.concat(this.$store.state.models.stories[i].shading);
             }
-            return lib;
+
+            // extend the library clone with stories, spaces, and shading
+            return {
+                ...libClone,
+                stories: this.$store.state.models.stories,
+                spaces: spaces,
+                shading: shading
+            }
         },
+        //
         objects () {
-            return this.libraryObjects[this.type] || [];
+            return this.extendedLibrary[this.type] || [];
         },
         columns () {
             const columns = [];
@@ -112,22 +120,6 @@ export default {
         destroyObject (object) {
             this.$store.dispatch('models/destroyObject', {
                 object: object
-            });
-        },
-        addField () {
-            this.fields.push({
-                label: '',
-                value: ''
-            });
-        },
-        initObject () {
-            var newObject = new helpers.map[this.type].init(this.objectName);
-            this.fields.forEach((field) => {
-                newObject[field.label] = field.value;
-            })
-            this.$store.dispatch('models/initObjectWithType', {
-                type: this.type,
-                object: newObject
             });
         }
     }

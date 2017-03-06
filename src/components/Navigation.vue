@@ -120,13 +120,13 @@ export default {
                     story: this.$store.state.application.currentSelections.story
                 });
                 this.currentStory = this.stories[0];
-            } else if (this.tab === 'spaces' && this.spaces.length > 1) {
+            } else if (this.tab === 'spaces') {
                 this.$store.dispatch('models/destroySpace', {
                     space: this.$store.state.application.currentSelections.space,
                     story: this.$store.state.application.currentSelections.story
                 });
                 this.currentSpace = this.spaces[0];
-            } else if (this.tab === 'shading' && this.shading.length > 1) {
+            } else if (this.tab === 'shading') {
                 this.$store.dispatch('models/destroyShading', {
                     shading: this.$store.state.application.currentSelections.shading,
                     story: this.$store.state.application.currentSelections.story
