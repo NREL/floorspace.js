@@ -25,7 +25,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
         <thead>
             <tr>
                 <th v-for="column in columns">
-                    <span>{{column}}</span>
+                    <span>{{displayNameForKey(column)}}</span>
                 </th>
             </tr>
         </thead>
@@ -34,7 +34,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
             <tr v-for='object in objects' @click="currentObject = object" :class="currentObject === object ? 'active' : ''">
 
                 <td v-for="column in columns">
-                    <span>{{object.hasOwnProperty(column) ? object[column] : '--'}}</span>
+                    <span>{{displayValueForKey(object, column)}}</span>
                 </td>
             </tr>
         </tbody>
@@ -67,27 +67,35 @@ export default {
             const lib = JSON.parse(JSON.stringify(this.$store.state.models.library));
             lib.stories = this.$store.state.models.stories;
             lib.spaces = [];
+
             for (var i = 0; i < this.$store.state.models.stories.length; i++) {
-                lib.spaces.concat(this.$store.state.models.stories[i].spaces);
+                lib.spaces = lib.spaces.concat(this.$store.state.models.stories[i].spaces);
             }
             return lib;
         },
         objects () {
-            return this.libraryObjects[this.typeForDisplayType(this.displayType)] || [];
+            return this.libraryObjects[this.type] || [];
         },
         columns () {
             const columns = [];
             this.objects.forEach((o) => {
                 Object.keys(o).forEach((k) => {
-                    if (!~columns.indexOf(k)) { columns.push(k); }
+                    if (!~columns.indexOf(k) && this.displayNameForKey(k)) { columns.push(k); }
                 })
             });
+            console.log(columns);
             return columns;
+        },
+        type () {
+            return Object.keys(helpers.map).find(k => helpers.map[k].displayName === this.displayType);
         }
     },
     methods: {
         displayTypeForType (type) { return helpers.map[type].displayName; },
-        typeForDisplayType (displayType) { return Object.keys(helpers.map).find(k => helpers.map[k].displayName === this.displayType); },
+        displayNameForKey (key) { return helpers.displayNameForKey(this.type, key); },
+        displayValueForKey (object, key) {
+            console.log(object, key);
+            return helpers.displayValueForKey(object, this.$store.state, this.type, key); },
         addField () {
             this.fields.push({
                 label: '',
@@ -95,13 +103,12 @@ export default {
             });
         },
         initObject () {
-            const type = this.typeForDisplayType(this.displayType);
-            var newObject = new helpers.map[type].init(this.objectName);
+            var newObject = new helpers.map[this.type].init(this.objectName);
             this.fields.forEach((field) => {
                 newObject[field.label] = field.value;
             })
             this.$store.dispatch('models/initObjectWithType', {
-                type: type,
+                type: this.type,
                 object: newObject
             });
         }
