@@ -59,8 +59,8 @@ export default {
     },
 
     destroyShading (context, payload) {
-        context.commit('destroySpace', {
-            space: payload.space,
+        context.commit('destroyShading', {
+            shading: payload.shading,
             story: payload.story
         });
 
@@ -70,6 +70,13 @@ export default {
             shading: context.rootGetters['application/currentStoryGeometry'].shading.find(f => f.id === payload.shading.face_id),
             geometry: context.rootGetters['application/currentStoryGeometry']
         }, { root: true });
+    },
+
+    // this is ONLY for library objects and does not include shading, spaces, or stories
+    destroyObject (context, payload) {
+        context.commit('destroyObject', {
+            object: payload.object
+        });
     },
 
     updateStoryWithData (context, payload) {

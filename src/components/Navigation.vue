@@ -176,9 +176,15 @@ export default {
             &.active {
                 background-color: $gray-medium-light;
                 svg {
+                    cursor: pointer;
                     height: 1rem;
                     path {
                         fill: $gray-lightest;
+                    }
+                    &:hover {
+                        path {
+                            fill: $primary;
+                        }
                     }
                 }
             }

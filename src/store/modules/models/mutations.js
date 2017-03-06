@@ -1,3 +1,5 @@
+import helpers from './helpers.js'
+
 export default {
     initStory (state, payload) { state.stories.push(payload.story); },
     initSpace (state, payload) { payload.story.spaces.push(payload.space); },
@@ -23,6 +25,16 @@ export default {
         state.stories.splice(state.stories.findIndex((s) => {
             return s.id === payload.story.id;
         }), 1);
+    },
+    destroyObject (state, payload) {
+        // search the library
+        for (var type in state.library) {
+            if (state.library.hasOwnProperty(type)) {
+                state.library[type].splice(state.library[type].findIndex((i) => {
+                    return i.id === payload.object.id;
+                }), 1)
+            }
+        }
     },
 
     updateStoryWithData (state, payload) {

@@ -30,13 +30,19 @@
             text-transform: uppercase;
         }
         svg.close {
-            position: absolute;
+            cursor: pointer;
             height: 1.25rem;
+            position: absolute;
             top: .5rem;
             right: .5rem;
             width: 1.5rem;
             path {
-                fill: $primary;
+                fill: $gray-lightest;
+            }
+            &:hover {
+                path {
+                    fill: $primary;
+                }
             }
         }
     }
