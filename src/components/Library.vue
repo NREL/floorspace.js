@@ -12,8 +12,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
         <h1>Object Library</h1>
         <div class='input-select'>
             <label>Type</label>
-            <select v-model='displayType'>
-                <option v-for='(objects, type) in extendedLibrary'>{{ displayTypeForType(type) }}</option>
+            <select v-model='type'>
+                <option v-for='(objects, type) in extendedLibrary' :value="type">{{ displayTypeForType(type) }}</option>
             </select>
             <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
                 <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
@@ -27,17 +27,17 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
                 <th v-for="column in columns">
                     <span>{{displayNameForKey(column)}}</span>
                 </th>
-                <th v-if='type !== "spaces" && type !== "stories" && type !== "shading"' class="destroy"></th>
+                <th class="destroy"></th>
             </tr>
         </thead>
 
         <tbody>
-            <tr v-for='object in objects'>
+            <tr v-for='object in displayObjects'>
                 <td v-for="column in columns">
-                    <input :value="displayValueForKey(object, column)" @change="setDisplayValueForKey(object, column, $event.target.value)" :readonly="valueForKeyIsReadonly(object, column)">
+                    <input :value="displayValueForKey(object, column)" @change="setDisplayValueForKey(object, column, $event.target.value)" :readonly="keyIsReadonly(object, column)">
                 </td>
-                <td v-if='type !== "spaces" && type !== "stories" && type !== "shading"' class="destroy">
-                    <svg @click="destroyObject" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                <td class="destroy">
+                    <svg @click="destroyObject(object)" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
                         <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
                     </svg>
                 </td>
@@ -56,11 +56,11 @@ export default {
     name: 'library',
     data() {
         return {
-            displayType: null
+            type: null
         };
     },
     mounted () {
-        this.displayType = this.displayTypeForType(Object.keys(this.extendedLibrary)[0]);
+        this.type = Object.keys(this.extendedLibrary)[0];
     },
     computed: {
         /*
@@ -71,7 +71,7 @@ export default {
             const libClone = JSON.parse(JSON.stringify(this.$store.state.models.library));
 
             var spaces = [],
-            shading = [];
+                shading = [];
             for (var i = 0; i < this.$store.state.models.stories.length; i++) {
                 spaces = spaces.concat(this.$store.state.models.stories[i].spaces);
                 shading = shading.concat(this.$store.state.models.stories[i].shading);
@@ -85,42 +85,99 @@ export default {
                 shading: shading
             }
         },
-        //
-        objects () {
+
+        /*
+        * return all objects in the extended library for a given type to be displayed at one time
+        */
+        displayObjects () {
             return this.extendedLibrary[this.type] || [];
         },
+
+        /*
+        * return all unique non private keys for the set of displayObjects
+        */
         columns () {
             const columns = [];
-            this.objects.forEach((o) => {
+            this.displayObjects.forEach((o) => {
                 Object.keys(o).forEach((k) => {
-                    if (!~columns.indexOf(k) && this.displayNameForKey(k)) { columns.push(k); }
+                    //
+                    if (!~columns.indexOf(k) && !this.keyIsPrivate(this.type, k)) { columns.push(k); }
                 })
             });
+            console.log(columns)
             return columns;
-        },
-        type () {
-            return Object.keys(helpers.map).find(k => helpers.map[k].displayName === this.displayType);
         }
     },
     methods: {
+        /*
+        * returns the formatted displayName for types defined in the library config
+        */
         displayTypeForType (type) { return helpers.map[type].displayName; },
+
+        /*
+        * returns the formatted displayName for keys defined in the library config
+        * only returns null for private keys - use to check if a key is private
+        * custom user defined keys which do not exist in the config keymap will be returned unchanged
+        */
         displayNameForKey (key) { return helpers.displayNameForKey(this.type, key); },
+
+        /*
+        * returns the readonly/private properties for keys defined in the library config
+        * returns false for custom user defined keys
+        */
+        keyIsReadonly (object, key) { return helpers.keyIsReadonly(this.type, key); },
+        keyIsPrivate (object, key) { return helpers.keyIsPrivate(this.type, key); },
+
+        /*
+        * return the value for a key on an object
+        * invokes the getter method on keys defined in the keymap
+        * returns the raw string value at obj[key] for custom user defined keys
+        */
         displayValueForKey (object, key) {
             return helpers.displayValueForKey(object, this.$store.state, this.type, key);
         },
-        valueForKeyIsReadonly (object, key) {
-            return helpers.valueForKeyIsReadonly(this.type, key);
-        },
+
+        /*
+        * dispatch an update action for the supplied object
+        * TODO: add setters and validation to the keymap
+        */
         setDisplayValueForKey (object, key, value) {
-            this.$store.dispatch('models/updateObjectWithData', {
-                object: object,
-                [key]: value
-            });
+            const result = helpers.setValueForKey(object, this.$store, this.type, key, value);
         },
+
+        /*
+        * destroy a library object
+        * dispatches destroyStory, destroySpace, destroyShading, or destroyObject depending on the object's type
+        */
         destroyObject (object) {
-            this.$store.dispatch('models/destroyObject', {
-                object: object
-            });
+            if (this.type === 'stories' && this.$store.state.models.stories.length > 1) {
+                this.$store.dispatch('models/destroyStory', {
+                    story: object
+                });
+                this.currentStory = this.$store.state.models.stories[0];
+            } else if (this.type === 'spaces') {
+                // look up the story referencing the space to be destroyed
+                const storyForSpace = this.$store.state.models.stories.find((story) => {
+                    return story.spaces.find(s => s.id === object.id);
+                });
+                this.$store.dispatch('models/destroySpace', {
+                    space: object,
+                    story: storyForSpace
+                });
+            } else if (this.type === 'shading') {
+                // look up the story referencing the shading to be destroyed
+                const storyForShading = this.$store.state.models.stories.find((story) => {
+                    return story.shading.find(s => s.id === object.id);
+                });
+                this.$store.dispatch('models/destroyShading', {
+                    shading: object,
+                    story: storyForShading
+                });
+            } else {
+                this.$store.dispatch('models/destroyObject', {
+                    object: object
+                });
+            }
         }
     }
 }

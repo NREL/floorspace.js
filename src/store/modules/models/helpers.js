@@ -21,17 +21,64 @@ const helpers = {
     */
     displayValueForKey (object, state, type, key) {
         if (this.map[type].keymap[key] && this.map[type].keymap[key].get) {
-            return this.map[type].keymap[key] && this.map[type].keymap[key].get(object, state);
+            return this.map[type].keymap[key].get(object, state);
         } else {
             return object[key];
         }
     },
-    valueForKeyIsReadonly (type, key) {
-        if (this.map[type].keymap[key]) {
-            return this.map[type].keymap[key].readonly;
-        } else {
-            return false;
+
+    /*
+    * dispatches an action to set the value for a key on an object
+    * if a validator is defined for the object type + key being changed, call the validator before dispatching the action
+    * if validation fails, return  { success: false, error: "validator error message" }
+    * if validation passes or no validator exists, return { success: true }
+    */
+    setValueForKey (object, store, type, key, value) {
+        const result = {
+            success: true
+        };
+
+        // if a validator is defined for the key, run it and store the result
+        if (this.map[type].keymap[key] && this.map[type].keymap[key].validator) {
+            const validationResult = this.map[type].keymap[key].validator(object, store, value);
+            result.success = validationResult.success;
+            if (!validationResult.success) {
+                result.error = validationResult.error;
+                return result;
+            }
         }
+
+        // dispatch the correct action to update the specified type
+        if (type === 'stories') {
+            store.dispatch('models/updateStoryWithData', {
+                story: object,
+                [key]: value
+            });
+        } else if (type === 'spaces') {
+            store.dispatch('models/updateSpaceWithData', {
+                space: object,
+                [key]: value
+            });
+        } else if (type === 'shading') {
+            store.dispatch('models/updateShadingWithData', {
+                shading: object,
+                [key]: value
+            });
+        } else {
+            store.dispatch('models/updateObjectWithData', {
+                object: object,
+                [key]: value
+            });
+        }
+
+        return result;
+    },
+
+    keyIsPrivate (type, key) {
+        return this.map[type].keymap[key] ? this.map[type].keymap[key].private : false;
+    },
+    keyIsReadonly (type, key) {
+        return this.map[type].keymap[key] ? this.map[type].keymap[key].readonly : false;
     },
     /*
     * each library object type has
