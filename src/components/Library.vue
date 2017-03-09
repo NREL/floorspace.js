@@ -8,6 +8,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
 
 <template>
 <section id='library'>
+
     <header>
         <h1>Object Library</h1>
         <div class='input-select'>
@@ -32,9 +33,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
         </thead>
 
         <tbody>
-            <tr v-for='object in displayObjects'>
-                <td v-for="column in columns">
-                    <input :value="displayValueForKey(object, column)" @change="setDisplayValueForKey(object, column, $event.target.value)" :readonly="keyIsReadonly(object, column)">
+            <tr v-for='object in displayObjects' @click="currentObject = object" :class="classForObjectRow(object)">
+                <td v-for="column in columns" @mouseover="toggleError(object, column, true)" @mouseout="toggleError(object, column, false)">
+                    <div v-if="errorForObjectAndKey(object, column) && errorForObjectAndKey(object, column).visible " class="tooltip-error">
+                        <svg data-v-1a7b2245="" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path data-v-1a7b2245="" d="M.5 0v14l11-7-11-7z"></path></svg>
+                        <span>{{errorForObjectAndKey(object, column).message}}</span>
+                    </div>
+                    <input :value="displayValueForKey(object, column)" @change="setValueForKey($event, object, column, $event.target.value)" :readonly="keyIsReadonly(object, column)">
                 </td>
                 <td class="destroy">
                     <svg @click="destroyObject(object)" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
@@ -56,13 +61,30 @@ export default {
     name: 'library',
     data() {
         return {
-            type: null
+            type: null,
+            validationErrors: []
         };
     },
     mounted () {
         this.type = Object.keys(this.extendedLibrary)[0];
+
     },
     computed: {
+        currentObject: {
+            get () { return this.$store.state.application.currentSelections.space ||
+                this.$store.state.application.currentSelections.shading ||
+                this.$store.state.application.currentSelections.story; },
+            set (object) {
+                if (this.type === 'stories') {
+                    this.$store.dispatch('application/setCurrentStory', { 'story': object });
+                } else if (this.type === 'spaces') {
+                    this.$store.dispatch('application/setCurrentSpace', { 'space': object });
+                } else if (this.type === 'shading') {
+                    this.$store.dispatch('application/setCurrentShading', { 'shading': object });
+                }
+            }
+        },
+
         /*
         * deep copy of the state.models.library extended to include stories, spaces, and shading
         */
@@ -100,11 +122,9 @@ export default {
             const columns = [];
             this.displayObjects.forEach((o) => {
                 Object.keys(o).forEach((k) => {
-                    //
                     if (!~columns.indexOf(k) && !this.keyIsPrivate(this.type, k)) { columns.push(k); }
                 })
             });
-            console.log(columns)
             return columns;
         }
     },
@@ -139,12 +159,35 @@ export default {
 
         /*
         * dispatch an update action for the supplied object
-        * TODO: add setters and validation to the keymap
+        * store errors if validation fails
         */
-        setDisplayValueForKey (object, key, value) {
+        setValueForKey (event, object, key, value) {
+            // must update the object so that the input field value does not reset
+            object[key] = value;
             const result = helpers.setValueForKey(object, this.$store, this.type, key, value);
+            if (!result.success) {
+                this.validationErrors.push({
+                    object_id: object.id,
+                    key: key,
+                    message: result.error,
+                    visible: false
+                });
+            }
         },
-
+        errorForObjectAndKey (object, key) {
+            if (key) {
+                return this.validationErrors.find(e => e.object_id === object.id && e.key === key);
+            } else {
+                return this.validationErrors.find(e => e.object_id === object.id);
+            }
+        },
+        toggleError(object, key, show) {
+            const error = this.errorForObjectAndKey(object, key);
+            if (error) {
+                console.log(error.message);
+                error.visible = show;
+            }
+        },
         /*
         * destroy a library object
         * dispatches destroyStory, destroySpace, destroyShading, or destroyObject depending on the object's type
@@ -154,7 +197,6 @@ export default {
                 this.$store.dispatch('models/destroyStory', {
                     story: object
                 });
-                this.currentStory = this.$store.state.models.stories[0];
             } else if (this.type === 'spaces') {
                 // look up the story referencing the space to be destroyed
                 const storyForSpace = this.$store.state.models.stories.find((story) => {
@@ -178,6 +220,21 @@ export default {
                     object: object
                 });
             }
+        },
+        classForObjectRow (object) {
+            var classList = "";
+            if (this.errorForObjectAndKey(object, null)) {
+                classList += " error"
+            }
+            if (this.currentObject === object) {
+                classList += " current"
+            }
+            return classList;
+        }
+    },
+    watch: {
+        displayObjects () {
+            this.validationErrors = [];
         }
     }
 }
@@ -190,6 +247,7 @@ export default {
     border-top: 1px solid $gray-medium;
     overflow: scroll;
     position: relative;
+
     header {
         display: flex;
         padding: 0 2.5rem;
@@ -217,14 +275,41 @@ export default {
             &:nth-of-type(odd) {
                 background-color: $gray-medium-dark;
             }
-            &.active {
+            &.current input{
                 color: $primary;
             }
         }
         thead tr, tbody tr {
+
+            &.error {
+                background: rgba($primary, .5);
+            }
+
+            .tooltip-error {
+                bottom: 3rem;
+                background-color: $gray-darkest;
+                border: 1px solid $primary;
+                color: $gray-lightest;
+                left: 3rem;
+                border-radius: .25rem;
+                padding: .5rem 1rem;
+                position: absolute;
+                svg {
+                    bottom: -0.7rem;
+                    height: .75rem;
+                    left: 0.5rem;
+                    position: absolute;
+                    transform: rotate(90deg);
+                    path {
+                        fill: $primary;
+                    }
+                }
+            }
             th, td {
                 text-align: left;
                 padding: 0 1rem;
+                position: relative;
+
                 &:first-child {
                     padding-left: 2.5rem;
                 }
@@ -248,7 +333,7 @@ export default {
                     }
                 }
                 input {
-                    background-color: inherit;
+                    background-color: rgba(0,0,0,0);
                     border: none;
                     color: $gray-lightest;
                     font-size: 1rem;

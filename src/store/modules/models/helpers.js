@@ -30,8 +30,8 @@ const helpers = {
     /*
     * dispatches an action to set the value for a key on an object
     * if a validator is defined for the object type + key being changed, call the validator before dispatching the action
-    * if validation fails, return  { success: false, error: "validator error message" }
-    * if validation passes or no validator exists, return { success: true }
+    * if validation fails, return { success: false, error: "validator error message" }
+    * if validation passes or no validator exists (custom user defined keys), return { success: true }
     */
     setValueForKey (object, store, type, key, value) {
         const result = {

@@ -17,7 +17,16 @@ const map = {
             name: {
                 displayName: 'Name',
                 readonly: false,
-                private: false
+                private: false,
+                validator (object, store, value) {
+                    if (!value.length) {
+                        return {
+                            success: false,
+                            error: "Names must be at least 5 characters long."
+                        };
+                    }
+                    return { success: true };
+                }
             }
         },
         init: factory.BuildingUnit
@@ -33,7 +42,10 @@ const map = {
             name: {
                 displayName: 'Name',
                 readonly: false,
-                private: false
+                private: false,
+                validator (object, store, value) {
+                    return { success: true };
+                }
             }
         },
         init: factory.ThermalZone
@@ -49,7 +61,10 @@ const map = {
             name: {
                 displayName: 'Name',
                 readonly: false,
-                private: false
+                private: false,
+                validator (object, store, value) {
+                    return { success: true };
+                }
             }
         },
         init: factory.SpaceType
@@ -65,7 +80,10 @@ const map = {
             name: {
                 displayName: 'Name',
                 readonly: false,
-                private: false
+                private: false,
+                validator (object, store, value) {
+                    return { success: true };
+                }
             }
         },
         init: factory.ConstructionSet
@@ -81,7 +99,10 @@ const map = {
             name: {
                 displayName: 'Name',
                 readonly: false,
-                private: false
+                private: false,
+                validator (object, store, value) {
+                    return { success: true };
+                }
             }
         },
         init: factory.Construction
@@ -97,7 +118,10 @@ const map = {
             name: {
                 displayName: 'Name',
                 readonly: false,
-                private: false
+                private: false,
+                validator (object, store, value) {
+                    return { success: true };
+                }
             }
         },
         init: factory.Window
@@ -113,7 +137,10 @@ const map = {
             name: {
                 displayName: 'Name',
                 readonly: false,
-                private: false
+                private: false,
+                validator (object, store, value) {
+                    return { success: true };
+                }
             }
         },
         init: factory.DaylightingControl
@@ -129,30 +156,42 @@ const map = {
             name: {
                 displayName: 'Name',
                 readonly: false,
-                private: false
+                private: false,
+                validator (object, store, value) {
+                    return { success: true };
+                }
             },
             handle: {
-                readonly: false,
+                readonly: true,
                 private: true
             },
             geometry_id: {
-                readonly: false,
+                readonly: true,
                 private: true
             },
             below_floor_plenum_height: {
                 displayName: 'Below Floor Plenum Height',
                 readonly: false,
-                private: false
+                private: false,
+                validator (object, store, value) {
+                    return { success: true };
+                }
             },
             floor_to_ceiling_height: {
                 displayName: 'Floor To Ceiling Height',
                 readonly: false,
-                private: false
+                private: false,
+                validator (object, store, value) {
+                    return { success: true };
+                }
             },
             multiplier: {
                 displayName: 'Multiplier',
                 readonly: false,
-                private: false
+                private: false,
+                validator (object, store, value) {
+                    return { success: true };
+                }
             },
             spaces: {
                 displayName: 'Spaces',
@@ -168,9 +207,6 @@ const map = {
                 private: false,
                 get (story, state) {
                     return story.windows.map(w => w.name).join(', ');
-                },
-                set () {
-
                 }
             },
             shading: {
@@ -210,14 +246,17 @@ const map = {
             name: {
                 displayName: 'Name',
                 readonly: false,
-                private: false
+                private: false,
+                validator (object, store, value) {
+                    return { success: true };
+                }
             },
             handle: {
-                readonly: false,
+                readonly: true,
                 private: true
             },
             face_id: {
-                readonly: false,
+                readonly: true,
                 private: true
             },
             daylighting_controls: {
@@ -277,14 +316,17 @@ const map = {
             name: {
                 displayName: 'Name',
                 readonly: false,
-                private: false
+                private: false,
+                validator (object, store, value) {
+                    return { success: true };
+                }
             },
             handle: {
-                readonly: false,
+                readonly: true,
                 private: true
             },
             face_id: {
-                readonly: false,
+                readonly: true,
                 private: true
             }
         }
