@@ -1,4 +1,6 @@
 import factory from './factory.js'
+import validators from './validators'
+
 /*
 * each library object type has
 * displayName - for use in the type dropdown
@@ -18,15 +20,7 @@ const map = {
                 displayName: 'Name',
                 readonly: false,
                 private: false,
-                validator (object, store, value) {
-                    if (!value.length) {
-                        return {
-                            success: false,
-                            error: "Names must be at least 5 characters long."
-                        };
-                    }
-                    return { success: true };
-                }
+                validator: validators.name
             }
         },
         init: factory.BuildingUnit
@@ -43,9 +37,7 @@ const map = {
                 displayName: 'Name',
                 readonly: false,
                 private: false,
-                validator (object, store, value) {
-                    return { success: true };
-                }
+                validator: validators.name
             }
         },
         init: factory.ThermalZone
@@ -62,9 +54,7 @@ const map = {
                 displayName: 'Name',
                 readonly: false,
                 private: false,
-                validator (object, store, value) {
-                    return { success: true };
-                }
+                validator: validators.name
             }
         },
         init: factory.SpaceType
@@ -81,9 +71,7 @@ const map = {
                 displayName: 'Name',
                 readonly: false,
                 private: false,
-                validator (object, store, value) {
-                    return { success: true };
-                }
+                validator: validators.name
             }
         },
         init: factory.ConstructionSet
@@ -100,9 +88,7 @@ const map = {
                 displayName: 'Name',
                 readonly: false,
                 private: false,
-                validator (object, store, value) {
-                    return { success: true };
-                }
+                validator: validators.name
             }
         },
         init: factory.Construction
@@ -119,9 +105,7 @@ const map = {
                 displayName: 'Name',
                 readonly: false,
                 private: false,
-                validator (object, store, value) {
-                    return { success: true };
-                }
+                validator: validators.name
             }
         },
         init: factory.Window
@@ -138,9 +122,7 @@ const map = {
                 displayName: 'Name',
                 readonly: false,
                 private: false,
-                validator (object, store, value) {
-                    return { success: true };
-                }
+                validator: validators.name
             }
         },
         init: factory.DaylightingControl
@@ -157,9 +139,7 @@ const map = {
                 displayName: 'Name',
                 readonly: false,
                 private: false,
-                validator (object, store, value) {
-                    return { success: true };
-                }
+                validator: validators.name
             },
             handle: {
                 readonly: true,
@@ -173,25 +153,19 @@ const map = {
                 displayName: 'Below Floor Plenum Height',
                 readonly: false,
                 private: false,
-                validator (object, store, value) {
-                    return { success: true };
-                }
+                validator: validators.name
             },
             floor_to_ceiling_height: {
                 displayName: 'Floor To Ceiling Height',
                 readonly: false,
                 private: false,
-                validator (object, store, value) {
-                    return { success: true };
-                }
+                validator: validators.name
             },
             multiplier: {
                 displayName: 'Multiplier',
                 readonly: false,
                 private: false,
-                validator (object, store, value) {
-                    return { success: true };
-                }
+                validator: validators.name
             },
             spaces: {
                 displayName: 'Spaces',
@@ -247,9 +221,7 @@ const map = {
                 displayName: 'Name',
                 readonly: false,
                 private: false,
-                validator (object, store, value) {
-                    return { success: true };
-                }
+                validator: validators.name
             },
             handle: {
                 readonly: true,
@@ -317,9 +289,7 @@ const map = {
                 displayName: 'Name',
                 readonly: false,
                 private: false,
-                validator (object, store, value) {
-                    return { success: true };
-                }
+                validator: validators.name
             },
             handle: {
                 readonly: true,

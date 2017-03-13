@@ -4,22 +4,22 @@ import map from './libconfig.js'
 const helpers = {
     /*
     * returns the displayName for a given key on an object type
-    * custom user defined attributes will not included in the keymap - the unchanged keyname will be returned
+    * return null if the key is private
+    * return the unchanged keyname for custom user defined keys
     */
     displayNameForKey (type, key) {
         if (this.map[type].keymap[key]) {
-            // return the displayName or null if the key is private
             return this.map[type].keymap[key].private ? null : this.map[type].keymap[key].displayName;
         } else {
-            // custom user defined key
             return key;
         }
     },
+
     /*
-    * returns the display value for a given key on an object type
-    * if the keymap includes a get () method for the key, its return value will be used
+    * returns the value for a given key on an object type
+    * if the keymap includes a get() method for the key, its return value will be used
     */
-    displayValueForKey (object, state, type, key) {
+    valueForKey (object, state, type, key) {
         if (this.map[type].keymap[key] && this.map[type].keymap[key].get) {
             return this.map[type].keymap[key].get(object, state);
         } else {

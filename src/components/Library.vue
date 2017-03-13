@@ -9,8 +9,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
 <template>
 <section id='library'>
 
-    <header>
-        <h1>Object Library</h1>
+    <header>{{sortDescending ? 'v' : '^'}} {{sortKey}}
+        <div class="input-text">
+            <label>Search</label>
+            <input v-model="search">
+        </div>
         <div class='input-select'>
             <label>Type</label>
             <select v-model='type'>
@@ -25,8 +28,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
     <table class="table">
         <thead>
             <tr>
-                <th v-for="column in columns">
-                    <span>{{displayNameForKey(column)}}</span>
+                <th v-for="column in columns" @click="sortBy(column)">
+                    <span>
+                        <span>{{ displayNameForKey(column)}}</span>
+                        <svg v-show="column === sortKey && sortDescending" viewBox="0 0 10 3" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0 .5l5 5 5-5H0z"/>
+                        </svg>
+                        <svg v-show="column === sortKey && !sortDescending" viewBox="0 0 10 3" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0 5.5l5-5 5 5H0z"/>
+                        </svg>
+                    </span>
                 </th>
                 <th class="destroy"></th>
             </tr>
@@ -36,10 +47,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
             <tr v-for='object in displayObjects' @click="currentObject = object" :class="classForObjectRow(object)">
                 <td v-for="column in columns" @mouseover="toggleError(object, column, true)" @mouseout="toggleError(object, column, false)">
                     <div v-if="errorForObjectAndKey(object, column) && errorForObjectAndKey(object, column).visible " class="tooltip-error">
-                        <svg data-v-1a7b2245="" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path data-v-1a7b2245="" d="M.5 0v14l11-7-11-7z"></path></svg>
-                        <span>{{errorForObjectAndKey(object, column).message}}</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14">
+                            <path d="M.5 0v14l11-7-11-7z"></path>
+                        </svg>
+                        <span>{{ errorForObjectAndKey(object, column).message }}</span>
                     </div>
-                    <input :value="displayValueForKey(object, column)" @change="setValueForKey($event, object, column, $event.target.value)" :readonly="keyIsReadonly(object, column)">
+                    <input :value="valueForKey(object, column)" @change="setValueForKey($event, object, column, $event.target.value)" :readonly="keyIsReadonly(object, column)">
                 </td>
                 <td class="destroy">
                     <svg @click="destroyObject(object)" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
@@ -56,20 +69,25 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
 <script>
 import helpers from './../store/modules/models/helpers'
 
-
 export default {
     name: 'library',
     data() {
         return {
+            search: '',
+            sortKey: 'id',
+            sortDescending: true,
             type: null,
             validationErrors: []
         };
     },
     mounted () {
         this.type = Object.keys(this.extendedLibrary)[0];
-
     },
     computed: {
+        /*
+        * returns the currently selected object, giving lowest priority to stories because a story must be selected to select a lower level object
+        * when set, dispatches an action to update the application's currentSelections in the store
+        */
         currentObject: {
             get () { return this.$store.state.application.currentSelections.space ||
                 this.$store.state.application.currentSelections.shading ||
@@ -86,12 +104,10 @@ export default {
         },
 
         /*
-        * deep copy of the state.models.library extended to include stories, spaces, and shading
+        * state.models.library extended to include stories, spaces, and shading
+        * objects are deep copies to avoid mutating the store
         */
         extendedLibrary () {
-            // create a deep copy to avoid mutating the store's library
-            const libClone = JSON.parse(JSON.stringify(this.$store.state.models.library));
-
             var spaces = [],
                 shading = [];
             for (var i = 0; i < this.$store.state.models.stories.length; i++) {
@@ -99,20 +115,27 @@ export default {
                 shading = shading.concat(this.$store.state.models.stories[i].shading);
             }
 
-            // extend the library clone with stories, spaces, and shading
-            return {
-                ...libClone,
+            return JSON.parse(JSON.stringify({
+                ...this.$store.state.models.library,
                 stories: this.$store.state.models.stories,
                 spaces: spaces,
                 shading: shading
-            }
+            }));
         },
 
         /*
         * return all objects in the extended library for a given type to be displayed at one time
+        * filters by the search term
+        * TODO: sorts
+        * objects are deep copies to avoid mutating the store
         */
         displayObjects () {
-            return this.extendedLibrary[this.type] || [];
+            const objects = this.extendedLibrary[this.type] || [];
+            return objects
+                .filter( o => Object.keys(o).find( k => ~o[k].indexOf(this.search) ) )
+                .sort((a, b) => {
+                    return this.sortDescending ? a[this.sortKey] > b[this.sortKey] : a[this.sortKey] < b[this.sortKey]
+                });
         },
 
         /*
@@ -149,12 +172,11 @@ export default {
         keyIsPrivate (object, key) { return helpers.keyIsPrivate(this.type, key); },
 
         /*
-        * return the value for a key on an object
-        * invokes the getter method on keys defined in the keymap
+        * returns the result of the getter defined for the key if one exists, otherwise
         * returns the raw string value at obj[key] for custom user defined keys
         */
-        displayValueForKey (object, key) {
-            return helpers.displayValueForKey(object, this.$store.state, this.type, key);
+        valueForKey (object, key) {
+            return helpers.valueForKey(object, this.$store.state, this.type, key);
         },
 
         /*
@@ -184,7 +206,6 @@ export default {
         toggleError(object, key, show) {
             const error = this.errorForObjectAndKey(object, key);
             if (error) {
-                console.log(error.message);
                 error.visible = show;
             }
         },
@@ -230,12 +251,18 @@ export default {
                 classList += " current"
             }
             return classList;
+        },
+
+        sortBy (key) {
+            this.sortDescending = this.sortKey === key ? !this.sortDescending : true;
+            this.sortKey = key;
         }
     },
     watch: {
         displayObjects () {
             this.validationErrors = [];
         }
+
     }
 }
 </script>
@@ -250,13 +277,10 @@ export default {
 
     header {
         display: flex;
-        padding: 0 2.5rem;
-        h1 {
-            flex-grow: 3;
-        }
-        .input-select {
-            float: right;
-            margin-right: 2.5rem;
+        padding: 1rem 1.5rem;
+        justify-content: space-between;
+        .input-text, .input-select {
+            margin: 0 1rem;
             width: 10rem;
         }
     }
@@ -268,6 +292,13 @@ export default {
             height: 3rem;
             th {
                 border-bottom: 2px solid $gray-medium-light;
+                svg {
+                    height: 1rem;
+                    width: 1rem;
+                    path {
+                        fill: $gray-medium-light;
+                    }
+                }
             }
         }
         tbody tr {
