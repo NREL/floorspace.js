@@ -9,7 +9,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
 <template>
 <section id='library'>
 
-    <header>{{sortDescending ? 'v' : '^'}} {{sortKey}}
+    <header>
         <div class="input-text">
             <label>Search</label>
             <input v-model="search">
@@ -56,7 +56,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
                     <input v-if="inputTypeForKey(column) === 'text'" :value="valueForKey(object, column)" @change="setValueForKey($event, object, column, $event.target.value)" readonly="false">
                     <div v-if="inputTypeForKey(column) === 'select'" class='input-select'>
                         <select @change="setValueForKey($event, object, column, $event.target.value)" >
-                            <option selected value></option>
+                            <option :selected="!valueForKey(object, column)" value="null">None</option>
                             <option v-for='(id, name) in selectOptionsForObjectAndKey(object, column)' :value="id" :selected="valueForKey(object, column)===name">{{ name }}</option>
                         </select>
                         <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
@@ -92,7 +92,7 @@ export default {
         };
     },
     mounted () {
-        this.type = Object.keys(this.extendedLibrary)[0];
+        this.type = Object.keys(this.extendedLibrary)[8];
     },
     computed: {
         /*
@@ -143,7 +143,11 @@ export default {
         displayObjects () {
             const objects = this.extendedLibrary[this.type] || [];
             return objects
-                .filter( o => Object.keys(o).find( k => o[k].length && ~o[k].indexOf(this.search) ) )
+                .filter((object) => {
+                    // check if the lowercased key values on the object are matches for the search
+                    return Object.keys(object).find( key => ~String(this.valueForKey(object, key)).toLowerCase().indexOf(this.search.toLowerCase()) )
+
+                })
                 .sort((a, b) => {
                     return this.sortDescending ? a[this.sortKey] > b[this.sortKey] : a[this.sortKey] < b[this.sortKey]
                 });
@@ -254,11 +258,12 @@ export default {
             }
         },
         classForObjectRow (object) {
+
             var classList = "";
             if (this.errorForObjectAndKey(object, null)) {
                 classList += " error"
             }
-            if (this.currentObject === object) {
+            if (this.currentObject.id === object.id) {
                 classList += " current"
             }
             return classList;
@@ -280,6 +285,11 @@ export default {
     watch: {
         displayObjects () {
             this.validationErrors = [];
+        },
+        type () {
+            this.search = '';
+            this.sortKey = 'id';
+            this.sortDescending = true;
         }
 
     }
@@ -382,6 +392,11 @@ export default {
                         }
                     }
                 }
+
+                .input-select {
+                    margin: .5rem 0;
+                }
+
                 input {
                     background-color: rgba(0,0,0,0);
                     border: none;
