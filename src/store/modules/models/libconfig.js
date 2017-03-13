@@ -19,6 +19,7 @@ const map = {
             name: {
                 displayName: 'Name',
                 readonly: false,
+                input_type: 'text',
                 private: false,
                 validator: validators.name
             }
@@ -36,6 +37,7 @@ const map = {
             name: {
                 displayName: 'Name',
                 readonly: false,
+                input_type: 'text',
                 private: false,
                 validator: validators.name
             }
@@ -53,6 +55,7 @@ const map = {
             name: {
                 displayName: 'Name',
                 readonly: false,
+                input_type: 'text',
                 private: false,
                 validator: validators.name
             }
@@ -70,6 +73,7 @@ const map = {
             name: {
                 displayName: 'Name',
                 readonly: false,
+                input_type: 'text',
                 private: false,
                 validator: validators.name
             }
@@ -87,6 +91,7 @@ const map = {
             name: {
                 displayName: 'Name',
                 readonly: false,
+                input_type: 'text',
                 private: false,
                 validator: validators.name
             }
@@ -104,6 +109,7 @@ const map = {
             name: {
                 displayName: 'Name',
                 readonly: false,
+                input_type: 'text',
                 private: false,
                 validator: validators.name
             }
@@ -121,6 +127,7 @@ const map = {
             name: {
                 displayName: 'Name',
                 readonly: false,
+                input_type: 'text',
                 private: false,
                 validator: validators.name
             }
@@ -138,6 +145,7 @@ const map = {
             name: {
                 displayName: 'Name',
                 readonly: false,
+                input_type: 'text',
                 private: false,
                 validator: validators.name
             },
@@ -152,18 +160,21 @@ const map = {
             below_floor_plenum_height: {
                 displayName: 'Below Floor Plenum Height',
                 readonly: false,
+                input_type: 'text',
                 private: false,
                 validator: validators.name
             },
             floor_to_ceiling_height: {
                 displayName: 'Floor To Ceiling Height',
                 readonly: false,
+                input_type: 'text',
                 private: false,
                 validator: validators.name
             },
             multiplier: {
                 displayName: 'Multiplier',
                 readonly: false,
+                input_type: 'text',
                 private: false,
                 validator: validators.name
             },
@@ -201,7 +212,9 @@ const map = {
             },
             image_id: {
                 displayName: 'Image',
-                readonly: true,
+                readonly: false,
+                input_type: 'select',
+                select_data (story, state) {},
                 private: false,
                 get (story, state) {
                     return story.shading.map(s => s.name).join(', ');
@@ -220,6 +233,7 @@ const map = {
             name: {
                 displayName: 'Name',
                 readonly: false,
+                input_type: 'text',
                 private: false,
                 validator: validators.name
             },
@@ -241,7 +255,13 @@ const map = {
             },
             building_unit_id: {
                 displayName: 'Building Unit',
-                readonly: true,
+                readonly: false,
+                input_type: 'select',
+                select_data (space, state) {
+                    const options = {};
+                    state.models.library.building_units.forEach( b => options[b.name] = b.id );
+                    return options;
+                },
                 private: false,
                 get (space, state) {
                     const buildingUnit = state.models.library.building_units.find(b => b.id === space.building_unit_id);
@@ -250,7 +270,13 @@ const map = {
             },
             thermal_zone_id: {
                 displayName: 'Thermal Zone',
-                readonly: true,
+                readonly: false,
+                input_type: 'select',
+                select_data (space, state) {
+                    const options = {};
+                    state.models.library.thermal_zones.forEach( t => options[t.name] = t.id );
+                    return options;
+                },
                 private: false,
                 get (space, state) {
                     const thermalZone = state.models.library.thermal_zones.find(b => b.id === space.thermal_zone_id);
@@ -259,7 +285,13 @@ const map = {
             },
             space_type_id: {
                 displayName: 'Space Type',
-                readonly: true,
+                readonly: false,
+                input_type: 'select',
+                select_data (space, state) {
+                    const options = {};
+                    state.models.library.space_types.forEach( s => options[s.name] = s.id );
+                    return options;
+                },
                 private: false,
                 get (space, state) {
                     const spaceType = state.models.library.space_types.find(s => s.id === space.space_type_id);
@@ -268,7 +300,13 @@ const map = {
             },
             construction_set_id: {
                 displayName: 'Construction Set',
-                readonly: true,
+                readonly: false,
+                input_type: 'select',
+                select_data (space, state) {
+                    const options = {};
+                    state.models.library.construction_sets.forEach( c => options[c.name] = c.id );
+                    return options;
+                },
                 private: false,
                 get (space, state) {
                     const constructionSet = state.models.library.construction_sets.find(c => c.id === space.construction_set_id);
@@ -288,6 +326,7 @@ const map = {
             name: {
                 displayName: 'Name',
                 readonly: false,
+                input_type: 'text',
                 private: false,
                 validator: validators.name
             },

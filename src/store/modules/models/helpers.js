@@ -80,6 +80,15 @@ const helpers = {
     keyIsReadonly (type, key) {
         return this.map[type].keymap[key] ? this.map[type].keymap[key].readonly : false;
     },
+
+    inputTypeForKey (type, key) {
+        return this.map[type].keymap[key] && !this.map[type].keymap[key].readonly ? this.map[type].keymap[key].input_type : null;
+    },
+
+    selectOptionsForKey (object, state, type, key) {
+        return this.map[type].keymap[key] && !this.map[type].keymap[key].readonly && this.map[type].keymap[key].input_type === 'select' ? this.map[type].keymap[key].select_data(object, state) : [];
+    },
+
     /*
     * each library object type has
     * displayName - for use in the type dropdown

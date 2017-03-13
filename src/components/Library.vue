@@ -52,7 +52,18 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
                         </svg>
                         <span>{{ errorForObjectAndKey(object, column).message }}</span>
                     </div>
-                    <input :value="valueForKey(object, column)" @change="setValueForKey($event, object, column, $event.target.value)" :readonly="keyIsReadonly(object, column)">
+                    <input v-if="!inputTypeForKey(column)" :value="valueForKey(object, column)" @change="setValueForKey($event, object, column, $event.target.value)" readonly="true">
+                    <input v-if="inputTypeForKey(column) === 'text'" :value="valueForKey(object, column)" @change="setValueForKey($event, object, column, $event.target.value)" readonly="false">
+                    <div v-if="inputTypeForKey(column) === 'select'" class='input-select'>
+                        <select @change="setValueForKey($event, object, column, $event.target.value)" >
+                            <option selected value></option>
+                            <option v-for='(id, name) in selectOptionsForObjectAndKey(object, column)' :value="id" :selected="valueForKey(object, column)===name">{{ name }}</option>
+                        </select>
+                        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
+                            <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
+                        </svg>
+                    </div>
+
                 </td>
                 <td class="destroy">
                     <svg @click="destroyObject(object)" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
@@ -132,7 +143,7 @@ export default {
         displayObjects () {
             const objects = this.extendedLibrary[this.type] || [];
             return objects
-                .filter( o => Object.keys(o).find( k => ~o[k].indexOf(this.search) ) )
+                .filter( o => Object.keys(o).find( k => o[k].length && ~o[k].indexOf(this.search) ) )
                 .sort((a, b) => {
                     return this.sortDescending ? a[this.sortKey] > b[this.sortKey] : a[this.sortKey] < b[this.sortKey]
                 });
@@ -256,6 +267,14 @@ export default {
         sortBy (key) {
             this.sortDescending = this.sortKey === key ? !this.sortDescending : true;
             this.sortKey = key;
+        },
+
+        inputTypeForKey (key) {
+            return helpers.inputTypeForKey(this.type, key);
+        },
+
+        selectOptionsForObjectAndKey (object, key) {
+            return helpers.selectOptionsForKey(object, this.$store.state, this.type, key);
         }
     },
     watch: {
