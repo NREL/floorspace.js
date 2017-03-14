@@ -52,8 +52,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
                         </svg>
                         <span>{{ errorForObjectAndKey(object, column).message }}</span>
                     </div>
-                    <input v-if="!inputTypeForKey(column)" :value="valueForKey(object, column)" @change="setValueForKey($event, object, column, $event.target.value)" readonly="true">
-                    <input v-if="inputTypeForKey(column) === 'text'" :value="valueForKey(object, column)" @change="setValueForKey($event, object, column, $event.target.value)" readonly="false">
+                    <input v-if="!inputTypeForKey(column)" :value="valueForKey(object, column)" @change="setValueForKey($event, object, column, $event.target.value)" readonly>
+                    <input v-if="inputTypeForKey(column) === 'text'" :value="valueForKey(object, column)" @change="setValueForKey($event, object, column, $event.target.value)">
                     <div v-if="inputTypeForKey(column) === 'select'" class='input-select'>
                         <select @change="setValueForKey($event, object, column, $event.target.value)" >
                             <option :selected="!valueForKey(object, column)" value="null">None</option>
@@ -100,16 +100,36 @@ export default {
         * when set, dispatches an action to update the application's currentSelections in the store
         */
         currentObject: {
-            get () { return this.$store.state.application.currentSelections.space ||
-                this.$store.state.application.currentSelections.shading ||
-                this.$store.state.application.currentSelections.story; },
+            get () {
+                switch (this.type) {
+                    case 'stories':
+                        return this.$store.state.application.currentSelections.story;
+                    case 'spaces':
+                        return this.$store.state.application.currentSelections.space;
+                    case 'shading':
+                        return this.$store.state.application.currentSelections.shading;
+                    case 'building_units':
+                        return this.$store.state.application.currentSelections.building_unit;
+                    case 'thermal_zones':
+                        return this.$store.state.application.currentSelections.thermal_zone;
+                    case 'space_types':
+                        return this.$store.state.application.currentSelections.space_type;
+                }
+            },
             set (object) {
-                if (this.type === 'stories') {
-                    this.$store.dispatch('application/setCurrentStory', { 'story': object });
-                } else if (this.type === 'spaces') {
-                    this.$store.dispatch('application/setCurrentSpace', { 'space': object });
-                } else if (this.type === 'shading') {
-                    this.$store.dispatch('application/setCurrentShading', { 'shading': object });
+                switch (this.type) {
+                    case 'stories':
+                        this.$store.dispatch('application/setCurrentStory', { 'story': object });
+                    case 'spaces':
+                        this.$store.dispatch('application/setCurrentSpace', { 'space': object });
+                    case 'shading':
+                        this.$store.dispatch('application/setCurrentShading', { 'shading': object });
+                    case 'building_units':
+                        this.$store.dispatch('application/setCurrentBuildingUnit', { 'building_unit': object });
+                    case 'thermal_zones':
+                        this.$store.dispatch('application/setCurrentThermalZone', { 'thermal_zone': object });
+                    case 'space_types':
+                        this.$store.dispatch('application/setCurrentSpaceType', { 'space_type': object });
                 }
             }
         },
@@ -263,7 +283,7 @@ export default {
             if (this.errorForObjectAndKey(object, null)) {
                 classList += " error"
             }
-            if (this.currentObject.id === object.id) {
+            if (this.currentObject && this.currentObject.id === object.id) {
                 classList += " current"
             }
             return classList;

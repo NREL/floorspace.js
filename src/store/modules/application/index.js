@@ -10,6 +10,9 @@ export default {
             story: null,
             space: null,
             shading: null,
+            building_unit: null,
+            thermal_zone: null,
+            space_type: null,
 
             // current application mode
             mode: 'Rectangle'

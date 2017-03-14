@@ -3,6 +3,9 @@ export default {
     setCurrentStory (state, payload) { state.currentSelections.story = payload.story; },
     setCurrentSpace (state, payload) { state.currentSelections.space = payload.space; },
     setCurrentShading (state, payload) { state.currentSelections.shading = payload.shading; },
+    setCurrentBuildingUnit (state, payload) { state.currentSelections.building_unit = payload.building_unit; },
+    setCurrentThermalZone (state, payload) { state.currentSelections.thermal_zone = payload.thermal_zone; },
+    setCurrentSpaceType (state, payload) { state.currentSelections.space_type = payload.space_type; },
 
     // editor rendering/drawing mode
     setsetApplicationMode (state, payload) { state.currentSelections.mode = payload.mode; },

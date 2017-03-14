@@ -8,30 +8,56 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
 <nav id="navigation">
-    <section class="tabs">
-        <span :class="tab === 'stories' ? 'active' : ''" @click="tab = 'stories'">Stories</span>
-        <span :class="tab === 'spaces' ? 'active' : ''" @click="tab = 'spaces'">Spaces</span>
-        <span :class="tab === 'shading' ? 'active' : ''" @click="tab = 'shading'">Shading</span>
+    <section id="selections">
+
+        <div class='input-select'>
+            <!-- <label>Type</label> -->
+            <select v-model='currentStory'>
+                <option v-for='story in stories' :value="story">{{ story.name }}</option>
+            </select>
+            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
+                <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
+            </svg>
+        </div>
+
+        <div class='input-select'>
+            <label>SubUnit</label>
+            <select v-model='tab'>
+                <option value>None</option>
+                <option v-for='(displayName, name) in tabs' :value="name">{{ displayName }}</option>
+            </select>
+            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
+                <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
+            </svg>
+        </div>
+        <!--
+        <span :class="{ active: tab === 'stories' }" @click="tab = 'stories'">Story</span>
+        <span :class="{ active: tab === 'spaces' }" @click="tab = 'spaces'">Spaces</span>
+        <span :class="{ active: tab === 'shading' }" @click="tab = 'shading'">Shading</span>
+        <span :class="{ active: tab === 'building_units' }" @click="tab = 'building_units'">Building Unit</span>
+        <span :class="{ active: tab === 'thermal_zones' }" @click="tab = 'thermal_zones'">Thermal Zone</span>
+        <span :class="{ active: tab === 'space_types' }" @click="tab = 'space_types'">Space Type</span>
+        -->
     </section>
 
     <section id="breadcrumbs">
-        <span @click="clearSpaceAndShading">
+        <span @click="clearSubSelections">
             {{ currentStory.name }}
-            <template v-if="(tab === 'shading' && currentShading) || (tab === 'spaces' && currentSpace)">
+            <template v-if="tab !== 'stories' && currentSubSelection">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path d="M.5 0v14l11-7-11-7z"/></svg>
-                {{ tab === 'shading' ? currentShading.name : currentSpace.name }}
+                {{ currentSubSelection.name }}
             </template>
         </span>
 
-        <button @click="addItem" id="new-item" height="50" viewBox="0 0 256 256" width="50" xmlns="http://www.w3.org/2000/svg">
+        <button @click="createItem" id="new-item" height="50" viewBox="0 0 256 256" width="50" xmlns="http://www.w3.org/2000/svg">
             New {{displayType}}
         </button>
     </section>
 
     <section id="list">
-        <div v-for="item in items" :key="item.id" :class="(currentSpace === item || currentStory === item || currentShading === item) ? 'active' : ''" @click="selectItem(item)">
+        <div v-for="item in items" :key="item.id" :class="{ active: currentSubSelection === item }" @click="selectItem(item)">
             {{item.name}}
-            <svg @click="destroyItem" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+            <svg @click="destroyItem(item)" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
                 <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
             </svg>
         </div>
@@ -42,11 +68,20 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <script>
 import { mapState } from 'vuex'
+import helpers from './../store/modules/models/helpers'
+
 export default {
     name: 'navigation',
     data() {
         return {
-            tab: null
+            tab: null,
+            tabs: {
+                spaces: "Space",
+                shading: "Shading",
+                building_units: "Building Unit",
+                thermal_zones: "Thermal Zone",
+                space_types: "Space Type"
+            }
         };
     },
     mounted () {
@@ -54,36 +89,57 @@ export default {
             this.tab = 'spaces';
         } else if (this.currentShading) {
             this.tab = 'shading';
+        } else if (this.currentBuildingUnit) {
+            this.tab = 'building_units';
+        } else if (this.currentThermalZone) {
+            this.tab = 'thermal_zones';
+        } else if (this.currentSpaceType) {
+            this.tab = 'space_types';
         } else {
             this.tab = 'stories';
         }
     },
     computed: {
-        // all stories
-        ...mapState({ stories: state => state.models.stories }),
-        // spaces for the currently selected story
+        /*
+        * arrays of all stories, building_units, space_types, and thermal_zones (top level)
+        * TODO: filter out items not referenced by current story
+        */
+        ...mapState({
+            stories: state => state.models.stories,
+            building_units: state => state.models.library.building_units,
+            space_types: state => state.models.library.space_types,
+            thermal_zones: state => state.models.library.thermal_zones,
+        }),
+        // spaces and shading for currently selected story
         spaces () { return this.currentStory.spaces; },
-        // shading for the currently selected story
         shading () { return this.currentStory.shading; },
+
+        // display name for library type (tab) selected
+        displayType () { return this.tab === "stories" ? 'Story': this.tabs[this.tab]; },
+
+        // list items to display for current tab
         items () {
-            if (this.tab === 'stories') {
-                return this.stories;
-            } else if (this.tab === 'spaces') {
-                return this.spaces;
-            } else if (this.tab === 'shading') {
-                return this.shading;
+            switch (this.tab) {
+                case 'stories':
+                    return this.stories;
+                case 'spaces':
+                    return this.spaces;
+                case 'shading':
+                    return this.shading;
+                case 'building_units':
+                    return this.building_units;
+                case 'thermal_zones':
+                    return this.thermal_zones;
+                case 'space_types':
+                    return this.space_types;
             }
-        },
-        displayType () {
-            if (this.tab === 'stories') {
-                return "Story";
-            } else if (this.tab === 'spaces') {
-                return "Space";
-            } else if (this.tab === 'shading') {
-                return "Shading";
-            }
+            return [];
         },
 
+        /*
+        * current selection getters and setters
+        * these dispatch actions to update the data store when a new item is selected
+        */
         currentStory: {
             get () { return this.$store.state.application.currentSelections.story; },
             set (item) { this.$store.dispatch('application/setCurrentStory', { 'story': item }); }
@@ -95,58 +151,127 @@ export default {
         currentShading: {
             get () { return this.$store.state.application.currentSelections.shading; },
             set (item) { this.$store.dispatch('application/setCurrentShading', { 'shading': item }); }
+        },
+        currentThermalZone: {
+            get () { return this.$store.state.application.currentSelections.thermal_zone; },
+            set (item) { this.$store.dispatch('application/setCurrentThermalZone', { 'thermal_zone': item }); }
+        },
+        currentBuildingUnit: {
+            get () { return this.$store.state.application.currentSelections.building_unit; },
+            set (item) { this.$store.dispatch('application/setCurrentBuildingUnit', { 'building_unit': item }); }
+        },
+        currentSpaceType: {
+            get () { return this.$store.state.application.currentSelections.space_type; },
+            set (item) { this.$store.dispatch('application/setCurrentSpaceType', { 'space_type': item }); }
+        },
+        currentSubSelection () {
+            switch (this.tab) {
+                case 'stories':
+                    return this.currentStory;
+                case 'spaces':
+                    return this.currentSpace;
+                case 'shading':
+                    return this.currentShading;
+                case 'building_units':
+                    return this.currentBuildingUnit;
+                case 'thermal_zones':
+                    return this.currentThermalZone;
+                case 'space_types':
+                    return this.currentSpaceType;
+            }
         }
+
     },
     methods: {
-        // initialize an empty story, space, or shading depending on the selected tab
-        addItem () {
-            if (this.tab === 'stories') {
-                this.$store.dispatch('models/initStory');
-            } else if (this.tab === 'spaces') {
-                this.$store.dispatch('models/initSpace', {
-                    story: this.$store.state.application.currentSelections.story
-                });
-            } else if (this.tab === 'shading') {
-                this.$store.dispatch('models/initShading', {
-                    story: this.$store.state.application.currentSelections.story
-                });
+        // initialize an empty story, space, shading, building_unit, or thermal_zone depending on the selected tab
+        createItem () {
+            switch (this.tab) {
+                case 'stories':
+                    this.$store.dispatch('models/initStory');
+                    break;
+                case 'spaces':
+                    this.$store.dispatch('models/initSpace', {
+                        story: this.$store.state.application.currentSelections.story
+                    });
+                    break;
+                case 'shading':
+                    this.$store.dispatch('models/initShading', {
+                        story: this.$store.state.application.currentSelections.story
+                    });
+                    break;
+                case 'building_units':
+                case 'thermal_zones':
+                case 'space_types':
+                    const newObject = new helpers.map[this.tab].init(this.displayType + " " + (1 + this.items.length));
+                    this.$store.dispatch('models/createObjectWithType', {
+                        type: this.tab,
+                        object: newObject
+                    });
+                    break;
             }
 
             this.selectItem(this.items[this.items.length - 1]);
         },
-        destroyItem () {
-            if (this.tab === 'stories' && this.stories.length > 1) {
-                this.$store.dispatch('models/destroyStory', {
-                    story: this.$store.state.application.currentSelections.story
-                });
-                this.currentStory = this.stories[0];
-            } else if (this.tab === 'spaces') {
-                this.$store.dispatch('models/destroySpace', {
-                    space: this.$store.state.application.currentSelections.space,
-                    story: this.$store.state.application.currentSelections.story
-                });
-                this.currentSpace = this.spaces[0];
-            } else if (this.tab === 'shading') {
-                this.$store.dispatch('models/destroyShading', {
-                    shading: this.$store.state.application.currentSelections.shading,
-                    story: this.$store.state.application.currentSelections.story
-                });
 
+        /*
+        * dispatch an action to destroy the currently selected item
+        */
+        destroyItem (item) {
+            switch (this.tab) {
+                case 'stories':
+                    if (this.stories.length <= 1) { return; }
+                    this.$store.dispatch('models/destroyStory', {
+                        story: item
+                    });
+                    this.currentStory = this.stories[0];
+                    break;
+                case 'spaces':
+                    this.$store.dispatch('models/destroySpace', {
+                        space: item,
+                        story: this.$store.state.application.currentSelections.story
+                    });
+                    break;
+                case 'shading':
+                    this.$store.dispatch('models/destroyShading', {
+                        shading: item,
+                        story: this.$store.state.application.currentSelections.story
+                    });
+                    break;
+                case 'building_units':
+                case 'thermal_zones':
+                case 'space_types':
+                    this.$store.dispatch('models/destroyObject', { object: item });
+                    break;
             }
         },
         selectItem (item) {
-            if (this.tab === 'stories') {
-                this.currentStory = item;
-            } else if (this.tab === 'spaces') {
-                this.currentSpace = (this.currentSpace && this.currentSpace.id === item.id) ? null : item;
-            } else if (this.tab === 'shading') {
-                this.currentShading = (this.currentShading && this.currentShading.id === item.id) ? null : item;
+            switch (this.tab) {
+                case 'stories':
+                    this.currentStory = item;
+                    break;
+                case 'spaces':
+                    this.currentSpace = (this.currentSpace && this.currentSpace.id === item.id) ? null : item;
+                    break;
+                case 'shading':
+                    this.currentShading = (this.currentShading && this.currentShading.id === item.id) ? null : item;
+                    break;
+                case 'building_units':
+                    this.currentBuildingUnit = (this.currentBuildingUnit && this.currentBuildingUnit.id === item.id) ? null : item;
+                    break;
+                case 'thermal_zones':
+                    this.currentThermalZone = (this.currentThermalZone && this.currentThermalZone.id === item.id) ? null : item;
+                    break;
+                case 'space_types':
+                    this.currentSpaceType = (this.currentSpaceType && this.currentSpaceType.id === item.id) ? null : item;
+                    break;
             }
         },
-        clearSpaceAndShading () {
+        clearSubSelections () {
             this.currentShading = null;
             this.currentSpace = null;
-
+            this.currentBuildingUnit = null;
+            this.currentThermalZone = null;
+            this.currentSpaceType = null;
         }
     }
 }
@@ -159,7 +284,11 @@ export default {
     background-color: $gray-medium-dark;
     border-right: 1px solid $gray-darkest;
     font-size: 0.75rem;
-
+    #selections {
+        display: flex;
+        padding: .25rem;
+        justify-content: space-between;
+    }
     #breadcrumbs, #list > div {
         align-items: center;
         display: flex;
@@ -194,6 +323,7 @@ export default {
     #breadcrumbs {
         background-color: $gray-medium-dark;
         border-bottom: 1px solid $gray-darkest;
+        border-top: 1px solid $gray-darkest;
         height: 2.5rem;
         span {
             cursor: pointer;
