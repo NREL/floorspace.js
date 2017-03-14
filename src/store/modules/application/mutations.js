@@ -8,7 +8,7 @@ export default {
     setCurrentSpaceType (state, payload) { state.currentSelections.space_type = payload.space_type; },
 
     // editor rendering/drawing mode
-    setsetApplicationMode (state, payload) { state.currentSelections.mode = payload.mode; },
+    setApplicationMode (state, payload) { state.currentSelections.mode = payload.mode; },
 
     // d3 scaling functions
     setScaleX (state, payload) { state.scale.x = payload.scaleX; },

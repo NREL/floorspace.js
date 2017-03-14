@@ -120,16 +120,22 @@ export default {
                 switch (this.type) {
                     case 'stories':
                         this.$store.dispatch('application/setCurrentStory', { 'story': object });
+                        break;
                     case 'spaces':
                         this.$store.dispatch('application/setCurrentSpace', { 'space': object });
+                        break;
                     case 'shading':
                         this.$store.dispatch('application/setCurrentShading', { 'shading': object });
+                        break;
                     case 'building_units':
                         this.$store.dispatch('application/setCurrentBuildingUnit', { 'building_unit': object });
+                        break;
                     case 'thermal_zones':
                         this.$store.dispatch('application/setCurrentThermalZone', { 'thermal_zone': object });
+                        break;
                     case 'space_types':
                         this.$store.dispatch('application/setCurrentSpaceType', { 'space_type': object });
+                        break;
                 }
             }
         },
@@ -161,7 +167,7 @@ export default {
         * objects are deep copies to avoid mutating the store
         */
         displayObjects () {
-            const objects = this.extendedLibrary[this.type] || [];
+            var objects = this.extendedLibrary[this.type] || [];
             return objects
                 .filter((object) => {
                     // check if the lowercased key values on the object are matches for the search
@@ -211,7 +217,7 @@ export default {
         * returns the raw string value at obj[key] for custom user defined keys
         */
         valueForKey (object, key) {
-            return helpers.valueForKey(object, this.$store.state, this.type, key);
+            return this.errorForObjectAndKey(object, key) ? this.errorForObjectAndKey(object, key).value : helpers.valueForKey(object, this.$store.state, this.type, key);
         },
 
         /*
@@ -220,12 +226,13 @@ export default {
         */
         setValueForKey (event, object, key, value) {
             // must update the object so that the input field value does not reset
-            object[key] = value;
+           // object[key] = value;
             const result = helpers.setValueForKey(object, this.$store, this.type, key, value);
             if (!result.success) {
                 this.validationErrors.push({
                     object_id: object.id,
                     key: key,
+                    value: value,
                     message: result.error,
                     visible: false
                 });
@@ -304,7 +311,7 @@ export default {
     },
     watch: {
         displayObjects () {
-            this.validationErrors = [];
+            //this.validationErrors = [];
         },
         type () {
             this.search = '';
