@@ -1,9 +1,11 @@
 import generateId from './../../utilities/generateId'
+import generateColor from './../../utilities/generateColor'
 
 export default {
     Story: function () {
         return {
             id: generateId(),
+            color: generateColor('story'),
             handle: null,
             name: null,
             geometry_id: null,
@@ -21,6 +23,7 @@ export default {
     Space: function () {
         return {
             id: generateId(),
+            color: generateColor('space'),
             name: null,
             handle: null,
             face_id: null,
@@ -34,6 +37,7 @@ export default {
     Shading: function () {
         return {
             id: generateId(),
+            color: generateColor('shading'),
             name: null,
             handle: null,
             face_id: null
@@ -48,18 +52,21 @@ export default {
     BuildingUnit: function (name) {
         return {
             id: generateId(),
+            color: generateColor('building_unit'),
             name: name
         };
     },
     ThermalZone: function (name) {
         return {
             id: generateId(),
+            color: generateColor('thermal_zone'),
             name: name
         };
     },
     SpaceType: function (name) {
         return {
             id: generateId(),
+            color: generateColor('space_type'),
             name: name
         };
     },
