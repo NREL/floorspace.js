@@ -7,8 +7,8 @@ export default {
     setCurrentThermalZone (state, payload) { state.currentSelections.thermal_zone = payload.thermal_zone; },
     setCurrentSpaceType (state, payload) { state.currentSelections.space_type = payload.space_type; },
 
-    // editor rendering/drawing mode
-    setApplicationMode (state, payload) { state.currentSelections.mode = payload.mode; },
+    // editor rendering/drawing tool
+    setApplicationTool (state, payload) { state.currentSelections.tool = payload.tool; },
 
     // d3 scaling functions
     setScaleX (state, payload) { state.scale.x = payload.scaleX; },

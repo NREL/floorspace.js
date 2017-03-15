@@ -11,12 +11,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <section class="tools">
             <button @click="$emit('setBackground')" id="import">Import Background</button>
             <button @click="$emit('createObject')">Create Object</button>
-
             <button @click="exportData" id="export">Export Model</button>
         </section>
 
         <section class="settings">
-            <template v-if="mode!=='3d'">
+            <template v-if="tool !== '3d'">
                 <div class="input-number">
                     <label>min_x</label>
                     <input v-model.number.lazy="min_x">
@@ -49,7 +48,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 </div>
             </template>
 
-            <template v-if="mode==='3d'">
+            <template v-if="tool==='3d'">
                 <div class="input-number">
                     <label>Field Of View</label>
                     <input v-model.number="fov">
@@ -66,10 +65,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 </div>
             </template>
 
-            <div class="input-select" id="drawing-mode">
-                <label>mode</label>
-                <select v-model="mode">
-                    <option v-for="mode in modes">{{ mode }}</option>
+            <div class="input-select" id="drawing-tool">
+                <label>tool</label>
+                <select v-model="tool">
+                    <option v-for="tool in tools">{{ tool }}</option>
                 </select>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14" height="10px">
                     <path d="M.5 0v14l11-7-11-7z" transform="translate(13) rotate(90)"></path>
@@ -95,14 +94,14 @@ export default {
         }
     },
     computed: {
-        ...mapState({ modes: state => state.application.modes }),
+        ...mapState({ tools: state => state.application.tools }),
         gridVisible: {
             get () { return this.$store.state.project.grid.visible; },
             set (val) { this.$store.dispatch('project/setGridVisible', { visible: val }); }
         },
-        mode: {
-            get () { return this.$store.state.application.currentSelections.mode; },
-            set (val) { this.$store.dispatch('application/setApplicationMode', { mode: val }); }
+        tool: {
+            get () { return this.$store.state.application.currentSelections.tool; },
+            set (val) { this.$store.dispatch('application/setApplicationTool', { tool: val }); }
         },
         // spacing between gridlines, measured in RWU
         x_spacing: {
@@ -180,10 +179,10 @@ export default {
 
         >div {
             margin: 0 1rem 0 0;
-            &#drawing-mode {
+            &#drawing-tool {
                 position: absolute;
                 right: 5rem;
-                width: 8.5rem
+
             }
         }
     }

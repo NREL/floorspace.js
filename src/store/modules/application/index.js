@@ -15,9 +15,9 @@ export default {
             space_type: null,
 
             // current application mode
-            mode: 'Rectangle'
+            tool: 'Rectangle'
         },
-        modes: ['Rectangle', 'Polygon', 'Place Component', 'Apply Property', '3d'],
+        tools: ['None', 'Rectangle', 'Polygon', 'Place Component', 'Apply Property', '3d'],
         // d3 scale functions translate screen pixel coordinates into RWU values to use within the SVG's grid system
         scale: {
             x: null,

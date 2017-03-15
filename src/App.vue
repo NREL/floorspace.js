@@ -11,8 +11,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <main>
             <navigation></navigation>
 
-            <view-3d v-if="mode==='3d'"></view-3d>
-            <canvas-view v-if="mode!=='3d'"></canvas-view>
+            <view-3d v-if="tool==='3d'"></view-3d>
+            <canvas-view v-if="tool!=='3d'"></canvas-view>
             <inspector @assignObject="showModal('assign-object', $event)"></inspector>
 
             <background-modal v-if="backgroundModalVisible" @close="backgroundModalVisible = false"></background-modal>
@@ -80,7 +80,7 @@ export default {
         }
     },
     computed: {
-        ...mapState({ mode: state => state.application.currentSelections.mode })
+        ...mapState({ tool: state => state.application.currentSelections.tool })
     },
     components: {
         'canvas-view': Canvas,

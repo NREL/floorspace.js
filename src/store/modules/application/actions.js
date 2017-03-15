@@ -65,11 +65,11 @@ export default {
         });
     },
 
-    setApplicationMode (context, payload) {
+    setApplicationTool (context, payload) {
         // check that the requested rendering mode exists
-        if (~context.state.modes.indexOf(payload.mode)) {
-            context.commit('setApplicationMode', {
-                mode: payload.mode
+        if (~context.state.tools.indexOf(payload.tool)) {
+            context.commit('setApplicationTool', {
+                tool: payload.tool
             });
         }
     },

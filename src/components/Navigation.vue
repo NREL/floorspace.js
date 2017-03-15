@@ -11,7 +11,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     <section id="selections">
 
         <div class='input-select'>
-            <!-- <label>Type</label> -->
             <select v-model='currentStory'>
                 <option v-for='story in stories' :value="story">{{ story.name }}</option>
             </select>
@@ -21,23 +20,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </div>
 
         <div class='input-select'>
-            <label>SubUnit</label>
+            <label>Mode</label>
             <select v-model='tab'>
-                <option value>None</option>
                 <option v-for='(displayName, name) in tabs' :value="name">{{ displayName }}</option>
             </select>
             <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
                 <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
             </svg>
         </div>
-        <!--
-        <span :class="{ active: tab === 'stories' }" @click="tab = 'stories'">Story</span>
-        <span :class="{ active: tab === 'spaces' }" @click="tab = 'spaces'">Spaces</span>
-        <span :class="{ active: tab === 'shading' }" @click="tab = 'shading'">Shading</span>
-        <span :class="{ active: tab === 'building_units' }" @click="tab = 'building_units'">Building Unit</span>
-        <span :class="{ active: tab === 'thermal_zones' }" @click="tab = 'thermal_zones'">Thermal Zone</span>
-        <span :class="{ active: tab === 'space_types' }" @click="tab = 'space_types'">Space Type</span>
-        -->
     </section>
 
     <section id="breadcrumbs">
@@ -76,6 +66,7 @@ export default {
         return {
             tab: null,
             tabs: {
+                stories: "Story",
                 spaces: "Space",
                 shading: "Shading",
                 building_units: "Building Unit",

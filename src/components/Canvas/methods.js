@@ -97,14 +97,14 @@ export default {
             point.y = round(this.scaleY(e.offsetY) - yAdjustment, this.y_spacing) + yAdjustment;
         }
 
-        // if rectangle drawing mode is selected and a point has already been drawn on the canvas, close and save the rectangle
-        if (this.currentMode === 'Rectangle' || this.currentMode === 'Polygon') {
+        // if rectangle drawing tool is selected and a point has already been drawn on the canvas, close and save the rectangle
+        if (this.currentTool === 'Rectangle' || this.currentTool === 'Polygon') {
             // store the point
             this.points.push(point);
         }
 
-        // create a rectangular face if two points have been drawn to the canvas in rectangle mode
-        if (this.currentMode === 'Rectangle' && this.points.length === 2) {
+        // create a rectangular face if two points have been drawn to the canvas in rectangle tool
+        if (this.currentTool === 'Rectangle' && this.points.length === 2) {
             this.saveRectuangularFace();
         }
 

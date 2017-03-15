@@ -33,48 +33,49 @@ export default {
         // recalculate scales when the window resizes
         window.addEventListener('resize', this.calcScales);
 
-        const mousedownHandler = (e) => {
-                this.isDragging = false;
-                this.$refs.grid.addEventListener('mouseup', mouseupHandler);
-                this.$refs.grid.addEventListener('mousemove', mousemoveHandler);
-            },
-            mousemoveHandler = (e) => {
-                if (this.isDragging) {
-                    const dx = this.scaleX(e.movementX),
-                        dy  = this.scaleY(e.movementY);
-                        
-                    this.min_x -= dx;
-                    this.max_x -= dx;
-                    this.min_y -= dy;
-                    this.max_y -= dy;
-
-                    this.drawGridLines();
-                } else {
-                    this.points = [];
-                    this.isDragging = true;
-                }
-            },
-            mouseupHandler = (e) => {
-                this.$refs.grid.removeEventListener('mousemove', mousemoveHandler);
-                this.$refs.grid.removeEventListener('mouseup', mouseupHandler);
-                if (this.isDragging) {
-                    this.points = [];
-
-                    this.drawGridLines();
-                    this.drawPolygons();
-                    setTimeout(() => {
-                        this.isDragging = false;
-                    })
-                }
-            };
-        this.$refs.grid.addEventListener('mousedown', mousedownHandler);
+        // disable panning for now because it is problematic
+        // const mousedownHandler = (e) => {
+        //         this.isDragging = false;
+        //         this.$refs.grid.addEventListener('mouseup', mouseupHandler);
+        //         this.$refs.grid.addEventListener('mousemove', mousemoveHandler);
+        //     },
+        //     mousemoveHandler = (e) => {
+        //         if (this.isDragging) {
+        //             const dx = this.scaleX(e.movementX),
+        //                 dy  = this.scaleY(e.movementY);
+        //
+        //             this.min_x -= dx;
+        //             this.max_x -= dx;
+        //             this.min_y -= dy;
+        //             this.max_y -= dy;
+        //
+        //             this.drawGridLines();
+        //         } else {
+        //             this.points = [];
+        //             this.isDragging = true;
+        //         }
+        //     },
+        //     mouseupHandler = (e) => {
+        //         this.$refs.grid.removeEventListener('mousemove', mousemoveHandler);
+        //         this.$refs.grid.removeEventListener('mouseup', mouseupHandler);
+        //         if (this.isDragging) {
+        //             this.points = [];
+        //
+        //             this.drawGridLines();
+        //             this.drawPolygons();
+        //             setTimeout(() => {
+        //                 this.isDragging = false;
+        //             })
+        //         }
+        //     };
+        // this.$refs.grid.addEventListener('mousedown', mousedownHandler);
     },
     beforeDestroy () {
         window.removeEventListener('resize', this.calcScales);
     },
     computed: {
         ...mapState({
-            currentMode: state => state.application.currentSelections.mode,
+            currentTool: state => state.application.currentSelections.tool,
 
             currentSpace: state => state.application.currentSelections.space,
             currentShading: state => state.application.currentSelections.shading,
@@ -173,7 +174,7 @@ export default {
             this.drawPoints();
         },
 
-        currentMode () { this.points = [];},
+        currentTool () { this.points = [];},
 
         currentSpace() {
             this.points = [];
