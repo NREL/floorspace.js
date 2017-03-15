@@ -26,7 +26,7 @@ export default {
     setCurrentSpace (context, payload) {
 
         // check that space belongs to the current story
-        if (~context.state.currentSelections.story.spaces.map(s => s.id).indexOf(payload.space.id) || !payload.space) {
+        if (!payload.space || ~context.state.currentSelections.story.spaces.map(s => s.id).indexOf(payload.space.id)) {
             context.dispatch('clearSubSelections');
             context.commit('setCurrentSpace', {
                 space: payload.space
@@ -36,7 +36,7 @@ export default {
 
     setCurrentShading (context, payload) {
         // check that shading belongs to the current story
-        if (~context.state.currentSelections.story.shading.map(s => s.id).indexOf(payload.shading.id) || !payload.shading) {
+        if (!payload.shading || ~context.state.currentSelections.story.shading.map(s => s.id).indexOf(payload.shading.id)) {
             context.dispatch('clearSubSelections');
             context.commit('setCurrentShading', {
                 shading: payload.shading
