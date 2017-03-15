@@ -5,7 +5,6 @@ export default {
     Story: function () {
         return {
             id: generateId(),
-            color: generateColor('story'),
             handle: null,
             name: null,
             geometry_id: null,
@@ -23,7 +22,7 @@ export default {
     Space: function () {
         return {
             id: generateId(),
-            color: generateColor('space'),
+            color: generateColor('shadingOrSpace'),
             name: null,
             handle: null,
             face_id: null,
@@ -37,7 +36,7 @@ export default {
     Shading: function () {
         return {
             id: generateId(),
-            color: generateColor('shading'),
+            color: generateColor('shadingOrSpace'),
             name: null,
             handle: null,
             face_id: null

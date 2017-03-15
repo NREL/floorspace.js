@@ -12,17 +12,17 @@
 #canvas svg {
     // points
     ellipse {
-        fill: $primary;
-        stroke: $primary;
+        fill: $gray-light;
+        stroke: $gray-light;
         &.origin {
             fill: none;
             &:hover {
-                fill: $primary;
+                fill: $gray-light;
             }
         }
         &.highlight {
-            stroke: #5F34DF;
-            fill: #5F34DF;
+            stroke: $secondary;
+            fill: $secondary;
         }
     }
     // gridlines
@@ -31,18 +31,15 @@
         opacity: .25;
     }
     line.highlight {
-        stroke: #5F34DF;
-        fill: #5F34DF;
+        stroke: $secondary;
     }
 
     // shapes
     polygon, rect, path {
-        fill: $primary;
         fill-opacity: 0.5;
-        stroke: $primary;
+        stroke: $gray-light;
         &.currentSpace, &.currentShading {
-            fill: $secondary;
-            stroke: $secondary;
+            stroke: $gray-light;
         }
     }
 }

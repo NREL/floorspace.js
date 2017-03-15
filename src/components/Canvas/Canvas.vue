@@ -15,7 +15,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <script>
 import methods from './methods'
 import { mapState } from 'vuex'
-import helpers from './../../store/modules/geometry/helpers.js'
+import geometryHelpers from './../../store/modules/geometry/helpers.js'
+import modelHelpers from './../../store/modules/models/helpers.js'
 export default {
     name: 'canvas',
     data () {
@@ -91,12 +92,6 @@ export default {
             scaleX: state => state.application.scale.x,
             scaleY: state => state.application.scale.y,
 
-            // mix_x, min_y, max_x, and max_y bound the portion of the canvas (in RWU) that is currently visible to the user and define the viewbox
-            // min_x: state => state.project.view.min_x,
-            // min_y: state => state.project.view.min_y,
-            // max_x: state => state.project.view.max_x,
-            // max_y: state => state.project.view.max_y,
-
             // SVG viewbox is the portion of the svg grid (in RWU) that is currently visible to the user
             viewbox: state => {
                 return state.project.view.min_x + ' ' + // x
@@ -148,11 +143,13 @@ export default {
             return this.currentStoryGeometry.faces.map((face) => {
                 return {
                     face_id: face.id,
+                    // TODO: lookup the story/space/shading associated with the face
+                    color: modelHelpers.modelForFace(this.$store.state.models, face.id) && modelHelpers.modelForFace(this.$store.state.models, face.id).color,
                     points: face.edgeRefs.map((edgeRef) => {
-                        const edge = helpers.edgeForId(edgeRef.edge_id, this.currentStoryGeometry),
+                        const edge = geometryHelpers.edgeForId(edgeRef.edge_id, this.currentStoryGeometry),
                             // look up the vertex associated with v1 unless the edge reference on the face is reversed
                             nextVertexId = edgeRef.reverse ? edge.v2 : edge.v1;
-                        return helpers.vertexForId(nextVertexId, this.currentStoryGeometry);
+                        return geometryHelpers.vertexForId(nextVertexId, this.currentStoryGeometry);
                     })
                 };
             });

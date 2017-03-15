@@ -289,7 +289,7 @@ export default {
 
     #list {
         overflow: scroll;
-        height: calc(100% - 4.25rem);
+        height: calc(100% - 5rem);
         > div  {
             cursor: pointer;
             height: 2rem;

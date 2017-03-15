@@ -247,6 +247,7 @@ export default {
                 if (this.currentSpace && d.face_id === this.currentSpace.face_id) { return 'currentSpace'; }
                 if (this.currentShading && d.face_id === this.currentShading.face_id) { return 'currentShading'; }
             })
+            .attr('fill', d => d.color)
             .attr('vector-effect', 'non-scaling-stroke');
 
         // remove expired points and guidelines

@@ -18,15 +18,13 @@ export default (function colorFactory () {
     ];
 
     var typeIndices = {
-        story: 0,
-        space: 0,
-        shading: 0,
+        shadingOrSpace: 0,
         building_unit: 0,
         thermal_zone: 0,
         space_type: 0
     };
     return (type) => {
         typeIndices[type]++;
-        return palette[palette.length % typeIndices[type]]
+        return palette[typeIndices[type] % Number(palette.length)]
     }
 })();

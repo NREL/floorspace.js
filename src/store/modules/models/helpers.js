@@ -121,6 +121,16 @@ const helpers = {
             }
         }
         return result;
+    },
+
+    /*
+    * searches local state's stories, shading, and spaces for an object with a given face id
+    */
+    modelForFace (state, face_id) {
+        for (var i = 0; i < state.stories.length; i++) {
+            const story = state.stories[i];
+            return story.shading.find(s => s.face_id === face_id) || story.spaces.find(s => s.face_id === face_id);
+        }
     }
 };
 export default helpers;

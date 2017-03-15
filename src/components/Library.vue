@@ -44,7 +44,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
         </thead>
 
         <tbody>
-            <tr v-for='object in displayObjects' @click="currentObject = object" :class="classForObjectRow(object)">
+            <tr v-for='object in displayObjects' @click="currentObject = object" :class="classForObjectRow(object)" :style="{'background-color': object.color }">
                 <td v-for="column in columns" @mouseover="toggleError(object, column, true)" @mouseout="toggleError(object, column, false)">
                     <div v-if="errorForObjectAndKey(object, column) && errorForObjectAndKey(object, column).visible " class="tooltip-error">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14">
