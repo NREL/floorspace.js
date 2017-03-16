@@ -1,5 +1,6 @@
 import generateId from './../../utilities/generateId'
 import generateColor from './../../utilities/generateColor'
+import appconfig from './../application/appconfig.js'
 
 export default {
     Story: function () {
@@ -22,7 +23,7 @@ export default {
     Space: function () {
         return {
             id: generateId(),
-            color: generateColor('shadingOrSpace'),
+            color: generateColor('space'),
             name: null,
             handle: null,
             face_id: null,
@@ -36,7 +37,7 @@ export default {
     Shading: function () {
         return {
             id: generateId(),
-            color: generateColor('shadingOrSpace'),
+            color: appconfig.palette.shading,
             name: null,
             handle: null,
             face_id: null

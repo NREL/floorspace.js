@@ -128,8 +128,16 @@ const helpers = {
     */
     modelForFace (state, face_id) {
         for (var i = 0; i < state.stories.length; i++) {
-            const story = state.stories[i];
-            return story.shading.find(s => s.face_id === face_id) || story.spaces.find(s => s.face_id === face_id);
+            const story = state.stories[i],
+                shading = story.shading.find(s => s.face_id === face_id),
+                space = story.spaces.find(s => s.face_id === face_id);
+            if (shading) {
+                shading.type = 'shading';
+                return shading;
+            } else if (space) {
+                space.type = 'space';
+                return space;
+            }
         }
     }
 };

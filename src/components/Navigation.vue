@@ -9,7 +9,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
 <nav id="navigation">
     <section id="selections">
-
         <div class='input-select'>
             <select v-model='currentStory'>
                 <option v-for='story in stories' :value="story">{{ story.name }}</option>
@@ -21,8 +20,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
         <div class='input-select'>
             <label>Mode</label>
-            <select v-model='tab'>
-                <option v-for='(displayName, name) in tabs' :value="name">{{ displayName }}</option>
+            <select v-model='mode'>
+                <option v-for='mode in modes' :value="mode">{{ displayNameForMode(mode) }}</option>
             </select>
             <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
                 <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
@@ -33,14 +32,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     <section id="breadcrumbs">
         <span @click="clearSubSelections">
             {{ currentStory.name }}
-            <template v-if="tab !== 'stories' && currentSubSelection">
+            <template v-if="mode !== 'stories' && currentSubSelection">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path d="M.5 0v14l11-7-11-7z"/></svg>
                 {{ currentSubSelection.name }}
             </template>
         </span>
 
         <button @click="createItem" id="new-item" height="50" viewBox="0 0 256 256" width="50" xmlns="http://www.w3.org/2000/svg">
-            New {{displayType}}
+            New {{displayNameForMode(mode)}}
         </button>
     </section>
 
@@ -58,42 +57,20 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <script>
 import { mapState } from 'vuex'
-import helpers from './../store/modules/models/helpers'
+import modelHelpers from './../store/modules/models/helpers'
+import applicationHelpers from './../store/modules/application/helpers'
 
 export default {
     name: 'navigation',
     data() {
-        return {
-            tab: null,
-            tabs: {
-                stories: "Story",
-                spaces: "Space",
-                shading: "Shading",
-                building_units: "Building Unit",
-                thermal_zones: "Thermal Zone",
-                space_types: "Space Type"
-            }
-        };
+        return {};
     },
     mounted () {
-        if (this.currentSpace) {
-            this.tab = 'spaces';
-        } else if (this.currentShading) {
-            this.tab = 'shading';
-        } else if (this.currentBuildingUnit) {
-            this.tab = 'building_units';
-        } else if (this.currentThermalZone) {
-            this.tab = 'thermal_zones';
-        } else if (this.currentSpaceType) {
-            this.tab = 'space_types';
-        } else {
-            this.tab = 'stories';
-        }
+        this.mode = 'spaces';
     },
     computed: {
         /*
         * arrays of all stories, building_units, space_types, and thermal_zones (top level)
-        * TODO: filter out items not referenced by current story
         */
         ...mapState({
             stories: state => state.models.stories,
@@ -105,12 +82,9 @@ export default {
         spaces () { return this.currentStory.spaces; },
         shading () { return this.currentStory.shading; },
 
-        // display name for library type (tab) selected
-        displayType () { return this.tab === "stories" ? 'Story': this.tabs[this.tab]; },
-
-        // list items to display for current tab
+        // list items to display for current mode
         items () {
-            switch (this.tab) {
+            switch (this.mode) {
                 case 'stories':
                     return this.stories;
                 case 'spaces':
@@ -126,7 +100,11 @@ export default {
             }
             return [];
         },
-
+        mode: {
+            get () { return this.$store.state.application.currentSelections.mode; },
+            set (mode) { this.$store.dispatch('application/setApplicationMode', { 'mode': mode }); }
+        },
+        modes () { return this.$store.state.application.modes; },
         /*
         * current selection getters and setters
         * these dispatch actions to update the data store when a new item is selected
@@ -156,7 +134,7 @@ export default {
             set (item) { this.$store.dispatch('application/setCurrentSpaceType', { 'space_type': item }); }
         },
         currentSubSelection () {
-            switch (this.tab) {
+            switch (this.mode) {
                 case 'stories':
                     return this.currentStory;
                 case 'spaces':
@@ -174,9 +152,9 @@ export default {
 
     },
     methods: {
-        // initialize an empty story, space, shading, building_unit, or thermal_zone depending on the selected tab
+        // initialize an empty story, space, shading, building_unit, or thermal_zone depending on the selected mode
         createItem () {
-            switch (this.tab) {
+            switch (this.mode) {
                 case 'stories':
                     this.$store.dispatch('models/initStory');
                     break;
@@ -193,9 +171,9 @@ export default {
                 case 'building_units':
                 case 'thermal_zones':
                 case 'space_types':
-                    const newObject = new helpers.map[this.tab].init(this.displayType + " " + (1 + this.items.length));
+                    const newObject = new modelHelpers.map[this.mode].init(this.displayNameForMode(this.mode) + " " + (1 + this.items.length));
                     this.$store.dispatch('models/createObjectWithType', {
-                        type: this.tab,
+                        type: this.mode,
                         object: newObject
                     });
                     break;
@@ -208,7 +186,7 @@ export default {
         * dispatch an action to destroy the currently selected item
         */
         destroyItem (item) {
-            switch (this.tab) {
+            switch (this.mode) {
                 case 'stories':
                     if (this.stories.length <= 1) { return; }
                     this.$store.dispatch('models/destroyStory', {
@@ -236,7 +214,7 @@ export default {
             }
         },
         selectItem (item) {
-            switch (this.tab) {
+            switch (this.mode) {
                 case 'stories':
                     this.currentStory = item;
                     break;
@@ -263,7 +241,10 @@ export default {
             this.currentBuildingUnit = null;
             this.currentThermalZone = null;
             this.currentSpaceType = null;
-        }
+        },
+
+        // display name for library type (mode) selected
+        displayNameForMode (mode) { return applicationHelpers.displayNameForMode(mode); },
     }
 }
 </script>

@@ -9,7 +9,7 @@ export default {
 
     // editor rendering/drawing tool
     setApplicationTool (state, payload) { state.currentSelections.tool = payload.tool; },
-
+    setApplicationMode (state, payload) { state.currentSelections.mode = payload.mode; },
     // d3 scaling functions
     setScaleX (state, payload) { state.scale.x = payload.scaleX; },
     setScaleY (state, payload) { state.scale.y = payload.scaleY; }

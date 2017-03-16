@@ -51,7 +51,7 @@ export default {
         }
     },
     updateSpaceWithData (state, payload) {
-        const space = payload.space;
+        var space = payload.space;
         Object.assign(space, payload);
         delete space.space;
     },

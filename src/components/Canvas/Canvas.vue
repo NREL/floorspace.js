@@ -17,6 +17,7 @@ import methods from './methods'
 import { mapState } from 'vuex'
 import geometryHelpers from './../../store/modules/geometry/helpers.js'
 import modelHelpers from './../../store/modules/models/helpers.js'
+import applicationHelpers from './../../store/modules/application/helpers.js'
 export default {
     name: 'canvas',
     data () {
@@ -76,6 +77,8 @@ export default {
     },
     computed: {
         ...mapState({
+
+            currentMode: state => state.application.currentSelections.mode,
             currentTool: state => state.application.currentSelections.tool,
 
             currentSpace: state => state.application.currentSelections.space,
@@ -141,10 +144,26 @@ export default {
         */
         polygons () {
             return this.currentStoryGeometry.faces.map((face) => {
+                const faceModel = modelHelpers.modelForFace(this.$store.state.models, face.id);
+                if (!faceModel) {debugger}
+                var color = faceModel.color, object;
+                if (faceModel.type === 'space' && this.currentMode === 'thermal_zones') {
+                    object = modelHelpers.libraryObjectWithId(this.$store.state.models, faceModel.thermal_zone_id)
+                    color = object ? object.color : applicationHelpers.config.palette.neutral;
+                } else if (faceModel.type === 'space' && this.currentMode === 'space_type') {
+                    object = modelHelpers.libraryObjectWithId(this.$store.state.models, faceModel.space_type_id)
+                    color = object ? object.color : applicationHelpers.config.palette.neutral;
+                } else if (faceModel.type === 'space' && this.currentMode === 'building_units') {
+                    object = modelHelpers.libraryObjectWithId(this.$store.state.models, faceModel.building_unit_id)
+                    color = object ? object.color : applicationHelpers.config.palette.neutral;
+                } else {
+                    color = faceModel.color;
+                }
+
                 return {
                     face_id: face.id,
                     // TODO: lookup the story/space/shading associated with the face
-                    color: modelHelpers.modelForFace(this.$store.state.models, face.id) && modelHelpers.modelForFace(this.$store.state.models, face.id).color,
+                    color: color,
                     points: face.edgeRefs.map((edgeRef) => {
                         const edge = geometryHelpers.edgeForId(edgeRef.edge_id, this.currentStoryGeometry),
                             // look up the vertex associated with v1 unless the edge reference on the face is reversed
@@ -181,6 +200,7 @@ export default {
             this.points = [];
             this.drawPolygons();
         },
+        currentMode () { this.drawPolygons(); },
         polygons () { this.drawPolygons(); },
         points () {
             this.drawPoints();

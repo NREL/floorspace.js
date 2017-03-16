@@ -66,10 +66,19 @@ export default {
     },
 
     setApplicationTool (context, payload) {
-        // check that the requested rendering mode exists
+        // check that the requested rendering tool exists
         if (~context.state.tools.indexOf(payload.tool)) {
             context.commit('setApplicationTool', {
                 tool: payload.tool
+            });
+        }
+    },
+
+    setApplicationMode (context, payload) {
+        // check that the requested rendering mode exists
+        if (~context.state.modes.indexOf(payload.mode)) {
+            context.commit('setApplicationMode', {
+                mode: payload.mode
             });
         }
     },
