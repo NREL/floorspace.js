@@ -55,9 +55,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
                     <input v-if="!inputTypeForKey(column)" :value="valueForKey(object, column)" @change="setValueForKey($event, object, column, $event.target.value)" readonly>
                     <input v-if="inputTypeForKey(column) === 'text'" :value="valueForKey(object, column)" @change="setValueForKey($event, object, column, $event.target.value)">
                     <div v-if="inputTypeForKey(column) === 'select'" class='input-select'>
-                        <select  >
-                            <option  @click="setValueForKey($event, object, column, $event.target.value)" :selected="!valueForKey(object, column)" value="null">None</option>
-                            <option @click="setValueForKey($event, object, column, $event.target.value)" v-for='(id, name) in selectOptionsForObjectAndKey(object, column)' :value="id" :selected="valueForKey(object, column)===name">{{ name }}</option>
+                        <select @change="setValueForKey($event, object, column, $event.target.value)" >
+                            <option :selected="!valueForKey(object, column)" value="null">None</option>
+                            <option v-for='(id, name) in selectOptionsForObjectAndKey(object, column)' :value="id" :selected="valueForKey(object, column)===name">{{ name }}</option>
                         </select>
                         <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
                             <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
@@ -227,15 +227,15 @@ export default {
         setValueForKey (event, object, key, value) {
             // must update the object so that the input field value does not reset
             const result = helpers.setValueForKey(object, this.$store, this.type, key, value);
-            // if (!result.success) {
-            //     this.validationErrors.push({
-            //         object_id: object.id,
-            //         key: key,
-            //         value: value,
-            //         message: result.error,
-            //         visible: false
-            //     });
-            // }
+            if (!result.success) {
+                this.validationErrors.push({
+                    object_id: object.id,
+                    key: key,
+                    value: value,
+                    message: result.error,
+                    visible: false
+                });
+            }
         },
         errorForObjectAndKey (object, key) {
             if (key) {

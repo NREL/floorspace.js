@@ -150,7 +150,7 @@ export default {
                 if (faceModel.type === 'space' && this.currentMode === 'thermal_zones') {
                     object = modelHelpers.libraryObjectWithId(this.$store.state.models, faceModel.thermal_zone_id)
                     color = object ? object.color : applicationHelpers.config.palette.neutral;
-                } else if (faceModel.type === 'space' && this.currentMode === 'space_type') {
+                } else if (faceModel.type === 'space' && this.currentMode === 'space_types') {
                     object = modelHelpers.libraryObjectWithId(this.$store.state.models, faceModel.space_type_id)
                     color = object ? object.color : applicationHelpers.config.palette.neutral;
                 } else if (faceModel.type === 'space' && this.currentMode === 'building_units') {
