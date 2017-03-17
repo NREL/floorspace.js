@@ -22,6 +22,13 @@ const map = {
                 input_type: 'text',
                 private: false,
                 validator: validators.name
+            },
+            color: {
+                displayName: 'Color',
+                readonly: false,
+                input_type: 'color',
+                private: false,
+                validator: validators.color
             }
         },
         init: factory.BuildingUnit
@@ -40,6 +47,13 @@ const map = {
                 input_type: 'text',
                 private: false,
                 validator: validators.name
+            },
+            color: {
+                displayName: 'Color',
+                readonly: false,
+                input_type: 'color',
+                private: false,
+                validator: validators.color
             }
         },
         init: factory.ThermalZone
@@ -58,6 +72,13 @@ const map = {
                 input_type: 'text',
                 private: false,
                 validator: validators.name
+            },
+            color: {
+                displayName: 'Color',
+                readonly: false,
+                input_type: 'color',
+                private: false,
+                validator: validators.color
             }
         },
         init: factory.SpaceType
@@ -312,6 +333,13 @@ const map = {
                     const constructionSet = state.models.library.construction_sets.find(c => c.id === space.construction_set_id);
                     return constructionSet ? constructionSet.name : null;
                 }
+            },
+            color: {
+                displayName: 'Color',
+                readonly: false,
+                input_type: 'color',
+                private: false,
+                validator: validators.color
             }
         }
     },
@@ -335,6 +363,10 @@ const map = {
                 private: true
             },
             face_id: {
+                readonly: true,
+                private: true
+            },
+            color: {
                 readonly: true,
                 private: true
             }

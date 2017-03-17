@@ -52,8 +52,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
                         </svg>
                         <span>{{ errorForObjectAndKey(object, column).message }}</span>
                     </div>
-                    <input v-if="!inputTypeForKey(column)" :value="valueForKey(object, column)" @change="setValueForKey($event, object, column, $event.target.value)" readonly>
-                    <input v-if="inputTypeForKey(column) === 'text'" :value="valueForKey(object, column)" @change="setValueForKey($event, object, column, $event.target.value)">
+                    <input v-if="!inputTypeForKey(column)" :value="valueForKey(object, column)" @change="setValueForKey(object, column, $event.target.value)" readonly>
+                    <input v-if="inputTypeForKey(column) === 'text'" :value="valueForKey(object, column)" @change="setValueForKey(object, column, $event.target.value)">
+
+                    <input v-if="inputTypeForKey(column) === 'color'" :ref="'nav-color-picker-' + object.id" :value="valueForKey(object, column)" @change="setValueForKey(object, column, $event.target.value)">
+
+
                     <div v-if="inputTypeForKey(column) === 'select'" class='input-select'>
                         <select @change="setValueForKey($event, object, column, $event.target.value)" >
                             <option :selected="!valueForKey(object, column)" value="null">None</option>
@@ -80,6 +84,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
 <script>
 import helpers from './../store/modules/models/helpers'
 
+const Huebee = require('Huebee');
 export default {
     name: 'library',
     data() {
@@ -88,11 +93,13 @@ export default {
             sortKey: 'id',
             sortDescending: true,
             type: null,
-            validationErrors: []
+            validationErrors: [],
+            huebs: []
         };
     },
     mounted () {
         this.type = Object.keys(this.extendedLibrary)[8];
+        this.configurePickers();
     },
     computed: {
         /*
@@ -224,7 +231,7 @@ export default {
         * dispatch an update action for the supplied object
         * store errors if validation fails
         */
-        setValueForKey (event, object, key, value) {
+        setValueForKey (object, key, value) {
             // must update the object so that the input field value does not reset
             const result = helpers.setValueForKey(object, this.$store, this.type, key, value);
             if (!result.success) {
@@ -306,12 +313,26 @@ export default {
 
         selectOptionsForObjectAndKey (object, key) {
             return helpers.selectOptionsForKey(object, this.$store.state, this.type, key);
+        },
+        configurePickers () {
+            this.huebs = [];
+            for (var ref in this.$refs) {
+                if (this.$refs.hasOwnProperty(ref)) {
+                    this.huebs[ref] = new Huebee(this.$refs[ref][0], {
+                        saturations: 1
+                    });
+                    this.huebs[ref].on('change', ( color, hue, sat, lum ) => {
+                        //this.$refs[ref][0].value = color;
+                        const object = helpers.libraryObjectWithId(this.$store.state.models, ref.replace('nav-color-picker-', ''));
+                        this.setValueForKey(object, 'color', color);
+                    });
+                }
+            }
         }
     },
     watch: {
-        displayObjects () {
-            //this.validationErrors = [];
-        },
+        $refs () { this.configurePickers(); },
+        displayObjects () { this.configurePickers(); },
         type () {
             this.search = '';
             this.sortKey = 'id';
@@ -324,6 +345,8 @@ export default {
 
 <style lang='scss' scoped>
 @import './../scss/config';
+@import './../../node_modules/huebee/dist/huebee.min.css';
+
 #library {
     background-color: $gray-darkest;
     border-top: 1px solid $gray-medium;
