@@ -10,9 +10,9 @@ export default {
 
     // face for the shading or space being edited
     currentSelectionsFace (state, getters, rootState, rootGetters) {
-        if (state.currentSelections.space) {
+        if (state.currentSelections.space && state.currentSelections.space.face_id) {
             return helpers.faceForId(state.currentSelections.space.face_id, getters['currentStoryGeometry']);
-        } else if (state.currentSelections.shading) {
+        } else if (state.currentSelections.shading && state.currentSelections.shading.face_id) {
             return helpers.faceForId(state.currentSelections.shading.face_id, getters['currentStoryGeometry']);
         }
     }
