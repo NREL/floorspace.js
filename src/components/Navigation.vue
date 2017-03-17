@@ -10,16 +10,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <nav id="navigation">
     <section id="selections">
         <div class='input-select'>
-            <select v-model='currentStory'>
-                <option v-for='story in stories' :value="story">{{ story.name }}</option>
-            </select>
-            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
-                <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
-            </svg>
-        </div>
-
-        <div class='input-select'>
-            <label>Mode</label>
             <select v-model='mode'>
                 <option v-for='mode in modes' :value="mode">{{ displayNameForMode(mode) }}</option>
             </select>
@@ -27,6 +17,19 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
             </svg>
         </div>
+
+        <button @click="createItem('stories')">
+            <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                <path d="M208 122h-74V48c0-3.534-2.466-6.4-6-6.4s-6 2.866-6 6.4v74H48c-3.534 0-6.4 2.466-6.4 6s2.866 6 6.4 6h74v74c0 3.534 2.466 6.4 6 6.4s6-2.866 6-6.4v-74h74c3.534 0 6.4-2.466 6.4-6s-2.866-6-6.4-6z"/>
+            </svg>
+            {{displayNameForMode('stories')}}
+        </button>
+        <button @click="createItem(mode)">
+            <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                <path d="M208 122h-74V48c0-3.534-2.466-6.4-6-6.4s-6 2.866-6 6.4v74H48c-3.534 0-6.4 2.466-6.4 6s2.866 6 6.4 6h74v74c0 3.534 2.466 6.4 6 6.4s6-2.866 6-6.4v-74h74c3.534 0 6.4-2.466 6.4-6s-2.866-6-6.4-6z"/>
+            </svg>
+            {{displayNameForMode(mode)}}
+        </button>
     </section>
 
     <section id="breadcrumbs">
@@ -38,19 +41,33 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             </template>
         </span>
 
-        <button @click="createItem" id="new-item" height="50" viewBox="0 0 256 256" width="50" xmlns="http://www.w3.org/2000/svg">
-            New {{displayNameForMode(mode)}}
-        </button>
     </section>
 
-    <section id="list">
-        <div v-for="item in items" :key="item.id" :class="{ active: currentSubSelection && currentSubSelection.id === item.id }" @click="selectItem(item)">
-            {{item.name}}
-            <svg @click="destroyItem(item)" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
-            </svg>
-        </div>
-    </section>
+    <div id="navigation-search" class="input-text">
+        <label>Search</label>
+        <input v-model="search">
+    </div>
+
+    <div id="list">
+        <section id="story-list">
+            <div v-for="item in stories" :key="item.id" :class="{ active: currentStory && currentStory.id === item.id }" @click="selectItem(item, 'stories')" :style="{'background-color': item && item.color }">
+                {{item.name}}
+                <svg @click="destroyItem(item)" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
+                </svg>
+            </div>
+        </section>
+
+        <section id="subselection-list">
+            <div v-for="item in items" :key="item.id" :class="{ active: currentSubSelection && currentSubSelection.id === item.id }" @click="selectItem(item, mode)" :style="{'background-color': item && currentSubSelection && currentSubSelection.id === item.id ? item.color : ''}">
+                <span :style="{'background-color': item && item.color }"></span>
+                {{item.name}}
+                <svg @click="destroyItem(item)" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
+                </svg>
+            </div>
+        </section>
+    </div>
 
 </nav>
 </template>
@@ -63,7 +80,9 @@ import applicationHelpers from './../store/modules/application/helpers'
 export default {
     name: 'navigation',
     data() {
-        return {};
+        return {
+            search: ''
+        };
     },
     mounted () {
         this.mode = 'spaces';
@@ -73,38 +92,48 @@ export default {
         * arrays of all stories, building_units, space_types, and thermal_zones (top level)
         */
         ...mapState({
-            stories: state => state.models.stories,
             building_units: state => state.models.library.building_units,
             space_types: state => state.models.library.space_types,
             thermal_zones: state => state.models.library.thermal_zones,
         }),
+
+        stories() { return this.$store.state.models.stories.filter(s => ~s.name.toLowerCase().indexOf(this.search.toLowerCase())); },
+
         // spaces and shading for currently selected story
         spaces () { return this.currentStory.spaces; },
         shading () { return this.currentStory.shading; },
 
         // list items to display for current mode
         items () {
+            var items = [];
             switch (this.mode) {
                 case 'stories':
-                    return this.stories;
+                    items = this.stories;
+                    break;
                 case 'spaces':
-                    return this.spaces;
+                    items = this.spaces;
+                    break;
                 case 'shading':
-                    return this.shading;
+                    items = this.shading;
+                    break;
                 case 'building_units':
-                    return this.building_units;
+                    items = this.building_units;
+                    break;
                 case 'thermal_zones':
-                    return this.thermal_zones;
+                    items = this.thermal_zones;
+                    break;
                 case 'space_types':
-                    return this.space_types;
+                    items = this.space_types;
+                    break;
             }
-            return [];
+            return items.filter(i => ~i.name.toLowerCase().indexOf(this.search.toLowerCase()));
         },
         mode: {
             get () { return this.$store.state.application.currentSelections.mode; },
             set (mode) { this.$store.dispatch('application/setApplicationMode', { 'mode': mode }); }
         },
         modes () { return this.$store.state.application.modes; },
+
         /*
         * current selection getters and setters
         * these dispatch actions to update the data store when a new item is selected
@@ -153,8 +182,8 @@ export default {
     },
     methods: {
         // initialize an empty story, space, shading, building_unit, or thermal_zone depending on the selected mode
-        createItem () {
-            switch (this.mode) {
+        createItem (mode) {
+            switch (mode) {
                 case 'stories':
                     this.$store.dispatch('models/initStory');
                     break;
@@ -213,8 +242,8 @@ export default {
                     break;
             }
         },
-        selectItem (item) {
-            switch (this.mode) {
+        selectItem (item, mode) {
+            switch (mode) {
                 case 'stories':
                     this.currentStory = item;
                     break;
@@ -260,31 +289,67 @@ export default {
         display: flex;
         padding: .25rem;
         justify-content: space-between;
+        button {
+            display: flex;
+            line-height: 1rem;
+            svg {
+                height: 1rem;
+                margin: 0 .25rem 0 -.1rem;
+                width: 1rem;
+                path {
+                    fill: $gray-lightest;
+                }
+            }
+        }
     }
-    #breadcrumbs, #list > div {
+
+    #navigation-search {
+        padding: .5rem 1rem;
+        border-bottom: 1px solid $gray-darkest;
+    }
+
+    #breadcrumbs, #story-list > div, #subselection-list > div {
         align-items: center;
         display: flex;
         justify-content: space-between;
-        padding: 0 1rem;
     }
 
     #list {
-        overflow: scroll;
-        height: calc(100% - 5rem);
-        > div  {
-            cursor: pointer;
-            height: 2rem;
-            &.active {
-                background-color: $gray-medium-light;
-                svg {
-                    cursor: pointer;
+        height: 100%;
+        display: flex;
+        #story-list {
+            border-right: 1px solid $gray-darkest;
+            width: 6rem;
+        }
+        #subselection-list {
+            flex-grow: 2;
+        }
+
+        #story-list, #subselection-list {
+            overflow: scroll;
+            height: calc(100% - 5rem);
+            > div  {
+                border-bottom: 1px solid $gray-darkest;
+                cursor: pointer;
+                height: 2rem;
+                padding: 0 .5rem;
+                span {
+                    display: inline-block;
                     height: 1rem;
-                    path {
-                        fill: $gray-lightest;
-                    }
-                    &:hover {
+                    width: 1rem;
+                }
+                &.active {
+                    color: $secondary;
+                    svg {
+                        cursor: pointer;
+                        height: 1rem;
                         path {
-                            fill: $primary;
+                            fill: $gray-lightest;
+                        }
+                        &:hover {
+                            path {
+                                fill: $primary;
+                            }
                         }
                     }
                 }
@@ -297,6 +362,7 @@ export default {
         border-bottom: 1px solid $gray-darkest;
         border-top: 1px solid $gray-darkest;
         height: 2.5rem;
+        padding: 0 1rem;
         span {
             cursor: pointer;
         }

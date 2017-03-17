@@ -39,7 +39,7 @@
         fill-opacity: 0.5;
         stroke: $gray-light;
         &.currentSpace, &.currentShading {
-            stroke: $gray-light;
+            stroke: $secondary;
         }
     }
 }
