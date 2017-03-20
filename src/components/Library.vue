@@ -55,11 +55,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
                     <input v-if="!inputTypeForKey(column)" :value="valueForKey(object, column)" @change="setValueForKey(object, column, $event.target.value)" readonly>
                     <input v-if="inputTypeForKey(column) === 'text'" :value="valueForKey(object, column)" @change="setValueForKey(object, column, $event.target.value)">
 
-                    <input v-if="inputTypeForKey(column) === 'color'" :ref="'nav-color-picker-' + object.id" :value="valueForKey(object, column)" @change="setValueForKey(object, column, $event.target.value)">
-
+                    <div v-if="inputTypeForKey(column) === 'color'" class='input-color'>
+                        <input v-if="inputTypeForKey(column) === 'color'" :ref="'nav-color-picker-' + object.id" :value="valueForKey(object, column)" @change="setValueForKey(object, column, $event.target.value)">
+                    </div>
 
                     <div v-if="inputTypeForKey(column) === 'select'" class='input-select'>
-                        <select @change="setValueForKey($event, object, column, $event.target.value)" >
+                        <select @change="setValueForKey(object, column, $event.target.value)" >
                             <option :selected="!valueForKey(object, column)" value="null">None</option>
                             <option v-for='(id, name) in selectOptionsForObjectAndKey(object, column)' :value="id" :selected="valueForKey(object, column)===name">{{ name }}</option>
                         </select>
@@ -94,7 +95,7 @@ export default {
             sortDescending: true,
             type: null,
             validationErrors: [],
-            huebs: []
+            huebs: {}
         };
     },
     mounted () {
@@ -170,7 +171,6 @@ export default {
         /*
         * return all objects in the extended library for a given type to be displayed at one time
         * filters by the search term
-        * TODO: sorts
         * objects are deep copies to avoid mutating the store
         */
         displayObjects () {
@@ -289,6 +289,9 @@ export default {
                     object: object
                 });
             }
+            // if (this.huebs['nav-color-picker-' + object.id]) {
+            //     delete this.huebs['nav-color-picker-' + object.id];
+            // }
         },
         classForObjectRow (object) {
 
@@ -315,24 +318,30 @@ export default {
             return helpers.selectOptionsForKey(object, this.$store.state, this.type, key);
         },
         configurePickers () {
-            this.huebs = [];
-            for (var ref in this.$refs) {
-                if (this.$refs.hasOwnProperty(ref)) {
-                    this.huebs[ref] = new Huebee(this.$refs[ref][0], {
-                        saturations: 1
-                    });
-                    this.huebs[ref].on('change', ( color, hue, sat, lum ) => {
-                        //this.$refs[ref][0].value = color;
-                        const object = helpers.libraryObjectWithId(this.$store.state.models, ref.replace('nav-color-picker-', ''));
-                        this.setValueForKey(object, 'color', color);
-                    });
+            // initials on multiple elements with loop
+            const inputs = document.querySelectorAll('.input-color > input');
+            for (var i = 0; i < inputs.length; i++) {
+                if (this.huebs[i]) {
+                    inputs[i].removeEventListener('change',  this.huebs[i].handler);
                 }
+            }
+
+            this.huebs = {};
+
+            console.log("inputs", inputs);
+            for (var i = 0; i < inputs.length; i++) {
+                this.huebs[i] = new Huebee(inputs[i], {
+                    saturations: 1
+                });
+                this.huebs[i].handler = (color, h, s, l) => {
+                    this.setValueForKey(this.displayObjects[i], 'color', color);
+                }
+                inputs[i].addEventListener('change', this.huebs[i].handler);
             }
         }
     },
     watch: {
-        $refs () { this.configurePickers(); },
-        displayObjects () { this.configurePickers(); },
+        displayObjects () { this.$nextTick(this.configurePickers); },
         type () {
             this.search = '';
             this.sortKey = 'id';

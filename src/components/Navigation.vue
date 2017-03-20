@@ -18,12 +18,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             </svg>
         </div>
 
-        <button @click="createItem('stories')">
-            <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                <path d="M208 122h-74V48c0-3.534-2.466-6.4-6-6.4s-6 2.866-6 6.4v74H48c-3.534 0-6.4 2.466-6.4 6s2.866 6 6.4 6h74v74c0 3.534 2.466 6.4 6 6.4s6-2.866 6-6.4v-74h74c3.534 0 6.4-2.466 6.4-6s-2.866-6-6.4-6z"/>
-            </svg>
-            {{displayNameForMode('stories')}}
-        </button>
         <button @click="createItem(mode)">
             <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
                 <path d="M208 122h-74V48c0-3.534-2.466-6.4-6-6.4s-6 2.866-6 6.4v74H48c-3.534 0-6.4 2.466-6.4 6s2.866 6 6.4 6h74v74c0 3.534 2.466 6.4 6 6.4s6-2.866 6-6.4v-74h74c3.534 0 6.4-2.466 6.4-6s-2.866-6-6.4-6z"/>
@@ -33,6 +27,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     </section>
 
     <section id="breadcrumbs">
+        <button @click="createItem('stories')">
+            <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                <path d="M208 122h-74V48c0-3.534-2.466-6.4-6-6.4s-6 2.866-6 6.4v74H48c-3.534 0-6.4 2.466-6.4 6s2.866 6 6.4 6h74v74c0 3.534 2.466 6.4 6 6.4s6-2.866 6-6.4v-74h74c3.534 0 6.4-2.466 6.4-6s-2.866-6-6.4-6z"/>
+            </svg>
+            {{displayNameForMode('stories')}}
+        </button>
         <span @click="clearSubSelections">
             {{ currentStory.name }}
             <template v-if="mode !== 'stories' && currentSubSelection">
@@ -289,16 +289,17 @@ export default {
         display: flex;
         padding: .25rem;
         justify-content: space-between;
-        button {
-            display: flex;
-            line-height: 1rem;
-            svg {
-                height: 1rem;
-                margin: 0 .25rem 0 -.1rem;
-                width: 1rem;
-                path {
-                    fill: $gray-lightest;
-                }
+    }
+
+    #selections > button, #breadcrumbs > button {
+        display: flex;
+        line-height: 1rem;
+        svg {
+            height: 1rem;
+            margin: 0 .25rem 0 -.1rem;
+            width: 1rem;
+            path {
+                fill: $gray-lightest;
             }
         }
     }
@@ -362,8 +363,10 @@ export default {
         border-bottom: 1px solid $gray-darkest;
         border-top: 1px solid $gray-darkest;
         height: 2.5rem;
+        justify-content: flex-start;
         padding: 0 1rem;
         span {
+            margin-left: 1rem;
             cursor: pointer;
         }
         svg {
