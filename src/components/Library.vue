@@ -56,7 +56,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
                     <input v-if="inputTypeForKey(column) === 'text'" :value="valueForKey(object, column)" @change="setValueForKey(object, column, $event.target.value)">
 
                     <div v-if="inputTypeForKey(column) === 'color'" class='input-color'>
-                        <input v-if="inputTypeForKey(column) === 'color'" :ref="'nav-color-picker-' + object.id" :value="valueForKey(object, column)" @change="setValueForKey(object, column, $event.target.value)">
+                        <input v-if="inputTypeForKey(column) === 'color'" :object-id="object.id" :value="valueForKey(object, column)" @change="setValueForKey(object, column, $event.target.value)">
                     </div>
 
                     <div v-if="inputTypeForKey(column) === 'select'" class='input-select'>
@@ -289,12 +289,8 @@ export default {
                     object: object
                 });
             }
-            // if (this.huebs['nav-color-picker-' + object.id]) {
-            //     delete this.huebs['nav-color-picker-' + object.id];
-            // }
         },
         classForObjectRow (object) {
-
             var classList = "";
             if (this.errorForObjectAndKey(object, null)) {
                 classList += " error"
@@ -321,22 +317,27 @@ export default {
             // initials on multiple elements with loop
             const inputs = document.querySelectorAll('.input-color > input');
             for (var i = 0; i < inputs.length; i++) {
-                if (this.huebs[i]) {
-                    inputs[i].removeEventListener('change',  this.huebs[i].handler);
-                }
+                // if (this.huebs[inputs[i].getAttribute("object-id")]) {
+                //     console.log("rm listener object id",  inputs[i].getAttribute("object-id"));
+                //     this.huebs[inputs[i].getAttribute("object-id")].off('change', this.huebs[inputs[i].getAttribute("object-id")].handler);
+                // }
             }
 
-            this.huebs = {};
+            // this.huebs = {};
 
             console.log("inputs", inputs);
-            for (var i = 0; i < inputs.length; i++) {
-                this.huebs[i] = new Huebee(inputs[i], {
+            for (let i = 0; i < inputs.length; i++) {
+                const object_id = inputs[i].getAttribute("object-id");
+                console.log("set listener object id", object_id);
+                this.huebs[object_id] = new Huebee(inputs[i], {
                     saturations: 1
                 });
-                this.huebs[i].handler = (color, h, s, l) => {
-                    this.setValueForKey(this.displayObjects[i], 'color', color);
+                this.huebs[object_id].handler = (color, h, s, l) => {
+                    const object = helpers.libraryObjectWithId(this.$store.state.models, object_id);
+                    console.log("handler for", object);
+                    this.setValueForKey(object, 'color', color);
                 }
-                inputs[i].addEventListener('change', this.huebs[i].handler);
+                this.huebs[object_id].on('change', this.huebs[object_id].handler);
             }
         }
     },
