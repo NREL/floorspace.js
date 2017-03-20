@@ -44,7 +44,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
         </thead>
 
         <tbody>
-            <tr v-for='object in displayObjects' @click="currentObject = object" :class="classForObjectRow(object)" :style="{'background-color': currentObject && currentObject.id === object.id ? object.color : '' }">
+            <tr v-for='object in displayObjects' :key="object.id" @click="currentObject = object" :class="classForObjectRow(object)" :style="{'background-color': currentObject && currentObject.id === object.id ? object.color : '' }">
                 <td v-for="column in columns" @mouseover="toggleError(object, column, true)" @mouseout="toggleError(object, column, false)">
                     <div v-if="errorForObjectAndKey(object, column) && errorForObjectAndKey(object, column).visible " class="tooltip-error">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14">
@@ -314,27 +314,13 @@ export default {
             return helpers.selectOptionsForKey(object, this.$store.state, this.type, key);
         },
         configurePickers () {
-            // initials on multiple elements with loop
             const inputs = document.querySelectorAll('.input-color > input');
-            for (var i = 0; i < inputs.length; i++) {
-                // if (this.huebs[inputs[i].getAttribute("object-id")]) {
-                //     console.log("rm listener object id",  inputs[i].getAttribute("object-id"));
-                //     this.huebs[inputs[i].getAttribute("object-id")].off('change', this.huebs[inputs[i].getAttribute("object-id")].handler);
-                // }
-            }
-
-            // this.huebs = {};
-
-            console.log("inputs", inputs);
             for (let i = 0; i < inputs.length; i++) {
                 const object_id = inputs[i].getAttribute("object-id");
-                console.log("set listener object id", object_id);
-                this.huebs[object_id] = new Huebee(inputs[i], {
-                    saturations: 1
-                });
+
+                this.huebs[object_id] = new Huebee(inputs[i], { saturations: 1 });
                 this.huebs[object_id].handler = (color, h, s, l) => {
                     const object = helpers.libraryObjectWithId(this.$store.state.models, object_id);
-                    console.log("handler for", object);
                     this.setValueForKey(object, 'color', color);
                 }
                 this.huebs[object_id].on('change', this.huebs[object_id].handler);
