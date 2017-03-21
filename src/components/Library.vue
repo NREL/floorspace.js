@@ -387,7 +387,7 @@ export default {
         thead tr, tbody tr {
 
             &.error {
-                background: rgba($primary, .5);
+                background: rgba($primary, .5)!important;
             }
 
             .tooltip-error {

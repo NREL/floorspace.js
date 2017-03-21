@@ -8,13 +8,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
     <nav id="toolbar">
-        <section class="tools">
+        <section class="settings">
             <button @click="$emit('setBackground')" id="import">Import Background</button>
             <button @click="$emit('createObject')">Create Object</button>
-            <button @click="exportData" id="export">Export Model</button>
-        </section>
 
-        <section class="settings">
             <template v-if="tool !== '3d'">
                 <div class="input-number">
                     <label>min_x</label>
@@ -65,15 +62,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 </div>
             </template>
 
-            <div class="input-select" id="drawing-tool">
-                <label>tool</label>
-                <select v-model="tool">
-                    <option v-for="tool in tools">{{ tool }}</option>
-                </select>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14" height="10px">
-                    <path d="M.5 0v14l11-7-11-7z" transform="translate(13) rotate(90)"></path>
-                </svg>
-            </div>
+
+            <button @click="exportData" id="export">Export Model</button>
+        </section>
+
+        <section class="tools">
+            <button @click="tool = item" :class="{ active: tool === item }" v-for="item in availableTools">{{ item }}</button>
         </section>
 
     </nav>
@@ -94,7 +88,16 @@ export default {
         }
     },
     computed: {
-        ...mapState({ tools: state => state.application.tools }),
+        ...mapState({
+            currentMode: state => state.application.currentSelections.mode
+        }),
+        availableTools () {
+            return this.$store.state.application.tools.filter((t) => {
+                return (this.currentMode !== 'spaces' && this.currentMode !== 'shading') && (t == 'Rectangle' || t == 'Polygon') ? false : true;
+            });
+
+
+        },
         gridVisible: {
             get () { return this.$store.state.project.grid.visible; },
             set (val) { this.$store.dispatch('project/setGridVisible', { visible: val }); }
@@ -155,9 +158,10 @@ export default {
         align-items: center;
         display: flex;
         height: 2.5rem;
-        &.tools {
+        padding:0 2.5rem;
+        &.settings {
             background-color: $gray-medium-dark;
-            padding:0 2.5rem;
+           text-align: right;
             > button {
                 margin-right: 1rem;
             }
@@ -167,22 +171,15 @@ export default {
                 right: 2.5rem;
             }
         }
-        &.settings {
+        &.tools {
             background-color: $gray-medium-light;
-            div:first-child {
-                margin-left: 5rem;
-            }
-            .input-checkbox, .input-number {
-                margin-left: 1rem;
-            }
+            justify-content: flex-end;
         }
 
-        >div {
+        >div, >button {
             margin: 0 1rem 0 0;
-            &#drawing-tool {
-                position: absolute;
-                right: 5rem;
-
+            .active {
+                border: 1px solid $primary;
             }
         }
     }
