@@ -161,7 +161,7 @@ export default {
         padding:0 2.5rem;
         &.settings {
             background-color: $gray-medium-dark;
-           text-align: right;
+            text-align: right;
             > button {
                 margin-right: 1rem;
             }
@@ -178,7 +178,7 @@ export default {
 
         >div, >button {
             margin: 0 1rem 0 0;
-            .active {
+            &.active {
                 border: 1px solid $primary;
             }
         }

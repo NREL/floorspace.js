@@ -19,7 +19,7 @@ export default {
             mode: 'stories'
         },
         modes: [ 'spaces', 'shading', 'building_units', 'thermal_zones', 'space_types'],
-        tools: ['Rectangle', 'Polygon', 'Place Component', 'Apply Property', '3d', 'Background'],
+        tools: ['Rectangle', 'Polygon', 'Eraser', 'Place Component', 'Apply Property', '3d', 'Background'],
         // d3 scale functions translate screen pixel coordinates into RWU values to use within the SVG's grid system
         scale: {
             x: null,

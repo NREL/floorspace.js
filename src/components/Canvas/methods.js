@@ -98,14 +98,14 @@ export default {
         }
 
         // if rectangle drawing tool is selected and a point has already been drawn on the canvas, close and save the rectangle
-        if (this.currentTool === 'Rectangle' || this.currentTool === 'Polygon') {
+        if (this.currentTool === 'Rectangle' || this.currentTool === 'Polygon' || this.currentTool === 'Eraser') {
             // store the point
             this.points.push(point);
         }
 
         // create a rectangular face if two points have been drawn to the canvas in rectangle tool
-        if (this.currentTool === 'Rectangle' && this.points.length === 2) {
-            this.saveRectuangularFace();
+        if ((this.currentTool === 'Rectangle' || this.currentTool === 'Eraser') && this.points.length === 2) {
+            this.currentTool === 'Rectangle' ? this.saveRectuangularFace() : this.eraseRectangularSelection();
         }
 
         function round (point, spacing) {
@@ -164,6 +164,27 @@ export default {
             payload.shading = this.currentShading;
         }
         this.$store.dispatch('geometry/createFaceFromPoints', payload);
+        this.points = [];
+    },
+
+
+    // ****************** ERASING FACES ****************** //
+    /*
+    * cut out a rectangular selection based on the two points on the canvas
+    * save the rectangle as a face for the selected space or shading
+    */
+    eraseRectangularSelection () {
+        // infer 4 corners of the rectangle based on the two points that have been drawn
+        const payload = {
+            points: [
+                this.points[0],
+                { x: this.points[1].x, y: this.points[0].y },
+                this.points[1],
+                { x: this.points[0].x, y: this.points[1].y }
+            ]
+        };
+
+        this.$store.dispatch('geometry/eraseSelection', payload);
         this.points = [];
     },
 
