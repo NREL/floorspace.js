@@ -7,7 +7,8 @@
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 const d3 = require('d3');
-import helpers from './../../store/modules/geometry/helpers.js'
+import geometryHelpers from './../../store/modules/geometry/helpers.js'
+import modelHelpers from './../../store/modules/models/helpers.js'
 
 export default {
     // ****************** USER INTERACTION EVENTS ****************** //
@@ -257,6 +258,17 @@ export default {
         d3.select('#canvas svg').selectAll('polygon')
             .data(this.polygons).enter()
             .append('polygon')
+            .on('click', (d) => {
+                if (this.currentTool === 'Select') {
+                    const model = modelHelpers.modelForFace(this.$store.state.models, d.face_id);
+                    console.log("clicky", d, model)
+                    if (model.type === 'space') {
+                        this.$store.dispatch('application/setCurrentSpace', { 'space': model });
+                    } else if (model.type === 'shading') {
+                        this.$store.dispatch('application/setCurrentShading', { 'shading': model });
+                    }
+                } 
+            })
             .attr('points', (d, i) => {
                 var pointsString = '';
                 d.points.forEach((p) => {
@@ -270,6 +282,8 @@ export default {
             })
             .attr('fill', d => d.color)
             .attr('vector-effect', 'non-scaling-stroke');
+
+
 
         // remove expired points and guidelines
         d3.selectAll('#canvas path').remove();
@@ -375,12 +389,12 @@ export default {
     snappingEdgeData (point) {
         // filter all edges within the snap tolerance of the point
         const snappingCandidates = this.currentStoryGeometry.edges.map((e) => {
-            const v1 = helpers.vertexForId(e.v1, this.currentStoryGeometry),
-                v2 = helpers.vertexForId(e.v2, this.currentStoryGeometry);
+            const v1 = geometryHelpers.vertexForId(e.v1, this.currentStoryGeometry),
+                v2 = geometryHelpers.vertexForId(e.v2, this.currentStoryGeometry);
 
             if (!v1 || !v2) { debugger; }
 
-            const edgeResult = helpers.projectToEdge(point, v1, v2);
+            const edgeResult = geometryHelpers.projectToEdge(point, v1, v2);
             return edgeResult ? {
                 dist: edgeResult.dist,
                 scalar: edgeResult.scalar,
