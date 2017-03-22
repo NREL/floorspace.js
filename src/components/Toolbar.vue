@@ -9,8 +9,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
     <nav id="toolbar">
         <section class="settings">
-            <button @click="$emit('setBackground')" id="import">Import Background</button>
-            <button @click="$emit('createObject')">Create Object</button>
+            <div id="modal-buttons">
+                <button @click="$emit('setBackground')">Import Background</button>
+                <button @click="$emit('createObject')">Create Object</button>
+            </div>
 
             <template v-if="tool !== '3d'">
                 <div class="input-number">
@@ -62,8 +64,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 </div>
             </template>
 
+            <div id="import-export">
+                <input ref="importInput" @change="importData" type="file"/>
 
-            <button @click="exportData" id="export">Export Model</button>
+                <button @click="$refs.importInput.click()" id="import">Import Model</button>
+                <button @click="exportData" id="export">Export Model</button>
+            </div>
+
         </section>
 
         <section class="tools">
@@ -85,6 +92,17 @@ export default {
             const data = this.$store.getters['exportData'];
             console.log(data);
             return data;
+        },
+        importData (event) {
+            const file = event.target.files[0],
+                reader = new FileReader();
+            reader.addEventListener("load", () => {
+                this.$store.dispatch('importData', {
+                    data: JSON.parse(reader.result)
+                });
+            }, false);
+
+            if (file) { reader.readAsText(file); }
         }
     },
     computed: {
@@ -162,14 +180,27 @@ export default {
         &.settings {
             background-color: $gray-medium-dark;
             text-align: right;
-            > button {
-                margin-right: 1rem;
+            #modal-buttons {
+                margin-right: 2rem;
             }
-            #export {
-                border: 1px solid $primary;
+
+            #import-export {
                 position: absolute;
                 right: 2.5rem;
+                #import {
+                    margin-right: 1rem;
+                    border: 1px solid $secondary;
+                }
+                #export {
+                    border: 1px solid $primary;
+                }
             }
+
+            input[type="file"] {
+                position: absolute;
+                visibility: hidden;
+            }
+
         }
         &.tools {
             background-color: $gray-medium-light;

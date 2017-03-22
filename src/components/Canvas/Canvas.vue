@@ -182,8 +182,14 @@ export default {
         mapUrl () { this.setBackground(); },
         backgroundSrc () { this.setBackground(); },
 
-        x_spacing () { this.calcScales(); },
-        y_spacing () { this.calcScales(); },
+        x_spacing () {
+            this.calcScales();
+            this.drawGridLines();
+        },
+        y_spacing () {
+            this.calcScales();
+            this.drawGridLines();
+        },
         viewbox () {
             this.calcScales();
             this.drawGridLines();

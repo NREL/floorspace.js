@@ -66,5 +66,13 @@ export default {
         const object = payload.object;
         Object.assign(object, payload);
         delete object.object;
+    },
+
+    // import model data
+    importData (state, payload) {
+        state.stories = payload.stories;
+        state.images = payload.images;
+        state.library = payload.library;
+        
     }
 }

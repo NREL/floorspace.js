@@ -41,5 +41,12 @@ export default {
         payload.geometry.faces.splice(payload.geometry.faces.findIndex((f) => {
             return f.id === payload.face_id;
         }), 1);
+    },
+
+    // import geometry data
+    importData (state, payload) {
+
+        state = JSON.parse(JSON.stringify(payload.data));
+        debugger
     }
 }

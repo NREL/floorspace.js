@@ -9,6 +9,7 @@ import geometry from './modules/geometry/index.js'
 import models from './modules/models/index.js'
 
 import exportData from './utilities/export.js'
+import importData from './utilities/import.js'
 
 const store = new Vuex.Store({
     strict: process.env.NODE_ENV !== 'production',
@@ -20,6 +21,9 @@ const store = new Vuex.Store({
     },
     getters: {
         exportData: exportData
+    },
+    actions: {
+        importData: importData
     }
 });
 

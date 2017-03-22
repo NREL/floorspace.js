@@ -151,14 +151,9 @@ export default {
             }
         }
 
-        input {
-            &[type="file"] {
-                border: 1px solid $gray-lightest;
-                height: 0;
-                position: absolute;
-                visibility: hidden;
-                width: 0;
-            }
+        input[type="file"] {
+            position: absolute;
+            visibility: hidden;
         }
     }
 </style>

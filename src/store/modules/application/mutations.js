@@ -12,5 +12,12 @@ export default {
     setApplicationMode (state, payload) { state.currentSelections.mode = payload.mode; },
     // d3 scaling functions
     setScaleX (state, payload) { state.scale.x = payload.scaleX; },
-    setScaleY (state, payload) { state.scale.y = payload.scaleY; }
+    setScaleY (state, payload) { state.scale.y = payload.scaleY; },
+
+    // import application data
+    importData (state, payload) {
+        state.currentSelections = payload.currentSelections;
+        state.modes = payload.modes;
+        state.tools = payload.tools;
+    }
 }
