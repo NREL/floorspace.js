@@ -261,13 +261,12 @@ export default {
             .on('click', (d) => {
                 if (this.currentTool === 'Select') {
                     const model = modelHelpers.modelForFace(this.$store.state.models, d.face_id);
-                    console.log("clicky", d, model)
                     if (model.type === 'space') {
                         this.$store.dispatch('application/setCurrentSpace', { 'space': model });
                     } else if (model.type === 'shading') {
                         this.$store.dispatch('application/setCurrentShading', { 'shading': model });
                     }
-                } 
+                }
             })
             .attr('points', (d, i) => {
                 var pointsString = '';

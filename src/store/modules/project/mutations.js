@@ -93,14 +93,5 @@ export default {
         if ('zoom' in payload) {
             state.map.zoom = payload.zoom;
         }
-    },
-
-    // import project data
-    importData (state, payload) {
-        state.config = payload.config;
-        state.grid = payload.grid;
-        state.view = payload.view;
-        state.map = payload.map;
-
     }
 }

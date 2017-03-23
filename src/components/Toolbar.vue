@@ -98,6 +98,8 @@ export default {
                 reader = new FileReader();
             reader.addEventListener("load", () => {
                 this.$store.dispatch('importData', {
+                    clientWidth: document.getElementById('svgcanvas').clientWidth,
+                    clientHeight: document.getElementById('svgcanvas').clientHeight,
                     data: JSON.parse(reader.result)
                 });
             }, false);
