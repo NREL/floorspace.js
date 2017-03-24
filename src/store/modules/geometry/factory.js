@@ -1,10 +1,10 @@
-import generateId from './../../utilities/generateId'
+import idFactory from './../../utilities/generateId'
 import helpers from './helpers'
 
 export default {
     Vertex (x, y) {
         return {
-            id: generateId(),
+            id: idFactory.generate(),
             x: x,
             y: y,
             get X () { return this.x; },
@@ -13,7 +13,7 @@ export default {
     },
     Edge (v1, v2) {
         return {
-            id: generateId(),
+            id: idFactory.generate(),
             v1: v1,
             v2: v2,
             isShared (geometry) { return helpers.facesForEdge(this.id, geometry).length > 1; }
@@ -21,13 +21,13 @@ export default {
     },
     Face (edgeRefs) {
         return {
-            id: generateId(),
+            id: idFactory.generate(),
             edgeRefs: edgeRefs
         }
     },
     Geometry () {
         return {
-            'id': generateId(),
+            'id': idFactory.generate(),
             'vertices': [],
             'edges': [],
             'faces': []

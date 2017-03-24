@@ -40,7 +40,7 @@ export default {
                 });
 
                 if (affectedSpace) {
-                    context.commit('models/updateSpaceWithData', {
+                    context.dispatch('models/updateSpaceWithData', {
                         space: affectedSpace,
                         face_id: null
                     }, { root: true });
@@ -94,6 +94,7 @@ export default {
         // set of points to translate to vertices when creating the new face
         var points = payload.points,
             target = payload.space || payload.shading;
+            
         target = modelHelpers.libraryObjectWithId(context.rootState.models, target.id);
 
         const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'],
@@ -111,13 +112,14 @@ export default {
             const existingFace = geometryHelpers.faceForId(target.face_id, currentStoryGeometry),
                 existingFaceVertices = geometryHelpers.verticesForFace(existingFace, currentStoryGeometry);
 
+
             if (payload.space) {
-                context.commit('models/updateSpaceWithData', {
+                context.dispatch('models/updateSpaceWithData', {
                     space: target,
                     face_id: null
                 }, { root: true });
             } else if (payload.shading) {
-                context.commit('models/updateShadingWithData', {
+                context.dispatch('models/updateShadingWithData', {
                     shading: target,
                     face_id: null
                 }, { root: true });
@@ -258,7 +260,7 @@ export default {
         });
 
         if (payload.space) {
-            context.commit('models/updateSpaceWithData', {
+            context.dispatch('models/updateSpaceWithData', {
                 space: target,
                 face_id: face.id
             }, { root: true });

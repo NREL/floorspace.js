@@ -164,6 +164,7 @@ export default {
         } else if (this.currentShading) {
             payload.shading = this.currentShading;
         }
+        
         this.$store.dispatch('geometry/createFaceFromPoints', payload);
         this.points = [];
     },

@@ -100,8 +100,8 @@ export default {
         stories() { return this.$store.state.models.stories.filter(s => ~s.name.toLowerCase().indexOf(this.search.toLowerCase())); },
 
         // spaces and shading for currently selected story
-        spaces () { return this.currentStory.spaces; },
-        shading () { return this.currentStory.shading; },
+        spaces () { return this.$store.state.application.currentSelections.story.spaces; },
+        shading () { return this.$store.state.application.currentSelections.story.shading; },
 
         // list items to display for current mode
         items () {

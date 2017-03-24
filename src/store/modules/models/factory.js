@@ -1,11 +1,11 @@
-import generateId from './../../utilities/generateId'
+import idFactory from './../../utilities/generateId'
 import generateColor from './../../utilities/generateColor'
 import appconfig from './../application/appconfig.js'
 
 export default {
     Story: function () {
         return {
-            id: generateId(),
+            id: idFactory.generate(),
             handle: null,
             name: null,
             geometry_id: null,
@@ -22,7 +22,7 @@ export default {
     },
     Space: function () {
         return {
-            id: generateId(),
+            id: idFactory.generate(),
             color: generateColor('space'),
             name: null,
             handle: null,
@@ -36,7 +36,7 @@ export default {
     },
     Shading: function () {
         return {
-            id: generateId(),
+            id: idFactory.generate(),
             color: appconfig.palette.shading,
             name: null,
             handle: null,
@@ -45,52 +45,52 @@ export default {
     },
     Image: function (src) {
         return {
-            id: generateId(),
+            id: idFactory.generate(),
             src: src
         };
     },
     BuildingUnit: function (name) {
         return {
-            id: generateId(),
+            id: idFactory.generate(),
             color: generateColor('building_unit'),
             name: name
         };
     },
     ThermalZone: function (name) {
         return {
-            id: generateId(),
+            id: idFactory.generate(),
             color: generateColor('thermal_zone'),
             name: name
         };
     },
     SpaceType: function (name) {
         return {
-            id: generateId(),
+            id: idFactory.generate(),
             color: generateColor('space_type'),
             name: name
         };
     },
     Construction: function (name) {
         return {
-            id: generateId(),
+            id: idFactory.generate(),
             name: name
         };
     },
     ConstructionSet: function (name) {
         return {
-            id: generateId(),
+            id: idFactory.generate(),
             name: name
         };
     },
     Window: function (name) {
         return {
-            id: generateId(),
+            id: idFactory.generate(),
             name: name
         };
     },
     DaylightingControl: function (name) {
         return {
-            id: generateId(),
+            id: idFactory.generate(),
             name: name
         };
     }

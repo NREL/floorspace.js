@@ -1,3 +1,5 @@
+import idFactory from './generateId'
+
 const d3 = require('d3');
 
 export default function importData (context, payload)  {
@@ -50,6 +52,19 @@ export default function importData (context, payload)  {
         .domain([0, payload.clientHeight])
         .range([payload.data.project.view.min_y, payload.data.project.view.max_y])
 
+    // set currentSelections so that references are pointed to objects in the store instead of deep copies
+    const currentSelections = payload.data.application.currentSelections,
+        currentStory = payload.data.stories.find(s => s.id === currentSelections.story.id)
+    currentSelections.story = currentStory;
+    currentSelections.space = currentSelections.space ? currentStory.spaces.find(s => s.id === currentSelections.space.id) : null;
+    currentSelections.shading = currentSelections.shading ? currentStory.shading.find(s => s.id === currentSelections.shading.id) : null;
+
+    currentSelections.building_unit = currentSelections.building_unit ? payload.data.library.building_units.find(b => b.id === currentSelections.building_unit.id) : null;
+    currentSelections.thermal_zone = currentSelections.thermal_zone ? payload.data.library.thermal_zones.find(t => t.id === currentSelections.thermal_zone.id) : null;
+    currentSelections.space_type = currentSelections.space_type ? payload.data.library.space_types.find(s => s.id === currentSelections.space_type.id) : null;
+
+
+    idFactory.setId(1000000 + parseInt(idFactory.generate()))
     context.commit('importState', {
         project: payload.data.project,
         application: payload.data.application,
@@ -60,4 +75,6 @@ export default function importData (context, payload)  {
         },
         geometry: geometry
     });
+
+
 }
