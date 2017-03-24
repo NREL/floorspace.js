@@ -19,10 +19,10 @@ export default {
     */
     highlightSnapTarget (e) {
         // unhighlight all edges and vertices
-        d3.selectAll('#canvas .highlight').remove();
+        d3.selectAll('#canvas .highlight, #canvas .gridpoint').remove();
 
-        const point = this.getEventRWU(e),
-            snapTarget = this.findSnapTarget(point);
+        const point = this.getEventRWU(e);
+        var snapTarget = this.findSnapTarget(point);
 
         if (snapTarget && snapTarget.type === 'edge') {
             d3.select('#canvas svg')
@@ -51,6 +51,24 @@ export default {
                 .attr('rx', this.calcRadius(5, 'x'))
                 .attr('ry', this.calcRadius(5, 'y'))
                 .classed('highlight', true)
+                .attr('vector-effect', 'non-scaling-stroke');
+        } else if (!snapTarget && this.gridVisible) {
+            // calculate an offset for the gridlines based on the viewbox min_x and min_y
+            const xAdjustment = this.min_x % this.x_spacing,
+                yAdjustment = this.min_y % this.y_spacing;
+                
+            // round point RWU coordinates to nearest gridline
+            snapTarget = {
+                x: round(this.scaleX(e.offsetX) - xAdjustment, this.x_spacing) + xAdjustment,
+                y: round(this.scaleY(e.offsetY) - yAdjustment, this.y_spacing) + yAdjustment
+            };
+            d3.select('#canvas svg')
+                .append('ellipse')
+                .attr('cx', snapTarget.x)
+                .attr('cy', snapTarget.y)
+                .attr('rx', this.calcRadius(2, 'x'))
+                .attr('ry', this.calcRadius(2, 'y'))
+                .classed('gridpoint', true)
                 .attr('vector-effect', 'non-scaling-stroke');
         }
     },
@@ -108,21 +126,6 @@ export default {
         if ((this.currentTool === 'Rectangle' || this.currentTool === 'Eraser') && this.points.length === 2) {
             this.currentTool === 'Rectangle' ? this.saveRectuangularFace() : this.eraseRectangularSelection();
         }
-
-        function round (point, spacing) {
-            var result,
-                sign = point < 0 ? -1 : 1;
-            point = Math.abs(point);
-            if (point % spacing < spacing / 2) {
-                result = point - (point % spacing);
-            } else {
-                result = point + spacing - (point % spacing);
-            }
-            // handle negatives
-            result *= sign;
-            // floating point precision
-            return Math.round(result * 10000000000000) / 10000000000000;
-        }
     },
 
 
@@ -164,7 +167,7 @@ export default {
         } else if (this.currentShading) {
             payload.shading = this.currentShading;
         }
-        
+
         this.$store.dispatch('geometry/createFaceFromPoints', payload);
         this.points = [];
     },
@@ -207,13 +210,20 @@ export default {
             .attr('cy', (d, i) => { return d.y; })
             .attr('rx', this.calcRadius(2, 'x'))
             .attr('ry', this.calcRadius(2, 'y'))
-            .attr('vector-effect', 'non-scaling-stroke');
+            .attr('vector-effect', 'non-scaling-stroke')
+            .on('mouseover', function (d, i) {
+                this.setAttribute('fill', '#839199');
+            })
+            .on('mouseout', function (d, i) {
+                this.setAttribute('fill', 'none');
+            });
 
         // connect the points with a guideline
         this.connectCanvasPoints();
 
         // when the first point in the polygon is clicked, close the shape
         d3.select('#canvas svg').select('ellipse')
+
             .on('click', () => {
                 // store the points in the polygon as a face
                 this.savePolygonFace();
@@ -223,7 +233,8 @@ export default {
             .attr('rx', this.calcRadius(7, 'x'))
             .attr('ry', this.calcRadius(7, 'y'))
             .classed('origin', true) // apply custom CSS for origin of polygons
-            .attr('vector-effect', 'non-scaling-stroke');
+            .attr('vector-effect', 'non-scaling-stroke')
+            .attr('fill', 'none');
     },
 
     /*
@@ -445,7 +456,6 @@ export default {
         }
         // res.x += this.min_x;
         // res.y += this.min_x;
-        // console.log(res);
         return res;
     },
 
@@ -488,4 +498,19 @@ export default {
                 .range([this.min_y, this.max_y])
         });
     }
+}
+
+function round (point, spacing) {
+    var result,
+        sign = point < 0 ? -1 : 1;
+    point = Math.abs(point);
+    if (point % spacing < spacing / 2) {
+        result = point - (point % spacing);
+    } else {
+        result = point + spacing - (point % spacing);
+    }
+    // handle negatives
+    result *= sign;
+    // floating point precision
+    return Math.round(result * 10000000000000) / 10000000000000;
 }

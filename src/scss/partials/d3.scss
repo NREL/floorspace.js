@@ -11,19 +11,17 @@
 // Vue's inline template styling will not work with dynamically created markup
 #canvas svg {
     // points
-    ellipse {
+    ellipse:not(.origin) {
         fill: $gray-light;
         stroke: $gray-light;
-        &.origin {
-            fill: none;
-            &:hover {
-                fill: $gray-light;
-            }
-        }
+        &.gridpoint {}
         &.highlight {
             stroke: $secondary;
             fill: $secondary;
         }
+    }
+    ellipse.origin {
+        stroke: $gray-light;
     }
     // gridlines
     line.horizontal, line.vertical {
