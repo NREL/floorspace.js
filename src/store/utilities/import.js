@@ -3,7 +3,7 @@ import idFactory from './generateId'
 const d3 = require('d3');
 
 export default function importData (context, payload)  {
-    // format the geometry
+    // GEOMETRY
     const geometry = JSON.parse(JSON.stringify(payload.data.stories.map(s => s.geometry)));
     for (var i = 0; i < geometry.length; i++) {
         geometry[i].faces = geometry[i].faces.map((f) => {
@@ -38,12 +38,13 @@ export default function importData (context, payload)  {
     }
 
 
-    // format models.stories
+    // MODELS
     payload.data.stories.forEach((story) => {
         story.geometry_id = story.geometry.id;
         delete story.geometry;
     });
 
+    // APPLICATION
     // update scales with new grid boundaries
     payload.data.application.scale.x = d3.scaleLinear()
         .domain([0, payload.clientWidth])
@@ -63,8 +64,21 @@ export default function importData (context, payload)  {
     currentSelections.thermal_zone = currentSelections.thermal_zone ? payload.data.library.thermal_zones.find(t => t.id === currentSelections.thermal_zone.id) : null;
     currentSelections.space_type = currentSelections.space_type ? payload.data.library.space_types.find(s => s.id === currentSelections.space_type.id) : null;
 
+    var max_id = 0;
+    (function loopOnObject (obj) {
+        for (var key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                max_id = (key === 'id' && Number(obj[key]) > max_id) ? Number(obj[key]) : max_id;
+                if (obj[key] !== null && typeof obj[key] === 'object') {
+                    loopOnObject(obj[key]);
+                }
+            }
+        }
+    })(payload);
+    
+    console.log(max_id);
 
-    idFactory.setId(1000000 + parseInt(idFactory.generate()))
+    idFactory.setId(max_id);
     context.commit('importState', {
         project: payload.data.project,
         application: payload.data.application,
