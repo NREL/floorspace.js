@@ -32,7 +32,9 @@ const helpers = {
             return difference[0].map((p) => {
                 return {
                     x: p.X / this.clipScale(),
-                    y: p.Y / this.clipScale()
+                    y: p.Y / this.clipScale(),
+                    X: p.X / this.clipScale(),
+                    Y: p.Y / this.clipScale()
                 };
             });
         }
@@ -45,7 +47,9 @@ const helpers = {
             return intersection[0].map((p) => {
                 return {
                     x: p.X / this.clipScale(),
-                    y: p.Y / this.clipScale()
+                    y: p.Y / this.clipScale(),
+                    X: p.X / this.clipScale(),
+                    Y: p.Y / this.clipScale()
                 };
             });
         }
@@ -58,7 +62,9 @@ const helpers = {
             return union[0].map((p) => {
                 return {
                     x: p.X / this.clipScale(),
-                    y: p.Y / this.clipScale()
+                    y: p.Y / this.clipScale(),
+                    X: p.X / this.clipScale(),
+                    Y: p.Y / this.clipScale()
                 };
             });
         }

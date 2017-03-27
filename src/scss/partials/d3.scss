@@ -16,8 +16,8 @@
         stroke: $gray-light;
         &.gridpoint {}
         &.highlight {
-            stroke: $secondary;
-            fill: $secondary;
+            stroke: red;
+            fill: red;
         }
     }
     ellipse.origin {
@@ -29,7 +29,7 @@
         opacity: .25;
     }
     line.highlight {
-        stroke: $secondary;
+        stroke: red;
     }
 
     // shapes

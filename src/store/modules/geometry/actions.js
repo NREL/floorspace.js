@@ -19,27 +19,24 @@ export default {
     */
     eraseSelection (context, payload) {
         // set of points defining the selection
-        const points = payload.points,
-            currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'],
-            // translate points to clipper's path format
-            clipperPaths = points.map(p => ({ X: p.x, Y: p.y }));
+        const points = payload.points.map(p => ({ ...p, X: p.x, Y: p.y })),
+            currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'];
 
         // validation - a selection must have at least 3 vertices and area
-        if (payload.points.length < 3 || !geometryHelpers.areaOfFace(clipperPaths)) { return; }
+        if (payload.points.length < 3 || !geometryHelpers.areaOfFace(points)) { return; }
 
         /*
         * loop through all existing faces and checking for an intersection with the selection
-        * if there is an intersection, destroy the existing face and
-        * recreate it from the original area minus the intersection
+        * if there is an intersection, subtract it from the existing face
         */
         currentStoryGeometry.faces.forEach((existingFace) => {
-            const existingFaceVertices = geometryHelpers.verticesForFace(existingFace, currentStoryGeometry),
-                overlap = geometryHelpers.intersectionOfFaces(existingFaceVertices, clipperPaths, currentStoryGeometry);
-            if (overlap) {
+            const existingFaceVertices = geometryHelpers.verticesForFace(existingFace, currentStoryGeometry);
+            // test for overlap between existing face and selection
+            if (geometryHelpers.intersectionOfFaces(existingFaceVertices, points, currentStoryGeometry)) {
                 const affectedModel = modelHelpers.modelForFace(context.rootState.models, existingFace.id);
 
-                // destroy previous face
-                context.dispatch(affectedModel.type === "space" ? 'models/updateSpaceWithData' : 'models/updateShadingWithData', {
+                // destroy existing face
+                context.dispatch(affectedModel.type === 'space' ? 'models/updateSpaceWithData' : 'models/updateShadingWithData', {
                     [affectedModel.type]: affectedModel,
                     face_id: null
                 }, { root: true });
@@ -49,11 +46,11 @@ export default {
                     face: existingFace
                 });
 
-                // create updated face
-                const differenceOfFaces = geometryHelpers.differenceOfFaces(existingFaceVertices, clipperPaths, currentStoryGeometry);
+                // create new face by subtracting overlap (intersection) from the existing face's original area
+                const differenceOfFaces = geometryHelpers.differenceOfFaces(existingFaceVertices, points, currentStoryGeometry);
                 if (differenceOfFaces) {
                     context.dispatch('createFaceFromPoints', {
-                        'space': affectedModel,
+                        [affectedModel.type]: affectedModel,
                         'geometry': currentStoryGeometry,
                         'points': differenceOfFaces
                     });
@@ -68,68 +65,54 @@ export default {
     */
     createFaceFromPoints (context, payload) {
         // set of points to translate to vertices when creating the new face
-        var points = payload.points,
-            target = payload.space || payload.shading;
-
-        target = modelHelpers.libraryObjectWithId(context.rootState.models, target.id);
-
+        var points = payload.points.map(p => ({ ...p, X: p.x, Y: p.y }));
         const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'],
-            // translate points to clipper's path format
-            clipperPaths = points.map(p => ({ X: p.x, Y: p.y }));
+            target = modelHelpers.libraryObjectWithId(context.rootState.models, payload.space ? payload.space.id : payload.shading.id);
 
         // validation - a face must have at least 3 vertices and area
-        if (payload.points.length < 3 || !geometryHelpers.areaOfFace(clipperPaths)) { return; }
+        if (points.length < 3 || !geometryHelpers.areaOfFace(points)) { return; }
 
         /*
         * if the space already has an existing face, destroy it
-        * create a face from the union of the new face and existing face if they intersect or share an edge
+        * create a face from the union of the new face and existing face if they intersect TODO: or share an edge
         */
         if (target.face_id) {
             const existingFace = geometryHelpers.faceForId(target.face_id, currentStoryGeometry),
                 existingFaceVertices = geometryHelpers.verticesForFace(existingFace, currentStoryGeometry);
 
-
-            if (payload.space) {
-                context.dispatch('models/updateSpaceWithData', {
-                    space: target,
-                    face_id: null
-                }, { root: true });
-            } else if (payload.shading) {
-                context.dispatch('models/updateShadingWithData', {
-                    shading: target,
-                    face_id: null
-                }, { root: true });
-            }
+            // destroy the face
+            context.dispatch(target.type === 'space' ? 'models/updateSpaceWithData' : 'models/updateShadingWithData', {
+                [target.type]: target,
+                face_id: null
+            }, { root: true });
 
             context.dispatch('destroyFaceAndDescendents', {
                 geometry: currentStoryGeometry,
                 face: existingFace
             });
 
-            if (geometryHelpers.intersectionOfFaces(existingFaceVertices, clipperPaths, currentStoryGeometry)) {
-                points = geometryHelpers.unionOfFaces(existingFaceVertices, clipperPaths, currentStoryGeometry);
+            // check for intersection between new and original face
+            if (geometryHelpers.intersectionOfFaces(existingFaceVertices, points, currentStoryGeometry)) {
+                points = geometryHelpers.unionOfFaces(existingFaceVertices, points, currentStoryGeometry);
             }
 
+            // check for shared edge between new and original face
+
             // TODO: use the union if the new face has an edge snapped to the existing face
+
+
         }
 
-        /*
-        * prevent overlapping faces by looping through all existing faces and checking for an intersection with the new face
-        * if there is an intersection, destroy the existing face
-        * recreate it from the difference between its original shape minus the intersection
-        */
-        context.dispatch('eraseSelection', {
-            points: points
-        });
+        // prevent overlapping faces by erasing existing geometry covered by the points defining the new face
+        context.dispatch('eraseSelection', { points: points });
 
-        /*
-        * build an array of vertices for the face from the coodrinates of each point
-        * if a point was snapped to an existing vertex during drawing, it will have a vertex id
-        * reuse the existing vertex if it was not destroyed during the set operations
-        */
-        const faceVertices = points.map((p, i) => {
-            if (p.id && geometryHelpers.vertexForId(p.id, currentStoryGeometry)) {
-                return geometryHelpers.vertexForId(p.id, currentStoryGeometry);
+        // build an array of vertices for the face being created
+        const faceVertices = points.map((p) => {
+            // if a point was snapped to an existing vertex during drawing, it will have a vertex id
+            const existingVertex = p.id && geometryHelpers.vertexForId(p.id, currentStoryGeometry);
+            // reuse the existing vertex or create a new one
+            if (existingVertex) {
+                return existingVertex;
             } else {
                 const vertex = new factory.Vertex(p.x, p.y);
                 context.commit('createVertex', {
@@ -350,7 +333,6 @@ export default {
             });
         }
     },
-
 
     destroyFaceAndDescendents (context, payload) {
         const geometry = payload.geometry,
