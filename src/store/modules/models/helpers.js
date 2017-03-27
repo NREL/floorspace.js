@@ -98,7 +98,7 @@ const helpers = {
     map: map,
 
     /*
-    * searches local state's library, stories, and spaces for an object with a given id
+    * searches local state's library, stories, spaces, and shading for an object with a given id
     */
     libraryObjectWithId (state, id) {
         var result;
@@ -117,7 +117,7 @@ const helpers = {
         if (!result) {
             for (var i = 0; i < state.stories.length; i++) {
                 const story = state.stories[i];
-                result = result || story.spaces.find(s => s.id === id);
+                result = result || story.spaces.find(s => s.id === id) || story.shading.find(s => s.id === id);
             }
         }
         return result;

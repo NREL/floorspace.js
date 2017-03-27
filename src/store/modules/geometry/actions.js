@@ -15,72 +15,48 @@ export default {
 
     /*
     * Erase the selection defined by a set of points on all faces on the current story
+    * Dispatched by the eraser tool and by the createFaceFromPoints action (to prevent overlapping faces)
     */
     eraseSelection (context, payload) {
-        // set of points to translate to vertices when creating the new face
+        // set of points defining the selection
         const points = payload.points,
             currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'],
             // translate points to clipper's path format
             clipperPaths = points.map(p => ({ X: p.x, Y: p.y }));
 
-        // validation - a face must have at least 3 vertices and area
+        // validation - a selection must have at least 3 vertices and area
         if (payload.points.length < 3 || !geometryHelpers.areaOfFace(clipperPaths)) { return; }
 
         /*
         * loop through all existing faces and checking for an intersection with the selection
-        * if there is an intersection, destroy the existing face
-        * recreate it from the difference between its original shape minus the intersection
+        * if there is an intersection, destroy the existing face and
+        * recreate it from the original area minus the intersection
         */
         currentStoryGeometry.faces.forEach((existingFace) => {
             const existingFaceVertices = geometryHelpers.verticesForFace(existingFace, currentStoryGeometry),
                 overlap = geometryHelpers.intersectionOfFaces(existingFaceVertices, clipperPaths, currentStoryGeometry);
             if (overlap) {
-                const affectedSpace = context.rootState.application.currentSelections.story.spaces.find((space) => {
-                    return space.face_id === existingFace.id;
+                const affectedModel = modelHelpers.modelForFace(context.rootState.models, existingFace.id);
+
+                // destroy previous face
+                context.dispatch(affectedModel.type === "space" ? 'models/updateSpaceWithData' : 'models/updateShadingWithData', {
+                    [affectedModel.type]: affectedModel,
+                    face_id: null
+                }, { root: true });
+
+                context.dispatch('destroyFaceAndDescendents', {
+                    geometry: currentStoryGeometry,
+                    face: existingFace
                 });
 
-                if (affectedSpace) {
-                    context.dispatch('models/updateSpaceWithData', {
-                        space: affectedSpace,
-                        face_id: null
-                    }, { root: true });
-
-                    context.dispatch('destroyFaceAndDescendents', {
-                        geometry: currentStoryGeometry,
-                        face: existingFace
+                // create updated face
+                const differenceOfFaces = geometryHelpers.differenceOfFaces(existingFaceVertices, clipperPaths, currentStoryGeometry);
+                if (differenceOfFaces) {
+                    context.dispatch('createFaceFromPoints', {
+                        'space': affectedModel,
+                        'geometry': currentStoryGeometry,
+                        'points': differenceOfFaces
                     });
-
-                    const differenceOfFaces = geometryHelpers.differenceOfFaces(existingFaceVertices, clipperPaths, currentStoryGeometry);
-                    if (differenceOfFaces) {
-                        context.dispatch('createFaceFromPoints', {
-                            'space': affectedSpace,
-                            'geometry': currentStoryGeometry,
-                            'points': differenceOfFaces
-                        });
-                    }
-                } else {
-                    const affectedShading = context.rootState.application.currentSelections.story.shading.find((shading) => {
-                        return shading.face_id === existingFace.id;
-                    });
-
-                    context.commit('models/updateShadingWithData', {
-                        shading: affectedShading,
-                        face_id: null
-                    }, { root: true });
-
-                    context.dispatch('destroyFaceAndDescendents', {
-                        geometry: currentStoryGeometry,
-                        face: existingFace
-                    });
-
-                    const differenceOfFaces = geometryHelpers.differenceOfFaces(existingFaceVertices, clipperPaths, currentStoryGeometry);
-                    if (differenceOfFaces) {
-                        context.dispatch('createFaceFromPoints', {
-                            shading: affectedShading,
-                            geometry: currentStoryGeometry,
-                            points: differenceOfFaces
-                        });
-                    }
                 }
             }
         });
@@ -94,7 +70,7 @@ export default {
         // set of points to translate to vertices when creating the new face
         var points = payload.points,
             target = payload.space || payload.shading;
-            
+
         target = modelHelpers.libraryObjectWithId(context.rootState.models, target.id);
 
         const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'],
