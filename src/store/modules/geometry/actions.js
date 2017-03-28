@@ -75,24 +75,26 @@ export default {
         ////////////////////////////////////////////////// HANDLE EXISTING FACE ON TARGET //////////////////////////////////////////////////
         /*
         * if the space already has an existing face, destroy it
-        * create a face from the union of the new face and existing face if they intersect TODO: or share an edge
+        * create a face from the union of the new face and existing face if they intersect or share an edge
         */
         if (target.face_id) {
             const existingFace = geometryHelpers.faceForId(target.face_id, currentStoryGeometry),
                 existingFaceVertices = geometryHelpers.verticesForFace(existingFace, currentStoryGeometry);
 
-            var splittingVertexCt = 0;
-            points.forEach((p) => {
-                if (p.splittingEdge && ~existingFace.edgeRefs.map(r => r.edge_id).indexOf(p.splittingEdge.id)) {
-                    splittingVertexCt++;
+            // track whether the same edge on the existing face is split more that once by the new set of points
+            // if a single edge is split multiple times by new points, then the new face shares an edge with the existing face and their union should be used
+            const splitEdges = [];
+            for (var i = 0; i < points.length; i++) {
+                var splitEdge = points[i].splittingEdge;
+                if (splitEdge && ~splitEdges.indexOf(splitEdge)) {
+                    // if an existing face edge has been split twice by the new set of points, use the union
+                    points = geometryHelpers.unionOfFaces(existingFaceVertices, points, currentStoryGeometry);
+                    break;
+                } else if (splitEdge) {
+                    // store existing face edges that have been split by new points
+                    splitEdges.push(splitEdge);
                 }
-            });
-            console.log(splittingVertexCt)
-            // TODO: this does not check that the same edge is being split
-            if (splittingVertexCt >= 2){
-                points = geometryHelpers.unionOfFaces(existingFaceVertices, points, currentStoryGeometry);
             }
-
 
             // destroy the face
             context.dispatch(target.type === 'space' ? 'models/updateSpaceWithData' : 'models/updateShadingWithData', {
@@ -109,7 +111,6 @@ export default {
             if (geometryHelpers.intersectionOfFaces(existingFaceVertices, points, currentStoryGeometry)) {
                 points = geometryHelpers.unionOfFaces(existingFaceVertices, points, currentStoryGeometry);
             }
-
         }
 
         // prevent overlapping faces by erasing existing geometry covered by the points defining the new face
