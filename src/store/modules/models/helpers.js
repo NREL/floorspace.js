@@ -30,7 +30,7 @@ const helpers = {
     /*
     * dispatches an action to set the value for a key on an object
     * if a validator is defined for the object type + key being changed, call the validator before dispatching the action
-    * if validation fails, return { success: false, error: "validator error message" }
+    * if validation fails, return { success: false, error: 'validator error message' }
     * if validation passes or no validator exists (custom user defined keys), return { success: true }
     */
     setValueForKey (object, store, type, key, value) {
@@ -104,20 +104,28 @@ const helpers = {
         var result;
         // search the library
         for (var type in state.library) {
-            if (state.library.hasOwnProperty(type) && !result) {
-                const items = state.library[type];
-                result = items.find(i => i.id === id);
+            if (state.library.hasOwnProperty(type) && !result && state.library[type].find(i => i.id === id)) {
+                result = state.library[type].find(i => i.id === id);
+                result.type = type;
             }
         }
         // search stories
-        if (!result) {
+        if (!result && state.stories.find(s => s.id === id)) {
             result = state.stories.find(s => s.id === id);
+            result.type = 'story';
         }
-        // search spaces
+        // search spaces and shading
         if (!result) {
             for (var i = 0; i < state.stories.length; i++) {
                 const story = state.stories[i];
-                result = result || story.spaces.find(s => s.id === id) || story.shading.find(s => s.id === id);
+                if (!result && story.spaces.find(s => s.id === id)) {
+                    result = story.spaces.find(s => s.id === id);
+                    result.type = 'space';
+                }
+                if (!result && story.shading.find(s => s.id === id)) {
+                    result = story.shading.find(s => s.id === id);
+                    result.type = 'shading';
+                }
             }
         }
         return result;

@@ -75,6 +75,9 @@ const helpers = {
         * and create a single larger face
         */
     },
+    /*
+    * return the set of saved vertices directly on an edge, not including edge endpoints
+    */
     verticesOnEdge (edge, geometry) {
         const edgeV1 = this.vertexForId(edge.v1, geometry),
             edgeV2 = this.vertexForId(edge.v2, geometry);
