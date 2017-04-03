@@ -56,7 +56,7 @@ export default {
             // calculate an offset for the gridlines based on the viewbox min_x and min_y
             const xAdjustment = this.min_x % this.x_spacing,
                 yAdjustment = this.min_y % this.y_spacing;
-                
+
             // round point RWU coordinates to nearest gridline
             snapTarget = {
                 x: round(this.scaleX(e.offsetX) - xAdjustment, this.x_spacing) + xAdjustment,
@@ -366,6 +366,7 @@ export default {
         const snappingCandidates = this.$store.getters['application/currentStoryGeometry'].vertices.filter((v) => {
             const dx = Math.abs(v.x - point.x),
                 dy = Math.abs(v.y - point.y);
+            // use double the snap tolerance for vertices
             return (dx < this.$store.getters['project/snapTolerance'] && dy < this.$store.getters['project/snapTolerance']);
         });
 
