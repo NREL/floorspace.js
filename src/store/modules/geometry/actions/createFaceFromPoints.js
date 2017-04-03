@@ -15,15 +15,78 @@ export default function createFaceFromPoints (context, payload) {
     // validation - a face must have at least 3 vertices and area
     if (points.length < 3 || !geometryHelpers.areaOfFace(points)) { return; }
 
-    // target already has an existing face, destroy it and create a new face from the union of the new points and old face if they intersect
+    /*
+    * if target already has an existing face, destroy existing face and
+    * calculate a new set of points for the new face if they intersect or share an edge
+    */
     if (target.face_id) {
-        points = handleExistingFace(points, currentStoryGeometry, target, context);
+        points = mergeWithExistingFace(points, currentStoryGeometry, target, context);
     }
 
     // prevent overlapping faces by erasing existing geometry covered by the points defining the new face
     context.dispatch('eraseSelection', { points: points });
 
-    ////////////////////////////////////////////////// CREATE AND SAVE GEOMETRY FOR THE FACE //////////////////////////////////////////////////
+    // create and save vertices and edges for the face
+    const face = createFaceGeometry(points, currentStoryGeometry, context);
+
+    // validate and save the face, return if validation fails
+    const validFace = validateAndSaveFace(face, currentStoryGeometry, target, context);
+    if (!validFace) { return; }
+
+    // split edges where vertices touch them
+    splitEdges(currentStoryGeometry, context);
+};
+
+
+
+/*
+* if the target has an existing face - destroy the existing face on the target
+* if the new face being created intersects the existing face or shares an edge with the existing face,
+* update the points used to create the new face to be the UNION of the new and existing faces
+*/
+function mergeWithExistingFace (points, currentStoryGeometry, target, context) {
+    const existingFace = geometryHelpers.faceForId(target.face_id, currentStoryGeometry),
+        existingFaceVertices = geometryHelpers.verticesForFace(existingFace, currentStoryGeometry);
+
+    /*
+    * check if new and existing face share an edge
+    * loop through all points for the new face and check if they are splitting an edge which belongs to the existing face
+    */
+    for (var i = 0; i < points.length; i++) {
+        const splitEdge = points[i].splittingEdge;
+        if (splitEdge && ~existingFace.edgeRefs.map(e => e.edge_id).indexOf(splitEdge.id)) {
+            console.log("do union, point splits edge", existingFace.edgeRefs[existingFace.edgeRefs.map(e => e.edge_id).indexOf(splitEdge.id)]);
+            // new and existing face share an edge - update points to use their union
+            points = geometryHelpers.unionOfFaces(existingFaceVertices, points, currentStoryGeometry);
+        }
+    }
+
+    // check if new and existing face intersect
+    if (geometryHelpers.intersectionOfFaces(existingFaceVertices, points, currentStoryGeometry)) {
+        points = geometryHelpers.unionOfFaces(existingFaceVertices, points, currentStoryGeometry);
+    }
+
+    // destroy the existing face and remove references to it
+    context.dispatch(target.type === 'space' ? 'models/updateSpaceWithData' : 'models/updateShadingWithData', {
+        [target.type]: target,
+        face_id: null
+    }, { root: true });
+
+    context.dispatch('destroyFaceAndDescendents', {
+        geometry: currentStoryGeometry,
+        face: existingFace
+    });
+
+    return points;
+}
+
+/*
+* instantiate vertices, edges, and face for the set of points defining the face being created
+* handle snapped vertiecs - points with an id property
+* and shared edges - edges referencing two vertices with matching ids
+* persist vertices and edges to datastore so that validation on the unsaved face can be done, they will be removed from the store if validation fails
+*/
+function createFaceGeometry (points, currentStoryGeometry, context) {
     // build an array of vertices for the face being created, setting the same ID for points with the same coordinates to prevent overlapping vertices
     const faceVertices = points.map((point) => {
         // if a point was snapped to an existing vertex during drawing, it will have a vertex id
@@ -74,50 +137,49 @@ export default function createFaceFromPoints (context, payload) {
         reverse: e.reverse
     })));
 
+    // return these, they will be used during validation
+    return face;
+}
+
+/*
+* Validate the new face against self intersection by checking for:
+* folded (duplicate geometry) edges referencing the same two endpoints on the same face
+* vertex on the face splitting an edge on the face
+* vertex on the face snapped to another vertex on the face
+* TODO: prevent crossing edges on the same face
+* Save the fave if validation passes, destroy its vertices and edges if validation fails
+*/
+function validateAndSaveFace (face, currentStoryGeometry, target, context) {
+    // vertices and edges on the face being created
+    const faceEdges = geometryHelpers.edgesForFace(face, currentStoryGeometry),
+        faceVertices = geometryHelpers.verticesForFace(face, currentStoryGeometry);
+
+    // validate and save the face
     var validFace = true;
-    /*
-    * Validate the new face against self intersection by checking for:
-    * folded (duplicate geometry) edges referencing the same two endpoints on the same face
-    * vertex on the face splitting an edge on the face
-    * vertex on the face snapped to another vertex on the face
-    * TODO: prevent crossing edges on the same face
-    */
     for (var i = 0; i < faceEdges.length; i++) {
         const edge = faceEdges[i];
 
-        // vertices on the face being created
-        const verticesForFace = geometryHelpers.verticesForFace(face, currentStoryGeometry),
-            // saved vertices which are touching the edge (excluding the edge's endpoints)
-            splittingVertices = geometryHelpers.verticesOnEdge(edge, currentStoryGeometry)
+        // saved vertices which are touching the edge (excluding the edge's endpoints)
+        const splittingVertices = geometryHelpers.verticesOnEdge(edge, currentStoryGeometry)
 
         // if a vertex on the face touches an edge on the face, then the face is self intersecting and invalid
-        for (var j = 0; j < splittingVertices.length; j++) {
+        for (let j = 0; j < splittingVertices.length; j++) {
             const vertex = splittingVertices[j];
-            if (verticesForFace.indexOf(vertex) !== -1) {
+            if (faceVertices.indexOf(vertex) !== -1) {
                 validFace = false;
             }
         }
 
         // if more than one vertex on the face has a single id, the face has snapped to itself and is self intersecting
-        for (var j = 0; j < verticesForFace.length; j++) {
-            const vertex = verticesForFace[j];
-            if (verticesForFace.filter(v => v.id === vertex.id).length >= 2) {
+        for (let j = 0; j < faceVertices.length; j++) {
+            const vertex = faceVertices[j];
+            if (faceVertices.filter(v => v.id === vertex.id).length >= 2) {
                 validFace = false;
             }
         }
-
-        // // if two edges on the same face reference the same two vertices, the face is invalid
-        // faceEdges.forEach((e) => {
-        //     // don't compare an edge to itself
-        //     if (e.id === edge.id) { return; }
-        //     // found another edge with the same v1 and v2 on the face being created
-        //     if ((e.v1 === edge.v1 && e.v2 === edge.v2) || (e.v2 === edge.v1 && e.v1 === edge.v2)) {
-        //         validFace = false;
-        //     }
-        // });
     }
 
-    // save the face if it is valid, otherwise abort and destroy the edges and vertices created earlier to prevent an invalid state
+    // save the face if it is valid, otherwise destroy the edges and vertices created earlier to prevent an invalid state
     if (validFace) {
         context.commit('createFace', {
             face: face,
@@ -134,13 +196,13 @@ export default function createFaceFromPoints (context, payload) {
             geometry: currentStoryGeometry,
             face: face
         });
-        return;
     }
+    return validFace;
+}
 
 
-
-
-
+function splitEdges (currentStoryGeometry, context) {
+    // EDGE SPLITTING
     function splittingVertices () {
         var ct = 0;
         currentStoryGeometry.edges.forEach((edge) => {
@@ -172,45 +234,4 @@ export default function createFaceFromPoints (context, payload) {
             edgeRefs: normalizeEdges
         });
     });
-};
-
-/*
-* destroy the existing face on the target
-* if the new face intersects the existing face or shares an edge with the existing face,
-* update the points used to create the new face to be the UNION of the new and existing faces
-*/
-function handleExistingFace (points, currentStoryGeometry, target, context) {
-    const existingFace = geometryHelpers.faceForId(target.face_id, currentStoryGeometry),
-        existingFaceVertices = geometryHelpers.verticesForFace(existingFace, currentStoryGeometry);
-
-    /*
-    * check if new and existing face share an edge
-    * loop through all points for the new face and check if they are splitting an edge which belongs to the existing face
-    */
-    for (var i = 0; i < points.length; i++) {
-        const splitEdge = points[i].splittingEdge;
-        if (splitEdge && ~existingFace.edgeRefs.map(e => e.edge_id).indexOf(splitEdge.id)) {
-            console.log("do union, point splits edge", existingFace.edgeRefs[existingFace.edgeRefs.map(e => e.edge_id).indexOf(splitEdge.id)]);
-            // new and existing face share an edge - update points to use their union
-            points = geometryHelpers.unionOfFaces(existingFaceVertices, points, currentStoryGeometry);
-        }
-    }
-
-    // check if new and existing face intersect
-    if (geometryHelpers.intersectionOfFaces(existingFaceVertices, points, currentStoryGeometry)) {
-        points = geometryHelpers.unionOfFaces(existingFaceVertices, points, currentStoryGeometry);
-    }
-
-    // destroy the existing face and remove references to it
-    context.dispatch(target.type === 'space' ? 'models/updateSpaceWithData' : 'models/updateShadingWithData', {
-        [target.type]: target,
-        face_id: null
-    }, { root: true });
-
-    context.dispatch('destroyFaceAndDescendents', {
-        geometry: currentStoryGeometry,
-        face: existingFace
-    });
-
-    return points;
 }

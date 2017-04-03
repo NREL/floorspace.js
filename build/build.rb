@@ -34,6 +34,6 @@ html =
     </body>
 </html>"
 
-output_file = File.new('./dist/build.html', 'w')
+output_file = File.new(base_path + '/build.html', 'w')
 output_file.write(html)
 output_file.close
