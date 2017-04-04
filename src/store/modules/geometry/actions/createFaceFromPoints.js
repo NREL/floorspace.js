@@ -33,6 +33,7 @@ export default function createFaceFromPoints (context, payload) {
     // split edges where vertices touch them
     //normalizeAllGeometry(currentStoryGeometry, context);
     splitEdges(currentStoryGeometry, context);
+    connectEdges(currentStoryGeometry, context);
 };
 
 //////////////////////// HELPERS //////////////////////////////
@@ -149,6 +150,8 @@ function createFaceGeometry (points, currentStoryGeometry, context) {
 function validateAndSaveFace (face, currentStoryGeometry, target, context) {
     // vertices and edges on the face being created
     const faceEdges = geometryHelpers.edgesForFace(face, currentStoryGeometry),
+        // faceVertices will include a vertex (the startpoint) for every single edge ref on the face,
+        // so multiple edges referencing the same vertex will result in duplicate vertices in the array, causing our validation to fail as expected
         faceVertices = geometryHelpers.verticesForFace(face, currentStoryGeometry);
 
     // validate and save the face
@@ -171,6 +174,7 @@ function validateAndSaveFace (face, currentStoryGeometry, target, context) {
         for (let j = 0; j < faceVertices.length; j++) {
             const vertex = faceVertices[j];
             if (faceVertices.filter(v => v.id === vertex.id).length >= 2) {
+                debugger
                 validFace = false;
             }
         }
@@ -197,41 +201,6 @@ function validateAndSaveFace (face, currentStoryGeometry, target, context) {
     return validFace;
 }
 
-
-// function splitEdges (currentStoryGeometry, context) {
-//     // EDGE SPLITTING
-//     function splittingVertices () {
-//         var ct = 0;
-//         currentStoryGeometry.edges.forEach((edge) => {
-//             ct += geometryHelpers.verticesOnEdge(edge, currentStoryGeometry).length;
-//         });
-//         return ct;
-//     }
-//     var splitcount = splittingVertices();
-//     // TODO: fix infinite loop on self intersecting polygon shapes
-//     while (splitcount) {
-//         // loop through all edges and divide them at any non endpoint vertices they contain
-//         currentStoryGeometry.edges.forEach((edge) => {
-//             // vertices dividing the current edge
-//             geometryHelpers.verticesOnEdge(edge, currentStoryGeometry).forEach((splittingVertex) => {
-//                 context.dispatch('splitEdge', {
-//                     vertex: splittingVertex,
-//                     edge: edge
-//                 });
-//             });
-//         });
-//         splitcount = splittingVertices();
-//     }
-//
-//     // if the faces which were originally snapped to still exist, normalize their edges
-//     currentStoryGeometry.faces.forEach((affectedFace) => {
-//         const normalizeEdges = geometryHelpers.normalizedEdges(affectedFace, currentStoryGeometry);
-//         context.commit('setEdgeRefsForFace', {
-//             face: affectedFace,
-//             edgeRefs: normalizeEdges
-//         });
-//     });
-// }
 
 /*
 * loop through all edges on the currentStoryGeometry, checking if there are any vertices touching (splitting) them
@@ -311,5 +280,56 @@ function splitEdges (currentStoryGeometry, context) {
                 edge_id: edge.id
             });
         }
+    });
+}
+
+/*
+* order the edgeRefs on each face on the currentStoryGeometry so that all edges are connected from startpoint to endpoint
+* set reverse property on edgeRefs as needed
+*/
+function connectEdges (currentStoryGeometry, context) {
+    currentStoryGeometry.faces.forEach((face) => {
+        const edges = geometryHelpers.edgesForFace(face, currentStoryGeometry);
+        // pick an arbitrary edge (edges[0]) and treat its v2 as the endpoint
+        // all ordering will assume this edge's v1 as the origin of the face
+        var nextEdge = edges[0],
+            endpoint = nextEdge.v2;
+
+        // initialize ordered edgeRef array with our origin edge
+        const connectedEdgeRefs = [];
+        var reverse = false;
+
+        while (true) {
+            connectedEdgeRefs.push({
+                edge_id: nextEdge.id,
+                reverse: reverse
+            });
+            reverse = false;
+
+            // each vertex must be referenced by exactly two edges, it acts as the endpoint for the first edge and the startpoint for the next
+            // look up the next edge by finding the edge on the face referencing the endpoint of the current edge
+            nextEdge = edges.find((edge) => {
+                if (edge.id === nextEdge.id) { return; }
+                // if the next edge is connected to the endpoint of the current edge by its v2 and not its v1, it is reversed
+                if (edge.v2 === endpoint) {
+                    // TODO: why isn't this ever reached?
+                    debugger;
+                    reverse = true;
+                    endpoint = edge.v1;
+                    return true;
+                } else if (edge.v1 === endpoint) {
+                    endpoint = edge.v2;
+                    return true;
+                }
+            });
+            // we've handled all edges in the face and are back to the first edge, break out of the loop
+            if (nextEdge === edges[0]) { break; }
+        }
+
+        // update the face with the ordered edge refs
+        context.commit('setEdgeRefsForFace', {
+            face: face,
+            edgeRefs: connectedEdgeRefs
+        });
     });
 }
