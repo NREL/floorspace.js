@@ -15,10 +15,7 @@ export default function createFaceFromPoints (context, payload) {
     // validation - a face must have at least 3 vertices and area
     if (points.length < 3 || !geometryHelpers.areaOfFace(points)) { return; }
 
-    /*
-    * if target already has an existing face, destroy existing face and
-    * calculate a new set of points for the new face if they intersect or share an edge
-    */
+    // if target already has an existing face, destroy existing face and calculate a new set of points
     if (target.face_id) {
         points = mergeWithExistingFace(points, currentStoryGeometry, target, context);
     }
@@ -34,10 +31,11 @@ export default function createFaceFromPoints (context, payload) {
     if (!validFace) { return; }
 
     // split edges where vertices touch them
+    //normalizeAllGeometry(currentStoryGeometry, context);
     splitEdges(currentStoryGeometry, context);
 };
 
-
+//////////////////////// HELPERS //////////////////////////////
 
 /*
 * if the target has an existing face - destroy the existing face on the target
@@ -55,7 +53,6 @@ function mergeWithExistingFace (points, currentStoryGeometry, target, context) {
     for (var i = 0; i < points.length; i++) {
         const splitEdge = points[i].splittingEdge;
         if (splitEdge && ~existingFace.edgeRefs.map(e => e.edge_id).indexOf(splitEdge.id)) {
-            console.log("do union, point splits edge", existingFace.edgeRefs[existingFace.edgeRefs.map(e => e.edge_id).indexOf(splitEdge.id)]);
             // new and existing face share an edge - update points to use their union
             points = geometryHelpers.unionOfFaces(existingFaceVertices, points, currentStoryGeometry);
         }
@@ -201,37 +198,118 @@ function validateAndSaveFace (face, currentStoryGeometry, target, context) {
 }
 
 
-function splitEdges (currentStoryGeometry, context) {
-    // EDGE SPLITTING
-    function splittingVertices () {
-        var ct = 0;
-        currentStoryGeometry.edges.forEach((edge) => {
-            ct += geometryHelpers.verticesOnEdge(edge, currentStoryGeometry).length;
-        });
-        return ct;
-    }
-    var splitcount = splittingVertices();
-    // TODO: fix infinite loop on self intersecting polygon shapes
-    while (splitcount) {
-        // loop through all edges and divide them at any non endpoint vertices they contain
-        currentStoryGeometry.edges.forEach((edge) => {
-            // vertices dividing the current edge
-            geometryHelpers.verticesOnEdge(edge, currentStoryGeometry).forEach((splittingVertex) => {
-                context.dispatch('splitEdge', {
-                    vertex: splittingVertex,
-                    edge: edge
-                });
-            });
-        });
-        splitcount = splittingVertices();
-    }
+// function splitEdges (currentStoryGeometry, context) {
+//     // EDGE SPLITTING
+//     function splittingVertices () {
+//         var ct = 0;
+//         currentStoryGeometry.edges.forEach((edge) => {
+//             ct += geometryHelpers.verticesOnEdge(edge, currentStoryGeometry).length;
+//         });
+//         return ct;
+//     }
+//     var splitcount = splittingVertices();
+//     // TODO: fix infinite loop on self intersecting polygon shapes
+//     while (splitcount) {
+//         // loop through all edges and divide them at any non endpoint vertices they contain
+//         currentStoryGeometry.edges.forEach((edge) => {
+//             // vertices dividing the current edge
+//             geometryHelpers.verticesOnEdge(edge, currentStoryGeometry).forEach((splittingVertex) => {
+//                 context.dispatch('splitEdge', {
+//                     vertex: splittingVertex,
+//                     edge: edge
+//                 });
+//             });
+//         });
+//         splitcount = splittingVertices();
+//     }
+//
+//     // if the faces which were originally snapped to still exist, normalize their edges
+//     currentStoryGeometry.faces.forEach((affectedFace) => {
+//         const normalizeEdges = geometryHelpers.normalizedEdges(affectedFace, currentStoryGeometry);
+//         context.commit('setEdgeRefsForFace', {
+//             face: affectedFace,
+//             edgeRefs: normalizeEdges
+//         });
+//     });
+// }
 
-    // if the faces which were originally snapped to still exist, normalize their edges
-    currentStoryGeometry.faces.forEach((affectedFace) => {
-        const normalizeEdges = geometryHelpers.normalizedEdges(affectedFace, currentStoryGeometry);
-        context.commit('setEdgeRefsForFace', {
-            face: affectedFace,
-            edgeRefs: normalizeEdges
-        });
+/*
+* loop through all edges on the currentStoryGeometry, checking if there are any vertices touching (splitting) them
+* order the splitting vertices based on where they appear on the original edge
+* build and store a new set of edges by connecting the ordered splitting vertices
+* look up all faces referencing the original edge and replace those references with references to the new edges
+* destroy the original edge
+*/
+function splitEdges (currentStoryGeometry, context) {
+    currentStoryGeometry.edges.forEach((edge) => {
+        const splittingVertices = geometryHelpers.verticesOnEdge(edge, currentStoryGeometry);
+
+        if (splittingVertices.length) {
+            // endpoints of the original edge
+            const startpoint = geometryHelpers.vertexForId(edge.v1, currentStoryGeometry),
+                endpoint = geometryHelpers.vertexForId(edge.v2, currentStoryGeometry);
+
+            // sort splittingVertices by location on original edge
+            splittingVertices.sort((va, vb) => {
+                const vaDist = Math.sqrt(
+                        Math.pow(Math.abs(va.x - startpoint.x), 2) +
+                        Math.pow(Math.abs(va.y - startpoint.y), 2)
+                    ),
+                    vbDist = Math.sqrt(
+                        Math.pow(Math.abs(vb.x - startpoint.x), 2) +
+                        Math.pow(Math.abs(vb.y - startpoint.y), 2)
+                    );
+
+                // compare distance from vertices to original edge startpoint
+                return vaDist > vbDist;
+            });
+
+            // add startpoint and endpoint of original edge to splittingVertices array from which new edges will be created
+            splittingVertices.unshift(startpoint);
+            splittingVertices.push(endpoint);
+
+            // create new edges by connecting the original edge startpoint, ordered splitting vertices, and original edge endpoint
+            // eg: startpoint -> SV1, SV1 -> SV2, SV2 -> SV3, SV3 -> endpoint
+            const newEdges = [];
+            for (var i = 0; i < splittingVertices.length - 1; i++) {
+                const newEdgeV1 = splittingVertices[i],
+                    newEdgeV2 = splittingVertices[i + 1],
+                    newEdge = new factory.Edge(newEdgeV1.id, newEdgeV2.id);
+
+                context.commit('createEdge', {
+                    edge: newEdge,
+                    geometry: currentStoryGeometry
+                });
+                newEdges.push(newEdge);
+            }
+
+            // look up all faces with a reference to the original edge being split
+            const affectedFaces = geometryHelpers.facesForEdge(edge.id, currentStoryGeometry);
+            console.log('affectedFaces: ', affectedFaces);
+
+            // remove reference to old edge and add references to the new edges
+            affectedFaces.forEach((affectedFace) => {
+                context.commit('destroyEdgeRef', {
+                    edge_id: edge.id,
+                    face: affectedFace
+                });
+
+                newEdges.forEach((newEdge) => {
+                    context.commit('createEdgeRef', {
+                        face: affectedFace,
+                        edgeRef: {
+                            edge_id: newEdge.id,
+                            reverse: false
+                        }
+                    });
+                })
+            });
+
+            // destroy original edge
+            context.dispatch('destroyEdge', {
+                geometry: currentStoryGeometry,
+                edge_id: edge.id
+            });
+        }
     });
 }

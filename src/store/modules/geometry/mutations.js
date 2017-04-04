@@ -33,7 +33,11 @@ export default {
         }), 1);
     },
     destroyEdgeRef (state, payload) {
-        payload.face.edgeRefs.splice(payload.face.edgeRefs.findIndex((edgeRef) => {
+        var face;
+        state.forEach((geometry) => {
+            face = geometry.faces.find(f => f.id === payload.face.id);
+        });
+        face.edgeRefs.splice(face.edgeRefs.findIndex((edgeRef) => {
             return edgeRef.edge_id === payload.edge_id;
         }), 1);
     },
