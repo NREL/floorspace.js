@@ -12,7 +12,6 @@ import modelHelpers from './../../store/modules/models/helpers.js'
 
 export default {
     // ****************** USER INTERACTION EVENTS ****************** //
-
     /*
     * adds the 'highlight' class to the snapTarget for a mousemove event
     * called on mousemove events
@@ -43,6 +42,7 @@ export default {
                 .attr('ry', this.calcRadius(2, 'y'))
                 .classed('highlight', true)
                 .attr('vector-effect', 'non-scaling-stroke');
+            snapTarget = snapTarget.scalar;
         } else if (snapTarget && snapTarget.type === 'vertex') {
             d3.select('#canvas svg')
                 .append('ellipse')
@@ -59,6 +59,7 @@ export default {
 
             // round point RWU coordinates to nearest gridline
             snapTarget = {
+                type: 'vertex',
                 x: round(this.scaleX(e.offsetX) - xAdjustment, this.x_spacing) + xAdjustment,
                 y: round(this.scaleY(e.offsetY) - yAdjustment, this.y_spacing) + yAdjustment
             };
@@ -71,6 +72,59 @@ export default {
                 .classed('gridpoint', true)
                 .attr('vector-effect', 'non-scaling-stroke');
         }
+
+        this.drawGuideLines(e, snapTarget);
+    },
+
+    /*
+    * called by highlightSnapTarget on mousemove events,
+    * draws guidelines connecting the snaptarget and the face being drawn depending on drawing tool
+    */
+    drawGuideLines (e, snapTarget) {
+        if (!this.points.length) { return; }
+
+        // remove expired guideline paths
+        d3.selectAll('#canvas .guideline').remove();
+
+        var guidelinePoints, point;
+
+        // if there is no snapTarget, just use the current mouse location
+        if (snapTarget ) {
+            point = snapTarget;
+        } else {
+            point = this.getEventRWU(e);
+        }
+
+        // determine how to complete face based on current tool
+        if (this.currentTool === 'Polygon') {
+            // connect last point in polygon to current mouse location/snap target with a guideline
+            guidelinePoints = [point, this.points[this.points.length - 1]];
+
+        } else if (this.currentTool === 'Rectangle' || this.currentTool === 'Eraser') {
+            // infer the remaining 2 points in the rectangle based on the first point in the rectangle and the  current mouse location/snap target
+            guidelinePoints = [
+                this.points[0],
+                { x: point.x, y: this.points[0].y },
+                point,
+                { x: this.points[0].x, y: point.y },
+                this.points[0]
+            ];
+        }
+
+        // draw guideline connecting guideline points
+        d3.select('#canvas svg').append('path')
+            .datum(guidelinePoints)
+            .attr('fill', 'none')
+            .classed('guideline', true)
+            .attr('vector-effect', 'non-scaling-stroke')
+            .attr('d', d3.line()
+                .x((d) => { return d.x; })
+                .y((d) => { return d.y; }))
+            // prevent edges from overlapping points - interferes with click events
+            .lower();
+
+        // keep grid lines under polygon edges
+        d3.selectAll('.vertical, .horizontal').lower();
     },
 
     /*
@@ -364,7 +418,7 @@ export default {
 
         // if a vertex and an edge are both within the cursor's snap tolerance, find the closest one
         if (snappingVertexData && snappingEdgeData) {
-            // if we are in polygon mode and the snappingVertex is the origin use the vertex regardless of whether the edge is closer 
+            // if we are in polygon mode and the snappingVertex is the origin use the vertex regardless of whether the edge is closer
             if (snappingVertexData === this.points[0]) { return snappingVertexData; }
             return snappingVertexData.dist <= snappingEdgeData.dist ? snappingVertexData : snappingEdgeData;
         } else if (snappingVertexData) {

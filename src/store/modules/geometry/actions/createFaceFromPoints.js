@@ -31,7 +31,6 @@ export default function createFaceFromPoints (context, payload) {
     if (!validFace) { return; }
 
     // split edges where vertices touch them
-    //normalizeAllGeometry(currentStoryGeometry, context);
     splitEdges(currentStoryGeometry, context);
     connectEdges(currentStoryGeometry, context);
 };
@@ -174,7 +173,6 @@ function validateAndSaveFace (face, currentStoryGeometry, target, context) {
         for (let j = 0; j < faceVertices.length; j++) {
             const vertex = faceVertices[j];
             if (faceVertices.filter(v => v.id === vertex.id).length >= 2) {
-                debugger
                 validFace = false;
             }
         }
