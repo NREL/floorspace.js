@@ -91,6 +91,7 @@ export default {
         * vertex: reuse that vertex on the face being created
         * edge: create a new vertex at the scalar projection from the click location to the edge,
         *     set a flag to split the edge at the new vertex
+        * origin of polygon: close the polygon being drawn
         */
         const snapTarget = this.findSnapTarget(point);
         if (snapTarget) {
@@ -120,19 +121,19 @@ export default {
             // round point RWU coordinates to nearest gridline
             point.x = round(this.scaleX(e.offsetX) - xAdjustment, this.x_spacing) + xAdjustment;
             point.y = round(this.scaleY(e.offsetY) - yAdjustment, this.y_spacing) + yAdjustment;
+        }
 
-            // if we are in polygon mode and the snapped gridpoint is within the tolerance zone of the origin of the face being drawn, close the face
-            if (this.points[0] && this.currentTool === 'Polygon') {
-                const distToOrigin = Math.sqrt(
-                    Math.pow(Math.abs(point.x - this.points[0].x), 2) +
-                    Math.pow(Math.abs(point.y - this.points[0].y), 2)
-                );
-                
-                if (distToOrigin < this.$store.getters['project/snapTolerance']) {
-                    // store the points in the polygon as a face
-                    this.savePolygonFace();
-                    return;
-                }
+        // if we are in polygon mode and the snapped gridpoint is within the tolerance zone of the origin of the face being drawn, close the face
+        if (this.points[0] && this.currentTool === 'Polygon') {
+            const distToOrigin = Math.sqrt(
+                Math.pow(Math.abs(point.x - this.points[0].x), 2) +
+                Math.pow(Math.abs(point.y - this.points[0].y), 2)
+            );
+
+            if (distToOrigin < this.$store.getters['project/snapTolerance']) {
+                // store the points in the polygon as a face
+                this.savePolygonFace();
+                return;
             }
         }
 
@@ -242,13 +243,6 @@ export default {
 
         // when the first point in the polygon is clicked, close the shape
         d3.select('#canvas svg').select('ellipse')
-
-            .on('click', () => {
-                // store the points in the polygon as a face
-                this.savePolygonFace();
-                // prevent a new point from being created by this click event
-                d3.event.stopPropagation();
-            })
             .attr('rx', this.calcRadius(7, 'x'))
             .attr('ry', this.calcRadius(7, 'y'))
             .classed('origin', true) // apply custom CSS for origin of polygons
@@ -370,6 +364,8 @@ export default {
 
         // if a vertex and an edge are both within the cursor's snap tolerance, find the closest one
         if (snappingVertexData && snappingEdgeData) {
+            // if we are in polygon mode and the snappingVertex is the origin use the vertex regardless of whether the edge is closer 
+            if (snappingVertexData === this.points[0]) { return snappingVertexData; }
             return snappingVertexData.dist <= snappingEdgeData.dist ? snappingVertexData : snappingEdgeData;
         } else if (snappingVertexData) {
             return snappingVertexData;
