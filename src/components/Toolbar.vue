@@ -65,7 +65,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             </template>
 
             <div id="import-export">
-                <input ref="importInput" @change="importData" type="file"/>
+                <input ref="importInput" @change="importDataAsFile" type="file"/>
+                <input id="json-input" v-model="importData" type="text"/>
 
                 <button @click="$refs.importInput.click()" id="import">Import Model</button>
                 <button @click="exportData" id="export">Export Model</button>
@@ -93,15 +94,11 @@ export default {
             console.log(data);
             return data;
         },
-        importData (event) {
+        importDataAsFile (event) {
             const file = event.target.files[0],
                 reader = new FileReader();
             reader.addEventListener("load", () => {
-                this.$store.dispatch('importData', {
-                    clientWidth: document.getElementById('svgcanvas').clientWidth,
-                    clientHeight: document.getElementById('svgcanvas').clientHeight,
-                    data: JSON.parse(reader.result)
-                });
+                this.importData = reader.result;
             }, false);
 
             if (file) { reader.readAsText(file); }
@@ -117,6 +114,15 @@ export default {
             });
 
 
+        },
+        importData: {
+            set (data) {
+                this.$store.dispatch('importData', {
+                    clientWidth: document.getElementById('svgcanvas').clientWidth,
+                    clientHeight: document.getElementById('svgcanvas').clientHeight,
+                    data: JSON.parse(data)
+                });
+            }
         },
         gridVisible: {
             get () { return this.$store.state.project.grid.visible; },
@@ -198,11 +204,10 @@ export default {
                 }
             }
 
-            input[type="file"] {
+            input[type="file"], input[type="text"], {
                 position: absolute;
                 visibility: hidden;
             }
-
         }
         &.tools {
             background-color: $gray-medium-light;

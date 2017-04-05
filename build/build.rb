@@ -1,21 +1,28 @@
-base_path = './dist'
-webpack_output = File.open(base_path + '/index.html') {|file| file.read}
+dist_path = './dist'
+src_path = './src'
+
+webpack_output = File.open(dist_path + '/index.html') {|file| file.read}
 
 scripts = ''
 css = ''
 
+print "Loading geometry editor API script from: #{src_path + 'api.js'}\n\n"
+api_scripts = File.open(src_path + '/api.js') {|file| file.read}
+scripts << "\n\t<script>#{api_scripts}</script>"
+
 webpack_output.split('src=').drop(1).each do |js|
     jspath = js.split('></script>').first
     print "Loading scripts from: #{jspath}\n\n"
-    js = File.open(base_path + jspath) {|file| file.read}
+    js = File.open(dist_path + jspath) {|file| file.read}
     scripts << "\n\t<script>#{js}</script>"
 end
 
 webpack_output.split('<link href=').drop(1).each do |linktag|
     csspath = linktag.split(' rel=stylesheet>').first
     print "Loading styles from: #{csspath}\n\n"
-    css = File.open(base_path + csspath) {|file| file.read}
+    css = File.open(dist_path + csspath) {|file| file.read}
 end
+
 
 html =
 "<!DOCTYPE html>
@@ -34,6 +41,6 @@ html =
     </body>
 </html>"
 
-output_file = File.new(base_path + '/build.html', 'w')
+output_file = File.new(dist_path + '/build.html', 'w')
 output_file.write(html)
 output_file.close
