@@ -95,6 +95,12 @@ export default {
         const snapTarget = this.findSnapTarget(point);
         if (snapTarget) {
             if (snapTarget.type === 'vertex') {
+                // if the snapTarget is the origin of the face being drawn in Polygon mode, close the face
+                if (snapTarget === this.points[0] && this.currentTool === 'Polygon') {
+                    // store the points in the polygon as a face
+                    this.savePolygonFace();
+                    return;
+                }
                 // data store will detect that the new point already has an id value
                 // will save a reference to the existing vertex on the new face instead of creating a new vertex
                 point = snapTarget;
@@ -114,11 +120,24 @@ export default {
             // round point RWU coordinates to nearest gridline
             point.x = round(this.scaleX(e.offsetX) - xAdjustment, this.x_spacing) + xAdjustment;
             point.y = round(this.scaleY(e.offsetY) - yAdjustment, this.y_spacing) + yAdjustment;
+
+            // if we are in polygon mode and the snapped gridpoint is within the tolerance zone of the origin of the face being drawn, close the face
+            if (this.points[0] && this.currentTool === 'Polygon') {
+                const distToOrigin = Math.sqrt(
+                    Math.pow(Math.abs(point.x - this.points[0].x), 2) +
+                    Math.pow(Math.abs(point.y - this.points[0].y), 2)
+                );
+                
+                if (distToOrigin < this.$store.getters['project/snapTolerance']) {
+                    // store the points in the polygon as a face
+                    this.savePolygonFace();
+                    return;
+                }
+            }
         }
 
-        // if rectangle drawing tool is selected and a point has already been drawn on the canvas, close and save the rectangle
+        // store the point
         if (this.currentTool === 'Rectangle' || this.currentTool === 'Polygon' || this.currentTool === 'Eraser') {
-            // store the point
             this.points.push(point);
         }
 
@@ -363,10 +382,15 @@ export default {
     * look up data for the closest vertex within the tolerance zone of a point
     */
     snappingVertexData (point) {
-        const snappingCandidates = this.$store.getters['application/currentStoryGeometry'].vertices.filter((v) => {
+        var snappingCandidates = JSON.parse(JSON.stringify(this.$store.getters['application/currentStoryGeometry'].vertices));
+
+        // add the origin of the current polygon as a snapping candidate
+        if (this.points[0] && this.currentTool === 'Polygon') {
+            snappingCandidates.push(this.points[0]);
+        }
+        snappingCandidates = snappingCandidates.filter((v) => {
             const dx = Math.abs(v.x - point.x),
                 dy = Math.abs(v.y - point.y);
-            // use double the snap tolerance for vertices
             return (dx < this.$store.getters['project/snapTolerance'] && dy < this.$store.getters['project/snapTolerance']);
         });
 
