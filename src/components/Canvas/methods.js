@@ -26,10 +26,10 @@ export default {
         if (snapTarget && snapTarget.type === 'edge') {
             d3.select('#canvas svg')
                 .append('line')
-                .attr('x1', snapTarget.v1.x)
-                .attr('y1', snapTarget.v1.y)
-                .attr('x2', snapTarget.v2.x)
-                .attr('y2', snapTarget.v2.y)
+                .attr('x1', snapTarget.snappingEdgeV1.x)
+                .attr('y1', snapTarget.snappingEdgeV1.y)
+                .attr('x2', snapTarget.snappingEdgeV2.x)
+                .attr('y2', snapTarget.snappingEdgeV2.y)
                 .attr('stroke-width', 1)
                 .classed('highlight', true)
                 .attr('vector-effect', 'non-scaling-stroke');
@@ -163,7 +163,7 @@ export default {
                 // create a vertex on the edge at the location closest to the mouse event (scalar projection)
                 point = snapTarget.scalar;
                 // mark the point so that the edge will be split during face creation
-                point.splittingEdge = snapTarget.edge;
+                point.splittingEdge = snapTarget.snappingEdge;
             }
         }
         // if no snapTarget was found and the grid is visible snap to the grid
@@ -482,11 +482,12 @@ export default {
 
             const edgeResult = geometryHelpers.projectToEdge(point, v1, v2);
             return edgeResult ? {
-                dist: edgeResult.dist,
-                scalar: edgeResult.scalar,
-                edge: e,
-                v1: v1,
-                v2: v2
+                dist: edgeResult.dist, // dist between original point location and projection to edge
+                scalar: edgeResult.scalar, // projection of point to edge
+                snappingEdge: e, // snapping edge
+                // populated snapping edge vertices - to display snapping point
+                snappingEdgeV1: v1,
+                snappingEdgeV2: v2
             } : null;
         }).filter((eR) => {
             return eR && eR.dist < this.$store.getters['project/snapTolerance'];

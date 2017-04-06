@@ -7,13 +7,15 @@ import modelHelpers from './../../models/helpers'
 * associate the face with the space or shading included in the payload
 */
 export default function createFaceFromPoints (context, payload) {
-    // set of points to translate to vertices when creating the new face
+    // points defining the boundaries of the new face
     var points = payload.points.map(p => ({ ...p, X: p.x, Y: p.y }));
-    const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'],
-        target = modelHelpers.libraryObjectWithId(context.rootState.models, payload.space ? payload.space.id : payload.shading.id);
 
     // validation - a face must have at least 3 vertices and area
     if (points.length < 3 || !geometryHelpers.areaOfFace(points)) { return; }
+
+    const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'],
+        target = modelHelpers.libraryObjectWithId(context.rootState.models, payload.space ? payload.space.id : payload.shading.id);
+
 
     // if target already has an existing face, destroy existing face and calculate a new set of points
     if (target.face_id) {
@@ -47,14 +49,22 @@ function mergeWithExistingFace (points, currentStoryGeometry, target, context) {
         existingFaceVertices = geometryHelpers.verticesForFace(existingFace, currentStoryGeometry);
 
     /*
-    * check if new and existing face share an edge
+    * if new and existing face share an edge, update points to use their union
     * loop through all points for the new face and check if they are splitting an edge which belongs to the existing face
+    * check if the edges to be created for the new face are split by any vertices on the existing face
     */
     for (var i = 0; i < points.length; i++) {
-        const splitEdge = points[i].splittingEdge;
-        if (splitEdge && ~existingFace.edgeRefs.map(e => e.edge_id).indexOf(splitEdge.id)) {
-            // new and existing face share an edge - update points to use their union
+        // infer edges to be created for the new face based on points
+        const edgeV1 = points[i],
+            edgeV2 = points[i < points.length - 1 ? i + 1 : 0],
+            // look up all existing face vertices splitting the edge to be created for the new face
+            verticesOnEdge = existingFaceVertices.filter((vertex) => {
+                if ((edgeV1.x === vertex.x && edgeV1.y === vertex.y) || (edgeV2.x === vertex.x && edgeV2.y === vertex.y)) { return; }
+                return geometryHelpers.projectToEdge(vertex, edgeV1, edgeV2).dist <= 1 / geometryHelpers.clipScale();
+            });
+        if ((points[i].splittingEdge && ~existingFace.edgeRefs.map(e => e.edge_id).indexOf(points[i].splittingEdge.id)) || verticesOnEdge.length) {
             points = geometryHelpers.unionOfFaces(existingFaceVertices, points, currentStoryGeometry);
+            break;
         }
     }
 
