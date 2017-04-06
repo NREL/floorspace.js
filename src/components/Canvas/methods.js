@@ -21,6 +21,7 @@ export default {
         d3.selectAll('#canvas .highlight, #canvas .gridpoint').remove();
 
         const point = this.getEventRWU(e);
+
         var snapTarget = this.findSnapTarget(point);
 
         if (snapTarget && snapTarget.type === 'edge') {
@@ -60,9 +61,10 @@ export default {
             // round point RWU coordinates to nearest gridline
             snapTarget = {
                 type: 'vertex',
-                x: round(this.scaleX(e.offsetX) - xAdjustment, this.x_spacing) + xAdjustment,
-                y: round(this.scaleY(e.offsetY) - yAdjustment, this.y_spacing) + yAdjustment
+                x: round(point.x - xAdjustment, this.x_spacing) + xAdjustment,
+                y: round(point.y - yAdjustment, this.y_spacing) + yAdjustment
             };
+
             d3.select('#canvas svg')
                 .append('ellipse')
                 .attr('cx', snapTarget.x)
@@ -72,6 +74,7 @@ export default {
                 .classed('gridpoint', true)
                 .attr('vector-effect', 'non-scaling-stroke');
         }
+
 
         this.drawGuideLines(e, snapTarget);
     },
@@ -173,8 +176,8 @@ export default {
                 yAdjustment = this.min_y % this.y_spacing;
 
             // round point RWU coordinates to nearest gridline
-            point.x = round(this.scaleX(e.offsetX) - xAdjustment, this.x_spacing) + xAdjustment;
-            point.y = round(this.scaleY(e.offsetY) - yAdjustment, this.y_spacing) + yAdjustment;
+            point.x = round(point.x - xAdjustment, this.x_spacing) + xAdjustment;
+            point.y = round(point.y - yAdjustment, this.y_spacing) + yAdjustment;
         }
 
         // if we are in polygon mode and the snapped gridpoint is within the tolerance zone of the origin of the face being drawn, close the face
@@ -516,23 +519,19 @@ export default {
     * adjusts incorrect coordinates caused by svg hover
     */
     getEventRWU (e) {
-        var res;
         // when the user hovers over certain SVG child nodes, event locations are incorrect
         if (e.clientX === e.offsetX) {
             // adjust the incorrect offset value by the position of the canvas
-            res = {
+            return {
                 x: this.scaleX(e.offsetX - this.$refs.grid.getBoundingClientRect().left),
                 y: this.scaleY(e.offsetY - this.$refs.grid.getBoundingClientRect().top)
             };
         } else {
-            res = {
+            return {
                 x: this.scaleX(e.offsetX),
                 y: this.scaleY(e.offsetY)
             };
         }
-        // res.x += this.min_x;
-        // res.y += this.min_x;
-        return res;
     },
 
     /*
