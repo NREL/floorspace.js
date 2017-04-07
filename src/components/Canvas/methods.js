@@ -38,7 +38,7 @@ export default {
             snapTarget = snapTarget.scalar;
         }
 
-        if (snapTarget ) {
+        if (snapTarget) {
             d3.select('#canvas svg')
                 .append('ellipse')
                 .attr('cx', snapTarget.x)
@@ -527,10 +527,18 @@ export default {
     },
 
     /*
-    * calc radius
+    * calc point radius, adjusting by the minimum x and y values for the canvas to prevent stretched points
     */
     calcRadius (pxRad, axis) {
-        return axis === 'x' ? this.scaleX(pxRad) : this.scaleY(pxRad);
+        if (this.isDragging) { return 0; }
+        var r;
+        if (axis === 'x') {
+            r = this.scaleX(pxRad) - this.min_x;
+        } else if (axis === 'y') {
+            r = this.scaleY(pxRad) - this.min_y;
+        }
+
+        return r < 0 ? 0 : r;
     },
 
     /*
@@ -553,6 +561,7 @@ export default {
         if (this.isDragging) { return; }
 
         // update scales with new grid boundaries
+        console.log("Scale X from min -> max", this.min_x, this.max_x);
         this.$store.dispatch('application/setScaleX', {
             scaleX: d3.scaleLinear()
                 .domain([0, this.$refs.grid.clientWidth])
