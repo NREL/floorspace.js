@@ -17,14 +17,14 @@ export default {
     * called on mousemove events
     */
     highlightSnapTarget (e) {
-        // unhighlight all edges and vertices
+        // unhighlight expired snap targets
         d3.selectAll('#canvas .highlight, #canvas .gridpoint').remove();
 
         const point = this.getEventRWU(e);
 
         var snapTarget = this.findSnapTarget(point);
 
-        if (snapTarget && snapTarget.type === 'edge') {
+        if (snapTarget && snapTarget.snappingEdge) {
             d3.select('#canvas svg')
                 .append('line')
                 .attr('x1', snapTarget.snappingEdgeV1.x)
@@ -35,16 +35,10 @@ export default {
                 .classed('highlight', true)
                 .attr('vector-effect', 'non-scaling-stroke');
 
-            d3.select('#canvas svg')
-                .append('ellipse')
-                .attr('cx', snapTarget.scalar.x)
-                .attr('cy', snapTarget.scalar.y)
-                .attr('rx', this.calcRadius(2, 'x'))
-                .attr('ry', this.calcRadius(2, 'y'))
-                .classed('highlight', true)
-                .attr('vector-effect', 'non-scaling-stroke');
             snapTarget = snapTarget.scalar;
-        } else if (snapTarget && snapTarget.type === 'vertex') {
+        }
+
+        if (snapTarget ) {
             d3.select('#canvas svg')
                 .append('ellipse')
                 .attr('cx', snapTarget.x)
@@ -74,8 +68,6 @@ export default {
                 .classed('gridpoint', true)
                 .attr('vector-effect', 'non-scaling-stroke');
         }
-
-
         this.drawGuideLines(e, snapTarget);
     },
 
