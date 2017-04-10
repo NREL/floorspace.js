@@ -35,6 +35,10 @@ export default {
         // recalculate scales when the window resizes
         window.addEventListener('resize', this.calcScales);
 
+        var originalScales = {
+            x: this.scaleX,
+            y: this.scaleY
+        };
         // disable panning for now because it is problematic
         const mousedownHandler = (e) => {
                 this.isDragging = false;
@@ -43,8 +47,8 @@ export default {
             },
             mousemoveHandler = (e) => {
                 if (this.isDragging) {
-                    const dx = this.scaleX(e.movementX),
-                        dy  = this.scaleY(e.movementY);
+                    const dx = originalScales.x(e.movementX),
+                        dy  = originalScales.y(e.movementY);
 
                     this.min_x -= dx;
                     this.max_x -= dx;
@@ -67,6 +71,7 @@ export default {
                     this.drawPolygons();
                     setTimeout(() => {
                         this.isDragging = false;
+                        this.calcScales();
                     })
                 }
             };
