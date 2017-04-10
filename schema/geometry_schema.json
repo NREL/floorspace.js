@@ -3,19 +3,11 @@
 	"description": "Comment describing your JSON Schema",
 	"type": "object",
 	"properties": {
+		"application": {
+			"$ref": "#/definitions/Application"
+		},
 		"project": {
-			"type": "object",
-			"properties": {
-				"grid": {
-					"type": "object"
-				},
-				"view": {
-					"type": "object"
-				},
-				"map": {
-					"type": "object"
-				}
-			}
+			"$ref": "#/definitions/Project"
 		},
 		"stories": {
 			"type": "array",
@@ -87,9 +79,98 @@
 		}
 	},
 	"definitions": {
+		"Application": {
+			"type": "object"
+		},
+		"Project": {
+			"type": "object",
+			"properties": {
+				"config": {
+					"type": "object",
+					"properties": {
+						"units": {
+							"type": "string",
+							"enum": [
+								"ft",
+								"m"
+							]
+						},
+						"language": {
+							"type": "string"
+						},
+						"north_axis": {
+							"type": "number"
+						}
+					}
+				},
+				"grid": {
+					"type": "object",
+					"properties": {
+						"visible": {
+							"type": "boolean"
+						},
+						"x_spacing": {
+							"type": "number"
+						},
+						"y_spacing": {
+							"type": "number"
+						}
+					}
+				},
+				"view": {
+					"type": "object",
+					"properties": {
+						"min_x": {
+							"type": "number"
+						},
+						"min_y": {
+							"type": "number"
+						},
+						"max_x": {
+							"type": "number"
+						},
+						"max_y": {
+							"type": "number"
+						},
+						"filmOffset": {
+							"type": "number"
+						},
+						"fov": {
+							"type": "number"
+						},
+						"zoom": {
+							"type": "number"
+						}
+					}
+				},
+				"map": {
+					"type": "object",
+					"properties": {
+						"visible": {
+							"type": "boolean"
+						},
+						"latitude": {
+							"type": "number"
+						},
+						"longitude": {
+							"type": "number"
+						},
+						"zoom": {
+							"type": "number"
+						},
+						"elevation": {
+							"type": "number"
+						}
+					}
+				}
+			}
+		},
 		"Geometry": {
 			"type": "object",
 			"properties": {
+				"id": {
+					"type": "string"
+				},
 				"vertices": {
 					"type": "array",
 					"items": {
@@ -220,11 +301,26 @@
 						"null"
 					]
 				},
+				"imageVisible": {
+					"type": "boolean"
+				},
+				"below_floor_plenum_height": {
+					"type": "number"
+				},
+				"floor_to_ceiling_height": {
+					"type": "number"
+				},
+				"above_ceiling_plenum_height": {
+					"type": "number"
+				},
+				"multiplier": {
+					"type": "number"
+				},
+				"color": {
+					"type": "string"
+				},
 				"geometry": {
-					"type": "array",
-					"items": {
-						"$ref": "#/definitions/Geometry"
-					}
+					"$ref": "#/definitions/Geometry"
 				},
 				"images": {
 					"type": "array"
@@ -257,6 +353,12 @@
 							"window_id",
 							"vertex_id"
 						]
+					}
+				},
+				"image_ids": {
+					"type": "array",
+					"items": {
+						"type": "string"
 					}
 				}
 			},
@@ -371,6 +473,9 @@
 						"string",
 						"null"
 					]
+				},
+				"color": {
+					"type": "string"
 				}
 			},
 			"required": [
@@ -394,6 +499,9 @@
 						"string",
 						"null"
 					]
+				},
+				"color": {
+					"type": "string"
 				}
 			},
 			"required": [
@@ -417,6 +525,9 @@
 						"string",
 						"null"
 					]
+				},
+				"color": {
+					"type": "string"
 				}
 			},
 			"required": [
