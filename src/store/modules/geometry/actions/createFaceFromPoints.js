@@ -262,7 +262,6 @@ function splitEdges (currentStoryGeometry, context) {
 
             // look up all faces with a reference to the original edge being split
             const affectedFaces = geometryHelpers.facesForEdge(edge.id, currentStoryGeometry);
-            console.log('affectedFaces: ', affectedFaces);
 
             // remove reference to old edge and add references to the new edges
             affectedFaces.forEach((affectedFace) => {
@@ -288,6 +287,7 @@ function splitEdges (currentStoryGeometry, context) {
                 edge_id: edge.id
             });
         }
+        connectEdges(currentStoryGeometry, context);
     });
 }
 
@@ -297,17 +297,18 @@ function splitEdges (currentStoryGeometry, context) {
 */
 function connectEdges (currentStoryGeometry, context) {
     currentStoryGeometry.faces.forEach((face) => {
-        const edges = geometryHelpers.edgesForFace(face, currentStoryGeometry);
-        // pick an arbitrary edge (edges[0]) and treat its v2 as the endpoint
-        // all ordering will assume this edge's v1 as the origin of the face
-        var nextEdge = edges[0],
-            endpoint = nextEdge.v2;
+        const faceEdges = geometryHelpers.edgesForFace(face, currentStoryGeometry);
 
         // initialize ordered edgeRef array with our origin edge
         const connectedEdgeRefs = [];
         var reverse = false;
 
-        while (true) {
+        // pick an arbitrary edge (edges[0]) and treat its v2 as the endpoint
+        // all ordering will assume this edge's v1 as the origin of the face
+        var nextEdge = faceEdges[0],
+            endpoint = nextEdge.v2;
+
+        while (connectedEdgeRefs.length < faceEdges.length) {
             connectedEdgeRefs.push({
                 edge_id: nextEdge.id,
                 reverse: reverse
@@ -316,22 +317,23 @@ function connectEdges (currentStoryGeometry, context) {
 
             // each vertex must be referenced by exactly two edges, it acts as the endpoint for the first edge and the startpoint for the next
             // look up the next edge by finding the edge on the face referencing the endpoint of the current edge
-            nextEdge = edges.find((edge) => {
-                if (edge.id === nextEdge.id) { return; }
+            nextEdge = faceEdges.find((e) => {
+                if (e.id === nextEdge.id) { return; }
+                if ((e.v2 === endpoint || e.v1 === endpoint) && e !== faceEdges[0] && ~connectedEdgeRefs.map(eR => eR.edge_id).indexOf(e.id)) {
+                    // TODO: sometimes multiple edges reference the same endpoint, causing duplicated in the connectedEdgeRefs array. not sure why this is happening.
+                    return false;
+                }
                 // if the next edge is connected to the endpoint of the current edge by its v2 and not its v1, it is reversed
-                if (edge.v2 === endpoint) {
-                    // TODO: why isn't this ever reached?
-                    debugger;
+                if (e.v2 === endpoint) {
                     reverse = true;
-                    endpoint = edge.v1;
+                    endpoint = e.v1;
                     return true;
-                } else if (edge.v1 === endpoint) {
-                    endpoint = edge.v2;
+                } else if (e.v1 === endpoint) {
+                    endpoint = e.v2;
                     return true;
                 }
             });
-            // we've handled all edges in the face and are back to the first edge, break out of the loop
-            if (nextEdge === edges[0]) { break; }
+            if (nextEdge === faceEdges[0]) { break; }
         }
 
         // update the face with the ordered edge refs

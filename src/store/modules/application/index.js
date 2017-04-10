@@ -15,7 +15,7 @@ export default {
             space_type: null,
 
             // current application mode and tool
-            tool: 'Polygon',
+            tool: 'Rectangle',
             mode: 'stories'
         },
         modes: ['spaces', 'shading', 'building_units', 'thermal_zones', 'space_types'],

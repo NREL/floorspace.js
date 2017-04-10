@@ -328,7 +328,7 @@ export default {
 
         #story-list, #subselection-list {
             overflow: scroll;
-            height: calc(100% - 5rem);
+            height: calc(100% - 8rem);
             > div  {
                 border-bottom: 1px solid $gray-darkest;
                 cursor: pointer;
