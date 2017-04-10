@@ -4,8 +4,8 @@ export default function exportData (state, getters) {
         application: state.application,
         project: state.project,
         stories: state.models.stories,
-        library: state.models.library,
-        images: state.models.images
+        images: state.models.images,
+        ...state.models.library
     };
     const geometrySets = getters['geometry/exportData']
     exportObject = JSON.parse(JSON.stringify(exportObject));
@@ -16,46 +16,6 @@ export default function exportData (state, getters) {
     formatObject(exportObject);
     return exportObject;
 }
-
-const lib = {
-    'images': [{
-        'id': 0,
-        'src': ""
-    }],
-    'building_units': [{
-        'id': 0,
-        'name': '',
-        'face_id': ''
-    }],
-    'thermal_zones': [{
-        'id': 0,
-        'name': '',
-        'face_id': ''
-    }],
-    'space_types': [{
-        'id': 0,
-        'name': '',
-        'face_id': ''
-    }],
-    'constructions': [{
-        'id': 0,
-        'handle': null,
-        'name': ''
-    }],
-    'construction_sets': [{
-        'id': 0,
-        'handle': null,
-        'name': ''
-    }],
-    'windows': [{
-        'id': 0,
-        'name': ''
-    }],
-    'daylighting_controls': [{
-        'id': 0,
-        'name': ''
-    }]
-};
 
 function formatObject(obj) {
     for (var key in obj) {

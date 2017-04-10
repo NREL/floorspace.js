@@ -75,7 +75,7 @@ export default function importData (context, payload)  {
             }
         }
     })(payload);
-    
+
     console.log(max_id);
 
     idFactory.setId(max_id);
@@ -85,7 +85,15 @@ export default function importData (context, payload)  {
         models: {
             stories: payload.data.stories,
             images: payload.data.images,
-            library: payload.data.library
+            library: {
+                building_units: payload.data.building_units,
+                thermal_zones: payload.data.thermal_zones,
+                space_types: payload.data.space_types,
+                construction_sets: payload.data.construction_sets,
+                constructions: payload.data.constructions,
+                windows: payload.data.windows,
+                daylighting_controls: payload.data.daylighting_controls
+            }
         },
         geometry: geometry
     });
