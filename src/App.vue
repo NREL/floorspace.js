@@ -11,8 +11,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <main>
             <navigation></navigation>
 
-            <view-3d v-if="tool==='3d'"></view-3d>
-            <canvas-view v-if="tool!=='3d'"></canvas-view>
+            <canvas-view></canvas-view>
             <inspector @assignObject="showModal('assign-object', $event)"></inspector>
 
             <background-modal v-if="backgroundModalVisible" @close="backgroundModalVisible = false"></background-modal>
@@ -30,7 +29,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 import Navigation from './components/Navigation'
 import Inspector from './components/Inspector'
 import Canvas from './components/Canvas/Canvas'
-import View3d from './components/3d/3d'
 import Toolbar from './components/Toolbar'
 import Library from './components/Library'
 import BackgroundModal from './components/Modals/BackgroundModal'
@@ -84,7 +82,6 @@ export default {
     },
     components: {
         'canvas-view': Canvas,
-        'view-3d': View3d,
         'library': Library,
         'navigation': Navigation,
         'toolbar': Toolbar,

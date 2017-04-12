@@ -131,15 +131,6 @@
 						},
 						"max_y": {
 							"type": "number"
-						},
-						"filmOffset": {
-							"type": "number"
-						},
-						"fov": {
-							"type": "number"
-						},
-						"zoom": {
-							"type": "number"
 						}
 					}
 				},

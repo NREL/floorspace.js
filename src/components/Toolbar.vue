@@ -14,55 +14,36 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 <button @click="$emit('createObject')">Create Object</button>
             </div>
 
-            <template v-if="tool !== '3d'">
-                <div class="input-number">
-                    <label>min_x</label>
-                    <input v-model.number.lazy="min_x">
-                </div>
-                <div class="input-number">
-                    <label>min_y</label>
-                    <input v-model.number.lazy="min_y">
-                </div>
-                <div class="input-number">
-                    <label>max_x</label>
-                    <input v-model.number.lazy="max_x">
-                </div>
-                <div class="input-number">
-                    <label>max_y</label>
-                    <input v-model.number.lazy="max_y">
-                </div>
+            <div class="input-number">
+                <label>min_x</label>
+                <input v-model.number.lazy="min_x">
+            </div>
+            <div class="input-number">
+                <label>min_y</label>
+                <input v-model.number.lazy="min_y">
+            </div>
+            <div class="input-number">
+                <label>max_x</label>
+                <input v-model.number.lazy="max_x">
+            </div>
+            <div class="input-number">
+                <label>max_y</label>
+                <input v-model.number.lazy="max_y">
+            </div>
 
-                <div class="input-number">
-                    <label>x_spacing</label>
-                    <input v-model.number.lazy="x_spacing">
-                </div>
-                <div class="input-number">
-                    <label>y_spacing</label>
-                    <input v-model.number.lazy="y_spacing">
-                </div>
+            <div class="input-number">
+                <label>x_spacing</label>
+                <input v-model.number.lazy="x_spacing">
+            </div>
+            <div class="input-number">
+                <label>y_spacing</label>
+                <input v-model.number.lazy="y_spacing">
+            </div>
 
-                <div class="input-checkbox">
-                    <label>grid</label>
-                    <input type="checkbox" v-model="gridVisible">
-                </div>
-            </template>
-
-            <template v-if="tool==='3d'">
-                <div class="input-number">
-                    <label>Field Of View</label>
-                    <input v-model.number="fov">
-                </div>
-
-                <div class="input-number">
-                    <label>Film Offset</label>
-                    <input v-model.number="filmOffset">
-                </div>
-
-                <div class="input-number">
-                    <label>Zoom</label>
-                    <input v-model.number="zoom">
-                </div>
-            </template>
+            <div class="input-checkbox">
+                <label>grid</label>
+                <input type="checkbox" v-model="gridVisible">
+            </div>
 
             <div id="import-export">
                 <input ref="importInput" @change="importDataAsFile" type="file"/>
@@ -158,20 +139,7 @@ export default {
         max_y: {
             get () { return this.$store.state.project.view.max_y + ' ' + this.$store.state.project.config.units;  },
             set (val) { this.$store.dispatch('project/setViewMaxY', { max_y: val  }); }
-        },
-
-        zoom: {
-            get () { return this.$store.state.project.view.zoom; },
-            set (val) { this.$store.dispatch('project/setZoom', { zoom: val }); }
-        },
-        fov: {
-            get () { return this.$store.state.project.view.fov; },
-            set (val) { this.$store.dispatch('project/setFov', { fov: val }); }
-        },
-        filmOffset: {
-            get () { return this.$store.state.project.view.filmOffset; },
-            set (val) { this.$store.dispatch('project/setFilmOffset', { filmOffset: val }); }
-        },
+        }
     }
 }
 </script>

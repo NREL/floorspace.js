@@ -1,7 +1,7 @@
 {
   "name": "geometry-editor",
   "version": "1.0.0",
-  "description": "a widget for creating 2d building energy models in svg and visualizing them in 3d",
+  "description": "a widget for creating 2d building energy models in svg",
   "author": "Katie Noland <katie@devetry.com>",
   "private": true,
   "scripts": {
@@ -17,7 +17,6 @@
     "d3": "^4.4.0",
     "huebee": "^1.0.1",
     "js-clipper": "^1.0.1",
-    "three": "^0.84.0",
     "vue": "^2.1.0",
     "vuex": "^2.1.1"
   },

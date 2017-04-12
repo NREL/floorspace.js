@@ -21,11 +21,7 @@ export default {
             min_x: 0,
             min_y: 0,
             max_x: 10,
-            max_y: 10,
-            // 3d view
-            filmOffset: 0,
-            fov: 75,
-            zoom: 1
+            max_y: 10
         },
         map: {
             visible: false,
