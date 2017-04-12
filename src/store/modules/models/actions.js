@@ -154,10 +154,11 @@ export default {
     createImageForStory (context, payload) {
         const story = context.state.stories.find(s => s.id === payload.story.id),
             image = new factory.Image(payload.src);
-        context.commit('initImage', { image: image });
+        image.name = payload.name;
+        // context.commit('initImage', { image: image });
         context.commit('updateStoryWithData', {
             story: story,
-            image_id: image.id
+            image: image
         });
     },
     createObjectWithType (context, payload) {

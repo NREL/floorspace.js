@@ -35,7 +35,10 @@ export default {
                 name: null,
                 face_id: null
             }],
-            image_id: null
+            images: [{
+                name: null,
+                face_id: null
+            }]
         }*/],
         images: [],
         // lib

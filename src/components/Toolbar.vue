@@ -10,7 +10,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     <nav id="toolbar">
         <section class="settings">
             <div id="modal-buttons">
-                <button @click="$emit('setBackground')">Import Background</button>
                 <button @click="$emit('createObject')">Create Object</button>
             </div>
 

@@ -1,6 +1,7 @@
 const config = {
     modes: {
         stories: 'Story',
+        images: 'Image',
         spaces: 'Space',
         shading: 'Shading',
         building_units: 'Building Unit',

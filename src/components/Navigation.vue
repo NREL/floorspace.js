@@ -18,7 +18,17 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             </svg>
         </div>
 
-        <button @click="createItem(mode)">
+        <template v-if="mode=='images'">
+            <input ref="fileInput" @change="uploadImage" type="file"/>
+            <button @click="$refs.fileInput.click()">
+                <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M208 122h-74V48c0-3.534-2.466-6.4-6-6.4s-6 2.866-6 6.4v74H48c-3.534 0-6.4 2.466-6.4 6s2.866 6 6.4 6h74v74c0 3.534 2.466 6.4 6 6.4s6-2.866 6-6.4v-74h74c3.534 0 6.4-2.466 6.4-6s-2.866-6-6.4-6z"/>
+                </svg>
+                {{displayNameForMode(mode)}}
+            </button>
+        </template>
+
+        <button v-else @click="createItem(mode)">
             <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
                 <path d="M208 122h-74V48c0-3.534-2.466-6.4-6-6.4s-6 2.866-6 6.4v74H48c-3.534 0-6.4 2.466-6.4 6s2.866 6 6.4 6h74v74c0 3.534 2.466 6.4 6 6.4s6-2.866 6-6.4v-74h74c3.534 0 6.4-2.466 6.4-6s-2.866-6-6.4-6z"/>
             </svg>
@@ -35,7 +45,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </button>
         <span @click="clearSubSelections">
             {{ currentStory.name }}
-            <template v-if="mode !== 'stories' && currentSubSelection">
+            <template v-if="mode !== 'stories' && mode !== 'images' && currentSubSelection">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path d="M.5 0v14l11-7-11-7z"/></svg>
                 {{ currentSubSelection.name }}
             </template>
@@ -84,9 +94,6 @@ export default {
             search: ''
         };
     },
-    mounted () {
-        this.mode = 'spaces';
-    },
     computed: {
         /*
         * arrays of all stories, building_units, space_types, and thermal_zones (top level)
@@ -99,17 +106,25 @@ export default {
 
         stories() { return this.$store.state.models.stories.filter(s => ~s.name.toLowerCase().indexOf(this.search.toLowerCase())); },
 
-        // spaces and shading for currently selected story
+        // spaces, shading, images for currently selected story
         spaces () { return this.$store.state.application.currentSelections.story.spaces; },
         shading () { return this.$store.state.application.currentSelections.story.shading; },
+        images () { return this.$store.state.application.currentSelections.story.images; },
+
+
+        imageVisible: {
+            get () { return this.currentStory.imageVisible; },
+            set (val) { this.$store.dispatch('models/updateStoryWithData', {
+                    story: this.currentStory,
+                    imageVisible: val
+                });
+            }
+        },
 
         // list items to display for current mode
         items () {
             var items = [];
             switch (this.mode) {
-                case 'stories':
-                    items = this.stories;
-                    break;
                 case 'spaces':
                     items = this.spaces;
                     break;
@@ -124,6 +139,9 @@ export default {
                     break;
                 case 'space_types':
                     items = this.space_types;
+                    break;
+                case 'images':
+                    items = this.images;
                     break;
             }
             return items.filter(i => ~i.name.toLowerCase().indexOf(this.search.toLowerCase()));
@@ -165,7 +183,8 @@ export default {
         currentSubSelection () {
             switch (this.mode) {
                 case 'stories':
-                    return this.currentStory;
+                case 'images':
+                    return;
                 case 'spaces':
                     return this.currentSpace;
                 case 'shading':
@@ -181,6 +200,23 @@ export default {
 
     },
     methods: {
+
+        uploadImage (event) {
+            const file = event.target.files[0],
+                reader = new FileReader();
+
+            reader.addEventListener("load", () => {
+                this.src = reader.result;
+                this.$store.dispatch('models/createImageForStory', {
+                    story: this.currentStory,
+                    src: reader.result,
+                    name: "Image " + (this.images.length + 1)
+                });
+                this.imageVisible = true;
+            }, false);
+
+            if (file) { reader.readAsDataURL(file); }
+        },
         // initialize an empty story, space, shading, building_unit, or thermal_zone depending on the selected mode
         createItem (mode) {
             switch (mode) {
@@ -205,6 +241,9 @@ export default {
                         type: this.mode,
                         object: newObject
                     });
+                    break;
+                case 'images':
+                    this.$emit('createImage');
                     break;
             }
 
@@ -289,6 +328,11 @@ export default {
         display: flex;
         padding: .25rem;
         justify-content: space-between;
+
+            input[type="file"] {
+                position: absolute;
+                visibility: hidden;
+            }
     }
 
     #selections > button, #breadcrumbs > button {

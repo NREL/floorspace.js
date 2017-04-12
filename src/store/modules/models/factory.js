@@ -16,8 +16,7 @@ export default {
             spaces: [],
             windows: [],
             shading: [],
-            image_ids: [],
-            image_id: null
+            images: []
         }
     },
     Space: function () {
@@ -46,6 +45,11 @@ export default {
     Image: function (src) {
         return {
             id: idFactory.generate(),
+            name: null,
+            height: 0,
+            width: 0,
+            x: 0,
+            y: 0,
             src: src
         };
     },

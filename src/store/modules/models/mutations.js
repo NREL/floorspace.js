@@ -5,8 +5,6 @@ export default {
     initSpace (state, payload) { payload.story.spaces.push(payload.space); },
     initShading (state, payload) { payload.story.shading.push(payload.shading); },
 
-    initImage (state, payload) { state.images.push(payload.image); },
-
     initObject (state, payload) {
         state.library[payload.type].push(payload.object);
     },
@@ -42,12 +40,8 @@ export default {
         delete payload.story;
         Object.assign(story, payload);
 
-        if ('image_id' in payload) {
-            // payload.story.image_id = payload.image_id;
-            // if the image doesn't already exist on the story, add it to image_ids
-            if (!~story.image_ids.indexOf(payload.image_id)) {
-                story.image_ids.push(payload.image_id);
-            }
+        if ('image' in payload) {
+            story.images.push(payload.image);
         }
     },
     updateSpaceWithData (state, payload) {

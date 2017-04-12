@@ -142,7 +142,7 @@ export default {
                 "&size=600x300&key=AIzaSyBHevuNXeCuPXkiV3hq-pFKZSdSFLX6kF0"
         },
         backgroundSrc () {
-            const image = this.images.find(image => image.id === this.currentStory.image_id);
+            const image = this.currentStory.images[0] && this.currentStory.images[0].visible ? this.currentStory.images[0]: null;//this.images.find(image => image.id === this.currentStory.image_id);
             return image ? image.src : "";
         },
         /*

@@ -227,19 +227,9 @@ const map = {
                 readonly: true,
                 private: true
             },
-            image_ids: {
+            images: {
                 readonly: true,
                 private: true
-            },
-            image_id: {
-                displayName: 'Image',
-                readonly: false,
-                input_type: 'select',
-                select_data (story, state) {},
-                private: false,
-                get (story, state) {
-                    return story.shading.map(s => s.name).join(', ');
-                }
             }
         }
     },

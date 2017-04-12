@@ -16,10 +16,10 @@ export default {
 
             // current application mode and tool
             tool: 'Rectangle',
-            mode: 'stories'
+            mode: 'spaces'
         },
-        modes: ['spaces', 'shading', 'building_units', 'thermal_zones', 'space_types'],
-        tools: ['Rectangle', 'Polygon', 'Eraser', 'Select', 'Place Component', 'Apply Property', 'Background'],
+        modes: ['spaces', 'shading', 'building_units', 'thermal_zones', 'space_types', 'images'],
+        tools: ['Rectangle', 'Polygon', 'Eraser', 'Select', 'Place Component', 'Apply Property', 'Map'],
         // d3 scale functions translate screen pixel coordinates into RWU values to use within the SVG's grid system
         scale: {
             x: null,
