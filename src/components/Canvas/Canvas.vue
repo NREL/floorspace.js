@@ -39,6 +39,7 @@ export default {
             x: this.scaleX,
             y: this.scaleY
         };
+
         // disable panning for now because it is problematic
         const mousedownHandler = (e) => {
                 this.isDragging = false;
@@ -66,11 +67,11 @@ export default {
                 this.$refs.grid.removeEventListener('mouseup', mouseupHandler);
                 if (this.isDragging) {
                     this.points = [];
-
                     this.drawGridLines();
                     this.drawPolygons();
                     setTimeout(() => {
                         this.isDragging = false;
+
                         this.calcScales();
                     })
                 }

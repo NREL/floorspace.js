@@ -561,7 +561,6 @@ export default {
         if (this.isDragging) { return; }
 
         // update scales with new grid boundaries
-        console.log("Scale X from min -> max", this.min_x, this.max_x);
         this.$store.dispatch('application/setScaleX', {
             scaleX: d3.scaleLinear()
                 .domain([0, this.$refs.grid.clientWidth])
