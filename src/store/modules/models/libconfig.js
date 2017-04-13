@@ -183,21 +183,21 @@ const map = {
                 readonly: false,
                 input_type: 'text',
                 private: false,
-                validator: validators.name
+                validator: validators.number
             },
             floor_to_ceiling_height: {
                 displayName: 'Floor To Ceiling Height',
                 readonly: false,
                 input_type: 'text',
                 private: false,
-                validator: validators.name
+                validator: validators.number
             },
             multiplier: {
                 displayName: 'Multiplier',
                 readonly: false,
                 input_type: 'text',
                 private: false,
-                validator: validators.name
+                validator: validators.number
             },
             spaces: {
                 displayName: 'Spaces',
@@ -222,10 +222,6 @@ const map = {
                 get (story, state) {
                     return story.shading.map(s => s.name).join(', ');
                 }
-            },
-            imageVisible: {
-                readonly: true,
-                private: true
             },
             images: {
                 readonly: true,
@@ -357,6 +353,48 @@ const map = {
                 private: true
             },
             color: {
+                readonly: true,
+                private: true
+            }
+        }
+    },
+    images: {
+        displayName: 'Images',
+        keymap: {
+            id: {
+                displayName: 'ID',
+                readonly: true,
+                private: false
+            },
+            name: {
+                displayName: 'Name',
+                readonly: false,
+                input_type: 'text',
+                private: false,
+                validator: validators.name
+            },
+            height: {
+                displayName: 'Height',
+                readonly: false,
+                input_type: 'text',
+                private: false,
+                validator: validators.number
+            },
+            x: {
+                displayName: 'X Position',
+                readonly: false,
+                input_type: 'text',
+                private: false,
+                validator: validators.number
+            },
+            y: {
+                displayName: 'Y Position',
+                readonly: false,
+                input_type: 'text',
+                private: false,
+                validator: validators.number
+            },
+            src: {
                 readonly: true,
                 private: true
             }

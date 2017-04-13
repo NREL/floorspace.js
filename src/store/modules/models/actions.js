@@ -85,6 +85,7 @@ export default {
             }, { root: true });
         }
     },
+    destroyImage (){debugger},
 
     // this is ONLY for library objects and does not include shading, spaces, or stories
     destroyObject (context, payload) {
@@ -143,6 +144,22 @@ export default {
         // TODO: validation
         context.commit('updateShadingWithData', cleanedPayload);
     },
+    updateImageWithData (context, payload) {
+        const image = context.rootState.application.currentSelections.story.images.find(i => i.id === payload.image.id),
+            validProperties = Object.keys(image),
+            cleanedPayload = {};
+
+        // remove extra properties from the payload
+        for (var key in payload) {
+            if (payload.hasOwnProperty(key) && ~validProperties.indexOf(key)) {
+                cleanedPayload[key] = payload[key];
+            }
+        }
+        cleanedPayload.image = image;
+
+        // TODO: validation
+        context.commit('updateImageWithData', cleanedPayload);
+    },
 
     updateObjectWithData (context, payload) {
         const object = helpers.libraryObjectWithId(context.state, payload.object.id);
@@ -152,15 +169,15 @@ export default {
     },
 
     createImageForStory (context, payload) {
-        const story = context.state.stories.find(s => s.id === payload.story.id),
-            image = new factory.Image(payload.src);
+        const image = new factory.Image(payload.src);
         image.name = payload.name;
-        // context.commit('initImage', { image: image });
-        context.commit('updateStoryWithData', {
-            story: story,
+
+        context.commit('createImageForStory', {
+            story_id: payload.story_id,
             image: image
         });
     },
+
     createObjectWithType (context, payload) {
         context.commit('initObject', {
             type: payload.type,

@@ -15,11 +15,7 @@ export default {
             context.commit('setCurrentStory', {
                 story: story
             });
-
-            // update project grid background settings based on story configuration
-            if (payload.story.imageVisible) {
-                context.dispatch('project/setMapVisible', { visible: false }, { root: true });
-            }
+            
             context.dispatch('clearSubSelections');
         }
     },

@@ -39,11 +39,12 @@ export default {
         const story = payload.story;
         delete payload.story;
         Object.assign(story, payload);
-
-        if ('image' in payload) {
-            story.images.push(payload.image);
-        }
     },
+    createImageForStory (state, payload) {
+        const story = state.stories.find(s => s.id === payload.story_id);
+        story.images.push(payload.image);
+    },
+
     updateSpaceWithData (state, payload) {
         var space = payload.space;
         Object.assign(space, payload);
@@ -55,7 +56,11 @@ export default {
         Object.assign(shading, payload);
         delete shading.shading;
     },
-
+    updateImageWithData (state, payload) {
+        const image = payload.image;
+        Object.assign(image, payload);
+        delete image.image;
+    },
     updateObjectWithData (state, payload) {
         const object = payload.object;
         Object.assign(object, payload);

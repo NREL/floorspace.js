@@ -12,7 +12,6 @@ export default {
             below_floor_plenum_height: 0,
             floor_to_ceiling_height: 0,
             multiplier: 0,
-            imageVisible: false,
             spaces: [],
             windows: [],
             shading: [],
@@ -45,12 +44,13 @@ export default {
     Image: function (src) {
         return {
             id: idFactory.generate(),
+            src: src,
             name: null,
-            height: 0,
+            visible: true,
+            height: 100,
             width: 0,
             x: 0,
-            y: 0,
-            src: src
+            y: 0
         };
     },
     BuildingUnit: function (name) {

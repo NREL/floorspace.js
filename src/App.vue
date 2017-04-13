@@ -14,7 +14,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <canvas-view></canvas-view>
             <inspector @assignObject="showModal('assign-object', $event)"></inspector>
 
-            <background-modal v-if="backgroundModalVisible" @close="backgroundModalVisible = false"></background-modal>
             <assign-object-modal :type="assignObjectType" :target="assignObjectTarget" v-if="assignObjectModalVisible" @close="assignObjectModalVisible = false"></assign-object-modal>
             <create-object-modal v-if="createObjectModalVisible" @close="createObjectModalVisible = false"></create-object-modal>
 
@@ -31,7 +30,6 @@ import Inspector from './components/Inspector'
 import Canvas from './components/Canvas/Canvas'
 import Toolbar from './components/Toolbar'
 import Library from './components/Library'
-import BackgroundModal from './components/Modals/BackgroundModal'
 import AssignObjectModal from './components/Modals/AssignObjectModal'
 import CreateObjectModal from './components/Modals/CreateObjectModal'
 
@@ -41,7 +39,6 @@ export default {
     name: 'app',
     data () {
         return {
-            backgroundModalVisible: false,
             createObjectModalVisible: false,
             assignObjectModalVisible: false,
             assignObjectType: null,
@@ -60,16 +57,10 @@ export default {
     },
     methods: {
         showModal (type, eventData) {
-            if (type === 'background') {
-                this.backgroundModalVisible = true;
-                this.createObjectModalVisible = false;
-                this.assignObjectModalVisible = false;
-            } else if (type === 'create-object') {
-                this.backgroundModalVisible = false;
+            if (type === 'create-object') {
                 this.createObjectModalVisible = true;
                 this.assignObjectModalVisible = false;
             } else if (type === 'assign-object') {
-                this.backgroundModalVisible = false;
                 this.createObjectModalVisible = false;
                 this.assignObjectModalVisible = true;
                 this.assignObjectType = eventData.type;
@@ -86,7 +77,6 @@ export default {
         'navigation': Navigation,
         'toolbar': Toolbar,
         'inspector': Inspector,
-        'background-modal': BackgroundModal,
         'assign-object-modal': AssignObjectModal,
         'create-object-modal': CreateObjectModal
     }

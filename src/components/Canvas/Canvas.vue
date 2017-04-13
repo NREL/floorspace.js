@@ -8,6 +8,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
 <div id="canvas">
+
+    <img v-for="image in images" :src="image.src" :style="{ height: image.height + 'px', left: image.x + 'px', top: image.y + 'px'}">
     <svg ref="grid" @click="addPoint" @mousemove="highlightSnapTarget" :viewBox="viewbox" preserveAspectRatio="none" id="svgcanvas"></svg>
 </div>
 </template>
@@ -29,7 +31,6 @@ export default {
     mounted () {
         this.calcScales();
         this.drawGridLines();
-        this.setBackground();
         this.drawPolygons();
 
         // recalculate scales when the window resizes
@@ -114,8 +115,7 @@ export default {
             longitude: state => state.project.map.longitude,
             zoom: state => state.project.map.zoom,
 
-            imageVisible: state => state.application.currentSelections.story.imageVisible,
-            images: state => state.models.images
+            images: state => state.application.currentSelections.story.images
         }),
         // mix_x, min_y, max_x, and max_y are the grid dimensions in real world units
         min_x: {
@@ -141,10 +141,7 @@ export default {
                 this.latitude + "," + this.longitude + "&zoom=" + this.zoom +
                 "&size=600x300&key=AIzaSyBHevuNXeCuPXkiV3hq-pFKZSdSFLX6kF0"
         },
-        backgroundSrc () {
-            const image = this.currentStory.images[0] && this.currentStory.images[0].visible ? this.currentStory.images[0]: null;//this.images.find(image => image.id === this.currentStory.image_id);
-            return image ? image.src : "";
-        },
+
         /*
         * map all faces for the current story to polygon representations (sets of ordered points) for d3 to render
         */
@@ -182,11 +179,6 @@ export default {
     },
     watch: {
         gridVisible () { this.drawGridLines(); },
-
-        mapVisible () { this.setBackground(); },
-        imageVisible () { this.setBackground(); },
-        mapUrl () { this.setBackground(); },
-        backgroundSrc () { this.setBackground(); },
 
         x_spacing () {
             this.calcScales();
@@ -227,6 +219,10 @@ export default {
 // styles for dynamically created d3 elements go into src/scss/partials/d3.scss
 #canvas {
     background-color: $gray-darkest;
+    position: relative;
+    img {
+        position: absolute;
+    }
     svg {
         background-size: cover;
         background-repeat: no-repeat;

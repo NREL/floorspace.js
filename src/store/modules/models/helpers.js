@@ -64,6 +64,11 @@ const helpers = {
                 shading: object,
                 [key]: value
             });
+        } else if (type === 'images') {
+            store.dispatch('models/updateImageWithData', {
+                image: object,
+                [key]: value
+            });
         } else {
             store.dispatch('models/updateObjectWithData', {
                 object: object,

@@ -12,7 +12,6 @@ export default {
             below_floor_plenum_height: 0,
             floor_to_ceiling_height: 0,
             multiplier: 0,
-            imageVisible: false,
             spaces: [{
                 id: null,
                 name: null,
@@ -40,7 +39,6 @@ export default {
                 face_id: null
             }]
         }*/],
-        images: [],
         // lib
         library: {
             'building_units': [{

@@ -542,19 +542,6 @@ export default {
     },
 
     /*
-    * update the background of the svg to be a map, image, or blank
-    */
-    setBackground () {
-        var url = '';
-        if (this.currentStory.imageVisible) {
-            url = this.backgroundSrc;
-        } else if (this.mapVisible) {
-            url = this.mapUrl;
-        }
-        this.$refs.grid.style.backgroundImage = 'url("' + url + '")';
-    },
-
-    /*
     * generate d3 scaling functions based on the svg viewbox and the pixel size of the svg
     */
     calcScales () {

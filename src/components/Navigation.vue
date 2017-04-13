@@ -112,15 +112,6 @@ export default {
         images () { return this.$store.state.application.currentSelections.story.images; },
 
 
-        imageVisible: {
-            get () { return this.currentStory.imageVisible; },
-            set (val) { this.$store.dispatch('models/updateStoryWithData', {
-                    story: this.currentStory,
-                    imageVisible: val
-                });
-            }
-        },
-
         // list items to display for current mode
         items () {
             var items = [];
@@ -208,11 +199,10 @@ export default {
             reader.addEventListener("load", () => {
                 this.src = reader.result;
                 this.$store.dispatch('models/createImageForStory', {
-                    story: this.currentStory,
+                    story_id: this.currentStory.id,
                     src: reader.result,
                     name: "Image " + (this.images.length + 1)
                 });
-                this.imageVisible = true;
             }, false);
 
             if (file) { reader.readAsDataURL(file); }

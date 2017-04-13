@@ -149,22 +149,26 @@ export default {
         },
 
         /*
-        * state.models.library extended to include stories, spaces, and shading
+        * state.models.library extended to include stories, spaces, shading and images
         * objects are deep copies to avoid mutating the store
         */
         extendedLibrary () {
             var spaces = [],
-                shading = [];
+                shading = [],
+                images = [];
+
             for (var i = 0; i < this.$store.state.models.stories.length; i++) {
                 spaces = spaces.concat(this.$store.state.models.stories[i].spaces);
                 shading = shading.concat(this.$store.state.models.stories[i].shading);
+                images = shading.concat(this.$store.state.models.stories[i].images);
             }
 
             return JSON.parse(JSON.stringify({
                 ...this.$store.state.models.library,
                 stories: this.$store.state.models.stories,
                 spaces: spaces,
-                shading: shading
+                shading: shading,
+                images: images
             }));
         },
 
@@ -274,6 +278,15 @@ export default {
                 this.$store.dispatch('models/destroySpace', {
                     space: object,
                     story: storyForSpace
+                });
+            }  else if (this.type === 'images') {
+                // look up the story referencing the space to be destroyed
+                const storyForImage = this.$store.state.models.stories.find((story) => {
+                    return story.images.find(i => i.id === object.id);
+                });
+                this.$store.dispatch('models/destroyImage', {
+                    image: object,
+                    story: storyForImage
                 });
             } else if (this.type === 'shading') {
                 // look up the story referencing the shading to be destroyed

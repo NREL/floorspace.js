@@ -4,7 +4,6 @@ export default function exportData (state, getters) {
         application: state.application,
         project: state.project,
         stories: state.models.stories,
-        images: state.models.images,
         ...state.models.library
     };
     const geometrySets = getters['geometry/exportData']

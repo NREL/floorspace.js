@@ -84,7 +84,6 @@ export default function importData (context, payload)  {
         application: payload.data.application,
         models: {
             stories: payload.data.stories,
-            images: payload.data.images,
             library: {
                 building_units: payload.data.building_units,
                 thermal_zones: payload.data.thermal_zones,
