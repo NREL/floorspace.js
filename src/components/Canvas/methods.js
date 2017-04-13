@@ -20,6 +20,8 @@ export default {
         // unhighlight expired snap targets
         d3.selectAll('#canvas .highlight, #canvas .gridpoint').remove();
 
+        if (!this.currentSpace && !this.currentShading) { return; }
+
         const point = this.getEventRWU(e);
 
         var snapTarget = this.findSnapTarget(point);
@@ -559,7 +561,16 @@ export default {
                 .domain([0, this.$refs.grid.clientHeight])
                 .range([this.min_y, this.max_y])
         });
+    },
+    imagesStyles (image) {
+        return {
+            height: image.height + 'px',
+            left: image.x + 'px',
+            top: image.y + 'px',
+            'pointer-events': this.currentMode === 'images' ? 'all' : 'none'
+        };
     }
+
 }
 
 function round (point, spacing) {

@@ -45,7 +45,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </button>
         <span @click="clearSubSelections">
             {{ currentStory.name }}
-            <template v-if="mode !== 'stories' && mode !== 'images' && currentSubSelection">
+            <template v-if="currentSubSelection">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path d="M.5 0v14l11-7-11-7z"/></svg>
                 {{ currentSubSelection.name }}
             </template>
@@ -191,7 +191,6 @@ export default {
 
     },
     methods: {
-
         uploadImage (event) {
             const file = event.target.files[0],
                 reader = new FileReader();
@@ -303,6 +302,11 @@ export default {
 
         // display name for library type (mode) selected
         displayNameForMode (mode) { return applicationHelpers.displayNameForMode(mode); },
+    },
+    watch: {
+        mode () {
+            this.clearSubSelections();
+        }
     }
 }
 </script>

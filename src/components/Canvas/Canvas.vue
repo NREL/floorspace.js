@@ -9,7 +9,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
 <div id="canvas">
 
-    <img v-for="image in images" :src="image.src" :style="{ height: image.height + 'px', left: image.x + 'px', top: image.y + 'px'}">
+    <img v-for="image in images" :src="image.src" :style="imagesStyles(image)">
     <svg ref="grid" @click="addPoint" @mousemove="highlightSnapTarget" :viewBox="viewbox" preserveAspectRatio="none" id="svgcanvas"></svg>
 </div>
 </template>
@@ -45,6 +45,7 @@ export default {
         const mousedownHandler = (e) => {
                 this.isDragging = false;
                 this.$refs.grid.addEventListener('mouseup', mouseupHandler);
+                this.$refs.grid.addEventListener('mouseout', mouseupHandler);
                 this.$refs.grid.addEventListener('mousemove', mousemoveHandler);
             },
             mousemoveHandler = (e) => {
@@ -65,6 +66,7 @@ export default {
             },
             mouseupHandler = (e) => {
                 this.$refs.grid.removeEventListener('mousemove', mousemoveHandler);
+                this.$refs.grid.removeEventListener('mouseout', mouseupHandler);
                 this.$refs.grid.removeEventListener('mouseup', mouseupHandler);
                 if (this.isDragging) {
                     this.points = [];
@@ -227,7 +229,11 @@ export default {
         background-size: cover;
         background-repeat: no-repeat;
         height: 100%;
+        left:0;
+        top: 0;
+        position: absolute;
         width: 100%;
+        z-index: 2;
     }
 }
 </style>
