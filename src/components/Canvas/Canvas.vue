@@ -8,9 +8,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
 <div id="canvas">
-
-    <img v-for="image in images" :src="image.src" :style="imagesStyles(image)">
-    <svg ref="grid" @click="addPoint" @mousemove="highlightSnapTarget" :viewBox="viewbox" preserveAspectRatio="none" id="svgcanvas"></svg>
+    <img v-for="(image, index) in images" :ref="'image-' + index" :src="image.src" :image-id="image.id" :style="imagesStyles(image)">
+    <svg ref="grid" @click="addPoint" @mousemove="highlightSnapTarget" :viewBox="viewbox" :style="{ 'pointer-events': currentMode === 'images' ? 'none': 'all' }" preserveAspectRatio="none" id="svgcanvas"></svg>
 </div>
 </template>
 
@@ -36,12 +35,11 @@ export default {
         // recalculate scales when the window resizes
         window.addEventListener('resize', this.calcScales);
 
+        // Panning
         var originalScales = {
             x: this.scaleX,
             y: this.scaleY
         };
-
-        // disable panning for now because it is problematic
         const mousedownHandler = (e) => {
                 this.isDragging = false;
                 this.$refs.grid.addEventListener('mouseup', mouseupHandler);
@@ -68,6 +66,7 @@ export default {
                 this.$refs.grid.removeEventListener('mousemove', mousemoveHandler);
                 this.$refs.grid.removeEventListener('mouseout', mouseupHandler);
                 this.$refs.grid.removeEventListener('mouseup', mouseupHandler);
+               
                 if (this.isDragging) {
                     this.points = [];
                     this.drawGridLines();
@@ -210,6 +209,40 @@ export default {
         polygons () { this.drawPolygons(); },
         points () {
             this.drawPoints();
+        },
+
+        images () {
+            var canvas = document.querySelector('#canvas');
+            this.$nextTick(() => {
+                var images = document.querySelectorAll('#canvas img');
+                for (var i = 0; i < images.length; i++) {
+                    const imageEl = images[i],
+                        image = this.images.find(i => i.id === imageEl.getAttribute('image-id'));
+                    if (!imageEl.hasDragListener) {
+                        imageEl.hasDragListener = true;
+                        var startPosition;
+                        imageEl.addEventListener("dragstart", (e) => {
+                            setTimeout(() => { imageEl.style.visibility = "hidden"; });
+                            startPosition = {
+                                x: image.x - this.scaleX(e.clientX - imageEl.getBoundingClientRect().left),
+                                y: image.y - this.scaleY(e.clientY - imageEl.getBoundingClientRect().top)
+                            };
+                            return false;
+                        }, false);
+
+                        imageEl.addEventListener("dragend", (e) => {
+                            var endPosition = this.getEventRWU(e);
+                            imageEl.style.visibility = "visible";
+                            this.$store.dispatch('models/updateImageWithData', {
+                                image: image,
+                                x: startPosition.x + endPosition.x,
+                                y: startPosition.y + endPosition.y
+                            });
+                            return false;
+                        }, false);
+                    }
+                }
+            });
         }
     },
     methods: methods
@@ -225,6 +258,7 @@ export default {
     img {
         position: absolute;
     }
+
     svg {
         background-size: cover;
         background-repeat: no-repeat;

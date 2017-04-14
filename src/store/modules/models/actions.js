@@ -171,6 +171,7 @@ export default {
     createImageForStory (context, payload) {
         const image = new factory.Image(payload.src);
         image.name = payload.name;
+        image.height = (context.rootState.project.view.max_y - context.rootState.project.view.min_y) / 3;
 
         context.commit('createImageForStory', {
             story_id: payload.story_id,

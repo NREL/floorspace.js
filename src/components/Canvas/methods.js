@@ -564,9 +564,9 @@ export default {
     },
     imagesStyles (image) {
         return {
-            height: image.height + 'px',
-            left: image.x + 'px',
-            top: image.y + 'px',
+            height: this.scaleY.invert(image.height) + 'px',
+            left: this.scaleX.invert(image.x) + 'px',
+            top: this.scaleY.invert(image.y) + 'px',
             'pointer-events': this.currentMode === 'images' ? 'all' : 'none'
         };
     }
