@@ -16,8 +16,9 @@ main {
         width: 17.5rem;
     }
 
-    #canvas {
+    #canvas, #map {
         height: 100%;
+        position: relative;
         width: calc(100% - 35rem);
     }
 }

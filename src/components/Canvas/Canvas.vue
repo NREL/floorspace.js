@@ -66,7 +66,7 @@ export default {
                 this.$refs.grid.removeEventListener('mousemove', mousemoveHandler);
                 this.$refs.grid.removeEventListener('mouseout', mouseupHandler);
                 this.$refs.grid.removeEventListener('mouseup', mouseupHandler);
-               
+
                 if (this.isDragging) {
                     this.points = [];
                     this.drawGridLines();
@@ -254,7 +254,6 @@ export default {
 // styles for dynamically created d3 elements go into src/scss/partials/d3.scss
 #canvas {
     background-color: $gray-darkest;
-    position: relative;
     img {
         position: absolute;
     }

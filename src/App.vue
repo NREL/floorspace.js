@@ -10,8 +10,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <toolbar @createObject="showModal('create-object')"></toolbar>
         <main>
             <navigation></navigation>
-
-            <canvas-view></canvas-view>
+            <map-view v-if="tool==='Map'"></map-view>
+            <canvas-view v-if="tool!=='Map'"></canvas-view>
             <inspector @assignObject="showModal('assign-object', $event)"></inspector>
 
             <assign-object-modal :type="assignObjectType" :target="assignObjectTarget" v-if="assignObjectModalVisible" @close="assignObjectModalVisible = false"></assign-object-modal>
@@ -28,6 +28,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 import Navigation from './components/Navigation'
 import Inspector from './components/Inspector'
 import Canvas from './components/Canvas/Canvas'
+import ViewMap from './components/Map/Map'
 import Toolbar from './components/Toolbar'
 import Library from './components/Library'
 import AssignObjectModal from './components/Modals/AssignObjectModal'
@@ -73,6 +74,7 @@ export default {
     },
     components: {
         'canvas-view': Canvas,
+        'map-view': ViewMap,
         'library': Library,
         'navigation': Navigation,
         'toolbar': Toolbar,
