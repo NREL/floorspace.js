@@ -41,6 +41,7 @@ export default {
             y: this.scaleY
         };
         const mousedownHandler = (e) => {
+                console.log('mousedown');
                 this.isDragging = false;
                 this.$refs.grid.addEventListener('mouseup', mouseupHandler);
                 this.$refs.grid.addEventListener('mouseout', mouseupHandler);

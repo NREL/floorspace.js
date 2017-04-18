@@ -26,7 +26,6 @@ export default {
         var osmSource = new ol.source.OSM();
         this.view = new ol.View({
             center: ol.proj.fromLonLat([this.longitude, this.latitude]),
-
             rotation: Math.PI / 4,
             zoom: this.zoom
         });
@@ -45,13 +44,7 @@ export default {
             }),
             view: this.view
         });
-        console.log(this.map.getView().getCenter());
-        setTimeout(()=>{
-            this.map.getView().setCenter(ol.proj.fromLonLat([0, 0]))
-            console.log(this.map.getView().getCenter());
-        },3000)
-
-
+        
     },
     computed: {
         ...mapState({
@@ -61,7 +54,11 @@ export default {
             zoom: state => state.project.map.zoom,
 
             images: state => state.application.currentSelections.story.images
-        })
+        }),
+        currentLongitude () { this.map.getView().getCenter()[0] },
+        currentLatitude () { this.map.getView().getCenter()[1] },
+        currentZoom () { this.map.getView().getZoom() },
+        currentRotation () { this.map.getView().getRotation() }
     }
 }
 
