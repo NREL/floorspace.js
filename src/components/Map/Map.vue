@@ -12,15 +12,26 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <script>
 
-const ol = require('openlayers');
-
+// const ol = require('openlayers');
+const openlayers = require('./../../../node_modules/openlayers/dist/ol-debug.js');
 import { mapState } from 'vuex'
 export default {
     name: 'map',
-    data () { return {}; },
+    data () { return {
+        view: {},
+        map: {}
+    }; },
     mounted () {
+
         var osmSource = new ol.source.OSM();
-        var map = new ol.Map({
+        this.view = new ol.View({
+            center: ol.proj.fromLonLat([this.longitude, this.latitude]),
+
+            rotation: Math.PI / 4,
+            zoom: this.zoom
+        });
+
+        this.map = new ol.Map({
             layers: [
                 new ol.layer.Tile({
                     source: osmSource
@@ -28,17 +39,29 @@ export default {
             ],
             target: 'map',
             controls: ol.control.defaults({
-                attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
+                attributionOptions: ({
                     collapsible: false
                 })
             }),
-            view: new ol.View({
-                center: ol.proj.transform([-104.9863, 39.7653], 'EPSG:4326', 'EPSG:3857'),
-
-                rotation: Math.PI / 4,
-                zoom: 18
-            })
+            view: this.view
         });
+        console.log(this.map.getView().getCenter());
+        setTimeout(()=>{
+            this.map.getView().setCenter(ol.proj.fromLonLat([0, 0]))
+            console.log(this.map.getView().getCenter());
+        },3000)
+
+
+    },
+    computed: {
+        ...mapState({
+            mapVisible: state => state.project.map.visible,
+            latitude: state => state.project.map.latitude,
+            longitude: state => state.project.map.longitude,
+            zoom: state => state.project.map.zoom,
+
+            images: state => state.application.currentSelections.story.images
+        })
     }
 }
 
