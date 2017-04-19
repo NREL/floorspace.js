@@ -14,6 +14,13 @@ npm run dev
 # build for production with minification
 npm run build
 
+# build single page output for openstudio
+npm run openstudio-build
+
+# alternative if `npm run openstudio-build` does not work, build single page output for openstudio
+npm run build
+ruby build/build.rb
+
 # run unit tests
 npm run unit
 
