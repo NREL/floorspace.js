@@ -27,7 +27,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             </div>
             <div class="input-number">
                 <label>max_y</label>
-                <input v-model.number.lazy="max_y">
+                <input :value="max_y" disabled>
             </div>
 
             <div class="input-number">
@@ -133,11 +133,14 @@ export default {
         },
         max_x: {
             get () { return this.$store.state.project.view.max_x + ' ' + this.$store.state.project.config.units; },
-            set (val) { this.$store.dispatch('project/setViewMaxX', { max_x: val }); }
+            set (val) {
+                this.$store.dispatch('project/setViewMaxX', { max_x: val });
+                this.max_y = (document.getElementById('svgcanvas').clientHeight/document.getElementById('svgcanvas').clientWidth) * val;
+            }
         },
         max_y: {
             get () { return this.$store.state.project.view.max_y + ' ' + this.$store.state.project.config.units;  },
-            set (val) { this.$store.dispatch('project/setViewMaxY', { max_y: val  }); }
+            set (val) { this.$store.dispatch('project/setViewMaxY', { max_y: val }); }
         }
     }
 }

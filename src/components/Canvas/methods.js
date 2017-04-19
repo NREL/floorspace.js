@@ -281,13 +281,7 @@ export default {
             .attr('cy', (d, i) => { return d.y; })
             .attr('rx', this.calcRadius(2, 'x'))
             .attr('ry', this.calcRadius(2, 'y'))
-            .attr('vector-effect', 'non-scaling-stroke')
-            .on('mouseover', function (d, i) {
-                this.setAttribute('fill', '#839199');
-            })
-            .on('mouseout', function (d, i) {
-                this.setAttribute('fill', 'none');
-            });
+            .attr('vector-effect', 'non-scaling-stroke');
 
         // connect the points with a guideline
         this.connectCanvasPoints();
@@ -515,6 +509,8 @@ export default {
     getEventRWU (e) {
         // when the user hovers over certain SVG child nodes, event locations are incorrect
         if (e.clientX === e.offsetX) {
+            // TODO: blocking pointer events on SVG probably fixed this, if the debugger statement isn't ever being triggered, this code can be removed
+            debugger
             // adjust the incorrect offset value by the position of the canvas
             return {
                 x: this.scaleX(e.offsetX - this.$refs.grid.getBoundingClientRect().left),

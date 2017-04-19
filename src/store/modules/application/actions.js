@@ -15,7 +15,7 @@ export default {
             context.commit('setCurrentStory', {
                 story: story
             });
-            
+
             context.dispatch('clearSubSelections');
         }
     },
