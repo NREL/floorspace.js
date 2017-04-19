@@ -252,7 +252,6 @@ export default {
 @import "./../../scss/config";
 // styles for dynamically created d3 elements go into src/scss/partials/d3.scss
 #canvas {
-    background-color: $gray-darkest;
     img {
         position: absolute;
     }

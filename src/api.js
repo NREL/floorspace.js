@@ -10,7 +10,8 @@ const api = {
     },
 
     doExport () {
-        document.getElementById("export").click();
+        //document.getElementById("export").click();
+        return window.application.$store.getters['exportData'];
     },
 
     setConfig (config) {

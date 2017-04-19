@@ -10,8 +10,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <toolbar @createObject="showModal('create-object')"></toolbar>
         <main>
             <navigation></navigation>
-            <map-view v-if="tool==='Map'"></map-view>
-            <canvas-view v-if="tool!=='Map'"></canvas-view>
+            <map-view></map-view>
+            <canvas-view></canvas-view>
             <inspector @assignObject="showModal('assign-object', $event)"></inspector>
 
             <assign-object-modal :type="assignObjectType" :target="assignObjectTarget" v-if="assignObjectModalVisible" @close="assignObjectModalVisible = false"></assign-object-modal>

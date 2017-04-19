@@ -14,7 +14,7 @@ import Vue from 'vue'
 import App from './App'
 
 // mount the root vue instance
-new Vue({
+window.application = new Vue({
     store: store,
     el: '#app',
     template: '<App/>',

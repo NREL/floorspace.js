@@ -12,7 +12,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <script>
 
-// const ol = require('openlayers');
 const openlayers = require('./../../../node_modules/openlayers/dist/ol-debug.js');
 import { mapState } from 'vuex'
 export default {
@@ -44,7 +43,7 @@ export default {
             }),
             view: this.view
         });
-        
+
     },
     computed: {
         ...mapState({

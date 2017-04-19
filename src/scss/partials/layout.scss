@@ -18,8 +18,13 @@ main {
 
     #canvas, #map {
         height: 100%;
-        position: relative;
+        position: absolute;
+        left: 17.5rem;
+        top: 5rem;
         width: calc(100% - 35rem);
+    }
+    #canvas {
+        background-color: transparent;
     }
 }
 #library {
