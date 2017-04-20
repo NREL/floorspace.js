@@ -26,6 +26,14 @@ main {
     #canvas {
         background-color: transparent;
     }
+    #map >div  {
+        top:0!important;
+        position: absolute!important;
+        &.konvajs-content {
+            z-index: 1;
+        }
+    }
+
 }
 #library {
     height: 30%;
