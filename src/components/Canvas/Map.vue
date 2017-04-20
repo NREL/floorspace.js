@@ -7,7 +7,10 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 
 <template>
-    <div id="map" ref="map"></div>
+    <div id="canvas" ref="canvas">
+        <div id="map" ref="map" :style="{ 'pointer-events': currentTool === 'Map' ? 'all': 'none' }"></div>
+        <div id="images" ref="images" :style="{ 'pointer-events': currentMode === 'images' ? 'all': 'none' }"></div>
+    </div>
 </template>
 
 <script>
@@ -42,8 +45,8 @@ export default {
             });
         },
         loadImages() {
-            var width = this.$refs.map.clientWidth;
-            var height = this.$refs.map.clientHeight;
+            var width = this.$refs.canvas.clientWidth;
+            var height = this.$refs.canvas.clientHeight;
             function update(activeAnchor) {
                 var group = activeAnchor.getParent();
                 var topLeft = group.get('.topLeft')[0];
@@ -122,7 +125,7 @@ export default {
                 group.add(anchor);
             }
             var stage = new Konva.Stage({
-                container: 'map',
+                container: 'images',
                 width: width,
                 height: height
             });
@@ -178,6 +181,9 @@ export default {
     },
     computed: {
         ...mapState({
+
+            currentMode: state => state.application.currentSelections.mode,
+            currentTool: state => state.application.currentSelections.tool,
             images: state => state.application.viewSelections.story.images
         }),
         mapVisible: {

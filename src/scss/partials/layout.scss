@@ -16,7 +16,7 @@ main {
         width: 17.5rem;
     }
 
-    #grid, #map {
+    #grid, #canvas {
         height: calc(70% - 5rem);
         position: absolute;
         left: 17.5rem;
@@ -26,14 +26,14 @@ main {
     #grid {
         background-color: transparent;
     }
-    #map >div  {
-        top:0!important;
-        position: absolute!important;
+    
+    #canvas #images {
+        position: absolute;
+        top:0;
         &.konvajs-content {
             z-index: 1;
         }
     }
-
 }
 #library {
     height: 30%;

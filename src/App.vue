@@ -28,7 +28,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 import Navigation from './components/Navigation'
 import Inspector from './components/Inspector'
 import Grid from './components/Grid/Grid'
-import ViewMap from './components/Map/Map'
+import ViewMap from './components/Canvas/Map'
 import Toolbar from './components/Toolbar'
 import Library from './components/Library'
 import AssignObjectModal from './components/Modals/AssignObjectModal'
