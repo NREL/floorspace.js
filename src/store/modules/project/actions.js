@@ -106,6 +106,10 @@ export default {
     setMapZoom (context, payload) {
         const validator = new Validator(payload);
         validator.validateFloat('zoom');
-        context.commit('setMapZoom', validator.validatedPayload);
+        context.commit('setMapZoom',  { zoom: payload.zoom });
+    },
+
+    setMapRotation (context, payload) {
+        context.commit('setMapRotation', { rotation: payload.rotation });
     }
 }

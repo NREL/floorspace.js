@@ -199,6 +199,51 @@ export default {
         }
     },
 
+    registerPan () {
+        // Panning
+
+        this.$refs.grid.addEventListener('mousedown', this.panStart);
+    },
+    panStart (e) {
+        console.log("panStart")
+        if (this.currentTool !== 'Map' && this.currentTool !== 'Pan') { return; }
+        this.isDragging = false;
+        this.$refs.grid.addEventListener('mouseup', this.panEnd);
+        this.$refs.grid.addEventListener('mouseout', this.panEnd);
+        this.$refs.grid.addEventListener('mousemove', this.panMove);
+    },
+    panMove (e) {
+        if (this.isDragging) {
+            const dx = this.originalScales.x(e.movementX),
+                dy  = this.originalScales.y(e.movementY);
+
+            this.min_x -= dx;
+            this.max_x -= dx;
+            this.min_y -= dy;
+            this.max_y -= dy;
+
+            this.drawGridLines();
+        } else {
+            this.points = [];
+            this.isDragging = true;
+        }
+    },
+    panEnd (e) {
+        this.$refs.grid.removeEventListener('mousemove', this.panMove);
+        this.$refs.grid.removeEventListener('mouseout', this.panEnd);
+        this.$refs.grid.removeEventListener('mouseup', this.panEnd);
+
+        if (this.isDragging) {
+            this.points = [];
+            this.drawGridLines();
+            this.drawPolygons();
+            setTimeout(() => {
+                this.isDragging = false;
+                this.calcScales();
+            })
+        }
+    },
+
 
     // ****************** SAVING FACES ****************** //
     /*

@@ -20,14 +20,15 @@ export default {
             // drawing canvas
             min_x: 0,
             min_y: 0,
-            max_x: 10,
-            max_y: 10
+            max_x: 100,
+            max_y: 100
         },
         map: {
             visible: false,
             latitude: 39.7653,
             longitude: -104.9863,
             zoom: 18,
+            rotation: 0.791,
             elevation: 0
         }
     },

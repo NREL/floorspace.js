@@ -73,9 +73,16 @@ export default {
             state.map.longitude = payload.longitude;
         }
     },
+
     setMapZoom (state, payload) {
         if ('zoom' in payload) {
             state.map.zoom = payload.zoom;
+        }
+    },
+
+    setMapRotation (state, payload) {
+        if ('rotation' in payload) {
+            state.map.rotation = payload.rotation;
         }
     }
 }

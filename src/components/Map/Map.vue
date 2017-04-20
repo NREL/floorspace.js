@@ -16,13 +16,13 @@ const openlayers = require('./../../../node_modules/openlayers/dist/ol-debug.js'
 import { mapState } from 'vuex'
 export default {
     name: 'map',
-    data () { return {
-        view: {},
-        map: {}
-    }; },
+    data () {
+        return {
+            view: null,
+            map: null
+        };
+    },
     mounted () {
-
-        var osmSource = new ol.source.OSM();
         this.view = new ol.View({
             center: ol.proj.fromLonLat([this.longitude, this.latitude]),
             rotation: Math.PI / 4,
@@ -30,40 +30,71 @@ export default {
         });
 
         this.map = new ol.Map({
-            layers: [
-                new ol.layer.Tile({
-                    source: osmSource
-                })
-            ],
+            layers: [new ol.layer.Tile({ source: new ol.source.OSM() })],
             target: 'map',
-            controls: ol.control.defaults({
-                attributionOptions: ({
-                    collapsible: false
-                })
-            }),
             view: this.view
         });
 
     },
     computed: {
         ...mapState({
-            mapVisible: state => state.project.map.visible,
-            latitude: state => state.project.map.latitude,
-            longitude: state => state.project.map.longitude,
-            zoom: state => state.project.map.zoom,
-
-            images: state => state.application.currentSelections.story.images
+            images: state => state.application.viewSelections.story.images
         }),
-        currentLongitude () { this.map.getView().getCenter()[0] },
-        currentLatitude () { this.map.getView().getCenter()[1] },
-        currentZoom () { this.map.getView().getZoom() },
-        currentRotation () { this.map.getView().getRotation() }
+        mapVisible: {
+            get () { return this.$store.state.project.map.visible; },
+            set (val) { this.$store.dispatch('project/setMapVisible', { visible: val }); }
+        },
+
+        latitude: {
+            get () { return this.$store.state.project.map.latitude; },
+            set (val) { this.$store.dispatch('project/setMapLatitude', { latitude: val }); }
+        },
+
+        longitude: {
+            get () { return this.$store.state.project.map.longitude; },
+            set (val) { this.$store.dispatch('project/setMapLongitude', { longitude: val }); }
+        },
+
+        zoom: {
+            get () { return this.$store.state.project.map.zoom; },
+            set (val) { this.$store.dispatch('project/setMapZoom', { zoom: val }); }
+        },
+
+        rotation: {
+            get () { return this.$store.state.project.map.rotation; },
+            set (val) { this.$store.dispatch('project/setMapRotation', { rotation: val }); }
+        },
+
+        // the current position of the map view, return the position information from the store if none is set
+        viewLongitude () { return this.view ? ol.proj.transform(this.view.getCenter(), 'EPSG:3857', 'EPSG:4326')[0] : null; },
+        viewLatitude () { return this.view ? ol.proj.transform(this.view.getCenter(), 'EPSG:3857', 'EPSG:4326')[1] : null; },
+        viewZoom () { return this.view ? this.view.getZoom() : this.zoom; },
+        viewRotation () { return this.map ? this.view.getRotation() : this.rotation; }
+    },
+    watch: {
+        // latitude () { this.view.setCenter(ol.proj.fromLonLat([this.longitude, this.latitude])); },
+        // longitude () { this.view.setCenter(ol.proj.fromLonLat([this.longitude, this.latitude])); },
+        // zoom () { this.view.setZoom(this.zoom); },
+        // rotation () { this.view.setRotation(this.rotation); },
+
+        // update the store to match the position of the map view
+        viewLongitude (val) { this.longitude = val; },
+        viewLatitude (val) { this.latitude = val; },
+        viewZoom (val) { this.zoom = val; },
+        viewRotation (val) { this.rotation = val; }
     }
 }
 
 </script>
 <style lang="scss" scoped>
 @import "./../../scss/config";
-
+#mapinfo {
+    z-index: 2;
+    color: black;
+    position: absolute;
+    left: 17.5rem;
+    top: 5rem;
+    width: calc(100% - 35rem);
+}
 
 </style>
