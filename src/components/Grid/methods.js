@@ -18,7 +18,7 @@ export default {
     */
     highlightSnapTarget (e) {
         // unhighlight expired snap targets
-        d3.selectAll('#canvas .highlight, #canvas .gridpoint').remove();
+        d3.selectAll('#grid .highlight, #grid .gridpoint').remove();
 
         if (!this.currentSpace && !this.currentShading) { return; }
 
@@ -27,7 +27,7 @@ export default {
         var snapTarget = this.findSnapTarget(point);
 
         if (snapTarget && snapTarget.snappingEdge) {
-            d3.select('#canvas svg')
+            d3.select('#grid svg')
                 .append('line')
                 .attr('x1', snapTarget.snappingEdgeV1.x)
                 .attr('y1', snapTarget.snappingEdgeV1.y)
@@ -41,7 +41,7 @@ export default {
         }
 
         if (snapTarget) {
-            d3.select('#canvas svg')
+            d3.select('#grid svg')
                 .append('ellipse')
                 .attr('cx', snapTarget.x)
                 .attr('cy', snapTarget.y)
@@ -61,7 +61,7 @@ export default {
                 y: round(point.y - yAdjustment, this.y_spacing) + yAdjustment
             };
 
-            d3.select('#canvas svg')
+            d3.select('#grid svg')
                 .append('ellipse')
                 .attr('cx', snapTarget.x)
                 .attr('cy', snapTarget.y)
@@ -81,7 +81,7 @@ export default {
         if (!this.points.length) { return; }
 
         // remove expired guideline paths
-        d3.selectAll('#canvas .guideline').remove();
+        d3.selectAll('#grid .guideline').remove();
 
         var guidelinePoints, point;
 
@@ -109,7 +109,7 @@ export default {
         }
 
         // draw guideline connecting guideline points
-        d3.select('#canvas svg').append('path')
+        d3.select('#grid svg').append('path')
             .datum(guidelinePoints)
             .attr('fill', 'none')
             .classed('guideline', true)
@@ -125,7 +125,7 @@ export default {
     },
 
     /*
-    * create and store a RWU canvas point
+    * create and store a RWU grid point
     * called on click events
     */
     addPoint (e) {
@@ -193,7 +193,7 @@ export default {
             this.points.push(point);
         }
 
-        // create a rectangular face if two points have been drawn to the canvas in rectangle tool
+        // create a rectangular face if two points have been drawn to the grid in rectangle tool
         if ((this.currentTool === 'Rectangle' || this.currentTool === 'Eraser') && this.points.length === 2) {
             this.currentTool === 'Rectangle' ? this.saveRectuangularFace() : this.eraseRectangularSelection();
         }
@@ -247,7 +247,7 @@ export default {
 
     // ****************** SAVING FACES ****************** //
     /*
-    * create a rectangular face from the two points on the canvas
+    * create a rectangular face from the two points on the grid
     * save the rectangle as a face for the selected space or shading
     */
     saveRectuangularFace () {
@@ -271,7 +271,7 @@ export default {
     },
 
     /*
-    * create a polygon face from all points on the canvas
+    * create a polygon face from all points on the grid
     * save the face for the selected space or shading
     */
     savePolygonFace () {
@@ -291,7 +291,7 @@ export default {
 
     // ****************** ERASING FACES ****************** //
     /*
-    * cut out a rectangular selection based on the two points on the canvas
+    * cut out a rectangular selection based on the two points on the grid
     * save the rectangle as a face for the selected space or shading
     */
     eraseRectangularSelection () {
@@ -316,10 +316,10 @@ export default {
     */
     drawPoints () {
         // remove expired points
-        d3.selectAll('#canvas ellipse').remove();
+        d3.selectAll('#grid ellipse').remove();
 
         // draw points
-        d3.select('#canvas svg')
+        d3.select('#grid svg')
             .selectAll('ellipse').data(this.points)
             .enter().append('ellipse')
             .attr('cx', (d, i) => { return d.x; })
@@ -329,10 +329,10 @@ export default {
             .attr('vector-effect', 'non-scaling-stroke');
 
         // connect the points with a guideline
-        this.connectCanvasPoints();
+        this.connectGridPoints();
 
         // when the first point in the polygon is clicked, close the shape
-        d3.select('#canvas svg').select('ellipse')
+        d3.select('#grid svg').select('ellipse')
             .attr('rx', this.calcRadius(7, 'x'))
             .attr('ry', this.calcRadius(7, 'y'))
             .classed('origin', true) // apply custom CSS for origin of polygons
@@ -343,12 +343,12 @@ export default {
     /*
     * render a line connecting all points for the face being drawn
     */
-    connectCanvasPoints () {
+    connectGridPoints () {
         // remove expired paths
-        d3.selectAll('#canvas path').remove();
+        d3.selectAll('#grid path').remove();
 
         // draw edges
-        d3.select('#canvas svg').append('path')
+        d3.select('#grid svg').append('path')
             .datum(this.points)
             .attr('fill', 'none')
             .attr('vector-effect', 'non-scaling-stroke')
@@ -367,10 +367,10 @@ export default {
     */
     drawPolygons () {
         // remove expired polygons
-        d3.select('#canvas svg').selectAll('polygon').remove();
+        d3.select('#grid svg').selectAll('polygon').remove();
 
         // draw polygons
-        d3.select('#canvas svg').selectAll('polygon')
+        d3.select('#grid svg').selectAll('polygon')
             .data(this.polygons).enter()
             .append('polygon')
             .on('click', (d) => {
@@ -400,15 +400,15 @@ export default {
 
 
         // remove expired points and guidelines
-        d3.selectAll('#canvas path').remove();
-        d3.selectAll('#canvas ellipse').remove();
+        d3.selectAll('#grid path').remove();
+        d3.selectAll('#grid ellipse').remove();
     },
 
     /*
     * draw lines over the svg for the grid
     */
     drawGridLines () {
-        var svg = d3.select('#canvas svg');
+        var svg = d3.select('#grid svg');
         svg.selectAll('line').remove();
 
         // redraw the grid if the grid is visible
@@ -447,7 +447,7 @@ export default {
         if (this.isDragging) { return; }
 
         // unhighlight all edges and vertices
-        d3.selectAll('#canvas .highlight').remove();
+        d3.selectAll('#grid .highlight').remove();
 
         const snappingVertexData = this.snappingVertexData(point),
             snappingEdgeData = this.snappingEdgeData(point);
@@ -556,7 +556,7 @@ export default {
         if (e.clientX === e.offsetX) {
             // TODO: blocking pointer events on SVG probably fixed this, if the debugger statement isn't ever being triggered, this code can be removed
             debugger
-            // adjust the incorrect offset value by the position of the canvas
+            // adjust the incorrect offset value by the position of the grid
             return {
                 x: this.scaleX(e.offsetX - this.$refs.grid.getBoundingClientRect().left),
                 y: this.scaleY(e.offsetY - this.$refs.grid.getBoundingClientRect().top)
@@ -570,7 +570,7 @@ export default {
     },
 
     /*
-    * calc point radius, adjusting by the minimum x and y values for the canvas to prevent stretched points
+    * calc point radius, adjusting by the minimum x and y values for the grid to prevent stretched points
     */
     calcRadius (pxRad, axis) {
         if (this.isDragging) { return 0; }

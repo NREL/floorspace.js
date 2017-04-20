@@ -98,8 +98,8 @@ export default {
         importData: {
             set (data) {
                 this.$store.dispatch('importData', {
-                    clientWidth: document.getElementById('svgcanvas').clientWidth,
-                    clientHeight: document.getElementById('svgcanvas').clientHeight,
+                    clientWidth: document.getElementById('svg-grid').clientWidth,
+                    clientHeight: document.getElementById('svg-grid').clientHeight,
                     data: JSON.parse(data)
                 });
             }
@@ -135,7 +135,7 @@ export default {
             get () { return this.$store.state.project.view.max_x + ' ' + this.$store.state.project.config.units; },
             set (val) {
                 this.$store.dispatch('project/setViewMaxX', { max_x: val });
-                this.max_y = (document.getElementById('svgcanvas').clientHeight/document.getElementById('svgcanvas').clientWidth) * val;
+                this.max_y = (document.getElementById('svg-grid').clientHeight/document.getElementById('svg-grid').clientWidth) * val;
             }
         },
         max_y: {

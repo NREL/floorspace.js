@@ -11,7 +11,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <main>
             <navigation></navigation>
             <map-view></map-view>
-            <canvas-view></canvas-view>
+            <grid-view></grid-view>
             <inspector @assignObject="showModal('assign-object', $event)"></inspector>
 
             <assign-object-modal :type="assignObjectType" :target="assignObjectTarget" v-if="assignObjectModalVisible" @close="assignObjectModalVisible = false"></assign-object-modal>
@@ -27,7 +27,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 // this import order is important, if the grid is loaded before the other elements or after the toolbar, it ends up warped
 import Navigation from './components/Navigation'
 import Inspector from './components/Inspector'
-import Canvas from './components/Canvas/Canvas'
+import Grid from './components/Grid/Grid'
 import ViewMap from './components/Map/Map'
 import Toolbar from './components/Toolbar'
 import Library from './components/Library'
@@ -73,7 +73,7 @@ export default {
         ...mapState({ tool: state => state.application.currentSelections.tool })
     },
     components: {
-        'canvas-view': Canvas,
+        'grid-view': Grid,
         'map-view': ViewMap,
         'library': Library,
         'navigation': Navigation,

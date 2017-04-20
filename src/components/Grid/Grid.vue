@@ -7,9 +7,9 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 
 <template>
-<div id="canvas"  :style="{ 'pointer-events': (currentMode === 'images' || currentTool === 'Map') ? 'none': 'all' }">
+<div id="grid"  :style="{ 'pointer-events': (currentMode === 'images' || currentTool === 'Map') ? 'none': 'all' }">
     <img v-for="(image, index) in images" :ref="'image-' + index" :src="image.src" :image-id="image.id" :style="imagesStyles(image)">
-    <svg ref="grid" @click="addPoint" @mousemove="highlightSnapTarget" :viewBox="viewbox" preserveAspectRatio="none" id="svgcanvas"></svg>
+    <svg ref="grid" @click="addPoint" @mousemove="highlightSnapTarget" :viewBox="viewbox" preserveAspectRatio="none" id="svg-grid"></svg>
 </div>
 </template>
 
@@ -20,7 +20,7 @@ import geometryHelpers from './../../store/modules/geometry/helpers.js'
 import modelHelpers from './../../store/modules/models/helpers.js'
 import applicationHelpers from './../../store/modules/application/helpers.js'
 export default {
-    name: 'canvas',
+    name: 'grid',
     data () {
         return {
             originalScales: {},
@@ -178,9 +178,9 @@ export default {
         },
 
         images () {
-            var canvas = document.querySelector('#canvas');
+            var grid = document.querySelector('#grid');
             this.$nextTick(() => {
-                var images = document.querySelectorAll('#canvas img');
+                var images = document.querySelectorAll('#grid img');
                 for (var i = 0; i < images.length; i++) {
                     const imageEl = images[i],
                         image = this.images.find(i => i.id === imageEl.getAttribute('image-id'));
@@ -218,7 +218,7 @@ export default {
 <style lang="scss" scoped>
 @import "./../../scss/config";
 // styles for dynamically created d3 elements go into src/scss/partials/d3.scss
-#canvas {
+#grid {
     img {
         position: absolute;
     }

@@ -9,7 +9,7 @@
 @import "./../config";
 // styling for svg elements created by d3
 // Vue's inline template styling will not work with dynamically created markup
-#canvas svg {
+#grid svg {
     * {
         pointer-events: none;
     }

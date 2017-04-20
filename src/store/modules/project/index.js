@@ -17,7 +17,7 @@ export default {
             y_spacing: 1
         },
         view: {
-            // drawing canvas
+            // drawing grid
             min_x: 0,
             min_y: 0,
             max_x: 100,

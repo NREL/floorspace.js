@@ -16,14 +16,14 @@ main {
         width: 17.5rem;
     }
 
-    #canvas, #map {
+    #grid, #map {
         height: calc(70% - 5rem);
         position: absolute;
         left: 17.5rem;
         top: 5rem;
         width: calc(100% - 35rem);
     }
-    #canvas {
+    #grid {
         background-color: transparent;
     }
     #map >div  {
