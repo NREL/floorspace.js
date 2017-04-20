@@ -544,7 +544,6 @@ export default {
     */
     calcScales () {
         if (this.isDragging) { return; }
-
         // update scales with new grid boundaries
         this.$store.dispatch('application/setScaleX', {
             scaleX: d3.scaleLinear()

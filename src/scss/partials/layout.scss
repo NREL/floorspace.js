@@ -17,7 +17,7 @@ main {
     }
 
     #canvas, #map {
-        height: 100%;
+        height: calc(70% - 5rem);
         position: absolute;
         left: 17.5rem;
         top: 5rem;

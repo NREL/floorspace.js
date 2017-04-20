@@ -1,16 +1,14 @@
 const api = {
     doImport (data) {
-        const input = document.getElementById("json-input"),
-            event = new Event('input', {
-                'bubbles': true,
-                'cancelable': true
-            });
-        input.value = data;
-        input.dispatchEvent(event)
+        
+        window.application.$store.dispatch('importData', {
+            clientWidth: document.getElementById('svgcanvas').clientWidth,
+            clientHeight: document.getElementById('svgcanvas').clientHeight,
+            data: JSON.parse(data)
+        });
     },
 
     doExport () {
-        //document.getElementById("export").click();
         return window.application.$store.getters['exportData'];
     },
 

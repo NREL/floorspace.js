@@ -7,9 +7,9 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 
 <template>
-<div id="canvas">
-    <img v-for="(image, index) in images" :ref="'image-' + index" :src="image.src" :image-id="image.id" :style="imagesStyles(image)">
-    <svg ref="grid" @click="addPoint" @mousemove="highlightSnapTarget" :viewBox="viewbox" :style="{ 'pointer-events': currentMode === 'images' ? 'none': 'all' }" preserveAspectRatio="none" id="svgcanvas"></svg>
+<div id="canvas"  :style="{ 'pointer-events': (currentMode === 'images' || currentTool === 'Map') ? 'none': 'all' }">
+    <img v-for="(image, index) in images" :ref="'image-' + index" :src="image.src" :image-id="image.id" :style="imagesStyles(image)">currentTool{{currentTool}}
+    <svg ref="grid" @click="addPoint" @mousemove="highlightSnapTarget" :viewBox="viewbox" preserveAspectRatio="none" id="svgcanvas"></svg>
 </div>
 </template>
 
@@ -32,52 +32,54 @@ export default {
         this.drawGridLines();
         this.drawPolygons();
 
-        // recalculate scales when the window resizes
-        window.addEventListener('resize', this.calcScales);
-
         // Panning
         var originalScales = {
             x: this.scaleX,
             y: this.scaleY
         };
         const mousedownHandler = (e) => {
-                this.isDragging = false;
-                this.$refs.grid.addEventListener('mouseup', mouseupHandler);
-                this.$refs.grid.addEventListener('mouseout', mouseupHandler);
-                this.$refs.grid.addEventListener('mousemove', mousemoveHandler);
-            },
-            mousemoveHandler = (e) => {
-                if (this.isDragging) {
-                    const dx = originalScales.x(e.movementX),
-                        dy  = originalScales.y(e.movementY);
+            if (this.currentTool !== 'Pan') { return; }
+            this.isDragging = false;
+            this.$refs.grid.addEventListener('mouseup', mouseupHandler);
+            this.$refs.grid.addEventListener('mouseout', mouseupHandler);
+            this.$refs.grid.addEventListener('mousemove', mousemoveHandler);
+        },
+        mousemoveHandler = (e) => {
+            if (this.isDragging) {
+                const dx = originalScales.x(e.movementX),
+                    dy  = originalScales.y(e.movementY);
 
-                    this.min_x -= dx;
-                    this.max_x -= dx;
-                    this.min_y -= dy;
-                    this.max_y -= dy;
+                this.min_x -= dx;
+                this.max_x -= dx;
+                this.min_y -= dy;
+                this.max_y -= dy;
 
-                    this.drawGridLines();
-                } else {
-                    this.points = [];
-                    this.isDragging = true;
-                }
-            },
-            mouseupHandler = (e) => {
-                this.$refs.grid.removeEventListener('mousemove', mousemoveHandler);
-                this.$refs.grid.removeEventListener('mouseout', mouseupHandler);
-                this.$refs.grid.removeEventListener('mouseup', mouseupHandler);
+                this.drawGridLines();
+            } else {
+                this.points = [];
+                this.isDragging = true;
+            }
+        },
+        mouseupHandler = (e) => {
+            this.$refs.grid.removeEventListener('mousemove', mousemoveHandler);
+            this.$refs.grid.removeEventListener('mouseout', mouseupHandler);
+            this.$refs.grid.removeEventListener('mouseup', mouseupHandler);
 
-                if (this.isDragging) {
-                    this.points = [];
-                    this.drawGridLines();
-                    this.drawPolygons();
-                    setTimeout(() => {
-                        this.isDragging = false;
-                        this.calcScales();
-                    })
-                }
-            };
+            if (this.isDragging) {
+                this.points = [];
+                this.drawGridLines();
+                this.drawPolygons();
+                setTimeout(() => {
+                    this.isDragging = false;
+                    this.calcScales();
+                })
+            }
+        };
+
         this.$refs.grid.addEventListener('mousedown', mousedownHandler);
+
+        // recalculate scales when the window resizes
+        window.addEventListener('resize', this.calcScales);
     },
     beforeDestroy () {
         window.removeEventListener('resize', this.calcScales);
@@ -128,7 +130,9 @@ export default {
         },
         max_x: {
             get () { return this.$store.state.project.view.max_x; },
-            set (val) { this.$store.dispatch('project/setViewMaxX', { max_x: val }); }
+            set (val) {
+                this.$store.dispatch('project/setViewMaxX', { max_x: val });
+            }
         },
         max_y: {
             get () { return this.$store.state.project.view.max_y;  },
@@ -194,7 +198,9 @@ export default {
             this.drawPoints();
         },
 
-        currentTool () { this.points = [];},
+        currentTool () {
+            this.points = [];
+        },
 
         currentSpace() {
             this.points = [];
