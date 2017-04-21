@@ -28,7 +28,7 @@ export default {
     },
     mounted () {
         this.loadImages();
-
+        this.loadMap();
     },
     methods: {
         loadMap() {
@@ -176,7 +176,6 @@ export default {
             };
             imageObj2.src = 'https://static1.squarespace.com/static/53a9f885e4b0dd0e73d2f493/t/53dbfd65e4b06e886b54d336/1406926183061/blueextinguisher+image_tm.jpg?format=2500w';
 
-                        this.loadMap();
         }
     },
     computed: {

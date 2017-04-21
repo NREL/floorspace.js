@@ -26,13 +26,16 @@ main {
     #grid {
         background-color: transparent;
     }
-    
+
     #canvas #images {
         position: absolute;
         top:0;
         &.konvajs-content {
             z-index: 1;
         }
+    }
+    #canvas #map {
+        height: 100%;
     }
 }
 #library {

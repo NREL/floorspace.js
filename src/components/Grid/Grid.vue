@@ -40,7 +40,7 @@ export default {
             y: this.scaleY
         };
 
-        this.registerPan();
+        this.$refs.grid.addEventListener('mousedown', this.panStart);
         // recalculate scales when the window resizes
         window.addEventListener('resize', this.calcScales);
     },

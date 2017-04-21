@@ -199,13 +199,8 @@ export default {
         }
     },
 
-    registerPan () {
-        // Panning
-
-        this.$refs.grid.addEventListener('mousedown', this.panStart);
-    },
+    // ****************** PANNING ****************** //
     panStart (e) {
-        console.log("panStart")
         if (this.currentTool !== 'Map' && this.currentTool !== 'Pan') { return; }
         this.isDragging = false;
         this.$refs.grid.addEventListener('mouseup', this.panEnd);
