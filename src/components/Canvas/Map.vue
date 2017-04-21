@@ -9,7 +9,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
     <div id="canvas" ref="canvas">
         <div id="map" ref="map" :style="{ 'pointer-events': currentTool === 'Map' ? 'all': 'none' }"></div>
-        <div id="images" ref="images" :style="{ 'pointer-events': currentMode === 'images' ? 'all': 'none' }"></div>
+        <div id="images" ref="images" :style="{ 'pointer-events': currentTool === 'Drag' ? 'all': 'none' }"></div>
     </div>
 </template>
 

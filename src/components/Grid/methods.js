@@ -602,7 +602,7 @@ export default {
             height: this.scaleY.invert(image.height) + 'px',
             left: this.scaleX.invert(image.x) + 'px',
             top: this.scaleY.invert(image.y) + 'px',
-            'pointer-events': this.currentMode === 'images' ? 'all' : 'none'
+            'pointer-events': this.currentTool === 'Drag' ? 'all' : 'none'
         };
     }
 

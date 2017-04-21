@@ -19,7 +19,7 @@ export default {
             mode: 'spaces'
         },
         modes: ['spaces', 'shading', 'building_units', 'thermal_zones', 'space_types', 'images'],
-        tools: ['Pan', 'Rectangle', 'Polygon', 'Eraser', 'Select', 'Place Component', 'Apply Property', 'Map'],
+        tools: ['Drag', 'Pan', 'Rectangle', 'Polygon', 'Eraser', 'Select', 'Place Component', 'Apply Property', 'Map'],
         // d3 scale functions translate screen pixel coordinates into RWU values to use within the SVG's grid system
         scale: {
             x: null,
