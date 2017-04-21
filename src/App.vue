@@ -10,7 +10,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <toolbar @createObject="showModal('create-object')"></toolbar>
         <main>
             <navigation></navigation>
-            <map-view></map-view>
+            <canvas-view></canvas-view>
             <grid-view></grid-view>
             <inspector @assignObject="showModal('assign-object', $event)"></inspector>
 
@@ -28,7 +28,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 import Navigation from './components/Navigation'
 import Inspector from './components/Inspector'
 import Grid from './components/Grid/Grid'
-import ViewMap from './components/Canvas/Map'
+import Canvas from './components/Canvas/Canvas'
 import Toolbar from './components/Toolbar'
 import Library from './components/Library'
 import AssignObjectModal from './components/Modals/AssignObjectModal'
@@ -74,7 +74,7 @@ export default {
     },
     components: {
         'grid-view': Grid,
-        'map-view': ViewMap,
+        'canvas-view': Canvas,
         'library': Library,
         'navigation': Navigation,
         'toolbar': Toolbar,

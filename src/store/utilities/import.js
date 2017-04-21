@@ -37,7 +37,6 @@ export default function importData (context, payload)  {
         });
     }
 
-
     // MODELS
     payload.data.stories.forEach((story) => {
         story.geometry_id = story.geometry.id;
@@ -76,7 +75,6 @@ export default function importData (context, payload)  {
         }
     })(payload);
 
-    console.log(max_id);
 
     idFactory.setId(max_id);
     context.commit('importState', {
@@ -96,6 +94,4 @@ export default function importData (context, payload)  {
         },
         geometry: geometry
     });
-
-
 }

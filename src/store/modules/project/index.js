@@ -24,7 +24,7 @@ export default {
             max_y: 100
         },
         map: {
-            visible: false,
+            visible: true,
             latitude: 39.7653,
             longitude: -104.9863,
             zoom: 18,
