@@ -74,16 +74,16 @@ export default {
                 draggable: true,
                 dragOnTop: false
             });
-            
+
             anchor.on('dragmove', (e) => {
                 this.update(e.target);
                 layer.draw();
             });
-            anchor.on('mousedown touchstart', function() {
+            anchor.on('mousedown touchstart', function () {
                 group.setDraggable(false);
                 this.moveToTop();
             });
-            anchor.on('dragend', function() {
+            anchor.on('dragend', () => {
                 group.setDraggable(true);
                 layer.draw();
             });
@@ -104,69 +104,56 @@ export default {
             group.add(anchor);
         },
         loadImages() {
-            var width = document.getElementById('canvas').clientWidth;
-            var height = document.getElementById('canvas').clientHeight;
 
-
-            var stage = new Konva.Stage({
+            const stage = new Konva.Stage({
                 container: 'images',
-                width: width,
-                height: height
+                width: document.getElementById('canvas').clientWidth,
+                height: document.getElementById('canvas').clientHeight
             });
-            var layer = new Konva.Layer();
-            stage.add(layer);
-            // darth vader
-            var darthVaderImg = new Konva.Image({
-                width: 200,
-                height: 137
-            });
-            // yoda
-            var yodaImg = new Konva.Image({
-                width: 93,
-                height: 104
-            });
-            var darthVaderGroup = new Konva.Group({
-                x: 180,
-                y: 50,
-                draggable: true
-            });
-            layer.add(darthVaderGroup);
-            darthVaderGroup.add(darthVaderImg);
-            this.addAnchor(darthVaderGroup, 0, 0, 'topLeft');
-            this.addAnchor(darthVaderGroup, 200, 0, 'topRight');
-            this.addAnchor(darthVaderGroup, 200, 138, 'bottomRight');
-            this.addAnchor(darthVaderGroup, 0, 138, 'bottomLeft');
-            var yodaGroup = new Konva.Group({
-                x: 20,
-                y: 110,
-                draggable: true
-            });
-            layer.add(yodaGroup);
-            yodaGroup.add(yodaImg);
-            this.addAnchor(yodaGroup, 0, 0, 'topLeft');
-            this.addAnchor(yodaGroup, 93, 0, 'topRight');
-            this.addAnchor(yodaGroup, 93, 104, 'bottomRight');
-            this.addAnchor(yodaGroup, 0, 104, 'bottomLeft');
-            var imageObj1 = new Image();
-            imageObj1.onload = function() {
-                darthVaderImg.image(imageObj1);
-                layer.draw();
-            };
-            imageObj1.src = 'https://i.kinja-img.com/gawker-media/image/upload/s--cABEgGOx--/c_scale,fl_progressive,q_80,w_800/xkguz9qxka9dfo73noba.png';
-            var imageObj2 = new Image();
-            imageObj2.onload = function() {
-                yodaImg.image(imageObj2);
-                layer.draw();
-            };
-            imageObj2.src = 'https://static1.squarespace.com/static/53a9f885e4b0dd0e73d2f493/t/53dbfd65e4b06e886b54d336/1406926183061/blueextinguisher+image_tm.jpg?format=2500w';
 
+            const layer = new Konva.Layer();
+            stage.add(layer);
+
+
+            this.images.forEach((image) => {
+                console.log(image);
+                // yoda
+                var konvaImage = new Konva.Image({
+                    width: 93,
+                    height: 104
+                });
+
+                var imageGroup = new Konva.Group({
+                    x: 20,
+                    y: 110,
+                    draggable: true
+                });
+                layer.add(imageGroup);
+                imageGroup.add(konvaImage);
+                this.addAnchor(imageGroup, 0, 0, 'topLeft');
+                this.addAnchor(imageGroup, 93, 0, 'topRight');
+                this.addAnchor(imageGroup, 93, 104, 'bottomRight');
+                this.addAnchor(imageGroup, 0, 104, 'bottomLeft');
+
+               var imageObj2 = new Image();
+                imageObj2.onload = function() {
+                    konvaImage.image(imageObj2);
+                    layer.draw();
+                };
+                imageObj2.src = image.src;
+            })
         }
     },
     computed: {
         ...mapState({
             currentTool: state => state.application.currentSelections.tool,
-            images: state => state.application.viewSelections.story.images
+            images: state => state.application.currentSelections.story.images
         })
+    },
+    watch: {
+        images() {
+            this.loadImages();
+        }
     }
 }
 

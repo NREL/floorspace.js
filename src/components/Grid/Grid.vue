@@ -8,7 +8,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
 <div id="grid"  :style="{ 'pointer-events': (currentTool === 'Drag' || currentTool === 'Map') ? 'none': 'all' }">
-    <img v-for="(image, index) in images" :ref="'image-' + index" :src="image.src" :image-id="image.id" :style="imagesStyles(image)">
+    <!-- <img v-for="(image, index) in images" :ref="'image-' + index" :src="image.src" :image-id="image.id" :style="imagesStyles(image)"> -->
     <svg ref="grid" @click="addPoint" @mousemove="highlightSnapTarget" :viewBox="viewbox" preserveAspectRatio="none" id="svg-grid"></svg>
 </div>
 </template>
@@ -80,7 +80,7 @@ export default {
             longitude: state => state.project.map.longitude,
             zoom: state => state.project.map.zoom,
 
-            images: state => state.application.currentSelections.story.images
+            // images: state => state.application.currentSelections.story.images
         }),
         // mix_x, min_y, max_x, and max_y are the grid dimensions in real world units
         min_x: {
@@ -177,39 +177,39 @@ export default {
             this.drawPoints();
         },
 
-        images () {
-            var grid = document.querySelector('#grid');
-            this.$nextTick(() => {
-                var images = document.querySelectorAll('#grid img');
-                for (var i = 0; i < images.length; i++) {
-                    const imageEl = images[i],
-                        image = this.images.find(i => i.id === imageEl.getAttribute('image-id'));
-                    if (!imageEl.hasDragListener) {
-                        imageEl.hasDragListener = true;
-                        var startPosition;
-                        imageEl.addEventListener("dragstart", (e) => {
-                            setTimeout(() => { imageEl.style.visibility = "hidden"; });
-                            startPosition = {
-                                x: image.x - this.scaleX(e.clientX - imageEl.getBoundingClientRect().left),
-                                y: image.y - this.scaleY(e.clientY - imageEl.getBoundingClientRect().top)
-                            };
-                            return false;
-                        }, false);
-
-                        imageEl.addEventListener("dragend", (e) => {
-                            var endPosition = this.getEventRWU(e);
-                            imageEl.style.visibility = "visible";
-                            this.$store.dispatch('models/updateImageWithData', {
-                                image: image,
-                                x: startPosition.x + endPosition.x,
-                                y: startPosition.y + endPosition.y
-                            });
-                            return false;
-                        }, false);
-                    }
-                }
-            });
-        }
+        // images () {
+        //     var grid = document.querySelector('#grid');
+        //     this.$nextTick(() => {
+        //         var images = document.querySelectorAll('#grid img');
+        //         for (var i = 0; i < images.length; i++) {
+        //             const imageEl = images[i],
+        //                 image = this.images.find(i => i.id === imageEl.getAttribute('image-id'));
+        //             if (!imageEl.hasDragListener) {
+        //                 imageEl.hasDragListener = true;
+        //                 var startPosition;
+        //                 imageEl.addEventListener("dragstart", (e) => {
+        //                     setTimeout(() => { imageEl.style.visibility = "hidden"; });
+        //                     startPosition = {
+        //                         x: image.x - this.scaleX(e.clientX - imageEl.getBoundingClientRect().left),
+        //                         y: image.y - this.scaleY(e.clientY - imageEl.getBoundingClientRect().top)
+        //                     };
+        //                     return false;
+        //                 }, false);
+        //
+        //                 imageEl.addEventListener("dragend", (e) => {
+        //                     var endPosition = this.getEventRWU(e);
+        //                     imageEl.style.visibility = "visible";
+        //                     this.$store.dispatch('models/updateImageWithData', {
+        //                         image: image,
+        //                         x: startPosition.x + endPosition.x,
+        //                         y: startPosition.y + endPosition.y
+        //                     });
+        //                     return false;
+        //                 }, false);
+        //             }
+        //         }
+        //     });
+        // }
     },
     methods: methods
 }

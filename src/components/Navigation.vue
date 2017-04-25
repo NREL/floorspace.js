@@ -19,7 +19,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </div>
 
         <template v-if="mode=='images'">
-            <input ref="fileInput" @change="uploadImage" type="file"/>
+            <input ref="fileInput" @change="uploadImage" type="file" multiple/>
             <button @click="$refs.fileInput.click()">
                 <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
                     <path d="M208 122h-74V48c0-3.534-2.466-6.4-6-6.4s-6 2.866-6 6.4v74H48c-3.534 0-6.4 2.466-6.4 6s2.866 6 6.4 6h74v74c0 3.534 2.466 6.4 6 6.4s6-2.866 6-6.4v-74h74c3.534 0 6.4-2.466 6.4-6s-2.866-6-6.4-6z"/>
@@ -192,19 +192,22 @@ export default {
     },
     methods: {
         uploadImage (event) {
-            const file = event.target.files[0],
-                reader = new FileReader();
+            for (var i = 0; i < event.target.files.length; i++) {
+                const file = event.target.files[i],
+                    reader = new FileReader();
 
-            reader.addEventListener("load", () => {
-                this.src = reader.result;
-                this.$store.dispatch('models/createImageForStory', {
-                    story_id: this.currentStory.id,
-                    src: reader.result,
-                    name: "Image " + (this.images.length + 1)
-                });
-            }, false);
+                reader.addEventListener("load", () => {
+                    this.src = reader.result;
+                    this.$store.dispatch('models/createImageForStory', {
+                        story_id: this.currentStory.id,
+                        src: reader.result,
+                        name: "Image " + (this.images.length + 1)
+                    });
+                }, false);
 
-            if (file) { reader.readAsDataURL(file); }
+                if (file) { reader.readAsDataURL(file); }
+            }
+
         },
         // initialize an empty story, space, shading, building_unit, or thermal_zone depending on the selected mode
         createItem (mode) {
