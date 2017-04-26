@@ -381,18 +381,12 @@ const map = {
                 validator: validators.number
             },
             x: {
-                displayName: 'X Position',
-                readonly: false,
-                input_type: 'text',
-                private: false,
-                validator: validators.number
+                readonly: true,
+                private: true
             },
             y: {
-                displayName: 'Y Position',
-                readonly: false,
-                input_type: 'text',
-                private: false,
-                validator: validators.number
+                readonly: true,
+                private: true
             },
             src: {
                 readonly: true,

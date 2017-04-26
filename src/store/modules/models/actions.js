@@ -68,7 +68,7 @@ export default {
 
     destroyShading (context, payload) {
         const story = context.state.stories.find(s => s.id === payload.story.id),
-            space = story.spaces.find(s => s.id === payload.shading.id);
+            shading = story.shading.find(s => s.id === payload.shading.id);
 
         context.commit('destroyShading', {
             shading: shading,
@@ -85,7 +85,15 @@ export default {
             }, { root: true });
         }
     },
-    destroyImage (){debugger},
+    destroyImage (context, payload) {
+        const story = context.state.stories.find(s => s.id === payload.story.id),
+            image = story.images.find(i => i.id === payload.image.id);
+
+        context.commit('destroyImage', {
+            image: image,
+            story: story
+        });
+    },
 
     // this is ONLY for library objects and does not include shading, spaces, or stories
     destroyObject (context, payload) {

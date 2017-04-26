@@ -81,7 +81,7 @@ export default {
         },
         update(activeAnchor) {
             const group = activeAnchor.getParent(),
-                image = modelHelpers.libraryObjectWithId(this.$store.state.models, group.imageId),
+                image = this.images.find(i => i.id === group.imageId),
                 ratio = image.width / image.height,
                 topLeft = group.get('.topLeft')[0],
                 topRight = group.get('.topRight')[0],

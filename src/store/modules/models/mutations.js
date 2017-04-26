@@ -19,6 +19,11 @@ export default {
             return s.id === payload.shading.id;
         }), 1);
     },
+    destroyImage (state, payload) {
+        payload.story.images.splice(payload.story.images.findIndex((i) => {
+            return i.id === payload.image.id;
+        }), 1);
+    },
     destroyStory (state, payload) {
         state.stories.splice(state.stories.findIndex((s) => {
             return s.id === payload.story.id;
