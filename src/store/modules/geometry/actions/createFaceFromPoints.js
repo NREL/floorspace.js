@@ -59,7 +59,7 @@ function mergeWithExistingFace (points, currentStoryGeometry, target, context) {
             edgeV2 = points[i < points.length - 1 ? i + 1 : 0],
             // look up all existing face vertices splitting the edge to be created for the new face
             verticesOnEdge = existingFaceVertices.filter((vertex) => {
-                if ((edgeV1.x === vertex.x && edgeV1.y === vertex.y) || (edgeV2.x === vertex.x && edgeV2.y === vertex.y)) { return; }
+                if ((edgeV1.x === vertex.x && edgeV1.y === vertex.y) || (edgeV2.x === vertex.x && edgeV2.y === vertex.y)) { return true; }
                 return geometryHelpers.projectToEdge(vertex, edgeV1, edgeV2).dist <= 1 / geometryHelpers.clipScale();
             });
         if ((points[i].splittingEdge && ~existingFace.edgeRefs.map(e => e.edge_id).indexOf(points[i].splittingEdge.id)) || verticesOnEdge.length) {
