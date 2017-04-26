@@ -584,6 +584,8 @@ export default {
     */
     calcScales () {
         if (this.isDragging) { return; }
+        this.max_y = (this.$refs.grid.clientHeight/this.$refs.grid.clientWidth) * this.max_x;
+
         // update scales with new grid boundaries
         this.$store.dispatch('application/setScaleX', {
             scaleX: d3.scaleLinear()

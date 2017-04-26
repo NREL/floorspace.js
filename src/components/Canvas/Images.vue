@@ -24,7 +24,11 @@ export default {
         return { };
     },
     mounted () {
+        window.addEventListener('resize', this.loadImages);
         this.loadImages();
+    },
+    beforeDestroy () {
+        window.removeEventListener('resize', this.loadImages);
     },
     methods: {
 
