@@ -172,6 +172,9 @@ export default {
         const image = new factory.Image(payload.src);
         image.name = payload.name;
         image.height = (context.rootState.project.view.max_y - context.rootState.project.view.min_y) / 3;
+        image.width = (context.rootState.project.view.max_x - context.rootState.project.view.min_x) / 3;
+        image.y = (context.rootState.project.view.max_y - context.rootState.project.view.min_y - image.height) * Math.random();
+        image.x = (context.rootState.project.view.max_x - context.rootState.project.view.min_x - image.width) * Math.random();
 
         context.commit('createImageForStory', {
             story_id: payload.story_id,

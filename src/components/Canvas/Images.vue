@@ -15,6 +15,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 // const openlayers = require('./../../../node_modules/openlayers/dist/ol-debug.js');
 const Konva = require('konva');
 import { mapState } from 'vuex'
+import applicationHelpers from './../../store/modules/application/helpers.js'
+import modelHelpers from './../../store/modules/models/helpers.js'
+
 export default {
     name: 'images',
     data () {
@@ -24,130 +27,158 @@ export default {
         this.loadImages();
     },
     methods: {
+
+        loadImages() {
+            const stage = new Konva.Stage({
+                    container: 'images',
+                    width: document.getElementById('canvas').clientWidth,
+                    height: document.getElementById('canvas').clientHeight
+                }),
+                layer = new Konva.Layer();
+
+            stage.add(layer);
+
+            this.images.forEach((image) => {
+                const konvaImage = new Konva.Image({
+                        width: this.scaleX.invert(image.width),
+                        height: this.scaleY.invert(image.height),
+                    }),
+                    group = new Konva.Group({
+                        x: this.scaleX.invert(image.x),
+                        y: this.scaleY.invert(image.y),
+                        draggable: true
+                    }),
+                    imageObj = new Image();
+
+                group.imageId = image.id;
+
+                imageObj.onload = () => {
+                    konvaImage.image(imageObj);
+                    layer.draw();
+                };
+                imageObj.src = image.src;;
+
+                layer.add(group);
+                group.add(konvaImage);
+
+                this.addAnchor(group, 0, 0, 'topLeft');
+                this.addAnchor(group, this.scaleX.invert(image.width), 0, 'topRight');
+                this.addAnchor(group, this.scaleX.invert(image.width), this.scaleY.invert(image.height), 'bottomRight');
+                this.addAnchor(group, 0, this.scaleY.invert(image.height), 'bottomLeft');
+
+                group.on('dragend', (e) => {
+                    this.$store.dispatch('models/updateImageWithData', {
+                        image: image,
+                        x: this.scaleX(group.getX()),
+                        y: this.scaleY(group.getY())
+                    });
+                });
+            });
+        },
         update(activeAnchor) {
-            var group = activeAnchor.getParent();
-            var topLeft = group.get('.topLeft')[0];
-            var topRight = group.get('.topRight')[0];
-            var bottomRight = group.get('.bottomRight')[0];
-            var bottomLeft = group.get('.bottomLeft')[0];
-            var image = group.get('Image')[0];
-            var anchorX = activeAnchor.getX();
-            var anchorY = activeAnchor.getY();
+            const group = activeAnchor.getParent(),
+                image = modelHelpers.libraryObjectWithId(this.$store.state.models, group.imageId),
+                ratio = image.width / image.height,
+                topLeft = group.get('.topLeft')[0],
+                topRight = group.get('.topRight')[0],
+                bottomRight = group.get('.bottomRight')[0],
+                bottomLeft = group.get('.bottomLeft')[0],
+                imageObj = group.get('Image')[0],
+                anchorX = activeAnchor.getX(),
+                anchorY = activeAnchor.getY();
+
+                const width = topRight.getX() - topLeft.getX(),
+                    height = width / ratio;//bottomLeft.getY() - topLeft.getY();
+
+
             // update anchor positions
             switch (activeAnchor.getName()) {
                 case 'topLeft':
                     topRight.setY(anchorY);
-                    bottomLeft.setX(anchorX);
+                    bottomLeft.setX(anchorX).setY(anchorY + height);
+                    bottomRight.setX(anchorX + width).setY(anchorY + height);
                     break;
                 case 'topRight':
                     topLeft.setY(anchorY);
-                    bottomRight.setX(anchorX);
+                    bottomRight.setX(anchorX).setY(anchorY + height);
+                    bottomLeft.setX(anchorX - width).setY(anchorY + height);
                     break;
                 case 'bottomRight':
-                    bottomLeft.setY(anchorY);
-                    topRight.setX(anchorX);
+                    bottomLeft.setY(anchorY).setX(anchorX - width);
+                    topRight.setX(anchorX).setY(anchorY - height);
+                    topLeft.setY(anchorY - height);
                     break;
                 case 'bottomLeft':
-                    bottomRight.setY(anchorY);
-                    topLeft.setX(anchorX);
+                    bottomRight.setY(anchorY).setX(anchorX + width);
+                    topLeft.setX(anchorX).setY(anchorY - height);
+                    topRight.setY(anchorY - height);
                     break;
             }
-            image.position(topLeft.position());
-            var width = topRight.getX() - topLeft.getX();
-            var height = bottomLeft.getY() - topLeft.getY();
+
+            // update image position and size on canvas
+            imageObj.position(topLeft.position());
+
+
             if (width && height) {
-                image.width(width);
-                image.height(height);
+                imageObj.width(width);
+                imageObj.height(height);
             }
+
+            // update image position and size in datastore
+            this.$store.dispatch('models/updateImageWithData', {
+                image: image,
+                x: this.scaleX(topLeft.getX()),
+                y: this.scaleY(topLeft.getY()),
+                width: this.scaleX(width),
+                height: this.scaleY(height)
+            });
         },
         addAnchor(group, x, y, name) {
-            var stage = group.getStage();
-            var layer = group.getLayer();
-            var anchor = new Konva.Circle({
-                x: x,
-                y: y,
-                stroke: '#666',
-                fill: '#ddd',
-                strokeWidth: 1,
-                radius: 8,
-                name: name,
-                draggable: true,
-                dragOnTop: false
-            });
+            const stage = group.getStage(),
+                layer = group.getLayer(),
+                anchor = new Konva.Circle({
+                    x: x,
+                    y: y,
+                    fill: applicationHelpers.config.palette.neutral,
+                    radius: 3,
+                    name: name,
+                    draggable: true
+                });
 
-            anchor.on('dragmove', (e) => {
-                this.update(e.target);
-                layer.draw();
-            });
-            anchor.on('mousedown touchstart', function () {
+            anchor.on('mousedown touchstart', () => {
                 group.setDraggable(false);
-                this.moveToTop();
+                anchor.moveToTop();
+            });
+            anchor.on('dragmove', () => {
+                this.update(anchor);
+                layer.draw();
             });
             anchor.on('dragend', () => {
                 group.setDraggable(true);
                 layer.draw();
             });
-            // add hover styling
-            anchor.on('mouseover', function() {
-                var layer = this.getLayer();
+
+            anchor.on('mouseover', () => {
                 document.body.style.cursor = 'pointer';
-                this.setStrokeWidth(4);
-                layer.draw();
+                anchor.setRadius(6);
+                anchor.getLayer().draw();
             });
-            anchor.on('mouseout', function() {
-                var layer = this.getLayer();
+            anchor.on('mouseout', () => {
                 document.body.style.cursor = 'default';
-                this.setStrokeWidth(2);
-                layer.draw();
+                anchor.setRadius(3);
+                anchor.getLayer().draw();
             });
 
             group.add(anchor);
-        },
-        loadImages() {
-
-            const stage = new Konva.Stage({
-                container: 'images',
-                width: document.getElementById('canvas').clientWidth,
-                height: document.getElementById('canvas').clientHeight
-            });
-
-            const layer = new Konva.Layer();
-            stage.add(layer);
-
-
-            this.images.forEach((image) => {
-                console.log(image);
-                // yoda
-                var konvaImage = new Konva.Image({
-                    width: 93,
-                    height: 104
-                });
-
-                var imageGroup = new Konva.Group({
-                    x: 20,
-                    y: 110,
-                    draggable: true
-                });
-                layer.add(imageGroup);
-                imageGroup.add(konvaImage);
-                this.addAnchor(imageGroup, 0, 0, 'topLeft');
-                this.addAnchor(imageGroup, 93, 0, 'topRight');
-                this.addAnchor(imageGroup, 93, 104, 'bottomRight');
-                this.addAnchor(imageGroup, 0, 104, 'bottomLeft');
-
-               var imageObj2 = new Image();
-                imageObj2.onload = function() {
-                    konvaImage.image(imageObj2);
-                    layer.draw();
-                };
-                imageObj2.src = image.src;
-            })
         }
     },
     computed: {
         ...mapState({
             currentTool: state => state.application.currentSelections.tool,
-            images: state => state.application.currentSelections.story.images
+            images: state => state.application.currentSelections.story.images,
+
+            scaleX: state => state.application.scale.x,
+            scaleY: state => state.application.scale.y,
         })
     },
     watch: {

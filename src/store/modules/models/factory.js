@@ -48,7 +48,7 @@ export default {
             name: null,
             visible: true,
             height: 100,
-            width: 0,
+            width: 100,
             x: 0,
             y: 0
         };

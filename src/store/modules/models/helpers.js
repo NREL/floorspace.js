@@ -119,7 +119,7 @@ const helpers = {
             result = state.stories.find(s => s.id === id);
             result.type = 'story';
         }
-        // search spaces and shading
+        // search spaces, shading, and images
         if (!result) {
             for (var i = 0; i < state.stories.length; i++) {
                 const story = state.stories[i];
@@ -130,6 +130,10 @@ const helpers = {
                 if (!result && story.shading.find(s => s.id === id)) {
                     result = story.shading.find(s => s.id === id);
                     result.type = 'shading';
+                }
+                if (!result && story.images.find(i => i.id === id)) {
+                    result = story.images.find(i => i.id === id);
+                    result.type = 'image';
                 }
             }
         }
