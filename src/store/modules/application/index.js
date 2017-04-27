@@ -10,6 +10,7 @@ export default {
             story: null,
             space: null,
             shading: null,
+            image: null,
             building_unit: null,
             thermal_zone: null,
             space_type: null,

@@ -12,40 +12,43 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <script>
 
-// const openlayers = require('./../../../node_modules/openlayers/dist/ol-debug.js');
 const Konva = require('konva');
 import { mapState } from 'vuex'
 import applicationHelpers from './../../store/modules/application/helpers.js'
 import modelHelpers from './../../store/modules/models/helpers.js'
-
 export default {
     name: 'images',
     data () {
-        return { };
+        return {
+            // cache images on the component so that we can check which property was altered in the images watcher
+            imageCache: []
+        };
     },
     mounted () {
-        window.addEventListener('resize', this.loadImages);
-        this.loadImages();
+        window.addEventListener('resize', this.renderImages);
+        this.renderImages();
     },
     beforeDestroy () {
-        window.removeEventListener('resize', this.loadImages);
+        window.removeEventListener('resize', this.renderImages);
     },
     methods: {
+        renderImages() {
+            // udpate image cache
+            this.imageCache = JSON.parse(JSON.stringify(this.images));
 
-        loadImages() {
             const stage = new Konva.Stage({
                     container: 'images',
                     width: document.getElementById('canvas').clientWidth,
                     height: document.getElementById('canvas').clientHeight
                 }),
                 layer = new Konva.Layer();
-
             stage.add(layer);
-
             this.images.forEach((image) => {
                 const konvaImage = new Konva.Image({
                         width: this.scaleX.invert(image.width),
                         height: this.scaleY.invert(image.height),
+                        stroke: '#6AAC15',
+                        strokeWidth: 3
                     }),
                     group = new Konva.Group({
                         x: this.scaleX.invert(image.x),
@@ -54,14 +57,17 @@ export default {
                     }),
                     imageObj = new Image();
 
+                if (this.currentImage && this.currentImage.id === image.id) {
+                    konvaImage.strokeEnabled(true);
+                } else {
+                    konvaImage.strokeEnabled(false);
+                }
                 group.imageId = image.id;
-
                 imageObj.onload = () => {
                     konvaImage.image(imageObj);
                     layer.draw();
                 };
-                imageObj.src = image.src;
-
+                imageObj.src = image.src;;
                 layer.add(group);
                 group.add(konvaImage);
 
@@ -73,31 +79,34 @@ export default {
                 this.addAnchor(group, this.scaleX.invert(image.width), 0, 'topRight');
                 this.addAnchor(group, this.scaleX.invert(image.width), this.scaleY.invert(image.height), 'bottomRight');
                 this.addAnchor(group, 0, this.scaleY.invert(image.height), 'bottomLeft');
-
                 group.on('dragend', (e) => {
+                    this.currentImage = image;
                     this.$store.dispatch('models/updateImageWithData', {
                         image: image,
                         x: this.scaleX(group.getX()),
                         y: this.scaleY(group.getY())
                     });
                 });
+                group.on('click', (e) => { this.currentImage = image; });
             });
         },
         update(activeAnchor) {
             const group = activeAnchor.getParent(),
-                image = this.images.find(i => i.id === group.imageId),
-                ratio = image.width / image.height,
                 topLeft = group.get('.topLeft')[0],
                 topRight = group.get('.topRight')[0],
                 bottomRight = group.get('.bottomRight')[0],
                 bottomLeft = group.get('.bottomLeft')[0],
                 imageObj = group.get('Image')[0],
                 anchorX = activeAnchor.getX(),
-                anchorY = activeAnchor.getY();
+                anchorY = activeAnchor.getY(),
 
-                const width = topRight.getX() - topLeft.getX(),
-                    height = width / ratio;//bottomLeft.getY() - topLeft.getY();
+                // look up the image in the data store by the imageID stored on the canvas group
+                image = this.images.find(i => i.id === group.imageId),
+                ratio = image.width / image.height,
+                width = topRight.getX() - topLeft.getX(),
+                height = width / ratio;
 
+            this.currentImage = image;
 
             // update anchor positions
             switch (activeAnchor.getName()) {
@@ -125,8 +134,6 @@ export default {
 
             // update image position and size on canvas
             imageObj.position(topLeft.position());
-
-
             if (width && height) {
                 imageObj.width(width);
                 imageObj.height(height);
@@ -142,8 +149,7 @@ export default {
             });
         },
         addAnchor(group, x, y, name) {
-            const stage = group.getStage(),
-                layer = group.getLayer(),
+            const layer = group.getLayer(),
                 anchor = new Konva.Circle({
                     x: x,
                     y: y,
@@ -152,7 +158,6 @@ export default {
                     name: name,
                     draggable: true
                 });
-
             anchor.on('mousedown touchstart', () => {
                 group.setDraggable(false);
                 anchor.moveToTop();
@@ -165,7 +170,6 @@ export default {
                 group.setDraggable(true);
                 layer.draw();
             });
-
             anchor.on('mouseover', () => {
                 document.body.style.cursor = 'pointer';
                 anchor.setRadius(6);
@@ -176,7 +180,6 @@ export default {
                 anchor.setRadius(3);
                 anchor.getLayer().draw();
             });
-
             group.add(anchor);
         }
     },
@@ -184,23 +187,50 @@ export default {
         ...mapState({
             currentTool: state => state.application.currentSelections.tool,
             images: state => state.application.currentSelections.story.images,
-
             scaleX: state => state.application.scale.x,
             scaleY: state => state.application.scale.y,
-        })
+        }),
+
+        currentImage: {
+            get () { return this.$store.state.application.currentSelections.image; },
+            set (item) { this.$store.dispatch('application/setCurrentImage', { 'image': item }); }
+        }
     },
     watch: {
+        /*
+        * Compare the new images to a cached copy of the images because Vue will not store the previous value of an object that has changed
+        * if 'height', 'width', 'x', or 'y' have been updated, the canvas will already be updated too so there is no need to re rendering
+        * if z index or opacity has changed, or an image has been added/removed, we must re render the canvas
+        */
         images: {
-            handler (val, oldVal) {
-                this.loadImages();
+            handler (newImages) {
+                const ignoredProperties = ['height', 'width', 'x', 'y'];
+                // if no images were added or deleted
+                if (newImages.length === this.imageCache.length) {
+                    for (var i = 0; i < newImages.length; i++) {
+                        const newImage = newImages[i],
+                            cachedImage = this.imageCache[i];
+                        Object.keys(newImage).forEach((k) => {
+                            // check that the property changed is one that should trigger a re-render
+                            if (newImage[k] !== cachedImage[k] && !~ignoredProperties.indexOf(k)) {
+                                this.renderImages();
+                            }
+                        });
+                    }
+                } else {
+                    this.renderImages();
+                }
+
             },
+            // deep watch so that changes to properties on individual images trigger the handler
             deep: true
+        },
+        currentImage() {
+            this.renderImages();
         }
     }
 }
-
 </script>
 <style lang="scss" scoped>
 @import "./../../scss/config";
-
 </style>

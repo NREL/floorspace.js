@@ -37,6 +37,15 @@ export default {
         });
     },
 
+    setCurrentImage (context, payload) {
+        const image = payload.image ? context.state.currentSelections.story.images.find(i => i.id === payload.image.id) : null;
+
+        context.dispatch('clearSubSelections');
+        context.commit('setCurrentImage', {
+            image: image
+        });
+    },
+
     setCurrentBuildingUnit (context, payload) {
         const building_unit = payload.building_unit ? context.rootState.models.library.building_units.find(b => b.id === payload.building_unit.id) : null;
 

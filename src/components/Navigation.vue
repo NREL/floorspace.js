@@ -111,7 +111,6 @@ export default {
         shading () { return this.$store.state.application.currentSelections.story.shading; },
         images () { return this.$store.state.application.currentSelections.story.images; },
 
-
         // list items to display for current mode
         items () {
             var items = [];
@@ -159,6 +158,10 @@ export default {
             get () { return this.$store.state.application.currentSelections.shading; },
             set (item) { this.$store.dispatch('application/setCurrentShading', { 'shading': item }); }
         },
+        currentImage: {
+            get () { return this.$store.state.application.currentSelections.image; },
+            set (item) { this.$store.dispatch('application/setCurrentImage', { 'image': item }); }
+        },
         currentThermalZone: {
             get () { return this.$store.state.application.currentSelections.thermal_zone; },
             set (item) { this.$store.dispatch('application/setCurrentThermalZone', { 'thermal_zone': item }); }
@@ -174,8 +177,9 @@ export default {
         currentSubSelection () {
             switch (this.mode) {
                 case 'stories':
-                case 'images':
                     return;
+                case 'images':
+                    return this.currentImage;
                 case 'spaces':
                     return this.currentSpace;
                 case 'shading':
@@ -192,16 +196,17 @@ export default {
     },
     methods: {
         uploadImage (event) {
-            for (var i = 0; i < event.target.files.length; i++) {
+            for (let i = 0; i < event.target.files.length; i++) {
                 const file = event.target.files[i],
                     reader = new FileReader();
 
                 reader.addEventListener("load", () => {
                     this.src = reader.result;
+
                     this.$store.dispatch('models/createImageForStory', {
                         story_id: this.currentStory.id,
                         src: reader.result,
-                        name: "Image " + (this.images.length + 1)
+                        name: "Image " + (this.images.length + 1 + i)
                     });
                 }, false);
 
@@ -234,9 +239,9 @@ export default {
                         object: newObject
                     });
                     break;
-                case 'images':
-                    this.$emit('createImage');
-                    break;
+                // case 'images':
+                //     this.$emit('createImage');
+                //     break;
             }
 
             this.selectItem(this.items[this.items.length - 1]);
@@ -266,6 +271,12 @@ export default {
                         story: this.$store.state.application.currentSelections.story
                     });
                     break;
+                case 'images':
+                    this.$store.dispatch('models/destroyImage', {
+                        image: item,
+                        story: this.$store.state.application.currentSelections.story
+                    });
+                    break;
                 case 'building_units':
                 case 'thermal_zones':
                 case 'space_types':
@@ -284,6 +295,9 @@ export default {
                 case 'shading':
                     this.currentShading = (this.currentShading && this.currentShading.id === item.id) ? null : item;
                     break;
+                case 'images':
+                    this.currentImage = (this.currentImage && this.currentImage.id === item.id) ? null : item;
+                    break;
                 case 'building_units':
                     this.currentBuildingUnit = (this.currentBuildingUnit && this.currentBuildingUnit.id === item.id) ? null : item;
                     break;
@@ -297,6 +311,7 @@ export default {
         },
         clearSubSelections () {
             this.currentShading = null;
+            this.currentImage = null;
             this.currentSpace = null;
             this.currentBuildingUnit = null;
             this.currentThermalZone = null;
