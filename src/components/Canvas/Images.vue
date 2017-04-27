@@ -66,6 +66,7 @@ export default {
                 group.add(konvaImage);
 
                 konvaImage.setZIndex(image.z);
+                konvaImage.opacity(image.opacity);
                 group.setZIndex(image.z);
 
                 this.addAnchor(group, 0, 0, 'topLeft');

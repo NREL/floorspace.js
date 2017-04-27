@@ -387,6 +387,13 @@ const map = {
                 private: false,
                 validator: validators.number
             },
+            opacity: {
+                displayName: 'opacity',
+                readonly: false,
+                input_type: 'text',
+                private: false,
+                validator: validators.number
+            },
             x: {
                 readonly: true,
                 private: true
