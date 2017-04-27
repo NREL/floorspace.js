@@ -21,7 +21,7 @@ export default {
         d3.selectAll('#grid .highlight, #grid .gridpoint').remove();
 
         if (!this.currentSpace && !this.currentShading) { return; }
-
+        
         const point = this.getEventRWU(e);
 
         var snapTarget = this.findSnapTarget(point);
@@ -133,8 +133,6 @@ export default {
 
         // if no space or shading is selected, disable drawing
         if (!this.currentSpace && !this.currentShading) { return; }
-        if (this.currentTool !== 'Polygon' && this.currentTool !== 'Rectangle') { return e }
-
 
         // translate click event coordinates into RWU
         var point = this.getEventRWU(e);
@@ -549,6 +547,7 @@ export default {
     * adjusts incorrect coordinates caused by svg hover
     */
     getEventRWU (e) {
+        // when the user hovers over certain SVG child nodes, event locations are incorrect
         return {
             x: this.scaleX(e.offsetX),
             y: this.scaleY(e.offsetY)
@@ -589,7 +588,16 @@ export default {
                 .domain([0, this.$refs.grid.clientHeight])
                 .range([this.min_y, this.max_y])
         });
+    },
+    imagesStyles (image) {
+        return {
+            height: this.scaleY.invert(image.height) + 'px',
+            left: this.scaleX.invert(image.x) + 'px',
+            top: this.scaleY.invert(image.y) + 'px',
+            'pointer-events': this.currentTool === 'Drag' ? 'all' : 'none'
+        };
     }
+
 }
 
 function round (point, spacing) {

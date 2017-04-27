@@ -53,11 +53,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
     </section>
 
-    <div id="navigation-search" class="input-text">
-        <label>Search</label>
-        <input v-model="search">
-    </div>
-
     <div id="list">
         <section id="story-list">
             <div v-for="item in stories" :key="item.id" :class="{ active: currentStory && currentStory.id === item.id }" @click="selectItem(item, 'stories')" :style="{'background-color': item && item.color }">
@@ -90,9 +85,7 @@ import applicationHelpers from './../store/modules/application/helpers'
 export default {
     name: 'navigation',
     data() {
-        return {
-            search: ''
-        };
+        return { };
     },
     computed: {
         /*
@@ -104,7 +97,7 @@ export default {
             thermal_zones: state => state.models.library.thermal_zones,
         }),
 
-        stories() { return this.$store.state.models.stories.filter(s => ~s.name.toLowerCase().indexOf(this.search.toLowerCase())); },
+        stories() { return this.$store.state.models.stories; },
 
         // spaces, shading, images for currently selected story
         spaces () { return this.$store.state.application.currentSelections.story.spaces; },
@@ -134,7 +127,7 @@ export default {
                     items = this.images;
                     break;
             }
-            return items.filter(i => ~i.name.toLowerCase().indexOf(this.search.toLowerCase()));
+            return items;
         },
         mode: {
             get () { return this.$store.state.application.currentSelections.mode; },
@@ -360,11 +353,6 @@ export default {
         }
     }
 
-    #navigation-search {
-        padding: .5rem 1rem;
-        border-bottom: 1px solid $gray-darkest;
-    }
-
     #breadcrumbs, #story-list > div, #subselection-list > div {
         align-items: center;
         display: flex;
@@ -384,7 +372,7 @@ export default {
 
         #story-list, #subselection-list {
             overflow: scroll;
-            height: calc(100% - 8rem);
+            height: calc(100% - 5rem);
             > div  {
                 border-bottom: 1px solid $gray-darkest;
                 cursor: pointer;

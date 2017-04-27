@@ -8,7 +8,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
 <div id="grid" :style="{ 'pointer-events': (currentTool === 'Drag' || currentTool === 'Map') ? 'none': 'all' }">
-    <svg ref="grid" @click="addPoint" @mousemove="(currentTool === 'Rectangle' || currentTool === 'Polygon') ? highlightSnapTarget() : null" :viewBox="viewbox" preserveAspectRatio="none" id="svg-grid"></svg>
+    <svg ref="grid" @click="addPoint" @mousemove="(currentTool === 'Rectangle' || currentTool === 'Polygon') ? highlightSnapTarget($event) : null" :viewBox="viewbox" preserveAspectRatio="none" id="svg-grid"></svg>
 </div>
 </template>
 
