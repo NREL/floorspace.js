@@ -7,9 +7,8 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 
 <template>
-<div id="grid"  :style="{ 'pointer-events': (currentTool === 'Drag' || currentTool === 'Map') ? 'none': 'all' }">
-    <!-- <img v-for="(image, index) in images" :ref="'image-' + index" :src="image.src" :image-id="image.id" :style="imagesStyles(image)"> -->
-    <svg ref="grid" @click="addPoint" @mousemove="highlightSnapTarget" :viewBox="viewbox" preserveAspectRatio="none" id="svg-grid"></svg>
+<div id="grid" :style="{ 'pointer-events': (currentTool === 'Drag' || currentTool === 'Map') ? 'none': 'all' }">
+    <svg ref="grid" @click="addPoint" @mousemove="(currentTool === 'Rectangle' || currentTool === 'Polygon') ? highlightSnapTarget() : null" :viewBox="viewbox" preserveAspectRatio="none" id="svg-grid"></svg>
 </div>
 </template>
 
@@ -29,7 +28,7 @@ export default {
         };
     },
     mounted () {
-        this.max_y = (this.$refs.grid.clientHeight/this.$refs.grid.clientWidth) * this.max_x;
+        this.max_y = (this.$refs.grid.clientHeight / this.$refs.grid.clientWidth) * this.max_x;
 
         this.calcScales();
         this.drawGridLines();
@@ -175,41 +174,7 @@ export default {
         polygons () { this.drawPolygons(); },
         points () {
             this.drawPoints();
-        },
-
-        // images () {
-        //     var grid = document.querySelector('#grid');
-        //     this.$nextTick(() => {
-        //         var images = document.querySelectorAll('#grid img');
-        //         for (var i = 0; i < images.length; i++) {
-        //             const imageEl = images[i],
-        //                 image = this.images.find(i => i.id === imageEl.getAttribute('image-id'));
-        //             if (!imageEl.hasDragListener) {
-        //                 imageEl.hasDragListener = true;
-        //                 var startPosition;
-        //                 imageEl.addEventListener("dragstart", (e) => {
-        //                     setTimeout(() => { imageEl.style.visibility = "hidden"; });
-        //                     startPosition = {
-        //                         x: image.x - this.scaleX(e.clientX - imageEl.getBoundingClientRect().left),
-        //                         y: image.y - this.scaleY(e.clientY - imageEl.getBoundingClientRect().top)
-        //                     };
-        //                     return false;
-        //                 }, false);
-        //
-        //                 imageEl.addEventListener("dragend", (e) => {
-        //                     var endPosition = this.getEventRWU(e);
-        //                     imageEl.style.visibility = "visible";
-        //                     this.$store.dispatch('models/updateImageWithData', {
-        //                         image: image,
-        //                         x: startPosition.x + endPosition.x,
-        //                         y: startPosition.y + endPosition.y
-        //                     });
-        //                     return false;
-        //                 }, false);
-        //             }
-        //         }
-        //     });
-        // }
+        }
     },
     methods: methods
 }

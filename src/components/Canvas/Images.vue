@@ -43,6 +43,7 @@ export default {
                 }),
                 layer = new Konva.Layer();
             stage.add(layer);
+
             this.images.forEach((image) => {
                 const konvaImage = new Konva.Image({
                         width: this.scaleX.invert(image.width),
@@ -57,17 +58,18 @@ export default {
                     }),
                     imageObj = new Image();
 
-                if (this.currentImage && this.currentImage.id === image.id) {
-                    konvaImage.strokeEnabled(true);
-                } else {
-                    konvaImage.strokeEnabled(false);
-                }
+                // add border to currentImage
+                konvaImage.strokeEnabled(this.currentImage && this.currentImage.id === image.id);
+
+                // store imageId on group to look up the associated image object when user interacts with group
                 group.imageId = image.id;
+
                 imageObj.onload = () => {
                     konvaImage.image(imageObj);
                     layer.draw();
                 };
-                imageObj.src = image.src;;
+                imageObj.src = image.src;
+
                 layer.add(group);
                 group.add(konvaImage);
 
@@ -204,30 +206,24 @@ export default {
         */
         images: {
             handler (newImages) {
-                const ignoredProperties = ['height', 'width', 'x', 'y'];
-                // if no images were added or deleted
-                if (newImages.length === this.imageCache.length) {
-                    for (var i = 0; i < newImages.length; i++) {
-                        const newImage = newImages[i],
-                            cachedImage = this.imageCache[i];
-                        Object.keys(newImage).forEach((k) => {
-                            // check that the property changed is one that should trigger a re-render
-                            if (newImage[k] !== cachedImage[k] && !~ignoredProperties.indexOf(k)) {
-                                this.renderImages();
-                            }
-                        });
-                    }
-                } else {
-                    this.renderImages();
-                }
+                if (newImages.length !== this.imageCache.length) { this.renderImages(); }
 
+                // no images were added or deleted, check if the property changed is one that should trigger a re-render
+                const ignoredProperties = ['height', 'width', 'x', 'y'];
+                for (var i = 0; i < newImages.length; i++) {
+                    const newImage = newImages[i],
+                        cachedImage = this.imageCache[i];
+                    Object.keys(newImage).forEach((k) => {
+                        if (newImage[k] !== cachedImage[k] && !~ignoredProperties.indexOf(k)) {
+                            this.renderImages();
+                        }
+                    });
+                }
             },
             // deep watch so that changes to properties on individual images trigger the handler
             deep: true
         },
-        currentImage() {
-            this.renderImages();
-        }
+        currentImage() { this.renderImages(); }
     }
 }
 </script>

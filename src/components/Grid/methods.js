@@ -133,6 +133,8 @@ export default {
 
         // if no space or shading is selected, disable drawing
         if (!this.currentSpace && !this.currentShading) { return; }
+        if (this.currentTool !== 'Polygon' && this.currentTool !== 'Rectangle') { return e }
+
 
         // translate click event coordinates into RWU
         var point = this.getEventRWU(e);
@@ -547,21 +549,10 @@ export default {
     * adjusts incorrect coordinates caused by svg hover
     */
     getEventRWU (e) {
-        // when the user hovers over certain SVG child nodes, event locations are incorrect
-        if (e.clientX === e.offsetX) {
-            // TODO: blocking pointer events on SVG probably fixed this, if the debugger statement isn't ever being triggered, this code can be removed
-            debugger
-            // adjust the incorrect offset value by the position of the grid
-            return {
-                x: this.scaleX(e.offsetX - this.$refs.grid.getBoundingClientRect().left),
-                y: this.scaleY(e.offsetY - this.$refs.grid.getBoundingClientRect().top)
-            };
-        } else {
-            return {
-                x: this.scaleX(e.offsetX),
-                y: this.scaleY(e.offsetY)
-            };
-        }
+        return {
+            x: this.scaleX(e.offsetX),
+            y: this.scaleY(e.offsetY)
+        };
     },
 
     /*
@@ -598,16 +589,7 @@ export default {
                 .domain([0, this.$refs.grid.clientHeight])
                 .range([this.min_y, this.max_y])
         });
-    },
-    imagesStyles (image) {
-        return {
-            height: this.scaleY.invert(image.height) + 'px',
-            left: this.scaleX.invert(image.x) + 'px',
-            top: this.scaleY.invert(image.y) + 'px',
-            'pointer-events': this.currentTool === 'Drag' ? 'all' : 'none'
-        };
     }
-
 }
 
 function round (point, spacing) {

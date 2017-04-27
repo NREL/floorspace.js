@@ -11,6 +11,7 @@
 // Vue's inline template styling will not work with dynamically created markup
 #grid svg {
     * {
+        // prevent glitchy points caused by moving mouse over overlapping svg paths
         pointer-events: none;
     }
     // points
@@ -38,9 +39,11 @@
     // shapes
     polygon, rect, path {
         fill-opacity: 0.5;
+        pointer-events: all;
         stroke: $gray-light;
         &.currentSpace, &.currentShading {
             stroke: $secondary;
+            stroke-width: 2px;
         }
     }
 }
