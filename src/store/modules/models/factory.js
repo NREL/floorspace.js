@@ -50,7 +50,9 @@ export default {
             height: 100,
             width: 100,
             x: 0,
-            y: 0
+            y: 0,
+            z: 0,
+            opacity: 1
         };
     },
     BuildingUnit: function (name) {

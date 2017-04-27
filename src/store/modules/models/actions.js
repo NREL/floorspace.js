@@ -177,17 +177,23 @@ export default {
     },
 
     createImageForStory (context, payload) {
-        const image = new factory.Image(payload.src);
-        image.name = payload.name;
-        image.height = (context.rootState.project.view.max_y - context.rootState.project.view.min_y) / 3;
-        image.width = (context.rootState.project.view.max_x - context.rootState.project.view.min_x) / 3;
-        image.y = (context.rootState.project.view.max_y - context.rootState.project.view.min_y - image.height) * Math.random();
-        image.x = (context.rootState.project.view.max_x - context.rootState.project.view.min_x - image.width) * Math.random();
+        const img = new Image();
+        img.onload = () => {
+            const image = new factory.Image(payload.src);
 
-        context.commit('createImageForStory', {
-            story_id: payload.story_id,
-            image: image
-        });
+            image.name = payload.name;
+            image.height = context.rootState.application.scale.y(img.height);
+            image.width = context.rootState.application.scale.x(img.width);
+
+            image.y = (context.rootState.project.view.max_y - context.rootState.project.view.min_y - image.height) * Math.random();
+            image.x = (context.rootState.project.view.max_x - context.rootState.project.view.min_x - image.width) * Math.random();
+
+            context.commit('createImageForStory', {
+                story_id: payload.story_id,
+                image: image
+            });
+        };
+        img.src = payload.src;
     },
 
     createObjectWithType (context, payload) {

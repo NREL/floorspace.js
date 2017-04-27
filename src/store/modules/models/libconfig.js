@@ -380,6 +380,13 @@ const map = {
                 private: false,
                 validator: validators.number
             },
+            z: {
+                displayName: 'z',
+                readonly: false,
+                input_type: 'text',
+                private: false,
+                validator: validators.number
+            },
             x: {
                 readonly: true,
                 private: true

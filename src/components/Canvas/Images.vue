@@ -60,10 +60,13 @@ export default {
                     konvaImage.image(imageObj);
                     layer.draw();
                 };
-                imageObj.src = image.src;;
+                imageObj.src = image.src;
 
                 layer.add(group);
                 group.add(konvaImage);
+
+                konvaImage.setZIndex(image.z);
+                group.setZIndex(image.z);
 
                 this.addAnchor(group, 0, 0, 'topLeft');
                 this.addAnchor(group, this.scaleX.invert(image.width), 0, 'topRight');
@@ -186,8 +189,11 @@ export default {
         })
     },
     watch: {
-        images() {
-            this.loadImages();
+        images: {
+            handler (val, oldVal) {
+                this.loadImages();
+            },
+            deep: true
         }
     }
 }
