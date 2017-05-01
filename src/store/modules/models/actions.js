@@ -5,7 +5,6 @@ import helpers from './helpers.js'
 export default {
     initStory (context) {
         const story = new factory.Story();
-        story.name = 'Story ' + (context.state.stories.length + 1);
         context.commit('initStory', {
             story: story
         });
@@ -24,7 +23,6 @@ export default {
     initSpace (context, payload) {
         const story = context.state.stories.find(s => s.id === payload.story.id),
             space = new factory.Space();
-        space.name = 'Space ' + (story.spaces.length + 1);
         context.commit('initSpace', {
             story: story,
             space: space
@@ -34,7 +32,6 @@ export default {
     initShading (context, payload) {
         const story = context.state.stories.find(s => s.id === payload.story.id),
             shading = new factory.Shading();
-        shading.name = 'Shading ' + (story.shading.length + 1);
         context.commit('initShading', {
             story: story,
             shading: shading
@@ -181,7 +178,6 @@ export default {
         img.onload = () => {
             const image = new factory.Image(payload.src);
 
-            image.name = payload.name;
             image.height = context.rootState.application.scale.y(img.height);
             image.width = context.rootState.application.scale.x(img.width);
 

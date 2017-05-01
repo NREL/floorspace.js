@@ -4,10 +4,11 @@ import appconfig from './../application/appconfig.js'
 
 export default {
     Story: function () {
+        const id = idFactory.generate();
         return {
-            id: idFactory.generate(),
+            id: id,
             handle: null,
-            name: null,
+            name: "Story " + id,
             geometry_id: null,
             below_floor_plenum_height: 0,
             floor_to_ceiling_height: 0,
@@ -19,10 +20,11 @@ export default {
         }
     },
     Space: function () {
+        const id = idFactory.generate();
         return {
-            id: idFactory.generate(),
+            id: id,
             color: generateColor('space'),
-            name: null,
+            name: 'Space ' + id,
             handle: null,
             face_id: null,
             daylighting_controls: [],
@@ -33,19 +35,21 @@ export default {
         };
     },
     Shading: function () {
+        const id = idFactory.generate();
         return {
-            id: idFactory.generate(),
+            id: id,
             color: appconfig.palette.shading,
-            name: null,
+            name: 'Shading ' + id,
             handle: null,
             face_id: null
         };
     },
     Image: function (src) {
+        const id = idFactory.generate();
         return {
-            id: idFactory.generate(),
+            id: id,
             src: src,
-            name: null,
+            name: 'Image ' + id,
             visible: true,
             height: 100,
             width: 100,
@@ -55,49 +59,56 @@ export default {
             opacity: 1
         };
     },
-    BuildingUnit: function (name) {
+    BuildingUnit: function () {
+        const id = idFactory.generate();
         return {
-            id: idFactory.generate(),
+            id: id,
             color: generateColor('building_unit'),
-            name: name
+            name: 'Building Unit ' + id
         };
     },
-    ThermalZone: function (name) {
+    ThermalZone: function () {
+        const id = idFactory.generate();
         return {
-            id: idFactory.generate(),
+            id: id,
             color: generateColor('thermal_zone'),
-            name: name
+            name: 'Thermal Zone ' + id
         };
     },
-    SpaceType: function (name) {
+    SpaceType: function () {
+        const id = idFactory.generate();
         return {
-            id: idFactory.generate(),
+            id: id,
             color: generateColor('space_type'),
-            name: name
+            name: 'Space Type ' + id
         };
     },
-    Construction: function (name) {
+    Construction: function () {
+        const id = idFactory.generate();
         return {
-            id: idFactory.generate(),
-            name: name
+            id: id,
+            name: 'Construction ' + id
         };
     },
-    ConstructionSet: function (name) {
+    ConstructionSet: function () {
+        const id = idFactory.generate();
         return {
-            id: idFactory.generate(),
-            name: name
+            id: id,
+            name: 'Construction Set ' + id
         };
     },
-    Window: function (name) {
+    Window: function () {
+        const id = idFactory.generate();
         return {
-            id: idFactory.generate(),
-            name: name
+            id: id,
+            name: 'Window ' + id
         };
     },
-    DaylightingControl: function (name) {
+    DaylightingControl: function () {
+        const id = idFactory.generate();
         return {
-            id: idFactory.generate(),
-            name: name
+            id: id,
+            name: 'Daylighting Control ' + id
         };
     }
 }
