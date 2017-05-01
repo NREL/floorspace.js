@@ -53,8 +53,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 <input ref="importInput" @change="importDataAsFile" type="file"/>
                 <input id="json-input" v-model="importData" type="text"/>
 
-                <button @click="$refs.importInput.click()" id="import">Import Model</button>
-                <button @click="exportData" id="export">Export Model</button>
+                <button @click="$refs.importInput.click()" id="import">Open Floorplan</button>
+                <button @click="exportData" id="export">Save Floorplan</button>
             </div>
 
         </section>
@@ -77,6 +77,12 @@ export default {
         exportData () {
             const data = this.$store.getters['exportData'];
             console.log(data);
+
+            const a =document.createElement('a');
+            a.setAttribute("href", "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data)));
+            a.setAttribute("download", "floorplan.json");
+            a.click();
+
             return data;
         },
         importDataAsFile (event) {
