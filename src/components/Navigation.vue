@@ -384,7 +384,7 @@ export default {
                     width: 1rem;
                 }
                 &.active {
-                    color: $secondary;
+                    color: $primary;
                     svg {
                         cursor: pointer;
                         height: 1rem;
@@ -393,7 +393,7 @@ export default {
                         }
                         &:hover {
                             path {
-                                fill: $primary;
+                                fill: $secondary;
                             }
                         }
                     }

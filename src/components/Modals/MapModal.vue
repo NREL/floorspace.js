@@ -21,10 +21,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <p>If you would like to geolocate your floorplan, place the map at your desired location before drawing any geometry. Use alt+shift to rotate the north axis. Once geometry has been drawn, the map cannot be rotated.</p>
             <button @click="mapEnabled = true; tool='Map'; $emit('close')">Place Map</button>
             <button @click="mapEnabled = false; mapVisible = false; $emit('close')">Disable Map</button>
-            <div class="input-text">
-                <label>Address</label>
-                <input v-model="address">
-            </div>
         </div>
 
 

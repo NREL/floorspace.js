@@ -38,7 +38,7 @@ export default {
     name: 'app',
     data () {
         return {
-            mapModalVisible: true
+            mapModalVisible: false // TODO: return to true
         }
     },
     beforeCreate () {

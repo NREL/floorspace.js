@@ -23,6 +23,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
                 <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
             </svg>
         </div>
+        <button>New</button>
     </header>
 
     <table class="table">
@@ -44,7 +45,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
         </thead>
 
         <tbody>
-            <tr v-for='object in displayObjects' :key="object.id" @click="currentObject = object" :class="classForObjectRow(object)" :style="{'background-color': currentObject && currentObject.id === object.id ? object.color : '' }">
+            <tr v-for='object in displayObjects' :key="object.id" @click="currentObject = object" :class="classForObjectRow(object)">
                 <td v-for="column in columns" @mouseover="toggleError(object, column, true)" @mouseout="toggleError(object, column, false)">
                     <div v-if="errorForObjectAndKey(object, column) && errorForObjectAndKey(object, column).visible " class="tooltip-error">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14">
@@ -199,6 +200,11 @@ export default {
                 Object.keys(o).forEach((k) => {
                     if (!~columns.indexOf(k) && !this.keyIsPrivate(this.type, k)) { columns.push(k); }
                 })
+            });
+            // look up additional keys (computed properties)
+            const additionalKeys = helpers.defaultKeysForType(this.type)
+            additionalKeys.forEach((k) => {
+                if (!~columns.indexOf(k) && !this.keyIsPrivate(this.type, k)) { columns.push(k); }
             });
             return columns;
         }
@@ -358,16 +364,18 @@ export default {
 
 #library {
     background-color: $gray-darkest;
-    border-top: 1px solid $gray-medium;
     overflow: scroll;
-    position: relative;
 
     header {
         display: flex;
         padding: 1rem 1.5rem;
-        justify-content: space-between;
-        .input-text, .input-select {
-            margin: 0 1rem;
+
+        .input-select {
+            margin-right: 3rem;
+            width: 10rem;
+        }
+        .input-text {
+            margin-right: auto;
             width: 10rem;
         }
     }
@@ -375,38 +383,80 @@ export default {
     table {
         border-spacing: 0;
         width: 100%;
-        thead tr {
-            height: 3rem;
+
+        thead tr th, tbody tr td {
+            text-align: left;
+            padding: 0 1rem;
+            position: relative;
+
+            &:first-child {
+                padding-left: 2.5rem;
+            }
+            &:last-child {
+                flex-grow: 2;
+            }
+        }
+
+
+        thead {
             th {
                 border-bottom: 2px solid $gray-medium-light;
+            }
+            tr {
+                height: 3rem;
                 svg {
                     height: 1rem;
                     width: 1rem;
-                    path {
-                        fill: $gray-medium-light;
-                    }
+                    fill: $gray-medium-light;
                 }
             }
         }
+
         tbody tr {
             height: 2rem;
+
+            &.current {
+                background: $gray-lightest;
+            }
+
             &:nth-of-type(odd) {
                 background-color: $gray-medium-dark;
             }
-            &.current input{
-                color: $secondary;
-            }
-        }
-        thead tr, tbody tr {
 
+            .input-select {
+                margin: .5rem 0;
+            }
+
+            input {
+                background-color: rgba(0,0,0,0);
+                border: none;
+                color: $gray-lightest;
+                font-size: 1rem;
+            }
+
+            // last column - destroy item
+            td.destroy {
+                width: 2rem;
+                svg {
+                    cursor: pointer;
+                    height: 1.25rem;
+                    fill: $gray-lightest;
+                    &:hover {
+                        fill: $secondary;
+                    }
+                }
+            }
+
+            // error styles
             &.error {
-                background: rgba($primary, .5)!important;
+                background: rgba($secondary, .5);
+                position: relative;
             }
 
             .tooltip-error {
                 bottom: 3rem;
                 background-color: $gray-darkest;
-                border: 1px solid $primary;
+                border: 1px solid $secondary;
                 color: $gray-lightest;
                 left: 3rem;
                 border-radius: .25rem;
@@ -419,47 +469,8 @@ export default {
                     position: absolute;
                     transform: rotate(90deg);
                     path {
-                        fill: $primary;
+                        fill: $secondary;
                     }
-                }
-            }
-            th, td {
-                text-align: left;
-                padding: 0 1rem;
-                position: relative;
-
-                &:first-child {
-                    padding-left: 2.5rem;
-                }
-                &:last-child {
-                    flex-grow: 2;
-                }
-                &.destroy {
-                    width: 2rem;
-                    svg {
-                        cursor: pointer;
-                        height: 1.25rem;
-                        width: 1.5rem;
-                        path {
-                            fill: $gray-lightest;
-                        }
-                        &:hover {
-                            path {
-                                fill: $primary;
-                            }
-                        }
-                    }
-                }
-
-                .input-select {
-                    margin: .5rem 0;
-                }
-
-                input {
-                    background-color: rgba(0,0,0,0);
-                    border: none;
-                    color: $gray-lightest;
-                    font-size: 1rem;
                 }
             }
         }

@@ -260,6 +260,17 @@ const map = {
                     return space.daylighting_controls.map(d => d.name).join(', ');
                 }
             },
+            story: {
+                displayName: 'Story',
+                readonly: true,
+                private: false,
+                get (space, state) {
+                    const story = state.models.stories.find((story) => {
+                        return ~story.spaces.map(s => s.id).indexOf(space.id)
+                    });
+                    return story.name;
+                }
+            },
             building_unit_id: {
                 displayName: 'Building Unit',
                 readonly: false,
