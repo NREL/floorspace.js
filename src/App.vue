@@ -23,12 +23,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 // this import order is important, if the grid is loaded before the other elements or after the toolbar, it ends up warped
 import Navigation from './components/Navigation'
-// import Inspector from './components/Inspector'
 import Grid from './components/Grid/Grid'
 import Canvas from './components/Canvas/Canvas'
 import Toolbar from './components/Toolbar'
 import Library from './components/Library'
-import AssignObjectModal from './components/Modals/AssignObjectModal'
 import MapModal from './components/Modals/MapModal'
 import CreateObjectModal from './components/Modals/CreateObjectModal'
 

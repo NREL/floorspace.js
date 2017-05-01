@@ -232,12 +232,8 @@ export default {
                         object: newObject
                     });
                     break;
-                // case 'images':
-                //     this.$emit('createImage');
-                //     break;
             }
-
-            this.selectItem(this.items[this.items.length - 1]);
+            this.selectItem(this.items[this.items.length - 1], this.mode);
         },
 
         /*
@@ -278,6 +274,7 @@ export default {
             }
         },
         selectItem (item, mode) {
+
             switch (mode) {
                 case 'stories':
                     this.currentStory = item;

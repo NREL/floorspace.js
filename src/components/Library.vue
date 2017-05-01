@@ -23,7 +23,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
                 <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
             </svg>
         </div>
-        <button>New</button>
+        <button @click="createItem">New</button>
     </header>
 
     <table class="table">
@@ -210,6 +210,39 @@ export default {
         }
     },
     methods: {
+        // initialize an empty story, space, shading, building_unit, or thermal_zone depending on the selected mode
+        createItem () {
+            switch (this.type) {
+                case 'stories':
+                    this.$store.dispatch('models/initStory');
+                    break;
+                case 'spaces':
+                    this.$store.dispatch('models/initSpace', {
+                        story: this.$store.state.application.currentSelections.story
+                    });
+                    break;
+                case 'shading':
+                    this.$store.dispatch('models/initShading', {
+                        story: this.$store.state.application.currentSelections.story
+                    });
+                    break;
+                case 'building_units':
+                case 'thermal_zones':
+                case 'space_types':
+                case 'construction_sets':
+                case 'constructions':
+                case 'windows':
+                case 'daylighting_controls':
+                    const newObject = new helpers.map[this.type].init(this.displayTypeForType(this.type) + " " + (1 + this.displayObjects.length));
+                    this.$store.dispatch('models/createObjectWithType', {
+                        type: this.type,
+                        object: newObject
+                    });
+                    break;
+            }
+            this.currentObject = this.displayObjects[this.displayObjects.length - 1];
+        },
+
         /*
         * returns the formatted displayName for types defined in the library config
         */
@@ -415,12 +448,12 @@ export default {
         tbody tr {
             height: 2rem;
 
-            &.current {
-                background: $gray-lightest;
-            }
-
             &:nth-of-type(odd) {
                 background-color: $gray-medium-dark;
+            }
+
+            &.current {
+                background: $gray-medium-light;
             }
 
             .input-select {
