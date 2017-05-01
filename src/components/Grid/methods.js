@@ -21,7 +21,7 @@ export default {
         d3.selectAll('#grid .highlight, #grid .gridpoint').remove();
 
         if (!this.currentSpace && !this.currentShading) { return; }
-        
+
         const point = this.getEventRWU(e);
 
         var snapTarget = this.findSnapTarget(point);
@@ -133,6 +133,11 @@ export default {
 
         // if no space or shading is selected, disable drawing
         if (!this.currentSpace && !this.currentShading) { return; }
+
+        if (this.currentTool === 'Select') {
+            this.$store.dispatch('application/setCurrentSpace', { 'space': null });
+            this.$store.dispatch('application/setCurrentShading', { 'shading': null });
+        }
 
         // translate click event coordinates into RWU
         var point = this.getEventRWU(e);
@@ -370,6 +375,7 @@ export default {
             .append('polygon')
             .on('click', (d) => {
                 if (this.currentTool === 'Select') {
+                    d3.event.stopPropagation();
                     const model = modelHelpers.modelForFace(this.$store.state.models, d.face_id);
                     if (model.type === 'space') {
                         this.$store.dispatch('application/setCurrentSpace', { 'space': model });
