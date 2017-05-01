@@ -24,11 +24,12 @@ export default {
             max_y: 100
         },
         map: {
+            enabled: true,
             visible: true,
-            latitude: 39.7653,
-            longitude: -104.9863,
-            zoom: 18,
-            rotation: 0.791,
+            latitude: 37.8, // 39.7653,
+            longitude: -101.62,// -104.9863,
+            zoom: 4.5, // 18,
+            rotation: 0,//.791,
             elevation: 0
         }
     },

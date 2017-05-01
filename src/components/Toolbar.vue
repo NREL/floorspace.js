@@ -44,6 +44,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 <input type="checkbox" v-model="gridVisible">
             </div>
 
+            <div v-if="mapEnabled" class="input-checkbox">
+                <label>map</label>
+                <input type="checkbox" v-model="mapVisible">
+            </div>
+
             <div id="import-export">
                 <input ref="importInput" @change="importDataAsFile" type="file"/>
                 <input id="json-input" v-model="importData" type="text"/>
@@ -86,11 +91,17 @@ export default {
     },
     computed: {
         ...mapState({
-            currentMode: state => state.application.currentSelections.mode
+            currentMode: state => state.application.currentSelections.mode,
+            mapEnabled: state => state.project.map.enabled
         }),
         availableTools () {
-            return this.$store.state.application.tools.filter((t) => {
-                return (this.currentMode !== 'spaces' && this.currentMode !== 'shading') && (t == 'Rectangle' || t == 'Polygon') ? false : true;
+            return this.$store.state.application.tools
+            // only allow drawing tools in space and shade mode
+            .filter((t) => {
+                return (this.currentMode !== 'spaces' && this.currentMode !== 'shading') && (t === 'Rectangle' || t === 'Polygon') ? false : true;
+            })
+            .filter((t) => {
+                return (!this.mapEnabled && t === 'Map') ? false : true;
             });
 
 
@@ -107,6 +118,10 @@ export default {
         gridVisible: {
             get () { return this.$store.state.project.grid.visible; },
             set (val) { this.$store.dispatch('project/setGridVisible', { visible: val }); }
+        },
+        mapVisible: {
+            get () { return this.$store.state.project.map.visible; },
+            set (val) { this.$store.dispatch('project/setMapVisible', { visible: val }); }
         },
         tool: {
             get () { return this.$store.state.application.currentSelections.tool; },

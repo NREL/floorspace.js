@@ -28,16 +28,20 @@ export default {
     },
     methods: {
         loadMap() {
+            const mapNode = document.getElementById("map");
+            while (mapNode.firstChild) {
+                mapNode.removeChild(mapNode.firstChild);
+            }
             this.view = new ol.View({
                 center: ol.proj.fromLonLat([this.longitude, this.latitude]),
-                rotation: Math.PI / 4,
+                rotation: this.rotation,
                 zoom: this.zoom
             });
-
             this.map = new ol.Map({
                 layers: [new ol.layer.Tile({ source: new ol.source.OSM() })],
                 target: 'map',
-                view: this.view
+                view: this.view,
+                interactions: ol.interaction.defaults({ altShiftDragRotate: !this.currentStoryGeometry.faces.length})
             });
         }
     },
@@ -45,6 +49,7 @@ export default {
         ...mapState({
             currentTool: state => state.application.currentSelections.tool
         }),
+        currentStoryGeometry () { return this.$store.getters['application/currentStoryGeometry']; },
         mapVisible: {
             get () { return this.$store.state.project.map.visible; },
             set (val) { this.$store.dispatch('project/setMapVisible', { visible: val }); }
@@ -75,6 +80,11 @@ export default {
         viewRotation () { return this.view ? this.view.getRotation() : this.rotation; }
     },
     watch: {
+        'currentStoryGeometry.faces.length' (newVal, oldVal) {
+            if (oldVal === 0 && newVal === 1) {
+                this.loadMap();
+            }
+        },
         // watch for changes to map position in the datastore, update the view to reflect what's in the data store (used during model imports)
         latitude () { this.view.setCenter(ol.proj.fromLonLat([this.longitude, this.latitude])); },
         longitude () { this.view.setCenter(ol.proj.fromLonLat([this.longitude, this.latitude])); },

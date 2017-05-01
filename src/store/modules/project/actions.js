@@ -22,6 +22,11 @@ export default {
             context.commit('setMapVisible', payload);
         }
     },
+    setMapEnabled(context, payload) {
+        if (typeof payload.enabled === 'boolean') {
+            context.commit('setMapEnabled', payload);
+        }
+    },
     setGridVisible (context, payload) {
         if (typeof payload.visible === 'boolean') {
             context.commit('setGridVisible', payload);

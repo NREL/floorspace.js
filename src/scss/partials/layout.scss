@@ -11,7 +11,7 @@ main {
     display: flex;
     justify-content: space-between;
     height: calc(70% - 5rem);
-    #navigation, #inspector {
+    #navigation {
         height: 100%;
         width: 17.5rem;
     }
@@ -21,7 +21,7 @@ main {
         position: absolute;
         left: 17.5rem;
         top: 5rem;
-        width: calc(100% - 35rem);
+        width: calc(100% - 17.5rem);
     }
     #grid {
         background-color: transparent;
