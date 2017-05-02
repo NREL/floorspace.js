@@ -21,7 +21,7 @@ export default {
     },
 
     setCurrentSpace (context, payload) {
-        const space = payload.space ? context.state.currentSelections.story.spaces.find(s => s.id === payload.space.id) : null;
+        const space = payload.space ? context.rootGetters['models/allSpaces'].find(s => s.id === payload.space.id) : null;
         context.dispatch('clearSubSelections');
         context.commit('setCurrentSpace', {
             space: space
