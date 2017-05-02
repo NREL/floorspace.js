@@ -132,8 +132,34 @@ const map = {
                 readonly: false,
                 input_type: 'text',
                 private: false,
-                validator: validators.name
-            }
+                validator (object, store, value) {
+                    // if (~store.getters['models/allWindows'].map(w => w.name).indexOf(value)) {
+                    //     return {
+                    //         success: false,
+                    //         error: 'Names must be unique.'
+                    //     };
+                    // }
+
+                    if (value.length < 5) {
+                        return {
+                            success: false,
+                            error: 'Names must be at least 5 characters long.'
+                        };
+                    }
+                    return { success: true };
+                }
+            },
+            story: {
+                displayName: 'Story',
+                readonly: true,
+                private: false,
+                get (windowObj, state) {
+                    const story = state.models.stories.find((story) => {
+                        return ~story.windows.map(w => w.id).indexOf(windowObj.id)
+                    });
+                    return story.name;
+                }
+            },
         },
         init: factory.Window
     },
@@ -242,7 +268,22 @@ const map = {
                 readonly: false,
                 input_type: 'text',
                 private: false,
-                validator: validators.name
+                validator (object, store, value) {
+                    if (~store.getters['models/allSpaces'].map(s => s.name).indexOf(value)) {
+                        return {
+                            success: false,
+                            error: 'Names must be unique.'
+                        };
+                    }
+
+                    if (value.length < 5) {
+                        return {
+                            success: false,
+                            error: 'Names must be at least 5 characters long.'
+                        };
+                    }
+                    return { success: true };
+                }
             },
             handle: {
                 readonly: true,
@@ -353,7 +394,22 @@ const map = {
                 readonly: false,
                 input_type: 'text',
                 private: false,
-                validator: validators.name
+                validator (object, store, value) {
+                    if (~store.getters['models/allShading'].map(s => s.name).indexOf(value)) {
+                        return {
+                            success: false,
+                            error: 'Names must be unique.'
+                        };
+                    }
+
+                    if (value.length < 5) {
+                        return {
+                            success: false,
+                            error: 'Names must be at least 5 characters long.'
+                        };
+                    }
+                    return { success: true };
+                }
             },
             handle: {
                 readonly: true,
@@ -382,7 +438,22 @@ const map = {
                 readonly: false,
                 input_type: 'text',
                 private: false,
-                validator: validators.name
+                validator (object, store, value) {
+                    if (~store.getters['models/allImages'].map(i => i.name).indexOf(value)) {
+                        return {
+                            success: false,
+                            error: 'Names must be unique.'
+                        };
+                    }
+
+                    if (value.length < 5) {
+                        return {
+                            success: false,
+                            error: 'Names must be at least 5 characters long.'
+                        };
+                    }
+                    return { success: true };
+                }
             },
             height: {
                 displayName: 'Height',
