@@ -212,6 +212,7 @@ export default {
             switch (mode) {
                 case 'stories':
                     this.$store.dispatch('models/initStory');
+                    return;
                     break;
                 case 'spaces':
                     this.$store.dispatch('models/initSpace', {
