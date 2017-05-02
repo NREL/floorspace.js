@@ -174,7 +174,7 @@ export default {
     },
 
     destroyFace (context, payload) {
-        const faceSpace = context.rootState.application.currentSelections.story.spaces.find((space) => {
+        const faceSpace = context.rootGetters['models/allSpaces'].spaces.find((space) => {
             return space.face_id === payload.face_id;
         });
         if (faceSpace) {
