@@ -37,7 +37,7 @@ export default {
             shading: shading
         });
     },
-
+    
     destroyStory (context, payload) {
         const story = context.state.stories.find(s => s.id === payload.story.id);
         context.commit('destroyStory', {
@@ -117,7 +117,7 @@ export default {
     },
 
     updateSpaceWithData (context, payload) {
-        const space = context.rootState.application.currentSelections.story.spaces.find(s => s.id === payload.space.id),
+        const space = context.getters.allSpaces.find(s => s.id === payload.space.id),
             validProperties = Object.keys(space),
             cleanedPayload = {};
 
@@ -134,7 +134,7 @@ export default {
     },
 
     updateShadingWithData (context, payload) {
-        const shading = context.rootState.application.currentSelections.story.shading.find(s => s.id === payload.shading.id),
+        const shading = context.getters.allShading.find(s => s.id === payload.shading.id),
             validProperties = Object.keys(shading),
             cleanedPayload = {};
 
@@ -150,7 +150,7 @@ export default {
         context.commit('updateShadingWithData', cleanedPayload);
     },
     updateImageWithData (context, payload) {
-        const image = context.rootState.application.currentSelections.story.images.find(i => i.id === payload.image.id),
+        const image = context.getters.allImages.find(i => i.id === payload.image.id),
             validProperties = Object.keys(image),
             cleanedPayload = {};
 
