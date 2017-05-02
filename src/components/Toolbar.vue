@@ -51,8 +51,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
             <div id="import-export">
                 <input ref="importInput" @change="importDataAsFile" type="file"/>
-                <input id="json-input" v-model="importData" type="text"/>
-
                 <button @click="$refs.importInput.click()" id="import">Open Floorplan</button>
                 <button @click="exportData" id="export">Save Floorplan</button>
             </div>
@@ -78,7 +76,7 @@ export default {
             const data = this.$store.getters['exportData'];
             console.log(data);
 
-            const a =document.createElement('a');
+            const a = document.createElement('a');
             a.setAttribute("href", "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data)));
             a.setAttribute("download", "floorplan.json");
             a.click();
@@ -89,10 +87,17 @@ export default {
             const file = event.target.files[0],
                 reader = new FileReader();
             reader.addEventListener("load", () => {
-                this.importData = reader.result;
+                this.importData(reader.result);
             }, false);
 
             if (file) { reader.readAsText(file); }
+        },
+        importData (data) {
+            this.$store.dispatch('importData', {
+                clientWidth: document.getElementById('svg-grid').clientWidth,
+                clientHeight: document.getElementById('svg-grid').clientHeight,
+                data: JSON.parse(data)
+            });
         }
     },
     computed: {
@@ -109,18 +114,8 @@ export default {
             .filter((t) => {
                 return (!this.mapEnabled && t === 'Map') ? false : true;
             });
-
-
         },
-        importData: {
-            set (data) {
-                this.$store.dispatch('importData', {
-                    clientWidth: document.getElementById('svg-grid').clientWidth,
-                    clientHeight: document.getElementById('svg-grid').clientHeight,
-                    data: JSON.parse(data)
-                });
-            }
-        },
+
         gridVisible: {
             get () { return this.$store.state.project.grid.visible; },
             set (val) { this.$store.dispatch('project/setGridVisible', { visible: val }); }
@@ -133,6 +128,7 @@ export default {
             get () { return this.$store.state.application.currentSelections.tool; },
             set (val) { this.$store.dispatch('application/setApplicationTool', { tool: val }); }
         },
+        
         // spacing between gridlines, measured in RWU
         x_spacing: {
             get () { return this.$store.state.project.grid.x_spacing + ' ' + this.$store.state.project.config.units; },
