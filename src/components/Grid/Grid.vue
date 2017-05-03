@@ -58,9 +58,7 @@ export default {
 
             gridVisible: state => state.project.grid.visible,
 
-            // the spacing in RWU between gridlines - one square in the grid will be x_spacing x y_spacing
-            x_spacing: state => state.project.grid.x_spacing,
-            y_spacing: state => state.project.grid.y_spacing,
+            spacing: state => state.project.grid.spacing,
 
             // scale functions translate the pixel coordinates of a location on the screen into RWU coordinates to use within the SVG's grid system
             scaleX: state => state.application.scale.x,
@@ -144,11 +142,7 @@ export default {
     watch: {
         gridVisible () { this.drawGridLines(); },
 
-        x_spacing () {
-            this.calcScales();
-            this.drawGridLines();
-        },
-        y_spacing () {
+        spacing () {
             this.calcScales();
             this.drawGridLines();
         },

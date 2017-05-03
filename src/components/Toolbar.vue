@@ -31,13 +31,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             </div>
 
             <div class="input-number">
-                <label>x_spacing</label>
-                <input v-model.number.lazy="x_spacing">
+                <label>spacing</label>
+                <input v-model.number.lazy="spacing">
             </div>
-            <div class="input-number">
-                <label>y_spacing</label>
-                <input v-model.number.lazy="y_spacing">
-            </div>
+            
 
             <div class="input-checkbox">
                 <label>grid</label>
@@ -128,15 +125,11 @@ export default {
             get () { return this.$store.state.application.currentSelections.tool; },
             set (val) { this.$store.dispatch('application/setApplicationTool', { tool: val }); }
         },
-        
+
         // spacing between gridlines, measured in RWU
-        x_spacing: {
-            get () { return this.$store.state.project.grid.x_spacing + ' ' + this.$store.state.project.config.units; },
-            set (val) { this.$store.dispatch('project/setGridXSpacing', { x_spacing: val }); }
-        },
-        y_spacing: {
-            get () { return this.$store.state.project.grid.y_spacing + ' ' + this.$store.state.project.config.units; },
-            set (val) { this.$store.dispatch('project/setGridYSpacing', { y_spacing: val }); }
+        spacing: {
+            get () { return this.$store.state.project.grid.spacing + ' ' + this.$store.state.project.config.units; },
+            set (val) { this.$store.dispatch('project/setSpacing', { spacing: val }); }
         },
 
         // mix_x, min_y, max_x, and max_y are the grid dimensions in real world units

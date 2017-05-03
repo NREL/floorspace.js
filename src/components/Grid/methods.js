@@ -51,14 +51,14 @@ export default {
                 .attr('vector-effect', 'non-scaling-stroke');
         } else if (!snapTarget && this.gridVisible) {
             // calculate an offset for the gridlines based on the viewbox min_x and min_y
-            const xAdjustment = this.min_x % this.x_spacing,
-                yAdjustment = this.min_y % this.y_spacing;
+            const xAdjustment = this.min_x % this.spacing,
+                yAdjustment = this.min_y % this.spacing;
 
             // round point RWU coordinates to nearest gridline
             snapTarget = {
                 type: 'vertex',
-                x: round(point.x - xAdjustment, this.x_spacing) + xAdjustment,
-                y: round(point.y - yAdjustment, this.y_spacing) + yAdjustment
+                x: round(point.x - xAdjustment, this.spacing) + xAdjustment,
+                y: round(point.y - yAdjustment, this.spacing) + yAdjustment
             };
 
             d3.select('#grid svg')
@@ -171,12 +171,12 @@ export default {
         // if no snapTarget was found and the grid is visible snap to the grid
         else if (this.gridVisible) {
             // calculate an offset for the gridlines based on the viewbox min_x and min_y
-            const xAdjustment = this.min_x % this.x_spacing,
-                yAdjustment = this.min_y % this.y_spacing;
+            const xAdjustment = this.min_x % this.spacing,
+                yAdjustment = this.min_y % this.spacing;
 
             // round point RWU coordinates to nearest gridline
-            point.x = round(point.x - xAdjustment, this.x_spacing) + xAdjustment;
-            point.y = round(point.y - yAdjustment, this.y_spacing) + yAdjustment;
+            point.x = round(point.x - xAdjustment, this.spacing) + xAdjustment;
+            point.y = round(point.y - yAdjustment, this.spacing) + yAdjustment;
         }
 
         // if we are in polygon mode and the snapped gridpoint is within the tolerance zone of the origin of the face being drawn, close the face
@@ -417,22 +417,22 @@ export default {
 
         // lines are drawn in RWU
         svg.selectAll('.vertical')
-            .data(d3.range(this.min_x / this.x_spacing, this.max_x / this.x_spacing))
+            .data(d3.range(this.min_x / this.spacing, this.max_x / this.spacing))
             .enter().append('line')
-            .attr('x1', (d) => { return d * this.x_spacing; })
-            .attr('x2', (d) => { return d * this.x_spacing; })
+            .attr('x1', (d) => { return d * this.spacing; })
+            .attr('x2', (d) => { return d * this.spacing; })
             .attr('y1', this.min_y)
             .attr('y2', this.max_y)
             .attr('class', 'vertical')
             .attr('vector-effect', 'non-scaling-stroke');
 
         svg.selectAll('.horizontal')
-            .data(d3.range(this.min_y / this.y_spacing, this.max_y / this.y_spacing))
+            .data(d3.range(this.min_y / this.spacing, this.max_y / this.spacing))
             .enter().append('line')
             .attr('x1', this.min_x)
             .attr('x2', this.max_x)
-            .attr('y1', (d) => { return d * this.y_spacing; })
-            .attr('y2', (d) => { return d * this.y_spacing; })
+            .attr('y1', (d) => { return d * this.spacing; })
+            .attr('y2', (d) => { return d * this.spacing; })
             .attr('class', 'horizontal')
             .attr('vector-effect', 'non-scaling-stroke');
 

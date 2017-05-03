@@ -22,15 +22,8 @@ export default {
             state.grid.visible = payload.visible;
         }
     },
-    setGridXSpacing (state, payload) {
-        if ('x_spacing' in payload) {
-            state.grid.x_spacing = payload.x_spacing;
-        }
-    },
-    setGridYSpacing (state, payload) {
-        if ('y_spacing' in payload) {
-            state.grid.y_spacing = payload.y_spacing;
-        }
+    setSpacing (state, payload) {
+        state.grid.spacing = payload.spacing;
     },
 
     // VIEW
