@@ -174,7 +174,7 @@ export default {
     },
 
     destroyFace (context, payload) {
-        const faceSpace = context.rootGetters['models/allSpaces'].spaces.find((space) => {
+        const faceSpace = context.rootGetters['models/allSpaces'].find((space) => {
             return space.face_id === payload.face_id;
         });
         if (faceSpace) {

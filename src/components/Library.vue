@@ -161,7 +161,7 @@ export default {
             for (var i = 0; i < this.$store.state.models.stories.length; i++) {
                 spaces = spaces.concat(this.$store.state.models.stories[i].spaces);
                 shading = shading.concat(this.$store.state.models.stories[i].shading);
-                images = shading.concat(this.$store.state.models.stories[i].images);
+                images = images.concat(this.$store.state.models.stories[i].images);
             }
 
             return JSON.parse(JSON.stringify({
