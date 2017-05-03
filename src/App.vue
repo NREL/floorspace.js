@@ -28,7 +28,6 @@ import Canvas from './components/Canvas/Canvas'
 import Toolbar from './components/Toolbar'
 import Library from './components/Library'
 import MapModal from './components/Modals/MapModal'
-import CreateObjectModal from './components/Modals/CreateObjectModal'
 
 import { mapState } from 'vuex'
 
@@ -36,7 +35,7 @@ export default {
     name: 'app',
     data () {
         return {
-            mapModalVisible: true
+            mapModalVisible: false // TODO: return to true
         }
     },
     beforeCreate () {

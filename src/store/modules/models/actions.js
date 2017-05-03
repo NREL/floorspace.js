@@ -37,7 +37,7 @@ export default {
             shading: shading
         });
     },
-    
+
     destroyStory (context, payload) {
         const story = context.state.stories.find(s => s.id === payload.story.id);
         context.commit('destroyStory', {
@@ -178,12 +178,12 @@ export default {
         img.onload = () => {
             const image = new factory.Image(payload.src);
 
-            image.height = context.rootState.application.scale.y(img.height);
-            image.width = context.rootState.application.scale.x(img.width);
+            image.height = payload.height;
+            image.width = payload.width;
 
-            image.y = (context.rootState.project.view.max_y - context.rootState.project.view.min_y - image.height) * Math.random();
-            image.x = (context.rootState.project.view.max_x - context.rootState.project.view.min_x - image.width) * Math.random();
-
+            image.x = payload.x;
+            image.y = payload.y;
+            
             context.commit('createImageForStory', {
                 story_id: payload.story_id,
                 image: image

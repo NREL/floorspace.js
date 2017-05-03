@@ -32,8 +32,17 @@ export default {
                 face_id: null
             }],
             images: [{
+                id: null,
+                src: null,
                 name: null,
-                face_id: null
+                visible: false,
+                // coordinates and dimensions stored in RWU
+                height: 0,
+                width: 0,
+                x: 0,
+                y: 0,
+                z: 0,
+                opacity: 0
             }]
         }*/],
         // lib

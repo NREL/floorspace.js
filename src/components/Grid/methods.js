@@ -591,19 +591,10 @@ export default {
 
         this.$store.dispatch('application/setScaleY', {
             scaleY: d3.scaleLinear()
-                .domain([0, this.$refs.grid.clientHeight])
-                .range([this.min_y, this.max_y])
+                .domain([0, this.$refs.grid.clientHeight]) // input domain (px)
+                .range([this.min_y, this.max_y]) // output range (rwu)
         });
-    },
-    imagesStyles (image) {
-        return {
-            height: this.scaleY.invert(image.height) + 'px',
-            left: this.scaleX.invert(image.x) + 'px',
-            top: this.scaleY.invert(image.y) + 'px',
-            'pointer-events': this.currentTool === 'Drag' ? 'all' : 'none'
-        };
     }
-
 }
 
 function round (point, spacing) {

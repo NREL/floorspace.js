@@ -46,12 +46,14 @@ export default {
 
             this.images.forEach((image) => {
                 const konvaImage = new Konva.Image({
+                        // translate image dimensions from RWU to px
                         width: this.scaleX.invert(image.width),
                         height: this.scaleY.invert(image.height),
                         stroke: '#6AAC15',
                         strokeWidth: 3
                     }),
                     group = new Konva.Group({
+                        // translate image coordinates from RWU to px
                         x: this.scaleX.invert(image.x),
                         y: this.scaleY.invert(image.y),
                         draggable: true
@@ -77,14 +79,17 @@ export default {
                 konvaImage.opacity(image.opacity);
                 group.setZIndex(image.z);
 
-                this.addAnchor(group, 0, 0, 'topLeft');
+                // translate image dimensions from RWU to px
                 this.addAnchor(group, this.scaleX.invert(image.width), 0, 'topRight');
+                this.addAnchor(group, 0, 0, 'topLeft');
                 this.addAnchor(group, this.scaleX.invert(image.width), this.scaleY.invert(image.height), 'bottomRight');
                 this.addAnchor(group, 0, this.scaleY.invert(image.height), 'bottomLeft');
+
                 group.on('dragend', (e) => {
                     this.currentImage = image;
                     this.$store.dispatch('models/updateImageWithData', {
                         image: image,
+                        // store new image coordinates in rwu
                         x: this.scaleX(group.getX()),
                         y: this.scaleY(group.getY())
                     });
@@ -144,6 +149,7 @@ export default {
             // update image position and size in datastore
             this.$store.dispatch('models/updateImageWithData', {
                 image: image,
+                // convert coordinates and dimensions to rwu before storing
                 x: this.scaleX(topLeft.getX()),
                 y: this.scaleY(topLeft.getY()),
                 width: this.scaleX(width),
