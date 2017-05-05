@@ -23,52 +23,68 @@ var svg = d3.select("svg"),
     width = +svg.attr("width"),
     height = +svg.attr("height");
 
-var zoom = d3.zoom()
-    // scale must be between .5 * original bounds and 2 * original bounds
-    .scaleExtent([.5, 2])
-    // panning rectangle starts at the original boundaries - 100 in the x and y directions end ends at the original bounds + 90x 100y
-    .translateExtent([[-100, -100], [width + 90, height + 100]])
-    .on("zoom", zoomed);
+    const scaleX = d3.scaleLinear()
+            .domain([0, width])
+            .range([0, width]),
+        scaleY = d3.scaleLinear()
+            .domain([0, height])
+            .range([0, height]);
 
-var x = d3.scaleLinear()
-    .domain([0, width])
-    .range([0, 2 * width]);
+    // axes
+    const xAxisGenerator = d3.axisBottom(scaleX)
+            .ticks(10 * width / height) // number of ticks
+            .tickSize( height) // length of tick marks (full height of grid coming up from x axis)
+            .tickPadding(-20), // padding between axisBottom and tick text
+        yAxisGenerator = d3.axisRight(scaleY)
+            .ticks(10) // number of ticks
+            .tickSize(width) // length of tick marks (full width of grid coming up from y axis)
+            .tickPadding(-20); // padding between axisRight and tick text
 
-var y = d3.scaleLinear()
-    .domain([0, height])
-    .range([0, height]);
+    const view = svg.append("rect")
+        .attr("class", "view")
+        .attr("width", width / 2)
+        .attr("height", height / 2);
 
-var xAxis = d3.axisBottom(x)
-    .ticks((width + 2) / (height + 2) * 10)
-    .tickSize(height)
-    .tickPadding(8 - height);
+    const circles = [];
+    for (var i = 0; i < 10; i++) {
+        const circle = svg.append("circle")
+            .attr("cx", width * Math.random())
+            .attr("cy", height * Math.random())
+            .attr("r", (width * Math.random())/10)
+        circles.push(circle);
+    }
 
-var yAxis = d3.axisRight(y)
-    .ticks(10)
-    .tickSize(width)
-    .tickPadding(8 - width);
+    var xAxis = svg.append("g")
+            .attr("class", "axis axis--x")
+            .call(xAxisGenerator),
+        yAxis = svg.append("g")
+            .attr("class", "axis axis--y")
+            .call(yAxisGenerator);
 
-var view = svg.append("rect")
-    .attr("class", "view")
-    .attr("x", 0.5)
-    .attr("y", 0.5)
-    .attr("width", width)
-    .attr("height", height);
 
-var gX = svg.append("g")
-    .attr("class", "axis axis--x")
-    .call(xAxis);
+    var zoomBehavior = d3.zoom()
+        // scale must be between .5 * original bounds and 2 * original bounds
+        .scaleExtent([.5, 2])
+        // allow panning by 200px in any direction
+        .translateExtent([[-200, -200], [width + 200, height + 200]])
+        .on("zoom", zoomHandler);
 
-var gY = svg.append("g")
-    .attr("class", "axis axis--y")
-    .call(yAxis);
+    svg.call(zoomBehavior);
 
-svg.call(zoom);
+    function zoomHandler() {
+        // don't change the original scale or you'll get exponential growth
+        // x = d3.event.transform.rescaleX(x)
+        // y = d3.event.transform.rescaleX(y)
 
-function zoomed() {
-  view.attr("transform", d3.event.transform);
-  gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
-  gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
-}
+        view.attr("transform", d3.event.transform);
+        circles.forEach(c => c.attr("transform", d3.event.transform))
+
+        // create transformed copies of the scales and apply them to the axes
+        xAxis.call(xAxisGenerator.scale(d3.event.transform.rescaleX(scaleX)));
+        yAxis.call(yAxisGenerator.scale(d3.event.transform.rescaleY(scaleY)));
+
+        // console.log(xAxis.call(xAxisGenerator.ticks(6)))
+        // console.log(x.domain()[0], x.domain()[1], x.domain()[0] - x.domain()[1])
+    }
 
 </script>
