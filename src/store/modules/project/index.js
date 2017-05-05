@@ -13,7 +13,7 @@ export default {
         },
         grid: {
             visible: true,
-            spacing: 1
+            spacing: 10
         },
         view: {
             // grid boundaties in rwu

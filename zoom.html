@@ -41,12 +41,12 @@ var y = d3.scaleLinear()
 var xAxis = d3.axisBottom(x)
     .ticks((width + 2) / (height + 2) * 10)
     .tickSize(height)
-    // .tickPadding(8 - height);
+    .tickPadding(8 - height);
 
 var yAxis = d3.axisRight(y)
     .ticks(10)
     .tickSize(width)
-    // .tickPadding(8 - width);
+    .tickPadding(8 - width);
 
 var view = svg.append("rect")
     .attr("class", "view")

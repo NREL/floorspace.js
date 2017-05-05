@@ -34,7 +34,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 <label>spacing</label>
                 <input v-model.number.lazy="spacing">
             </div>
-            
 
             <div class="input-checkbox">
                 <label>grid</label>

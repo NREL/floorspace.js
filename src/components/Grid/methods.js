@@ -205,44 +205,44 @@ export default {
     },
 
     // ****************** PANNING ****************** //
-    panStart (e) {
-        if (this.currentTool !== 'Map' && this.currentTool !== 'Pan') { return; }
-        this.isDragging = false;
-        this.$refs.grid.addEventListener('mouseup', this.panEnd);
-        this.$refs.grid.addEventListener('mouseout', this.panEnd);
-        this.$refs.grid.addEventListener('mousemove', this.panMove);
-    },
-    panMove (e) {
-        if (this.isDragging) {
-            const dx = this.originalScales.x(e.movementX),
-                dy  = this.originalScales.y(e.movementY);
-
-            this.min_x -= dx;
-            this.max_x -= dx;
-            this.min_y -= dy;
-            this.max_y -= dy;
-
-            this.drawGridLines();
-        } else {
-            this.points = [];
-            this.isDragging = true;
-        }
-    },
-    panEnd (e) {
-        this.$refs.grid.removeEventListener('mousemove', this.panMove);
-        this.$refs.grid.removeEventListener('mouseout', this.panEnd);
-        this.$refs.grid.removeEventListener('mouseup', this.panEnd);
-
-        if (this.isDragging) {
-            this.points = [];
-            this.drawGridLines();
-            this.drawPolygons();
-            setTimeout(() => {
-                this.isDragging = false;
-                this.calcScales();
-            })
-        }
-    },
+    // panStart (e) {
+    //     if (this.currentTool !== 'Map' && this.currentTool !== 'Pan') { return; }
+    //     this.isDragging = false;
+    //     this.$refs.grid.addEventListener('mouseup', this.panEnd);
+    //     this.$refs.grid.addEventListener('mouseout', this.panEnd);
+    //     this.$refs.grid.addEventListener('mousemove', this.panMove);
+    // },
+    // panMove (e) {
+    //     if (this.isDragging) {
+    //         const dx = this.originalScales.x(e.movementX),
+    //             dy  = this.originalScales.y(e.movementY);
+    //
+    //         this.min_x -= dx;
+    //         this.max_x -= dx;
+    //         this.min_y -= dy;
+    //         this.max_y -= dy;
+    //
+    //         this.drawGridLines();
+    //     } else {
+    //         this.points = [];
+    //         this.isDragging = true;
+    //     }
+    // },
+    // panEnd (e) {
+    //     this.$refs.grid.removeEventListener('mousemove', this.panMove);
+    //     this.$refs.grid.removeEventListener('mouseout', this.panEnd);
+    //     this.$refs.grid.removeEventListener('mouseup', this.panEnd);
+    //
+    //     if (this.isDragging) {
+    //         this.points = [];
+    //         this.drawGridLines();
+    //         this.drawPolygons();
+    //         setTimeout(() => {
+    //             this.isDragging = false;
+    //             this.calcScales();
+    //         })
+    //     }
+    // },
 
 
     // ****************** SAVING FACES ****************** //
@@ -409,36 +409,35 @@ export default {
     * draw lines over the svg for the grid
     */
     drawGridLines () {
-        var svg = d3.select('#grid svg');
-        svg.selectAll('line').remove();
-
-        // redraw the grid if the grid is visible
-        if (!this.$store.state.project.grid.visible) { return; }
-
-        // lines are drawn in RWU
-        svg.selectAll('.vertical')
-            .data(d3.range(this.min_x / this.spacing, this.max_x / this.spacing))
-            .enter().append('line')
-            .attr('x1', (d) => { return d * this.spacing; })
-            .attr('x2', (d) => { return d * this.spacing; })
-            .attr('y1', this.min_y)
-            .attr('y2', this.max_y)
-            .attr('class', 'vertical')
-            .attr('vector-effect', 'non-scaling-stroke');
-
-        svg.selectAll('.horizontal')
-            .data(d3.range(this.min_y / this.spacing, this.max_y / this.spacing))
-            .enter().append('line')
-            .attr('x1', this.min_x)
-            .attr('x2', this.max_x)
-            .attr('y1', (d) => { return d * this.spacing; })
-            .attr('y2', (d) => { return d * this.spacing; })
-            .attr('class', 'horizontal')
-            .attr('vector-effect', 'non-scaling-stroke');
-
-        d3.selectAll('.vertical, .horizontal').lower();
+        // var svg = d3.select('#grid svg');
+        // svg.selectAll('line').remove();
+        //
+        // // redraw the grid if the grid is visible
+        // if (!this.$store.state.project.grid.visible) { return; }
+        //
+        // // lines are drawn in RWU
+        // svg.selectAll('.vertical')
+        //     .data(d3.range(this.min_x / this.spacing, this.max_x / this.spacing))
+        //     .enter().append('line')
+        //     .attr('x1', (d) => { return d * this.spacing; })
+        //     .attr('x2', (d) => { return d * this.spacing; })
+        //     .attr('y1', this.min_y)
+        //     .attr('y2', this.max_y)
+        //     .attr('class', 'vertical')
+        //     .attr('vector-effect', 'non-scaling-stroke');
+        //
+        // svg.selectAll('.horizontal')
+        //     .data(d3.range(this.min_y / this.spacing, this.max_y / this.spacing))
+        //     .enter().append('line')
+        //     .attr('x1', this.min_x)
+        //     .attr('x2', this.max_x)
+        //     .attr('y1', (d) => { return d * this.spacing; })
+        //     .attr('y2', (d) => { return d * this.spacing; })
+        //     .attr('class', 'horizontal')
+        //     .attr('vector-effect', 'non-scaling-stroke');
+        //
+        // d3.selectAll('.vertical, .horizontal').lower();
     },
-
 
     // ****************** SNAPPING TO EXISTING GEOMETRY ****************** //
     /*
@@ -594,6 +593,99 @@ export default {
                 .domain([0, this.$refs.grid.clientHeight]) // input domain (px)
                 .range([this.min_y, this.max_y]) // output range (rwu)
         });
+    },
+
+    calcGrid () {
+        var svg = d3.select('#grid svg'),
+            rwuWidth = this.max_x - this.min_x,
+            rwuHeight = this.max_y - this.min_y;
+
+        var zoom = d3.zoom()
+            // scale must be between .5 * original bounds and 2 * original bounds
+            .scaleExtent([1, 2])
+            // panning rectangle starts at the original boundaries - 100 in the x and y directions end ends at the original bounds + 90x 100y
+            .translateExtent([[0, 0], [1000, 1000]])
+            .on('zoom', () => {
+                view.attr('transform', d3.event.transform);
+
+                // this.scaleX = d3.event.transform.rescaleX(this.scaleX);
+                // this.scaleY = d3.event.transform.rescaleY(this.scaleY);
+                //
+                // this.min_x += d3.event.transform.x;
+                // this.max_x += d3.event.transform.x;
+                // this.min_y += d3.event.transform.y;
+                // this.max_y += d3.event.transform.y;
+
+                gX.call(xAxis.scale(d3.event.transform.rescaleX(this.scaleX)));
+                gY.call(yAxis.scale(d3.event.transform.rescaleY(this.scaleY)));
+
+            });
+
+
+        var xAxis = d3.axisBottom(this.scaleX)
+            .ticks(rwuHeight / this.spacing)
+            .tickSize(rwuHeight)
+            .tickPadding(this.scaleY(8 - this.$refs.grid.clientHeight));
+
+        var yAxis = d3.axisRight(this.scaleY)
+            .ticks(rwuWidth / this.spacing)
+            .tickSize(rwuWidth)
+            .tickPadding(this.scaleX(8 - this.$refs.grid.clientWidth));
+
+        var view = svg.append('rect')
+            .attr('class', 'view')
+            .attr('x', 0.5)
+            .attr('y', 0.5)
+            .attr('width', rwuWidth)
+            .attr('height', rwuHeight);
+
+        var gX = svg.append('g')
+          .style('font-size', '4px')
+            .attr('class', 'axis axis--x')
+            .call(xAxis);
+
+        var gY = svg.append('g')
+          .style('font-size', '4px')
+            .attr('class', 'axis axis--y')
+            .call(yAxis);
+
+        svg.call(zoom);
+
+
+
+        //
+        //
+        // const svg = d3.select('#grid svg');
+        // var pxbounds = {
+        //     width: this.max_x - this.min_x,
+        //     height: this.max_y - this.min_y,
+        //     svg_dx: this.min_x,
+        //     svg_dy: this.min_y
+        // };
+        // console.log("extent", [[pxbounds.svg_dx, pxbounds.svg_dy], [pxbounds.width-(pxbounds.svg_dx*2), pxbounds.height-pxbounds.svg_dy]])
+        // console.log("scaleExtent", [1,10])
+        // var zoom = d3.zoom()
+        //     .extent([[pxbounds.svg_dx, pxbounds.svg_dy], [pxbounds.width-(pxbounds.svg_dx*2), pxbounds.height-pxbounds.svg_dy]])
+        //     .scaleExtent([1, 10])
+        //     .translateExtent([[pxbounds.svg_dx, pxbounds.svg_dy], [pxbounds.width-(pxbounds.svg_dx*2), pxbounds.height-pxbounds.svg_dy]])
+        //     .on('zoom',  (e) => {
+        //         const transform = d3.event.transform;
+        //
+        //         // update scales with new grid boundaries
+        //         this.$store.dispatch('application/setScaleX', {
+        //             scaleX: transform.rescaleX(this.scaleX)
+        //         });
+        //
+        //
+        //         // this.max_x = transform.applyX(this.scaleX(this.max_x));
+        //         // this.min_x = transform.applyX(this.scaleX(this.min_x));
+        //
+        //         // this.max_y = transform.applyY(this.max_y);
+        //         // this.min_y = transform.applyY(this.min_y);
+        //         this.drawGridLines()
+        //     });
+        //
+        // svg.call(zoom);
     }
 }
 

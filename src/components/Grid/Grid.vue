@@ -39,7 +39,9 @@ export default {
             y: this.scaleY
         };
 
-        this.$refs.grid.addEventListener('mousedown', this.panStart);
+        // this.$refs.grid.addEventListener('mousedown', this.panStart);
+        this.calcGrid();
+
         // recalculate scales when the window resizes
         window.addEventListener('resize', this.calcScales);
     },
@@ -60,10 +62,6 @@ export default {
 
             spacing: state => state.project.grid.spacing,
 
-            // scale functions translate the pixel coordinates of a location on the screen into RWU coordinates to use within the SVG's grid system
-            scaleX: state => state.application.scale.x,
-            scaleY: state => state.application.scale.y,
-
             // SVG viewbox is the portion of the svg grid (in RWU) that is currently visible to the user
             viewbox: state => {
                 return state.project.view.min_x + ' ' + // x
@@ -75,10 +73,17 @@ export default {
             mapVisible: state => state.project.map.visible,
             latitude: state => state.project.map.latitude,
             longitude: state => state.project.map.longitude,
-            zoom: state => state.project.map.zoom,
-
-            // images: state => state.application.currentSelections.story.images
+            zoom: state => state.project.map.zoom
         }),
+        scaleX: {
+            get () { return this.$store.state.application.scale.x; },
+            set (val) { this.$store.dispatch('application/setScaleX', { scaleX: val }); }
+        },
+        scaleY: {
+            get () { return this.$store.state.application.scale.y; },
+            set (val) { this.$store.dispatch('application/setScaleY', { scaleY: val }); }
+        },
+
         // mix_x, min_y, max_x, and max_y are the grid dimensions in real world units
         min_x: {
             get () { return this.$store.state.project.view.min_x; },
@@ -178,6 +183,7 @@ export default {
 @import "./../../scss/config";
 // styles for dynamically created d3 elements go into src/scss/partials/d3.scss
 #grid {
+
     img {
         position: absolute;
     }
