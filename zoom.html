@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
+<meta charset='utf-8'>
 <style>
 
 .axis line {
@@ -13,52 +13,57 @@
 }
 
 </style>
-<svg width="960" height="500">
+<svg width='960' height='500' viewbox="0 0 100 100" >
 </svg>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.8.0/d3.js"></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/d3/4.8.0/d3.js'></script>
 <script>
 
-var svg = d3.select("svg"),
+var svg = d3.select('svg'),
     // px
-    width = +svg.attr("width"),
-    height = +svg.attr("height");
+    pxWidth = +svg.attr('width'),
+    pxHeight = +svg.attr('height'),
+
+    rwuHeight = 100,
+    rwuWidth = 100;
 
     const scaleX = d3.scaleLinear()
-            .domain([0, width])
-            .range([0, width]),
+            .domain([0, rwuWidth])
+            .range([0, rwuWidth]),
         scaleY = d3.scaleLinear()
-            .domain([0, height])
-            .range([0, height]);
+            .domain([0, rwuHeight])
+            .range([0, rwuHeight]);
 
     // axes
     const xAxisGenerator = d3.axisBottom(scaleX)
-            .ticks(10 * width / height) // number of ticks
-            .tickSize( height) // length of tick marks (full height of grid coming up from x axis)
+            .ticks(10 * pxWidth / pxHeight) // number of ticks
+            .tickSize(rwuHeight) // length of tick marks (full pxHeight of grid coming up from x axis)
             .tickPadding(-20), // padding between axisBottom and tick text
         yAxisGenerator = d3.axisRight(scaleY)
             .ticks(10) // number of ticks
-            .tickSize(width) // length of tick marks (full width of grid coming up from y axis)
+            .tickSize(rwuWidth) // length of tick marks (full pxWidth of grid coming up from y axis)
             .tickPadding(-20); // padding between axisRight and tick text
 
-    const view = svg.append("rect")
-        .attr("class", "view")
-        .attr("width", width / 2)
-        .attr("height", height / 2);
+    const view = svg.append('rect')
+        .attr('class', 'view')
+        .attr('width', rwuWidth / 2)
+        .attr('height', rwuHeight / 2);
 
     const circles = [];
     for (var i = 0; i < 10; i++) {
-        const circle = svg.append("circle")
-            .attr("cx", width * Math.random())
-            .attr("cy", height * Math.random())
-            .attr("r", (width * Math.random())/10)
+        const circle = svg.append('circle')
+            .attr('cx', rwuWidth * Math.random())
+            .attr('cy', rwuHeight * Math.random())
+            .attr('r', (rwuWidth * Math.random())/10)
         circles.push(circle);
     }
 
-    var xAxis = svg.append("g")
-            .attr("class", "axis axis--x")
+    var xAxis = svg.append('g')
+            .attr('class', 'axis axis--x')
+              .style('font-size', '2')
             .call(xAxisGenerator),
-        yAxis = svg.append("g")
-            .attr("class", "axis axis--y")
+        yAxis = svg.append('g')
+            .attr('class', 'axis axis--y')
+              .style('font-size', '2')
             .call(yAxisGenerator);
 
 
@@ -66,8 +71,8 @@ var svg = d3.select("svg"),
         // scale must be between .5 * original bounds and 2 * original bounds
         .scaleExtent([.5, 2])
         // allow panning by 200px in any direction
-        .translateExtent([[-200, -200], [width + 200, height + 200]])
-        .on("zoom", zoomHandler);
+        .translateExtent([[-20, -20], [pxWidth + 20, pxHeight + 20]])
+        .on('zoom', zoomHandler);
 
     svg.call(zoomBehavior);
 
@@ -76,15 +81,16 @@ var svg = d3.select("svg"),
         // x = d3.event.transform.rescaleX(x)
         // y = d3.event.transform.rescaleX(y)
 
-        view.attr("transform", d3.event.transform);
-        circles.forEach(c => c.attr("transform", d3.event.transform))
+        view.attr('transform', d3.event.transform);
+        circles.forEach(c => c.attr('transform', d3.event.transform))
 
+        console.log(scaleX.domain(), d3.event.transform.rescaleX(scaleX).domain());
         // create transformed copies of the scales and apply them to the axes
         xAxis.call(xAxisGenerator.scale(d3.event.transform.rescaleX(scaleX)));
         yAxis.call(yAxisGenerator.scale(d3.event.transform.rescaleY(scaleY)));
 
         // console.log(xAxis.call(xAxisGenerator.ticks(6)))
-        // console.log(x.domain()[0], x.domain()[1], x.domain()[0] - x.domain()[1])
+        // console.log(scaleX.domain(), d3.event.transform.rescaleX(scaleX).domain());
     }
 
 </script>
