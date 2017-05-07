@@ -204,47 +204,6 @@ export default {
         }
     },
 
-    // ****************** PANNING ****************** //
-    // panStart (e) {
-    //     if (this.currentTool !== 'Map' && this.currentTool !== 'Pan') { return; }
-    //     this.isDragging = false;
-    //     this.$refs.grid.addEventListener('mouseup', this.panEnd);
-    //     this.$refs.grid.addEventListener('mouseout', this.panEnd);
-    //     this.$refs.grid.addEventListener('mousemove', this.panMove);
-    // },
-    // panMove (e) {
-    //     if (this.isDragging) {
-    //         const dx = this.originalScales.x(e.movementX),
-    //             dy  = this.originalScales.y(e.movementY);
-    //
-    //         this.min_x -= dx;
-    //         this.max_x -= dx;
-    //         this.min_y -= dy;
-    //         this.max_y -= dy;
-    //
-    //         this.drawGridLines();
-    //     } else {
-    //         this.points = [];
-    //         this.isDragging = true;
-    //     }
-    // },
-    // panEnd (e) {
-    //     this.$refs.grid.removeEventListener('mousemove', this.panMove);
-    //     this.$refs.grid.removeEventListener('mouseout', this.panEnd);
-    //     this.$refs.grid.removeEventListener('mouseup', this.panEnd);
-    //
-    //     if (this.isDragging) {
-    //         this.points = [];
-    //         this.drawGridLines();
-    //         this.drawPolygons();
-    //         setTimeout(() => {
-    //             this.isDragging = false;
-    //             this.calcScales();
-    //         })
-    //     }
-    // },
-
-
     // ****************** SAVING FACES ****************** //
     /*
     * create a rectangular face from the two points on the grid
@@ -563,15 +522,14 @@ export default {
     * calc point radius, adjusting by the minimum x and y values for the grid to prevent stretched points
     */
     calcRadius (pxRad, axis) {
-        if (this.isDragging) { return 0; }
         var r;
         if (axis === 'x') {
-            r = this.scaleX(pxRad) - this.min_x;
+            r = this.originalScales.x(pxRad)  ;
         } else if (axis === 'y') {
-            r = this.scaleY(pxRad) - this.min_y;
+            r = this.originalScales.y(pxRad)  ;
         }
 
-        return r < 0 ? 0 : r;
+        return r;
     },
 
     /*
@@ -596,96 +554,97 @@ export default {
     },
 
     calcGrid () {
+        // originalScales are saved and used to scale elements based on zoom behavior transformations
+        // the scales themselves are a 1 to 1 mapping, in the zoomHandler the scales are cloned and transformed based on the zoom event transformations
+        // the transformed scales are then applied to the axes, causing the grid to display with the correct dimensions
+
+        // save the original scale values, calculate new scales in the zoom handler based on these
+        // recalculating new scales from the already updated scales results in exponential growth
+        this.originalScales = {
+            x: d3.scaleLinear()
+                .domain([0, this.$refs.grid.clientWidth])
+                .range([this.min_x, this.max_x]),
+            y: d3.scaleLinear()
+                .domain([0, this.$refs.grid.clientHeight])
+                .range([this.min_y, this.max_y])
+        };
+
+        // scaleX amd scaleY are used during drawing to translate from px to RWU given the current grid dimensions in rwu
+        // these are updated in the zoom handler
+        this.scaleX = this.originalScales.x;
+        this.scaleY = this.originalScales.y;
+
         var svg = d3.select('#grid svg'),
-            rwuWidth = this.max_x - this.min_x,
-            rwuHeight = this.max_y - this.min_y;
+            // rwu dimensions (coordinates used within grid)
+            rwuHeight = this.max_y - this.min_y,
+            rwuWidth = this.max_x - this.min_x;
 
-        var zoom = d3.zoom()
+
+        // TODO: calc ticks from spacing
+        const tickCount = rwuHeight / this.spacing,
+            aspectRatio = rwuWidth / rwuHeight;
+
+        // generator functions for axes
+        const xAxisGenerator = d3.axisBottom(this.originalScales.x)
+                // calculate number of horizontal ticks based on the aspect ratio of the svg element and the real world unit height
+                .ticks(tickCount * aspectRatio) // number of ticks (multiplied by width to height ratio)
+                .tickSize(rwuHeight) // length of tick marks (full height of grid in rwu coming up from x axis)
+                .tickPadding(this.scaleY(-20)), // padding between axisBottom and tick text (20px translated to rwu)
+            yAxisGenerator = d3.axisRight(this.originalScales.y)
+                .ticks(tickCount) // number of ticks
+                .tickSize(rwuWidth) // length of tick marks (full width of grid in rwu coming up from y axis)
+                .tickPadding(this.scaleX(-20)); // padding between axisRight and tick text (20px translated to rwu)
+
+        const xAxis = svg.append('g')
+                .attr('class', 'axis axis--x')
+                // .style('font-size', '20')
+                .attr('stroke-width', this.scaleY(1))
+                .call(xAxisGenerator),
+            yAxis = svg.append('g')
+                .attr('class', 'axis axis--y')
+                // .style('font-size', '20')
+                .attr('stroke-width', this.scaleX(1))
+                .call(yAxisGenerator);
+
+
+        // configure zoom behavior in rwu
+        const zoomBehavior = d3.zoom()
+            .extent([[0, 0], [rwuWidth, rwuHeight]])
             // scale must be between .5 * original bounds and 2 * original bounds
-            .scaleExtent([1, 2])
-            // panning rectangle starts at the original boundaries - 100 in the x and y directions end ends at the original bounds + 90x 100y
-            .translateExtent([[0, 0], [1000, 1000]])
+            // .scaleExtent([.5, 10])
+            // allow panning by 20 rwu in any direction
+            // .translateExtent([[-20, -20], [rwuWidth + 20, rwuHeight + 20]])
             .on('zoom', () => {
-                view.attr('transform', d3.event.transform);
+                // NOTE: don't change the original scale or you'll get exponential growth
+                // x = d3.event.transform.rescaleX(x)
+                // y = d3.event.transform.rescaleX(y)
 
-                // this.scaleX = d3.event.transform.rescaleX(this.scaleX);
-                // this.scaleY = d3.event.transform.rescaleY(this.scaleY);
-                //
-                // this.min_x += d3.event.transform.x;
-                // this.max_x += d3.event.transform.x;
-                // this.min_y += d3.event.transform.y;
-                // this.max_y += d3.event.transform.y;
+                // rescale the saved geometry
+                d3.select('#grid svg').selectAll('polygon').attr('transform', d3.event.transform)
 
-                gX.call(xAxis.scale(d3.event.transform.rescaleX(this.scaleX)));
-                gY.call(yAxis.scale(d3.event.transform.rescaleY(this.scaleY)));
+                // create updated copies of the scales based on the zoom transformation
+                const newScaleX = d3.event.transform.rescaleX(this.originalScales.x),
+                    newScaleY = d3.event.transform.rescaleY(this.originalScales.y);
 
+                [this.min_x, this.max_x] = newScaleX.domain();
+                [this.min_y, this.max_y] = newScaleY.domain();
+
+                this.scaleX = newScaleX;
+                this.scaleY = newScaleY;
+
+                const scaledRwuHeight = newScaleY.range()[0] - newScaleY.range()[1],
+                    scaledRwuWidth = newScaleX.range()[0] - newScaleX.range()[1]
+
+                // update the number of ticks to display based on the post zoom real world unit height and width
+                yAxis.call(yAxisGenerator.ticks(-tickCount * (scaledRwuHeight / rwuHeight)));
+                xAxis.call(xAxisGenerator.ticks(-tickCount * aspectRatio * (scaledRwuWidth / rwuWidth)));
+
+                // create transformed copies of the scales and apply them to the axes
+                xAxis.call(xAxisGenerator.scale(newScaleX));
+                yAxis.call(yAxisGenerator.scale(newScaleY));
             });
 
-
-        var xAxis = d3.axisBottom(this.scaleX)
-            .ticks(rwuHeight / this.spacing)
-            .tickSize(rwuHeight)
-            .tickPadding(this.scaleY(8 - this.$refs.grid.clientHeight));
-
-        var yAxis = d3.axisRight(this.scaleY)
-            .ticks(rwuWidth / this.spacing)
-            .tickSize(rwuWidth)
-            .tickPadding(this.scaleX(8 - this.$refs.grid.clientWidth));
-
-        var view = svg.append('rect')
-            .attr('class', 'view')
-            .attr('x', 0.5)
-            .attr('y', 0.5)
-            .attr('width', rwuWidth)
-            .attr('height', rwuHeight);
-
-        var gX = svg.append('g')
-          .style('font-size', '4px')
-            .attr('class', 'axis axis--x')
-            .call(xAxis);
-
-        var gY = svg.append('g')
-          .style('font-size', '4px')
-            .attr('class', 'axis axis--y')
-            .call(yAxis);
-
-        svg.call(zoom);
-
-
-
-        //
-        //
-        // const svg = d3.select('#grid svg');
-        // var pxbounds = {
-        //     width: this.max_x - this.min_x,
-        //     height: this.max_y - this.min_y,
-        //     svg_dx: this.min_x,
-        //     svg_dy: this.min_y
-        // };
-        // console.log("extent", [[pxbounds.svg_dx, pxbounds.svg_dy], [pxbounds.width-(pxbounds.svg_dx*2), pxbounds.height-pxbounds.svg_dy]])
-        // console.log("scaleExtent", [1,10])
-        // var zoom = d3.zoom()
-        //     .extent([[pxbounds.svg_dx, pxbounds.svg_dy], [pxbounds.width-(pxbounds.svg_dx*2), pxbounds.height-pxbounds.svg_dy]])
-        //     .scaleExtent([1, 10])
-        //     .translateExtent([[pxbounds.svg_dx, pxbounds.svg_dy], [pxbounds.width-(pxbounds.svg_dx*2), pxbounds.height-pxbounds.svg_dy]])
-        //     .on('zoom',  (e) => {
-        //         const transform = d3.event.transform;
-        //
-        //         // update scales with new grid boundaries
-        //         this.$store.dispatch('application/setScaleX', {
-        //             scaleX: transform.rescaleX(this.scaleX)
-        //         });
-        //
-        //
-        //         // this.max_x = transform.applyX(this.scaleX(this.max_x));
-        //         // this.min_x = transform.applyX(this.scaleX(this.min_x));
-        //
-        //         // this.max_y = transform.applyY(this.max_y);
-        //         // this.min_y = transform.applyY(this.min_y);
-        //         this.drawGridLines()
-        //     });
-        //
-        // svg.call(zoom);
+        svg.call(zoomBehavior);
     }
 }
 

@@ -81,6 +81,11 @@ var svg = d3.select('svg'),
 
             //rescale the saved circles
             circles.forEach(c => c.attr('transform', d3.event.transform))
+            const scaledRwuHeight = d3.event.transform.rescaleY(zoomScaleY).domain()[0] - d3.event.transform.rescaleY(zoomScaleY).domain()[1],
+                 scaledRwuWidth = d3.event.transform.rescaleX(zoomScaleX).domain()[0] - d3.event.transform.rescaleX(zoomScaleX).domain()[1]
+
+            yAxis.call(yAxisGenerator.ticks( -10 * (scaledRwuHeight /rwuHeight) ));
+            xAxis.call(xAxisGenerator.ticks( -10 * (rwuWidth / rwuHeight) * (scaledRwuWidth /rwuWidth) ));
 
             // create transformed copies of the scales and apply them to the axes
             xAxis.call(xAxisGenerator.scale(d3.event.transform.rescaleX(zoomScaleX)));

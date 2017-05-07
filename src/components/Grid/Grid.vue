@@ -8,7 +8,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
 <div id="grid" :style="{ 'pointer-events': (currentTool === 'Drag' || currentTool === 'Map') ? 'none': 'all' }">
-    <svg ref="grid" @click="addPoint" @mousemove="(currentTool === 'Rectangle' || currentTool === 'Polygon') ? highlightSnapTarget($event) : null" :viewBox="viewbox" preserveAspectRatio="none" id="svg-grid"></svg>
+    <svg ref="grid" @click="addPoint" @mousemove="(currentTool === 'Rectangle' || currentTool === 'Polygon') ? highlightSnapTarget($event) : null" preserveAspectRatio="none" id="svg-grid"></svg>
 </div>
 </template>
 
@@ -30,17 +30,15 @@ export default {
     mounted () {
         this.max_y = (this.$refs.grid.clientHeight / this.$refs.grid.clientWidth) * this.max_x;
 
-        this.calcScales();
+        // set viewbox on svg in rwu so drawing coordinates are in rwu and not pixels
+        this.$refs.grid.setAttribute('viewBox', `0 0 ${this.max_x - this.min_x} ${this.max_y - this.min_y}`);
+
+        this.calcGrid();
+
+
         this.drawGridLines();
         this.drawPolygons();
-
-        this.originalScales = {
-            x: this.scaleX,
-            y: this.scaleY
-        };
-
         // this.$refs.grid.addEventListener('mousedown', this.panStart);
-        this.calcGrid();
 
         // recalculate scales when the window resizes
         window.addEventListener('resize', this.calcScales);
@@ -77,11 +75,15 @@ export default {
         }),
         scaleX: {
             get () { return this.$store.state.application.scale.x; },
-            set (val) { this.$store.dispatch('application/setScaleX', { scaleX: val }); }
+            set (val) {
+                console.log("update scaleX with domain:", val.domain()[0], val.domain()[1]);
+                this.$store.dispatch('application/setScaleX', { scaleX: val }); }
         },
         scaleY: {
             get () { return this.$store.state.application.scale.y; },
-            set (val) { this.$store.dispatch('application/setScaleY', { scaleY: val }); }
+            set (val) {
+                console.log("update scaleY with domain:", val.domain()[0], val.domain()[1]);
+                this.$store.dispatch('application/setScaleY', { scaleY: val }); }
         },
 
         // mix_x, min_y, max_x, and max_y are the grid dimensions in real world units
@@ -152,9 +154,9 @@ export default {
             this.drawGridLines();
         },
         viewbox () {
-            this.calcScales();
-            this.drawGridLines();
-            this.drawPoints();
+            // this.calcScales();
+            // this.drawGridLines();
+            // this.drawPoints();
         },
 
         currentTool () {
