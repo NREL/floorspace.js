@@ -76,13 +76,13 @@ export default {
         scaleX: {
             get () { return this.$store.state.application.scale.x; },
             set (val) {
-                console.log("update scaleX with domain:", val.domain()[0], val.domain()[1]);
+                console.log("update scaleX with domain:", val.domain()[0], val.domain()[1], "and range:", val.range()[0], val.range()[1]);
                 this.$store.dispatch('application/setScaleX', { scaleX: val }); }
         },
         scaleY: {
             get () { return this.$store.state.application.scale.y; },
             set (val) {
-                console.log("update scaleY with domain:", val.domain()[0], val.domain()[1]);
+                console.log("update scaleY with domain:", val.domain()[0], val.domain()[1], "and range:", val.range()[0], val.range()[1]);
                 this.$store.dispatch('application/setScaleY', { scaleY: val }); }
         },
 

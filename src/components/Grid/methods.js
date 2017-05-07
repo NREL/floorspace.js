@@ -513,8 +513,8 @@ export default {
     getEventRWU (e) {
         // when the user hovers over certain SVG child nodes, event locations are incorrect
         return {
-            x: this.scaleX(e.offsetX),
-            y: this.scaleY(e.offsetY)
+            x: this.originalScales.x(e.offsetX),
+            y: this.originalScales.y(e.offsetY)
         };
     },
 
@@ -536,21 +536,21 @@ export default {
     * generate d3 scaling functions based on the svg viewbox and the pixel size of the svg
     */
     calcScales () {
-        if (this.isDragging) { return; }
-        this.max_y = (this.$refs.grid.clientHeight / this.$refs.grid.clientWidth) * this.max_x;
-
-        // update scales with new grid boundaries
-        this.$store.dispatch('application/setScaleX', {
-            scaleX: d3.scaleLinear()
-                .domain([0, this.$refs.grid.clientWidth])
-                .range([this.min_x, this.max_x])
-        });
-
-        this.$store.dispatch('application/setScaleY', {
-            scaleY: d3.scaleLinear()
-                .domain([0, this.$refs.grid.clientHeight]) // input domain (px)
-                .range([this.min_y, this.max_y]) // output range (rwu)
-        });
+        // if (this.isDragging) { return; }
+        // this.max_y = (this.$refs.grid.clientHeight / this.$refs.grid.clientWidth) * this.max_x;
+        //
+        // // update scales with new grid boundaries
+        // this.$store.dispatch('application/setScaleX', {
+        //     scaleX: d3.scaleLinear()
+        //         .domain([0, this.$refs.grid.clientWidth])
+        //         .range([this.min_x, this.max_x])
+        // });
+        //
+        // this.$store.dispatch('application/setScaleY', {
+        //     scaleY: d3.scaleLinear()
+        //         .domain([0, this.$refs.grid.clientHeight]) // input domain (px)
+        //         .range([this.min_y, this.max_y]) // output range (rwu)
+        // });
     },
 
     calcGrid () {
@@ -632,8 +632,8 @@ export default {
                 this.scaleX = newScaleX;
                 this.scaleY = newScaleY;
 
-                const scaledRwuHeight = newScaleY.range()[0] - newScaleY.range()[1],
-                    scaledRwuWidth = newScaleX.range()[0] - newScaleX.range()[1]
+                const scaledRwuHeight = newScaleY.domain()[0] - newScaleY.domain()[1],
+                    scaledRwuWidth = newScaleX.domain()[0] - newScaleX.domain()[1]
 
                 // update the number of ticks to display based on the post zoom real world unit height and width
                 yAxis.call(yAxisGenerator.ticks(-tickCount * (scaledRwuHeight / rwuHeight)));
