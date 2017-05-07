@@ -44,7 +44,7 @@ export default function createFaceFromPoints (context, payload) {
 * if the new face being created intersects the existing face or shares an edge with the existing face,
 * update the points used to create the new face to be the UNION of the new and existing faces
 */
-function mergeWithExistingFace (points, currentStoryGeometry, target, context) {
+export function mergeWithExistingFace (points, currentStoryGeometry, target, context) {
     const existingFace = geometryHelpers.faceForId(target.face_id, currentStoryGeometry),
         existingFaceVertices = geometryHelpers.verticesForFace(existingFace, currentStoryGeometry);
 
@@ -92,7 +92,7 @@ function mergeWithExistingFace (points, currentStoryGeometry, target, context) {
 * and shared edges - edges referencing two vertices with matching ids
 * persist vertices and edges to datastore so that validation on the unsaved face can be done, they will be removed from the store if validation fails
 */
-function createFaceGeometry (points, currentStoryGeometry, context) {
+export function createFaceGeometry (points, currentStoryGeometry, context) {
     // build an array of vertices for the face being created, setting the same ID for points with the same coordinates to prevent overlapping vertices
     const faceVertices = points.map((point) => {
         // if a point was snapped to an existing vertex during drawing, it will have a vertex id
@@ -155,7 +155,7 @@ function createFaceGeometry (points, currentStoryGeometry, context) {
 * TODO: prevent crossing edges on the same face
 * Save the fave if validation passes, destroy its vertices and edges if validation fails
 */
-function validateAndSaveFace (face, currentStoryGeometry, target, context) {
+export function validateAndSaveFace (face, currentStoryGeometry, target, context) {
     // vertices and edges on the face being created
     const faceEdges = geometryHelpers.edgesForFace(face, currentStoryGeometry),
         // faceVertices will include a vertex (the startpoint) for every single edge ref on the face,
@@ -216,7 +216,7 @@ function validateAndSaveFace (face, currentStoryGeometry, target, context) {
 * look up all faces referencing the original edge and replace those references with references to the new edges
 * destroy the original edge
 */
-function splitEdges (currentStoryGeometry, context) {
+export function splitEdges (currentStoryGeometry, context) {
     currentStoryGeometry.edges.forEach((edge) => {
         const splittingVertices = geometryHelpers.verticesOnEdge(edge, currentStoryGeometry);
 
@@ -294,7 +294,7 @@ function splitEdges (currentStoryGeometry, context) {
 * order the edgeRefs on each face on the currentStoryGeometry so that all edges are connected from startpoint to endpoint
 * set reverse property on edgeRefs as needed
 */
-function connectEdges (currentStoryGeometry, context) {
+export function connectEdges (currentStoryGeometry, context) {
     currentStoryGeometry.faces.forEach((face) => {
         const faceEdges = geometryHelpers.edgesForFace(face, currentStoryGeometry);
 

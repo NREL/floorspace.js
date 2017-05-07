@@ -15,7 +15,7 @@ export default {
     setNorthAxis (context, payload) {
         const validator = new Validator(payload);
         validator.validateFloat('north_axis');
-        context.commit('setNorthAxis', validator.validatedPayload);
+        context.commit('setConfigNorthAxis', validator.validatedPayload);
     },
     setMapVisible (context, payload) {
         if (typeof payload.visible === 'boolean') {
@@ -59,16 +59,15 @@ export default {
         validator.validateMin('max_y', context.state.view.min_y);
         context.commit('setViewMaxY', validator.validatedPayload);
     },
-
-    setFov (context, payload) {
-        context.commit('setFov', payload);
-    },
+    // setFov (context, payload) {
+    //     context.commit('setFov', payload);
+    // },
     setZoom (context, payload) {
-        context.commit('setZoom', payload);
+        context.commit('setMapZoom', payload);
     },
-    setFilmOffset (context, payload) {
-        context.commit('setFilmOffset', payload);
-    },
+    // setFilmOffset (context, payload) {
+    //     context.commit('setFilmOffset', payload);
+    // },
 
     setMapLatitude (context, payload) {
         const validator = new Validator(payload);
