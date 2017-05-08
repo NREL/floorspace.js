@@ -12,9 +12,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <script>
 
-const openlayers = require('./../../../node_modules/openlayers/dist/ol-debug.js');
-const Konva = require('konva');
+const ol = require('openlayers'),
+    Konva = require('konva');
 import { mapState } from 'vuex'
+
 export default {
     name: 'map',
     data () {
