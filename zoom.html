@@ -6,10 +6,19 @@
   stroke-opacity: 0.3;
   shape-rendering: crispEdges;
 }
+circle {
+    fill: transparent;
+    stroke: black;
+    stroke-width:1;
+}
+text {
+    font-size: 3;
+    fill: red;
+}
 
 
 </style>
-<svg width='1000' height='500' preserveAspectRatio="none">
+<svg width='1000' height='500' preserveAspectRatio='none'>
 </svg>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/d3/4.8.0/d3.js'></script>
 <script>
@@ -99,23 +108,27 @@ var svg = d3.select('svg'),
 
     // draw a new circle when the grid is clicked
     svg.on('click', () => {
-        const circle = svg.append('circle')
-            .attr('r', (rwuWidth * Math.random()) / 10)
+        const circleGroup = svg.append('g');
+        const randomRadius = (rwuWidth * Math.random()) / 10;
+        circleGroup.append('circle')
+            .attr('r', randomRadius)
             // translate coordinates of click to rwu and use for circle center
             .attr('cx', rwuScaleX(d3.event.clientX))
             .attr('cy', rwuScaleY(d3.event.clientY));
 
+        circleGroup.append('text')
+    	    .attr('dx', rwuScaleX(d3.event.clientX) - randomRadius + 3)
+            .attr('dy', rwuScaleY(d3.event.clientY) )
+    	    .text(`RWU: (${rwuScaleX(d3.event.clientX)}, ${rwuScaleY(d3.event.clientY)})`)
+            .attr('font-size', '3');
+
+        circleGroup.append('text')
+    	    .attr('dx', rwuScaleX(d3.event.clientX) - randomRadius + 3)
+            .attr('dy', rwuScaleY(d3.event.clientY) - 3)
+    	    .text(`PX: (${d3.event.clientX}, ${d3.event.clientY})`)
+            .attr('font-size', '3');
+
         // store circle in circles array so that it can be rescaled in the zoom handler
-        circles.push(circle);
-    })
-
-
-    // generate a few demo circles with dimensions in rwu
-    for (var i = 0; i < 10; i++) {
-        const circle = svg.append('circle')
-            .attr('cx', rwuWidth * Math.random())
-            .attr('cy', rwuHeight * Math.random())
-            .attr('r', (rwuWidth * Math.random()) / 10)
-        circles.push(circle);
-    }
+        circles.push(circleGroup);
+    });
 </script>
