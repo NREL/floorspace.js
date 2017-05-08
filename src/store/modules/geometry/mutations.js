@@ -10,6 +10,7 @@ export default {
         payload.story.geometry_id = payload.geometry.id;
     },
     createVertex (state, payload) {
+        console.log("create vertex", `(${payload.vertex.x}, ${payload.vertex.y})`);
         payload.geometry.vertices.push(payload.vertex);
     },
     createEdge (state, payload) {

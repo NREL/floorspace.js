@@ -34,17 +34,13 @@ export default {
         this.$refs.grid.setAttribute('viewBox', `0 0 ${this.max_x - this.min_x} ${this.max_y - this.min_y}`);
 
         this.calcGrid();
-
-
-        this.drawGridLines();
-        this.drawPolygons();
-        // this.$refs.grid.addEventListener('mousedown', this.panStart);
-
+        // this.drawGridLines();
+        // this.drawPolygons();
         // recalculate scales when the window resizes
-        window.addEventListener('resize', this.calcScales);
+        window.addEventListener('resize', this.calcGrid);
     },
     beforeDestroy () {
-        window.removeEventListener('resize', this.calcScales);
+        window.removeEventListener('resize', this.calcGrid);
     },
     computed: {
         ...mapState({
@@ -76,13 +72,13 @@ export default {
         scaleX: {
             get () { return this.$store.state.application.scale.x; },
             set (val) {
-                console.log("update scaleX with domain:", val.domain()[0], val.domain()[1], "and range:", val.range()[0], val.range()[1]);
+                // console.log("update scaleX with domain:", val.domain()[0], val.domain()[1], "and range:", val.range()[0], val.range()[1]);
                 this.$store.dispatch('application/setScaleX', { scaleX: val }); }
         },
         scaleY: {
             get () { return this.$store.state.application.scale.y; },
             set (val) {
-                console.log("update scaleY with domain:", val.domain()[0], val.domain()[1], "and range:", val.range()[0], val.range()[1]);
+                // console.log("update scaleY with domain:", val.domain()[0], val.domain()[1], "and range:", val.range()[0], val.range()[1]);
                 this.$store.dispatch('application/setScaleY', { scaleY: val }); }
         },
 
@@ -150,11 +146,9 @@ export default {
         gridVisible () { this.drawGridLines(); },
 
         spacing () {
-            this.calcScales();
             this.drawGridLines();
         },
         viewbox () {
-            // this.calcScales();
             // this.drawGridLines();
             // this.drawPoints();
         },

@@ -22,7 +22,7 @@ export default {
 
         if (!this.currentSpace && !this.currentShading) { return; }
 
-        const point = this.getEventRWU(e);
+        const point = this.pxToGridCoords(e);
 
         var snapTarget = this.findSnapTarget(point);
 
@@ -69,6 +69,15 @@ export default {
                 .attr('ry', this.calcRadius(2, 'y'))
                 .classed('gridpoint', true)
                 .attr('vector-effect', 'non-scaling-stroke');
+        } else {
+            d3.select('#grid svg')
+                .append('ellipse')
+                .attr('cx', point.x)
+                .attr('cy', point.y)
+                .attr('rx', this.calcRadius(2, 'x'))
+                .attr('ry', this.calcRadius(2, 'y'))
+                .classed('gridpoint', true)
+                .attr('vector-effect', 'non-scaling-stroke');
         }
         this.drawGuideLines(e, snapTarget);
     },
@@ -89,7 +98,7 @@ export default {
         if (snapTarget ) {
             point = snapTarget;
         } else {
-            point = this.getEventRWU(e);
+            point = this.pxToGridCoords(e);
         }
 
         // determine how to complete face based on current tool
@@ -140,7 +149,7 @@ export default {
         }
 
         // translate click event coordinates into RWU
-        var point = this.getEventRWU(e);
+        var point = this.pxToGridCoords(e);
 
         /*
         * check for snapping - if the click happened within the tolerance range of a
@@ -225,6 +234,9 @@ export default {
         } else if (this.currentShading) {
             payload.shading = this.currentShading;
         }
+
+        // scale points to RWU
+        payload.points = payload.points.map(p => this.gridCoordsToRWU(p));
         this.$store.dispatch('geometry/createFaceFromPoints', payload);
         this.points = [];
     },
@@ -243,6 +255,7 @@ export default {
             payload.shading = this.currentShading;
         }
 
+        payload.points = payload.points.map(p => this.gridCoordsToRWU(p));
         this.$store.dispatch('geometry/createFaceFromPoints', payload);
         this.points = [];
     },
@@ -346,6 +359,12 @@ export default {
             .attr('points', (d, i) => {
                 var pointsString = '';
                 d.points.forEach((p) => {
+                    
+                    p = this.RWUToPx(p);
+                    p = {
+                        x: this.originalScales.x(p.x),
+                        y: this.originalScales.y(p.y)
+                    };
                     pointsString += (p.x + ',' + p.y + ' ');
                 });
                 return pointsString;
@@ -510,11 +529,44 @@ export default {
     * translates the mouse event coordinates to RWU
     * adjusts incorrect coordinates caused by svg hover
     */
-    getEventRWU (e) {
+    pxToGridCoords (e) {
         // when the user hovers over certain SVG child nodes, event locations are incorrect
         return {
             x: this.originalScales.x(e.offsetX),
             y: this.originalScales.y(e.offsetY)
+        };
+    },
+
+    gridCoordsToRWU (gridPoint) {
+        const px = {
+            x: this.originalScales.x.invert(gridPoint.x),
+            y: this.originalScales.y.invert(gridPoint.y)
+        };
+
+        const currentScaleX = d3.scaleLinear()
+                .domain([0, this.$refs.grid.clientWidth])
+                .range([this.min_x, this.max_x]),
+            currentScaleY = d3.scaleLinear()
+               .domain([0, this.$refs.grid.clientHeight])
+               .range([this.min_y, this.max_y]);
+        // when the user hovers over certain SVG child nodes, event locations are incorrect
+        return {
+            x: currentScaleX(px.x),
+            y: currentScaleY(px.y)
+        };
+    },
+    RWUToPx (px) {
+        const currentScaleX = d3.scaleLinear()
+                .domain([0, this.$refs.grid.clientWidth])
+                .range([this.min_x, this.max_x]),
+            currentScaleY = d3.scaleLinear()
+               .domain([0, this.$refs.grid.clientHeight])
+               .range([this.min_y, this.max_y]);
+
+        // when the user hovers over certain SVG child nodes, event locations are incorrect
+        return {
+            x: currentScaleX.invert(px.x),
+            y: currentScaleY.invert(px.y)
         };
     },
 
@@ -530,27 +582,6 @@ export default {
         }
 
         return r;
-    },
-
-    /*
-    * generate d3 scaling functions based on the svg viewbox and the pixel size of the svg
-    */
-    calcScales () {
-        // if (this.isDragging) { return; }
-        // this.max_y = (this.$refs.grid.clientHeight / this.$refs.grid.clientWidth) * this.max_x;
-        //
-        // // update scales with new grid boundaries
-        // this.$store.dispatch('application/setScaleX', {
-        //     scaleX: d3.scaleLinear()
-        //         .domain([0, this.$refs.grid.clientWidth])
-        //         .range([this.min_x, this.max_x])
-        // });
-        //
-        // this.$store.dispatch('application/setScaleY', {
-        //     scaleY: d3.scaleLinear()
-        //         .domain([0, this.$refs.grid.clientHeight]) // input domain (px)
-        //         .range([this.min_y, this.max_y]) // output range (rwu)
-        // });
     },
 
     calcGrid () {
@@ -569,6 +600,13 @@ export default {
                 .range([this.min_y, this.max_y])
         };
 
+        const zoomScaleX = d3.scaleLinear()
+                .domain([this.min_x, this.max_x])
+                .range([this.min_x, this.max_x]),
+            zoomScaleY = d3.scaleLinear()
+                .domain([this.min_y, this.max_y])
+                .range([this.min_y, this.max_y]);
+
         // scaleX amd scaleY are used during drawing to translate from px to RWU given the current grid dimensions in rwu
         // these are updated in the zoom handler
         this.scaleX = this.originalScales.x;
@@ -585,12 +623,12 @@ export default {
             aspectRatio = rwuWidth / rwuHeight;
 
         // generator functions for axes
-        const xAxisGenerator = d3.axisBottom(this.originalScales.x)
+        const xAxisGenerator = d3.axisBottom(zoomScaleX)
                 // calculate number of horizontal ticks based on the aspect ratio of the svg element and the real world unit height
                 .ticks(tickCount * aspectRatio) // number of ticks (multiplied by width to height ratio)
                 .tickSize(rwuHeight) // length of tick marks (full height of grid in rwu coming up from x axis)
                 .tickPadding(this.scaleY(-20)), // padding between axisBottom and tick text (20px translated to rwu)
-            yAxisGenerator = d3.axisRight(this.originalScales.y)
+            yAxisGenerator = d3.axisRight(zoomScaleY)
                 .ticks(tickCount) // number of ticks
                 .tickSize(rwuWidth) // length of tick marks (full width of grid in rwu coming up from y axis)
                 .tickPadding(this.scaleX(-20)); // padding between axisRight and tick text (20px translated to rwu)
@@ -619,8 +657,6 @@ export default {
                 // x = d3.event.transform.rescaleX(x)
                 // y = d3.event.transform.rescaleX(y)
 
-                // rescale the saved geometry
-                d3.select('#grid svg').selectAll('polygon').attr('transform', d3.event.transform)
 
                 // create updated copies of the scales based on the zoom transformation
                 const newScaleX = d3.event.transform.rescaleX(this.originalScales.x),
@@ -629,8 +665,8 @@ export default {
                 [this.min_x, this.max_x] = newScaleX.domain();
                 [this.min_y, this.max_y] = newScaleY.domain();
 
-                this.scaleX = newScaleX;
-                this.scaleY = newScaleY;
+                // this.scaleX = newScaleX;
+                // this.scaleY = newScaleY;
 
                 const scaledRwuHeight = newScaleY.domain()[0] - newScaleY.domain()[1],
                     scaledRwuWidth = newScaleX.domain()[0] - newScaleX.domain()[1]
@@ -642,6 +678,10 @@ export default {
                 // create transformed copies of the scales and apply them to the axes
                 xAxis.call(xAxisGenerator.scale(newScaleX));
                 yAxis.call(yAxisGenerator.scale(newScaleY));
+                // rescale the saved geometry
+                this.drawPolygons();
+                // d3.select('#grid svg').selectAll('polygon').attr('transform', d3.event.transform)
+
             });
 
         svg.call(zoomBehavior);
