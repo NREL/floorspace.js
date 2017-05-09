@@ -149,8 +149,7 @@ export default {
             this.drawGridLines();
         },
         viewbox () {
-            // this.drawGridLines();
-            // this.drawPoints();
+            // this.calcGrid();
         },
 
         currentTool () {

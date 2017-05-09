@@ -22,9 +22,13 @@ export default {
 
         if (!this.currentSpace && !this.currentShading) { return; }
 
-        const point = this.pxToGridCoords(e);
+        const point = {
+            x: this.pxToGrid(e.offsetX, 'x'),
+            y: this.pxToGrid(e.offsetY, 'y')
+        };
 
-        var snapTarget = this.findSnapTarget(point);
+        var snapTarget = this.findSnapTarget({ x: e.offsetX, y: e.offsetY });
+        // TODO: traslate snapTarget (loaded from store) to grid location
 
         if (snapTarget && snapTarget.snappingEdge) {
             d3.select('#grid svg')
@@ -43,8 +47,8 @@ export default {
         if (snapTarget) {
             d3.select('#grid svg')
                 .append('ellipse')
-                .attr('cx', snapTarget.x)
-                .attr('cy', snapTarget.y)
+                .attr('cx', snapTarget.x, 'x')
+                .attr('cy', snapTarget.y, 'y')
                 .attr('rx', this.calcRadius(5, 'x'))
                 .attr('ry', this.calcRadius(5, 'y'))
                 .classed('highlight', true)
@@ -95,10 +99,13 @@ export default {
         var guidelinePoints, point;
 
         // if there is no snapTarget, just use the current mouse location
-        if (snapTarget ) {
+        if (snapTarget) {
             point = snapTarget;
         } else {
-            point = this.pxToGridCoords(e);
+            point = {
+                x: this.pxToGrid(e.offsetX, 'x'),
+                y: this.pxToGrid(e.offsetY, 'y')
+            };
         }
 
         // determine how to complete face based on current tool
@@ -149,7 +156,10 @@ export default {
         }
 
         // translate click event coordinates into RWU
-        var point = this.pxToGridCoords(e);
+        var point = {
+            x: this.pxToGrid(e.offsetX, 'x'),
+            y: this.pxToGrid(e.offsetY, 'y')
+        };
 
         /*
         * check for snapping - if the click happened within the tolerance range of a
@@ -158,7 +168,7 @@ export default {
         *     set a flag to split the edge at the new vertex
         * origin of polygon: close the polygon being drawn
         */
-        const snapTarget = this.findSnapTarget(point);
+        const snapTarget = this.findSnapTarget({x: e.offsetX, y: e.offsetY});
         if (snapTarget) {
             if (snapTarget.type === 'vertex') {
                 // if the snapTarget is the origin of the face being drawn in Polygon mode, close the face
@@ -236,7 +246,10 @@ export default {
         }
 
         // scale points to RWU
-        payload.points = payload.points.map(p => this.gridCoordsToRWU(p));
+        payload.points = payload.points.map(p => ({
+            x: this.gridToRWU(p.x, 'x'),
+            y: this.gridToRWU(p.y, 'y')
+        }));
         this.$store.dispatch('geometry/createFaceFromPoints', payload);
         this.points = [];
     },
@@ -255,7 +268,11 @@ export default {
             payload.shading = this.currentShading;
         }
 
-        payload.points = payload.points.map(p => this.gridCoordsToRWU(p));
+        payload.points = payload.points.map(p => ({
+            x: this.gridToRWU(p.x, 'x'),
+            y: this.gridToRWU(p.y, 'y')
+        }));
+
         this.$store.dispatch('geometry/createFaceFromPoints', payload);
         this.points = [];
     },
@@ -359,11 +376,9 @@ export default {
             .attr('points', (d, i) => {
                 var pointsString = '';
                 d.points.forEach((p) => {
-                    
-                    p = this.RWUToPx(p);
                     p = {
-                        x: this.originalScales.x(p.x),
-                        y: this.originalScales.y(p.y)
+                        x: this.rwuToGrid (p.x, 'x'),
+                        y: this.rwuToGrid (p.y, 'y')
                     };
                     pointsString += (p.x + ',' + p.y + ' ');
                 });
@@ -422,8 +437,10 @@ export default {
     * finds the closest vertex or edge within the snap tolerance zone of a point
     */
     findSnapTarget (point) {
-        if (this.isDragging) { return; }
-
+        point = {
+            x: this.pxToRWU(point.x, 'x'),
+            y: this.pxToRWU(point.y, 'y')
+        };
         // unhighlight all edges and vertices
         d3.selectAll('#grid .highlight').remove();
 
@@ -444,8 +461,14 @@ export default {
 
     /*
     * look up data for the closest vertex within the tolerance zone of a point
+    * translate coordinates for snapping vertex from rwu to grid
     */
     snappingVertexData (point) {
+        // point = {
+        //     x: this.pxToGrid(point.x, 'x'),
+        //     y: this.pxToGrid(point.y, 'y')
+        // };
+
         var snappingCandidates = JSON.parse(JSON.stringify(this.$store.getters['application/currentStoryGeometry'].vertices));
 
         // add the origin of the current polygon as a snapping candidate
@@ -479,6 +502,10 @@ export default {
             nearestVertex.dist = Math.sqrt(c);
             nearestVertex.type = 'vertex';
 
+            // scale to grid
+            nearestVertex.x = this.rwuToGrid(nearestVertex.x, 'x');
+            nearestVertex.y = this.rwuToGrid(nearestVertex.y, 'y');
+
             return nearestVertex;
         }
     },
@@ -487,14 +514,20 @@ export default {
     * look up data for the closest edge within the tolerance zone of a point
     */
     snappingEdgeData (point) {
+        // point = {
+        //     x: this.pxToGrid(point.x, 'x'),
+        //     y: this.pxToGrid(point.y, 'y')
+        // };
+
         // filter all edges within the snap tolerance of the point
         const snappingCandidates = this.currentStoryGeometry.edges.map((e) => {
-            const v1 = geometryHelpers.vertexForId(e.v1, this.currentStoryGeometry),
-                v2 = geometryHelpers.vertexForId(e.v2, this.currentStoryGeometry);
+            const v1 = JSON.parse(JSON.stringify(geometryHelpers.vertexForId(e.v1, this.currentStoryGeometry))),
+                v2 = JSON.parse(JSON.stringify(geometryHelpers.vertexForId(e.v2, this.currentStoryGeometry)));
 
             if (!v1 || !v2) { debugger; }
 
             const edgeResult = geometryHelpers.projectToEdge(point, v1, v2);
+
             return edgeResult ? {
                 dist: edgeResult.dist, // dist between original point location and projection to edge
                 scalar: edgeResult.scalar, // projection of point to edge
@@ -519,57 +552,88 @@ export default {
 
         if (nearestEdge) {
             nearestEdge.type = 'edge';
+
+            nearestEdge.snappingEdgeV1.x = this.rwuToGrid(nearestEdge.snappingEdgeV1.x, 'x');
+            nearestEdge.snappingEdgeV1.y = this.rwuToGrid(nearestEdge.snappingEdgeV1.y, 'y');
+
+            nearestEdge.snappingEdgeV2.x = this.rwuToGrid(nearestEdge.snappingEdgeV2.x, 'x');
+            nearestEdge.snappingEdgeV2.y = this.rwuToGrid(nearestEdge.snappingEdgeV2.y, 'y');
+
+            nearestEdge.scalar.x = this.rwuToGrid(nearestEdge.scalar.x, 'x');
+            nearestEdge.scalar.y = this.rwuToGrid(nearestEdge.scalar.y, 'y');
+
             return nearestEdge;
+        }
+    },
+
+    // ****************** SCALING FUNCTIONS ****************** //
+    /*
+    * take a pixel value (from a mouse event), find the corresponding real world units (for snapping to saved geometry in RWU)
+    */
+    pxToRWU (px, axis) {
+        if (axis === 'x') {
+            const currentScaleX = d3.scaleLinear()
+                    .domain([0, this.$refs.grid.clientWidth])
+                    .range([this.min_x, this.max_x]);
+            return currentScaleX(px);
+        } else if (axis === 'y') {
+            const currentScaleY = d3.scaleLinear()
+                   .domain([0, this.$refs.grid.clientHeight])
+                   .range([this.min_y, this.max_y]);
+            return currentScaleY(px);
+        }
+    },
+    /*
+    * take a pixel value (from a mouse event), find the corresponding coordinates in the svg grid
+    */
+    pxToGrid (px, axis) {
+        if (axis === 'x') {
+            return this.originalScales.x(px);
+        } else if (axis === 'y') {
+            return this.originalScales.y(px);
+        }
+    },
+
+    /*
+    * take a rwu value (from the datastore), find the corresponding coordinates in the svg grid
+    */
+    rwuToGrid (rwu, axis) {
+        if (axis === 'x') {
+            const currentScaleX = d3.scaleLinear()
+                    .domain([0, this.$refs.grid.clientWidth])
+                    .range([this.min_x, this.max_x]),
+                pxValue = currentScaleX.invert(rwu);
+            return this.pxToGrid(pxValue, axis);
+        } else if (axis === 'y') {
+            const currentScaleY = d3.scaleLinear()
+                   .domain([0, this.$refs.grid.clientHeight])
+                   .range([this.min_y, this.max_y]),
+                pxValue = currentScaleY.invert(rwu);
+            return this.pxToGrid(pxValue, axis);
+        }
+    },
+
+    /*
+    * take a grid value (from some point already rendered to the grid) and translate it into RWU for persistence to the datastore
+    */
+    gridToRWU (gridValue, axis) {
+        if (axis === 'x') {
+            const currentScaleX = d3.scaleLinear()
+                    .domain([0, this.$refs.grid.clientWidth])
+                    .range([this.min_x, this.max_x]),
+                pxValue = this.originalScales.x.invert(gridValue);
+            return currentScaleX(pxValue);
+        } else if (axis === 'y') {
+            const currentScaleY = d3.scaleLinear()
+                   .domain([0, this.$refs.grid.clientHeight])
+                   .range([this.min_y, this.max_y]),
+                pxValue = this.originalScales.y.invert(gridValue);
+            return currentScaleY(pxValue);
         }
     },
 
 
     // ****************** HELPERS ****************** //
-    /*
-    * translates the mouse event coordinates to RWU
-    * adjusts incorrect coordinates caused by svg hover
-    */
-    pxToGridCoords (e) {
-        // when the user hovers over certain SVG child nodes, event locations are incorrect
-        return {
-            x: this.originalScales.x(e.offsetX),
-            y: this.originalScales.y(e.offsetY)
-        };
-    },
-
-    gridCoordsToRWU (gridPoint) {
-        const px = {
-            x: this.originalScales.x.invert(gridPoint.x),
-            y: this.originalScales.y.invert(gridPoint.y)
-        };
-
-        const currentScaleX = d3.scaleLinear()
-                .domain([0, this.$refs.grid.clientWidth])
-                .range([this.min_x, this.max_x]),
-            currentScaleY = d3.scaleLinear()
-               .domain([0, this.$refs.grid.clientHeight])
-               .range([this.min_y, this.max_y]);
-        // when the user hovers over certain SVG child nodes, event locations are incorrect
-        return {
-            x: currentScaleX(px.x),
-            y: currentScaleY(px.y)
-        };
-    },
-    RWUToPx (px) {
-        const currentScaleX = d3.scaleLinear()
-                .domain([0, this.$refs.grid.clientWidth])
-                .range([this.min_x, this.max_x]),
-            currentScaleY = d3.scaleLinear()
-               .domain([0, this.$refs.grid.clientHeight])
-               .range([this.min_y, this.max_y]);
-
-        // when the user hovers over certain SVG child nodes, event locations are incorrect
-        return {
-            x: currentScaleX.invert(px.x),
-            y: currentScaleY.invert(px.y)
-        };
-    },
-
     /*
     * calc point radius, adjusting by the minimum x and y values for the grid to prevent stretched points
     */
@@ -585,10 +649,6 @@ export default {
     },
 
     calcGrid () {
-        // originalScales are saved and used to scale elements based on zoom behavior transformations
-        // the scales themselves are a 1 to 1 mapping, in the zoomHandler the scales are cloned and transformed based on the zoom event transformations
-        // the transformed scales are then applied to the axes, causing the grid to display with the correct dimensions
-
         // save the original scale values, calculate new scales in the zoom handler based on these
         // recalculating new scales from the already updated scales results in exponential growth
         this.originalScales = {
@@ -617,8 +677,6 @@ export default {
             rwuHeight = this.max_y - this.min_y,
             rwuWidth = this.max_x - this.min_x;
 
-
-        // TODO: calc ticks from spacing
         const tickCount = rwuHeight / this.spacing,
             aspectRatio = rwuWidth / rwuHeight;
 

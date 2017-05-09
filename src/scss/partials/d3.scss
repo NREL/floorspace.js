@@ -34,7 +34,8 @@
         opacity: .25;
     }
     line.highlight {
-        stroke: red;
+        stroke: yellow;
+        z-index: 10;
     }
 
     // shapes
