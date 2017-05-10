@@ -54,16 +54,21 @@ export default {
                 .classed('highlight', true)
                 .attr('vector-effect', 'non-scaling-stroke');
         } else if (!snapTarget && this.gridVisible) {
-            // calculate an offset for the gridlines based on the viewbox min_x and min_y
-            const xAdjustment = this.min_x % this.spacing,
-                yAdjustment = this.min_y % this.spacing;
+            const xAdjustment = +this.xAxis.select(".tick").attr("transform").replace("translate(", "").replace(")", "").split(",")[0],
+                yAdjustment = +this.yAxis.select(".tick").attr("transform").replace("translate(", "").replace(")", "").split(",")[1];
+
 
             // round point RWU coordinates to nearest gridline
             snapTarget = {
                 type: 'vertex',
-                x: round(point.x - xAdjustment, this.spacing) + xAdjustment,
-                y: round(point.y - yAdjustment, this.spacing) + yAdjustment
+                x: round(point.x, this.rwuToGrid(this.spacing + this.min_x, 'x')) + xAdjustment,//this.rwuToGrid(transformX, 'x'),
+                y: round(point.y, this.rwuToGrid(this.spacing + this.min_y, 'y')) + yAdjustment//this.rwuToGrid(transformY, 'y')
             };
+
+            // snapTarget.x = Math.abs(point.x - (round(point.x, this.rwuToGrid(this.spacing + this.min_x, 'x')) + xAdjustment)) > Math.abs(point.x - (round(point.x, this.rwuToGrid(this.spacing - this.min_x, 'x')) + xAdjustment)) ?
+            //     round(point.x, this.rwuToGrid(this.spacing - this.min_x, 'x')) + xAdjustment :
+            //     round(point.x, this.rwuToGrid(this.spacing + this.min_x, 'x')) + xAdjustment;
+
 
             d3.select('#grid svg')
                 .append('ellipse')
@@ -145,8 +150,6 @@ export default {
     * called on click events
     */
     addPoint (e) {
-        if (this.isDragging) { return; }
-
         // if no space or shading is selected, disable drawing
         if (!this.currentSpace && !this.currentShading) { return; }
 
@@ -377,8 +380,8 @@ export default {
                 var pointsString = '';
                 d.points.forEach((p) => {
                     p = {
-                        x: this.rwuToGrid (p.x, 'x'),
-                        y: this.rwuToGrid (p.y, 'y')
+                        x: this.rwuToGrid(p.x, 'x'),
+                        y: this.rwuToGrid(p.y, 'y')
                     };
                     pointsString += (p.x + ',' + p.y + ' ');
                 });
@@ -403,7 +406,7 @@ export default {
     */
     drawGridLines () {
         // var svg = d3.select('#grid svg');
-        // svg.selectAll('line').remove();
+        // svg.selectAll('.vertical, .horizontal').remove();
         //
         // // redraw the grid if the grid is visible
         // if (!this.$store.state.project.grid.visible) { return; }
@@ -691,16 +694,16 @@ export default {
                 .tickSize(rwuWidth) // length of tick marks (full width of grid in rwu coming up from y axis)
                 .tickPadding(this.scaleX(-20)); // padding between axisRight and tick text (20px translated to rwu)
 
-        const xAxis = svg.append('g')
-                .attr('class', 'axis axis--x')
-                // .style('font-size', '20')
-                .attr('stroke-width', this.scaleY(1))
-                .call(xAxisGenerator),
-            yAxis = svg.append('g')
-                .attr('class', 'axis axis--y')
-                // .style('font-size', '20')
-                .attr('stroke-width', this.scaleX(1))
-                .call(yAxisGenerator);
+        this.xAxis = svg.append('g')
+            .attr('class', 'axis axis--x')
+            // .style('font-size', '20')
+            .attr('stroke-width', this.scaleY(1))
+            .call(xAxisGenerator);
+        this.yAxis = svg.append('g')
+            .attr('class', 'axis axis--y')
+            // .style('font-size', '20')
+            .attr('stroke-width', this.scaleX(1))
+            .call(yAxisGenerator);
 
 
         // configure zoom behavior in rwu
@@ -730,12 +733,12 @@ export default {
                     scaledRwuWidth = newScaleX.domain()[0] - newScaleX.domain()[1]
 
                 // update the number of ticks to display based on the post zoom real world unit height and width
-                yAxis.call(yAxisGenerator.ticks(-tickCount * (scaledRwuHeight / rwuHeight)));
-                xAxis.call(xAxisGenerator.ticks(-tickCount * aspectRatio * (scaledRwuWidth / rwuWidth)));
+                this.yAxis.call(yAxisGenerator.ticks(-tickCount * (scaledRwuHeight / rwuHeight)));
+                this.xAxis.call(xAxisGenerator.ticks(-tickCount * aspectRatio * (scaledRwuWidth / rwuWidth)));
 
                 // create transformed copies of the scales and apply them to the axes
-                xAxis.call(xAxisGenerator.scale(newScaleX));
-                yAxis.call(yAxisGenerator.scale(newScaleY));
+                this.xAxis.call(xAxisGenerator.scale(newScaleX));
+                this.yAxis.call(yAxisGenerator.scale(newScaleY));
                 // rescale the saved geometry
                 this.drawPolygons();
                 // d3.select('#grid svg').selectAll('polygon').attr('transform', d3.event.transform)

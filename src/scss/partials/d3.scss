@@ -30,7 +30,7 @@
     }
     // gridlines
     line.horizontal, line.vertical {
-        stroke: $gray-medium-light;
+        stroke: red;
         opacity: .25;
     }
     line.highlight {
