@@ -23,8 +23,7 @@ export default {
     data () {
         return {
             originalScales: {},
-            points: [], // points for the face currently being drawn
-            isDragging: false // boolean - if a drag event is happening
+            points: [] // points for the face currently being drawn
         };
     },
     mounted () {

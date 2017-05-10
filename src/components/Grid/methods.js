@@ -411,51 +411,16 @@ export default {
         d3.selectAll('#grid ellipse').remove();
     },
 
-    /*
-    * draw lines over the svg for the grid
-    */
-    drawGridLines () {
-        // var svg = d3.select('#grid svg');
-        // svg.selectAll('.vertical, .horizontal').remove();
-        //
-        // // redraw the grid if the grid is visible
-        // if (!this.$store.state.project.grid.visible) { return; }
-        //
-        // // lines are drawn in RWU
-        // svg.selectAll('.vertical')
-        //     .data(d3.range(this.min_x / this.spacing, this.max_x / this.spacing))
-        //     .enter().append('line')
-        //     .attr('x1', (d) => { return d * this.spacing; })
-        //     .attr('x2', (d) => { return d * this.spacing; })
-        //     .attr('y1', this.min_y)
-        //     .attr('y2', this.max_y)
-        //     .attr('class', 'vertical')
-        //     .attr('vector-effect', 'non-scaling-stroke');
-        //
-        // svg.selectAll('.horizontal')
-        //     .data(d3.range(this.min_y / this.spacing, this.max_y / this.spacing))
-        //     .enter().append('line')
-        //     .attr('x1', this.min_x)
-        //     .attr('x2', this.max_x)
-        //     .attr('y1', (d) => { return d * this.spacing; })
-        //     .attr('y2', (d) => { return d * this.spacing; })
-        //     .attr('class', 'horizontal')
-        //     .attr('vector-effect', 'non-scaling-stroke');
-        //
-        // d3.selectAll('.vertical, .horizontal').lower();
-    },
-
     // ****************** SNAPPING TO EXISTING GEOMETRY ****************** //
     /*
-    * finds the closest vertex or edge within the snap tolerance zone of a point
+    * finds the closest vertex or edge within the snap tolerance zone of a point (in pixels)
     */
     findSnapTarget (point) {
+        // convert px to RWU
         point = {
             x: this.pxToRWU(point.x, 'x'),
             y: this.pxToRWU(point.y, 'y')
         };
-        // unhighlight all edges and vertices
-        d3.selectAll('#grid .highlight').remove();
 
         const snappingVertexData = this.snappingVertexData(point),
             snappingEdgeData = this.snappingEdgeData(point);
@@ -463,7 +428,7 @@ export default {
         // if a vertex and an edge are both within the cursor's snap tolerance, find the closest one
         if (snappingVertexData && snappingEdgeData) {
             // if we are in polygon mode and the snappingVertex is the origin use the vertex regardless of whether the edge is closer
-            if (snappingVertexData === this.points[0]) { return snappingVertexData; }
+            if (snappingVertexData.origin) { return snappingVertexData; }
             return snappingVertexData.dist <= snappingEdgeData.dist ? snappingVertexData : snappingEdgeData;
         } else if (snappingVertexData) {
             return snappingVertexData;
@@ -473,7 +438,7 @@ export default {
     },
 
     /*
-    * look up data for the closest vertex within the tolerance zone of a point
+    * look up data for the closest vertex within the tolerance zone of a point (in RWU)
     * translate coordinates for snapping vertex from rwu to grid
     */
     snappingVertexData (point) {
@@ -484,9 +449,13 @@ export default {
 
         var snappingCandidates = JSON.parse(JSON.stringify(this.$store.getters['application/currentStoryGeometry'].vertices));
 
-        // add the origin of the current polygon as a snapping candidate
+        // add the origin of the current polygon converted from grid to rwu as a snapping candidate
         if (this.points[0] && this.currentTool === 'Polygon') {
-            snappingCandidates.push(this.points[0]);
+            snappingCandidates.push({
+                x: this.gridToRWU(this.points[0].x, 'x'),
+                y: this.gridToRWU(this.points[0].y, 'y'),
+                origin: true
+            });
         }
         snappingCandidates = snappingCandidates.filter((v) => {
             const dx = Math.abs(v.x - point.x),

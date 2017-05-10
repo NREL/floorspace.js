@@ -12,7 +12,7 @@ export default {
             north_axis: 0
         },
         grid: {
-            visible: true,
+            visible: false,
             spacing: 100
         },
         view: {
