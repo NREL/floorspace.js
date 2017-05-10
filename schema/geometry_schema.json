@@ -33,32 +33,6 @@
 				"$ref": "#/definitions/SpaceType"
 			}
 		},
-		"constructions": {
-			"type": "array",
-			"items": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"handle": {
-						"type": [
-							"string",
-							"null"
-						]
-					},
-					"name": {
-						"type": [
-							"string",
-							"null"
-						]
-					}
-				},
-				"required": [
-					"id"
-				]
-			}
-		},
 		"construction_sets": {
 			"type": "array",
 			"items": {
@@ -559,6 +533,18 @@
 						"string",
 						"null"
 					]
+				},
+				"height": {
+					"description": "Vertical height of each window. In drawing units.",
+					"type": "number"
+				},
+				"width": {
+					"description": "Horizontal width of each window. In drawing units.",
+					"type": "number"
+				},
+				"sill_height": {
+					"description": "Vertical distance from the floor to the window sill. In drawing units.",
+					"type": "number"
 				}
 			},
 			"required": [
@@ -574,8 +560,17 @@
 				"name": {
 					"type": [
 						"string",
+						"number",
 						"null"
 					]
+				},
+				"illuminance_setpoint": {
+					"description": "Setpoint for daylighting control (lux).",
+					"type": "number"
+				},
+				"height": {
+					"description": "Vertical distance of sensor above floor.  In drawing units.",
+					"type": "number"
 				}
 			},
 			"required": [
