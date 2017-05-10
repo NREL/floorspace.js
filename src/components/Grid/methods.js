@@ -22,14 +22,12 @@ export default {
 
         if (!this.currentSpace && !this.currentShading) { return; }
 
+
+        var snapTarget = this.findSnapTarget({ x: e.offsetX, y: e.offsetY });
         const point = {
             x: this.pxToGrid(e.offsetX, 'x'),
             y: this.pxToGrid(e.offsetY, 'y')
         };
-
-        var snapTarget = this.findSnapTarget({ x: e.offsetX, y: e.offsetY });
-        // TODO: traslate snapTarget (loaded from store) to grid location
-
         if (snapTarget && snapTarget.snappingEdge) {
             d3.select('#grid svg')
                 .append('line')
@@ -54,21 +52,21 @@ export default {
                 .classed('highlight', true)
                 .attr('vector-effect', 'non-scaling-stroke');
         } else if (!snapTarget && this.gridVisible) {
-            const xAdjustment = +this.xAxis.select(".tick").attr("transform").replace("translate(", "").replace(")", "").split(",")[0],
-                yAdjustment = +this.yAxis.select(".tick").attr("transform").replace("translate(", "").replace(")", "").split(",")[1];
+            const xAdjustment = +this.xAxis.select('.tick').attr('transform').replace('translate(', '').replace(')', '').split(',')[0],
+                yAdjustment = +this.yAxis.select('.tick').attr('transform').replace('translate(', '').replace(')', '').split(',')[1];
 
+            const xTickSpacing = this.rwuToGrid(this.spacing + this.min_x, 'x'),
+                yTickSpacing = this.rwuToGrid(this.spacing + this.min_y, 'y');
 
             // round point RWU coordinates to nearest gridline
             snapTarget = {
                 type: 'vertex',
-                x: round(point.x, this.rwuToGrid(this.spacing + this.min_x, 'x')) + xAdjustment,//this.rwuToGrid(transformX, 'x'),
-                y: round(point.y, this.rwuToGrid(this.spacing + this.min_y, 'y')) + yAdjustment//this.rwuToGrid(transformY, 'y')
+                x: round(point.x, this.rwuToGrid(this.spacing + this.min_x, 'x')) + xAdjustment,
+                y: round(point.y, this.rwuToGrid(this.spacing + this.min_y, 'y')) + yAdjustment
             };
 
-            // snapTarget.x = Math.abs(point.x - (round(point.x, this.rwuToGrid(this.spacing + this.min_x, 'x')) + xAdjustment)) > Math.abs(point.x - (round(point.x, this.rwuToGrid(this.spacing - this.min_x, 'x')) + xAdjustment)) ?
-            //     round(point.x, this.rwuToGrid(this.spacing - this.min_x, 'x')) + xAdjustment :
-            //     round(point.x, this.rwuToGrid(this.spacing + this.min_x, 'x')) + xAdjustment;
-
+            snapTarget.x = Math.abs(point.x - (snapTarget.x - xTickSpacing)) >  Math.abs(point.x - snapTarget.x) ? snapTarget.x : snapTarget.x - xTickSpacing;
+            snapTarget.y = Math.abs(point.y - (snapTarget.y - yTickSpacing)) >  Math.abs(point.y - snapTarget.y) ? snapTarget.y : snapTarget.y - yTickSpacing;
 
             d3.select('#grid svg')
                 .append('ellipse')
@@ -78,6 +76,7 @@ export default {
                 .attr('ry', this.calcRadius(2, 'y'))
                 .classed('gridpoint', true)
                 .attr('vector-effect', 'non-scaling-stroke');
+
         } else {
             d3.select('#grid svg')
                 .append('ellipse')
@@ -171,7 +170,7 @@ export default {
         *     set a flag to split the edge at the new vertex
         * origin of polygon: close the polygon being drawn
         */
-        const snapTarget = this.findSnapTarget({x: e.offsetX, y: e.offsetY});
+        var snapTarget = this.findSnapTarget({x: e.offsetX, y: e.offsetY});
         if (snapTarget) {
             if (snapTarget.type === 'vertex') {
                 // if the snapTarget is the origin of the face being drawn in Polygon mode, close the face
@@ -192,13 +191,24 @@ export default {
         }
         // if no snapTarget was found and the grid is visible snap to the grid
         else if (this.gridVisible) {
-            // calculate an offset for the gridlines based on the viewbox min_x and min_y
-            const xAdjustment = this.min_x % this.spacing,
-                yAdjustment = this.min_y % this.spacing;
+            const xAdjustment = +this.xAxis.select('.tick').attr('transform').replace('translate(', '').replace(')', '').split(',')[0],
+                yAdjustment = +this.yAxis.select('.tick').attr('transform').replace('translate(', '').replace(')', '').split(',')[1];
+
+            const xTickSpacing = this.rwuToGrid(this.spacing + this.min_x, 'x'),
+                yTickSpacing = this.rwuToGrid(this.spacing + this.min_y, 'y');
 
             // round point RWU coordinates to nearest gridline
-            point.x = round(point.x - xAdjustment, this.spacing) + xAdjustment;
-            point.y = round(point.y - yAdjustment, this.spacing) + yAdjustment;
+            snapTarget = {
+                type: 'vertex',
+                x: round(point.x, this.rwuToGrid(this.spacing + this.min_x, 'x')) + xAdjustment,
+                y: round(point.y, this.rwuToGrid(this.spacing + this.min_y, 'y')) + yAdjustment
+            };
+
+            snapTarget.x = Math.abs(point.x - (snapTarget.x - xTickSpacing)) >  Math.abs(point.x - snapTarget.x) ? snapTarget.x : snapTarget.x - xTickSpacing;
+            snapTarget.y = Math.abs(point.y - (snapTarget.y - yTickSpacing)) >  Math.abs(point.y - snapTarget.y) ? snapTarget.y : snapTarget.y - yTickSpacing;
+
+            point.x = snapTarget.x;
+            point.y = snapTarget.y;
         }
 
         // if we are in polygon mode and the snapped gridpoint is within the tolerance zone of the origin of the face being drawn, close the face
