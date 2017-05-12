@@ -8,7 +8,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
 <div id="grid" :style="{ 'pointer-events': (currentTool === 'Drag' || currentTool === 'Map') ? 'none': 'all' }">
-    <svg ref="grid" @click="addPoint" @mousemove="(currentTool === 'Rectangle' || currentTool === 'Polygon') ? highlightSnapTarget($event) : null" preserveAspectRatio="none" id="svg-grid"></svg>
+    <svg ref="grid" @click="addPoint" @mousemove="highlightSnapTarget" preserveAspectRatio="none" id="svg-grid"></svg>
 </div>
 </template>
 
@@ -33,7 +33,6 @@ export default {
         this.$refs.grid.setAttribute('viewBox', `0 0 ${this.max_x - this.min_x} ${this.max_y - this.min_y}`);
 
         this.calcGrid();
-        // this.drawGridLines();
         // this.drawPolygons();
         // recalculate scales when the window resizes
         window.addEventListener('resize', this.calcGrid);
@@ -142,14 +141,10 @@ export default {
         },
     },
     watch: {
-        gridVisible () { this.drawGridLines(); },
+        gridVisible () { },
 
-        spacing () {
-            this.drawGridLines();
-        },
-        viewbox () {
-            this.drawGridLines();
-        },
+        spacing () { },
+        viewbox () { },
 
         currentTool () {
             this.points = [];
