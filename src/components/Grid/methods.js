@@ -42,15 +42,15 @@ export default {
             if (snapTarget && snapTarget.snappingEdge) {
                 d3.select('#grid svg')
                     .append('line')
-                    .attr('x1', snapTarget.snappingEdgeV1.x)
-                    .attr('y1', snapTarget.snappingEdgeV1.y)
-                    .attr('x2', snapTarget.snappingEdgeV2.x)
-                    .attr('y2', snapTarget.snappingEdgeV2.y)
+                    .attr('x1', snapTarget.v1GridCoords.x)
+                    .attr('y1', snapTarget.v1GridCoords.y)
+                    .attr('x2', snapTarget.v2GridCoords.x)
+                    .attr('y2', snapTarget.v2GridCoords.y)
                     .attr('stroke-width', 1)
                     .classed('highlight', true)
                     .attr('vector-effect', 'non-scaling-stroke');
 
-                snapTarget = snapTarget.scalar;
+                snapTarget = snapTarget.projection;
             }
 
             if (snapTarget) {
@@ -187,7 +187,7 @@ export default {
         /*
         * check for snapping - if the click happened within the tolerance range of a
         * vertex: reuse that vertex on the face being created
-        * edge: create a new vertex at the scalar projection from the click location to the edge,
+        * edge: create a new vertex at the projection from the click location to the edge,
         *     set a flag to split the edge at the new vertex
         * origin of polygon: close the polygon being drawn
         */
@@ -204,8 +204,8 @@ export default {
                 // will save a reference to the existing vertex on the new face instead of creating a new vertex
                 point = snapTarget;
             } else if (snapTarget.type === 'edge') {
-                // create a vertex on the edge at the location closest to the mouse event (scalar projection)
-                point = snapTarget.scalar;
+                // create a vertex on the edge at the location closest to the mouse event (projection)
+                point = snapTarget.projection;
                 // mark the point so that the edge will be split during face creation
                 point.splittingEdge = snapTarget.snappingEdge;
             }
@@ -459,15 +459,15 @@ export default {
         //     if (snapTarget && snapTarget.snappingEdge) {
         //         d3.select('#grid svg')
         //             .append('line')
-        //             .attr('x1', snapTarget.snappingEdgeV1.x)
-        //             .attr('y1', snapTarget.snappingEdgeV1.y)
-        //             .attr('x2', snapTarget.snappingEdgeV2.x)
-        //             .attr('y2', snapTarget.snappingEdgeV2.y)
+        //             .attr('x1', snapTarget.v1GridCoords.x)
+        //             .attr('y1', snapTarget.v1GridCoords.y)
+        //             .attr('x2', snapTarget.v2GridCoords.x)
+        //             .attr('y2', snapTarget.v2GridCoords.y)
         //             .attr('stroke-width', 1)
         //             .classed('highlight', true)
         //             .attr('vector-effect', 'non-scaling-stroke');
         //
-        //         snapTarget = snapTarget.scalar;
+        //         snapTarget = snapTarget.projection;
         //     }
         //
         //     if (snapTarget) {
@@ -527,7 +527,7 @@ export default {
     snappingVertexData (point) {
         // build a list of vertices (in RWU) available for snapping
         // deep copy all vertices on the current story
-        var snappableVertices = JSON.parse(JSON.stringify(this.$store.getters['application/currentStoryGeometry'].vertices));
+        var snappableVertices = JSON.parse(JSON.stringify(this.currentStoryGeometry.vertices));
 
         // TODO: conditionally combine this list with vertices from the next story down if it is visible
         // if (this.previousStoryVisible) { snappableVertices = snappableVertices.concat(JSON.parse(JSON.stringify(previousStoryVertices))); }
@@ -543,83 +543,80 @@ export default {
             });
         }
 
-
-        function distanceBetweenPoints (p1, p2) {
-            const dx = Math.abs(p1.x - p2.x),
-                dy = Math.abs(p1.y - p2.y);
-            return Math.sqrt((dx * dx) + (dy * dy));
-        }
-
         // find the vertex closest to the point being tested
         if (!snappableVertices.length) { return; }
-        const nearestVertex = snappableVertices.reduce((a, b, i, arr) => {
-            if (!a || !b) {debugger}
-            console.log(snappableVertices);
-            const aDist = distanceBetweenPoints(a, point),
-                bDist = distanceBetweenPoints(b, point);
+        const nearestVertex = snappableVertices.reduce((a, b) => {
+            const aDist = this.distanceBetweenPoints(a, point),
+                bDist = this.distanceBetweenPoints(b, point);
             return aDist < bDist ? a : b;
         });
 
         // check that the nearest vertex is within the snap tolerance of the point
-        if (distanceBetweenPoints(nearestVertex, point) < this.$store.getters['project/snapTolerance']) {
+        if (this.distanceBetweenPoints(nearestVertex, point) < this.$store.getters['project/snapTolerance']) {
             return {
                 x: this.rwuToGrid(nearestVertex.x, 'x'),
                 y: this.rwuToGrid(nearestVertex.y, 'y'),
                 origin: nearestVertex.origin,
-                dist: distanceBetweenPoints(nearestVertex, point),
+                dist: this.distanceBetweenPoints(nearestVertex, point),
                 type: 'vertex'
             };
         }
     },
 
     /*
-    * look up data for the closest edge within the tolerance zone of a point
+    * given a point in RWU, look up the closest edge that is available for snapping in the grid
+    * if the projection of the point to the edge is within the snap tolerance of the point
+    * return the edge and coordinates of the projection in grid units
+    * and the distance from the vertex to the point
     */
     snappingEdgeData (point) {
-        // filter all edges within the snap tolerance of the point
-        const snappingCandidates = this.currentStoryGeometry.edges.map((e) => {
-            const v1 = JSON.parse(JSON.stringify(geometryHelpers.vertexForId(e.v1, this.currentStoryGeometry))),
-                v2 = JSON.parse(JSON.stringify(geometryHelpers.vertexForId(e.v2, this.currentStoryGeometry)));
+        // build a list of edges (in RWU) available for snapping
+        // deep copy all vertices on the current story
+        var snappableEdges = JSON.parse(JSON.stringify(this.currentStoryGeometry.edges));
 
-            if (!v1 || !v2) { debugger; }
+        // TODO: conditionally combine this list with edges from the next story down if it is visible
+        // if (this.previousStoryVisible) { snappableEdges = snappableEdges.concat(JSON.parse(JSON.stringify(previousStoryEdges))); }
 
-            const edgeResult = geometryHelpers.projectToEdge(point, v1, v2);
+        // find the edge closest to the point being tested
+        if (!snappableEdges.length) { return; }
+        const nearestEdge = snappableEdges.reduce((a, b) => {
+            // look up vertices associated with edges
+            const aV1 = geometryHelpers.vertexForId(a.v1, this.currentStoryGeometry),
+                aV2 = geometryHelpers.vertexForId(a.v2, this.currentStoryGeometry),
 
-            return edgeResult ? {
-                dist: edgeResult.dist, // dist between original point location and projection to edge
-                scalar: edgeResult.scalar, // projection of point to edge
-                snappingEdge: e, // snapping edge
-                // populated snapping edge vertices - to display snapping point
-                snappingEdgeV1: v1,
-                snappingEdgeV2: v2
-            } : null;
-        }).filter((eR) => {
-            return eR && eR.dist < this.$store.getters['project/snapTolerance'];
+                bV1 = geometryHelpers.vertexForId(b.v1, this.currentStoryGeometry),
+                bV2 = geometryHelpers.vertexForId(b.v2, this.currentStoryGeometry);
+
+            // project point being tested to each edge
+            const aProjection = geometryHelpers.projectToEdge(point, aV1, aV2).projection,
+                bProjection = geometryHelpers.projectToEdge(point, bV1, bV2).projection;
+
+            // look up distance between projection and point being tested
+            const aDist = this.distanceBetweenPoints(aProjection, point),
+                bDist = this.distanceBetweenPoints(bProjection, point);
+
+            // return data for the edge with the closest projection to the point being tested
+            return aDist < bDist ? a : b;
         });
 
-        // use the closest edge if there are multiple edges within the snap tolerance
-        var nearestEdge;
-        if (snappingCandidates.length > 1) {
-            nearestEdge = snappingCandidates.reduce((a, b) => {
-                return a.dist <= b.dist ? a : b;
-            });
-        } else {
-            nearestEdge = snappingCandidates[0];
-        }
+        // look up vertices associated with nearest edge
+        const nearestEdgeV1 = geometryHelpers.vertexForId(nearestEdge.v1, this.currentStoryGeometry),
+            nearestEdgeV2 = geometryHelpers.vertexForId(nearestEdge.v2, this.currentStoryGeometry),
+            // project point being tested to nearest edge
+            projection = geometryHelpers.projectToEdge(point, nearestEdgeV1, nearestEdgeV2).projection,
+            // look up distance between projection and point being tested
+            dist = this.distanceBetweenPoints(projection, point);
 
-        if (nearestEdge) {
-            nearestEdge.type = 'edge';
-
-            nearestEdge.snappingEdgeV1.x = this.rwuToGrid(nearestEdge.snappingEdgeV1.x, 'x');
-            nearestEdge.snappingEdgeV1.y = this.rwuToGrid(nearestEdge.snappingEdgeV1.y, 'y');
-
-            nearestEdge.snappingEdgeV2.x = this.rwuToGrid(nearestEdge.snappingEdgeV2.x, 'x');
-            nearestEdge.snappingEdgeV2.y = this.rwuToGrid(nearestEdge.snappingEdgeV2.y, 'y');
-
-            nearestEdge.scalar.x = this.rwuToGrid(nearestEdge.scalar.x, 'x');
-            nearestEdge.scalar.y = this.rwuToGrid(nearestEdge.scalar.y, 'y');
-
-            return nearestEdge;
+        // check that the projection of the test point to the nearest edge is within the snap tolerance of the point
+        if (dist < this.$store.getters['project/snapTolerance']) {
+            return {
+                snappingEdge: nearestEdge,
+                dist: nearestEdge.dist,
+                // projection and snapping edge vertices translated into grid coordinates (to display snapping point)
+                projection: { x: this.rwuToGrid(projection.x, 'x'), y: this.rwuToGrid(projection.y, 'y') },
+                v1GridCoords: { x: this.rwuToGrid(nearestEdgeV1.x, 'x'), y: this.rwuToGrid(nearestEdgeV1.y, 'y') },
+                v2GridCoords: { x: this.rwuToGrid(nearestEdgeV2.x, 'x'), y: this.rwuToGrid(nearestEdgeV2.y, 'y') }
+            }
         }
     },
 
@@ -690,21 +687,7 @@ export default {
     },
 
 
-    // ****************** HELPERS ****************** //
-    /*
-    * calc point radius, adjusting by the minimum x and y values for the grid to prevent stretched points
-    */
-    calcRadius (pxRad, axis) {
-        var r;
-        if (axis === 'x') {
-            r = this.originalScales.x(pxRad)  ;
-        } else if (axis === 'y') {
-            r = this.originalScales.y(pxRad)  ;
-        }
-
-        return r;
-    },
-
+    // ****************** GRID ****************** //
     calcGrid () {
         // save the original scale values, calculate new scales in the zoom handler based on these
         // recalculating new scales from the already updated scales results in exponential growth
@@ -800,6 +783,25 @@ export default {
             });
 
         svg.call(zoomBehavior);
+    },
+    /*
+    * calc point radius, adjusting by the minimum x and y values for the grid to prevent stretched points
+    */
+    calcRadius (pxRad, axis) {
+        var r;
+        if (axis === 'x') {
+            r = this.originalScales.x(pxRad)  ;
+        } else if (axis === 'y') {
+            r = this.originalScales.y(pxRad)  ;
+        }
+
+        return r;
+    },
+
+    distanceBetweenPoints (p1, p2) {
+        const dx = Math.abs(p1.x - p2.x),
+            dy = Math.abs(p1.y - p2.y);
+        return Math.sqrt((dx * dx) + (dy * dy));
     }
 }
 
