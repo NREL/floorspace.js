@@ -508,6 +508,13 @@ export default {
                 .range([this.min_y, this.max_y])
         };
 
+        // scaleX amd scaleY are used during drawing to translate from px to RWU given the current grid dimensions in rwu
+        // these are never changed
+        // TODO: do we need these AND originalscales?
+        this.scaleX = this.originalScales.x;
+        this.scaleY = this.originalScales.y;
+
+        // these are essentially unit scales, but they span the full range that each axis should cover instead of just being 1 unit long
         const zoomScaleX = d3.scaleLinear()
                 .domain([this.min_x, this.max_x])
                 .range([this.min_x, this.max_x]),
@@ -515,45 +522,39 @@ export default {
                 .domain([this.min_y, this.max_y])
                 .range([this.min_y, this.max_y]);
 
-        // scaleX amd scaleY are used during drawing to translate from px to RWU given the current grid dimensions in rwu
-        // these are updated in the zoom handler
-        this.scaleX = this.originalScales.x;
-        this.scaleY = this.originalScales.y;
 
-        var svg = d3.select('#grid svg'),
+        const svg = d3.select('#grid svg'),
             // rwu dimensions (coordinates used within grid)
             rwuHeight = this.max_y - this.min_y,
-            rwuWidth = this.max_x - this.min_x;
+            rwuWidth = this.max_x - this.min_x,
 
-        const tickCount = rwuHeight / this.spacing,
+            tickCount = rwuHeight / this.spacing,
             aspectRatio = rwuWidth / rwuHeight;
 
         // generator functions for axes
         const xAxisGenerator = d3.axisBottom(zoomScaleX)
                 // calculate number of horizontal ticks based on the aspect ratio of the svg element and the real world unit height
-                .ticks(tickCount * aspectRatio) // number of ticks (multiplied by width to height ratio)
+                .ticks(rwuWidth / this.spacing) // number of ticks (multiplied by width to height ratio)
                 .tickSize(rwuHeight) // length of tick marks (full height of grid in rwu coming up from x axis)
                 .tickPadding(this.scaleY(-20)), // padding between axisBottom and tick text (20px translated to rwu)
             yAxisGenerator = d3.axisRight(zoomScaleY)
-                .ticks(tickCount) // number of ticks
+                .ticks(rwuHeight / this.spacing) // number of ticks
                 .tickSize(rwuWidth) // length of tick marks (full width of grid in rwu coming up from y axis)
                 .tickPadding(this.scaleX(-20)); // padding between axisRight and tick text (20px translated to rwu)
 
         this.xAxis = svg.append('g')
             .attr('class', 'axis axis--x')
-            // .style('font-size', '20')
             .attr('stroke-width', this.scaleY(1))
             .call(xAxisGenerator);
         this.yAxis = svg.append('g')
             .attr('class', 'axis axis--y')
-            // .style('font-size', '20')
             .attr('stroke-width', this.scaleX(1))
             .call(yAxisGenerator);
 
 
         // configure zoom behavior in rwu
         const zoomBehavior = d3.zoom()
-            .extent([[0, 0], [rwuWidth, rwuHeight]])
+            // .extent([[0, 0], [rwuWidth, rwuHeight]])
             // scale must be between .5 * original bounds and 2 * original bounds
             // .scaleExtent([.5, 10])
             // allow panning by 20 rwu in any direction
@@ -573,19 +574,20 @@ export default {
                     scaledRwuWidth = newScaleX.domain()[0] - newScaleX.domain()[1]
 
                 // update the number of ticks to display based on the post zoom real world unit height and width
-                this.yAxis.call(yAxisGenerator.ticks(-tickCount * (scaledRwuHeight / rwuHeight)));
-                this.xAxis.call(xAxisGenerator.ticks(-tickCount * aspectRatio * (scaledRwuWidth / rwuWidth)));
+                this.yAxis.call(yAxisGenerator.ticks(-scaledRwuHeight / this.spacing));
+                this.xAxis.call(xAxisGenerator.ticks(-scaledRwuWidth / this.spacing));
 
                 // create transformed copies of the scales and apply them to the axes
                 this.xAxis.call(xAxisGenerator.scale(newScaleX));
                 this.yAxis.call(yAxisGenerator.scale(newScaleY));
 
-                // rescale the saved geometry
+                // redraw the saved geometry
                 this.drawPolygons();
             });
 
         svg.call(zoomBehavior);
     },
+    updateGrid () {},
 
     // ****************** SCALING FUNCTIONS ****************** //
     /*

@@ -13,11 +13,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 </template>
 
 <script>
+
 import methods from './methods'
 import { mapState } from 'vuex'
 import geometryHelpers from './../../store/modules/geometry/helpers.js'
 import modelHelpers from './../../store/modules/models/helpers.js'
 import applicationHelpers from './../../store/modules/application/helpers.js'
+
 export default {
     name: 'grid',
     data () {
@@ -27,22 +29,23 @@ export default {
         };
     },
     mounted () {
+        // initialize the y dimensions in RWU based on the aspect ratio of the grid on the screen
         this.max_y = (this.$refs.grid.clientHeight / this.$refs.grid.clientWidth) * this.max_x;
 
         // set viewbox on svg in rwu so drawing coordinates are in rwu and not pixels
         this.$refs.grid.setAttribute('viewBox', `0 0 ${this.max_x - this.min_x} ${this.max_y - this.min_y}`);
 
         this.calcGrid();
-        // this.drawPolygons();
-        // recalculate scales when the window resizes
-        window.addEventListener('resize', this.calcGrid);
+        this.drawPolygons();
+
+        // recalculate the grid when the window resizes
+        window.addEventListener('resize', this.updateGrid);
     },
     beforeDestroy () {
-        window.removeEventListener('resize', this.calcGrid);
+        window.removeEventListener('resize', this.updateGrid);
     },
     computed: {
         ...mapState({
-
             currentMode: state => state.application.currentSelections.mode,
             currentTool: state => state.application.currentSelections.tool,
 
@@ -51,22 +54,10 @@ export default {
             currentStory: state => state.application.currentSelections.story,
 
             gridVisible: state => state.project.grid.visible,
-
-            spacing: state => state.project.grid.spacing,
-
-            // SVG viewbox is the portion of the svg grid (in RWU) that is currently visible to the user
-            viewbox: state => {
-                return state.project.view.min_x + ' ' + // x
-                    state.project.view.min_y + ' ' + // y
-                    (state.project.view.max_x - state.project.view.min_x) + ' ' + // width
-                    (state.project.view.max_y - state.project.view.min_y); // height
-            },
-
-            mapVisible: state => state.project.map.visible,
-            latitude: state => state.project.map.latitude,
-            longitude: state => state.project.map.longitude,
-            zoom: state => state.project.map.zoom
+            spacing: state => state.project.grid.spacing
         }),
+        // these are the original scales, they are never changed
+        // px -> rwu
         scaleX: {
             get () { return this.$store.state.application.scale.x; },
             set (val) {
@@ -99,52 +90,51 @@ export default {
         },
 
         currentStoryGeometry () { return this.$store.getters['application/currentStoryGeometry']; },
-        mapUrl () {
-            return "https://maps.googleapis.com/maps/api/staticmap?center=" +
-                this.latitude + "," + this.longitude + "&zoom=" + this.zoom +
-                "&size=600x300&key=AIzaSyBHevuNXeCuPXkiV3hq-pFKZSdSFLX6kF0"
-        },
+
 
         /*
         * map all faces for the current story to polygon representations (sets of ordered points) for d3 to render
         */
         polygons () {
             return this.currentStoryGeometry.faces.map((face) => {
-                const faceModel = modelHelpers.modelForFace(this.$store.state.models, face.id);
-                if (!faceModel) {debugger}
-                var color = faceModel.color, object;
-                if (faceModel.type === 'space' && this.currentMode === 'thermal_zones') {
-                    object = modelHelpers.libraryObjectWithId(this.$store.state.models, faceModel.thermal_zone_id)
-                    color = object ? object.color : applicationHelpers.config.palette.neutral;
-                } else if (faceModel.type === 'space' && this.currentMode === 'space_types') {
-                    object = modelHelpers.libraryObjectWithId(this.$store.state.models, faceModel.space_type_id)
-                    color = object ? object.color : applicationHelpers.config.palette.neutral;
-                } else if (faceModel.type === 'space' && this.currentMode === 'building_units') {
-                    object = modelHelpers.libraryObjectWithId(this.$store.state.models, faceModel.building_unit_id)
-                    color = object ? object.color : applicationHelpers.config.palette.neutral;
-                } else {
-                    color = faceModel.color;
+                // look up the model (space or shading) associated with the face
+                const model = modelHelpers.modelForFace(this.$store.state.models, face.id),
+                    polygon = {
+                        face_id: face.id,
+                        color: model.color,
+                        points: face.edgeRefs.map((edgeRef) => {
+                            const edge = geometryHelpers.edgeForId(edgeRef.edge_id, this.currentStoryGeometry),
+                                // use the vertex associated with v1 unless the edge reference on the face is reversed
+                                nextVertexId = edgeRef.reverse ? edge.v2 : edge.v1;
+                            return geometryHelpers.vertexForId(nextVertexId, this.currentStoryGeometry);
+                        })
+                    };
+
+                // if the model is a space, set the polygon's color based on the current mode
+                if (model.type === 'space') {
+                    switch (this.currentMode) {
+                        case 'thermal_zones':
+                            const thermal_zone = modelHelpers.libraryObjectWithId(this.$store.state.models, model.thermal_zone_id)
+                            polygon.color = thermal_zone ? thermal_zone.color : applicationHelpers.config.palette.neutral;
+                            break;
+                        case 'space_types':
+                            const space_type = modelHelpers.libraryObjectWithId(this.$store.state.models, model.space_type_id)
+                            polygon.color = space_type ? space_type.color : applicationHelpers.config.palette.neutral;
+                            break;
+                        case 'building_units':
+                            const building_unit = modelHelpers.libraryObjectWithId(this.$store.state.models, model.building_unit_id)
+                            polygon.color = building_unit ? building_unit.color : applicationHelpers.config.palette.neutral;
+                            break;
+                    }
                 }
 
-                return {
-                    face_id: face.id,
-                    // TODO: lookup the story/space/shading associated with the face
-                    color: color,
-                    points: face.edgeRefs.map((edgeRef) => {
-                        const edge = geometryHelpers.edgeForId(edgeRef.edge_id, this.currentStoryGeometry),
-                            // look up the vertex associated with v1 unless the edge reference on the face is reversed
-                            nextVertexId = edgeRef.reverse ? edge.v2 : edge.v1;
-                        return geometryHelpers.vertexForId(nextVertexId, this.currentStoryGeometry);
-                    })
-                };
+                return polygon;
             });
         },
     },
     watch: {
-        gridVisible () { },
-
-        spacing () { },
-        viewbox () { },
+        gridVisible () { this.updateGrid(); },
+        spacing () { this.updateGrid(); },
 
         currentTool () {
             this.points = [];
