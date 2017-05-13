@@ -13,134 +13,92 @@ import modelHelpers from './../../store/modules/models/helpers.js'
 export default {
     // ****************** USER INTERACTION EVENTS ****************** //
     /*
-    * When the 'Rectangle' or 'Polygon' tool is being used, and a mousemove event happens on the grid
+    * When a mousemove event is triggered on the grid and
+    * the 'Rectangle' or 'Polygon' tool is active and a space or shading is selected or the 'Eraser' tool is active
     * look up the snap target for the location of the event, highlight it, and render a guide point
+    * if there is no snap target, use the event location
     */
     highlightSnapTarget (e) {
         // only highlight snap targets in drawing modes when a space or shading has been selected
-        if ((this.currentTool !== 'Rectangle' && this.currentTool !== 'Polygon') || (!this.currentSpace && !this.currentShading)) { return; }
+        if (this.currentTool !== 'Eraser' && ((this.currentTool !== 'Rectangle' && this.currentTool !== 'Polygon') || (!this.currentSpace && !this.currentShading))) { return; }
 
         // unhighlight expired snap targets
         d3.selectAll('#grid .highlight, #grid .gridpoint').remove();
 
-
-        // location of the mousemove in grid units
+        // location of the mouse in grid units
         const gridPoint = {
-                x: this.pxToGrid(e.offsetX, 'x'),
-                y: this.pxToGrid(e.offsetY, 'y')
-            },
-            // location of the mouse in real world units
-            rwuPoint = {
-                x: this.pxToGrid(e.offsetX, 'x'),
-                y: this.pxToGrid(e.offsetY, 'y')
-            };
+            x: this.pxToGrid(e.offsetX, 'x'),
+            y: this.pxToGrid(e.offsetY, 'y')
+        };
 
-        // a vertex or edge is within snapping range of the mousemove event location
-        var snapTarget = this.findSnapTarget(rwuPoint);
-        if (snapTarget) {
+        const snapTarget = this.findSnapTarget(gridPoint);
 
-            if (snapTarget && snapTarget.snappingEdge) {
-                d3.select('#grid svg')
-                    .append('line')
-                    .attr('x1', snapTarget.v1GridCoords.x)
-                    .attr('y1', snapTarget.v1GridCoords.y)
-                    .attr('x2', snapTarget.v2GridCoords.x)
-                    .attr('y2', snapTarget.v2GridCoords.y)
-                    .attr('stroke-width', 1)
-                    .classed('highlight', true)
-                    .attr('vector-effect', 'non-scaling-stroke');
+        // render a line and point showing which geometry would be created with a click at this location
+        var guidePoint = snapTarget.type === 'edge' ? snapTarget.projection : snapTarget;
+        this.drawGuideLines(e, guidePoint);
 
-                snapTarget = snapTarget.projection;
-            }
-
-            if (snapTarget) {
-                d3.select('#grid svg')
-                    .append('ellipse')
-                    .attr('cx', snapTarget.x, 'x')
-                    .attr('cy', snapTarget.y, 'y')
-                    .attr('rx', this.calcRadius(5, 'x'))
-                    .attr('ry', this.calcRadius(5, 'y'))
-                    .classed('highlight', true)
-                    .attr('vector-effect', 'non-scaling-stroke');
-            }
-        }else if (!snapTarget && this.gridVisible) {
-            const xAdjustment = +this.xAxis.select('.tick').attr('transform').replace('translate(', '').replace(')', '').split(',')[0],
-                yAdjustment = +this.yAxis.select('.tick').attr('transform').replace('translate(', '').replace(')', '').split(',')[1];
-
-            const xTickSpacing = this.rwuToGrid(this.spacing + this.min_x, 'x'),
-                yTickSpacing = this.rwuToGrid(this.spacing + this.min_y, 'y');
-
-            // round point RWU coordinates to nearest gridline
-            snapTarget = {
-                type: 'vertex',
-                x: round(gridPoint.x, this.rwuToGrid(this.spacing + this.min_x, 'x')) + xAdjustment,
-                y: round(gridPoint.y, this.rwuToGrid(this.spacing + this.min_y, 'y')) + yAdjustment
-            };
-
-            snapTarget.x = Math.abs(gridPoint.x - (snapTarget.x - xTickSpacing)) >  Math.abs(gridPoint.x - snapTarget.x) ? snapTarget.x : snapTarget.x - xTickSpacing;
-            snapTarget.y = Math.abs(gridPoint.y - (snapTarget.y - yTickSpacing)) >  Math.abs(gridPoint.y - snapTarget.y) ? snapTarget.y : snapTarget.y - yTickSpacing;
-
+        // if snapping to an edisting edge or radius, draw a larger point, if snapping to the grid or just displaying the location of the pointer, create a small point
+        if (snapTarget.type === 'edge' || snapTarget.type === 'vertex') {
             d3.select('#grid svg')
                 .append('ellipse')
-                .attr('cx', snapTarget.x)
-                .attr('cy', snapTarget.y)
-                .attr('rx', this.calcRadius(2, 'x'))
-                .attr('ry', this.calcRadius(2, 'y'))
-                .classed('gridpoint', true)
+                .attr('cx', guidePoint.x, 'x')
+                .attr('cy', guidePoint.y, 'y')
+                .attr('rx', this.calcRadius(5, 'x'))
+                .attr('ry', this.calcRadius(5, 'y'))
+                .classed('highlight', true)
                 .attr('vector-effect', 'non-scaling-stroke');
-
         } else {
             d3.select('#grid svg')
                 .append('ellipse')
-                .attr('cx', gridPoint.x)
-                .attr('cy', gridPoint.y)
+                .attr('cx', guidePoint.x)
+                .attr('cy', guidePoint.y)
                 .attr('rx', this.calcRadius(2, 'x'))
                 .attr('ry', this.calcRadius(2, 'y'))
                 .classed('gridpoint', true)
                 .attr('vector-effect', 'non-scaling-stroke');
         }
-        this.drawGuideLines(e, snapTarget);
+
+        // in drawing modes, highlight edges that would be snapped to
+        if (snapTarget.type === 'edge' && this.currentTool !== 'Eraser') {
+            d3.select('#grid svg')
+                .append('line')
+                .attr('x1', snapTarget.v1GridCoords.x)
+                .attr('y1', snapTarget.v1GridCoords.y)
+                .attr('x2', snapTarget.v2GridCoords.x)
+                .attr('y2', snapTarget.v2GridCoords.y)
+                .attr('stroke-width', 1)
+                .classed('highlight', true)
+                .attr('vector-effect', 'non-scaling-stroke');
+        }
     },
 
     /*
-    * called by highlightSnapTarget on mousemove events,
-    * draws guidelines connecting the snaptarget and the face being drawn depending on drawing tool
+    * called on mousemove events, shows the user what geometry will be created by clicking at the current mouse location by
+    * drawing a guide rectangle or a guideline between the last point drawn and the guidepoint
     */
-    drawGuideLines (e, snapTarget) {
+    drawGuideLines (e, guidePoint) {
         if (!this.points.length) { return; }
 
         // remove expired guideline paths
         d3.selectAll('#grid .guideline').remove();
 
-        var guidelinePoints, point;
+        var guidelinePoints;
 
-        // if there is no snapTarget, just use the current mouse location
-        if (snapTarget) {
-            point = snapTarget;
-        } else {
-            point = {
-                x: this.pxToGrid(e.offsetX, 'x'),
-                y: this.pxToGrid(e.offsetY, 'y')
-            };
-        }
-
-        // determine how to complete face based on current tool
+        // if the polygon tool is active, draw a line connecting the last point in the polygon to the guide point
+        // if the rectangle or eraser tool is active, infer a rectangle from the first point that was drawn and the guide point
         if (this.currentTool === 'Polygon') {
-            // connect last point in polygon to current mouse location/snap target with a guideline
-            guidelinePoints = [point, this.points[this.points.length - 1]];
-
+            guidelinePoints = [guidePoint, this.points[this.points.length - 1]];
         } else if (this.currentTool === 'Rectangle' || this.currentTool === 'Eraser') {
-            // infer the remaining 2 points in the rectangle based on the first point in the rectangle and the  current mouse location/snap target
             guidelinePoints = [
                 this.points[0],
-                { x: point.x, y: this.points[0].y },
-                point,
-                { x: this.points[0].x, y: point.y },
+                { x: guidePoint.x, y: this.points[0].y },
+                guidePoint,
+                { x: this.points[0].x, y: guidePoint.y },
                 this.points[0]
             ];
         }
 
-        // draw guideline connecting guideline points
+        // render a guideline or rectangle
         d3.select('#grid svg').append('path')
             .datum(guidelinePoints)
             .attr('fill', 'none')
@@ -149,20 +107,22 @@ export default {
             .attr('d', d3.line()
                 .x((d) => { return d.x; })
                 .y((d) => { return d.y; }))
-            // prevent edges from overlapping points - interferes with click events
             .lower();
 
-        // keep grid lines under polygon edges
         d3.selectAll('.vertical, .horizontal').lower();
     },
 
     /*
-    * create and store a RWU grid point
-    * called on click events
+    * When a click event is triggered on the grid and the 'Eraser' tool is being used or
+    * the 'Rectangle' or 'Polygon' tool is being used and a space or shading is selected
+    * look up the snap target for the location of the event and create a new point with its coordinates
+    * if there is no snap target, use the event location
     */
     addPoint (e) {
         // if no space or shading is selected, disable drawing
-        if (!this.currentSpace && !this.currentShading) { return; }
+        if (this.currentTool !== 'Eraser' &&
+            ((this.currentTool !== 'Rectangle' && this.currentTool !== 'Polygon') || (!this.currentSpace && !this.currentShading))
+        ) { return; }
 
         if (this.currentTool === 'Select') {
             this.$store.dispatch('application/setCurrentSpace', { 'space': null });
@@ -434,89 +394,53 @@ export default {
 
     // ****************** SNAPPING TO EXISTING GEOMETRY ****************** //
     /*
-    * given a point in pixels
-    * look up the closest vertex and the closest edge within snapping range
-    * finds the closest vertex or edge within the snap tolerance zone of a point (in real world units)
+    * given a point in grid units, finds the closest vertex or edge within its snap tolerance
+    * if no vertex or edge is within the snap tolerance, returns the closest grid point or the location of the event if the grid is inactive
+    * snapTarget is returned in grid coordinates
     */
-    findSnapTarget (point) {
-        const snappingVertexData = this.snappingVertexData(point),
-            snappingEdgeData = this.snappingEdgeData(point);
-
-        // if a vertex and an edge are both within the cursor's snap tolerance, find the closest one
-        if (snappingVertexData && snappingEdgeData) {
-            // if we are in polygon mode and the snappingVertex is the origin use the vertex regardless of whether the edge is closer
-            if (snappingVertexData.origin) { return snappingVertexData; }
-            return snappingVertexData.dist <= snappingEdgeData.dist ? snappingVertexData : snappingEdgeData;
-        } else if (snappingVertexData) {
-            return snappingVertexData;
-        } else if (snappingEdgeData) {
-            return snappingEdgeData;
+    findSnapTarget (gridPoint) {
+        const rwuPoint = {
+            x: this.gridToRWU(gridPoint.x, 'x'),
+            y: this.gridToRWU(gridPoint.y, 'y')
+        };
+        // if a vertex exists within the snap tolerance, don't check for edges
+        const snappingVertex = this.snappingVertexData(rwuPoint);
+        if (snappingVertex) {
+            return snappingVertex;
         }
 
-        // var snapTarget = this.findSnapTarget(rwuPoint);
-        // if (snapTarget) {
-        //
-        //     if (snapTarget && snapTarget.snappingEdge) {
-        //         d3.select('#grid svg')
-        //             .append('line')
-        //             .attr('x1', snapTarget.v1GridCoords.x)
-        //             .attr('y1', snapTarget.v1GridCoords.y)
-        //             .attr('x2', snapTarget.v2GridCoords.x)
-        //             .attr('y2', snapTarget.v2GridCoords.y)
-        //             .attr('stroke-width', 1)
-        //             .classed('highlight', true)
-        //             .attr('vector-effect', 'non-scaling-stroke');
-        //
-        //         snapTarget = snapTarget.projection;
-        //     }
-        //
-        //     if (snapTarget) {
-        //         d3.select('#grid svg')
-        //             .append('ellipse')
-        //             .attr('cx', snapTarget.x, 'x')
-        //             .attr('cy', snapTarget.y, 'y')
-        //             .attr('rx', this.calcRadius(5, 'x'))
-        //             .attr('ry', this.calcRadius(5, 'y'))
-        //             .classed('highlight', true)
-        //             .attr('vector-effect', 'non-scaling-stroke');
-        //     }
-        // }else if (!snapTarget && this.gridVisible) {
-        //     const xAdjustment = +this.xAxis.select('.tick').attr('transform').replace('translate(', '').replace(')', '').split(',')[0],
-        //         yAdjustment = +this.yAxis.select('.tick').attr('transform').replace('translate(', '').replace(')', '').split(',')[1];
-        //
-        //     const xTickSpacing = this.rwuToGrid(this.spacing + this.min_x, 'x'),
-        //         yTickSpacing = this.rwuToGrid(this.spacing + this.min_y, 'y');
-        //
-        //     // round point RWU coordinates to nearest gridline
-        //     snapTarget = {
-        //         type: 'vertex',
-        //         x: round(gridPoint.x, this.rwuToGrid(this.spacing + this.min_x, 'x')) + xAdjustment,
-        //         y: round(gridPoint.y, this.rwuToGrid(this.spacing + this.min_y, 'y')) + yAdjustment
-        //     };
-        //
-        //     snapTarget.x = Math.abs(gridPoint.x - (snapTarget.x - xTickSpacing)) >  Math.abs(gridPoint.x - snapTarget.x) ? snapTarget.x : snapTarget.x - xTickSpacing;
-        //     snapTarget.y = Math.abs(gridPoint.y - (snapTarget.y - yTickSpacing)) >  Math.abs(gridPoint.y - snapTarget.y) ? snapTarget.y : snapTarget.y - yTickSpacing;
-        //
-        //     d3.select('#grid svg')
-        //         .append('ellipse')
-        //         .attr('cx', snapTarget.x)
-        //         .attr('cy', snapTarget.y)
-        //         .attr('rx', this.calcRadius(2, 'x'))
-        //         .attr('ry', this.calcRadius(2, 'y'))
-        //         .classed('gridpoint', true)
-        //         .attr('vector-effect', 'non-scaling-stroke');
-        //
-        // } else {
-        //     d3.select('#grid svg')
-        //         .append('ellipse')
-        //         .attr('cx', gridPoint.x)
-        //         .attr('cy', gridPoint.y)
-        //         .attr('rx', this.calcRadius(2, 'x'))
-        //         .attr('ry', this.calcRadius(2, 'y'))
-        //         .classed('gridpoint', true)
-        //         .attr('vector-effect', 'non-scaling-stroke');
-        // }
-        // this.drawGuideLines(e, snapTarget);
+        const snappingEdge = this.snappingEdgeData(rwuPoint);
+        if (snappingEdge) {
+            return snappingEdge;
+        }
+
+        // no vertices or edges are within range, snap to the grid or return location of the event in grid coordinates
+        if (!this.gridVisible) {
+            return {
+                type: 'gridpoint',
+                ...gridPoint
+            };
+        } else {
+            // offset of the first gridline on each axis
+            const xOffset = +this.xAxis.select('.tick').attr('transform').replace('translate(', '').replace(')', '').split(',')[0],
+                yOffset = +this.yAxis.select('.tick').attr('transform').replace('translate(', '').replace(')', '').split(',')[1],
+
+                // spacing between ticks in grid units
+                xTickSpacing = this.rwuToGrid(this.spacing + this.min_x, 'x'),
+                yTickSpacing = this.rwuToGrid(this.spacing + this.min_y, 'y');
+
+            // round point RWU coordinates to nearest gridline, adjust by grid offset
+            const snapTarget = {
+                type: 'gridpoint',
+                x: round(gridPoint.x, this.rwuToGrid(this.spacing + this.min_x, 'x')) + xOffset,
+                y: round(gridPoint.y, this.rwuToGrid(this.spacing + this.min_y, 'y')) + yOffset
+            };
+
+            snapTarget.x = Math.abs(gridPoint.x - (snapTarget.x - xTickSpacing)) > Math.abs(gridPoint.x - snapTarget.x) ? snapTarget.x : snapTarget.x - xTickSpacing;
+            snapTarget.y = Math.abs(gridPoint.y - (snapTarget.y - yTickSpacing)) > Math.abs(gridPoint.y - snapTarget.y) ? snapTarget.y : snapTarget.y - yTickSpacing;
+
+            return snapTarget;
+        }
     },
 
     /*
@@ -557,7 +481,6 @@ export default {
                 x: this.rwuToGrid(nearestVertex.x, 'x'),
                 y: this.rwuToGrid(nearestVertex.y, 'y'),
                 origin: nearestVertex.origin,
-                dist: this.distanceBetweenPoints(nearestVertex, point),
                 type: 'vertex'
             };
         }
@@ -612,6 +535,7 @@ export default {
             return {
                 snappingEdge: nearestEdge,
                 dist: nearestEdge.dist,
+                type: 'edge',
                 // projection and snapping edge vertices translated into grid coordinates (to display snapping point)
                 projection: { x: this.rwuToGrid(projection.x, 'x'), y: this.rwuToGrid(projection.y, 'y') },
                 v1GridCoords: { x: this.rwuToGrid(nearestEdgeV1.x, 'x'), y: this.rwuToGrid(nearestEdgeV1.y, 'y') },
@@ -619,73 +543,6 @@ export default {
             }
         }
     },
-
-    // ****************** SCALING FUNCTIONS ****************** //
-    /*
-    * take a pixel value (from a mouse event), find the corresponding real world units (for snapping to saved geometry in RWU)
-    */
-    pxToRWU (px, axis) {
-        if (axis === 'x') {
-            const currentScaleX = d3.scaleLinear()
-                    .domain([0, this.$refs.grid.clientWidth])
-                    .range([this.min_x, this.max_x]);
-            return currentScaleX(px);
-        } else if (axis === 'y') {
-            const currentScaleY = d3.scaleLinear()
-                   .domain([0, this.$refs.grid.clientHeight])
-                   .range([this.min_y, this.max_y]);
-            return currentScaleY(px);
-        }
-    },
-    /*
-    * take a pixel value (from a mouse event), find the corresponding coordinates in the svg grid
-    */
-    pxToGrid (px, axis) {
-        if (axis === 'x') {
-            return this.originalScales.x(px);
-        } else if (axis === 'y') {
-            return this.originalScales.y(px);
-        }
-    },
-
-    /*
-    * take a rwu value (from the datastore), find the corresponding coordinates in the svg grid
-    */
-    rwuToGrid (rwu, axis) {
-        if (axis === 'x') {
-            const currentScaleX = d3.scaleLinear()
-                    .domain([0, this.$refs.grid.clientWidth])
-                    .range([this.min_x, this.max_x]),
-                pxValue = currentScaleX.invert(rwu);
-            return this.pxToGrid(pxValue, axis);
-        } else if (axis === 'y') {
-            const currentScaleY = d3.scaleLinear()
-                   .domain([0, this.$refs.grid.clientHeight])
-                   .range([this.min_y, this.max_y]),
-                pxValue = currentScaleY.invert(rwu);
-            return this.pxToGrid(pxValue, axis);
-        }
-    },
-
-    /*
-    * take a grid value (from some point already rendered to the grid) and translate it into RWU for persistence to the datastore
-    */
-    gridToRWU (gridValue, axis) {
-        if (axis === 'x') {
-            const currentScaleX = d3.scaleLinear()
-                    .domain([0, this.$refs.grid.clientWidth])
-                    .range([this.min_x, this.max_x]),
-                pxValue = this.originalScales.x.invert(gridValue);
-            return currentScaleX(pxValue);
-        } else if (axis === 'y') {
-            const currentScaleY = d3.scaleLinear()
-                   .domain([0, this.$refs.grid.clientHeight])
-                   .range([this.min_y, this.max_y]),
-                pxValue = this.originalScales.y.invert(gridValue);
-            return currentScaleY(pxValue);
-        }
-    },
-
 
     // ****************** GRID ****************** //
     calcGrid () {
@@ -784,6 +641,74 @@ export default {
 
         svg.call(zoomBehavior);
     },
+
+    // ****************** SCALING FUNCTIONS ****************** //
+    /*
+    * take a pixel value (from a mouse event), find the corresponding real world units (for snapping to saved geometry in RWU)
+    */
+    pxToRWU (px, axis) {
+        if (axis === 'x') {
+            const currentScaleX = d3.scaleLinear()
+                    .domain([0, this.$refs.grid.clientWidth])
+                    .range([this.min_x, this.max_x]);
+            return currentScaleX(px);
+        } else if (axis === 'y') {
+            const currentScaleY = d3.scaleLinear()
+                   .domain([0, this.$refs.grid.clientHeight])
+                   .range([this.min_y, this.max_y]);
+            return currentScaleY(px);
+        }
+    },
+    /*
+    * take a pixel value (from a mouse event), find the corresponding coordinates in the svg grid
+    */
+    pxToGrid (px, axis) {
+        if (axis === 'x') {
+            return this.originalScales.x(px);
+        } else if (axis === 'y') {
+            return this.originalScales.y(px);
+        }
+    },
+
+    /*
+    * take a rwu value (from the datastore), find the corresponding coordinates in the svg grid
+    */
+    rwuToGrid (rwu, axis) {
+        if (axis === 'x') {
+            const currentScaleX = d3.scaleLinear()
+                    .domain([0, this.$refs.grid.clientWidth])
+                    .range([this.min_x, this.max_x]),
+                pxValue = currentScaleX.invert(rwu);
+            return this.pxToGrid(pxValue, axis);
+        } else if (axis === 'y') {
+            const currentScaleY = d3.scaleLinear()
+                   .domain([0, this.$refs.grid.clientHeight])
+                   .range([this.min_y, this.max_y]),
+                pxValue = currentScaleY.invert(rwu);
+            return this.pxToGrid(pxValue, axis);
+        }
+    },
+
+    /*
+    * take a grid value (from some point already rendered to the grid) and translate it into RWU for persistence to the datastore
+    */
+    gridToRWU (gridValue, axis) {
+        if (axis === 'x') {
+            const currentScaleX = d3.scaleLinear()
+                    .domain([0, this.$refs.grid.clientWidth])
+                    .range([this.min_x, this.max_x]),
+                pxValue = this.originalScales.x.invert(gridValue);
+            return currentScaleX(pxValue);
+        } else if (axis === 'y') {
+            const currentScaleY = d3.scaleLinear()
+                   .domain([0, this.$refs.grid.clientHeight])
+                   .range([this.min_y, this.max_y]),
+                pxValue = this.originalScales.y.invert(gridValue);
+            return currentScaleY(pxValue);
+        }
+    },
+
+
     /*
     * calc point radius, adjusting by the minimum x and y values for the grid to prevent stretched points
     */
