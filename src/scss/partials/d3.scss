@@ -43,7 +43,7 @@
         fill-opacity: 0.5;
         pointer-events: all;
         stroke: $gray-light;
-        &.currentSpace, &.currentShading {
+        &.current {
             stroke: $secondary;
             stroke-width: 2px;
         }
