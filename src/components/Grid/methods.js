@@ -85,8 +85,8 @@ export default {
                 .append('ellipse')
                 .attr('cx', guidePoint.x, 'x')
                 .attr('cy', guidePoint.y, 'y')
-                .attr('rx', this.calcRadius(5, 'x'))
-                .attr('ry', this.calcRadius(5, 'y'))
+                .attr('rx', this.originalScales.x(5))
+                .attr('ry', this.originalScales.y(5))
                 .classed('highlight', true)
                 .attr('vector-effect', 'non-scaling-stroke');
         } else {
@@ -94,8 +94,8 @@ export default {
                 .append('ellipse')
                 .attr('cx', guidePoint.x)
                 .attr('cy', guidePoint.y)
-                .attr('rx', this.calcRadius(2, 'x'))
-                .attr('ry', this.calcRadius(2, 'y'))
+                .attr('rx', this.originalScales.x(2))
+                .attr('ry', this.originalScales.y(2))
                 .classed('gridpoint', true)
                 .attr('vector-effect', 'non-scaling-stroke');
         }
@@ -257,14 +257,14 @@ export default {
             .enter().append('ellipse')
             .attr('cx', d => d.x)
             .attr('cy', d => d.y)
-            .attr('rx', this.calcRadius(2, 'x'))
-            .attr('ry', this.calcRadius(2, 'y'))
+            .attr('rx', this.originalScales.x(2))
+            .attr('ry', this.originalScales.y(2))
             .attr('vector-effect', 'non-scaling-stroke');
 
         // apply custom CSS for origin of polygons
         d3.select('#grid svg').select('ellipse')
-            .attr('rx', this.calcRadius(7, 'x'))
-            .attr('ry', this.calcRadius(7, 'y'))
+            .attr('rx', this.originalScales.x(7))
+            .attr('ry', this.originalScales.y(7))
             .classed('origin', true)
             .attr('vector-effect', 'non-scaling-stroke')
             .attr('fill', 'none');
@@ -348,8 +348,8 @@ export default {
             // round point RWU coordinates to nearest gridline, adjust by grid offset
             const snapTarget = {
                 type: 'gridpoint',
-                x: round(gridPoint.x, this.rwuToGrid(this.spacing + this.min_x, 'x')) + xOffset,
-                y: round(gridPoint.y, this.rwuToGrid(this.spacing + this.min_y, 'y')) + yOffset
+                x: this.round(gridPoint.x, this.rwuToGrid(this.spacing + this.min_x, 'x')) + xOffset,
+                y: this.round(gridPoint.y, this.rwuToGrid(this.spacing + this.min_y, 'y')) + yOffset
             };
 
             // pick closest point
@@ -467,6 +467,32 @@ export default {
                 v2GridCoords: { x: this.rwuToGrid(nearestEdgeV2.x, 'x'), y: this.rwuToGrid(nearestEdgeV2.y, 'y') }
             }
         }
+    },
+
+    // ****************** SNAPPING HELPERS ****************** //
+    /*
+    * returns the distance between two points
+    */
+    distanceBetweenPoints (p1, p2) {
+        const dx = Math.abs(p1.x - p2.x),
+            dy = Math.abs(p1.y - p2.y);
+        return Math.sqrt((dx * dx) + (dy * dy));
+    },
+
+    /*
+    * round a number n to the nearest x
+    */
+    round (n, x) {
+        var result,
+            sign = n < 0 ? -1 : 1;
+        n = Math.abs(n);
+        if (n % x < x / 2) {
+            result = n - (n % x);
+        } else {
+            result = n + x - (n % x);
+        }
+        // handle negatives
+        return result *= sign;
     },
 
     // ****************** GRID ****************** //
@@ -626,38 +652,5 @@ export default {
                 pxValue = this.originalScales.y.invert(gridValue);
             return currentScaleY(pxValue);
         }
-    },
-
-
-    /*
-    * calc point radius, adjusting by the minimum x and y values for the grid to prevent stretched points
-    */
-    calcRadius (pxRad, axis) {
-        if (axis === 'x') {
-            return this.originalScales.x(pxRad);
-        } else if (axis === 'y') {
-            return this.originalScales.y(pxRad);
-        }
-    },
-
-    distanceBetweenPoints (p1, p2) {
-        const dx = Math.abs(p1.x - p2.x),
-            dy = Math.abs(p1.y - p2.y);
-        return Math.sqrt((dx * dx) + (dy * dy));
     }
-}
-
-function round (point, spacing) {
-    var result,
-        sign = point < 0 ? -1 : 1;
-    point = Math.abs(point);
-    if (point % spacing < spacing / 2) {
-        result = point - (point % spacing);
-    } else {
-        result = point + spacing - (point % spacing);
-    }
-    // handle negatives
-    result *= sign;
-    // floating point precision
-    return Math.round(result * 10000000000000) / 10000000000000;
 }
