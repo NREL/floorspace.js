@@ -33,21 +33,27 @@ export default {
         };
     },
     mounted () {
-        // // initialize the y dimensions in RWU based on the aspect ratio of the grid on the screen
-        // this.max_y = (this.$refs.grid.clientHeight / this.$refs.grid.clientWidth) * this.max_x;
-        //
-        // // set viewbox on svg in rwu so drawing coordinates are in rwu and not pixels
-        // this.$refs.grid.setAttribute('viewBox', `0 0 ${this.max_x - this.min_x} ${this.max_y - this.min_y}`);
+        // initialize the y dimensions in RWU based on the aspect ratio of the grid on the screen
+        this.max_y = (this.$refs.grid.clientHeight / this.$refs.grid.clientWidth) * this.max_x;
 
         this.calcGrid();
         this.drawPolygons();
 
         // recalculate the grid when the window resizes
-        window.addEventListener('resize', this.calcGrid);
+        // const original_max_x = this.max_x,
+        //     original_max_y = this.max_y,
+        //     original_width = this.$refs.grid.clientWidth,
+        //     original_height = this.$refs.grid.clientHeight;
+        // window.addEventListener('resize', () => {
+        //     this.max_y = original_max_y * (this.$refs.grid.clientHeight / original_height);
+        //     this.max_x = original_max_x * (this.$refs.grid.clientWidth / original_width);
+        //
+        //     this.updateGrid();
+        // });
     },
-    beforeDestroy () {
-        window.removeEventListener('resize', this.calcGrid);
-    },
+    // beforeDestroy () {
+    //     window.removeEventListener('resize', this.resize());
+    // },
     computed: {
         ...mapState({
             currentMode: state => state.application.currentSelections.mode,

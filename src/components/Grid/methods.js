@@ -497,16 +497,8 @@ export default {
 
     // ****************** GRID ****************** //
     calcGrid () {
-        d3.select('#grid svg').selectAll('.axis').remove();
-
-        // initialize the y dimensions in RWU based on the aspect ratio of the grid on the screen
-        this.max_y = (this.$refs.grid.clientHeight / this.$refs.grid.clientWidth) * this.max_x;
-
         // set viewbox on svg in rwu so drawing coordinates are in rwu and not pixels
         this.$refs.grid.setAttribute('viewBox', `0 0 ${this.max_x - this.min_x} ${this.max_y - this.min_y}`);
-
-        // save the original scale values, calculate new scales in the zoom handler based on these
-        // recalculating new scales from the already updated scales results in exponential growth
 
         // scaleX amd scaleY are used during drawing to translate from px to RWU given the current grid dimensions in rwu
         // these are never changed
