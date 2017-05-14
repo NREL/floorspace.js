@@ -24,11 +24,14 @@ export default {
     name: 'grid',
     data () {
         return {
-            xAxis: {},
-            yAxis: {},
-            xAxisGenerator: {},
-            yAxisGenerator: {},
-            originalScales: {},
+            axis: {
+                x: null,
+                y: null,
+            },
+            axisGenerator: {
+                x: null,
+                y: null
+            },
             points: [] // points for the face currently being drawn
         };
     },

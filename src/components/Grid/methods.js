@@ -338,8 +338,8 @@ export default {
         // grid is active and no vertices or edges are within snapping range, calculate the closest grid point to snap to
         if (this.gridVisible) {
             // offset of the first gridline on each axis
-            const xOffset = +this.xAxis.select('.tick').attr('transform').replace('translate(', '').replace(')', '').split(',')[0],
-                yOffset = +this.yAxis.select('.tick').attr('transform').replace('translate(', '').replace(')', '').split(',')[1],
+            const xOffset = +this.axis.x.select('.tick').attr('transform').replace('translate(', '').replace(')', '').split(',')[0],
+                yOffset = +this.axis.y.select('.tick').attr('transform').replace('translate(', '').replace(')', '').split(',')[1],
 
                 // spacing between ticks in grid units
                 xTickSpacing = this.rwuToGrid(this.spacing + this.min_x, 'x'),
@@ -501,7 +501,7 @@ export default {
         this.$refs.grid.setAttribute('viewBox', `0 0 ${this.max_x - this.min_x} ${this.max_y - this.min_y}`);
 
         // scaleX amd scaleY are used during drawing to translate from px to RWU given the current grid dimensions in rwu
-        // these are never changed
+        // these are initialized here and never changed
         this.scaleX = d3.scaleLinear()
             .domain([0, this.$refs.grid.clientWidth])
             .range([this.min_x, this.max_x]);
@@ -512,10 +512,10 @@ export default {
         const svg = d3.select('#grid svg'),
             // rwu dimensions (coordinates used within grid)
             rwuHeight = this.max_y - this.min_y,
-            rwuWidth = this.max_x - this.min_x;
+            rwuWidth = this.max_x - this.min_x,
 
-        // these are essentially unit scales, but they span the full range that each axis should cover instead of just being 1 unit long
-        const zoomScaleX = d3.scaleLinear()
+            // these are essentially unit scales, but they span the full range that each axis should cover instead of just being 1 unit long
+            zoomScaleX = d3.scaleLinear()
                 .domain([this.min_x, this.max_x])
                 .range([this.min_x, this.max_x]),
             zoomScaleY = d3.scaleLinear()
@@ -523,25 +523,25 @@ export default {
                 .range([this.min_y, this.max_y]);
 
         // generator functions for axes
-        this.xAxisGenerator = d3.axisBottom(zoomScaleX)
-                .ticks(rwuWidth / this.spacing)
-                .tickSize(rwuHeight) // length of tick marks (full height of grid in rwu coming up from x axis)
-                .tickPadding(this.scaleY(-20)), // padding between axisBottom and tick text (20px translated to rwu)
-        this.yAxisGenerator = d3.axisRight(zoomScaleY)
-                .ticks(rwuHeight / this.spacing)
-                .tickSize(rwuWidth) // length of tick marks (full width of grid in rwu coming up from y axis)
-                .tickPadding(this.scaleX(-20)); // padding between axisRight and tick text (20px translated to rwu)
+        this.axisGenerator.x = d3.axisBottom(zoomScaleX)
+            .ticks(rwuWidth / this.spacing)
+            .tickSize(rwuHeight)
+            .tickPadding(this.scaleY(-20));
+        this.axisGenerator.y = d3.axisRight(zoomScaleY)
+            .ticks(rwuHeight / this.spacing)
+            .tickSize(rwuWidth)
+            .tickPadding(this.scaleX(-20));
 
-        this.xAxis = svg.append('g')
+        this.axis.x = svg.append('g')
             .attr('class', 'axis axis--x')
             .attr('stroke-width', this.scaleY(1))
             .style('display', this.gridVisible ? 'inline' : 'none')
-            .call(this.xAxisGenerator);
-        this.yAxis = svg.append('g')
+            .call(this.axisGenerator.x);
+        this.axis.y = svg.append('g')
             .attr('class', 'axis axis--y')
             .attr('stroke-width', this.scaleX(1))
             .style('display', this.gridVisible ? 'inline' : 'none')
-            .call(this.yAxisGenerator);
+            .call(this.axisGenerator.y);
 
 
         // configure zoom behavior in rwu
@@ -563,12 +563,12 @@ export default {
                     scaledRwuWidth = this.max_x - this.min_x;
 
                 // update the number of ticks to display based on the post zoom real world unit height and width
-                this.yAxis.call(this.yAxisGenerator.ticks(scaledRwuHeight / this.spacing));
-                this.xAxis.call(this.xAxisGenerator.ticks(scaledRwuWidth / this.spacing));
+                this.axis.y.call(this.axisGenerator.y.ticks(scaledRwuHeight / this.spacing));
+                this.axis.x.call(this.axisGenerator.x.ticks(scaledRwuWidth / this.spacing));
 
                 // create transformed copies of the scales and apply them to the axes
-                this.xAxis.call(this.xAxisGenerator.scale(newScaleX));
-                this.yAxis.call(this.yAxisGenerator.scale(newScaleY));
+                this.axis.x.call(this.axisGenerator.x.scale(newScaleX));
+                this.axis.y.call(this.axisGenerator.y.scale(newScaleY));
 
                 // redraw the saved geometry
                 this.drawPolygons();
@@ -577,15 +577,15 @@ export default {
         svg.call(zoomBehavior);
     },
     updateGrid () {
-        this.xAxis.style('display', this.gridVisible ? 'inline' : 'none');
-        this.yAxis.style('display', this.gridVisible ? 'inline' : 'none');
+        this.axis.x.style('display', this.gridVisible ? 'inline' : 'none');
+        this.axis.y.style('display', this.gridVisible ? 'inline' : 'none');
 
         const rwuHeight = this.max_y - this.min_y,
             rwuWidth = this.max_x - this.min_x;
 
         // update the number of ticks to display based on the post zoom real world unit height and width
-        this.yAxis.call(this.yAxisGenerator.ticks(rwuHeight / this.spacing));
-        this.xAxis.call(this.xAxisGenerator.ticks(rwuWidth / this.spacing));
+        this.axis.y.call(this.axisGenerator.y.ticks(rwuHeight / this.spacing));
+        this.axis.x.call(this.axisGenerator.x.ticks(rwuWidth / this.spacing));
     },
 
     // ****************** SCALING FUNCTIONS ****************** //
