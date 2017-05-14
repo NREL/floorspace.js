@@ -56,6 +56,7 @@ export default {
             x: 0,
             y: 0,
             z: 0,
+            r: 0,
             opacity: 1
         };
     },
