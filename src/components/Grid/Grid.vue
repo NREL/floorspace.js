@@ -24,25 +24,29 @@ export default {
     name: 'grid',
     data () {
         return {
+            xAxis: {},
+            yAxis: {},
+            xAxisGenerator: {},
+            yAxisGenerator: {},
             originalScales: {},
             points: [] // points for the face currently being drawn
         };
     },
     mounted () {
-        // initialize the y dimensions in RWU based on the aspect ratio of the grid on the screen
-        this.max_y = (this.$refs.grid.clientHeight / this.$refs.grid.clientWidth) * this.max_x;
-
-        // set viewbox on svg in rwu so drawing coordinates are in rwu and not pixels
-        this.$refs.grid.setAttribute('viewBox', `0 0 ${this.max_x - this.min_x} ${this.max_y - this.min_y}`);
+        // // initialize the y dimensions in RWU based on the aspect ratio of the grid on the screen
+        // this.max_y = (this.$refs.grid.clientHeight / this.$refs.grid.clientWidth) * this.max_x;
+        //
+        // // set viewbox on svg in rwu so drawing coordinates are in rwu and not pixels
+        // this.$refs.grid.setAttribute('viewBox', `0 0 ${this.max_x - this.min_x} ${this.max_y - this.min_y}`);
 
         this.calcGrid();
         this.drawPolygons();
 
         // recalculate the grid when the window resizes
-        window.addEventListener('resize', this.updateGrid);
+        window.addEventListener('resize', this.calcGrid);
     },
     beforeDestroy () {
-        window.removeEventListener('resize', this.updateGrid);
+        window.removeEventListener('resize', this.calcGrid);
     },
     computed: {
         ...mapState({

@@ -85,8 +85,8 @@ export default {
                 .append('ellipse')
                 .attr('cx', guidePoint.x, 'x')
                 .attr('cy', guidePoint.y, 'y')
-                .attr('rx', this.originalScales.x(5))
-                .attr('ry', this.originalScales.y(5))
+                .attr('rx', this.scaleX(5))
+                .attr('ry', this.scaleY(5))
                 .classed('highlight', true)
                 .attr('vector-effect', 'non-scaling-stroke');
         } else {
@@ -94,8 +94,8 @@ export default {
                 .append('ellipse')
                 .attr('cx', guidePoint.x)
                 .attr('cy', guidePoint.y)
-                .attr('rx', this.originalScales.x(2))
-                .attr('ry', this.originalScales.y(2))
+                .attr('rx', this.scaleX(2))
+                .attr('ry', this.scaleY(2))
                 .classed('gridpoint', true)
                 .attr('vector-effect', 'non-scaling-stroke');
         }
@@ -257,14 +257,14 @@ export default {
             .enter().append('ellipse')
             .attr('cx', d => d.x)
             .attr('cy', d => d.y)
-            .attr('rx', this.originalScales.x(2))
-            .attr('ry', this.originalScales.y(2))
+            .attr('rx', this.scaleX(2))
+            .attr('ry', this.scaleY(2))
             .attr('vector-effect', 'non-scaling-stroke');
 
         // apply custom CSS for origin of polygons
         d3.select('#grid svg').select('ellipse')
-            .attr('rx', this.originalScales.x(7))
-            .attr('ry', this.originalScales.y(7))
+            .attr('rx', this.scaleX(7))
+            .attr('ry', this.scaleY(7))
             .classed('origin', true)
             .attr('vector-effect', 'non-scaling-stroke')
             .attr('fill', 'none');
@@ -497,22 +497,30 @@ export default {
 
     // ****************** GRID ****************** //
     calcGrid () {
+        d3.select('#grid svg').selectAll('.axis').remove();
+
+        // initialize the y dimensions in RWU based on the aspect ratio of the grid on the screen
+        this.max_y = (this.$refs.grid.clientHeight / this.$refs.grid.clientWidth) * this.max_x;
+
+        // set viewbox on svg in rwu so drawing coordinates are in rwu and not pixels
+        this.$refs.grid.setAttribute('viewBox', `0 0 ${this.max_x - this.min_x} ${this.max_y - this.min_y}`);
+
         // save the original scale values, calculate new scales in the zoom handler based on these
         // recalculating new scales from the already updated scales results in exponential growth
-        this.originalScales = {
-            x: d3.scaleLinear()
-                .domain([0, this.$refs.grid.clientWidth])
-                .range([this.min_x, this.max_x]),
-            y: d3.scaleLinear()
-                .domain([0, this.$refs.grid.clientHeight])
-                .range([this.min_y, this.max_y])
-        };
 
         // scaleX amd scaleY are used during drawing to translate from px to RWU given the current grid dimensions in rwu
         // these are never changed
-        // TODO: do we need these AND originalscales?
-        this.scaleX = this.originalScales.x;
-        this.scaleY = this.originalScales.y;
+        this.scaleX = d3.scaleLinear()
+            .domain([0, this.$refs.grid.clientWidth])
+            .range([this.min_x, this.max_x]);
+        this.scaleY = d3.scaleLinear()
+            .domain([0, this.$refs.grid.clientHeight])
+            .range([this.min_y, this.max_y]);
+
+        const svg = d3.select('#grid svg'),
+            // rwu dimensions (coordinates used within grid)
+            rwuHeight = this.max_y - this.min_y,
+            rwuWidth = this.max_x - this.min_x;
 
         // these are essentially unit scales, but they span the full range that each axis should cover instead of just being 1 unit long
         const zoomScaleX = d3.scaleLinear()
@@ -522,64 +530,53 @@ export default {
                 .domain([this.min_y, this.max_y])
                 .range([this.min_y, this.max_y]);
 
-
-        const svg = d3.select('#grid svg'),
-            // rwu dimensions (coordinates used within grid)
-            rwuHeight = this.max_y - this.min_y,
-            rwuWidth = this.max_x - this.min_x,
-
-            tickCount = rwuHeight / this.spacing,
-            aspectRatio = rwuWidth / rwuHeight;
-
         // generator functions for axes
-        const xAxisGenerator = d3.axisBottom(zoomScaleX)
-                // calculate number of horizontal ticks based on the aspect ratio of the svg element and the real world unit height
-                .ticks(rwuWidth / this.spacing) // number of ticks (multiplied by width to height ratio)
+        this.xAxisGenerator = d3.axisBottom(zoomScaleX)
+                .ticks(rwuWidth / this.spacing)
                 .tickSize(rwuHeight) // length of tick marks (full height of grid in rwu coming up from x axis)
                 .tickPadding(this.scaleY(-20)), // padding between axisBottom and tick text (20px translated to rwu)
-            yAxisGenerator = d3.axisRight(zoomScaleY)
-                .ticks(rwuHeight / this.spacing) // number of ticks
+        this.yAxisGenerator = d3.axisRight(zoomScaleY)
+                .ticks(rwuHeight / this.spacing)
                 .tickSize(rwuWidth) // length of tick marks (full width of grid in rwu coming up from y axis)
                 .tickPadding(this.scaleX(-20)); // padding between axisRight and tick text (20px translated to rwu)
 
         this.xAxis = svg.append('g')
             .attr('class', 'axis axis--x')
             .attr('stroke-width', this.scaleY(1))
-            .call(xAxisGenerator);
+            .style('display', this.gridVisible ? 'inline' : 'none')
+            .call(this.xAxisGenerator);
         this.yAxis = svg.append('g')
             .attr('class', 'axis axis--y')
             .attr('stroke-width', this.scaleX(1))
-            .call(yAxisGenerator);
+            .style('display', this.gridVisible ? 'inline' : 'none')
+            .call(this.yAxisGenerator);
 
 
         // configure zoom behavior in rwu
         const zoomBehavior = d3.zoom()
-            // .extent([[0, 0], [rwuWidth, rwuHeight]])
-            // scale must be between .5 * original bounds and 2 * original bounds
-            // .scaleExtent([.5, 10])
-            // allow panning by 20 rwu in any direction
-            // .translateExtent([[-20, -20], [rwuWidth + 20, rwuHeight + 20]])
             .on('zoom', () => {
+                // only allow zooming when the Pan tool is active
                 if (this.currentTool !== "Pan") { return; }
 
                 // create updated copies of the scales based on the zoom transformation
+                // the transformed scales are only used to obtain the new rwu grid dimensions and redraw the axes
                 // NOTE: don't change the original scale or you'll get exponential growth
-                const newScaleX = d3.event.transform.rescaleX(this.originalScales.x),
-                    newScaleY = d3.event.transform.rescaleY(this.originalScales.y);
+                const newScaleX = d3.event.transform.rescaleX(this.scaleX),
+                    newScaleY = d3.event.transform.rescaleY(this.scaleY);
 
                 [this.min_x, this.max_x] = newScaleX.domain();
                 [this.min_y, this.max_y] = newScaleY.domain();
 
-                const scaledRwuHeight = newScaleY.domain()[0] - newScaleY.domain()[1],
-                    scaledRwuWidth = newScaleX.domain()[0] - newScaleX.domain()[1]
+                const scaledRwuHeight = this.max_y - this.min_y,
+                    scaledRwuWidth = this.max_x - this.min_x;
 
                 // update the number of ticks to display based on the post zoom real world unit height and width
-                this.yAxis.call(yAxisGenerator.ticks(-scaledRwuHeight / this.spacing));
-                this.xAxis.call(xAxisGenerator.ticks(-scaledRwuWidth / this.spacing));
+                this.yAxis.call(this.yAxisGenerator.ticks(scaledRwuHeight / this.spacing));
+                this.xAxis.call(this.xAxisGenerator.ticks(scaledRwuWidth / this.spacing));
 
                 // create transformed copies of the scales and apply them to the axes
-                this.xAxis.call(xAxisGenerator.scale(newScaleX));
-                this.yAxis.call(yAxisGenerator.scale(newScaleY));
+                this.xAxis.call(this.xAxisGenerator.scale(newScaleX));
+                this.yAxis.call(this.yAxisGenerator.scale(newScaleY));
 
                 // redraw the saved geometry
                 this.drawPolygons();
@@ -587,7 +584,17 @@ export default {
 
         svg.call(zoomBehavior);
     },
-    updateGrid () {},
+    updateGrid () {
+        this.xAxis.style('display', this.gridVisible ? 'inline' : 'none');
+        this.yAxis.style('display', this.gridVisible ? 'inline' : 'none');
+
+        const rwuHeight = this.max_y - this.min_y,
+            rwuWidth = this.max_x - this.min_x;
+
+        // update the number of ticks to display based on the post zoom real world unit height and width
+        this.yAxis.call(this.yAxisGenerator.ticks(rwuHeight / this.spacing));
+        this.xAxis.call(this.xAxisGenerator.ticks(rwuWidth / this.spacing));
+    },
 
     // ****************** SCALING FUNCTIONS ****************** //
     /*
@@ -595,6 +602,7 @@ export default {
     */
     pxToRWU (px, axis) {
         if (axis === 'x') {
+            // TODO: computed property for current scales?
             const currentScaleX = d3.scaleLinear()
                     .domain([0, this.$refs.grid.clientWidth])
                     .range([this.min_x, this.max_x]);
@@ -612,9 +620,9 @@ export default {
     */
     pxToGrid (px, axis) {
         if (axis === 'x') {
-            return this.originalScales.x(px);
+            return this.scaleX(px);
         } else if (axis === 'y') {
-            return this.originalScales.y(px);
+            return this.scaleY(px);
         }
     },
 
@@ -645,13 +653,13 @@ export default {
             const currentScaleX = d3.scaleLinear()
                     .domain([0, this.$refs.grid.clientWidth])
                     .range([this.min_x, this.max_x]),
-                pxValue = this.originalScales.x.invert(gridValue);
+                pxValue = this.scaleX.invert(gridValue);
             return currentScaleX(pxValue);
         } else if (axis === 'y') {
             const currentScaleY = d3.scaleLinear()
                    .domain([0, this.$refs.grid.clientHeight])
                    .range([this.min_y, this.max_y]),
-                pxValue = this.originalScales.y.invert(gridValue);
+                pxValue = this.scaleY.invert(gridValue);
             return currentScaleY(pxValue);
         }
     }
