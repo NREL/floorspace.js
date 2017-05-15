@@ -15,15 +15,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
             <div class="input-number">
                 <label>min_x</label>
-                <input v-model.number.lazy="min_x">
+                <input :value="min_x" disabled>
             </div>
             <div class="input-number">
                 <label>min_y</label>
-                <input v-model.number.lazy="min_y">
+                <input :value="min_y" disabled>
             </div>
             <div class="input-number">
                 <label>max_x</label>
-                <input v-model.number.lazy="max_x">
+                <input :value="max_x" disabled>
             </div>
             <div class="input-number">
                 <label>max_y</label>
