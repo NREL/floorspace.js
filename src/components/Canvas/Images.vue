@@ -246,8 +246,10 @@ export default {
                     // update anchor positions
                     switch (anchor.getName()) {
                         case 'topLeft':
+                            topLeft.position({ x: anchorX, y: bottomRight.getY() - height });
                             topRight.setY(bottomRight.getY() - height);
                             bottomLeft.setX(anchorX);
+
                             imagePos = {
                                 x: bottomRight.getX() - width,
                                 y: bottomRight.getY() - height
@@ -255,20 +257,26 @@ export default {
                             break;
                         case 'topRight':
                             topLeft.setY(bottomRight.getY() - height);
+                            topRight.setY(bottomRight.getY() - height)
                             bottomRight.setX(anchorX);
+
                             imagePos = {
                                 x: bottomLeft.getX(),
                                 y: bottomLeft.getY() - height
                             };
                             break;
                         case 'bottomRight':
-                            bottomLeft.setY(height);
                             topRight.setX(anchorX);
+                            bottomRight.position({ x: anchorX, y: height });
+                            bottomLeft.setY(height);
+
                             imagePos = imageObj.position();
                             break;
                         case 'bottomLeft':
-                            bottomRight.setY(height);
                             topLeft.setX(anchorX);
+                            bottomRight.setY(height);
+                            bottomLeft.position({ x: anchorX, y: height });
+
                             imagePos = {
                                 x: topRight.getX() - width,
                                 y: topRight.getY()
@@ -303,6 +311,10 @@ export default {
                     rotateAnchor = group.get('.rotateAnchor')[0],
                     rotateAnchorCircle = group.get('.rotateAnchorCircle')[0],
                     rotateAnchorLine = group.get('.rotateAnchorLine')[0],
+                    topLeft = group.get('.topLeft')[0],
+                    topRight = group.get('.topRight')[0],
+                    bottomRight = group.get('.bottomRight')[0],
+                    bottomLeft = group.get('.bottomLeft')[0],
                     pos = imageObj.position(),
                     { width, height } = imageObj.size();
 
