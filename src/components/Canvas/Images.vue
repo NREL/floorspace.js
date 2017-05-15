@@ -15,6 +15,7 @@ const Konva = require('konva');
 import { mapState } from 'vuex'
 import applicationHelpers from './../../store/modules/application/helpers.js'
 import modelHelpers from './../../store/modules/models/helpers.js'
+
 export default {
     name: 'images',
     data () {
@@ -31,6 +32,7 @@ export default {
         window.removeEventListener('resize', this.renderImages);
     },
     methods: {
+        // render
         renderImages () {
             // udpate image cache
             this.imageCache = JSON.parse(JSON.stringify(this.images));
@@ -45,264 +47,131 @@ export default {
             stage.add(layer);
 
             this.images.forEach(this.renderImage.bind(this,layer));
-            layer.draw();
+            // layer.draw();
         },
-        renderImage (layer,image) {
-            const { width: w, height: h, x, y } = image;
-            /*
-            * Container Group
-            * maintains image x, y coordinates
-            * does not rotate
-            * drag to reposition image
-            */
-            const containerGroup = new Konva.Group({
-                x: this.scaleX.invert(x),
-                y: this.scaleY.invert(y),
-                draggable: true
-            });
-            /*
-            * Image Group
-            * image and anchors
-            * maintains image rotation
-            */
-            const imageGroup = new Konva.Group({
-                x: this.scaleX.invert(w/2),
-                y: this.scaleY.invert(h/2),
-                offset: {
+        renderImage (layer, image) {
+            const imageReader = new Image(),
+                { width: w, height: h, x, y } = image,
+                imageGroup = new Konva.Group({
+                    x: this.scaleX.invert(x + w/2),
+                    y: this.scaleY.invert(y + h/2),
+                    offset: {
+                        x: this.scaleX.invert(w/2),
+                        y: this.scaleY.invert(h/2)
+                    },
+                    draggable: true
+                }),
+                imageObj = new Konva.Image({
+                    x: 0,
+                    y: 0,
+                    width: this.scaleX.invert(w),
+                    height: this.scaleY.invert(h),
+                    stroke: '#6AAC15',
+                    strokeWidth: 3,
+                    strokeEnabled: (this.currentImage && this.currentImage.id === image.id),
+                    opacity: image.opacity,
+                    name: 'image'
+                }),
+                imageCenter = new Konva.Circle({
                     x: this.scaleX.invert(w/2),
-                    y: this.scaleY.invert(h/2)
-                },
-                draggable: false,
-                name: 'imageGroup'
-            });
-            const konvaImage = new Konva.Image({
-                width: this.scaleX.invert(w),
-                height: this.scaleY.invert(h),
-                stroke: '#6AAC15',  
-                strokeWidth: 3,
-                strokeEnabled: (this.currentImage && this.currentImage.id === image.id),
-                opacity: image.opacity
-            });
-            const imageCenter = new Konva.Circle({
-                x: this.scaleX.invert(w/2),
-                y: this.scaleY.invert(h/2),
-                // fill: 'blue',
-                radius: 3,
-                name: 'imageCenter',
-                draggable: false
-            });
+                    y: this.scaleY.invert(h/2),
+                    // fill: 'blue',
+                    // radius: 3,
+                    name: 'center',
+                    draggable: false
+                });
 
             // store imageId on group to look up the associated image object when user interacts with group
-            containerGroup.imageId = image.id;
             imageGroup.imageId = image.id; 
 
             // layout
-            containerGroup.add(imageGroup);
-            layer.add(containerGroup);
-            imageGroup.add(konvaImage)
+            layer.add(imageGroup);
+            imageGroup
+                .add(imageObj)
                 .add(imageCenter)
                 .setZIndex(image.z)
                 .rotation(image.r);
-            konvaImage.setZIndex(image.z);
             
             // load image
-            const imageObj = new Image();
-
-            imageObj.onload = () => {
-                konvaImage.image(imageObj);
+            imageReader.onload = () => {
+                imageObj.image(imageReader);
                 layer.draw();
             };
-            imageObj.src = image.src;
+            imageReader.src = image.src;
 
-            // translate image dimensions from RWU to px
-            this.initResizeAnchor(containerGroup, 0, 0, 'topLeft');
-            this.initResizeAnchor(containerGroup, w, 0, 'topRight');
-            this.initResizeAnchor(containerGroup, w, h, 'bottomRight');
-            this.initResizeAnchor(containerGroup, 0, h, 'bottomLeft');
-            this.initRotation(containerGroup, w, h);
+            // load controls
+            this.initRotation(imageGroup);
+            this.initResize(imageGroup);
 
             // events
-            containerGroup.on('click', (e) => {
-                // containerGroup.moveToTop();
+            imageGroup.on('click', (e) => {
+                // imageGroup.moveToTop();
                 this.currentImage = image;
             });
 
-            containerGroup.on('dragend', (e) => {
+            imageGroup.on('dragend', (e) => {
                 this.currentImage = image;
-                this.commitChanges(containerGroup);
-            });
-        },
-        // resize
-        initResizeAnchor (containerGroup, x, y, name) {
-            const group = containerGroup.get('.imageGroup')[0], 
-                layer = group.getLayer(),
-                anchor = new Konva.Circle({
-                    x: this.scaleX.invert(x),
-                    y: this.scaleY.invert(y),
-                    fill: applicationHelpers.config.palette.neutral,
-                    // fill: 'red',
-                    radius: 3,
-                    name: name,
-                    draggable: true
+
+                // update store
+                const { width: w, height: h } = imageObj.size(),
+                    r = imageGroup.rotation(),
+                    // get center relative to layer since group might be rotated
+                    { x, y } = imageCenter.getAbsolutePosition(layer);
+
+                this.$store.dispatch('models/updateImageWithData', {
+                    image,
+                    x: this.scaleX(x - w/2),
+                    y: this.scaleY(y - h/2),
+                    r,
+                    width: this.scaleX(w),
+                    height: this.scaleY(h)
                 });
 
-            // drag
-            anchor.on('dragstart', () => {
-                this.removeRotation(containerGroup);
-            })
-
-            anchor.on('dragmove', () => {
-                this.resize(containerGroup, anchor);
-                layer.draw();
+                this.renderImages();
             });
-
-            // hover effect
-            anchor.on('mouseover', () => {
-                document.body.style.cursor = 'pointer';
-                anchor.setRadius(6);
-                layer.draw();
-            });
-
-            anchor.on('mouseout', () => {
-                document.body.style.cursor = 'default';
-                anchor.setRadius(3);
-                layer.draw();
-            });
-
-            group.add(anchor);
         },
-        resize (containerGroup, activeAnchor) {
-            const topLeft = containerGroup.get('.topLeft')[0],
-                topRight = containerGroup.get('.topRight')[0],
-                bottomRight = containerGroup.get('.bottomRight')[0],
-                bottomLeft = containerGroup.get('.bottomLeft')[0],
-                imageObj = containerGroup.get('Image')[0],
-                imageCenter = containerGroup.get('.imageCenter')[0],
-                layer = containerGroup.getLayer(),
-                { x: anchorX, y: anchorY } = activeAnchor.position(),
+        // set up rotation behavior
+        initRotation (group) {
+            const imageCenter = group.get('.center')[0],
+                layer = group.getLayer();
 
-                // look up the image in the data store by the imageID stored on the canvas containerGroup
-                image = this.images.find(i => i.id === containerGroup.imageId),
-                // maintain aspect ratio
-                ratio = image.width / image.height,
-                width = topRight.getX() - topLeft.getX(),
-                height = width / ratio;
-
-            var imagePos;
-
-            // update anchor positions
-            switch (activeAnchor.getName()) {
-                case 'topLeft':
-                    topRight.setY(bottomRight.getY() - height);
-                    bottomLeft.setX(anchorX);
-                    imagePos = {
-                        x: bottomRight.getX() - width,
-                        y: bottomRight.getY() - height
-                    };
-                    break;
-                case 'topRight':
-                    topLeft.setY(bottomRight.getY() - height);
-                    bottomRight.setX(anchorX);
-                    imagePos = {
-                        x: bottomLeft.getX(),
-                        y: bottomLeft.getY() - height
-                    };
-                    break;
-                case 'bottomRight':
-                    bottomLeft.setY(height);
-                    topRight.setX(anchorX);
-                    imagePos = imageObj.position();
-                    break;
-                case 'bottomLeft':
-                    bottomRight.setY(height);
-                    topLeft.setX(anchorX);
-                    imagePos = {
-                        x: topRight.getX() - width,
-                        y: topRight.getY()
-                    };
-                    break;
-            }
-
-            // update image size and position
-            imageObj.size({ width, height })
-                .position(imagePos)
-
-            // image center
-            imageCenter.position({
-                x: imagePos.x + width/2,
-                y: imagePos.y + height/2
-            });
-
-            layer.draw();
-        },
-        // rotate
-        initRotation (containerGroup, w, h) {
-            const layer = containerGroup.getLayer();
-            /*
-            * Create new group for rotate anchor
-            *   Includes draggable anchor initialized on top of fixed anchor for actual rotation
-            * Adds visual reference to image group
-            *   Includes fixed anchor and connecting line to image center
-            */
-            const imageGroup = containerGroup.get('.imageGroup')[0];
-            const rotateGroup = new Konva.Group({
+            // fixed anchor (visible)
+            const rotateAnchorCircle = new Konva.Circle({
+                radius: 6,
                 draggable: false,
-                name: 'rotateGroup',
-                ...imageGroup.position(),
-                offset: imageGroup.offset(),
-                rotation: imageGroup.rotation()
+                name: 'rotateAnchorCircle',
+                stroke: applicationHelpers.config.palette.neutral,
+                strokeWidth: 2,
+            });
+            
+            // line between center and fixed anchor
+            const rotateAnchorLine = new Konva.Line({
+                stroke: applicationHelpers.config.palette.neutral,
+                // stroke: 'blue',
+                strokeWidth: 2,
+                name: 'rotateAnchorLine'
             });
 
             // draggable anchor (invisible)
-            const rotateAnchor = new Konva.Circle({
-                x: this.scaleX.invert(w/2),
-                y: this.scaleY.invert(h*1.25),
-                radius: 6,
-                name: 'rotate',
+            const rotateAnchor = rotateAnchorCircle.clone({
+                name: 'rotateAnchor',
                 draggable: true,
-                strokeWidth: 0
+                strokeEnabled: false,
+                // fill: 'blue'
             });
 
-            // fixed anchor (visible)
-            const rotateAnchorFixed = rotateAnchor.clone({
-                draggable: false,
-                name: 'rotateFixed',
-                stroke: applicationHelpers.config.palette.neutral,
-                strokeWidth: 2,
-            });
+            group
+                .add(rotateAnchorCircle)
+                .add(rotateAnchorLine)
+                .add(rotateAnchor);
 
-            // center point
-            const centerAnchor = new Konva.Circle({
-                x: this.scaleX.invert(w/2),
-                y: this.scaleY.invert(h/2),
-                name: 'center',
-                draggable: false
-            });
-            
-            rotateGroup.add(centerAnchor);
-            rotateGroup.add(rotateAnchor);
-            containerGroup.add(rotateGroup);
-
-            // line between center and fixed anchor
-            const rotateLine = new Konva.Line({
-                points: [
-                    rotateAnchorFixed.getX(),rotateAnchorFixed.getY(),
-                    centerAnchor.getX(),centerAnchor.getY()
-                ],
-                stroke: applicationHelpers.config.palette.neutral,
-                strokeWidth: 2,
-                name: 'rotateLine'
-            });
-
-            imageGroup.add(rotateAnchorFixed);
-            imageGroup.add(rotateLine);
-            rotateLine.setZIndex(containerGroup.getZIndex()-10); // render behind image
+            rotateAnchorLine.setZIndex(-10);
 
             // rotate on drag
             rotateAnchor.on('dragmove', () => {
                 const { x: anchorX, y: anchorY } = rotateAnchor.position();
-                const { x: centerX, y: centerY } = centerAnchor.position();
-                const rotationOffset = rotateGroup.rotation();
+                const { x: centerX, y: centerY } = imageCenter.position();
+                const rotationOffset = group.rotation();
 
                 var angle = 270 + (180/Math.PI)*Math.atan((anchorY - centerY)/(anchorX - centerX)) + rotationOffset;
 
@@ -310,82 +179,155 @@ export default {
                     angle -= 180;
                 }
 
-                imageGroup.rotation(angle%360);
+                angle %= 360;
+
+                group.rotation(angle%360);
             });
 
-            rotateAnchor.on('mouseup touchend', () => {
-                rotateAnchorFixed.setRadius(6);
-
+            rotateAnchor.on('dragend', () => {
+                rotateAnchorCircle.setRadius(6);
                 // snap draggable rotation anchor to match visible, fixed rotation anchor
-                rotateGroup.rotation(imageGroup.rotation());
-                rotateAnchor.position(rotateAnchorFixed.position());
+                rotateAnchor.position(rotateAnchorCircle.position());
                 layer.draw();
             });
 
             // hover effect
-            rotateAnchor.on('mouseover', () => {
+            rotateAnchor.on('dragstart mouseover mousedown', () => {
                 document.body.style.cursor = 'pointer';
-                rotateAnchorFixed.setRadius(10);
+                rotateAnchorCircle.setRadius(10);
                 layer.draw();
             });
 
             rotateAnchor.on('mouseout', () => {
                 document.body.style.cursor = 'default';
-                rotateAnchorFixed.setRadius(6);
-                layer.draw();
-            });
-
-            rotateAnchor.on('mousedown touchstart', () => {
-                rotateAnchorFixed.setRadius(10);
+                rotateAnchorCircle.setRadius(6);
                 layer.draw();
             });
         },
-        removeRotation (containerGroup) {
-            containerGroup.get('.rotateGroup,.rotateFixed,.rotateLine').destroy();
-        },
-        // update store
-        commitChanges (containerGroup) {
-            const imageObj = containerGroup.get('Image')[0],
-                topLeft = containerGroup.get('.topLeft')[0],
-                topRight = containerGroup.get('.topRight')[0],
-                bottomRight = containerGroup.get('.bottomRight')[0],
-                bottomLeft = containerGroup.get('.bottomLeft')[0],
-                imageGroup = containerGroup.get('.imageGroup')[0],
-                { width, height } = imageObj.size(),
-                { x: centerX, y: centerY } = containerGroup.get('.imageCenter')[0].getAbsolutePosition(containerGroup),
-                { x: containerX, y: containerY } = containerGroup.position(),
-                image = this.images.find(i => i.id === containerGroup.imageId),
-                layer = containerGroup.getLayer();
+        // set up resize behavior
+        initResize (group) {
+            const imageObj = group.get('.image')[0],
+                { width: w, height: h } = imageObj.size();
 
-            // transfer resize to container group so it can be committed
-            imageObj.position({ x: 0, y: 0 });
-            imageGroup.position({ x: width/2, y: height/2 }).offset({ x: width/2, y: height/2 });
-            containerGroup.position({
-                x: containerX + centerX - width/2,
-                y: containerY + centerY - height/2
-            });
+            addResizeAnchor.call(this, group, 0, 0, 'topLeft');
+            addResizeAnchor.call(this, group, w, 0, 'topRight');
+            addResizeAnchor.call(this, group, w, h, 'bottomRight');
+            addResizeAnchor.call(this, group, 0, h, 'bottomLeft');
+            redrawAnchors();
 
-            // reset anchor positions
-            topLeft.position({ x: 0, y: 0 });
-            topRight.position({ x: width, y: 0 });
-            bottomRight.position({ x: width, y: height });
-            bottomLeft.position({ x: 0, y: height });
+            function addResizeAnchor(group, w, h, name) {
+                const anchor = new Konva.Circle({
+                    x: w,
+                    y: h,
+                    fill: applicationHelpers.config.palette.neutral,
+                    // fill: 'red',
+                    radius: 3,
+                    name: name,
+                    draggable: true
+                });
 
-            // update store
-            this.$store.dispatch('models/updateImageWithData', {
-                image: image,
-                // store new image coordinates in rwu
-                x: this.scaleX(containerGroup.getX()),
-                y: this.scaleY(containerGroup.getY()),
-                r: imageGroup.rotation(),
-                width: this.scaleX(width),
-                height: this.scaleY(height)
-            });
+                // resize on drag
+                anchor.on('dragmove', () => {
+                    const topLeft = group.get('.topLeft')[0],
+                        topRight = group.get('.topRight')[0],
+                        bottomRight = group.get('.bottomRight')[0],
+                        bottomLeft = group.get('.bottomLeft')[0],
+                        { x: anchorX, y: anchorY } = anchor.position(),
+                        imageObj = group.get('.image')[0],
+                        // look up the image in the data store by the imageID stored on the canvas group
+                        image = this.images.find(i => i.id === group.imageId),
+                        // maintain aspect ratio
+                        ratio = image.width / image.height,
+                        width = topRight.getX() - topLeft.getX(),
+                        height = width / ratio;
 
-            // containerGroup.destroy();
-            // this.renderImage(layer,image);
-            // layer.draw();
-            this.renderImages();
+                    var imagePos;
+
+                    // update anchor positions
+                    switch (anchor.getName()) {
+                        case 'topLeft':
+                            topRight.setY(bottomRight.getY() - height);
+                            bottomLeft.setX(anchorX);
+                            imagePos = {
+                                x: bottomRight.getX() - width,
+                                y: bottomRight.getY() - height
+                            };
+                            break;
+                        case 'topRight':
+                            topLeft.setY(bottomRight.getY() - height);
+                            bottomRight.setX(anchorX);
+                            imagePos = {
+                                x: bottomLeft.getX(),
+                                y: bottomLeft.getY() - height
+                            };
+                            break;
+                        case 'bottomRight':
+                            bottomLeft.setY(height);
+                            topRight.setX(anchorX);
+                            imagePos = imageObj.position();
+                            break;
+                        case 'bottomLeft':
+                            bottomRight.setY(height);
+                            topLeft.setX(anchorX);
+                            imagePos = {
+                                x: topRight.getX() - width,
+                                y: topRight.getY()
+                            };
+                            break;
+                    }
+
+                    // update image size and position
+                    imageObj.size({ width, height })
+                        .position(imagePos);
+
+                    redrawAnchors();
+                });
+
+                // hover effect
+                anchor.on('mouseover', () => {
+                    document.body.style.cursor = 'pointer';
+                    anchor.setRadius(6).draw();
+                });
+
+                anchor.on('mouseout', () => {
+                    document.body.style.cursor = 'default';
+                    anchor.setRadius(3).draw();
+                });
+
+                group.add(anchor);
+            };
+
+            // recalc center and rotate anchors
+            function redrawAnchors() {
+                const center = group.get('.center')[0],
+                    rotateAnchor = group.get('.rotateAnchor')[0],
+                    rotateAnchorCircle = group.get('.rotateAnchorCircle')[0],
+                    rotateAnchorLine = group.get('.rotateAnchorLine')[0],
+                    pos = imageObj.position(),
+                    { width, height } = imageObj.size();
+
+                center.position({
+                    x: pos.x + width/2,
+                    y: pos.y + height/2
+                });
+
+                rotateAnchorCircle.position({
+                    x: pos.x + width/2,
+                    y: pos.y + height*1.25
+                });
+
+                rotateAnchor.position({
+                    x: pos.x + width/2,
+                    y: pos.y + height*1.25
+                });
+
+                rotateAnchorLine.points([
+                    rotateAnchorCircle.getX(),rotateAnchorCircle.getY(),
+                    center.getX(),center.getY()
+                ]);
+
+                group.draw();
+            };
         }
     },
     computed: {
