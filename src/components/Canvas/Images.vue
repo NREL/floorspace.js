@@ -88,7 +88,7 @@ export default {
                 });
 
             // store imageId on group to look up the associated image object when user interacts with group
-            imageGroup.imageId = image.id; 
+            imageGroup.imageId = image.id;
 
             // layout
             layer.add(imageGroup);
@@ -97,7 +97,7 @@ export default {
                 .add(imageCenter)
                 .setZIndex(image.z)
                 .rotation(image.r);
-            
+
             // load image
             imageReader.onload = () => {
                 imageObj.image(imageReader);
@@ -149,7 +149,7 @@ export default {
                 stroke: applicationHelpers.config.palette.neutral,
                 strokeWidth: 2,
             });
-            
+
             // line between center and fixed anchor
             const rotateAnchorLine = new Konva.Line({
                 stroke: applicationHelpers.config.palette.neutral,
@@ -348,6 +348,10 @@ export default {
             };
         },
         resetStage () {
+            if (!this.scaleX) {
+                // This is running before scales are set up, which means we don't need to reset anyway (and we can't, because there's no scale info yet)
+                return;
+            }
             const originalResFt = (this.scaleX.range()[1] - this.scaleX.range()[0])/(this.scaleX.domain()[1] - this.scaleX.domain()[0]);
             // const mPerFt = ol.proj.METERS_PER_UNIT['us-ft']; // m/ft
             const resFt = (this.view.max_x - this.view.min_x)/this.$refs.images.clientWidth; // ft/px
