@@ -553,8 +553,8 @@ export default {
                 // create updated copies of the scales based on the zoom transformation
                 // the transformed scales are only used to obtain the new rwu grid dimensions and redraw the axes
                 // NOTE: don't change the original scale or you'll get exponential growth
-                const newScaleX = d3.event.transform.rescaleX(this.scaleX),
-                    newScaleY = d3.event.transform.rescaleY(this.scaleY);
+                const newScaleX = d3.event.transform.rescaleX(zoomScaleX),
+                    newScaleY = d3.event.transform.rescaleY(zoomScaleY);
 
                 [this.min_x, this.max_x] = newScaleX.domain();
                 [this.min_y, this.max_y] = newScaleY.domain();
