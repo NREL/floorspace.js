@@ -11,7 +11,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 </template>
 
 <script>
-const Konva = require('konva');
+const Konva = require('konva'),
+    ol = require('openlayers'),
+    d3 = require('d3');
+
 import { mapState } from 'vuex'
 import applicationHelpers from './../../store/modules/application/helpers.js'
 import modelHelpers from './../../store/modules/models/helpers.js'
@@ -20,6 +23,7 @@ export default {
     name: 'images',
     data () {
         return {
+            stage: null,
             // cache images on the component so that we can check which property was altered in the images watcher
             imageCache: []
         };
@@ -46,7 +50,9 @@ export default {
 
             stage.add(layer);
 
+            this.stage = stage;
             this.images.forEach(this.renderImage.bind(this,layer));
+            this.resetStage();
             // layer.draw();
         },
         renderImage (layer, image) {
@@ -340,6 +346,30 @@ export default {
 
                 group.draw();
             };
+        },
+        resetStage () {
+            const originalResFt = (this.scaleX.range()[1] - this.scaleX.range()[0])/(this.scaleX.domain()[1] - this.scaleX.domain()[0]);
+            // const mPerFt = ol.proj.METERS_PER_UNIT['us-ft']; // m/ft
+            const resFt = (this.view.max_x - this.view.min_x)/this.$refs.images.clientWidth; // ft/px
+            // const resM = resFt*mPerFt; // m/px
+            const scale = originalResFt/resFt;
+
+            // console.log(originalResFt);
+
+            if (this.stage) {
+                const panX = this.view.min_x/resFt; // px
+                const panY = this.view.min_y/resFt; // px
+
+                this.stage.scale({
+                        x: scale,
+                        y: scale
+                    })
+                    .position({
+                        x: -panX,
+                        y: -panY
+                    })
+                    .draw();
+            }
         }
     },
     computed: {
@@ -348,6 +378,7 @@ export default {
             images: state => state.application.currentSelections.story.images,
             scaleX: state => state.application.scale.x,
             scaleY: state => state.application.scale.y,
+            view: state => state.project.view,
         }),
 
         currentImage: {
@@ -380,7 +411,13 @@ export default {
             // deep watch so that changes to properties on individual images trigger the handler
             deep: true
         },
-        currentImage() { this.renderImages(); }
+        currentImage() { this.renderImages(); },
+        view: {
+            handler(val) {
+                this.resetStage();
+            },
+            deep: true
+        }
     }
 }
 </script>

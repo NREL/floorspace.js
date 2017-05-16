@@ -25,8 +25,8 @@ export default {
         map: {
             enabled: true,
             visible: true,
-            latitude: 37.8, // 39.7653,
-            longitude: -101.62,// -104.9863,
+            latitude: 39.7653,
+            longitude: -104.9863,
             zoom: 4.5, // 18,
             rotation: 0, //.791,
             elevation: 0

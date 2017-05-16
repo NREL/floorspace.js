@@ -48,7 +48,8 @@ export default {
     },
     computed: {
         ...mapState({
-            currentTool: state => state.application.currentSelections.tool
+            currentTool: state => state.application.currentSelections.tool,
+            projectView: state => state.project.view,
         }),
         currentStoryGeometry () { return this.$store.getters['application/currentStoryGeometry']; },
         mapVisible: {
@@ -74,11 +75,11 @@ export default {
             set (val) { this.$store.dispatch('project/setMapRotation', { rotation: val }); }
         },
 
-        // the current position of the map view on the canvas, return the position information from the store if none is set
-        viewLongitude () { return this.view ? ol.proj.transform(this.view.getCenter(), 'EPSG:3857', 'EPSG:4326')[0] : null; },
-        viewLatitude () { return this.view ? ol.proj.transform(this.view.getCenter(), 'EPSG:3857', 'EPSG:4326')[1] : null; },
-        viewZoom () { return this.view ? this.view.getZoom() : this.zoom; },
-        viewRotation () { return this.view ? this.view.getRotation() : this.rotation; }
+        // // the current position of the map view on the canvas, return the position information from the store if none is set
+        // viewLongitude () { return this.view ? ol.proj.transform(this.view.getCenter(), 'EPSG:3857', 'EPSG:4326')[0] : null; },
+        // viewLatitude () { return this.view ? ol.proj.transform(this.view.getCenter(), 'EPSG:3857', 'EPSG:4326')[1] : null; },
+        // viewZoom () { return this.view ? this.view.getZoom() : this.zoom; },
+        // viewRotation () { return this.view ? this.view.getRotation() : this.rotation; }
     },
     watch: {
         'currentStoryGeometry.faces.length' (newVal, oldVal) {
@@ -86,17 +87,35 @@ export default {
                 this.loadMap();
             }
         },
-        // watch for changes to map position in the datastore, update the view to reflect what's in the data store (used during model imports)
-        latitude () { this.view.setCenter(ol.proj.fromLonLat([this.longitude, this.latitude])); },
-        longitude () { this.view.setCenter(ol.proj.fromLonLat([this.longitude, this.latitude])); },
-        zoom () { this.view.setZoom(this.zoom); },
-        rotation () { this.view.setRotation(this.rotation); },
+        // // watch for changes to map position in the datastore, update the view to reflect what's in the data store (used during model imports)
+        // latitude () { this.view.setCenter(ol.proj.fromLonLat([this.longitude, this.latitude])); },
+        // longitude () { this.view.setCenter(ol.proj.fromLonLat([this.longitude, this.latitude])); },
+        // zoom () { this.view.setZoom(this.zoom); },
+        // rotation () { this.view.setRotation(this.rotation); },
 
-        // update the store to match the position of the map view
-        viewLongitude (val) { this.longitude = val; },
-        viewLatitude (val) { this.latitude = val; },
-        viewZoom (val) { this.zoom = val; },
-        viewRotation (val) { this.rotation = val; }
+        // // update the store to match the position of the map view
+        // viewLongitude (val) { this.longitude = val; },
+        // viewLatitude (val) { this.latitude = val; },
+        // viewZoom (val) { this.zoom = val; },
+        // viewRotation (val) { this.rotation = val; },
+        projectView: {
+            handler (val) {
+                const ftPerM = ol.proj.METERS_PER_UNIT['us-ft'];
+                const res = (val.max_x - val.min_x)/this.$refs.map.clientWidth*ftPerM,
+                    view = this.map.getView(),
+                    centerX = ftPerM*(val.min_x + (val.max_x - val.min_x)/2),
+                    centerY = ftPerM*(val.min_y + (val.max_y - val.min_y)/2),
+                    originM = ol.proj.fromLonLat([this.longitude,this.latitude]); // meters
+
+                view.setResolution(res);
+
+                originM[0] += centerX;
+                originM[1] -= centerY; // ol origin is bottom left
+
+                view.setCenter(originM);
+            },
+            deep: true
+        }
     }
 }
 

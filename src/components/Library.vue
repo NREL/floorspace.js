@@ -86,7 +86,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
 <script>
 import helpers from './../store/modules/models/helpers'
 
-const Huebee = require('Huebee');
+const Huebee = require('huebee');
 export default {
     name: 'library',
     data() {
