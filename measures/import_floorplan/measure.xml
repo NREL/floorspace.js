@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>import_floorplan</name>
   <uid>79d7fbb8-e001-4c65-9444-c7dcb975290f</uid>
-  <version_id>555f4673-492d-47fa-bef5-2ac63c58aad0</version_id>
-  <version_modified>20170516T193418Z</version_modified>
+  <version_id>47aa3731-fb1b-4ae6-85ad-76b794bb2041</version_id>
+  <version_modified>20170516T200040Z</version_modified>
   <xml_checksum>0AD1E2E2</xml_checksum>
   <class_name>ImportFloorplan</class_name>
   <display_name>Import Floorplan</display_name>
@@ -11,9 +11,9 @@
   <modeler_description>Currently this measure deletes the existing geometry and replaces it.  In the future, a more advanced merge technique will be employed.</modeler_description>
   <arguments>
     <argument>
-      <name>space_name</name>
-      <display_name>New space name</display_name>
-      <description>This name will be used as the name of the new space.</description>
+      <name>floorplan_path</name>
+      <display_name>Floorplan Path</display_name>
+      <description>Path to the floorplan JSON.</description>
       <type>String</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -61,19 +61,19 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>CBB8F08B</checksum>
+      <checksum>150321A2</checksum>
     </file>
     <file>
       <filename>import_floorplan_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>F6B3F12A</checksum>
+      <checksum>C7FECBCD</checksum>
     </file>
     <file>
-      <filename>example_model.osm</filename>
-      <filetype>osm</filetype>
+      <filename>floorplan.json</filename>
+      <filetype>json</filetype>
       <usage_type>test</usage_type>
-      <checksum>53D14E69</checksum>
+      <checksum>464E161B</checksum>
     </file>
   </files>
 </measure>
