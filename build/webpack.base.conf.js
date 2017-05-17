@@ -65,7 +65,10 @@ module.exports = {
           name: utils.assetsPath('fonts/[name].[hash:7].[ext]')
         }
       }
-    ]
+    ],
+    noParse: [
+        /node_modules\/openlayers\/dist\/ol.js/
+    ],
   },
   eslint: {
     formatter: require('eslint-friendly-formatter')

@@ -8,49 +8,57 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
 <div id="grid" :style="{ 'pointer-events': (currentTool === 'Drag' || currentTool === 'Map') ? 'none': 'all' }">
-    <svg ref="grid" @click="addPoint" @mousemove="(currentTool === 'Rectangle' || currentTool === 'Polygon') ? highlightSnapTarget($event) : null" :viewBox="viewbox" preserveAspectRatio="none" id="svg-grid"></svg>
+    <svg ref="grid" @click="gridClicked" @mousemove="highlightSnapTarget" preserveAspectRatio="none" id="svg-grid"></svg>
 </div>
 </template>
 
 <script>
+
 import methods from './methods'
 import { mapState } from 'vuex'
 import geometryHelpers from './../../store/modules/geometry/helpers.js'
 import modelHelpers from './../../store/modules/models/helpers.js'
 import applicationHelpers from './../../store/modules/application/helpers.js'
+
 export default {
     name: 'grid',
     data () {
         return {
-            originalScales: {},
-            points: [], // points for the face currently being drawn
-            isDragging: false // boolean - if a drag event is happening
+            axis: {
+                x: null,
+                y: null,
+            },
+            axisGenerator: {
+                x: null,
+                y: null
+            },
+            points: [] // points for the face currently being drawn
         };
     },
     mounted () {
+        // initialize the y dimensions in RWU based on the aspect ratio of the grid on the screen
         this.max_y = (this.$refs.grid.clientHeight / this.$refs.grid.clientWidth) * this.max_x;
 
-        this.calcScales();
-        this.drawGridLines();
+        this.calcGrid();
         this.drawPolygons();
 
-        this.originalScales = {
-            x: this.scaleX,
-            y: this.scaleY
-        };
-
-        // this.$refs.grid.addEventListener('mousedown', this.panStart);
-        this.calcGrid();
-
-        // recalculate scales when the window resizes
-        window.addEventListener('resize', this.calcScales);
+        // recalculate the grid when the window resizes
+        // const original_max_x = this.max_x,
+        //     original_max_y = this.max_y,
+        //     original_width = this.$refs.grid.clientWidth,
+        //     original_height = this.$refs.grid.clientHeight;
+        // window.addEventListener('resize', () => {
+        //     this.max_y = original_max_y * (this.$refs.grid.clientHeight / original_height);
+        //     this.max_x = original_max_x * (this.$refs.grid.clientWidth / original_width);
+        //
+        //     this.updateGrid();
+        // });
     },
-    beforeDestroy () {
-        window.removeEventListener('resize', this.calcScales);
-    },
+    // beforeDestroy () {
+    //     window.removeEventListener('resize', this.resize());
+    // },
     computed: {
         ...mapState({
-
             currentMode: state => state.application.currentSelections.mode,
             currentTool: state => state.application.currentSelections.tool,
 
@@ -59,29 +67,21 @@ export default {
             currentStory: state => state.application.currentSelections.story,
 
             gridVisible: state => state.project.grid.visible,
-
-            spacing: state => state.project.grid.spacing,
-
-            // SVG viewbox is the portion of the svg grid (in RWU) that is currently visible to the user
-            viewbox: state => {
-                return state.project.view.min_x + ' ' + // x
-                    state.project.view.min_y + ' ' + // y
-                    (state.project.view.max_x - state.project.view.min_x) + ' ' + // width
-                    (state.project.view.max_y - state.project.view.min_y); // height
-            },
-
-            mapVisible: state => state.project.map.visible,
-            latitude: state => state.project.map.latitude,
-            longitude: state => state.project.map.longitude,
-            zoom: state => state.project.map.zoom
+            spacing: state => state.project.grid.spacing
         }),
+        // these are the original scales, they are never changed
+        // px -> rwu
         scaleX: {
             get () { return this.$store.state.application.scale.x; },
-            set (val) { this.$store.dispatch('application/setScaleX', { scaleX: val }); }
+            set (val) {
+                // console.log("update scaleX with domain:", val.domain()[0], val.domain()[1], "and range:", val.range()[0], val.range()[1]);
+                this.$store.dispatch('application/setScaleX', { scaleX: val }); }
         },
         scaleY: {
             get () { return this.$store.state.application.scale.y; },
-            set (val) { this.$store.dispatch('application/setScaleY', { scaleY: val }); }
+            set (val) {
+                // console.log("update scaleY with domain:", val.domain()[0], val.domain()[1], "and range:", val.range()[0], val.range()[1]);
+                this.$store.dispatch('application/setScaleY', { scaleY: val }); }
         },
 
         // mix_x, min_y, max_x, and max_y are the grid dimensions in real world units
@@ -103,59 +103,51 @@ export default {
         },
 
         currentStoryGeometry () { return this.$store.getters['application/currentStoryGeometry']; },
-        mapUrl () {
-            return "https://maps.googleapis.com/maps/api/staticmap?center=" +
-                this.latitude + "," + this.longitude + "&zoom=" + this.zoom +
-                "&size=600x300&key=AIzaSyBHevuNXeCuPXkiV3hq-pFKZSdSFLX6kF0"
-        },
+
 
         /*
         * map all faces for the current story to polygon representations (sets of ordered points) for d3 to render
         */
         polygons () {
             return this.currentStoryGeometry.faces.map((face) => {
-                const faceModel = modelHelpers.modelForFace(this.$store.state.models, face.id);
-                if (!faceModel) {debugger}
-                var color = faceModel.color, object;
-                if (faceModel.type === 'space' && this.currentMode === 'thermal_zones') {
-                    object = modelHelpers.libraryObjectWithId(this.$store.state.models, faceModel.thermal_zone_id)
-                    color = object ? object.color : applicationHelpers.config.palette.neutral;
-                } else if (faceModel.type === 'space' && this.currentMode === 'space_types') {
-                    object = modelHelpers.libraryObjectWithId(this.$store.state.models, faceModel.space_type_id)
-                    color = object ? object.color : applicationHelpers.config.palette.neutral;
-                } else if (faceModel.type === 'space' && this.currentMode === 'building_units') {
-                    object = modelHelpers.libraryObjectWithId(this.$store.state.models, faceModel.building_unit_id)
-                    color = object ? object.color : applicationHelpers.config.palette.neutral;
-                } else {
-                    color = faceModel.color;
+                // look up the model (space or shading) associated with the face
+                const model = modelHelpers.modelForFace(this.$store.state.models, face.id),
+                    polygon = {
+                        face_id: face.id,
+                        color: model.color,
+                        points: face.edgeRefs.map((edgeRef) => {
+                            const edge = geometryHelpers.edgeForId(edgeRef.edge_id, this.currentStoryGeometry),
+                                // use the vertex associated with v1 unless the edge reference on the face is reversed
+                                nextVertexId = edgeRef.reverse ? edge.v2 : edge.v1;
+                            return geometryHelpers.vertexForId(nextVertexId, this.currentStoryGeometry);
+                        })
+                    };
+
+                // if the model is a space, set the polygon's color based on the current mode
+                if (model.type === 'space') {
+                    switch (this.currentMode) {
+                        case 'thermal_zones':
+                            const thermal_zone = modelHelpers.libraryObjectWithId(this.$store.state.models, model.thermal_zone_id)
+                            polygon.color = thermal_zone ? thermal_zone.color : applicationHelpers.config.palette.neutral;
+                            break;
+                        case 'space_types':
+                            const space_type = modelHelpers.libraryObjectWithId(this.$store.state.models, model.space_type_id)
+                            polygon.color = space_type ? space_type.color : applicationHelpers.config.palette.neutral;
+                            break;
+                        case 'building_units':
+                            const building_unit = modelHelpers.libraryObjectWithId(this.$store.state.models, model.building_unit_id)
+                            polygon.color = building_unit ? building_unit.color : applicationHelpers.config.palette.neutral;
+                            break;
+                    }
                 }
 
-                return {
-                    face_id: face.id,
-                    // TODO: lookup the story/space/shading associated with the face
-                    color: color,
-                    points: face.edgeRefs.map((edgeRef) => {
-                        const edge = geometryHelpers.edgeForId(edgeRef.edge_id, this.currentStoryGeometry),
-                            // look up the vertex associated with v1 unless the edge reference on the face is reversed
-                            nextVertexId = edgeRef.reverse ? edge.v2 : edge.v1;
-                        return geometryHelpers.vertexForId(nextVertexId, this.currentStoryGeometry);
-                    })
-                };
+                return polygon;
             });
         },
     },
     watch: {
-        gridVisible () { this.drawGridLines(); },
-
-        spacing () {
-            this.calcScales();
-            this.drawGridLines();
-        },
-        viewbox () {
-            this.calcScales();
-            this.drawGridLines();
-            this.drawPoints();
-        },
+        gridVisible () { this.updateGrid(); },
+        spacing () { this.updateGrid(); },
 
         currentTool () {
             this.points = [];

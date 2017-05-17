@@ -13,102 +13,134 @@ import modelHelpers from './../../store/modules/models/helpers.js'
 export default {
     // ****************** USER INTERACTION EVENTS ****************** //
     /*
-    * adds the 'highlight' class to the snapTarget for a mousemove event
-    * called on mousemove events
+    * handle a click on the svg grid
     */
-    highlightSnapTarget (e) {
-        // unhighlight expired snap targets
-        d3.selectAll('#grid .highlight, #grid .gridpoint').remove();
-
-        if (!this.currentSpace && !this.currentShading) { return; }
-
-        const point = this.getEventRWU(e);
-
-        var snapTarget = this.findSnapTarget(point);
-
-        if (snapTarget && snapTarget.snappingEdge) {
-            d3.select('#grid svg')
-                .append('line')
-                .attr('x1', snapTarget.snappingEdgeV1.x)
-                .attr('y1', snapTarget.snappingEdgeV1.y)
-                .attr('x2', snapTarget.snappingEdgeV2.x)
-                .attr('y2', snapTarget.snappingEdgeV2.y)
-                .attr('stroke-width', 1)
-                .classed('highlight', true)
-                .attr('vector-effect', 'non-scaling-stroke');
-
-            snapTarget = snapTarget.scalar;
+    gridClicked (e) {
+        if (this.currentTool === 'Select') {
+            this.$store.dispatch('application/setCurrentSpace', { 'space': null });
+            this.$store.dispatch('application/setCurrentShading', { 'shading': null });
+        } else if (this.currentTool === 'Eraser' ||
+            ((this.currentTool === 'Rectangle' || this.currentTool === 'Polygon') && (this.currentSpace || this.currentShading))) {
+            this.addPoint(e);
         }
-
-        if (snapTarget) {
-            d3.select('#grid svg')
-                .append('ellipse')
-                .attr('cx', snapTarget.x)
-                .attr('cy', snapTarget.y)
-                .attr('rx', this.calcRadius(5, 'x'))
-                .attr('ry', this.calcRadius(5, 'y'))
-                .classed('highlight', true)
-                .attr('vector-effect', 'non-scaling-stroke');
-        } else if (!snapTarget && this.gridVisible) {
-            // calculate an offset for the gridlines based on the viewbox min_x and min_y
-            const xAdjustment = this.min_x % this.spacing,
-                yAdjustment = this.min_y % this.spacing;
-
-            // round point RWU coordinates to nearest gridline
-            snapTarget = {
-                type: 'vertex',
-                x: round(point.x - xAdjustment, this.spacing) + xAdjustment,
-                y: round(point.y - yAdjustment, this.spacing) + yAdjustment
-            };
-
-            d3.select('#grid svg')
-                .append('ellipse')
-                .attr('cx', snapTarget.x)
-                .attr('cy', snapTarget.y)
-                .attr('rx', this.calcRadius(2, 'x'))
-                .attr('ry', this.calcRadius(2, 'y'))
-                .classed('gridpoint', true)
-                .attr('vector-effect', 'non-scaling-stroke');
-        }
-        this.drawGuideLines(e, snapTarget);
     },
 
     /*
-    * called by highlightSnapTarget on mousemove events,
-    * draws guidelines connecting the snaptarget and the face being drawn depending on drawing tool
+    * If the grid is clicked when a drawing tool or the eraser tool is active, add a point to the component
+    * if the new point completes a face being drawn, save the face
+    * if the new point completes an eraser selection, call the eraseRectangularSelection method
     */
-    drawGuideLines (e, snapTarget) {
+    addPoint (e) {
+        // location of the mouse in grid units
+        const gridPoint = {
+                x: this.pxToGrid(e.offsetX, 'x'),
+                y: this.pxToGrid(e.offsetY, 'y')
+            },
+            snapTarget = this.findSnapTarget(gridPoint);
+
+        // if the snapTarget is the origin of the face being drawn in Polygon mode, close the face and don't add a new point
+        if (snapTarget.type === 'vertex' && snapTarget.origin && this.currentTool === 'Polygon') {
+            this.savePolygonFace();
+            return;
+        }
+
+        // create the point
+        var newPoint = snapTarget.type === 'edge' ? snapTarget.projection : snapTarget;
+        this.points.push(newPoint);
+
+        // if the Rectangle or Eraser tool is active and two points have been drawn (to define a rectangle)
+        // complete the corresponding operation for the tool
+        if (this.currentTool === 'Eraser' && this.points.length === 2) { this.eraseRectangularSelection(); }
+        if (this.currentTool === 'Rectangle' && this.points.length === 2) { this.saveRectuangularFace(); }
+    },
+
+    /*
+    * When a mousemove event is triggered on the grid and
+    * the 'Rectangle' or 'Polygon' tool is active and a space or shading is selected or the 'Eraser' tool is active
+    * look up the snap target for the location of the event, highlight it, and render a guide point
+    * if there is no snap target, use the event location
+    */
+    highlightSnapTarget (e) {
+        // only highlight snap targets in drawing modes when a space or shading has been selected
+        if (this.currentTool !== 'Eraser' && ((this.currentTool !== 'Rectangle' && this.currentTool !== 'Polygon') || (!this.currentSpace && !this.currentShading))) { return; }
+
+        // unhighlight expired snap targets
+        d3.selectAll('#grid .highlight, #grid .gridpoint').remove();
+
+        // location of the mouse in grid units
+        const gridPoint = {
+            x: this.pxToGrid(e.offsetX, 'x'),
+            y: this.pxToGrid(e.offsetY, 'y')
+        };
+
+        const snapTarget = this.findSnapTarget(gridPoint);
+
+        // render a line and point showing which geometry would be created with a click at this location
+        var guidePoint = snapTarget.type === 'edge' ? snapTarget.projection : snapTarget;
+        this.drawGuideLines(e, guidePoint);
+
+        // if snapping to an edisting edge or radius, draw a larger point, if snapping to the grid or just displaying the location of the pointer, create a small point
+        if (snapTarget.type === 'edge' || snapTarget.type === 'vertex') {
+            d3.select('#grid svg')
+                .append('ellipse')
+                .attr('cx', guidePoint.x, 'x')
+                .attr('cy', guidePoint.y, 'y')
+                .attr('rx', this.scaleX(5))
+                .attr('ry', this.scaleY(5))
+                .classed('highlight', true)
+                .attr('vector-effect', 'non-scaling-stroke');
+        } else {
+            d3.select('#grid svg')
+                .append('ellipse')
+                .attr('cx', guidePoint.x)
+                .attr('cy', guidePoint.y)
+                .attr('rx', this.scaleX(2))
+                .attr('ry', this.scaleY(2))
+                .classed('gridpoint', true)
+                .attr('vector-effect', 'non-scaling-stroke');
+        }
+
+        // in drawing modes, highlight edges that would be snapped to
+        if (snapTarget.type === 'edge' && this.currentTool !== 'Eraser') {
+            d3.select('#grid svg')
+                .append('line')
+                .attr('x1', snapTarget.v1GridCoords.x)
+                .attr('y1', snapTarget.v1GridCoords.y)
+                .attr('x2', snapTarget.v2GridCoords.x)
+                .attr('y2', snapTarget.v2GridCoords.y)
+                .attr('stroke-width', 1)
+                .classed('highlight', true)
+                .attr('vector-effect', 'non-scaling-stroke');
+        }
+    },
+
+    /*
+    * called on mousemove events, shows the user what geometry will be created by clicking at the current mouse location by
+    * drawing a guide rectangle or a guideline between the last point drawn and the guidepoint
+    */
+    drawGuideLines (e, guidePoint) {
         if (!this.points.length) { return; }
 
         // remove expired guideline paths
         d3.selectAll('#grid .guideline').remove();
 
-        var guidelinePoints, point;
+        var guidelinePoints;
 
-        // if there is no snapTarget, just use the current mouse location
-        if (snapTarget ) {
-            point = snapTarget;
-        } else {
-            point = this.getEventRWU(e);
-        }
-
-        // determine how to complete face based on current tool
+        // if the polygon tool is active, draw a line connecting the last point in the polygon to the guide point
+        // if the rectangle or eraser tool is active, infer a rectangle from the first point that was drawn and the guide point
         if (this.currentTool === 'Polygon') {
-            // connect last point in polygon to current mouse location/snap target with a guideline
-            guidelinePoints = [point, this.points[this.points.length - 1]];
-
+            guidelinePoints = [guidePoint, this.points[this.points.length - 1]];
         } else if (this.currentTool === 'Rectangle' || this.currentTool === 'Eraser') {
-            // infer the remaining 2 points in the rectangle based on the first point in the rectangle and the  current mouse location/snap target
             guidelinePoints = [
                 this.points[0],
-                { x: point.x, y: this.points[0].y },
-                point,
-                { x: this.points[0].x, y: point.y },
+                { x: guidePoint.x, y: this.points[0].y },
+                guidePoint,
+                { x: this.points[0].x, y: guidePoint.y },
                 this.points[0]
             ];
         }
 
-        // draw guideline connecting guideline points
+        // render a guideline or rectangle
         d3.select('#grid svg').append('path')
             .datum(guidelinePoints)
             .attr('fill', 'none')
@@ -117,135 +149,37 @@ export default {
             .attr('d', d3.line()
                 .x((d) => { return d.x; })
                 .y((d) => { return d.y; }))
-            // prevent edges from overlapping points - interferes with click events
             .lower();
 
-        // keep grid lines under polygon edges
         d3.selectAll('.vertical, .horizontal').lower();
     },
 
+    // ****************** SAVING FACES ****************** //
     /*
-    * create and store a RWU grid point
-    * called on click events
+    * The origin of the polygon being drawn was clicked, create a polygon face from all points on the grid
+    * translate the points into RWU and save the face for the selected space or shading
     */
-    addPoint (e) {
-        if (this.isDragging) { return; }
+    savePolygonFace () {
+        const payload = {
+            // translate grid points from grid units to RWU
+            points: this.points.map(p => ({
+                x: this.gridToRWU(p.x, 'x'),
+                y: this.gridToRWU(p.y, 'y')
+            }))
+        };
 
-        // if no space or shading is selected, disable drawing
-        if (!this.currentSpace && !this.currentShading) { return; }
-
-        if (this.currentTool === 'Select') {
-            this.$store.dispatch('application/setCurrentSpace', { 'space': null });
-            this.$store.dispatch('application/setCurrentShading', { 'shading': null });
+        if (this.currentSpace) {
+            payload.space = this.currentSpace;
+        } else if (this.currentShading) {
+            payload.shading = this.currentShading;
         }
 
-        // translate click event coordinates into RWU
-        var point = this.getEventRWU(e);
+        this.$store.dispatch('geometry/createFaceFromPoints', payload);
 
-        /*
-        * check for snapping - if the click happened within the tolerance range of a
-        * vertex: reuse that vertex on the face being created
-        * edge: create a new vertex at the scalar projection from the click location to the edge,
-        *     set a flag to split the edge at the new vertex
-        * origin of polygon: close the polygon being drawn
-        */
-        const snapTarget = this.findSnapTarget(point);
-        if (snapTarget) {
-            if (snapTarget.type === 'vertex') {
-                // if the snapTarget is the origin of the face being drawn in Polygon mode, close the face
-                if (snapTarget === this.points[0] && this.currentTool === 'Polygon') {
-                    // store the points in the polygon as a face
-                    this.savePolygonFace();
-                    return;
-                }
-                // data store will detect that the new point already has an id value
-                // will save a reference to the existing vertex on the new face instead of creating a new vertex
-                point = snapTarget;
-            } else if (snapTarget.type === 'edge') {
-                // create a vertex on the edge at the location closest to the mouse event (scalar projection)
-                point = snapTarget.scalar;
-                // mark the point so that the edge will be split during face creation
-                point.splittingEdge = snapTarget.snappingEdge;
-            }
-        }
-        // if no snapTarget was found and the grid is visible snap to the grid
-        else if (this.gridVisible) {
-            // calculate an offset for the gridlines based on the viewbox min_x and min_y
-            const xAdjustment = this.min_x % this.spacing,
-                yAdjustment = this.min_y % this.spacing;
-
-            // round point RWU coordinates to nearest gridline
-            point.x = round(point.x - xAdjustment, this.spacing) + xAdjustment;
-            point.y = round(point.y - yAdjustment, this.spacing) + yAdjustment;
-        }
-
-        // if we are in polygon mode and the snapped gridpoint is within the tolerance zone of the origin of the face being drawn, close the face
-        if (this.points[0] && this.currentTool === 'Polygon') {
-            const distToOrigin = Math.sqrt(
-                Math.pow(Math.abs(point.x - this.points[0].x), 2) +
-                Math.pow(Math.abs(point.y - this.points[0].y), 2)
-            );
-
-            if (distToOrigin < this.$store.getters['project/snapTolerance']) {
-                // store the points in the polygon as a face
-                this.savePolygonFace();
-                return;
-            }
-        }
-
-        // store the point
-        if (this.currentTool === 'Rectangle' || this.currentTool === 'Polygon' || this.currentTool === 'Eraser') {
-            this.points.push(point);
-        }
-
-        // create a rectangular face if two points have been drawn to the grid in rectangle tool
-        if ((this.currentTool === 'Rectangle' || this.currentTool === 'Eraser') && this.points.length === 2) {
-            this.currentTool === 'Rectangle' ? this.saveRectuangularFace() : this.eraseRectangularSelection();
-        }
+        // clear points from the grid
+        this.points = [];
     },
 
-    // ****************** PANNING ****************** //
-    // panStart (e) {
-    //     if (this.currentTool !== 'Map' && this.currentTool !== 'Pan') { return; }
-    //     this.isDragging = false;
-    //     this.$refs.grid.addEventListener('mouseup', this.panEnd);
-    //     this.$refs.grid.addEventListener('mouseout', this.panEnd);
-    //     this.$refs.grid.addEventListener('mousemove', this.panMove);
-    // },
-    // panMove (e) {
-    //     if (this.isDragging) {
-    //         const dx = this.originalScales.x(e.movementX),
-    //             dy  = this.originalScales.y(e.movementY);
-    //
-    //         this.min_x -= dx;
-    //         this.max_x -= dx;
-    //         this.min_y -= dy;
-    //         this.max_y -= dy;
-    //
-    //         this.drawGridLines();
-    //     } else {
-    //         this.points = [];
-    //         this.isDragging = true;
-    //     }
-    // },
-    // panEnd (e) {
-    //     this.$refs.grid.removeEventListener('mousemove', this.panMove);
-    //     this.$refs.grid.removeEventListener('mouseout', this.panEnd);
-    //     this.$refs.grid.removeEventListener('mouseup', this.panEnd);
-    //
-    //     if (this.isDragging) {
-    //         this.points = [];
-    //         this.drawGridLines();
-    //         this.drawPolygons();
-    //         setTimeout(() => {
-    //             this.isDragging = false;
-    //             this.calcScales();
-    //         })
-    //     }
-    // },
-
-
-    // ****************** SAVING FACES ****************** //
     /*
     * create a rectangular face from the two points on the grid
     * save the rectangle as a face for the selected space or shading
@@ -261,23 +195,12 @@ export default {
             ]
         };
 
-        if (this.currentSpace) {
-            payload.space = this.currentSpace;
-        } else if (this.currentShading) {
-            payload.shading = this.currentShading;
-        }
-        this.$store.dispatch('geometry/createFaceFromPoints', payload);
-        this.points = [];
-    },
+        // translate points from grid units to RWU
+        payload.points = payload.points.map(p => ({
+            x: this.gridToRWU(p.x, 'x'),
+            y: this.gridToRWU(p.y, 'y')
+        }));
 
-    /*
-    * create a polygon face from all points on the grid
-    * save the face for the selected space or shading
-    */
-    savePolygonFace () {
-        const payload = {
-            points: this.points
-        };
         if (this.currentSpace) {
             payload.space = this.currentSpace;
         } else if (this.currentShading) {
@@ -285,14 +208,16 @@ export default {
         }
 
         this.$store.dispatch('geometry/createFaceFromPoints', payload);
+
+        // clear points from the grid
         this.points = [];
     },
-
 
     // ****************** ERASING FACES ****************** //
     /*
-    * cut out a rectangular selection based on the two points on the grid
-    * save the rectangle as a face for the selected space or shading
+    * called when 2 points have been created on the grid and the eraser tool is active
+    * infer a rectangular eraser selection based on two points on the grid
+    * remove the intersection of all geometry on the current story with the eraser selection
     */
     eraseRectangularSelection () {
         // infer 4 corners of the rectangle based on the two points that have been drawn
@@ -305,56 +230,51 @@ export default {
             ]
         };
 
+        // translate points from grid units to RWU
+        payload.points = payload.points.map(p => ({
+            x: this.gridToRWU(p.x, 'x'),
+            y: this.gridToRWU(p.y, 'y')
+        }));
+
         this.$store.dispatch('geometry/eraseSelection', payload);
+
+        // clear points from the grid
         this.points = [];
     },
 
 
     // ****************** d3 RENDERING ****************** //
     /*
-    * render points for the face being created
+    * render points for the face being drawn, connect them with a guideline
     */
     drawPoints () {
-        // remove expired points
-        d3.selectAll('#grid ellipse').remove();
+        // remove expired points and guidelines
+        d3.selectAll('#grid ellipse, #grid path').remove();
 
         // draw points
         d3.select('#grid svg')
             .selectAll('ellipse').data(this.points)
             .enter().append('ellipse')
-            .attr('cx', (d, i) => { return d.x; })
-            .attr('cy', (d, i) => { return d.y; })
-            .attr('rx', this.calcRadius(2, 'x'))
-            .attr('ry', this.calcRadius(2, 'y'))
+            .attr('cx', d => d.x)
+            .attr('cy', d => d.y)
+            .attr('rx', this.scaleX(2))
+            .attr('ry', this.scaleY(2))
             .attr('vector-effect', 'non-scaling-stroke');
 
-        // connect the points with a guideline
-        this.connectGridPoints();
-
-        // when the first point in the polygon is clicked, close the shape
+        // apply custom CSS for origin of polygons
         d3.select('#grid svg').select('ellipse')
-            .attr('rx', this.calcRadius(7, 'x'))
-            .attr('ry', this.calcRadius(7, 'y'))
-            .classed('origin', true) // apply custom CSS for origin of polygons
+            .attr('rx', this.scaleX(7))
+            .attr('ry', this.scaleY(7))
+            .classed('origin', true)
             .attr('vector-effect', 'non-scaling-stroke')
             .attr('fill', 'none');
-    },
 
-    /*
-    * render a line connecting all points for the face being drawn
-    */
-    connectGridPoints () {
-        // remove expired paths
-        d3.selectAll('#grid path').remove();
-
-        // draw edges
+        // connect the points for the face being drawn with a line
         d3.select('#grid svg').append('path')
             .datum(this.points)
             .attr('fill', 'none')
             .attr('vector-effect', 'non-scaling-stroke')
-            .attr('d', d3.line()
-                .x((d) => { return d.x; })
-                .y((d) => { return d.y; }))
+            .attr('d', d3.line().x(d => d.x).y(d => d.y))
             // prevent edges from overlapping points - interferes with click events
             .lower();
 
@@ -363,7 +283,8 @@ export default {
     },
 
     /*
-    * render saved faces
+    * render saved faces as polygons
+    * handle clicks to select faces
     */
     drawPolygons () {
         // remove expired polygons
@@ -373,6 +294,7 @@ export default {
         d3.select('#grid svg').selectAll('polygon')
             .data(this.polygons).enter()
             .append('polygon')
+            // if a face is clicked while the Select tool is active, lookup its corresponding model (space/shading) and select it
             .on('click', (d) => {
                 if (this.currentTool === 'Select') {
                     d3.event.stopPropagation();
@@ -384,322 +306,353 @@ export default {
                     }
                 }
             })
-            .attr('points', (d, i) => {
-                var pointsString = '';
-                d.points.forEach((p) => {
-                    pointsString += (p.x + ',' + p.y + ' ');
-                });
-                return pointsString;
-            })
+            .attr("points", d => d.points.map(p => [this.rwuToGrid(p.x, 'x'), this.rwuToGrid(p.y, 'y')].join(",")).join(" "))
             .attr('class', (d, i) => {
-                if (this.currentSpace && d.face_id === this.currentSpace.face_id) { return 'currentSpace'; }
-                if (this.currentShading && d.face_id === this.currentShading.face_id) { return 'currentShading'; }
+                if ((this.currentSpace && d.face_id === this.currentSpace.face_id) ||
+                    (this.currentShading && d.face_id === this.currentShading.face_id)) { return 'current'; }
             })
             .attr('fill', d => d.color)
             .attr('vector-effect', 'non-scaling-stroke');
-
-
-
-        // remove expired points and guidelines
-        d3.selectAll('#grid path').remove();
-        d3.selectAll('#grid ellipse').remove();
-    },
-
-    /*
-    * draw lines over the svg for the grid
-    */
-    drawGridLines () {
-        // var svg = d3.select('#grid svg');
-        // svg.selectAll('line').remove();
-        //
-        // // redraw the grid if the grid is visible
-        // if (!this.$store.state.project.grid.visible) { return; }
-        //
-        // // lines are drawn in RWU
-        // svg.selectAll('.vertical')
-        //     .data(d3.range(this.min_x / this.spacing, this.max_x / this.spacing))
-        //     .enter().append('line')
-        //     .attr('x1', (d) => { return d * this.spacing; })
-        //     .attr('x2', (d) => { return d * this.spacing; })
-        //     .attr('y1', this.min_y)
-        //     .attr('y2', this.max_y)
-        //     .attr('class', 'vertical')
-        //     .attr('vector-effect', 'non-scaling-stroke');
-        //
-        // svg.selectAll('.horizontal')
-        //     .data(d3.range(this.min_y / this.spacing, this.max_y / this.spacing))
-        //     .enter().append('line')
-        //     .attr('x1', this.min_x)
-        //     .attr('x2', this.max_x)
-        //     .attr('y1', (d) => { return d * this.spacing; })
-        //     .attr('y2', (d) => { return d * this.spacing; })
-        //     .attr('class', 'horizontal')
-        //     .attr('vector-effect', 'non-scaling-stroke');
-        //
-        // d3.selectAll('.vertical, .horizontal').lower();
     },
 
     // ****************** SNAPPING TO EXISTING GEOMETRY ****************** //
     /*
-    * finds the closest vertex or edge within the snap tolerance zone of a point
+    * given a point in grid units, find the closest vertex or edge within its snap tolerance
+    * if the grid is active and no vertex or edge is within the snap tolerance, returns the closest grid point
+    * if the grid is inactive, returns the or the location of the point
     */
-    findSnapTarget (point) {
-        if (this.isDragging) { return; }
+    findSnapTarget (gridPoint) {
+        // translate grid point to real world units to check for snapping targets
+        const rwuPoint = {
+            x: this.gridToRWU(gridPoint.x, 'x'),
+            y: this.gridToRWU(gridPoint.y, 'y')
+        };
 
-        // unhighlight all edges and vertices
-        d3.selectAll('#grid .highlight').remove();
+        // if a snappable vertex exists, don't check for edges
+        const snappingVertex = this.snappingVertexData(rwuPoint);
+        if (snappingVertex) { return snappingVertex; }
 
-        const snappingVertexData = this.snappingVertexData(point),
-            snappingEdgeData = this.snappingEdgeData(point);
+        const snappingEdge = this.snappingEdgeData(rwuPoint);
+        if (snappingEdge) { return snappingEdge; }
 
-        // if a vertex and an edge are both within the cursor's snap tolerance, find the closest one
-        if (snappingVertexData && snappingEdgeData) {
-            // if we are in polygon mode and the snappingVertex is the origin use the vertex regardless of whether the edge is closer
-            if (snappingVertexData === this.points[0]) { return snappingVertexData; }
-            return snappingVertexData.dist <= snappingEdgeData.dist ? snappingVertexData : snappingEdgeData;
-        } else if (snappingVertexData) {
-            return snappingVertexData;
-        } else if (snappingEdgeData) {
-            return snappingEdgeData;
-        }
-    },
+        // grid is active and no vertices or edges are within snapping range, calculate the closest grid point to snap to
+        if (this.gridVisible) {
+            // offset of the first gridline on each axis
+            const xOffset = +this.axis.x.select('.tick').attr('transform').replace('translate(', '').replace(')', '').split(',')[0],
+                yOffset = +this.axis.y.select('.tick').attr('transform').replace('translate(', '').replace(')', '').split(',')[1],
 
-    /*
-    * look up data for the closest vertex within the tolerance zone of a point
-    */
-    snappingVertexData (point) {
-        var snappingCandidates = JSON.parse(JSON.stringify(this.$store.getters['application/currentStoryGeometry'].vertices));
+                // spacing between ticks in grid units
+                xTickSpacing = this.rwuToGrid(this.spacing + this.min_x, 'x'),
+                yTickSpacing = this.rwuToGrid(this.spacing + this.min_y, 'y');
 
-        // add the origin of the current polygon as a snapping candidate
-        if (this.points[0] && this.currentTool === 'Polygon') {
-            snappingCandidates.push(this.points[0]);
-        }
-        snappingCandidates = snappingCandidates.filter((v) => {
-            const dx = Math.abs(v.x - point.x),
-                dy = Math.abs(v.y - point.y);
-            return (dx < this.$store.getters['project/snapTolerance'] && dy < this.$store.getters['project/snapTolerance']);
-        });
+            // round point RWU coordinates to nearest gridline, adjust by grid offset
+            const snapTarget = {
+                type: 'gridpoint',
+                x: this.round(gridPoint.x, this.rwuToGrid(this.spacing + this.min_x, 'x')) + xOffset,
+                y: this.round(gridPoint.y, this.rwuToGrid(this.spacing + this.min_y, 'y')) + yOffset
+            };
 
-        var nearestVertex;
-        if (snappingCandidates.length > 1) {
-            nearestVertex = snappingCandidates.reduce((a, b) => {
-                const aDx = Math.abs(a.x - point.x),
-                    aDy = Math.abs(a.y - point.y),
-                    bDx = Math.abs(b.x - point.x),
-                    bDy = Math.abs(b.y - point.y);
-                return aDx * aDy <= bDx * bDy ? a : b;
-            });
-        } else {
-            nearestVertex = snappingCandidates[0];
+            // pick closest point
+            snapTarget.x = Math.abs(gridPoint.x - (snapTarget.x - xTickSpacing)) > Math.abs(gridPoint.x - snapTarget.x) ? snapTarget.x : snapTarget.x - xTickSpacing;
+            snapTarget.y = Math.abs(gridPoint.y - (snapTarget.y - yTickSpacing)) > Math.abs(gridPoint.y - snapTarget.y) ? snapTarget.y : snapTarget.y - yTickSpacing;
+
+            return snapTarget;
         }
 
-        if (nearestVertex) {
-            const a = Math.abs(point.x - nearestVertex.x),
-                b = Math.abs(point.y - nearestVertex.y),
-                c = (a * a) + (b * b);
-
-            nearestVertex.dist = Math.sqrt(c);
-            nearestVertex.type = 'vertex';
-
-            return nearestVertex;
-        }
-    },
-
-    /*
-    * look up data for the closest edge within the tolerance zone of a point
-    */
-    snappingEdgeData (point) {
-        // filter all edges within the snap tolerance of the point
-        const snappingCandidates = this.currentStoryGeometry.edges.map((e) => {
-            const v1 = geometryHelpers.vertexForId(e.v1, this.currentStoryGeometry),
-                v2 = geometryHelpers.vertexForId(e.v2, this.currentStoryGeometry);
-
-            if (!v1 || !v2) { debugger; }
-
-            const edgeResult = geometryHelpers.projectToEdge(point, v1, v2);
-            return edgeResult ? {
-                dist: edgeResult.dist, // dist between original point location and projection to edge
-                scalar: edgeResult.scalar, // projection of point to edge
-                snappingEdge: e, // snapping edge
-                // populated snapping edge vertices - to display snapping point
-                snappingEdgeV1: v1,
-                snappingEdgeV2: v2
-            } : null;
-        }).filter((eR) => {
-            return eR && eR.dist < this.$store.getters['project/snapTolerance'];
-        });
-
-        // use the closest edge if there are multiple edges within the snap tolerance
-        var nearestEdge;
-        if (snappingCandidates.length > 1) {
-            nearestEdge = snappingCandidates.reduce((a, b) => {
-                return a.dist <= b.dist ? a : b;
-            });
-        } else {
-            nearestEdge = snappingCandidates[0];
-        }
-
-        if (nearestEdge) {
-            nearestEdge.type = 'edge';
-            return nearestEdge;
-        }
-    },
-
-
-    // ****************** HELPERS ****************** //
-    /*
-    * translates the mouse event coordinates to RWU
-    * adjusts incorrect coordinates caused by svg hover
-    */
-    getEventRWU (e) {
-        // when the user hovers over certain SVG child nodes, event locations are incorrect
+        // nothing to snap to, just return the locatio of the point
         return {
-            x: this.scaleX(e.offsetX),
-            y: this.scaleY(e.offsetY)
+            type: 'gridpoint',
+            ...gridPoint
         };
     },
 
     /*
-    * calc point radius, adjusting by the minimum x and y values for the grid to prevent stretched points
+    * given a point in RWU, look up the closest snappable vertex
+    * if the vertex is within the snap tolerance of the point, return the coordinates of the vertex in grid units
+    * and the distance from the vertex to the point
     */
-    calcRadius (pxRad, axis) {
-        if (this.isDragging) { return 0; }
-        var r;
-        if (axis === 'x') {
-            r = this.scaleX(pxRad) - this.min_x;
-        } else if (axis === 'y') {
-            r = this.scaleY(pxRad) - this.min_y;
+    snappingVertexData (point) {
+        // build a list of vertices (in RWU) available for snapping
+        // deep copy all vertices on the current story
+        var snappableVertices =  [...this.currentStoryGeometry.vertices];
+
+        // TODO: conditionally combine this list with vertices from the next story down if it is visible
+        // if (this.previousStoryVisible) { snappableVertices = snappableVertices.concat(JSON.parse(JSON.stringify(previousStoryVertices))); }
+
+        // if the polygon tool is active and the polygon being drawn has at least 3 existing points allow snapping to the origin of the polygon
+        if (this.points.length >= 3 && this.currentTool === 'Polygon') {
+            // convert the polygon origin from grid units to real world units before adding it as a snappable vertex
+            snappableVertices.push({
+                x: this.gridToRWU(this.points[0].x, 'x'),
+                y: this.gridToRWU(this.points[0].y, 'y'),
+                origin: true // set a flag to mark the origin
+            });
         }
 
-        return r < 0 ? 0 : r;
+        if (!snappableVertices.length) { return; }
+
+        // find the vertex closest to the point being tested
+        const nearestVertex = snappableVertices.reduce((a, b) => {
+            const aDist = this.distanceBetweenPoints(a, point),
+                bDist = this.distanceBetweenPoints(b, point);
+            return aDist < bDist ? a : b;
+        });
+
+        // return the nearest vertex if it is within the snap tolerance of the point
+        if (this.distanceBetweenPoints(nearestVertex, point) < this.$store.getters['project/snapTolerance']) {
+            return {
+                x: this.rwuToGrid(nearestVertex.x, 'x'),
+                y: this.rwuToGrid(nearestVertex.y, 'y'),
+                origin: nearestVertex.origin,
+                type: 'vertex'
+            };
+        }
     },
 
     /*
-    * generate d3 scaling functions based on the svg viewbox and the pixel size of the svg
+    * given a point in RWU, look up the closest snappable edge
+    * if the projection of the point to the edge is within the snap tolerance of the point, return the edge and coordinates of the projection in grid units
+    * and the distance from the projection to the point
     */
-    calcScales () {
-        if (this.isDragging) { return; }
-        this.max_y = (this.$refs.grid.clientHeight / this.$refs.grid.clientWidth) * this.max_x;
+    snappingEdgeData (point) {
+        // build a list of edges (in RWU) available for snapping
+        // deep copy all vertices on the current story
+        var snappableEdges = [...this.currentStoryGeometry.edges];
 
-        // update scales with new grid boundaries
-        this.$store.dispatch('application/setScaleX', {
-            scaleX: d3.scaleLinear()
-                .domain([0, this.$refs.grid.clientWidth])
-                .range([this.min_x, this.max_x])
+        // TODO: conditionally combine this list with edges from the next story down if it is visible
+        // if (this.previousStoryVisible) { snappableEdges = snappableEdges.concat(JSON.parse(JSON.stringify(previousStoryEdges))); }
+
+        if (!snappableEdges.length) { return; }
+
+        // find the edge closest to the point being tested
+        const nearestEdge = snappableEdges.reduce((a, b) => {
+            // look up vertices associated with edges
+            const aV1 = geometryHelpers.vertexForId(a.v1, this.currentStoryGeometry),
+                aV2 = geometryHelpers.vertexForId(a.v2, this.currentStoryGeometry),
+
+                bV1 = geometryHelpers.vertexForId(b.v1, this.currentStoryGeometry),
+                bV2 = geometryHelpers.vertexForId(b.v2, this.currentStoryGeometry),
+
+                // project point being tested to each edge
+                aProjection = geometryHelpers.projectToEdge(point, aV1, aV2).projection,
+                bProjection = geometryHelpers.projectToEdge(point, bV1, bV2).projection,
+
+                // look up distance between projection and point being tested
+                aDist = this.distanceBetweenPoints(aProjection, point),
+                bDist = this.distanceBetweenPoints(bProjection, point);
+
+            // return data for the edge with the closest projection to the point being tested
+            return aDist < bDist ? a : b;
         });
 
-        this.$store.dispatch('application/setScaleY', {
-            scaleY: d3.scaleLinear()
-                .domain([0, this.$refs.grid.clientHeight]) // input domain (px)
-                .range([this.min_y, this.max_y]) // output range (rwu)
-        });
+        // look up vertices associated with nearest edge
+        const nearestEdgeV1 = geometryHelpers.vertexForId(nearestEdge.v1, this.currentStoryGeometry),
+            nearestEdgeV2 = geometryHelpers.vertexForId(nearestEdge.v2, this.currentStoryGeometry),
+
+            // project point being tested to nearest edge
+            projection = geometryHelpers.projectToEdge(point, nearestEdgeV1, nearestEdgeV2).projection,
+
+            // look up distance between projection and point being tested
+            dist = this.distanceBetweenPoints(projection, point);
+
+        // return data for the edge if the projection is within the snap tolerance of the point
+        if (dist < this.$store.getters['project/snapTolerance']) {
+            return {
+                snappingEdge: nearestEdge,
+                dist: nearestEdge.dist,
+                type: 'edge',
+                // projection and snapping edge vertices translated into grid coordinates (to display snapping point and highlight edges)
+                projection: { x: this.rwuToGrid(projection.x, 'x'), y: this.rwuToGrid(projection.y, 'y') },
+                v1GridCoords: { x: this.rwuToGrid(nearestEdgeV1.x, 'x'), y: this.rwuToGrid(nearestEdgeV1.y, 'y') },
+                v2GridCoords: { x: this.rwuToGrid(nearestEdgeV2.x, 'x'), y: this.rwuToGrid(nearestEdgeV2.y, 'y') }
+            }
+        }
     },
 
+    // ****************** SNAPPING HELPERS ****************** //
+    /*
+    * returns the distance between two points
+    */
+    distanceBetweenPoints (p1, p2) {
+        const dx = Math.abs(p1.x - p2.x),
+            dy = Math.abs(p1.y - p2.y);
+        return Math.sqrt((dx * dx) + (dy * dy));
+    },
+
+    /*
+    * round a number n to the nearest x
+    */
+    round (n, x) {
+        var result,
+            sign = n < 0 ? -1 : 1;
+        n = Math.abs(n);
+        if (n % x < x / 2) {
+            result = n - (n % x);
+        } else {
+            result = n + x - (n % x);
+        }
+        // handle negatives
+        return result *= sign;
+    },
+
+    // ****************** GRID ****************** //
     calcGrid () {
-        var svg = d3.select('#grid svg'),
+        // set viewbox on svg in rwu so drawing coordinates are in rwu and not pixels
+        this.$refs.grid.setAttribute('viewBox', `0 0 ${this.max_x - this.min_x} ${this.max_y - this.min_y}`);
+
+        // scaleX amd scaleY are used during drawing to translate from px to RWU given the current grid dimensions in rwu
+        // these are initialized here and never changed
+        this.scaleX = d3.scaleLinear()
+            .domain([0, this.$refs.grid.clientWidth])
+            .range([this.min_x, this.max_x]);
+        this.scaleY = d3.scaleLinear()
+            .domain([0, this.$refs.grid.clientHeight])
+            .range([this.min_y, this.max_y]);
+
+        const svg = d3.select('#grid svg'),
+            // rwu dimensions (coordinates used within grid)
+            rwuHeight = this.max_y - this.min_y,
             rwuWidth = this.max_x - this.min_x,
-            rwuHeight = this.max_y - this.min_y;
 
-        var zoom = d3.zoom()
-            // scale must be between .5 * original bounds and 2 * original bounds
-            .scaleExtent([1, 2])
-            // panning rectangle starts at the original boundaries - 100 in the x and y directions end ends at the original bounds + 90x 100y
-            .translateExtent([[0, 0], [1000, 1000]])
+            // these are essentially unit scales, but they span the full range that each axis should cover instead of just being 1 unit long
+            zoomScaleX = d3.scaleLinear()
+                .domain([this.min_x, this.max_x])
+                .range([this.min_x, this.max_x]),
+            zoomScaleY = d3.scaleLinear()
+                .domain([this.min_y, this.max_y])
+                .range([this.min_y, this.max_y]);
+
+        // generator functions for axes
+        this.axisGenerator.x = d3.axisBottom(zoomScaleX)
+            .ticks(rwuWidth / this.spacing)
+            .tickSize(rwuHeight)
+            .tickPadding(this.scaleY(-20));
+        this.axisGenerator.y = d3.axisRight(zoomScaleY)
+            .ticks(rwuHeight / this.spacing)
+            .tickSize(rwuWidth)
+            .tickPadding(this.scaleX(-20));
+
+        this.axis.x = svg.append('g')
+            .attr('class', 'axis axis--x')
+            .attr('stroke-width', this.scaleY(1))
+            .style('display', this.gridVisible ? 'inline' : 'none')
+            .call(this.axisGenerator.x);
+        this.axis.y = svg.append('g')
+            .attr('class', 'axis axis--y')
+            .attr('stroke-width', this.scaleX(1))
+            .style('display', this.gridVisible ? 'inline' : 'none')
+            .call(this.axisGenerator.y);
+
+
+        // configure zoom behavior in rwu
+        const zoomBehavior = d3.zoom()
             .on('zoom', () => {
-                view.attr('transform', d3.event.transform);
+                // only allow zooming when the Pan tool is active
+                if (this.currentTool !== "Pan") { return; }
 
-                // this.scaleX = d3.event.transform.rescaleX(this.scaleX);
-                // this.scaleY = d3.event.transform.rescaleY(this.scaleY);
-                //
-                // this.min_x += d3.event.transform.x;
-                // this.max_x += d3.event.transform.x;
-                // this.min_y += d3.event.transform.y;
-                // this.max_y += d3.event.transform.y;
+                // create updated copies of the scales based on the zoom transformation
+                // the transformed scales are only used to obtain the new rwu grid dimensions and redraw the axes
+                // NOTE: don't change the original scale or you'll get exponential growth
+                const newScaleX = d3.event.transform.rescaleX(zoomScaleX),
+                    newScaleY = d3.event.transform.rescaleY(zoomScaleY);
 
-                gX.call(xAxis.scale(d3.event.transform.rescaleX(this.scaleX)));
-                gY.call(yAxis.scale(d3.event.transform.rescaleY(this.scaleY)));
+                [this.min_x, this.max_x] = newScaleX.domain();
+                [this.min_y, this.max_y] = newScaleY.domain();
 
+                const scaledRwuHeight = this.max_y - this.min_y,
+                    scaledRwuWidth = this.max_x - this.min_x;
+
+                // update the number of ticks to display based on the post zoom real world unit height and width
+                this.axis.y.call(this.axisGenerator.y.ticks(scaledRwuHeight / this.spacing));
+                this.axis.x.call(this.axisGenerator.x.ticks(scaledRwuWidth / this.spacing));
+
+                // create transformed copies of the scales and apply them to the axes
+                this.axis.x.call(this.axisGenerator.x.scale(newScaleX));
+                this.axis.y.call(this.axisGenerator.y.scale(newScaleY));
+
+                // redraw the saved geometry
+                this.drawPolygons();
             });
 
+        svg.call(zoomBehavior);
+    },
+    updateGrid () {
+        this.axis.x.style('display', this.gridVisible ? 'inline' : 'none');
+        this.axis.y.style('display', this.gridVisible ? 'inline' : 'none');
 
-        var xAxis = d3.axisBottom(this.scaleX)
-            .ticks(rwuHeight / this.spacing)
-            .tickSize(rwuHeight)
-            .tickPadding(this.scaleY(8 - this.$refs.grid.clientHeight));
+        const rwuHeight = this.max_y - this.min_y,
+            rwuWidth = this.max_x - this.min_x;
 
-        var yAxis = d3.axisRight(this.scaleY)
-            .ticks(rwuWidth / this.spacing)
-            .tickSize(rwuWidth)
-            .tickPadding(this.scaleX(8 - this.$refs.grid.clientWidth));
+        // update the number of ticks to display based on the post zoom real world unit height and width
+        this.axis.y.call(this.axisGenerator.y.ticks(rwuHeight / this.spacing));
+        this.axis.x.call(this.axisGenerator.x.ticks(rwuWidth / this.spacing));
+    },
 
-        var view = svg.append('rect')
-            .attr('class', 'view')
-            .attr('x', 0.5)
-            .attr('y', 0.5)
-            .attr('width', rwuWidth)
-            .attr('height', rwuHeight);
+    // ****************** SCALING FUNCTIONS ****************** //
+    /*
+    * take a pixel value (from a mouse event), find the corresponding real world units (for snapping to saved geometry in RWU)
+    */
+    pxToRWU (px, axis) {
+        if (axis === 'x') {
+            // TODO: computed property for current scales?
+            const currentScaleX = d3.scaleLinear()
+                    .domain([0, this.$refs.grid.clientWidth])
+                    .range([this.min_x, this.max_x]);
+            return currentScaleX(px);
+        } else if (axis === 'y') {
+            const currentScaleY = d3.scaleLinear()
+                   .domain([0, this.$refs.grid.clientHeight])
+                   .range([this.min_y, this.max_y]);
+            return currentScaleY(px);
+        }
+    },
 
-        var gX = svg.append('g')
-          .style('font-size', '4px')
-            .attr('class', 'axis axis--x')
-            .call(xAxis);
+    /*
+    * take a pixel value (from a mouse event), find the corresponding coordinates in the svg grid
+    */
+    pxToGrid (px, axis) {
+        if (axis === 'x') {
+            return this.scaleX(px);
+        } else if (axis === 'y') {
+            return this.scaleY(px);
+        }
+    },
 
-        var gY = svg.append('g')
-          .style('font-size', '4px')
-            .attr('class', 'axis axis--y')
-            .call(yAxis);
+    /*
+    * take a rwu value (from the datastore), find the corresponding coordinates in the svg grid
+    */
+    rwuToGrid (rwu, axis) {
+        if (axis === 'x') {
+            const currentScaleX = d3.scaleLinear()
+                    .domain([0, this.$refs.grid.clientWidth])
+                    .range([this.min_x, this.max_x]),
+                pxValue = currentScaleX.invert(rwu);
+            return this.pxToGrid(pxValue, axis);
+        } else if (axis === 'y') {
+            const currentScaleY = d3.scaleLinear()
+                   .domain([0, this.$refs.grid.clientHeight])
+                   .range([this.min_y, this.max_y]),
+                pxValue = currentScaleY.invert(rwu);
+            return this.pxToGrid(pxValue, axis);
+        }
+    },
 
-        svg.call(zoom);
-
-
-
-        //
-        //
-        // const svg = d3.select('#grid svg');
-        // var pxbounds = {
-        //     width: this.max_x - this.min_x,
-        //     height: this.max_y - this.min_y,
-        //     svg_dx: this.min_x,
-        //     svg_dy: this.min_y
-        // };
-        // console.log("extent", [[pxbounds.svg_dx, pxbounds.svg_dy], [pxbounds.width-(pxbounds.svg_dx*2), pxbounds.height-pxbounds.svg_dy]])
-        // console.log("scaleExtent", [1,10])
-        // var zoom = d3.zoom()
-        //     .extent([[pxbounds.svg_dx, pxbounds.svg_dy], [pxbounds.width-(pxbounds.svg_dx*2), pxbounds.height-pxbounds.svg_dy]])
-        //     .scaleExtent([1, 10])
-        //     .translateExtent([[pxbounds.svg_dx, pxbounds.svg_dy], [pxbounds.width-(pxbounds.svg_dx*2), pxbounds.height-pxbounds.svg_dy]])
-        //     .on('zoom',  (e) => {
-        //         const transform = d3.event.transform;
-        //
-        //         // update scales with new grid boundaries
-        //         this.$store.dispatch('application/setScaleX', {
-        //             scaleX: transform.rescaleX(this.scaleX)
-        //         });
-        //
-        //
-        //         // this.max_x = transform.applyX(this.scaleX(this.max_x));
-        //         // this.min_x = transform.applyX(this.scaleX(this.min_x));
-        //
-        //         // this.max_y = transform.applyY(this.max_y);
-        //         // this.min_y = transform.applyY(this.min_y);
-        //         this.drawGridLines()
-        //     });
-        //
-        // svg.call(zoom);
+    /*
+    * take a grid value (from some point already rendered to the grid) and translate it into RWU for persistence to the datastore
+    */
+    gridToRWU (gridValue, axis) {
+        if (axis === 'x') {
+            const currentScaleX = d3.scaleLinear()
+                    .domain([0, this.$refs.grid.clientWidth])
+                    .range([this.min_x, this.max_x]),
+                pxValue = this.scaleX.invert(gridValue);
+            return currentScaleX(pxValue);
+        } else if (axis === 'y') {
+            const currentScaleY = d3.scaleLinear()
+                   .domain([0, this.$refs.grid.clientHeight])
+                   .range([this.min_y, this.max_y]),
+                pxValue = this.scaleY.invert(gridValue);
+            return currentScaleY(pxValue);
+        }
     }
-}
-
-function round (point, spacing) {
-    var result,
-        sign = point < 0 ? -1 : 1;
-    point = Math.abs(point);
-    if (point % spacing < spacing / 2) {
-        result = point - (point % spacing);
-    } else {
-        result = point + spacing - (point % spacing);
-    }
-    // handle negatives
-    result *= sign;
-    // floating point precision
-    return Math.round(result * 10000000000000) / 10000000000000;
 }

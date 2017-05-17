@@ -30,11 +30,12 @@
     }
     // gridlines
     line.horizontal, line.vertical {
-        stroke: $gray-medium-light;
+        stroke: red;
         opacity: .25;
     }
     line.highlight {
-        stroke: red;
+        stroke: yellow;
+        z-index: 10;
     }
 
     // shapes
@@ -42,7 +43,7 @@
         fill-opacity: 0.5;
         pointer-events: all;
         stroke: $gray-light;
-        &.currentSpace, &.currentShading {
+        &.current {
             stroke: $secondary;
             stroke-width: 2px;
         }
@@ -53,5 +54,8 @@
     .axis line {
       stroke-opacity: 0.3;
       shape-rendering: crispEdges;
+    }
+    .tick {
+        stroke-width:1px;
     }
 }

@@ -179,7 +179,7 @@ const helpers = {
 
         return {
             dist: Math.sqrt(dx * dx + dy * dy),
-            scalar: {
+            projection: {
                 x: xProjection,
                 y: yProjection
             }
