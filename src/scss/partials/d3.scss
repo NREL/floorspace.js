@@ -40,12 +40,18 @@
 
     // shapes
     polygon, rect, path {
-        fill-opacity: 0.5;
+        fill-opacity: .9;
+        z-index: 3;
         pointer-events: all;
         stroke: $gray-light;
         &.current {
             stroke: $secondary;
             stroke-width: 2px;
+        }
+        &.previousStory {
+            z-index: -1;
+            fill-opacity: 0.3;
+
         }
     }
     rect.view {

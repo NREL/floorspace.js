@@ -83,5 +83,11 @@ export default {
         if ('rotation' in payload) {
             state.map.rotation = payload.rotation;
         }
+    },
+
+    setPreviousStoryVisible (state, payload) {
+        if ('visible' in payload) {
+            state.previous_story.visible = payload.visible;
+        }
     }
 }
