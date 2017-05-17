@@ -93,5 +93,11 @@ export default {
 
     setMapRotation (context, payload) {
         context.commit('setMapRotation', { rotation: payload.rotation });
+    },
+
+
+    setPreviousStoryVisible (context, payload) {
+        context.commit('setPreviousStoryVisible', { visible: payload.visible });
+         
     }
 }

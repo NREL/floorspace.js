@@ -310,6 +310,7 @@ export default {
             .attr('class', (d, i) => {
                 if ((this.currentSpace && d.face_id === this.currentSpace.face_id) ||
                     (this.currentShading && d.face_id === this.currentShading.face_id)) { return 'current'; }
+                if (d.previous_story) { return 'previousStory'}
             })
             .attr('fill', d => d.color)
             .attr('vector-effect', 'non-scaling-stroke');
@@ -377,7 +378,9 @@ export default {
         var snappableVertices =  [...this.currentStoryGeometry.vertices];
 
         // TODO: conditionally combine this list with vertices from the next story down if it is visible
-        // if (this.previousStoryVisible) { snappableVertices = snappableVertices.concat(JSON.parse(JSON.stringify(previousStoryVertices))); }
+        if (this.previousStoryGeometry) {
+            snappableVertices = snappableVertices.concat(JSON.parse(JSON.stringify(this.previousStoryGeometry.vertices)));
+        }
 
         // if the polygon tool is active and the polygon being drawn has at least 3 existing points allow snapping to the origin of the polygon
         if (this.points.length >= 3 && this.currentTool === 'Polygon') {
@@ -420,18 +423,25 @@ export default {
         var snappableEdges = [...this.currentStoryGeometry.edges];
 
         // TODO: conditionally combine this list with edges from the next story down if it is visible
-        // if (this.previousStoryVisible) { snappableEdges = snappableEdges.concat(JSON.parse(JSON.stringify(previousStoryEdges))); }
+        if (this.previousStoryGeometry) {
+            snappableEdges = snappableEdges.concat(JSON.parse(JSON.stringify(this.previousStoryGeometry.edges.map(e => ({
+                ...e,
+                previous_story: true
+            })))));
+        }
 
         if (!snappableEdges.length) { return; }
 
         // find the edge closest to the point being tested
         const nearestEdge = snappableEdges.reduce((a, b) => {
-            // look up vertices associated with edges
-            const aV1 = geometryHelpers.vertexForId(a.v1, this.currentStoryGeometry),
-                aV2 = geometryHelpers.vertexForId(a.v2, this.currentStoryGeometry),
+            const aStoryGeometry = a.previous_story ? this.previousStoryGeometry : this.currentStoryGeometry,
+                bStoryGeometry = b.previous_story ? this.previousStoryGeometry : this.currentStoryGeometry,
+                // look up vertices associated with edges
+                aV1 = geometryHelpers.vertexForId(a.v1, aStoryGeometry),
+                aV2 = geometryHelpers.vertexForId(a.v2, aStoryGeometry),
 
-                bV1 = geometryHelpers.vertexForId(b.v1, this.currentStoryGeometry),
-                bV2 = geometryHelpers.vertexForId(b.v2, this.currentStoryGeometry),
+                bV1 = geometryHelpers.vertexForId(b.v1, bStoryGeometry),
+                bV2 = geometryHelpers.vertexForId(b.v2, bStoryGeometry),
 
                 // project point being tested to each edge
                 aProjection = geometryHelpers.projectToEdge(point, aV1, aV2).projection,
@@ -446,8 +456,9 @@ export default {
         });
 
         // look up vertices associated with nearest edge
-        const nearestEdgeV1 = geometryHelpers.vertexForId(nearestEdge.v1, this.currentStoryGeometry),
-            nearestEdgeV2 = geometryHelpers.vertexForId(nearestEdge.v2, this.currentStoryGeometry),
+        const nearestEdgeStoryGeometry = nearestEdge.previous_story ? this.previousStoryGeometry : this.currentStoryGeometry,
+            nearestEdgeV1 = geometryHelpers.vertexForId(nearestEdge.v1, nearestEdgeStoryGeometry),
+            nearestEdgeV2 = geometryHelpers.vertexForId(nearestEdge.v2, nearestEdgeStoryGeometry),
 
             // project point being tested to nearest edge
             projection = geometryHelpers.projectToEdge(point, nearestEdgeV1, nearestEdgeV2).projection,
@@ -502,12 +513,16 @@ export default {
 
         // scaleX amd scaleY are used during drawing to translate from px to RWU given the current grid dimensions in rwu
         // these are initialized here and never changed
-        this.scaleX = d3.scaleLinear()
-            .domain([0, this.$refs.grid.clientWidth])
-            .range([this.min_x, this.max_x]);
-        this.scaleY = d3.scaleLinear()
-            .domain([0, this.$refs.grid.clientHeight])
-            .range([this.min_y, this.max_y]);
+        this.$store.dispatch('application/setScaleX', {
+            scaleX: d3.scaleLinear()
+                .domain([0, this.$refs.grid.clientWidth])
+                .range([this.min_x, this.max_x])
+        });
+        this.$store.dispatch('application/setScaleY', {
+            scaleY: d3.scaleLinear()
+                .domain([0, this.$refs.grid.clientHeight])
+                .range([this.min_y, this.max_y])
+        });
 
         const svg = d3.select('#grid svg'),
             // rwu dimensions (coordinates used within grid)

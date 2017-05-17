@@ -12,7 +12,7 @@ export default {
             north_axis: 0
         },
         grid: {
-            visible: true,
+            visible: false,
             spacing: 100
         },
         view: {
@@ -30,6 +30,9 @@ export default {
             zoom: 4.5, // 18,
             rotation: 0, //.791,
             elevation: 0
+        },
+        previous_story: {
+            visible: true
         }
     },
     actions: actions,

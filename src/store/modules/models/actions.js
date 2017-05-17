@@ -9,13 +9,13 @@ export default {
             story: story
         });
 
-        // set the new story as the current story
-        context.dispatch('application/setCurrentStory', {
-            story: story
-        }, { root: true });
-
         // create a geometry object for the story
         context.dispatch('geometry/initGeometry', {
+            story: story
+        }, { root: true });
+        
+        // set the new story as the current story
+        context.dispatch('application/setCurrentStory', {
             story: story
         }, { root: true });
     },
@@ -183,7 +183,7 @@ export default {
 
             image.x = payload.x;
             image.y = payload.y;
-            
+
             context.commit('createImageForStory', {
                 story_id: payload.story_id,
                 image: image

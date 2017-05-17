@@ -13,31 +13,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 <button @click="$emit('createObject')">Create Object</button>
             </div>
 
-            <div class="input-number">
-                <label>min_x</label>
-                <input :value="min_x" disabled>
-            </div>
-            <div class="input-number">
-                <label>min_y</label>
-                <input :value="min_y" disabled>
-            </div>
-            <div class="input-number">
-                <label>max_x</label>
-                <input :value="max_x" disabled>
-            </div>
-            <div class="input-number">
-                <label>max_y</label>
-                <input :value="max_y" disabled>
-            </div>
-
-            <div class="input-number">
-                <label>spacing</label>
-                <input v-model.number.lazy="spacing">
-            </div>
-
             <div class="input-checkbox">
                 <label>grid</label>
                 <input type="checkbox" v-model="gridVisible">
+            </div>
+
+            <div class="input-checkbox">
+                <label>Previous Story</label>
+                <input type="checkbox" v-model="previousStoryVisible">
             </div>
 
             <div v-if="mapEnabled" class="input-checkbox">
@@ -120,6 +103,10 @@ export default {
             get () { return this.$store.state.project.map.visible; },
             set (val) { this.$store.dispatch('project/setMapVisible', { visible: val }); }
         },
+        previousStoryVisible: {
+            get () { return this.$store.state.project.previous_story.visible; },
+            set (val) { this.$store.dispatch('project/setPreviousStoryVisible', { visible: val }); }
+        },
         tool: {
             get () { return this.$store.state.application.currentSelections.tool; },
             set (val) { this.$store.dispatch('application/setApplicationTool', { tool: val }); }
@@ -129,27 +116,6 @@ export default {
         spacing: {
             get () { return this.$store.state.project.grid.spacing + ' ' + this.$store.state.project.config.units; },
             set (val) { this.$store.dispatch('project/setSpacing', { spacing: val }); }
-        },
-
-        // mix_x, min_y, max_x, and max_y are the grid dimensions in real world units
-        min_x: {
-            get () { return this.$store.state.project.view.min_x + ' ' + this.$store.state.project.config.units; },
-            set (val) { this.$store.dispatch('project/setViewMinX', { min_x: val }); }
-        },
-        min_y: {
-            get () { return this.$store.state.project.view.min_y + ' ' + this.$store.state.project.config.units; },
-            set(val) { this.$store.dispatch('project/setViewMinY', { min_y: val }); }
-        },
-        max_x: {
-            get () { return this.$store.state.project.view.max_x + ' ' + this.$store.state.project.config.units; },
-            set (val) {
-                this.$store.dispatch('project/setViewMaxX', { max_x: val });
-                this.max_y = (document.getElementById('svg-grid').clientHeight/document.getElementById('svg-grid').clientWidth) * val;
-            }
-        },
-        max_y: {
-            get () { return this.$store.state.project.view.max_y + ' ' + this.$store.state.project.config.units;  },
-            set (val) { this.$store.dispatch('project/setViewMaxY', { max_y: val }); }
         }
     }
 }

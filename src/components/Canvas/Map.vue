@@ -47,20 +47,20 @@ export default {
             this.setMapView();
         },
         setMapView() {
-          const val = this.projectView;
-          const ftPerM = ol.proj.METERS_PER_UNIT['us-ft'];
-          const res = (val.max_x - val.min_x)/this.$refs.map.clientWidth*ftPerM,
-              view = this.map.getView(),
-              centerX = ftPerM*(val.min_x + (val.max_x - val.min_x)/2),
-              centerY = ftPerM*(val.min_y + (val.max_y - val.min_y)/2),
-              originM = ol.proj.fromLonLat([this.longitude,this.latitude]); // meters
+            const val = this.projectView;
+            const ftPerM = ol.proj.METERS_PER_UNIT['us-ft'];
+            const res = (val.max_x - val.min_x)/this.$refs.map.clientWidth*ftPerM,
+                view = this.map.getView(),
+                centerX = ftPerM*(val.min_x + (val.max_x - val.min_x)/2),
+                centerY = ftPerM*(val.min_y + (val.max_y - val.min_y)/2),
+                originM = ol.proj.fromLonLat([this.longitude,this.latitude]); // meters
 
-          view.setResolution(res);
+            view.setResolution(res);
 
-          originM[0] += centerX;
-          originM[1] -= centerY; // ol origin is bottom left
+            originM[0] += centerX;
+            originM[1] -= centerY; // ol origin is bottom left
 
-          view.setCenter(originM);
+            view.setCenter(originM);
         }
     },
     computed: {

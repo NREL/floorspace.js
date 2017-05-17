@@ -205,7 +205,7 @@ export default {
                 const img = new Image();
                 var _this = this;
                 img.onload = () => {
-                    
+
                     this.$store.dispatch('models/createImageForStory', {
                         story_id: _this.currentStory.id,
                         src: img.src,
