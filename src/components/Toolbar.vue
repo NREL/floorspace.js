@@ -29,6 +29,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             </div>
 
             <div id="import-export">
+                <input ref="importLibrary" @change="importLibraryAsFile" type="file"/>
+                <button @click="$refs.importLibrary.click()">Import Library</button>
                 <input ref="importInput" @change="importDataAsFile" type="file"/>
                 <button @click="$refs.importInput.click()" id="import">Open Floorplan</button>
                 <button @click="exportData" id="export">Save Floorplan</button>
@@ -67,6 +69,17 @@ export default {
                 reader = new FileReader();
             reader.addEventListener("load", () => {
                 this.importData(reader.result);
+            }, false);
+
+            if (file) { reader.readAsText(file); }
+        },
+        importLibraryAsFile (event) {
+            const file = event.target.files[0],
+                reader = new FileReader();
+            reader.addEventListener("load", () => {
+                this.$store.dispatch('importLibrary', {
+                    data: JSON.parse(reader.result)
+                });
             }, false);
 
             if (file) { reader.readAsText(file); }
