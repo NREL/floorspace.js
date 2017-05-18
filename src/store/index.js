@@ -9,7 +9,7 @@ import geometry from './modules/geometry/index.js'
 import models from './modules/models/index.js'
 
 import exportData from './utilities/export.js'
-import importData from './utilities/import.js'
+import importData from './utilities/importModel.js'
 import importLibrary from './utilities/importLibrary.js'
 import mutations from './mutations.js'
 
