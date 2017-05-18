@@ -51,7 +51,6 @@ export default {
             thermal_zones: [],
             space_types: [],
             construction_sets: [],
-            constructions: [],
             windows: [],
             daylighting_controls: []
         }

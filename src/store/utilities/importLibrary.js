@@ -1,6 +1,6 @@
 import idFactory from './generateId'
 
-export default function importLibrary (context, payload)  {
+export default function importLibrary (context, payload) {
     // generate ids for imported objects
     (function setIds (obj) {
         for (var key in obj) {

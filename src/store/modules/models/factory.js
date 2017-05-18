@@ -84,13 +84,6 @@ export default {
             name: 'Space Type ' + id
         };
     },
-    Construction: function () {
-        const id = idFactory.generate();
-        return {
-            id: id,
-            name: 'Construction ' + id
-        };
-    },
     ConstructionSet: function () {
         const id = idFactory.generate();
         return {

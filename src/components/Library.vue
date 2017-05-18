@@ -230,7 +230,6 @@ export default {
                 case 'thermal_zones':
                 case 'space_types':
                 case 'construction_sets':
-                case 'constructions':
                 case 'windows':
                 case 'daylighting_controls':
                     const newObject = new helpers.map[this.type].init(this.displayTypeForType(this.type) + " " + (1 + this.displayObjects.length));

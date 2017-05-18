@@ -101,24 +101,6 @@ const map = {
         },
         init: factory.ConstructionSet
     },
-    constructions: {
-        displayName: 'Construction',
-        keymap: {
-            id: {
-                displayName: 'ID',
-                readonly: true,
-                private: false
-            },
-            name: {
-                displayName: 'Name',
-                readonly: false,
-                input_type: 'text',
-                private: false,
-                validator: validators.name
-            }
-        },
-        init: factory.Construction
-    },
     windows: {
         displayName: 'Window',
         keymap: {
