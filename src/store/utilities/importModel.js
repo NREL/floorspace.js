@@ -89,4 +89,6 @@ export default function importModel (context, payload)  {
         },
         geometry: geometry
     });
+    
+    document.getElementById("svg-grid").dispatchEvent(new Event('reloadGrid'));
 }

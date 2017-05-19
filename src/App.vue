@@ -11,7 +11,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <main>
             <navigation></navigation>
             <canvas-view></canvas-view>
-            <grid-view></grid-view>
+            <grid-view ref="grid"></grid-view>
 
             <map-modal v-if="mapModalVisible" @close="mapModalVisible = false"></map-modal>
         </main>

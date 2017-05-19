@@ -8,7 +8,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
 <div id="grid" :style="{ 'pointer-events': (currentTool === 'Drag' || currentTool === 'Map') ? 'none': 'all' }">
-    <button @click="reloadGrid">hgjf</button>
     <svg ref="grid" @click="gridClicked" @mousemove="highlightSnapTarget" preserveAspectRatio="none" id="svg-grid"></svg>
 </div>
 </template>
@@ -59,6 +58,7 @@ export default {
         this.calcGrid();
         this.drawPolygons();
 
+        this.$refs.grid.addEventListener('reloadGrid', this.reloadGrid);
         // recalculate the grid when the window resizes
         // const _this = this;
         // window.addEventListener('resize', () => {
@@ -69,6 +69,8 @@ export default {
         // });
     },
     beforeDestroy () {
+
+        this.$refs.grid.removeEventListener('reloadGrid', this.reloadGrid);
         // window.removeEventListener('resize', this.resize());
     },
     computed: {

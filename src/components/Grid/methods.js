@@ -519,12 +519,10 @@ export default {
                 // the zoom identity scale is calculated from original_bounds,
                 // so we can infer a new zoom identity by taking the ratio between the original x range and new x range
                 d3.zoomIdentity.k = (this.original_bounds.max_x - this.original_bounds.min_x) / (this.max_x - this.min_x);
-
                 d3.zoomIdentity.x = -this.min_x * d3.zoomIdentity.k;
                 d3.zoomIdentity.y = -this.min_y * d3.zoomIdentity.k;
 
                 d3.select('#grid svg').call(this.zoomBehavior.transform, d3.zoomIdentity);
-
                 return d3.zoomIdentity;
             });
     },
