@@ -8,6 +8,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
 <div id="grid" :style="{ 'pointer-events': (currentTool === 'Drag' || currentTool === 'Map') ? 'none': 'all' }">
+    <button @click="reloadGrid">hgjf</button>
     <svg ref="grid" @click="gridClicked" @mousemove="highlightSnapTarget" preserveAspectRatio="none" id="svg-grid"></svg>
 </div>
 </template>
@@ -23,11 +24,19 @@ export default {
     name: 'grid',
     data() {
         return {
+            original_bounds: {
+                min_x: null,
+                min_y: null,
+                max_x: null,
+                max_y: null,
+                pxWidth: null,
+                pxHeight: null
+            },
             axis: {
                 x: null,
                 y: null,
             },
-            axisGenerator: {
+            axis_generator: {
                 x: null,
                 y: null
             },
@@ -38,24 +47,30 @@ export default {
         // initialize the y dimensions in RWU based on the aspect ratio of the grid on the screen
         this.max_y = (this.$refs.grid.clientHeight / this.$refs.grid.clientWidth) * this.max_x;
 
+        this.original_bounds = {
+            min_x: this.min_x,
+            min_y: this.min_y,
+            max_x: this.max_x,
+            max_y: this.max_y,
+            pxWidth: this.$refs.grid.clientWidth,
+            pxHeight: this.$refs.grid.clientHeight
+        };
+
         this.calcGrid();
         this.drawPolygons();
 
         // recalculate the grid when the window resizes
-        // const original_max_x = this.max_x,
-        //     original_max_y = this.max_y,
-        //     original_width = this.$refs.grid.clientWidth,
-        //     original_height = this.$refs.grid.clientHeight;
+        // const _this = this;
         // window.addEventListener('resize', () => {
-        //     this.max_y = original_max_y * (this.$refs.grid.clientHeight / original_height);
-        //     this.max_x = original_max_x * (this.$refs.grid.clientWidth / original_width);
+        //     _this.max_y = _this.original_bounds.max_y * (_this.$refs.grid.clientHeight / _this.original_bounds.pxHeight);
+        //     _this.max_x = _this.original_bounds.max_x * (_this.$refs.grid.clientWidth / _this.original_bounds.pxWidth);
         //
-        //     this.updateGrid();
+        //     _this.reloadGrid();
         // });
     },
-    // beforeDestroy () {
-    //     window.removeEventListener('resize', this.resize());
-    // },
+    beforeDestroy () {
+        // window.removeEventListener('resize', this.resize());
+    },
     computed: {
         ...mapState({
             currentMode: state => state.application.currentSelections.mode,
@@ -193,6 +208,8 @@ export default {
         },
     },
     watch: {
+        // TODO: method for when new view dimensions are imported or the px dimensions change
+
         gridVisible() {
             this.updateGrid();
         },
@@ -228,7 +245,10 @@ export default {
 <style lang="scss" scoped>@import "./../../scss/config";
 // styles for dynamically created d3 elements go into src/scss/partials/d3.scss
 #grid {
-
+    button {
+        position: absolute;
+        z-index: 1000;
+    }
     img {
         position: absolute;
     }

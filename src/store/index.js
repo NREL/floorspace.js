@@ -9,7 +9,7 @@ import geometry from './modules/geometry/index.js'
 import models from './modules/models/index.js'
 
 import exportData from './utilities/export.js'
-import importData from './utilities/importModel.js'
+import importModel from './utilities/importModel.js'
 import importLibrary from './utilities/importLibrary.js'
 import mutations from './mutations.js'
 
@@ -25,7 +25,7 @@ const store = new Vuex.Store({
         exportData: exportData
     },
     actions: {
-        importData: importData,
+        importModel: importModel,
         importLibrary: importLibrary
     },
     mutations: mutations

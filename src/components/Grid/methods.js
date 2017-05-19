@@ -314,6 +314,9 @@ export default {
             })
             .attr('fill', d => d.color)
             .attr('vector-effect', 'non-scaling-stroke');
+
+        // render the selected model's face above the other polygons so that the border is not obscured
+        d3.select('.current').raise();
     },
 
     // ****************** SNAPPING TO EXISTING GEOMETRY ****************** //
@@ -506,6 +509,26 @@ export default {
         return result *= sign;
     },
 
+    /*
+    * If the min_x, max_x, min_y, max_y are changed by some non zoom event (like window resize or model import)
+    * like a window resize or a data import adjust the zoom identity
+    */
+    reloadGrid (dx, dy, dz) {
+        d3.select('#grid svg')
+            .call(this.zoomBehavior.transform, () => {
+                // the zoom identity scale is calculated from original_bounds,
+                // so we can infer a new zoom identity by taking the ratio between the original x range and new x range
+                d3.zoomIdentity.k = (this.original_bounds.max_x - this.original_bounds.min_x) / (this.max_x - this.min_x);
+
+                d3.zoomIdentity.x = -this.min_x * d3.zoomIdentity.k;
+                d3.zoomIdentity.y = -this.min_y * d3.zoomIdentity.k;
+
+                d3.select('#grid svg').call(this.zoomBehavior.transform, d3.zoomIdentity);
+
+                return d3.zoomIdentity;
+            });
+    },
+
     // ****************** GRID ****************** //
     calcGrid () {
         // set viewbox on svg in rwu so drawing coordinates are in rwu and not pixels
@@ -538,11 +561,11 @@ export default {
                 .range([this.min_y, this.max_y]);
 
         // generator functions for axes
-        this.axisGenerator.x = d3.axisBottom(zoomScaleX)
+        this.axis_generator.x = d3.axisBottom(zoomScaleX)
             .ticks(rwuWidth / this.spacing)
             .tickSize(rwuHeight)
             .tickPadding(this.scaleY(-20));
-        this.axisGenerator.y = d3.axisRight(zoomScaleY)
+        this.axis_generator.y = d3.axisRight(zoomScaleY)
             .ticks(rwuHeight / this.spacing)
             .tickSize(rwuWidth)
             .tickPadding(this.scaleX(-20));
@@ -551,17 +574,18 @@ export default {
             .attr('class', 'axis axis--x')
             .attr('stroke-width', this.scaleY(1))
             .style('display', this.gridVisible ? 'inline' : 'none')
-            .call(this.axisGenerator.x);
+            .call(this.axis_generator.x);
         this.axis.y = svg.append('g')
             .attr('class', 'axis axis--y')
             .attr('stroke-width', this.scaleX(1))
             .style('display', this.gridVisible ? 'inline' : 'none')
-            .call(this.axisGenerator.y);
+            .call(this.axis_generator.y);
 
 
         // configure zoom behavior in rwu
-        const zoomBehavior = d3.zoom()
+        this.zoomBehavior = d3.zoom()
             .on('zoom', () => {
+
                 // only allow zooming when the Pan tool is active
                 if (this.currentTool !== "Pan") { return; }
 
@@ -570,7 +594,7 @@ export default {
                 // NOTE: don't change the original scale or you'll get exponential growth
                 const newScaleX = d3.event.transform.rescaleX(zoomScaleX),
                     newScaleY = d3.event.transform.rescaleY(zoomScaleY);
-
+                console.log(d3.event.transform.k);
                 [this.min_x, this.max_x] = newScaleX.domain();
                 [this.min_y, this.max_y] = newScaleY.domain();
 
@@ -578,18 +602,18 @@ export default {
                     scaledRwuWidth = this.max_x - this.min_x;
 
                 // update the number of ticks to display based on the post zoom real world unit height and width
-                this.axis.y.call(this.axisGenerator.y.ticks(scaledRwuHeight / this.spacing));
-                this.axis.x.call(this.axisGenerator.x.ticks(scaledRwuWidth / this.spacing));
+                this.axis.y.call(this.axis_generator.y.ticks(scaledRwuHeight / this.spacing));
+                this.axis.x.call(this.axis_generator.x.ticks(scaledRwuWidth / this.spacing));
 
                 // create transformed copies of the scales and apply them to the axes
-                this.axis.x.call(this.axisGenerator.x.scale(newScaleX));
-                this.axis.y.call(this.axisGenerator.y.scale(newScaleY));
+                this.axis.x.call(this.axis_generator.x.scale(newScaleX));
+                this.axis.y.call(this.axis_generator.y.scale(newScaleY));
 
                 // redraw the saved geometry
                 this.drawPolygons();
             });
 
-        svg.call(zoomBehavior);
+        svg.call(this.zoomBehavior);
     },
     updateGrid () {
         this.axis.x.style('display', this.gridVisible ? 'inline' : 'none');
@@ -599,8 +623,8 @@ export default {
             rwuWidth = this.max_x - this.min_x;
 
         // update the number of ticks to display based on the post zoom real world unit height and width
-        this.axis.y.call(this.axisGenerator.y.ticks(rwuHeight / this.spacing));
-        this.axis.x.call(this.axisGenerator.x.ticks(rwuWidth / this.spacing));
+        this.axis.y.call(this.axis_generator.y.ticks(rwuHeight / this.spacing));
+        this.axis.x.call(this.axis_generator.x.ticks(rwuWidth / this.spacing));
     },
 
     // ****************** SCALING FUNCTIONS ****************** //

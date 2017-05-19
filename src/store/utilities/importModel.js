@@ -2,7 +2,7 @@ import idFactory from './generateId'
 
 const d3 = require('d3');
 
-export default function importData (context, payload)  {
+export default function importModel (context, payload)  {
     // GEOMETRY
     const geometry = JSON.parse(JSON.stringify(payload.data.stories.map(s => s.geometry)));
     for (var i = 0; i < geometry.length; i++) {
@@ -45,12 +45,8 @@ export default function importData (context, payload)  {
 
     // APPLICATION
     // update scales with new grid boundaries
-    payload.data.application.scale.x = d3.scaleLinear()
-        .domain([0, payload.clientWidth])
-        .range([payload.data.project.view.min_x, payload.data.project.view.max_x])
-    payload.data.application.scale.y = d3.scaleLinear()
-        .domain([0, payload.clientHeight])
-        .range([payload.data.project.view.min_y, payload.data.project.view.max_y])
+    payload.data.application.scale.x = context.state.application.scale.x;
+    payload.data.application.scale.y = context.state.application.scale.y;
 
     // set currentSelections so that references are pointed to objects in the store instead of deep copies
     const currentSelections = payload.data.application.currentSelections,

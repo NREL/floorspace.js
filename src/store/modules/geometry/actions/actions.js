@@ -41,7 +41,7 @@ export default {
                     [affectedModel.type]: affectedModel,
                     face_id: null
                 }, { root: true });
-
+                
                 context.dispatch('destroyFaceAndDescendents', {
                     geometry: currentStoryGeometry,
                     face: existingFace
