@@ -104,7 +104,8 @@ export default {
                 return (this.currentMode !== 'spaces' && this.currentMode !== 'shading') && (t === 'Rectangle' || t === 'Polygon') ? false : true;
             })
             .filter((t) => {
-                return (!this.mapEnabled && t === 'Map') ? false : true;
+                // return (!this.mapEnabled && t === 'Map') ? false : true;
+                return t !== 'Map'; // Hide map tool
             });
         },
 

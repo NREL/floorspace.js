@@ -7,15 +7,13 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 <template>
     <div id="app">
-        <toolbar></toolbar>
+        <toolbar v-bind:class="[{'disabled-component': mapSetup}]"></toolbar>
         <main>
-            <navigation></navigation>
+            <navigation v-bind:class="[{'disabled-component': mapSetup}]"></navigation>
             <canvas-view></canvas-view>
             <grid-view></grid-view>
-
-            <map-modal v-if="mapModalVisible" @close="mapModalVisible = false"></map-modal>
         </main>
-        <library></library>
+        <library v-bind:class="[{'disabled-component': mapSetup}]"></library>
     </div>
 </template>
 
@@ -27,16 +25,13 @@ import Grid from './components/Grid/Grid'
 import Canvas from './components/Canvas/Canvas'
 import Toolbar from './components/Toolbar'
 import Library from './components/Library'
-import MapModal from './components/Modals/MapModal'
 
 import { mapState } from 'vuex'
 
 export default {
     name: 'app',
     data () {
-        return {
-            mapModalVisible: false // TODO: return to true
-        }
+        return {}
     },
     beforeCreate () {
         // create a default story, set as current story
@@ -52,7 +47,8 @@ export default {
 
     },
     computed: {
-        ...mapState({ tool: state => state.application.currentSelections.tool })
+        ...mapState({ tool: state => state.application.currentSelections.tool }),
+        mapSetup () { return this.tool === 'Map'; }
     },
     components: {
         'grid-view': Grid,
@@ -60,7 +56,6 @@ export default {
         'library': Library,
         'navigation': Navigation,
         'toolbar': Toolbar,
-        'map-modal': MapModal
     }
 }
 </script>

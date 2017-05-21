@@ -7,7 +7,21 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 
 <template>
-    <div id="map" ref="map" :style="{ 'pointer-events': currentTool === 'Map' ? 'all': 'none' }"></div>
+    <div id="map-container">
+        <div id="map" ref="map" :style="{ 'pointer-events': mapSetup ? 'all': 'none' }"></div>
+        <div id="autocomplete" v-show="mapSetup">
+            <span class="input-text">
+                <input
+                    ref="autocompleteText"
+                    type="text"
+                    placeholder="Search for a location"
+                />
+            </span>
+            <button @click="finishSetup">Done</button>
+        </div>
+        <p v-if="mapSetup" id="help-text">Drag the map and/or search to set desired location.  Use alt+shift to rotate the north axis. Click 'Done' when finished.</p>
+        <map-modal v-if="mapModalVisible" @close="mapModalVisible = false; loadMap();"></map-modal>
+    </div>
 </template>
 
 <script>
@@ -15,66 +29,95 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 const ol = require('openlayers'),
     Konva = require('konva');
 import { mapState } from 'vuex'
+import MapModal from 'src/components/Modals/MapModal'
 
 export default {
     name: 'map',
     data () {
         return {
             view: null,
-            map: null
+            map: null,
+            autocomplete: null,
+            mapModalVisible: true
         };
     },
     mounted () {
+        if (window.google) {
+            this.loadAutocomplete();
+        } else {
+            const script = document.createElement('script');
+
+            window.googPlacesReady = this.loadAutocomplete;
+
+            script.type = 'text/javascript';
+            script.src = 'https://maps.googleapis.com/maps/api/js?libraries=places&callback=googPlacesReady';
+            document.body.appendChild(script);
+        }
+
         this.loadMap();
     },
     methods: {
         loadMap() {
             const mapNode = document.getElementById("map");
+
             while (mapNode.firstChild) {
                 mapNode.removeChild(mapNode.firstChild);
             }
-            this.view = new ol.View({
-                center: ol.proj.fromLonLat([this.longitude, this.latitude]),
-                rotation: this.rotation,
-                zoom: this.zoom
-            });
+
+            this.view = new ol.View();
             this.map = new ol.Map({
                 layers: [new ol.layer.Tile({ source: new ol.source.OSM() })],
                 target: 'map',
-                view: this.view,
-                interactions: ol.interaction.defaults({ altShiftDragRotate: !this.currentStoryGeometry.faces.length})
+                view: this.view
             });
-            this.setMapView();
+
+            this.updateMapView();
         },
-        setMapView() {
-            const val = this.projectView;
-            const ftPerM = ol.proj.METERS_PER_UNIT['us-ft'];
-            const res = (val.max_x - val.min_x)/this.$refs.map.clientWidth*ftPerM,
-                view = this.map.getView(),
-                centerX = ftPerM*(val.min_x + (val.max_x - val.min_x)/2),
-                centerY = ftPerM*(val.min_y + (val.max_y - val.min_y)/2),
-                originM = ol.proj.fromLonLat([this.longitude,this.latitude]); // meters
+        updateMapView() {
+            const mPerFt = ol.proj.METERS_PER_UNIT['us-ft'];
+            const res = (this.projectView.max_x - this.projectView.min_x)/this.$refs.map.clientWidth*mPerFt,
+                deltaXFt = this.projectView.min_x + (this.projectView.max_x - this.projectView.min_x)/2,
+                deltaYFt = this.projectView.min_y + (this.projectView.max_y - this.projectView.min_y)/2,
+                center = ol.proj.fromLonLat([this.longitude,this.latitude]), // meters
+                sine = Math.sin(this.rotation),
+                cosine = Math.cos(this.rotation);
 
-            view.setResolution(res);
+            center[0] += mPerFt*(deltaXFt * cosine + deltaYFt * sine);
+            center[1] -= mPerFt*(deltaYFt * cosine - deltaXFt * sine); // ol origin is bottom left
 
-            originM[0] += centerX;
-            originM[1] -= centerY; // ol origin is bottom left
+            this.view.setResolution(res);
+            this.view.setCenter(center);
+            this.view.setRotation(this.rotation);
+        },
+        // setup
+        loadAutocomplete () {
+            this.autocomplete = new google.maps.places.Autocomplete(this.$refs.autocompleteText);
+            this.autocomplete.addListener('place_changed', this.selectLocation);
+        },
+        selectLocation () {
+            var place = this.autocomplete.getPlace();
 
-            view.setCenter(originM);
+            if (place.geometry) {
+                this.latitude = place.geometry.location.lat(),
+                this.longitude = place.geometry.location.lng();
+            }
+        },
+        finishSetup () {
+            const center = ol.proj.transform(this.view.getCenter(), 'EPSG:3857', 'EPSG:4326')
+
+            this.longitude = center[0];
+            this.latitude = center[1];
+            this.rotation = this.view.getRotation();
+            this.tool = 'Rectangle';
         }
     },
     computed: {
-        ...mapState({
-            currentTool: state => state.application.currentSelections.tool,
-            projectView: state => state.project.view,
-        }),
-        currentStoryGeometry () { return this.$store.getters['application/currentStoryGeometry']; },
-        mapVisible: {
-            get () { return this.$store.state.project.map.visible; },
-            set (val) { this.$store.dispatch('project/setMapVisible', { visible: val }); }
+        ...mapState({ projectView: state => state.project.view }),
+        tool: {
+            get () { return this.$store.state.application.currentSelections.tool; },
+            set (val) { this.$store.dispatch('application/setApplicationTool', { tool: val }); }
         },
-
-        // the position information for the map in the data store
+        mapSetup () { return this.tool === 'Map'; },
         latitude: {
             get () { return this.$store.state.project.map.latitude; },
             set (val) { this.$store.dispatch('project/setMapLatitude', { latitude: val }); }
@@ -83,44 +126,22 @@ export default {
             get () { return this.$store.state.project.map.longitude; },
             set (val) { this.$store.dispatch('project/setMapLongitude', { longitude: val }); }
         },
-        zoom: {
-            get () { return this.$store.state.project.map.zoom; },
-            set (val) { this.$store.dispatch('project/setMapZoom', { zoom: val }); }
-        },
         rotation: {
             get () { return this.$store.state.project.map.rotation; },
             set (val) { this.$store.dispatch('project/setMapRotation', { rotation: val }); }
         },
-
-        // // the current position of the map view on the canvas, return the position information from the store if none is set
-        // viewLongitude () { return this.view ? ol.proj.transform(this.view.getCenter(), 'EPSG:3857', 'EPSG:4326')[0] : null; },
-        // viewLatitude () { return this.view ? ol.proj.transform(this.view.getCenter(), 'EPSG:3857', 'EPSG:4326')[1] : null; },
-        // viewZoom () { return this.view ? this.view.getZoom() : this.zoom; },
-        // viewRotation () { return this.view ? this.view.getRotation() : this.rotation; }
     },
     watch: {
-        'currentStoryGeometry.faces.length' (newVal, oldVal) {
-            if (oldVal === 0 && newVal === 1) {
-                this.loadMap();
-            }
-        },
-        // // watch for changes to map position in the datastore, update the view to reflect what's in the data store (used during model imports)
-        // latitude () { this.view.setCenter(ol.proj.fromLonLat([this.longitude, this.latitude])); },
-        // longitude () { this.view.setCenter(ol.proj.fromLonLat([this.longitude, this.latitude])); },
-        // zoom () { this.view.setZoom(this.zoom); },
-        // rotation () { this.view.setRotation(this.rotation); },
-
-        // // update the store to match the position of the map view
-        // viewLongitude (val) { this.longitude = val; },
-        // viewLatitude (val) { this.latitude = val; },
-        // viewZoom (val) { this.zoom = val; },
-        // viewRotation (val) { this.rotation = val; },
+        latitude () { this.updateMapView(); },
+        longitude () { this.updateMapView(); },
+        rotation () { this.updateMapView(); },
         projectView: {
-            handler (val) {
-                this.setMapView();
-            },
+            handler () { this.updateMapView(); },
             deep: true
         }
+    },
+    components: {
+        MapModal
     }
 }
 
@@ -128,4 +149,33 @@ export default {
 <style lang="scss" scoped>
 @import "./../../scss/config";
 
+#map-container {
+    height: 100%;
+    width: 100%;
+}
+
+#autocomplete {
+    z-index: 100;
+    position: absolute;
+    right: 0;
+    top: 10px;
+
+    > * {
+        float: left;
+        margin-right: 10px;
+    }
+
+    input:focus {
+        outline: none;
+    }
+}
+
+#help-text {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: $gray-darkest;
+}
 </style>
