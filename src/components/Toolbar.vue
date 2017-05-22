@@ -28,10 +28,32 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 <input type="checkbox" v-model="mapVisible">
             </div>
 
+            <!-- <div class="input-number">
+                <label>min_x</label>
+                <input v-model.number.lazy="min_x">
+            </div>
+            <div class="input-number">
+                <label>min_y</label>
+                <input v-model.number.lazy="min_y">
+            </div>
+            <div class="input-number">
+                <label>max_x</label>
+                <input v-model.number.lazy="max_x">
+            </div>
+            <div class="input-number">
+                <label>max_y</label>
+                <input v-model.number.lazy="max_y">
+            </div> -->
+
+            <div class="input-number">
+                <label>spacing</label>
+                <input v-model.number.lazy="spacing">
+            </div>
+
             <div id="import-export">
                 <input ref="importLibrary" @change="importLibraryAsFile" type="file"/>
                 <button @click="$refs.importLibrary.click()">Import Library</button>
-                <input ref="importInput" @change="importDataAsFile" type="file"/>
+                <input ref="importInput" @change="importModelAsFile" type="file"/>
                 <button @click="$refs.importInput.click()" id="import">Open Floorplan</button>
                 <button @click="exportData" id="export">Save Floorplan</button>
             </div>
@@ -64,11 +86,11 @@ export default {
 
             return data;
         },
-        importDataAsFile (event) {
+        importModelAsFile (event) {
             const file = event.target.files[0],
                 reader = new FileReader();
             reader.addEventListener("load", () => {
-                this.importData(reader.result);
+                this.importModel(reader.result);
             }, false);
 
             if (file) { reader.readAsText(file); }
@@ -84,8 +106,8 @@ export default {
 
             if (file) { reader.readAsText(file); }
         },
-        importData (data) {
-            this.$store.dispatch('importData', {
+        importModel (data) {
+            this.$store.dispatch('importModel', {
                 clientWidth: document.getElementById('svg-grid').clientWidth,
                 clientHeight: document.getElementById('svg-grid').clientHeight,
                 data: JSON.parse(data)
@@ -130,6 +152,23 @@ export default {
         spacing: {
             get () { return this.$store.state.project.grid.spacing + ' ' + this.$store.state.project.config.units; },
             set (val) { this.$store.dispatch('project/setSpacing', { spacing: val }); }
+        },
+        // mix_x, min_y, max_x, and max_y are the grid dimensions in real world units
+        min_x: {
+            get () { return this.$store.state.project.view.min_x + ' ' + this.$store.state.project.config.units; },
+            set (val) { this.$store.dispatch('project/setViewMinX', { min_x: parseFloat(val) }); }
+        },
+        min_y: {
+            get () { return this.$store.state.project.view.min_y + ' ' + this.$store.state.project.config.units; },
+            set(val) { this.$store.dispatch('project/setViewMinY', { min_y: val }); }
+        },
+        max_x: {
+            get () { return this.$store.state.project.view.max_x + ' ' + this.$store.state.project.config.units; },
+            set (val) { this.$store.dispatch('project/setViewMaxX', { max_x: val }); }
+        },
+        max_y: {
+            get () { return this.$store.state.project.view.max_y + ' ' + this.$store.state.project.config.units;  },
+            set (val) { this.$store.dispatch('project/setViewMaxY', { max_y: val  }); }
         }
     }
 }

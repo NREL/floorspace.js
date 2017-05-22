@@ -12,8 +12,8 @@ export default {
             north_axis: 0
         },
         grid: {
-            visible: false,
-            spacing: 100
+            visible: true,
+            spacing: 50
         },
         view: {
             // grid boundaties in rwu

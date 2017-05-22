@@ -1,6 +1,6 @@
 const api = {
     doImport (data) {
-        window.application.$store.dispatch('importData', {
+        window.application.$store.dispatch('importModel', {
             clientWidth: document.getElementById('svg-grid').clientWidth,
             clientHeight: document.getElementById('svg-grid').clientHeight,
             data: JSON.parse(data)

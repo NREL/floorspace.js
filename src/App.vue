@@ -11,7 +11,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <main>
             <navigation v-bind:class="[{'disabled-component': mapSetup}]"></navigation>
             <canvas-view></canvas-view>
-            <grid-view></grid-view>
+            <grid-view ref="grid"></grid-view>
         </main>
         <library v-bind:class="[{'disabled-component': mapSetup}]"></library>
     </div>
