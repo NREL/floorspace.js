@@ -41,7 +41,7 @@ export default {
                     [affectedModel.type]: affectedModel,
                     face_id: null
                 }, { root: true });
-                
+
                 context.dispatch('destroyFaceAndDescendents', {
                     geometry: currentStoryGeometry,
                     face: existingFace
@@ -60,6 +60,39 @@ export default {
         });
     },
 
+    /*
+    * Given a dx, dy, and face
+    * clone the face with all points adjusted by the delta and destroy the original
+    * this will trigger all set operations
+    */
+    moveFaceByOffset (context, payload) {
+        const { face_id, dx, dy } = payload,
+            currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'],
+            face = geometryHelpers.faceForId(face_id, currentStoryGeometry),
+            movedPoints = geometryHelpers.verticesForFace(face, currentStoryGeometry).map(v => ({
+                x: v.x + dx,
+                y: v.y + dy
+            })),
+            affectedModel = modelHelpers.modelForFace(context.rootState.models, face.id);
+
+        // destroy existing face
+        context.dispatch(affectedModel.type === 'space' ? 'models/updateSpaceWithData' : 'models/updateShadingWithData', {
+            [affectedModel.type]: affectedModel,
+            face_id: null
+        }, { root: true });
+
+        context.dispatch('destroyFaceAndDescendents', {
+            geometry: currentStoryGeometry,
+            face: face
+        });
+
+        // create new face from adjusted points
+        context.dispatch('createFaceFromPoints', {
+            [affectedModel.type]: affectedModel,
+            'geometry': currentStoryGeometry,
+            'points': movedPoints
+        });
+    },
     /*
     * create a face and associated edges and vertices from an array of points
     * associate the face with the space or shading included in the payload

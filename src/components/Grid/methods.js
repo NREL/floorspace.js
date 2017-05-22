@@ -290,10 +290,33 @@ export default {
         // remove expired polygons
         d3.select('#grid svg').selectAll('polygon').remove();
 
+        // store total drag offset (grid units)
+        var dx = 0,
+            dy = 0;
+        // polygon drag handler
+        const drag = d3.drag()
+            .on('drag', function (d) {
+                // if (this.currentTool !== 'Select') { return; }
+                dx += d3.event.dx;
+                dy += d3.event.dy;
+                d3.select(this)
+                    .attr('transform', (d) => 'translate(' + [dx, dy] + ')');
+            })
+            .on('end', (d, i) => {
+                // when the drag is finished, update the face in the store with the total offset in RWU
+                this.$store.dispatch('geometry/moveFaceByOffset', {
+                    face_id: d.face_id,
+                    dx: this.gridToRWU(dx, 'x'),
+                    dy: this.gridToRWU(dy, 'y')
+                });
+            });
+
+
         // draw polygons
         d3.select('#grid svg').selectAll('polygon')
             .data(this.polygons).enter()
             .append('polygon')
+            .call(drag)
             // if a face is clicked while the Select tool is active, lookup its corresponding model (space/shading) and select it
             .on('click', (d) => {
                 if (this.currentTool === 'Select') {
@@ -306,7 +329,7 @@ export default {
                     }
                 }
             })
-            .attr("points", d => d.points.map(p => [this.rwuToGrid(p.x, 'x'), this.rwuToGrid(p.y, 'y')].join(",")).join(" "))
+            .attr('points', d => d.points.map(p => [this.rwuToGrid(p.x, 'x'), this.rwuToGrid(p.y, 'y')].join(',')).join(' '))
             .attr('class', (d, i) => {
                 if ((this.currentSpace && d.face_id === this.currentSpace.face_id) ||
                     (this.currentShading && d.face_id === this.currentShading.face_id)) { return 'current'; }
@@ -585,14 +608,14 @@ export default {
             .on('zoom', () => {
 
                 // only allow zooming when the Pan tool is active
-                if (this.currentTool !== "Pan") { return; }
+                if (this.currentTool !== 'Pan') { return; }
 
                 // create updated copies of the scales based on the zoom transformation
                 // the transformed scales are only used to obtain the new rwu grid dimensions and redraw the axes
                 // NOTE: don't change the original scale or you'll get exponential growth
                 const newScaleX = d3.event.transform.rescaleX(zoomScaleX),
                     newScaleY = d3.event.transform.rescaleY(zoomScaleY);
-                    
+
                 [this.min_x, this.max_x] = newScaleX.domain();
                 [this.min_y, this.max_y] = newScaleY.domain();
 
