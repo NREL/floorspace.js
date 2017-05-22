@@ -19,7 +19,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             </span>
             <button @click="finishSetup">Done</button>
         </div>
-        <p v-if="mapSetup" id="help-text">Drag the map and/or search to set desired location.  Use alt+shift to rotate the north axis. Click 'Done' when finished.</p>
+        <div v-if="mapSetup" id="help-text">
+            <p>Drag the map and/or search to set desired location.  Use alt+shift to rotate the north axis. Click 'Done' when finished.</p>
+        </div>
         <map-modal v-if="mapModalVisible" @close="mapModalVisible = false; loadMap();"></map-modal>
     </div>
 </template>
@@ -176,6 +178,15 @@ export default {
     left: 0;
     right: 0;
     text-align: center;
-    color: $gray-darkest;
+    z-index: 3;
+
+    p {
+        color: $gray-darkest;
+        background: white;
+        padding: 2px 4px;
+        margin: 10px;
+        border: 2px solid $gray-darkest;
+        display: inline-block;
+    }
 }
 </style>
