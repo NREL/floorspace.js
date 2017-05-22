@@ -22,9 +22,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <button @click="mapEnabled = true; tool='Map'; $emit('close')">Place Map</button>
             <button @click="mapEnabled = false; mapVisible = false; $emit('close')">Disable Map</button>
         </div>
-
-
-
     </div>
 </aside>
 </template>

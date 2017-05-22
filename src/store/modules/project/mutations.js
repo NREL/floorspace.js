@@ -54,7 +54,11 @@ export default {
             state.map.enabled = payload.enabled;
         }
     },
-
+    setMapInitialized (state, payload) {
+        if ('initialized' in payload) {
+            state.map.initialized = payload.initialized;
+        }
+    },
     setMapVisible (state, payload) {
         if ('visible' in payload) {
             state.map.visible = payload.visible;

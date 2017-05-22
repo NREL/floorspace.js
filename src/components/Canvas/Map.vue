@@ -22,14 +22,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <div v-if="mapSetup" id="help-text">
             <p>Drag the map and/or search to set desired location.  Use alt+shift to rotate the north axis. Click 'Done' when finished.</p>
         </div>
-        <map-modal v-if="mapModalVisible" @close="mapModalVisible = false; loadMap();"></map-modal>
+        <map-modal v-if="mapModalVisible && !mapInitialized" @close="mapModalVisible = false; loadMap();"></map-modal>
     </div>
 </template>
 
 <script>
 
-const ol = require('openlayers'),
-    Konva = require('konva');
+const ol = require('openlayers');
 import { mapState } from 'vuex'
 import MapModal from 'src/components/Modals/MapModal'
 
@@ -111,10 +110,14 @@ export default {
             this.latitude = center[1];
             this.rotation = this.view.getRotation();
             this.tool = 'Rectangle';
+            this.$store.dispatch('project/setMapInitialized', { initialized: true });
         }
     },
     computed: {
-        ...mapState({ projectView: state => state.project.view }),
+        ...mapState({
+            projectView: state => state.project.view,
+            mapInitialized: state => state.project.map.initialized,
+        }),
         tool: {
             get () { return this.$store.state.application.currentSelections.tool; },
             set (val) { this.$store.dispatch('application/setApplicationTool', { tool: val }); }

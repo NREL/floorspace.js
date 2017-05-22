@@ -7,13 +7,13 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 <template>
     <div id="app">
-        <toolbar v-bind:class="[{'disabled-component': mapSetup}]"></toolbar>
+        <toolbar :class="{ 'disabled-component': tool === 'Map' }"></toolbar>
         <main>
-            <navigation v-bind:class="[{'disabled-component': mapSetup}]"></navigation>
+            <navigation :class="{ 'disabled-component': tool === 'Map' }"></navigation>
             <canvas-view></canvas-view>
-            <grid-view ref="grid"></grid-view>
+            <grid-view></grid-view>
         </main>
-        <library v-bind:class="[{'disabled-component': mapSetup}]"></library>
+        <library :class="{ 'disabled-component': tool === 'Map' }"></library>
     </div>
 </template>
 
@@ -47,8 +47,7 @@ export default {
 
     },
     computed: {
-        ...mapState({ tool: state => state.application.currentSelections.tool }),
-        mapSetup () { return this.tool === 'Map'; }
+        ...mapState({ tool: state => state.application.currentSelections.tool })
     },
     components: {
         'grid-view': Grid,

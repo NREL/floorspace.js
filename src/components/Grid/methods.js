@@ -592,7 +592,7 @@ export default {
                 // NOTE: don't change the original scale or you'll get exponential growth
                 const newScaleX = d3.event.transform.rescaleX(zoomScaleX),
                     newScaleY = d3.event.transform.rescaleY(zoomScaleY);
-                console.log(d3.event.transform.k);
+                    
                 [this.min_x, this.max_x] = newScaleX.domain();
                 [this.min_y, this.max_y] = newScaleY.domain();
 
