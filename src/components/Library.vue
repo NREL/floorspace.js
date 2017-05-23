@@ -100,7 +100,7 @@ export default {
         };
     },
     mounted () {
-        this.type = Object.keys(this.extendedLibrary)[8];
+        this.type = Object.keys(this.extendedLibrary)[7];
         this.configurePickers();
     },
     computed: {
