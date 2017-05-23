@@ -14,11 +14,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             </div>
 
             <div class="input-checkbox">
-                <label>grid</label>
-                <input type="checkbox" v-model="gridVisible">
-            </div>
-
-            <div class="input-checkbox">
                 <label>Previous Story</label>
                 <input type="checkbox" v-model="previousStoryVisible">
             </div>
@@ -26,6 +21,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <div v-if="mapEnabled" class="input-checkbox">
                 <label>map</label>
                 <input type="checkbox" v-model="mapVisible">
+            </div>
+
+            <div class="input-checkbox">
+                <label>grid</label>
+                <input type="checkbox" v-model="gridVisible">
             </div>
 
             <!-- <div class="input-number">
