@@ -126,8 +126,8 @@ export default {
                 return (this.currentMode !== 'spaces' && this.currentMode !== 'shading') && (t === 'Rectangle' || t === 'Polygon') ? false : true;
             })
             .filter((t) => {
-                // return (!this.mapEnabled && t === 'Map') ? false : true;
-                return t !== 'Map'; // Hide map tool
+                // never display the map tool, it is only used when the map is initialized
+                return t !== 'Map';
             });
         },
 

@@ -27,6 +27,11 @@ export default {
             context.commit('setMapEnabled', payload);
         }
     },
+    setMapInitialized(context, payload) {
+        if (typeof payload.initialized === 'boolean') {
+            context.commit('setMapInitialized', payload);
+        }
+    },
     setGridVisible (context, payload) {
         if (typeof payload.visible === 'boolean') {
             context.commit('setGridVisible', payload);
@@ -98,6 +103,6 @@ export default {
 
     setPreviousStoryVisible (context, payload) {
         context.commit('setPreviousStoryVisible', { visible: payload.visible });
-         
+
     }
 }

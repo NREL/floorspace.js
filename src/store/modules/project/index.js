@@ -23,6 +23,7 @@ export default {
             max_y: 1000
         },
         map: {
+            initialized: false,
             enabled: true,
             visible: true,
             latitude: 39.7653,
