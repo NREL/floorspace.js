@@ -20,7 +20,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 <h3>Face {{face.id}}</h3>
             </header>
             <div v-for="edgeRef in face.edgeRefs" class="list-item">
-                edge {{ edgeRef.edge_id }} {{ edgeRef.reverse ? 'reversed ' : '' }} {{ edgeForId(edgeRef.edge_id).isShared(currentStoryGeometry) ? 'shared' : '' }}
+                edge {{ edgeRef.edge_id }} {{ edgeRef.reverse ? 'reversed ' : '' }}
                 <br>startpoint {{ startpoint(edgeRef) }}
                 <br>endpoint {{ endpoint(edgeRef) }}
             </div>
@@ -31,7 +31,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 <h3>Face {{currentSelectionsFace.id}} on {{ currentSpace ? currentSpace.name : currentShading.name }}</h3>
             </header>
             <div v-for="edgeRef in currentSelectionsFace.edgeRefs" class="list-item">
-                edge {{ edgeRef.edge_id }} {{ edgeRef.reverse ? 'reversed ' : '' }} {{ edgeForId(edgeRef.edge_id).isShared(currentStoryGeometry) ? 'shared' : '' }}
+                edge {{ edgeRef.edge_id }} {{ edgeRef.reverse ? 'reversed ' : '' }}
                 <br>startpoint {{ startpoint(edgeRef) }}
                 <br>endpoint {{ endpoint(edgeRef) }}
             </div>

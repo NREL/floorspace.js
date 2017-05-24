@@ -39,7 +39,7 @@ export default {
             view: null,
             map: null,
             autocomplete: null,
-            mapModalVisible: true
+            mapModalVisible: false//true
         };
     },
     mounted () {

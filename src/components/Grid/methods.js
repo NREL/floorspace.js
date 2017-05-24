@@ -296,13 +296,14 @@ export default {
         // polygon drag handler
         const drag = d3.drag()
             .on('drag', function (d) {
-                // if (this.currentTool !== 'Select') { return; }
+                if (this.currentTool === 'Select' || !d.previous_story) { return; }
                 dx += d3.event.dx;
                 dy += d3.event.dy;
                 d3.select(this)
                     .attr('transform', (d) => 'translate(' + [dx, dy] + ')');
             })
             .on('end', (d, i) => {
+                if (this.currentTool === 'Select' || !d.previous_story) { return; }
                 // when the drag is finished, update the face in the store with the total offset in RWU
                 this.$store.dispatch('geometry/moveFaceByOffset', {
                     face_id: d.face_id,

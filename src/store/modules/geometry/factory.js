@@ -7,6 +7,7 @@ export default {
             id: idFactory.generate(),
             x: x,
             y: y,
+            // clipper expects points to have X and Y properties
             get X () { return this.x; },
             get Y () { return this.y; }
         }
@@ -15,8 +16,7 @@ export default {
         return {
             id: idFactory.generate(),
             v1: v1,
-            v2: v2,
-            isShared (geometry) { return helpers.facesForEdge(this.id, geometry).length > 1; }
+            v2: v2
         }
     },
     Face (edgeRefs) {
@@ -27,10 +27,10 @@ export default {
     },
     Geometry () {
         return {
-            'id': idFactory.generate(),
-            'vertices': [],
-            'edges': [],
-            'faces': []
+            id: idFactory.generate(),
+            vertices: [],
+            edges: [],
+            faces: []
         }
     }
 }

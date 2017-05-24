@@ -157,21 +157,22 @@ export default {
             // remove references to the edge being split
             context.commit('destroyEdgeRef', {
                 edge_id: payload.edge.id,
-                face: face
+                face_id: face.id
             });
         });
 
         // remove references to the edge being split
         if (geometryHelpers.facesForEdge(payload.edge.id, geometry).length < 2) {
             context.dispatch('destroyEdge', {
-                geometry: geometry,
+                geometry_id: geometry.id,
                 edge_id: payload.edge.id
             });
         }
     },
 
     destroyFaceAndDescendents (context, payload) {
-        const geometry = payload.geometry,
+        const geometry = context.state.find(g => g.id === payload.geometry.id),
+            
             expFace = payload.face;
 
         // filter vertices referenced by only the face being destroyed so that no shared edges are destroyed
@@ -185,14 +186,14 @@ export default {
         });
 
         context.dispatch('destroyFace', {
-            geometry: geometry,
+            geometry_id: geometry.id,
             face_id: expFace.id
         });
 
         // delete associated edges
         expEdgeRefs.forEach((edgeRef) => {
             context.dispatch('destroyEdge', {
-                geometry: geometry,
+                geometry_id: geometry.id,
                 edge_id: edgeRef.edge_id
             });
         });
@@ -200,46 +201,55 @@ export default {
         // delete associated vertices
         expVertices.forEach((vertex) => {
             context.dispatch('destroyVertex', {
-                geometry: geometry,
+                geometry_id: geometry.id,
                 vertex_id: vertex.id
             });
         });
     },
 
+    // destroy a face, edge, or vertex if it is not referenced by any model/geometry object
     destroyFace (context, payload) {
-        const faceSpace = context.rootGetters['models/allSpaces'].find((space) => {
-            return space.face_id === payload.face_id;
-        });
-        if (faceSpace) {
-            console.error('Attempting to delete face ' + payload.face_id + ' referenced by space: ', geometryHelpers.dc(faceSpace));
+        const geometry = context.state.find(g => g.id === payload.geometry_id),
+            faceSpace = context.rootGetters['models/allSpaces'].find(s => s.face_id === payload.face_id),
+            faceShading = context.rootGetters['models/allShading'].find(s => s.face_id === payload.face_id);
+
+        if (faceSpace || faceShading) {
+            console.error('Attempting to delete face ' + payload.face_id + ' referenced by model: ', (faceSpace || faceShading));
             throw new Error();
         }
+
         context.commit('destroyFace', {
-            geometry: payload.geometry,
+            geometry_id: geometry.id,
             face_id: payload.face_id
         });
     },
 
     destroyVertex (context, payload) {
-        const edgesForVertex = geometryHelpers.edgesForVertex(payload.vertex_id, payload.geometry);
+        const geometry = context.state.find(g => g.id === payload.geometry_id),
+            edgesForVertex = geometryHelpers.edgesForVertex(payload.vertex_id, geometry);
+
         if (edgesForVertex.length) {
             console.error('Attempting to delete vertex ' + payload.vertex_id + ' referenced by edges: ', geometryHelpers.dc(edgesForVertex));
             throw new Error();
         }
+
         context.commit('destroyVertex', {
-            geometry: payload.geometry,
+            geometry_id: geometry.id,
             vertex_id: payload.vertex_id
         });
     },
 
     destroyEdge (context, payload) {
-        const facesForEdge = geometryHelpers.facesForEdge(payload.edge_id, payload.geometry);
+        const geometry = context.state.find(g => g.id === payload.geometry_id),
+            facesForEdge = geometryHelpers.facesForEdge(payload.edge_id, geometry);
+
         if (facesForEdge.length) {
             console.error('Attempting to delete edge ' + payload.edge_id + ' referenced by faces: ', geometryHelpers.dc(facesForEdge));
             throw new Error();
         }
+
         context.commit('destroyEdge', {
-            geometry: payload.geometry,
+            geometry_id: geometry.id,
             edge_id: payload.edge_id
         });
     }

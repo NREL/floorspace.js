@@ -266,7 +266,7 @@ export function splitEdges (currentStoryGeometry, context) {
             affectedFaces.forEach((affectedFace) => {
                 context.commit('destroyEdgeRef', {
                     edge_id: edge.id,
-                    face: affectedFace
+                    face_id: affectedFace.id
                 });
 
                 newEdges.forEach((newEdge) => {
@@ -282,7 +282,7 @@ export function splitEdges (currentStoryGeometry, context) {
 
             // destroy original edge
             context.dispatch('destroyEdge', {
-                geometry: currentStoryGeometry,
+                geometry_id: currentStoryGeometry.id,
                 edge_id: edge.id
             });
         }
@@ -295,9 +295,13 @@ export function splitEdges (currentStoryGeometry, context) {
 * set reverse property on edgeRefs as needed
 */
 export function connectEdges (currentStoryGeometry, context) {
+
+
+    currentStoryGeometry = context.state.find(g => g.id === currentStoryGeometry.id);
+    console.log(currentStoryGeometry.edges);
     currentStoryGeometry.faces.forEach((face) => {
         const faceEdges = geometryHelpers.edgesForFace(face, currentStoryGeometry);
-
+        if (~faceEdges.indexOf(undefined)) { debugger }
         // initialize ordered edgeRef array with our origin edge
         const connectedEdgeRefs = [];
         var reverse = false;
