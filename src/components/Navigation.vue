@@ -390,7 +390,7 @@ export default {
         }
 
         #story-list, #subselection-list {
-            overflow: scroll;
+            overflow: auto;
             height: calc(100% - 5rem);
             > div  {
                 border-bottom: 1px solid $gray-darkest;

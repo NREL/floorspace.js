@@ -396,7 +396,7 @@ export default {
 
 #library {
     background-color: $gray-darkest;
-    overflow: scroll;
+    overflow: auto;
 
     header {
         display: flex;

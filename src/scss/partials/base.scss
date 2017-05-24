@@ -28,6 +28,10 @@ html, body {
     }
 }
 
+body {
+    overflow: hidden;
+}
+
 #toolbar {
     background-color: $gray-dark;
     border-bottom: 1px solid $gray-medium-light;
