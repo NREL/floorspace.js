@@ -9,9 +9,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
     <nav id="toolbar">
         <section class="settings">
-            <div id="modal-buttons">
+            <!-- <div id="modal-buttons">
                 <button @click="$emit('createObject')">Create Object</button>
-            </div>
+            </div> -->
 
             <div class="input-checkbox">
                 <label>Previous Story</label>
@@ -112,6 +112,12 @@ export default {
                 clientHeight: document.getElementById('svg-grid').clientHeight,
                 data: JSON.parse(data)
             });
+        },
+        checkTool () {
+            // only allow dragging in images mode
+            if (this.tool === 'Drag' && this.currentMode !== 'images') {
+                this.tool = 'Rectangle';
+            }
         }
     },
     computed: {
@@ -121,13 +127,23 @@ export default {
         }),
         availableTools () {
             return this.$store.state.application.tools
-            // only allow drawing tools in space and shade mode
             .filter((t) => {
-                return (this.currentMode !== 'spaces' && this.currentMode !== 'shading') && (t === 'Rectangle' || t === 'Polygon') ? false : true;
+                if (t === 'Rectangle' || t === 'Polygon' || t === 'Eraser') {
+                    // only allow drawing tools in space and shade mode
+                    return (this.currentMode === 'spaces' || this.currentMode === 'shading');
+                } else if ( t === 'Drag') {
+                    // only allow dragging in image mode
+                    return (this.currentMode === 'images');
+                } else {
+                    return true;
+                }
             })
             .filter((t) => {
                 // never display the map tool, it is only used when the map is initialized
-                return t !== 'Map';
+                // return t !== 'Map';
+
+                // temp: also hide non-working tools
+                return !(t === 'Map' || t === 'Place Component' || t === 'Apply Property');
             });
         },
 
@@ -170,6 +186,10 @@ export default {
             get () { return this.$store.state.project.view.max_y + ' ' + this.$store.state.project.config.units;  },
             set (val) { this.$store.dispatch('project/setViewMaxY', { max_y: val  }); }
         }
+    },
+    watch: {
+        tool () { this.checkTool(); },
+        currentMode () { this.checkTool(); }
     }
 }
 </script>
