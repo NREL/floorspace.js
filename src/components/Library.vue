@@ -100,7 +100,7 @@ export default {
         };
     },
     mounted () {
-        this.type = Object.keys(this.extendedLibrary)[7];
+        this.type = "spaces";
         this.configurePickers();
     },
     computed: {

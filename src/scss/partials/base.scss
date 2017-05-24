@@ -32,15 +32,12 @@ html, body {
     background-color: $gray-dark;
     border-bottom: 1px solid $gray-medium-light;
 }
+
 main {
     background-color: $gray-darkest;
     #navigation {
         background-color: $gray-dark;
         border-right: 1px solid $gray-medium-light;
-    }
-
-    #grid {
-        background-color: $gray-darkest;
     }
 }
 

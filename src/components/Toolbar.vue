@@ -9,9 +9,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
     <nav id="toolbar">
         <section class="settings">
-            <!-- <div id="modal-buttons">
-                <button @click="$emit('createObject')">Create Object</button>
-            </div> -->
 
             <div class="input-checkbox">
                 <label>Previous Story</label>
