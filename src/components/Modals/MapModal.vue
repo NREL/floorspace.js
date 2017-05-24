@@ -21,6 +21,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <p>If you would like to geolocate your floorplan, place the map at your desired location now.</p>
             <button @click="mapEnabled = true; tool='Map'; $emit('close')">Place Map</button>
             <button @click="mapEnabled = false; mapVisible = false; $emit('close')">Disable Map</button>
+            <input ref="importInput" @change="importModelAsFile" type="file"/>
+            <button @click="$refs.importInput.click()" id="import">Open Floorplan</button>
         </div>
     </div>
 </aside>
@@ -45,6 +47,25 @@ export default {
             get () { return this.$store.state.application.currentSelections.tool; },
             set (val) { this.$store.dispatch('application/setApplicationTool', { tool: val }); }
         }
+    },
+    methods: {
+        importModelAsFile (event) {
+            const file = event.target.files[0],
+                reader = new FileReader();
+            reader.addEventListener("load", () => {
+                this.importModel(reader.result);
+            }, false);
+
+            if (file) { reader.readAsText(file); }
+        },
+        importModel (data) {
+            this.$store.dispatch('importModel', {
+                clientWidth: document.getElementById('svg-grid').clientWidth,
+                clientHeight: document.getElementById('svg-grid').clientHeight,
+                data: JSON.parse(data)
+            });
+            this.$emit('close');
+        }
     }
 
 }
@@ -54,10 +75,19 @@ export default {
 @import "./../../scss/config";
 .content {
     margin: 0 2rem 2rem 2rem;
+    text-align: center;
+
     button {
         margin: 1rem .5rem;
-
     }
+
+    input[type=file] {
+        display: none;
+    }
+}
+
+.modal {
+    width: 30rem;
 }
 
 </style>
