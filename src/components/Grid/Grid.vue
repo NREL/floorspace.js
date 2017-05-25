@@ -130,6 +130,7 @@ export default {
             if (this.previousStoryVisible && this.previousStoryGeometry) {
                 return this.previousStoryGeometry.faces.map((face) => {
                     // look up the model (space or shading) associated with the face
+
                     const model = modelHelpers.modelForFace(this.$store.state.models, face.id),
                         polygon = {
                             face_id: face.id,

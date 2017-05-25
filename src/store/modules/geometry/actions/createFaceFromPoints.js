@@ -131,7 +131,7 @@ export function createFaceGeometry (points, currentStoryGeometry, context) {
             const edge = new factory.Edge(v1.id, v2.id);
             context.commit('createEdge', {
                 edge: edge,
-                geometry: currentStoryGeometry
+                geometry_id: currentStoryGeometry.id
             });
             return edge;
         }
@@ -189,15 +189,15 @@ export function validateAndSaveFace (face, currentStoryGeometry, target, context
 
     // save the face if it is valid, otherwise destroy the edges and vertices created earlier to prevent an invalid state
     if (validFace) {
-        context.commit('createFace', {
-            face: face,
-            geometry: currentStoryGeometry
-        });
-
         context.dispatch(target.type === 'space' ? 'models/updateSpaceWithData' : 'models/updateShadingWithData', {
             [target.type]: target,
             face_id: face.id
         }, { root: true });
+
+        context.commit('createFace', {
+            face: face,
+            geometry: currentStoryGeometry
+        });
     } else {
         // dispatch destroyFaceAndDescendents to destroy edges and vertices created for the invalid face
         context.dispatch('destroyFaceAndDescendents', {
@@ -251,10 +251,9 @@ export function splitEdges (currentStoryGeometry, context) {
                 const newEdgeV1 = splittingVertices[i],
                     newEdgeV2 = splittingVertices[i + 1],
                     newEdge = new factory.Edge(newEdgeV1.id, newEdgeV2.id);
-
                 context.commit('createEdge', {
                     edge: newEdge,
-                    geometry: currentStoryGeometry
+                    geometry_id: currentStoryGeometry.id
                 });
                 newEdges.push(newEdge);
             }
@@ -281,10 +280,7 @@ export function splitEdges (currentStoryGeometry, context) {
             });
 
             // destroy original edge
-            context.dispatch('destroyEdge', {
-                geometry_id: currentStoryGeometry.id,
-                edge_id: edge.id
-            });
+            context.commit('destroyGeometry', { id: edge.id });
         }
         connectEdges(currentStoryGeometry, context);
     });
@@ -298,7 +294,6 @@ export function connectEdges (currentStoryGeometry, context) {
 
 
     currentStoryGeometry = context.state.find(g => g.id === currentStoryGeometry.id);
-    console.log(currentStoryGeometry.edges);
     currentStoryGeometry.faces.forEach((face) => {
         const faceEdges = geometryHelpers.edgesForFace(face, currentStoryGeometry);
         if (~faceEdges.indexOf(undefined)) { debugger }
@@ -341,7 +336,7 @@ export function connectEdges (currentStoryGeometry, context) {
 
         // update the face with the ordered edge refs
         context.commit('setEdgeRefsForFace', {
-            face: face,
+            face_id: face.id,
             edgeRefs: connectedEdgeRefs
         });
     });

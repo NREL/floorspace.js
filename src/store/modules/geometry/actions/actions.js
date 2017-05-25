@@ -30,9 +30,14 @@ export default {
         * loop through all existing faces and checking for an intersection with the selection
         * if there is an intersection, subtract it from the existing face
         */
-        currentStoryGeometry.faces.forEach((existingFace) => {
-            const existingFaceVertices = geometryHelpers.verticesForFace(existingFace, currentStoryGeometry);
+        console.log(points.map(p => `(${p.x}, ${p.y})`));
+        debugger
+        for (var i = 0; i < currentStoryGeometry.faces.length; i++) {
+            const existingFace = currentStoryGeometry.faces[i],
+                existingFaceVertices = geometryHelpers.verticesForFace(existingFace, currentStoryGeometry);
             // test for overlap between existing face and selection
+
+            console.log(`intersecting with face ${existingFace.id} ${geometryHelpers.intersectionOfFaces(existingFaceVertices, points, currentStoryGeometry)}`)
             if (geometryHelpers.intersectionOfFaces(existingFaceVertices, points, currentStoryGeometry)) {
                 const affectedModel = modelHelpers.modelForFace(context.rootState.models, existingFace.id);
 
@@ -46,18 +51,21 @@ export default {
                     geometry: currentStoryGeometry,
                     face: existingFace
                 });
+                setTimeout(() => {
+                    // create new face by subtracting overlap (intersection) from the existing face's original area
+                    const differenceOfFaces = geometryHelpers.differenceOfFaces(existingFaceVertices, points, currentStoryGeometry);
+                    if (differenceOfFaces) {
+                        context.dispatch('createFaceFromPoints', {
+                            [affectedModel.type]: affectedModel,
+                            'geometry': currentStoryGeometry,
+                            'points': differenceOfFaces
+                        });
+                    }
+                })
 
-                // create new face by subtracting overlap (intersection) from the existing face's original area
-                const differenceOfFaces = geometryHelpers.differenceOfFaces(existingFaceVertices, points, currentStoryGeometry);
-                if (differenceOfFaces) {
-                    context.dispatch('createFaceFromPoints', {
-                        [affectedModel.type]: affectedModel,
-                        'geometry': currentStoryGeometry,
-                        'points': differenceOfFaces
-                    });
-                }
             }
-        });
+        }
+
     },
 
     /*
@@ -163,16 +171,13 @@ export default {
 
         // remove references to the edge being split
         if (geometryHelpers.facesForEdge(payload.edge.id, geometry).length < 2) {
-            context.dispatch('destroyEdge', {
-                geometry_id: geometry.id,
-                edge_id: payload.edge.id
-            });
+            context.commit('destroyGeometry', { id: payload.edge.id });
         }
     },
 
     destroyFaceAndDescendents (context, payload) {
         const geometry = context.state.find(g => g.id === payload.geometry.id),
-            
+
             expFace = payload.face;
 
         // filter vertices referenced by only the face being destroyed so that no shared edges are destroyed
@@ -185,73 +190,12 @@ export default {
             return geometryHelpers.facesForEdge(edgeRef.edge_id, geometry).length < 2;
         });
 
-        context.dispatch('destroyFace', {
-            geometry_id: geometry.id,
-            face_id: expFace.id
-        });
+        context.commit('destroyGeometry', { id: expFace.id });
 
         // delete associated edges
-        expEdgeRefs.forEach((edgeRef) => {
-            context.dispatch('destroyEdge', {
-                geometry_id: geometry.id,
-                edge_id: edgeRef.edge_id
-            });
-        });
+        expEdgeRefs.forEach(edgeRef => context.commit('destroyGeometry', { id: edgeRef.edge_id }));
 
         // delete associated vertices
-        expVertices.forEach((vertex) => {
-            context.dispatch('destroyVertex', {
-                geometry_id: geometry.id,
-                vertex_id: vertex.id
-            });
-        });
-    },
-
-    // destroy a face, edge, or vertex if it is not referenced by any model/geometry object
-    destroyFace (context, payload) {
-        const geometry = context.state.find(g => g.id === payload.geometry_id),
-            faceSpace = context.rootGetters['models/allSpaces'].find(s => s.face_id === payload.face_id),
-            faceShading = context.rootGetters['models/allShading'].find(s => s.face_id === payload.face_id);
-
-        if (faceSpace || faceShading) {
-            console.error('Attempting to delete face ' + payload.face_id + ' referenced by model: ', (faceSpace || faceShading));
-            throw new Error();
-        }
-
-        context.commit('destroyFace', {
-            geometry_id: geometry.id,
-            face_id: payload.face_id
-        });
-    },
-
-    destroyVertex (context, payload) {
-        const geometry = context.state.find(g => g.id === payload.geometry_id),
-            edgesForVertex = geometryHelpers.edgesForVertex(payload.vertex_id, geometry);
-
-        if (edgesForVertex.length) {
-            console.error('Attempting to delete vertex ' + payload.vertex_id + ' referenced by edges: ', geometryHelpers.dc(edgesForVertex));
-            throw new Error();
-        }
-
-        context.commit('destroyVertex', {
-            geometry_id: geometry.id,
-            vertex_id: payload.vertex_id
-        });
-    },
-
-    destroyEdge (context, payload) {
-        const geometry = context.state.find(g => g.id === payload.geometry_id),
-            facesForEdge = geometryHelpers.facesForEdge(payload.edge_id, geometry);
-
-        if (facesForEdge.length) {
-            console.error('Attempting to delete edge ' + payload.edge_id + ' referenced by faces: ', geometryHelpers.dc(facesForEdge));
-            throw new Error();
-        }
-
-        context.commit('destroyEdge', {
-            geometry_id: geometry.id,
-            edge_id: payload.edge_id
-        });
+        expVertices.forEach(vertex => context.commit('destroyGeometry', { id: vertex.id }));
     }
-
 }
