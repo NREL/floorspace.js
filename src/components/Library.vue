@@ -214,8 +214,8 @@ export default {
         createItem () {
             switch (this.type) {
                 case 'stories':
+                    // init story and space
                     this.$store.dispatch('models/initStory');
-                    break;
                 case 'spaces':
                     this.$store.dispatch('models/initSpace', {
                         story: this.$store.state.application.currentSelections.story
