@@ -41,6 +41,6 @@ html =
     </body>
 </html>"
 
-output_file = File.new(dist_path + '/build.html', 'w')
+output_file = File.new(dist_path + '/geometry_editor.html', 'w')
 output_file.write(html)
 output_file.close
