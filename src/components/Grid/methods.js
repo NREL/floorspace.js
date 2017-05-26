@@ -153,6 +153,14 @@ export default {
 
         d3.selectAll('.vertical, .horizontal').lower();
     },
+    /*
+    * Handle escape key presses to cancel current drawing operation
+    */
+    escapeAction (e) {
+        if (e.code === 'Escape' || e.which === 27) {
+            this.points = [];
+        }
+    },
 
     // ****************** SAVING FACES ****************** //
     /*

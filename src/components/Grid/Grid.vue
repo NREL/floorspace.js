@@ -67,11 +67,14 @@ export default {
         //
         //     _this.reloadGrid();
         // });
+
+        // watch escape to cancel current drawing action
+        window.addEventListener('keyup',this.escapeAction);
     },
     beforeDestroy () {
-
         this.$refs.grid.removeEventListener('reloadGrid', this.reloadGrid);
         // window.removeEventListener('resize', this.resize());
+        window.removeEventListener('keyup', this.escapeAction);
     },
     computed: {
         ...mapState({
