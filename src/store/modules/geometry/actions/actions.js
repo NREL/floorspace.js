@@ -30,42 +30,34 @@ export default {
         * loop through all existing faces and checking for an intersection with the selection
         * if there is an intersection, subtract it from the existing face
         */
-        console.log(points.map(p => `(${p.x}, ${p.y})`));
-        debugger
-        for (var i = 0; i < currentStoryGeometry.faces.length; i++) {
-            const existingFace = currentStoryGeometry.faces[i],
-                existingFaceVertices = geometryHelpers.verticesForFace(existingFace, currentStoryGeometry);
+        currentStoryGeometry.faces.filter((existingFace) => {
+            const existingFaceVertices = geometryHelpers.verticesForFace(existingFace, currentStoryGeometry);
             // test for overlap between existing face and selection
+            return geometryHelpers.intersectionOfFaces(existingFaceVertices, points, currentStoryGeometry);
+        }).forEach((existingFace) => {
+            const existingFaceVertices = geometryHelpers.verticesForFace(existingFace, currentStoryGeometry),
+                affectedModel = modelHelpers.modelForFace(context.rootState.models, existingFace.id);
 
-            console.log(`intersecting with face ${existingFace.id} ${geometryHelpers.intersectionOfFaces(existingFaceVertices, points, currentStoryGeometry)}`)
-            if (geometryHelpers.intersectionOfFaces(existingFaceVertices, points, currentStoryGeometry)) {
-                const affectedModel = modelHelpers.modelForFace(context.rootState.models, existingFace.id);
+            // destroy existing face
+            context.dispatch(affectedModel.type === 'space' ? 'models/updateSpaceWithData' : 'models/updateShadingWithData', {
+                [affectedModel.type]: affectedModel,
+                face_id: null
+            }, { root: true });
 
-                // destroy existing face
-                context.dispatch(affectedModel.type === 'space' ? 'models/updateSpaceWithData' : 'models/updateShadingWithData', {
+            context.dispatch('destroyFaceAndDescendents', {
+                geometry: currentStoryGeometry,
+                face: existingFace
+            });
+            // create new face by subtracting overlap (intersection) from the existing face's original area
+            const differenceOfFaces = geometryHelpers.differenceOfFaces(existingFaceVertices, points, currentStoryGeometry);
+            if (differenceOfFaces) {
+                context.dispatch('createFaceFromPoints', {
                     [affectedModel.type]: affectedModel,
-                    face_id: null
-                }, { root: true });
-
-                context.dispatch('destroyFaceAndDescendents', {
-                    geometry: currentStoryGeometry,
-                    face: existingFace
+                    'geometry': currentStoryGeometry,
+                    'points': differenceOfFaces
                 });
-                setTimeout(() => {
-                    // create new face by subtracting overlap (intersection) from the existing face's original area
-                    const differenceOfFaces = geometryHelpers.differenceOfFaces(existingFaceVertices, points, currentStoryGeometry);
-                    if (differenceOfFaces) {
-                        context.dispatch('createFaceFromPoints', {
-                            [affectedModel.type]: affectedModel,
-                            'geometry': currentStoryGeometry,
-                            'points': differenceOfFaces
-                        });
-                    }
-                })
-
             }
-        }
-
+        });
     },
 
     /*
