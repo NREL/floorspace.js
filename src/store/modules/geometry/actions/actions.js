@@ -8,10 +8,14 @@ export default {
     * initializes a new geometry object for a story
     */
     initGeometry (context, payload) {
-        context.commit('initGeometry', {
-            geometry: new factory.Geometry(),
-            story: context.rootState.models.stories.find(s => s.id === payload.story.id)
-        });
+        const geometry = new factory.Geometry();
+        context.commit('initGeometry', { geometry: geometry });
+
+        // set a reference to the new geometry set for the story it belongs to
+        context.dispatch('models/updateStoryWithData', {
+            story: context.rootState.models.stories.find(s => s.id === payload.story_id),
+            geometry_id: geometry.id
+        }, { root: true });
     },
 
     /*
@@ -27,14 +31,13 @@ export default {
         if (payload.points.length < 3 || !geometryHelpers.areaOfFace(points)) { return; }
 
         /*
-        * loop through all existing faces and checking for an intersection with the selection
-        * if there is an intersection, subtract it from the existing face
+        * find all existing faces that have an intersection with the selection being erased
+        * destroy faces intersecting the eraser selection and recreate them
+        * from the difference between their original area and the eraser selection
         */
-        currentStoryGeometry.faces.filter((existingFace) => {
-            const existingFaceVertices = geometryHelpers.verticesForFace(existingFace, currentStoryGeometry);
-            // test for overlap between existing face and selection
-            return geometryHelpers.intersectionOfFaces(existingFaceVertices, points, currentStoryGeometry);
-        }).forEach((existingFace) => {
+        currentStoryGeometry.faces.filter(face => geometryHelpers.intersectionOfFaces(
+            geometryHelpers.verticesForFace(face, currentStoryGeometry), points, currentStoryGeometry)
+        ).forEach((existingFace) => {
             const existingFaceVertices = geometryHelpers.verticesForFace(existingFace, currentStoryGeometry),
                 affectedModel = modelHelpers.modelForFace(context.rootState.models, existingFace.id);
 
@@ -48,6 +51,7 @@ export default {
                 geometry: currentStoryGeometry,
                 face: existingFace
             });
+
             // create new face by subtracting overlap (intersection) from the existing face's original area
             const differenceOfFaces = geometryHelpers.differenceOfFaces(existingFaceVertices, points, currentStoryGeometry);
             if (differenceOfFaces) {
@@ -140,14 +144,16 @@ export default {
         const affectedFaces = geometryHelpers.facesForEdge(payload.edge.id, geometry);
         affectedFaces.forEach((face) => {
             context.commit('createEdgeRef', {
-                face: face,
+                geometry_id: geometry.id,
+                face_id: face.id,
                 edgeRef: {
                     edge_id: edge1.id,
                     reverse: false
                 }
             });
             context.commit('createEdgeRef', {
-                face: face,
+                geometry_id: geometry.id,
+                face_id: face.id,
                 edgeRef: {
                     edge_id: edge2.id,
                     reverse: false
@@ -156,6 +162,7 @@ export default {
 
             // remove references to the edge being split
             context.commit('destroyEdgeRef', {
+                geometry_id: geometry.id,
                 edge_id: payload.edge.id,
                 face_id: face.id
             });
@@ -189,5 +196,5 @@ export default {
 
         // delete associated vertices
         expVertices.forEach(vertex => context.commit('destroyGeometry', { id: vertex.id }));
-    }
+    },
 }

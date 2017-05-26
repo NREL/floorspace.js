@@ -11,9 +11,9 @@ export default {
 
         // create a geometry object for the story
         context.dispatch('geometry/initGeometry', {
-            story: story
+            story_id: story.id
         }, { root: true });
-        
+
         // set the new story as the current story
         context.dispatch('application/setCurrentStory', {
             story: story

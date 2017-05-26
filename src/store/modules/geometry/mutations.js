@@ -1,43 +1,12 @@
 
 export default {
-
-    initGeometry (state, payload) {
-        state.push(payload.geometry);
-        payload.story.geometry_id = payload.geometry.id;
-    },
-    createVertex (state, payload) {
-        const geometry = state.find(g => g.id === payload.geometry.id);
-        geometry.vertices.push(payload.vertex);
-    },
-    createEdge (state, payload) {
-        const geometry = state.find(g => g.id === payload.geometry_id);
-        geometry.edges.push(payload.edge);
-    },
-    createEdgeRef (state, payload) {
-        const allFaces = [].concat.apply([], state.map(g => g.faces)),
-            allEdges = [].concat.apply([], state.map(g => g.edges)),
-            face = allFaces.find(f => f.id === payload.face.id);
-        if (allEdges.find(e => e.id === payload.edgeRef.edge_id)) {
-            face.edgeRefs.push(payload.edgeRef);
-        }
-    },
-    createFace (state, payload) {
-        const geometry = state.find(g => g.id === payload.geometry.id);
-        geometry.faces.push(payload.face);
-    },
-
-    // set the array of edgeRefs on a face
-    setEdgeRefsForFace (state, payload) {
-        const allFaces = [].concat.apply([], state.map(g => g.faces)),
-            face = allFaces.find(f => f.id === payload.face_id);
-        face.edgeRefs = payload.edgeRefs;
-    },
-    // remove a reference to an edge from a face
-    destroyEdgeRef (state, payload) {
-        const allFaces = [].concat.apply([], state.map(g => g.faces)),
-            face = allFaces.find(f => f.id === payload.face_id);
-        face.edgeRefs.splice(face.edgeRefs.findIndex(eR => eR.edge_id === payload.edge_id), 1);
-    },
+    /*
+    * create a new geometry set, face, edge, or vertex in the data store
+    */
+    initGeometry (state, payload) { state.push(payload.geometry); },
+    createVertex (state, payload) { state.find(g => g.id === payload.geometry_id).vertices.push(payload.vertex); },
+    createEdge (state, payload) { state.find(g => g.id === payload.geometry_id).edges.push(payload.edge); },
+    createFace (state, payload) { state.find(g => g.id === payload.geometry_id).faces.push(payload.face); },
 
     /*
     * removes an object with a given id from the datastore
@@ -66,5 +35,31 @@ export default {
                 break;
             }
         }
+    },
+
+    // set a reference to an edge on a face
+    createEdgeRef (state, payload) {
+        const { geometry_id, face_id, edgeRef } = payload,
+            geometry = state.find(g => g.id === geometry_id),
+            face = geometry.faces.find(f => f.id === face_id),
+            edge = geometry.edges.find(e => e.id === edgeRef.edge_id);
+
+        if (edge) { face.edgeRefs.push(edgeRef); }
+    },
+
+    // set the array of edgeRefs on a face
+    setEdgeRefsForFace (state, payload) {
+        const { geometry_id, face_id, edgeRefs } = payload,
+            geometry = state.find(g => g.id === geometry_id),
+            face = geometry.faces.find(f => f.id === face_id);
+        face.edgeRefs = edgeRefs.filter(ref => geometry.edges.find(e => e.id === ref.edge_id));
+    },
+
+    // remove a reference to an edge from a face
+    destroyEdgeRef (state, payload) {
+        const { geometry_id, face_id, edge_id } = payload,
+            geometry = state.find(g => g.id === geometry_id),
+            face = geometry.faces.find(f => f.id === face_id);
+        face.edgeRefs.splice(face.edgeRefs.findIndex(eR => eR.edge_id === edge_id), 1);
     }
 }

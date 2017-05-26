@@ -106,7 +106,7 @@ export function createFaceGeometry (points, currentStoryGeometry, context) {
 
             context.commit('createVertex', {
                 vertex: vertex,
-                geometry: currentStoryGeometry
+                geometry_id: currentStoryGeometry.id
             });
         }
         return vertex;
@@ -196,7 +196,7 @@ export function validateAndSaveFace (face, currentStoryGeometry, target, context
 
         context.commit('createFace', {
             face: face,
-            geometry: currentStoryGeometry
+            geometry_id: currentStoryGeometry.id
         });
     } else {
         // dispatch destroyFaceAndDescendents to destroy edges and vertices created for the invalid face
@@ -264,13 +264,15 @@ export function splitEdges (currentStoryGeometry, context) {
             // remove reference to old edge and add references to the new edges
             affectedFaces.forEach((affectedFace) => {
                 context.commit('destroyEdgeRef', {
+                    geometry_id: currentStoryGeometry.id,
                     edge_id: edge.id,
                     face_id: affectedFace.id
                 });
 
                 newEdges.forEach((newEdge) => {
                     context.commit('createEdgeRef', {
-                        face: affectedFace,
+                        geometry_id: currentStoryGeometry.id,
+                        face_id: affectedFace.id,
                         edgeRef: {
                             edge_id: newEdge.id,
                             reverse: false
@@ -296,7 +298,7 @@ export function connectEdges (currentStoryGeometry, context) {
     currentStoryGeometry = context.state.find(g => g.id === currentStoryGeometry.id);
     currentStoryGeometry.faces.forEach((face) => {
         const faceEdges = geometryHelpers.edgesForFace(face, currentStoryGeometry);
-        if (~faceEdges.indexOf(undefined)) { debugger }
+
         // initialize ordered edgeRef array with our origin edge
         const connectedEdgeRefs = [];
         var reverse = false;
@@ -336,6 +338,7 @@ export function connectEdges (currentStoryGeometry, context) {
 
         // update the face with the ordered edge refs
         context.commit('setEdgeRefsForFace', {
+            geometry_id: currentStoryGeometry.id,
             face_id: face.id,
             edgeRefs: connectedEdgeRefs
         });
