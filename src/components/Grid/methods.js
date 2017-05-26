@@ -287,8 +287,10 @@ export default {
     * handle clicks to select faces
     */
     drawPolygons () {
+        let that = this;
+
         // remove expired polygons
-        d3.select('#grid svg').selectAll('polygon').remove();
+        d3.select('#grid svg').selectAll('polygon, text').remove();
 
         // draw polygons
         d3.select('#grid svg').selectAll('polygon')
@@ -313,10 +315,66 @@ export default {
                 if (d.previous_story) { return 'previousStory'}
             })
             .attr('fill', d => d.color)
-            .attr('vector-effect', 'non-scaling-stroke');
+            .attr('vector-effect', 'non-scaling-stroke')
+            // add label
+            .select(function (poly) {
+                // let bbox = this.getBBox(),
+                //     x = bbox.x + bbox.width/2,
+                //     y = bbox.y + bbox.height/2;
+                let { x, y } = getCentroid(poly.points);
+
+                d3.select('#grid svg')
+                    .append('text')
+                    .attr('x',x)
+                    .attr('y',y)
+                    .attr("text-anchor", "middle")
+                    .text(() => poly.name)
+                    .attr("font-family", "sans-serif")
+                    .attr("font-size", "2em")
+                    .attr("fill", "red")
+                    .style("font-weight","bold")
+                    .attr('class', (t, i) => {
+                        return this.getAttribute('class');
+                        // if ((that.currentSpace && poly.face_id === that.currentSpace.face_id) || (that.currentShading && poly.face_id === that.currentShading.face_id)) { return 'current'; }
+                        // if (poly.previous_story) { return 'previousStory'}
+                    });
+            });
 
         // render the selected model's face above the other polygons so that the border is not obscured
         d3.select('.current').raise();
+        d3.select('text.current').raise();
+
+        function getCentroid(points) {
+            var numPoints = points.length,
+                first = points[0],
+                last = points[points.length-1],
+                x = 0,
+                y = 0,
+                acc = 0,
+                f;
+
+            if (first.x !== last.x || first.y !== last.y) {
+                // ensure closed
+                points.push(first);
+            }
+
+            for (let i=0, j=numPoints-1; i<numPoints; j=i++) {
+                let p1 = points[i],
+                    p2 = points[j];
+
+                f = p1.x*p2.y - p2.x*p1.y;
+                acc += f;
+                x += (p1.x + p2.x)*f;
+                y += (p1.y + p2.y)*f;
+            }
+
+            f = acc * 3;
+
+            return {
+                x: x/f,
+                y: y/f
+            };
+        };
     },
 
     // ****************** SNAPPING TO EXISTING GEOMETRY ****************** //

@@ -177,6 +177,7 @@ export default {
                 const model = modelHelpers.modelForFace(this.$store.state.models, face.id),
                     polygon = {
                         face_id: face.id,
+                        name: model.name,
                         color: model.color,
                         points: face.edgeRefs.map((edgeRef) => {
                             const edge = geometryHelpers.edgeForId(edgeRef.edge_id, this.currentStoryGeometry),
