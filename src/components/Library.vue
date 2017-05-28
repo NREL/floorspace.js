@@ -214,8 +214,8 @@ export default {
         createItem () {
             switch (this.type) {
                 case 'stories':
-                    // init story and space
                     this.$store.dispatch('models/initStory');
+                    return;
                 case 'spaces':
                     this.$store.dispatch('models/initSpace', {
                         story: this.$store.state.application.currentSelections.story
@@ -307,7 +307,7 @@ export default {
         * dispatches destroyStory, destroySpace, destroyShading, or destroyObject depending on the object's type
         */
         destroyObject (object) {
-            if (this.type === 'stories' && this.$store.state.models.stories.length > 1) {
+            if (this.type === 'stories') {
                 this.$store.dispatch('models/destroyStory', {
                     story: object
                 });

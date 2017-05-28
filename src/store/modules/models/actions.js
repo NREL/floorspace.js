@@ -5,19 +5,12 @@ import helpers from './helpers.js'
 export default {
     initStory (context) {
         const story = new factory.Story();
-        context.commit('initStory', {
-            story: story
-        });
-
-        // create a geometry object for the story
-        context.dispatch('geometry/initGeometry', {
-            story: story
-        }, { root: true });
-        
-        // set the new story as the current story
-        context.dispatch('application/setCurrentStory', {
-            story: story
-        }, { root: true });
+        // create story/geometry
+        context.commit('initStory', { story });
+        context.dispatch('geometry/initGeometry', { story }, { root: true });
+        // create space and select
+        context.dispatch('initSpace', { story });
+        context.dispatch('selectStoryAndSpace', { story });
     },
 
     initSpace (context, payload) {
@@ -39,10 +32,17 @@ export default {
     },
 
     destroyStory (context, payload) {
-        const story = context.state.stories.find(s => s.id === payload.story.id);
-        context.commit('destroyStory', {
-            story: story
-        });
+        const stories = context.state.stories,
+            storyIndex = stories.findIndex(s => s.id === payload.story.id),
+            story = stories[storyIndex];
+
+        context.commit('destroyStory', { story });
+
+        if (stories.length === 0) {
+            context.dispatch('initStory');
+        } else {
+            context.dispatch('selectStoryAndSpace',{ story: stories[storyIndex - 1] });
+        }
     },
 
     destroySpace (context, payload) {
@@ -82,6 +82,7 @@ export default {
             }, { root: true });
         }
     },
+
     destroyImage (context, payload) {
         const story = context.state.stories.find(s => s.id === payload.story.id),
             image = story.images.find(i => i.id === payload.image.id);
@@ -149,6 +150,7 @@ export default {
         // TODO: validation
         context.commit('updateShadingWithData', cleanedPayload);
     },
+
     updateImageWithData (context, payload) {
         const image = context.getters.allImages.find(i => i.id === payload.image.id),
             validProperties = Object.keys(image),
@@ -197,5 +199,15 @@ export default {
             type: payload.type,
             object: payload.object
         });
+    },
+
+    selectStoryAndSpace (context, payload) {
+        const story = payload.story,
+            // select last space
+            space = story.spaces[story.spaces.length - 1];
+
+        context.dispatch('application/setCurrentStory', { story }, { root: true });
+        context.dispatch('application/setCurrentSpace', { space }, { root: true });
+        context.dispatch('application/setApplicationMode', { mode: 'spaces' }, { root: true });
     }
 }
