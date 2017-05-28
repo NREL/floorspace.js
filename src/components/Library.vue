@@ -276,6 +276,9 @@ export default {
         setValueForKey (object, key, value) {
             // must update the object so that the input field value does not reset
             const result = helpers.setValueForKey(object, this.$store, this.type, key, value);
+            // remove existing errors for object
+            this.validationErrors = this.validationErrors.filter(e => e.object_id !== object.id);
+
             if (!result.success) {
                 this.validationErrors.push({
                     object_id: object.id,
