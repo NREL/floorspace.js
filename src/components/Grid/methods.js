@@ -649,9 +649,15 @@ export default {
         // configure zoom behavior in rwu
         this.zoomBehavior = d3.zoom()
             .on('zoom', () => {
+                const lastTransform = this.transform,
+                    newTransform = d3.event.transform;
 
-                // only allow zooming when the Pan tool is active
-                if (this.currentTool !== "Pan") { return; }
+                this.transform = newTransform;
+
+                // cancel current drawing action if actual zoom and not justu accidental drag
+                if (newTransform.k !== lastTransform.k || Math.abs(lastTransform.y - newTransform.y) > 3 || Math.abs(lastTransform.x - newTransform.x) > 3) {
+                    this.points = [];
+                }
 
                 // create updated copies of the scales based on the zoom transformation
                 // the transformed scales are only used to obtain the new rwu grid dimensions and redraw the axes

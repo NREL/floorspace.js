@@ -39,7 +39,12 @@ export default {
                 x: null,
                 y: null
             },
-            points: [] // points for the face currently being drawn
+            points: [], // points for the face currently being drawn
+            transform: {
+                x: 0,
+                y: 0,
+                k: 1
+            }
         };
     },
     mounted() {
