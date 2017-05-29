@@ -232,10 +232,8 @@ export default {
                 case 'construction_sets':
                 case 'windows':
                 case 'daylighting_controls':
-                    const newObject = new helpers.map[this.type].init(this.displayTypeForType(this.type) + " " + (1 + this.displayObjects.length));
                     this.$store.dispatch('models/createObjectWithType', {
                         type: this.type,
-                        object: newObject
                     });
                     break;
             }

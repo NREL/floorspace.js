@@ -250,10 +250,8 @@ export default {
                 case 'building_units':
                 case 'thermal_zones':
                 case 'space_types':
-                    const newObject = new modelHelpers.map[mode].init(this.displayNameForMode(mode) + " " + (1 + items.length));
                     this.$store.dispatch('models/createObjectWithType', {
                         type: mode,
-                        object: newObject
                     });
                     break;
             }

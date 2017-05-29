@@ -4,7 +4,9 @@ import helpers from './helpers.js'
 
 export default {
     initStory (context) {
-        const story = new factory.Story();
+        const name = helpers.generateName(context.state, 'stories'),
+            story = new factory.Story({ name });
+
         // create story/geometry
         context.commit('initStory', { story });
         context.dispatch('geometry/initGeometry', { story }, { root: true });
@@ -14,21 +16,19 @@ export default {
     },
 
     initSpace (context, payload) {
-        const story = context.state.stories.find(s => s.id === payload.story.id),
-            space = new factory.Space();
-        context.commit('initSpace', {
-            story: story,
-            space: space
-        });
+        const name = helpers.generateName(context.state, 'spaces'),
+            story = context.state.stories.find(s => s.id === payload.story.id),
+            space = new factory.Space({ name });
+
+        context.commit('initSpace', { story, space });
     },
 
     initShading (context, payload) {
-        const story = context.state.stories.find(s => s.id === payload.story.id),
-            shading = new factory.Shading();
-        context.commit('initShading', {
-            story: story,
-            shading: shading
-        });
+        const name = helpers.generateName(context.state, 'shading'),
+            story = context.state.stories.find(s => s.id === payload.story.id),
+            shading = new factory.Shading({ name });
+
+        context.commit('initShading', { story, space });
     },
 
     destroyStory (context, payload) {
@@ -176,9 +176,11 @@ export default {
     },
 
     createImageForStory (context, payload) {
-        const img = new Image();
+        const name = helpers.generateName(context.state, 'images'),
+            img = new Image();
+
         img.onload = () => {
-            const image = new factory.Image(payload.src);
+            const image = new factory.Image({ src: payload.src, name });
 
             image.height = payload.height;
             image.width = payload.width;
@@ -195,10 +197,11 @@ export default {
     },
 
     createObjectWithType (context, payload) {
-        context.commit('initObject', {
-            type: payload.type,
-            object: payload.object
-        });
+        const type = payload.type,
+            name = helpers.generateName(context.state, type),
+            object = new helpers.map[type].init({ name });
+
+        context.commit('initObject', { type, object });
     },
 
     selectStoryAndSpace (context, payload) {

@@ -168,6 +168,67 @@ const helpers = {
                 return space;
             }
         }
-    }
+    },
+
+    generateName: (() => {
+        const counters = {};
+
+        return (state, type) => {
+            const objs = libraryObjectsWithType(state, type),
+                displayName = map[type].displayName;
+
+            var name = null;
+
+            // init type counter, if needed
+            if (counters[type] === undefined) {
+                counters[type] = 1;
+            }
+
+            // Make sure name is unique
+            while (name === null) {
+                name = displayName + " " + counters[type]++;
+
+                if (objs.find(o => o.name === name)) {
+                    // try again
+                    name = null;
+                } else {
+                    return name;
+                }
+            }
+        };
+
+        function libraryObjectsWithType(state, type) {
+            switch (type) {
+                case 'stories':
+                    return state.stories;
+                case 'building_units':
+                case 'thermal_zones':
+                case 'space_types':
+                case 'construction_sets':
+                case 'windows':
+                case 'daylighting_controls':
+                    return state.library[type];
+                default:
+                    const out = {
+                        spaces: [],
+                        shading: [],
+                        images: []
+                    };
+
+                    for (let i = 0; i < state.stories.length; i++) {
+                        let story = state.stories[i],
+                            spaces = story.spaces || [],
+                            shading = story.shading || [],
+                            images = story.images || [];
+
+                        out.spaces.push(...spaces);
+                        out.shading.push(...shading);
+                        out.images.push(...images);
+                    }
+
+                    return out[type];
+            }
+        };
+    })()
 };
 export default helpers;
