@@ -7,6 +7,8 @@
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 const d3 = require('d3');
+const polylabel = require('polylabel');
+
 import geometryHelpers from './../../store/modules/geometry/helpers.js'
 import modelHelpers from './../../store/modules/models/helpers.js'
 
@@ -326,10 +328,7 @@ export default {
             .attr('vector-effect', 'non-scaling-stroke')
             // add label
             .select(function (poly) {
-                // let bbox = this.getBBox(),
-                //     x = bbox.x + bbox.width/2,
-                //     y = bbox.y + bbox.height/2;
-                let { x, y } = getCentroid(poly.points);
+                let { x, y } = getLabelPosition(poly.points);
 
                 d3.select('#grid svg')
                     .append('text')
@@ -338,13 +337,17 @@ export default {
                     .attr("text-anchor", "middle")
                     .text(() => poly.name)
                     .attr("font-family", "sans-serif")
-                    .attr("font-size", "2em")
+                    .attr("font-size", function (d) {
+                        // scale font w/ zoom
+                        return 2 * that.transform.k + "em";
+                    })
                     .attr("fill", "red")
                     .style("font-weight","bold")
                     .attr('class', (t, i) => {
                         return this.getAttribute('class');
-                        // if ((that.currentSpace && poly.face_id === that.currentSpace.face_id) || (that.currentShading && poly.face_id === that.currentShading.face_id)) { return 'current'; }
-                        // if (poly.previous_story) { return 'previousStory'}
+                    })
+                    .attr('dy', function () {
+                        return 0.25 * (that.transform.k > 1 ? 1 : that.transform.k) + "em";
                     });
             });
 
@@ -352,35 +355,13 @@ export default {
         d3.select('.current').raise();
         d3.select('text.current').raise();
 
-        function getCentroid(points) {
-            var numPoints = points.length,
-                first = points[0],
-                last = points[points.length-1],
-                x = 0,
-                y = 0,
-                acc = 0,
-                f;
-
-            if (first.x !== last.x || first.y !== last.y) {
-                // ensure closed
-                points.push(first);
-            }
-
-            for (let i=0, j=numPoints-1; i<numPoints; j=i++) {
-                let p1 = points[i],
-                    p2 = points[j];
-
-                f = p1.x*p2.y - p2.x*p1.y;
-                acc += f;
-                x += (p1.x + p2.x)*f;
-                y += (p1.y + p2.y)*f;
-            }
-
-            f = acc * 3;
+        function getLabelPosition(pointsIn) {
+            const points = [pointsIn.map(p => [that.rwuToGrid(p.x, 'x'), that.rwuToGrid(p.y, 'y')])],
+                out = polylabel(points, 1.0);
 
             return {
-                x: x/f,
-                y: y/f
+                x: out[0],
+                y: out[1]
             };
         };
     },
