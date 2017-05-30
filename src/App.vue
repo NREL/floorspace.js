@@ -8,12 +8,20 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
     <div id="app">
         <toolbar :class="{ 'disabled-component': tool === 'Map' }"></toolbar>
-        <main>
-            <navigation :class="{ 'disabled-component': tool === 'Map' }"></navigation>
-            <canvas-view></canvas-view>
-            <grid-view></grid-view>
-        </main>
-        <library :class="{ 'disabled-component': tool === 'Map' }"></library>
+        <resize-group :vertical="true">
+            <resize-group :horizontal="true" id="layout-main">
+                <resize id="layout-navigation" :resize-right="true" :resize-right-min="200">
+                    <navigation :class="{ 'disabled-component': tool === 'Map' }"></navigation>
+                </resize>
+                <main>
+                    <canvas-view></canvas-view>
+                    <grid-view></grid-view>
+                </main>
+            </resize-group>
+            <resize id="layout-library" :resize-top="true" :resize-top-min="100">
+                <library :class="{ 'disabled-component': tool === 'Map' }"></library>
+            </resize>
+        </resize-group>
     </div>
 </template>
 
@@ -25,6 +33,8 @@ import Grid from './components/Grid/Grid'
 import Canvas from './components/Canvas/Canvas'
 import Toolbar from './components/Toolbar'
 import Library from './components/Library'
+import Resize from './components/Resize'
+import ResizeGroup from './components/ResizeGroup'
 
 import { mapState } from 'vuex'
 
@@ -55,6 +65,8 @@ export default {
         'library': Library,
         'navigation': Navigation,
         'toolbar': Toolbar,
+        'resize': Resize,
+        'resize-group': ResizeGroup
     }
 }
 </script>
