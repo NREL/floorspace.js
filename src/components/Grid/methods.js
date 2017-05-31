@@ -300,7 +300,7 @@ export default {
         let that = this;
 
         // remove expired polygons
-        d3.select('#grid svg').selectAll('polygon, text').remove();
+        d3.select('#grid svg').selectAll('polygon, .polygon-text').remove();
 
         // draw polygons
         d3.select('#grid svg').selectAll('polygon')
@@ -332,6 +332,7 @@ export default {
 
                 d3.select('#grid svg')
                     .append('text')
+                    .classed('polygon-text',true)
                     .attr('x',x)
                     .attr('y',y)
                     .attr("text-anchor", "middle")
