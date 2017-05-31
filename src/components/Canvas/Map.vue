@@ -76,15 +76,24 @@ export default {
         },
         updateMapView() {
             const mPerFt = ol.proj.METERS_PER_UNIT['us-ft'];
-            const res = (this.projectView.max_x - this.projectView.min_x)/this.$refs.map.clientWidth*mPerFt,
-                deltaXFt = this.projectView.min_x + (this.projectView.max_x - this.projectView.min_x)/2,
-                deltaYFt = this.projectView.min_y + (this.projectView.max_y - this.projectView.min_y)/2,
+            let res = (this.projectView.max_x - this.projectView.min_x)/this.$refs.map.clientWidth;
+            const deltaX = this.projectView.min_x + (this.projectView.max_x - this.projectView.min_x)/2,
+                deltaY = this.projectView.min_y + (this.projectView.max_y - this.projectView.min_y)/2,
                 center = ol.proj.fromLonLat([this.longitude,this.latitude]), // meters
                 sine = Math.sin(this.rotation),
                 cosine = Math.cos(this.rotation);
 
-            center[0] += mPerFt*(deltaXFt * cosine + deltaYFt * sine);
-            center[1] -= mPerFt*(deltaYFt * cosine - deltaXFt * sine); // ol origin is bottom left
+            let latitudeModifier = 1;
+            // Once map is loaded and we know where we are, then adjust scale by a modifier to account for skew based on latitude (because of how mercator projection works)
+            if (this.view.getCenter()) {
+              let projection = this.view.getProjection();
+              latitudeModifier = 1 / ol.proj.getPointResolution(projection, 1, this.view.getCenter());
+            }
+
+            res = res * latitudeModifier;
+
+            center[0] += (deltaX * cosine + deltaY * sine) * latitudeModifier;
+            center[1] -= (deltaY * cosine - deltaX * sine) * latitudeModifier; // ol origin is bottom left
 
             this.view.setResolution(res);
             this.view.setCenter(center);
