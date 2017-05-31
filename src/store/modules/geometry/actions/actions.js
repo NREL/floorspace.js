@@ -60,7 +60,6 @@ export default {
             if (differenceOfFaces) {
                 context.dispatch('createFaceFromPoints', {
                     [affectedModel.type]: affectedModel,
-                    geometry: currentStoryGeometry,
                     points: differenceOfFaces
                 });
             }
@@ -96,8 +95,7 @@ export default {
         // create new face from adjusted points
         context.dispatch('createFaceFromPoints', {
             [affectedModel.type]: affectedModel,
-            'geometry': currentStoryGeometry,
-            'points': movedPoints
+            points: movedPoints
         });
     },
     /*
@@ -112,38 +110,22 @@ export default {
         const geometry = context.rootGetters['application/currentStoryGeometry'];
 
         // splittingEdge.v1 -> midpoint
-        // prevent duplicate edges
-        var edge1 = geometry.edges.find((e) => {
-            return (e.v1 === edge.v1 && e.v2 === vertex.id) || (e.v2 === edge.v1 && e.v1 === vertex.id);
+        const edge1 = new factory.Edge();
+        edge1.v1 = edge.v1;
+        edge1.v2 = vertex.id;
+        context.commit('createEdge', {
+            geometry_id: geometry.id,
+            edge: edge1
         });
-        if (!edge1) {
-            edge1 = new factory.Edge();
-            edge1.v1 = edge.v1;
-            edge1.v2 = vertex.id;
-            context.commit('createEdge', {
-                geometry: geometry,
-                edge: edge1
-            });
-        } else {
-          debugger
-        }
 
         // midpoint -> splittingEdge.v2
-        // prevent duplicate edges
-        var edge2 = geometry.edges.find((e) => {
-            return (e.v2 === edge.v2 && e.v1 === vertex.id) || (e.v1 === edge.v2 && e.v2 === vertex.id);
+        const edge2 = new factory.Edge();
+        edge2.v1 = vertex.id;
+        edge2.v2 = edge.v2;
+        context.commit('createEdge', {
+            geometry_id: geometry.id,
+            edge: edge2
         });
-        if (!edge2) {
-            edge2 = new factory.Edge();
-            edge2.v1 = vertex.id;
-            edge2.v2 = edge.v2;
-            context.commit('createEdge', {
-                geometry: geometry,
-                edge: edge2
-            });
-        } else {
-          debugger
-        }
 
         // TODO: it will be impossible for multiple faces to be referecing the same edge (with the same two vertices)
         // once we prevent overlapping faces, so this code wont be needed
