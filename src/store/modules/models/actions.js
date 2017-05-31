@@ -58,7 +58,7 @@ export default {
             // destroy face associated with the space
             context.dispatch('geometry/destroyFaceAndDescendents', {
                 face: face,
-                geometry: context.rootGetters['application/currentStoryGeometry']
+                geometry_id: context.rootGetters['application/currentStoryGeometry'].id
             }, { root: true });
         }
     },
@@ -72,13 +72,12 @@ export default {
             story: story
         });
 
-        // TODO: update destroyFaceAndDescendents to work with shading
         const face = context.rootGetters['application/currentStoryGeometry'].faces.find(f => f.id === shading.face_id);
         if (face) {
             // destroy face associated with the space
             context.dispatch('geometry/destroyFaceAndDescendents', {
                 face: face,
-                geometry: context.rootGetters['application/currentStoryGeometry']
+                geometry_id: context.rootGetters['application/currentStoryGeometry'].id
             }, { root: true });
         }
     },

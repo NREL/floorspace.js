@@ -3,10 +3,22 @@ export default {
     /*
     * create a new geometry set, face, edge, or vertex in the data store
     */
-    initGeometry (state, payload) { state.push(payload.geometry); },
-    createVertex (state, payload) { state.find(g => g.id === payload.geometry_id).vertices.push(payload.vertex); },
-    createEdge (state, payload) { state.find(g => g.id === payload.geometry_id).edges.push(payload.edge); },
-    createFace (state, payload) { state.find(g => g.id === payload.geometry_id).faces.push(payload.face); },
+    initGeometry (state, payload) {
+      const { geometry } = payload;
+      state.push(geometry);
+    },
+    createVertex (state, payload) {
+      const { geometry_id, vertex } = payload;
+      state.find(g => g.id === geometry_id).vertices.push(vertex);
+    },
+    createEdge (state, payload) {
+      const { geometry_id, edge } = payload;
+      state.find(g => g.id === geometry_id).edges.push(edge);
+    },
+    createFace (state, payload) {
+      const { geometry_id, face } = payload;
+      state.find(g => g.id === geometry_id).faces.push(face);
+    },
 
     /*
     * removes an object with a given id from the datastore
@@ -24,7 +36,6 @@ export default {
                 state.splice(state.findIndex(g => g.id === id), 1);
                 break;
             } else if (~g.faces.map(f => f.id).indexOf(id)) {
-                console.log(`destroy face ${id}`);
                 g.faces.splice(g.faces.findIndex(f => f.id === id), 1);
                 break;
             } else if (~g.edges.map(e => e.id).indexOf(id)) {
