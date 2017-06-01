@@ -398,7 +398,7 @@ export default {
                     .attr('x',x)
                     .attr('y',y)
                     // scaling
-                    .attr("font-size", () => 1 * that.transform.k + "em")
+                    .attr("font-size", () => 0.6 * that.transform.k + "em")
                     .attr('dy', () => 0.25 * (that.transform.k > 1 ? 1 : that.transform.k) + "em")
                     // styling
                     .text(poly.name)
