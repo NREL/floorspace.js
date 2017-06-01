@@ -8,7 +8,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
 <div id="grid" :style="{ 'pointer-events': (currentTool === 'Drag' || currentTool === 'Map') ? 'none': 'all' }">
-    <svg ref="grid" @mousedown="gridClicked" @mousemove="highlightSnapTarget" preserveAspectRatio="none" id="svg-grid"></svg>
+    <svg ref="grid" @mousedown="gridClicked" @mousemove="handleMouseMove" preserveAspectRatio="none" id="svg-grid"></svg>
 </div>
 </template>
 
@@ -44,7 +44,8 @@ export default {
                 x: 0,
                 y: 0,
                 k: 1
-            }
+            },
+            handleMouseMove() {} // placeholder --> overwritten in mounted()
         };
     },
     mounted() {
@@ -75,6 +76,22 @@ export default {
 
         // watch escape to cancel current drawing action
         window.addEventListener('keyup',this.escapeAction);
+
+        // throttle mouse move
+        this.handleMouseMove = throttle(this.highlightSnapTarget,100);
+
+        function throttle(func, wait) {
+            var start = Date.now();
+
+            return function(...args) {
+                let now = Date.now()
+
+                if (start + wait < now) {
+                    start = now;
+                    func.apply(this,args);
+                }
+            }
+        };
     },
     beforeDestroy () {
         this.$refs.grid.removeEventListener('reloadGrid', this.reloadGrid);

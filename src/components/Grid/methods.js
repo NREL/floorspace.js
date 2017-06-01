@@ -123,15 +123,16 @@ export default {
     drawGuideLines (e, guidePoint) {
         if (!this.points.length) { return; }
 
-        // remove expired guideline paths
+        // remove expired guideline paths and text
         d3.selectAll('#grid .guideline').remove();
 
-        var guidelinePoints;
+        var guidelinePoints, guidelinePaths;
 
         // if the polygon tool is active, draw a line connecting the last point in the polygon to the guide point
         // if the rectangle or eraser tool is active, infer a rectangle from the first point that was drawn and the guide point
         if (this.currentTool === 'Polygon') {
             guidelinePoints = [guidePoint, this.points[this.points.length - 1]];
+            guidelinePaths = [guidelinePoints];
         } else if (this.currentTool === 'Rectangle' || this.currentTool === 'Eraser') {
             guidelinePoints = [
                 this.points[0],
@@ -140,18 +141,78 @@ export default {
                 { x: this.points[0].x, y: guidePoint.y },
                 this.points[0]
             ];
+
+            guidelinePaths = [
+                [guidelinePoints[0],guidelinePoints[1]],
+                [guidelinePoints[1],guidelinePoints[2]]
+            ];
         }
 
+        const guidelineArea = this.currentTool === 'Polygon' ? [...this.points, guidePoint, this.points[0]] : guidelinePoints,
+            guidelinePolys = [guidelineArea,this.points],
+            svg = d3.select('#grid svg');
+
         // render a guideline or rectangle
-        d3.select('#grid svg').append('path')
+        svg.selectAll('.guideline-line')
+            .append('path')
             .datum(guidelinePoints)
             .attr('fill', 'none')
-            .classed('guideline', true)
+            .classed('guideline guideline-line', true)
             .attr('vector-effect', 'non-scaling-stroke')
-            .attr('d', d3.line()
-                .x((d) => { return d.x; })
-                .y((d) => { return d.y; }))
+            .attr('d', d3.line().x(d => d.x).y(d => d.y))
             .lower();
+
+        // render gridline distance(s)
+        svg.selectAll('.guideline-text')
+            .data(guidelinePaths)
+            .enter()
+            .append('text')
+            .attr('x', d => d[0].x + (d[1].x - d[0].x)/2)
+            .attr('y', d => d[0].y + (d[1].y - d[0].y)/2)
+            .attr('dx', - 1.25 * (this.transform.k > 1 ? 1 : this.transform.k) + "em")
+            .text(d => {
+                let dist = this.distanceBetweenPoints(d[0],d[1]);
+                return dist ? dist.toFixed(2) : "";
+            })
+            .classed('guideline guideline-text',true)
+            .attr("font-family", "sans-serif")
+            .attr("fill", "red")
+            .attr("font-size","1em");
+
+        // render unfinished area polygon(s)
+        svg.selectAll('.guideline-area')
+            .data(guidelinePolys)
+            .enter()
+            .append('polygon')
+            .attr('points',d => d.map(p => [p.x,p.y].join(",")).join(" "))
+            .classed('guideline guideline-area previousStory',true)
+            .attr('vector-effect', 'non-scaling-stroke')
+            .attr('fill', () => {
+                if (this.currentSpace) { return this.currentSpace.color; }
+                else if (this.currentShading) { return this.currentShading.color; }
+            });
+
+        if (guidelineArea.length > 3) {
+            let areaPoints = guidelineArea.map(p => ({ ...p, X: p.x, Y: p.y })),
+                areaSize = Math.abs(Math.round(geometryHelpers.areaOfFace(areaPoints))),
+                areaText = areaSize ? areaSize.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") + " m²" : "",
+                { x, y } = this.polygonLabelPosition(areaPoints),
+                offset = 0.25 * (this.transform.k > 1 ? 1 : this.transform.k);
+
+            // render unfinished area #
+            svg.append('text')
+                .attr('x', x)
+                .attr('y', y)
+                .attr('dx', -offset + "em")
+                .attr('dy', offset + "em")
+                .text(areaText)
+                .classed('guideline guideline-text previousStory',true)
+                .attr("text-anchor", "middle")
+                .attr("font-family", "sans-serif")
+                .attr("fill", "red")
+                .attr("font-size","1em")
+                .raise();
+        }
 
         d3.selectAll('.vertical, .horizontal').lower();
     },
@@ -161,6 +222,7 @@ export default {
     escapeAction (e) {
         if (e.code === 'Escape' || e.which === 27) {
             this.points = [];
+            d3.selectAll('.guideline').remove();
         }
     },
 
@@ -297,10 +359,10 @@ export default {
     * handle clicks to select faces
     */
     drawPolygons () {
-        let that = this;
+        const that = this;
 
         // remove expired polygons
-        d3.select('#grid svg').selectAll('polygon, .polygon-text').remove();
+        d3.select('#grid svg').selectAll('polygon, .polygon-text, .guideline').remove();
 
         // draw polygons
         d3.select('#grid svg').selectAll('polygon')
@@ -328,43 +390,29 @@ export default {
             .attr('vector-effect', 'non-scaling-stroke')
             // add label
             .select(function (poly) {
-                let { x, y } = getLabelPosition(poly.points);
+                let { x, y } = that.polygonLabelPosition(poly.points);
 
                 d3.select('#grid svg')
                     .append('text')
                     .classed('polygon-text',true)
                     .attr('x',x)
                     .attr('y',y)
+                    // scaling
+                    .attr("font-size", () => 1 * that.transform.k + "em")
+                    .attr('dy', () => 0.25 * (that.transform.k > 1 ? 1 : that.transform.k) + "em")
+                    // styling
+                    .text(poly.name)
                     .attr("text-anchor", "middle")
-                    .text(() => poly.name)
                     .attr("font-family", "sans-serif")
-                    .attr("font-size", function (d) {
-                        // scale font w/ zoom
-                        return 2 * that.transform.k + "em";
-                    })
                     .attr("fill", "red")
                     .style("font-weight","bold")
-                    .attr('class', (t, i) => {
-                        return this.getAttribute('class');
-                    })
-                    .attr('dy', function () {
-                        return 0.25 * (that.transform.k > 1 ? 1 : that.transform.k) + "em";
-                    });
+                    .attr('class', () => this.getAttribute('class'))
+                    .classed('polygon-text',true);
             });
 
         // render the selected model's face above the other polygons so that the border is not obscured
         d3.select('.current').raise();
         d3.select('text.current').raise();
-
-        function getLabelPosition(pointsIn) {
-            const points = [pointsIn.map(p => [that.rwuToGrid(p.x, 'x'), that.rwuToGrid(p.y, 'y')])],
-                out = polylabel(points, 1.0);
-
-            return {
-                x: out[0],
-                y: out[1]
-            };
-        };
     },
 
     // ****************** SNAPPING TO EXISTING GEOMETRY ****************** //
@@ -745,5 +793,18 @@ export default {
                 pxValue = this.scaleY.invert(gridValue);
             return currentScaleY(pxValue);
         }
+    },
+
+    /*
+    * determine label x,y for given polygon
+    */
+    polygonLabelPosition (pointsIn) {
+        const points = [pointsIn.map(p => [this.rwuToGrid(p.x, 'x'), this.rwuToGrid(p.y, 'y')])],
+            out = polylabel(points, 1.0);
+
+        return {
+            x: out[0],
+            y: out[1]
+        };
     }
 }
