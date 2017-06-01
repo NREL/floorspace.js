@@ -46,7 +46,7 @@ export default function createFaceFromPoints (context, payload) {
 */
 function mergeWithExistingFace (points, currentStoryGeometry, target, context) {
     const existingFace = geometryHelpers.faceForId(target.face_id, currentStoryGeometry),
-        existingFaceVertices = geometryHelpers.verticesForFace(existingFace, currentStoryGeometry);
+        existingFaceVertices = geometryHelpers.verticesForFaceId(existingFace.id, currentStoryGeometry);
 
     /*
     * if new and existing face share an edge, update points to use their union
@@ -156,11 +156,15 @@ function createFaceGeometry (points, currentStoryGeometry, context) {
 * Save the fave if validation passes, destroy its vertices and edges if validation fails
 */
 function validateAndSaveFace (face, currentStoryGeometry, target, context) {
-    // vertices and edges on the face being created
-    const faceEdges = geometryHelpers.edgesForFace(face, currentStoryGeometry),
-        // faceVertices will include a vertex (the startpoint) for every single edge ref on the face,
-        // so multiple edges referencing the same vertex will result in duplicate vertices in the array, causing our validation to fail as expected
-        faceVertices = geometryHelpers.verticesForFace(face, currentStoryGeometry);
+    // vertices and edges referenced by the face being created (already saved to the data store)
+    // these have already been saved to the data store
+    const faceEdges = face.edgeRefs.map(eR => geometryHelpers.edgeForId(eR.edge_id, currentStoryGeometry)),
+        faceVertices = face.edgeRefs.map((edgeRef) => {
+              const edge = geometryHelpers.edgeForId(edgeRef.edge_id, currentStoryGeometry),
+                // startpoint will be v1 unless the edge is reversed
+                vertexId = edgeRef.reverse ? edge.v2 : edge.v1;
+              return geometryHelpers.vertexForId(vertexId, currentStoryGeometry);
+          });
 
     // validate and save the face
     var validFace = true;
@@ -178,7 +182,11 @@ function validateAndSaveFace (face, currentStoryGeometry, target, context) {
             }
         }
 
-        // if more than one vertex on the face has a single id, the face has snapped to itself and is self intersecting
+        /*
+        * faceVertices will only include the startpoint for each edge,
+        * so multiple edges referencing the same vertex will result in duplicate vertices in the array,
+        * meaning that the face has snapped to itself (is self intersecting) - fail validation
+        */
         for (let j = 0; j < faceVertices.length; j++) {
             const vertex = faceVertices[j];
             if (faceVertices.filter(v => v.id === vertex.id).length >= 2) {
@@ -259,7 +267,7 @@ function splitEdges (currentStoryGeometry, context) {
             }
 
             // look up all faces with a reference to the original edge being split
-            const affectedFaces = geometryHelpers.facesForEdge(edge.id, currentStoryGeometry);
+            const affectedFaces = geometryHelpers.facesForEdgeId(edge.id, currentStoryGeometry);
 
             // remove reference to old edge and add references to the new edges
             affectedFaces.forEach((affectedFace) => {
@@ -297,7 +305,7 @@ function connectEdges (currentStoryGeometry, context) {
 
     currentStoryGeometry = context.state.find(g => g.id === currentStoryGeometry.id);
     currentStoryGeometry.faces.forEach((face) => {
-        const faceEdges = geometryHelpers.edgesForFace(face, currentStoryGeometry);
+        const faceEdges = geometryHelpers.edgesForFaceId(face.id, currentStoryGeometry);
 
         // initialize ordered edgeRef array with our origin edge
         const connectedEdgeRefs = [];

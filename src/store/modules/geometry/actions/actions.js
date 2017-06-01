@@ -39,9 +39,9 @@ export default {
         * from the difference between their original area and the eraser selection
         */
         currentStoryGeometry.faces.filter(face => geometryHelpers.intersectionOfFaces(
-            geometryHelpers.verticesForFace(face, currentStoryGeometry), clipSelection, currentStoryGeometry)
+            geometryHelpers.verticesForFaceId(face.id, currentStoryGeometry), clipSelection, currentStoryGeometry)
         ).forEach((existingFace) => {
-            const existingFaceVertices = geometryHelpers.verticesForFace(existingFace, currentStoryGeometry),
+            const existingFaceVertices = geometryHelpers.verticesForFaceId(existingFace.id, currentStoryGeometry),
                 affectedModel = modelHelpers.modelForFace(context.rootState.models, existingFace.id);
 
             // destroy existing face
@@ -75,7 +75,7 @@ export default {
         const { face_id, dx, dy } = payload,
             currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'],
             face = geometryHelpers.faceForId(face_id, currentStoryGeometry),
-            movedPoints = geometryHelpers.verticesForFace(face, currentStoryGeometry).map(v => ({
+            movedPoints = geometryHelpers.verticesForFaceId(face.id, currentStoryGeometry).map(v => ({
                 x: v.x + dx,
                 y: v.y + dy
             })),
@@ -127,12 +127,8 @@ export default {
             edge: edge2
         });
 
-        // TODO: it will be impossible for multiple faces to be referecing the same edge (with the same two vertices)
-        // once we prevent overlapping faces, so this code wont be needed
-
-        // look up faces referencing the edge being split
-        const affectedFaces = geometryHelpers.facesForEdge(edge.id, geometry);
-        affectedFaces.forEach((face) => {
+        // update faces referencing the edge being split
+        geometryHelpers.facesForEdgeId(edge.id, geometry).forEach((face) => {
             context.commit('createEdgeRef', {
                 geometry_id: geometry.id,
                 face_id: face.id,
@@ -158,10 +154,8 @@ export default {
             });
         });
 
-        // remove references to the edge being split
-        if (geometryHelpers.facesForEdge(edge.id, geometry).length < 2) {
-            context.commit('destroyGeometry', { id: edge.id });
-        }
+        // destroy edge that was split
+        context.commit('destroyGeometry', { id: edge.id });
     },
 
     destroyFaceAndDescendents (context, payload) {
@@ -169,8 +163,8 @@ export default {
 
       const geometry = context.state.find(g => g.id === geometry_id),
         // find edges and vertices referenced ONLY by the face being destroyed so that no shared geometry is lost
-        expVertices = geometryHelpers.verticesForFace(face, geometry).filter(v => geometryHelpers.facesForVertex(v.id, geometry).length < 2),
-        expEdgeRefs = face.edgeRefs.filter(edgeRef => geometryHelpers.facesForEdge(edgeRef.edge_id, geometry).length < 2 );
+        expVertices = geometryHelpers.verticesForFaceId(face.id, geometry).filter(v => geometryHelpers.facesForVertexId(v.id, geometry).length < 2),
+        expEdgeRefs = face.edgeRefs.filter(edgeRef => geometryHelpers.facesForEdgeId(edgeRef.edge_id, geometry).length < 2 );
 
       // destroy face, then edges, then vertices
       context.commit('destroyGeometry', { id: face.id });

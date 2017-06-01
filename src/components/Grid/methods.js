@@ -479,7 +479,7 @@ export default {
                 // look up distance between projection and point being tested
                 aDist = this.distanceBetweenPoints(aProjection, point),
                 bDist = this.distanceBetweenPoints(bProjection, point);
-
+                
             // return data for the edge with the closest projection to the point being tested
             return aDist < bDist ? a : b;
         });

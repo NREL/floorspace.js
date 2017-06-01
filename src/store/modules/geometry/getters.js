@@ -10,13 +10,13 @@ export default {
                 id: vertex.id,
                 x: Number(vertex.x),
                 y: Number(vertex.y),
-                edge_ids: helpers.edgesForVertex(vertex.id, geometry).map(e => e.id)
+                edge_ids: helpers.edgesForVertexId(vertex.id, geometry).map(e => e.id)
             })),
 
             edges: geometry.edges.map(edge => ({
                 id: edge.id,
                 vertex_ids: [edge.v1, edge.v2],
-                face_ids: helpers.facesForEdge(edge.id, geometry).map(f => f.id)
+                face_ids: helpers.facesForEdgeId(edge.id, geometry).map(f => f.id)
             })),
 
             faces: geometry.faces.map(face => ({
