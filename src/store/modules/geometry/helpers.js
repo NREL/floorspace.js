@@ -74,108 +74,59 @@ const helpers = {
     /*
     * return the set of saved vertices directly on an edge, not including edge endpoints
     */
-    verticesOnEdge(edge, geometry) {
-        const edgeV1 = this.vertexForId(edge.v1, geometry),
+    splittingVerticesForEdgeId(edge_id, geometry) {
+        const edge = geometry.edges.find(e => e.id === edge_id),
+            edgeV1 = this.vertexForId(edge.v1, geometry),
             edgeV2 = this.vertexForId(edge.v2, geometry);
 
-        // look up all vertices directly ON the edge, ignoring the edge's endpoints
+        // look up all vertices touching the edge, ignoring the edge's endpoints
         return geometry.vertices.filter((vertex) => {
-            if ((edgeV1.x === vertex.x && edgeV1.y === vertex.y) || (edgeV2.x === vertex.x && edgeV2.y === vertex.y)) {
-                return;
+            if (edge.v1 !== vertex.id && edge.v2 !== vertex.id) {
+              const projection = this.projectionOfPointToLine(vertex, { p1: edgeV1, p2: edgeV2 });
+              return this.distanceBetweenPoints(vertex, projection) <= 1 / this.clipScale();
             }
-            return this.projectToEdge(vertex, edgeV1, edgeV2).dist <= 1 / this.clipScale();
         });
     },
-    projectToEdge(point, v1, v2) {
-        const x = point.x,
-            y = point.y,
-            x1 = v1.x,
-            y1 = v1.y,
-            x2 = v2.x,
-            y2 = v2.y,
-            A = x - x1,
-            B = y - y1,
+
+    /*
+    * given a point and a line (object with two points p1 and p2)
+    * return the coordinates of the projection of the point onto the line
+    */
+    projectionOfPointToLine (point, line) {
+        const {
+          p1: { x: x1, y: y1 },
+          p2: { x: x2, y: y2 }
+        } = line;
+
+        const A = point.x - x1,
+            B = point.y - y1,
             C = x2 - x1,
             D = y2 - y1,
             dot = A * C + B * D,
-            lenSq = (C * C + D * D) || 2;
+            lenSq = (C * C + D * D) || 2,
+            param = dot / lenSq;
 
-        const param = dot / lenSq;
-        var xProjection, yProjection;
-
+        // projection is an endpoint
         if (param <= 0) {
-            xProjection = x1;
-            yProjection = y1;
+          return p1;
         } else if (param > 1) {
-            xProjection = x2;
-            yProjection = y2;
-        } else {
-            xProjection = x1 + param * C;
-            yProjection = y1 + param * D;
+          return p2;
         }
 
-        const dx = x - xProjection,
-            dy = y - yProjection;
-
         return {
-            dist: Math.sqrt(dx * dx + dy * dy),
-            projection: {
-                x: xProjection,
-                y: yProjection
-            }
+            x: x1 + param * C,
+            y: y1 + param * D
         };
     },
 
-
-    // ************************************ GEOMETRY LOOKUP ************************************ //
-
-    // given a vertex id, find the vertex on the geometry set with that id
-    vertexForId(vertex_id, geometry) { return geometry.vertices.find(v =>  v.id === vertex_id); },
-
-    // given a face id, returns the populated vertex objects reference by edges on that face
-    verticesForFaceId(face_id, geometry) {
-        return geometry.faces.find(f => f.id === face_id)
-            .edgeRefs.map((edgeRef) => {
-                const edge = this.edgeForId(edgeRef.edge_id, geometry),
-                  // look up the vertex associated with v1 unless the edge reference on the face is reversed
-                  vertexId = edgeRef.reverse ? edge.v2 : edge.v1;
-                return this.vertexForId(vertexId, geometry);
-            });
+    /*
+    * given two points return the distance between them
+    */
+    distanceBetweenPoints (p1, p2) {
+        const dx = Math.abs(p1.x - p2.x),
+            dy = Math.abs(p1.y - p2.y);
+        return Math.sqrt((dx * dx) + (dy * dy));
     },
-
-    // given an edge id, find the edge on the geometry set with that id
-    edgeForId(edge_id, geometry) { return geometry.edges.find(e => e.id === edge_id); },
-
-    // given a vertex id returns edges referencing that vertex
-    edgesForVertexId(vertex_id, geometry) {
-        return geometry.edges.filter(e => (e.v1 === vertex_id) || (e.v2 === vertex_id));
-    },
-
-    // given a face id, return the populated edge objects referenced by that face
-    edgesForFaceId(face_id, geometry) {
-        return geometry.faces.find(f => f.id === face_id)
-            .edgeRefs.map(eR => this.edgeForId(eR.edge_id, geometry));
-    },
-
-    // given a face id, find the face on the geometry set with that id
-    faceForId(face_id, geometry) { return geometry.faces.find(f => f.id === face_id); },
-
-    // given a vertex id returns all faces with an edge referencing that vertex
-    facesForVertexId(vertex_id, geometry) {
-        return geometry.faces.filter((face) => {
-            return face.edgeRefs.find((edgeRef) => {
-                const edge = this.edgeForId(edgeRef.edge_id, geometry);
-                return (edge.v1 === vertex_id || edge.v2 === vertex_id);
-            });
-        });
-    },
-
-    // given an edge id returns all faces referencing that edge
-    facesForEdgeId(edge_id, geometry) {
-        return geometry.faces.filter(face => face.edgeRefs.find(eR => eR.edge_id === edge_id));
-    },
-
-
 
     // ************************************ EDGES ************************************ //
     /*
@@ -230,6 +181,57 @@ const helpers = {
             normalizedEdgeRefs.push(nextEdgeRefCopy);
         }
         return normalizedEdgeRefs;
+    },
+
+
+    // ************************************ GEOMETRY LOOKUP ************************************ //
+
+    // given a vertex id, find the vertex on the geometry set with that id
+    vertexForId(vertex_id, geometry) { return geometry.vertices.find(v =>  v.id === vertex_id); },
+
+    // given a face id, returns the populated vertex objects reference by edges on that face
+    verticesForFaceId(face_id, geometry) {
+        return geometry.faces.find(f => f.id === face_id)
+            .edgeRefs.map((edgeRef) => {
+                const edge = this.edgeForId(edgeRef.edge_id, geometry),
+                  // look up the vertex associated with v1 unless the edge reference on the face is reversed
+                  vertexId = edgeRef.reverse ? edge.v2 : edge.v1;
+                return this.vertexForId(vertexId, geometry);
+            });
+    },
+
+
+    // given an edge id, find the edge on the geometry set with that id
+    edgeForId(edge_id, geometry) { return geometry.edges.find(e => e.id === edge_id); },
+
+    // given a vertex id returns edges referencing that vertex
+    edgesForVertexId(vertex_id, geometry) {
+        return geometry.edges.filter(e => (e.v1 === vertex_id) || (e.v2 === vertex_id));
+    },
+
+    // given a face id, return the populated edge objects referenced by that face
+    edgesForFaceId(face_id, geometry) {
+        return geometry.faces.find(f => f.id === face_id)
+            .edgeRefs.map(eR => this.edgeForId(eR.edge_id, geometry));
+    },
+
+
+    // given a face id, find the face on the geometry set with that id
+    faceForId(face_id, geometry) { return geometry.faces.find(f => f.id === face_id); },
+
+    // given a vertex id returns all faces with an edge referencing that vertex
+    facesForVertexId(vertex_id, geometry) {
+        return geometry.faces.filter((face) => {
+            return face.edgeRefs.find((edgeRef) => {
+                const edge = this.edgeForId(edgeRef.edge_id, geometry);
+                return (edge.v1 === vertex_id || edge.v2 === vertex_id);
+            });
+        });
+    },
+
+    // given an edge id returns all faces referencing that edge
+    facesForEdgeId(edge_id, geometry) {
+        return geometry.faces.filter(face => face.edgeRefs.find(eR => eR.edge_id === edge_id));
     }
 };
 

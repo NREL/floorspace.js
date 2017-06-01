@@ -59,7 +59,8 @@ function mergeWithExistingFace (points, currentStoryGeometry, target, context) {
             edgeV2 = points[i < points.length - 1 ? i + 1 : 0],
             // look up all existing face vertices splitting the edge to be created for the new face
             verticesOnEdge = existingFaceVertices.filter((vertex) => {
-                return geometryHelpers.projectToEdge(vertex, edgeV1, edgeV2).dist <= 1 / geometryHelpers.clipScale();
+                const projection = geometryHelpers.projectionOfPointToLine(vertex, { p1: edgeV1, p2: edgeV2 });
+                return geometryHelpers.distanceBetweenPoints(vertex, projection) <= (1 / geometryHelpers.clipScale());
             });
         if ((points[i].splittingEdge && ~existingFace.edgeRefs.map(e => e.edge_id).indexOf(points[i].splittingEdge.id)) || verticesOnEdge.length) {
             points = geometryHelpers.unionOfFaces(existingFaceVertices, points, currentStoryGeometry);
@@ -172,7 +173,7 @@ function validateAndSaveFace (face, currentStoryGeometry, target, context) {
         const edge = faceEdges[i];
 
         // saved vertices which are touching the edge (excluding the edge's endpoints)
-        const splittingVertices = geometryHelpers.verticesOnEdge(edge, currentStoryGeometry)
+        const splittingVertices = geometryHelpers.splittingVerticesForEdgeId(edge.id, currentStoryGeometry)
 
         // if a vertex on the face touches an edge on the face, then the face is self intersecting and invalid
         for (let j = 0; j < splittingVertices.length; j++) {
@@ -226,7 +227,7 @@ function validateAndSaveFace (face, currentStoryGeometry, target, context) {
 */
 function splitEdges (currentStoryGeometry, context) {
     currentStoryGeometry.edges.forEach((edge) => {
-        const splittingVertices = geometryHelpers.verticesOnEdge(edge, currentStoryGeometry);
+        const splittingVertices = geometryHelpers.splittingVerticesForEdgeId(edge.id, currentStoryGeometry);
 
         if (splittingVertices.length) {
             // endpoints of the original edge

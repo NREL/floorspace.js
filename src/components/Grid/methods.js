@@ -473,13 +473,13 @@ export default {
                 bV2 = geometryHelpers.vertexForId(b.v2, bStoryGeometry),
 
                 // project point being tested to each edge
-                aProjection = geometryHelpers.projectToEdge(point, aV1, aV2).projection,
-                bProjection = geometryHelpers.projectToEdge(point, bV1, bV2).projection,
+                aProjection = geometryHelpers.projectionOfPointToLine(point, { p1: aV1, p2: aV2 }),
+                bProjection = geometryHelpers.projectionOfPointToLine(point, { p1: bV1, p2: bV2 }),
 
                 // look up distance between projection and point being tested
-                aDist = this.distanceBetweenPoints(aProjection, point),
-                bDist = this.distanceBetweenPoints(bProjection, point);
-                
+                aDist = geometryHelpers.distanceBetweenPoints(aProjection, point),
+                bDist = geometryHelpers.distanceBetweenPoints(bProjection, point);
+
             // return data for the edge with the closest projection to the point being tested
             return aDist < bDist ? a : b;
         });
@@ -490,7 +490,7 @@ export default {
             nearestEdgeV2 = geometryHelpers.vertexForId(nearestEdge.v2, nearestEdgeStoryGeometry),
 
             // project point being tested to nearest edge
-            projection = geometryHelpers.projectToEdge(point, nearestEdgeV1, nearestEdgeV2).projection,
+            projection = geometryHelpers.projectionOfPointToLine(point, { p1: nearestEdgeV1, p2: nearestEdgeV2 }),
 
             // look up distance between projection and point being tested
             dist = this.distanceBetweenPoints(projection, point);
