@@ -3,95 +3,81 @@ import ClipperLib from 'js-clipper'
 const helpers = {
     // ************************************ CLIPPER ************************************ //
     clipScale: 100,
-    initClip(f1Paths, f2Paths) {
-        const cpr = new ClipperLib.Clipper();
-        // TODO: when we add support for holes, pass them in as additional subject/clip paths
-        var subj_paths = JSON.parse(JSON.stringify(f1Paths)),
-            clip_paths = JSON.parse(JSON.stringify(f2Paths));
-
-        ClipperLib.JS.ScaleUpPaths(subj_paths, this.clipScale);
-        ClipperLib.JS.ScaleUpPaths(clip_paths, this.clipScale);
-
-
-
-        cpr.AddPaths(subj_paths, ClipperLib.PolyType.ptSubject, true);
-        cpr.AddPaths(clip_paths, ClipperLib.PolyType.ptClip, true);
-        return cpr;
-    },
-
+	offset: 0.01,
     differenceOfFaces(f1Points, f2Points) {
-        const f1Paths = this.performOffset(f1Points, 10),
-        	f2Paths = this.performOffset(f2Points, 10),
-			cpr = this.initClip(f1Paths, f2Paths);
-
-        var difference = new ClipperLib.Paths();
-        cpr.Execute(ClipperLib.ClipType.ctDifference, difference, ClipperLib.PolyFillType.pftEvenOdd, ClipperLib.PolyFillType.pftEvenOdd);
-        if (difference.length && difference[0].length) {
-            return difference[0].map((p) => {
-                return {
-                    x: p.X / this.clipScale,
-                    y: p.Y / this.clipScale
-                };
-            });
-        }
+		return this.setOperation('difference', f1Points, f2Points);
     },
     intersectionOfFaces(f1Points, f2Points) {
-        const f1Paths = this.performOffset(f1Points, 10),
-        	f2Paths = this.performOffset(f2Points, 10),
-			cpr = this.initClip(f1Paths, f2Paths);
-
-        var intersection = new ClipperLib.Paths();
-        cpr.Execute(ClipperLib.ClipType.ctIntersection, intersection, ClipperLib.PolyFillType.pftEvenOdd, ClipperLib.PolyFillType.pftEvenOdd);
-        if (intersection.length && intersection[0].length) {
-            return intersection[0].map((p) => {
-                return {
-                    x: p.X / this.clipScale,
-                    y: p.Y / this.clipScale,
-                    X: p.X / this.clipScale,
-                    Y: p.Y / this.clipScale
-                };
-            });
-        }
+		return this.setOperation('intersection', f1Points, f2Points);
     },
     unionOfFaces(f1Points, f2Points) {
-        const f1Paths = this.performOffset(f1Points, 10),
-        	f2Paths = this.performOffset(f2Points, 10),
-			cpr = this.initClip(f1Paths, f2Paths),
-			result = new ClipperLib.Paths();
+		return this.setOperation('union', f1Points, f2Points);
+    },
 
-        cpr.Execute(ClipperLib.ClipType.ctUnion, result, ClipperLib.PolyFillType.pftEvenOdd, ClipperLib.PolyFillType.pftEvenOdd);
+	/*
+	* given a set of points
+	*/
+	setOperation (type, f1Points, f2Points) {
+		// translate points for each face into a clipper path
+		const f1Path = f1Points.map(p => ({ X: p.x, Y: p.y })),
+        	f2Path = f2Points.map(p => ({ X: p.x, Y: p.y }));
 
-        if (result.length === 1) {
-            var points = result[0].map(p => ({
-                    x: p.X / this.clipScale,
-                    y: p.Y / this.clipScale
-                }));
-			points = this.performOffset(points, -10)[0].map(p => ({
-                    x: p.X,
-                    y: p.Y
-                }));
+		// offset both paths to prevent floating point inaccuracies from causing incorrect intersections
+		const offset = new ClipperLib.ClipperOffset(),
+			f1PathsOffsetted = new ClipperLib.Paths(),
+			f2PathsOffsetted = new ClipperLib.Paths();
 
-			return points
+		offset.AddPaths([f1Path], ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
+		offset.Execute(f1PathsOffsetted, this.offset);
+		offset.Clear();
+		offset.AddPaths([f2Path], ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
+		offset.Execute(f2PathsOffsetted, this.offset);
+		offset.Clear();
 
-        }
-		else if (result.length === 0) {
+		// scale paths up before performing operation
+		ClipperLib.JS.ScaleUpPaths(f1PathsOffsetted, this.clipScale);
+		ClipperLib.JS.ScaleUpPaths(f2PathsOffsetted, this.clipScale);
+
+		const cpr = new ClipperLib.Clipper(),
+			resultPathsOffsetted = new ClipperLib.Paths();
+
+        cpr.AddPaths(f1PathsOffsetted, ClipperLib.PolyType.ptSubject, true);
+        cpr.AddPaths(f2PathsOffsetted, ClipperLib.PolyType.ptClip, true);
+
+		var operation;
+		switch (type) {
+			case 'union':
+				operation = ClipperLib.ClipType.ctUnion;
+				break;
+			case 'intersection':
+				operation = ClipperLib.ClipType.ctIntersection;
+				break;
+			case 'difference':
+				operation = ClipperLib.ClipType.ctDifference;
+				break;
+		}
+
+        cpr.Execute(operation, resultPathsOffsetted, ClipperLib.PolyFillType.pftEvenOdd, ClipperLib.PolyFillType.pftEvenOdd);
+
+		// scale down path
+		ClipperLib.JS.ScaleUpPaths(resultPathsOffsetted, 1 / this.clipScale);
+
+		// undo offset
+		const resultPaths = new ClipperLib.Paths();
+		offset.AddPaths(resultPathsOffsetted, ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
+		offset.Execute(resultPaths, -this.offset);
+
+        if (resultPaths.length === 1) {
+			// translate into points
+			return resultPaths[0].map(p => ({ x: p.X, y: p.Y }));
+        } else if (resultPaths.length === 0) {
         	return [];
-        } else if (result.length > 1) {
+        } else if (resultPaths.length > 1) {
 			// TODO: the operation created multiple faces, we need to handle this case
 			throw new Error('The operation resulted in multiple closed faces, we need to handle this case.');
         	return false;
         }
-    },
-
-    performOffset(points, delta) {
-        const path = points.map(p => ({ X: p.x, Y: p.y })),
-			offset = new ClipperLib.ClipperOffset(),
-            result = new ClipperLib.Paths();
-
-        offset.AddPaths([path], ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
-        offset.Execute(result, delta);
-        return result;
-    },
+	},
 
     // given an array of points return the area of the space they enclose
     areaOfSelection(paths) {

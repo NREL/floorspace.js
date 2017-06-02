@@ -38,9 +38,11 @@ export default {
         * destroy faces intersecting the eraser selection and recreate them
         * from the difference between their original area and the eraser selection
         */
-        currentStoryGeometry.faces.filter(face => geometryHelpers.intersectionOfFaces(
-            geometryHelpers.verticesForFaceId(face.id, currentStoryGeometry), clipSelection, currentStoryGeometry)
-        ).forEach((existingFace) => {
+        const intersectedFaces = currentStoryGeometry.faces.filter((face) => {
+			const faceVertices = geometryHelpers.verticesForFaceId(face.id, currentStoryGeometry),
+				intersection = geometryHelpers.intersectionOfFaces(faceVertices , clipSelection, currentStoryGeometry);
+			return intersection.length;
+		}).forEach((existingFace) => {
             const existingFaceVertices = geometryHelpers.verticesForFaceId(existingFace.id, currentStoryGeometry),
                 affectedModel = modelHelpers.modelForFace(context.rootState.models, existingFace.id);
 
@@ -175,8 +177,8 @@ export default {
 					vertexId = edgeRef.reverse ? edge.v2 : edge.v1;
 				return geometryHelpers.vertexForId(vertexId, geometry);
 			})
-			.filter(v => geometryHelpers.facesForVertexId(v.id, geometry).length === (isSaved ? 1 : 0)),
-        expEdgeRefs = face.edgeRefs.filter(edgeRef => geometryHelpers.facesForEdgeId(edgeRef.edge_id, geometry).length === (isSaved ? 1 : 0));
+			.filter(v => geometryHelpers.facesForVertexId(v.id, geometry).length <2),
+        expEdgeRefs = face.edgeRefs.filter(edgeRef => geometryHelpers.facesForEdgeId(edgeRef.edge_id, geometry).length <2);
 
       // destroy face, then edges, then vertices
       context.commit('destroyGeometry', { id: face.id });
