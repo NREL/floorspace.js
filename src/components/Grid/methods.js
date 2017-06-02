@@ -205,12 +205,11 @@ export default {
             let areaPoints = guidelineArea.map(p => ({ ...p, X: p.x / this.transform.k, Y: p.y / this.transform.k })), // scale X,Y for areaOfFace calc
                 areaSize = Math.abs(Math.round(geometryHelpers.areaOfFace(areaPoints))),
                 areaText = areaSize ? areaSize.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") + " m²" : "",
-                { x, y } = this.polygonLabelPosition(areaPoints),
-                offset = 0.25 * (this.transform.k > 1 ? 1 : this.transform.k);
+                { x, y } = this.polygonLabelPosition(areaPoints);
 
             // scale/translate label position
-            x = (x - this.transform.x) / this.transform.k + offset;
-            y = (y - this.transform.y) / this.transform.k - offset;
+            x = (x - this.transform.x) / this.transform.k;
+            y = (y - this.transform.y) / this.transform.k;
 
             // render unfinished area #
             svg.append('text')
