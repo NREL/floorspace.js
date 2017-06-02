@@ -171,7 +171,16 @@ export default {
             .attr('y', d => d[0].y + (d[1].y - d[0].y)/2)
             .attr('dx', - 1.25 * (this.transform.k > 1 ? 1 : this.transform.k) + "em")
             .text(d => {
-                let dist = this.distanceBetweenPoints(d[0],d[1]);
+                let zoom = this.transform.k,
+                    dist = this.distanceBetweenPoints({
+                        x: d[0].x / zoom,
+                        y: d[0].y / zoom
+                    },
+                    {
+                        x: d[1].x / zoom,
+                        y: d[1].y / zoom
+                    });
+
                 return dist ? dist.toFixed(2) : "";
             })
             .classed('guideline guideline-text',true)
@@ -193,18 +202,20 @@ export default {
             });
 
         if (guidelineArea.length > 3) {
-            let areaPoints = guidelineArea.map(p => ({ ...p, X: p.x, Y: p.y })),
+            let areaPoints = guidelineArea.map(p => ({ ...p, X: p.x / this.transform.k, Y: p.y / this.transform.k })), // scale X,Y for areaOfFace calc
                 areaSize = Math.abs(Math.round(geometryHelpers.areaOfFace(areaPoints))),
                 areaText = areaSize ? areaSize.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") + " m²" : "",
                 { x, y } = this.polygonLabelPosition(areaPoints),
                 offset = 0.25 * (this.transform.k > 1 ? 1 : this.transform.k);
 
+            // scale/translate label position
+            x = (x - this.transform.x) / this.transform.k + offset;
+            y = (y - this.transform.y) / this.transform.k - offset;
+
             // render unfinished area #
             svg.append('text')
                 .attr('x', x)
                 .attr('y', y)
-                .attr('dx', -offset + "em")
-                .attr('dy', offset + "em")
                 .text(areaText)
                 .classed('guideline guideline-text previousStory',true)
                 .attr("text-anchor", "middle")
