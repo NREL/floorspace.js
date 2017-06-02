@@ -11,7 +11,7 @@ export default function createFaceFromPoints (context, payload) {
     var points = payload.points.map(p => ({ ...p, X: p.x, Y: p.y }));
 
     // validation - a face must have at least 3 vertices and area
-    if (points.length < 3 || !geometryHelpers.areaOfFace(points)) { return; }
+    if (points.length < 3 || !geometryHelpers.areaOfSelection(points)) { return; }
 
     const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'],
         target = modelHelpers.libraryObjectWithId(context.rootState.models, payload.space ? payload.space.id : payload.shading.id);
@@ -60,7 +60,7 @@ function mergeWithExistingFace (points, currentStoryGeometry, target, context) {
             // look up all existing face vertices splitting the edge to be created for the new face
             verticesOnEdge = existingFaceVertices.filter((vertex) => {
                 const projection = geometryHelpers.projectionOfPointToLine(vertex, { p1: edgeV1, p2: edgeV2 });
-                return geometryHelpers.distanceBetweenPoints(vertex, projection) <= (1 / geometryHelpers.clipScale());
+                return geometryHelpers.distanceBetweenPoints(vertex, projection) <= (1 / geometryHelpers.clipScale);
             });
         if ((points[i].splittingEdge && ~existingFace.edgeRefs.map(e => e.edge_id).indexOf(points[i].splittingEdge.id)) || verticesOnEdge.length) {
             points = geometryHelpers.unionOfFaces(existingFaceVertices, points, currentStoryGeometry);

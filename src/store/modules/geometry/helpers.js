@@ -2,27 +2,23 @@ import ClipperLib from 'js-clipper'
 
 const helpers = {
     // ************************************ CLIPPER ************************************ //
-    clipScale() {
-        // TODO: this scaling feature could be useful for snapping, could calculate based on grid settings but we'd need to add an offset...
-        return 100000;
-    },
+    clipScale: 100,
     initClip(f1Paths, f2Paths, geometry) {
+        const cpr = new ClipperLib.Clipper();
+        // TODO: when we add support for holes, pass them in as additional subject/clip paths
+        var subj_paths = JSON.parse(JSON.stringify(f1Paths)),
+            clip_paths = JSON.parse(JSON.stringify(f2Paths));
 
-        const cpr = new ClipperLib.Clipper(),
-            // TODO: when we add support for holes, pass them in as additional subject/clip paths
-            subj_paths = JSON.parse(JSON.stringify([f1Paths.slice()])),
-            clip_paths = JSON.parse(JSON.stringify([f2Paths.slice()]));
+        ClipperLib.JS.ScaleUpPaths(subj_paths, this.clipScale);
+        ClipperLib.JS.ScaleUpPaths(clip_paths, this.clipScale);
 
-        ClipperLib.JS.ScaleUpPaths(subj_paths, this.clipScale());
-        ClipperLib.JS.ScaleUpPaths(clip_paths, this.clipScale());
+
 
         cpr.AddPaths(subj_paths, ClipperLib.PolyType.ptSubject, true);
         cpr.AddPaths(clip_paths, ClipperLib.PolyType.ptClip, true);
         return cpr;
     },
-    areaOfFace(paths) {
-        return ClipperLib.JS.AreaOfPolygon(paths);
-    },
+
     differenceOfFaces(f1Paths, f2Paths, geometry) {
         const cpr = this.initClip(f1Paths, f2Paths, geometry)
         var difference = new ClipperLib.Paths();
@@ -30,50 +26,74 @@ const helpers = {
         if (difference.length && difference[0].length) {
             return difference[0].map((p) => {
                 return {
-                    x: p.X / this.clipScale(),
-                    y: p.Y / this.clipScale(),
-                    X: p.X / this.clipScale(),
-                    Y: p.Y / this.clipScale()
+                    x: p.X / this.clipScale,
+                    y: p.Y / this.clipScale,
+                    X: p.X / this.clipScale,
+                    Y: p.Y / this.clipScale
                 };
             });
         }
     },
     intersectionOfFaces(f1Paths, f2Paths, geometry) {
-        const cpr = this.initClip(f1Paths, f2Paths, geometry)
+        const cpr = this.initClip([f1Paths], [f2Paths], geometry)
         var intersection = new ClipperLib.Paths();
         cpr.Execute(ClipperLib.ClipType.ctIntersection, intersection, ClipperLib.PolyFillType.pftEvenOdd, ClipperLib.PolyFillType.pftEvenOdd);
         if (intersection.length && intersection[0].length) {
             return intersection[0].map((p) => {
                 return {
-                    x: p.X / this.clipScale(),
-                    y: p.Y / this.clipScale(),
-                    X: p.X / this.clipScale(),
-                    Y: p.Y / this.clipScale()
+                    x: p.X / this.clipScale,
+                    y: p.Y / this.clipScale,
+                    X: p.X / this.clipScale,
+                    Y: p.Y / this.clipScale
                 };
             });
         }
     },
     unionOfFaces(f1Paths, f2Paths, geometry) {
-        const cpr = this.initClip(f1Paths, f2Paths, geometry)
+        const offset = new ClipperLib.ClipperOffset();
+        offset.AddPaths([f1Paths], ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
+        offset.Execute(f1Paths, 10  );
+
+        offset.Clear();
+        offset.AddPaths([f2Paths], ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
+        offset.Execute(f2Paths, 10  );
+
+        const cpr = this.initClip(f1Paths, f2Paths, geometry);
+
         var union = new ClipperLib.Paths();
         cpr.Execute(ClipperLib.ClipType.ctUnion, union, ClipperLib.PolyFillType.pftEvenOdd, ClipperLib.PolyFillType.pftEvenOdd);
+
         if (union.length && union[0].length) {
             return union[0].map((p) => {
                 return {
-                    x: p.X / this.clipScale(),
-                    y: p.Y / this.clipScale(),
-                    X: p.X / this.clipScale(),
-                    Y: p.Y / this.clipScale()
+                    x: p.X / this.clipScale,
+                    y: p.Y / this.clipScale,
+                    X: p.X / this.clipScale,
+                    Y: p.Y / this.clipScale
                 };
             });
         }
     },
 
 
+    performOffset(selection, delta) {
+        const offset = new ClipperLib.ClipperOffset(),
+            result = new ClipperLib.Paths();
+        offset.AddPaths([selection], ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
+        offset.Execute(result, delta * this.clipScale);
+        debugger
+        return result;
+    },
+
+    // given an array of points return the area of the space they enclose
+    areaOfSelection(paths) {
+        return ClipperLib.JS.AreaOfPolygon(paths);
+    },
+
     // ************************************ PROJECTIONS ************************************ //
     /*
-    * return the set of saved vertices directly on an edge, not including edge endpoints
-    */
+     * return the set of saved vertices directly on an edge, not including edge endpoints
+     */
     splittingVerticesForEdgeId(edge_id, geometry) {
         const edge = geometry.edges.find(e => e.id === edge_id),
             edgeV1 = this.vertexForId(edge.v1, geometry),
@@ -82,20 +102,29 @@ const helpers = {
         // look up all vertices touching the edge, ignoring the edge's endpoints
         return geometry.vertices.filter((vertex) => {
             if (edge.v1 !== vertex.id && edge.v2 !== vertex.id) {
-              const projection = this.projectionOfPointToLine(vertex, { p1: edgeV1, p2: edgeV2 });
-              return this.distanceBetweenPoints(vertex, projection) <= 1 / this.clipScale();
+                const projection = this.projectionOfPointToLine(vertex, {
+                    p1: edgeV1,
+                    p2: edgeV2
+                });
+                return this.distanceBetweenPoints(vertex, projection) <= 1 / this.clipScale;
             }
         });
     },
 
     /*
-    * given a point and a line (object with two points p1 and p2)
-    * return the coordinates of the projection of the point onto the line
-    */
-    projectionOfPointToLine (point, line) {
+     * given a point and a line (object with two points p1 and p2)
+     * return the coordinates of the projection of the point onto the line
+     */
+    projectionOfPointToLine(point, line) {
         const {
-          p1: { x: x1, y: y1 },
-          p2: { x: x2, y: y2 }
+            p1: {
+                x: x1,
+                y: y1
+            },
+            p2: {
+                x: x2,
+                y: y2
+            }
         } = line;
 
         const A = point.x - x1,
@@ -108,9 +137,9 @@ const helpers = {
 
         // projection is an endpoint
         if (param <= 0) {
-          return p1;
+            return line.p1;
         } else if (param > 1) {
-          return p2;
+            return line.p2;
         }
 
         return {
@@ -120,9 +149,9 @@ const helpers = {
     },
 
     /*
-    * given two points return the distance between them
-    */
-    distanceBetweenPoints (p1, p2) {
+     * given two points return the distance between them
+     */
+    distanceBetweenPoints(p1, p2) {
         const dx = Math.abs(p1.x - p2.x),
             dy = Math.abs(p1.y - p2.y);
         return Math.sqrt((dx * dx) + (dy * dy));
@@ -130,9 +159,9 @@ const helpers = {
 
     // ************************************ EDGES ************************************ //
     /*
-    * run through all edges on a face, sort them, and set the reverse property logically
-    * this actually mutates faces, call it from a data store mutation
-    */
+     * run through all edges on a face, sort them, and set the reverse property logically
+     * this actually mutates faces, call it from a data store mutation
+     */
     normalizedEdges(face, geometry) {
         // initialize the set with the first edge, we assume the reverse property is correctly set for this one
         const normalizedEdgeRefs = [];
@@ -187,22 +216,26 @@ const helpers = {
     // ************************************ GEOMETRY LOOKUP ************************************ //
 
     // given a vertex id, find the vertex on the geometry set with that id
-    vertexForId(vertex_id, geometry) { return geometry.vertices.find(v =>  v.id === vertex_id); },
+    vertexForId(vertex_id, geometry) {
+        return geometry.vertices.find(v => v.id === vertex_id);
+    },
 
     // given a face id, returns the populated vertex objects reference by edges on that face
     verticesForFaceId(face_id, geometry) {
         return geometry.faces.find(f => f.id === face_id)
             .edgeRefs.map((edgeRef) => {
                 const edge = this.edgeForId(edgeRef.edge_id, geometry),
-                  // look up the vertex associated with v1 unless the edge reference on the face is reversed
-                  vertexId = edgeRef.reverse ? edge.v2 : edge.v1;
+                    // look up the vertex associated with v1 unless the edge reference on the face is reversed
+                    vertexId = edgeRef.reverse ? edge.v2 : edge.v1;
                 return this.vertexForId(vertexId, geometry);
             });
     },
 
 
     // given an edge id, find the edge on the geometry set with that id
-    edgeForId(edge_id, geometry) { return geometry.edges.find(e => e.id === edge_id); },
+    edgeForId(edge_id, geometry) {
+        return geometry.edges.find(e => e.id === edge_id);
+    },
 
     // given a vertex id returns edges referencing that vertex
     edgesForVertexId(vertex_id, geometry) {
@@ -217,7 +250,9 @@ const helpers = {
 
 
     // given a face id, find the face on the geometry set with that id
-    faceForId(face_id, geometry) { return geometry.faces.find(f => f.id === face_id); },
+    faceForId(face_id, geometry) {
+        return geometry.faces.find(f => f.id === face_id);
+    },
 
     // given a vertex id returns all faces with an edge referencing that vertex
     facesForVertexId(vertex_id, geometry) {

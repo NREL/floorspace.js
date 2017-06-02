@@ -31,7 +31,7 @@ export default {
             currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'];
 
         // validation - a selection must have at least 3 vertices and area
-        if (clipSelection.length < 3 || !geometryHelpers.areaOfFace(clipSelection)) { return; }
+        if (clipSelection.length < 3 || !geometryHelpers.areaOfSelection(clipSelection)) { return; }
 
         /*
         * find all existing faces that have an intersection with the selection being erased
