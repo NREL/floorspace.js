@@ -3,7 +3,7 @@ import ClipperLib from 'js-clipper'
 const helpers = {
     // ************************************ CLIPPER ************************************ //
     clipScale: 100,
-    initClip(f1Paths, f2Paths, geometry) {
+    initClip(f1Paths, f2Paths) {
         const cpr = new ClipperLib.Clipper();
         // TODO: when we add support for holes, pass them in as additional subject/clip paths
         var subj_paths = JSON.parse(JSON.stringify(f1Paths)),
@@ -19,23 +19,27 @@ const helpers = {
         return cpr;
     },
 
-    differenceOfFaces(f1Paths, f2Paths, geometry) {
-        const cpr = this.initClip(f1Paths, f2Paths, geometry)
+    differenceOfFaces(f1Points, f2Points) {
+        const f1Paths = this.performOffset(f1Points, 10),
+        	f2Paths = this.performOffset(f2Points, 10),
+			cpr = this.initClip(f1Paths, f2Paths);
+
         var difference = new ClipperLib.Paths();
         cpr.Execute(ClipperLib.ClipType.ctDifference, difference, ClipperLib.PolyFillType.pftEvenOdd, ClipperLib.PolyFillType.pftEvenOdd);
         if (difference.length && difference[0].length) {
             return difference[0].map((p) => {
                 return {
                     x: p.X / this.clipScale,
-                    y: p.Y / this.clipScale,
-                    X: p.X / this.clipScale,
-                    Y: p.Y / this.clipScale
+                    y: p.Y / this.clipScale
                 };
             });
         }
     },
-    intersectionOfFaces(f1Paths, f2Paths, geometry) {
-        const cpr = this.initClip([f1Paths], [f2Paths], geometry)
+    intersectionOfFaces(f1Points, f2Points) {
+        const f1Paths = this.performOffset(f1Points, 10),
+        	f2Paths = this.performOffset(f2Points, 10),
+			cpr = this.initClip(f1Paths, f2Paths);
+
         var intersection = new ClipperLib.Paths();
         cpr.Execute(ClipperLib.ClipType.ctIntersection, intersection, ClipperLib.PolyFillType.pftEvenOdd, ClipperLib.PolyFillType.pftEvenOdd);
         if (intersection.length && intersection[0].length) {
@@ -49,39 +53,43 @@ const helpers = {
             });
         }
     },
-    unionOfFaces(f1Paths, f2Paths, geometry) {
-        const offset = new ClipperLib.ClipperOffset();
-        offset.AddPaths([f1Paths], ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
-        offset.Execute(f1Paths, 10  );
+    unionOfFaces(f1Points, f2Points) {
+        const f1Paths = this.performOffset(f1Points, 10),
+        	f2Paths = this.performOffset(f2Points, 10),
+			cpr = this.initClip(f1Paths, f2Paths),
+			result = new ClipperLib.Paths();
 
-        offset.Clear();
-        offset.AddPaths([f2Paths], ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
-        offset.Execute(f2Paths, 10  );
+        cpr.Execute(ClipperLib.ClipType.ctUnion, result, ClipperLib.PolyFillType.pftEvenOdd, ClipperLib.PolyFillType.pftEvenOdd);
 
-        const cpr = this.initClip(f1Paths, f2Paths, geometry);
-
-        var union = new ClipperLib.Paths();
-        cpr.Execute(ClipperLib.ClipType.ctUnion, union, ClipperLib.PolyFillType.pftEvenOdd, ClipperLib.PolyFillType.pftEvenOdd);
-
-        if (union.length && union[0].length) {
-            return union[0].map((p) => {
-                return {
+        if (result.length === 1) {
+            var points = result[0].map(p => ({
                     x: p.X / this.clipScale,
-                    y: p.Y / this.clipScale,
-                    X: p.X / this.clipScale,
-                    Y: p.Y / this.clipScale
-                };
-            });
+                    y: p.Y / this.clipScale
+                }));
+			points = this.performOffset(points, -10)[0].map(p => ({
+                    x: p.X,
+                    y: p.Y
+                }));
+
+			return points
+
+        }
+		else if (result.length === 0) {
+        	return [];
+        } else if (result.length > 1) {
+			// TODO: the operation created multiple faces, we need to handle this case
+			throw new Error('The operation resulted in multiple closed faces, we need to handle this case.');
+        	return false;
         }
     },
 
-
-    performOffset(selection, delta) {
-        const offset = new ClipperLib.ClipperOffset(),
+    performOffset(points, delta) {
+        const path = points.map(p => ({ X: p.x, Y: p.y })),
+			offset = new ClipperLib.ClipperOffset(),
             result = new ClipperLib.Paths();
-        offset.AddPaths([selection], ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
-        offset.Execute(result, delta * this.clipScale);
-        debugger
+
+        offset.AddPaths([path], ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
+        offset.Execute(result, delta);
         return result;
     },
 

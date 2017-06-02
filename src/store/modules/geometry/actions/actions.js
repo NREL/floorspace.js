@@ -158,13 +158,25 @@ export default {
         context.commit('destroyGeometry', { id: edge.id });
     },
 
+	/*
+	* given a face which may or may not be saved to the datastore
+	* look up and destroy all edges and vertices referenced only by that face
+	* destroy the face
+	*/
     destroyFaceAndDescendents (context, payload) {
       const { geometry_id, face } = payload;
 
       const geometry = context.state.find(g => g.id === geometry_id),
+	  	isSaved = !!geometry.faces.find(f => f.id === face.id),
         // find edges and vertices referenced ONLY by the face being destroyed so that no shared geometry is lost
-        expVertices = geometryHelpers.verticesForFaceId(face.id, geometry).filter(v => geometryHelpers.facesForVertexId(v.id, geometry).length < 2),
-        expEdgeRefs = face.edgeRefs.filter(edgeRef => geometryHelpers.facesForEdgeId(edgeRef.edge_id, geometry).length < 2 );
+        expVertices = face.edgeRefs.map((edgeRef) => {
+				const edge = geometryHelpers.edgeForId(edgeRef.edge_id, geometry),
+					// look up the vertex associated with v1 unless the edge reference on the face is reversed
+					vertexId = edgeRef.reverse ? edge.v2 : edge.v1;
+				return geometryHelpers.vertexForId(vertexId, geometry);
+			})
+			.filter(v => geometryHelpers.facesForVertexId(v.id, geometry).length === (isSaved ? 1 : 0)),
+        expEdgeRefs = face.edgeRefs.filter(edgeRef => geometryHelpers.facesForEdgeId(edgeRef.edge_id, geometry).length === (isSaved ? 1 : 0));
 
       // destroy face, then edges, then vertices
       context.commit('destroyGeometry', { id: face.id });
