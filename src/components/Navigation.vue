@@ -235,10 +235,8 @@ export default {
 
             switch (mode) {
                 case 'stories':
-                    // init story and space
                     this.$store.dispatch('models/initStory');
-                    mode = 'spaces';
-                    items = this.spaces;
+                    return;
                 case 'spaces':
                     this.$store.dispatch('models/initSpace', {
                         story: this.$store.state.application.currentSelections.story
@@ -252,10 +250,8 @@ export default {
                 case 'building_units':
                 case 'thermal_zones':
                 case 'space_types':
-                    const newObject = new modelHelpers.map[mode].init(this.displayNameForMode(mode) + " " + (1 + items.length));
                     this.$store.dispatch('models/createObjectWithType', {
                         type: mode,
-                        object: newObject
                     });
                     break;
             }
@@ -269,16 +265,9 @@ export default {
         destroyItem (item, mode = this.mode) {
             switch (mode) {
                 case 'stories':
-                    if (this.stories.length < 1) { return; }
-
                     this.$store.dispatch('models/destroyStory', {
-                        story: item
+                        story: item,
                     });
-
-                    if (this.stories.length === 0) {
-                        this.createItem('stories');
-                    }
-
                     break;
                 case 'spaces':
                     this.$store.dispatch('models/destroySpace', {

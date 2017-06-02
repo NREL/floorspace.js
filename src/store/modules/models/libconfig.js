@@ -251,20 +251,23 @@ const map = {
                 input_type: 'text',
                 private: false,
                 validator (object, store, value) {
-                    if (~store.getters['models/allSpaces'].map(s => s.name).indexOf(value)) {
+                    let objSameName = store.getters['models/allSpaces'].find(s => s.name === value);
+
+                    if (objSameName && objSameName.id !== object.id) {
                         return {
                             success: false,
                             error: 'Names must be unique.'
                         };
-                    }
-
-                    if (value.length < 5) {
+                    } else  if (value.length < 5) {
                         return {
                             success: false,
                             error: 'Names must be at least 5 characters long.'
                         };
+                    } else {
+                        return {
+                            success: true
+                        };
                     }
-                    return { success: true };
                 }
             },
             handle: {
