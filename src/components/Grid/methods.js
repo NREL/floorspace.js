@@ -724,6 +724,13 @@ export default {
             });
 
         svg.call(this.zoomBehavior);
+        this.centerGrid();
+    },
+    centerGrid () {
+        const x = this.min_x + (this.max_x - this.min_x)/2,
+            y = this.min_y + (this.max_y - this.min_y)/2;
+
+        d3.select('#grid svg').call(this.zoomBehavior.transform, d3.zoomIdentity.translate(x, y));
     },
     updateGrid () {
         this.axis.x.style('display', this.gridVisible ? 'inline' : 'none');
