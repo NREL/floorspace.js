@@ -47,7 +47,6 @@ export default {
         // create the point
         var newPoint = snapTarget.type === 'edge' ? snapTarget.projection : snapTarget;
         this.points.push(newPoint);
-
         // if the Rectangle or Eraser tool is active and two points have been drawn (to define a rectangle)
         // complete the corresponding operation for the tool
         if (this.currentTool === 'Eraser' && this.points.length === 2) { this.eraseRectangularSelection(); }
@@ -209,7 +208,6 @@ export default {
             payload.model_id = this.currentShading.id;
 			payload.type = "shading";
         }
-
         this.$store.dispatch('geometry/createFaceFromPoints', payload);
 
         // clear points from the grid
@@ -535,7 +533,8 @@ export default {
             result = n + x - (n % x);
         }
         // handle negatives
-        return result *= sign;
+        result *= sign;
+		return result
     },
 
     /*
@@ -707,18 +706,21 @@ export default {
     * take a grid value (from some point already rendered to the grid) and translate it into RWU for persistence to the datastore
     */
     gridToRWU (gridValue, axis) {
+		var result;
         if (axis === 'x') {
             const currentScaleX = d3.scaleLinear()
                     .domain([0, this.$refs.grid.clientWidth])
                     .range([this.min_x, this.max_x]),
                 pxValue = this.scaleX.invert(gridValue);
-            return currentScaleX(pxValue);
+            result = currentScaleX(pxValue);
         } else if (axis === 'y') {
             const currentScaleY = d3.scaleLinear()
                    .domain([0, this.$refs.grid.clientHeight])
                    .range([this.min_y, this.max_y]),
                 pxValue = this.scaleY.invert(gridValue);
-            return currentScaleY(pxValue);
+            result = currentScaleY(pxValue);
         }
+		// prevent floating point inaccuracies in stored numbers
+		return (Math.round(result * 100000000000))/100000000000;
     }
 }
