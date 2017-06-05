@@ -60,10 +60,11 @@ export default {
             // create new face by subtracting overlap (intersection) from the existing face's original area
             const differenceOfFaces = geometryHelpers.differenceOfFaces(existingFaceVertices, clipSelection, currentStoryGeometry);
             if (differenceOfFaces) {
-                context.dispatch('createFaceFromPoints', {
-                    [affectedModel.type]: affectedModel,
-                    points: differenceOfFaces
-                });
+				context.dispatch('createFaceFromPoints', {
+					type: affectedModel.type,
+		            model_id: affectedModel.id,
+		            points: differenceOfFaces
+		        });
             }
         });
     },
@@ -96,7 +97,8 @@ export default {
 
         // create new face from adjusted points
         context.dispatch('createFaceFromPoints', {
-            [affectedModel.type]: affectedModel,
+			type: affectedModel.Type,
+            model_id: affectedModel.id,
             points: movedPoints
         });
     },

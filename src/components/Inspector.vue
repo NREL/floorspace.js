@@ -167,7 +167,7 @@ export default {
     name: 'inspector',
     data() {
         return {
-            tab: 'attributes',
+            tab: 'geometry',
             geometryInspector: true,
             storyInspector: false
         }
@@ -265,9 +265,14 @@ export default {
         background-color: $gray-medium-dark;
         border-left: 1px solid $gray-darkest;
         font-size: .85rem;
+		width: 18rem;
+	    position: absolute;
+	    right: 0;
+	    z-index: 2;
+	    top: 5rem;
 
         .list {
-            height: calc(100% - 2rem);
+            height: calc(100vh - 6.75rem);
             overflow: scroll;
 
             header {

@@ -80,9 +80,10 @@ const helpers = {
 	},
 
     // given an array of points return the area of the space they enclose
-    areaOfSelection(paths) {
-        return ClipperLib.JS.AreaOfPolygon(paths);
-    },
+    areaOfSelection(points) {
+		const paths = points.map(p => ({ X: p.x, Y: p.y }))
+		return ClipperLib.JS.AreaOfPolygon(paths);
+	},
 
     // ************************************ PROJECTIONS ************************************ //
     /*
@@ -95,7 +96,10 @@ const helpers = {
 
         // look up all vertices touching the edge, ignoring the edge's endpoints
         return geometry.vertices.filter((vertex) => {
-            if (edge.v1 !== vertex.id && edge.v2 !== vertex.id) {
+            if ((edge.v1 !== vertex.id && edge.v2 !== vertex.id) &&
+				!(edgeV1.x === vertex.x && edgeV1.y === vertex.y) &&
+				!(edgeV2.x === vertex.x && edgeV2.y === vertex.y)
+			) {
                 const projection = this.projectionOfPointToLine(vertex, {
                     p1: edgeV1,
                     p2: edgeV2
@@ -185,17 +189,12 @@ const helpers = {
                 if ((nextEdgeVertex1.x === currentEdgeEndpointVertex.x && nextEdgeVertex1.y === currentEdgeEndpointVertex.y) ||
                     (nextEdgeVertex2.x === currentEdgeEndpointVertex.x && nextEdgeVertex2.y === currentEdgeEndpointVertex.y)) {
                     if (normalizedEdgeRefs.map(eR => eR.edge_id).indexOf(nextEdge.id) !== -1) {
-                        console.log(nextEdge.id);
-                        // debugger;
                         return;
                     }
                     reverse = (nextEdgeVertex1.x === currentEdgeEndpointVertex.x && nextEdgeVertex1.y === currentEdgeEndpointVertex.y) ? false : true;
                     return true;
                 }
             });
-            if (!nextEdgeRef) {
-                debugger;
-            }
             // prevent direct mutation of state
             const nextEdgeRefCopy = JSON.parse(JSON.stringify(nextEdgeRef));
             // set the reverse property on the next edge depending on whether its v1 or v2 references the endpoint of the current edge

@@ -160,6 +160,7 @@ export default {
     * translate the points into RWU and save the face for the selected space or shading
     */
     savePolygonFace () {
+
         const payload = {
             // translate grid points from grid units to RWU
             points: this.points.map(p => ({
@@ -168,10 +169,12 @@ export default {
             }))
         };
 
-        if (this.currentSpace) {
-            payload.space = this.currentSpace;
+		if (this.currentSpace) {
+            payload.model_id = this.currentSpace.id;
+			payload.type = "space";
         } else if (this.currentShading) {
-            payload.shading = this.currentShading;
+            payload.model_id = this.currentShading.id;
+			payload.type = "shading";
         }
 
         this.$store.dispatch('geometry/createFaceFromPoints', payload);
@@ -186,25 +189,25 @@ export default {
     */
     saveRectuangularFace () {
         // infer 4 corners of the rectangle based on the two points that have been drawn
-        const payload = {
-            points: [
-                this.points[0],
-                { x: this.points[1].x, y: this.points[0].y },
-                this.points[1],
-                { x: this.points[0].x, y: this.points[1].y }
-            ]
-        };
+        const payload = {};
 
         // translate points from grid units to RWU
-        payload.points = payload.points.map(p => ({
-            x: this.gridToRWU(p.x, 'x'),
-            y: this.gridToRWU(p.y, 'y')
-        }));
+        payload.points = [
+	            this.points[0],
+	            { x: this.points[1].x, y: this.points[0].y },
+	            this.points[1],
+	            { x: this.points[0].x, y: this.points[1].y }
+	        ].map(p => ({
+	            x: this.gridToRWU(p.x, 'x'),
+	            y: this.gridToRWU(p.y, 'y')
+	        }));
 
         if (this.currentSpace) {
-            payload.space = this.currentSpace;
+            payload.model_id = this.currentSpace.id;
+			payload.type = "space";
         } else if (this.currentShading) {
-            payload.shading = this.currentShading;
+            payload.model_id = this.currentShading.id;
+			payload.type = "shading";
         }
 
         this.$store.dispatch('geometry/createFaceFromPoints', payload);
@@ -375,11 +378,11 @@ export default {
                 xTickSpacing = this.rwuToGrid(this.spacing + this.min_x, 'x'),
                 yTickSpacing = this.rwuToGrid(this.spacing + this.min_y, 'y');
 
-            // round point RWU coordinates to nearest gridline, adjust by grid offset
+            // round point RWU coordinates to nearest gridline, adjust by grid offset, add 0.5 grid units to account for width of gridlines
             const snapTarget = {
                 type: 'gridpoint',
-                x: this.round(gridPoint.x, this.rwuToGrid(this.spacing + this.min_x, 'x')) + xOffset,
-                y: this.round(gridPoint.y, this.rwuToGrid(this.spacing + this.min_y, 'y')) + yOffset
+                x: this.round(gridPoint.x, this.rwuToGrid(this.spacing + this.min_x, 'x')) + xOffset - 0.5,
+                y: this.round(gridPoint.y, this.rwuToGrid(this.spacing + this.min_y, 'y')) + yOffset - 0.5
             };
 
             // pick closest point

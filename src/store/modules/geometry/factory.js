@@ -6,10 +6,7 @@ export default {
         return {
             id: idFactory.generate(),
             x: x,
-            y: y,
-            // clipper expects points to have X and Y properties
-            get X () { return this.x; },
-            get Y () { return this.y; }
+            y: y
         }
     },
     Edge (v1, v2) {

@@ -7,28 +7,25 @@ import modelHelpers from './../../models/helpers'
 * associate the face with the space or shading included in the payload
 */
 export default function createFaceFromPoints (context, payload) {
-    // points defining the boundaries of the new face
-    var points = payload.points.map(p => ({ ...p, X: p.x, Y: p.y }));
+	const { model_id, type, points } = payload;
+
+	// lookup target model for face assignment
+    const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'],
+        target = modelHelpers.libraryObjectWithId(context.rootState.models, model_id);
 
     // validation - a face must have at least 3 vertices and area
     if (points.length < 3 || !geometryHelpers.areaOfSelection(points)) { return; }
 
-    const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'],
-        target = modelHelpers.libraryObjectWithId(context.rootState.models, payload.space ? payload.space.id : payload.shading.id);
-
-
-    // if target already has an existing face, destroy existing face and calculate a new set of points
-    if (target.face_id) {
-        points = mergeWithExistingFace(points, currentStoryGeometry, target, context);
-    }
+	// if target already has an existing face, destroy existing face and calculate a new set of points
+	const facePoints = target.face_id ? mergeWithExistingFace(points, currentStoryGeometry, target, context) : points;
 
     // prevent overlapping faces by erasing existing geometry covered by the points defining the new face
-    context.dispatch('eraseSelection', { points: points });
+    context.dispatch('eraseSelection', { points: facePoints });
 
-    // create and save vertices and edges for the face
-    const face = createFaceGeometry(points, currentStoryGeometry, context);
+    // create and save vertices and edges to be referenced by the face
+    const face = createFaceGeometry(facePoints, currentStoryGeometry, context);
 
-    // validate and save the face, return if validation fails
+    // validate and save the face, destroy saved vertices and edges and abort face creation if validation fails
     const validFace = validateAndSaveFace(face, currentStoryGeometry, target, context);
     if (!validFace) { return; }
 
@@ -141,7 +138,7 @@ function createFaceGeometry (points, currentStoryGeometry, context) {
     // create a new face object with references to the edges
     const face = new factory.Face(faceEdges.map(e => ({
         edge_id: e.id,
-        reverse: e.reverse
+        reverse: !!e.reverse
     })));
 
     // return these, they will be used during validation
@@ -228,7 +225,6 @@ function validateAndSaveFace (face, currentStoryGeometry, target, context) {
 function splitEdges (currentStoryGeometry, context) {
     currentStoryGeometry.edges.forEach((edge) => {
         const splittingVertices = geometryHelpers.splittingVerticesForEdgeId(edge.id, currentStoryGeometry);
-
         if (splittingVertices.length) {
             // endpoints of the original edge
             const startpoint = geometryHelpers.vertexForId(edge.v1, currentStoryGeometry),
@@ -293,7 +289,7 @@ function splitEdges (currentStoryGeometry, context) {
             // destroy original edge
             context.commit('destroyGeometry', { id: edge.id });
         }
-        connectEdges(currentStoryGeometry, context);
+        // connectEdges(currentStoryGeometry, context);
     });
 }
 
@@ -302,8 +298,6 @@ function splitEdges (currentStoryGeometry, context) {
 * set reverse property on edgeRefs as needed
 */
 function connectEdges (currentStoryGeometry, context) {
-
-
     currentStoryGeometry = context.state.find(g => g.id === currentStoryGeometry.id);
     currentStoryGeometry.faces.forEach((face) => {
         const faceEdges = geometryHelpers.edgesForFaceId(face.id, currentStoryGeometry);
