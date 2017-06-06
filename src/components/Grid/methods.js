@@ -202,10 +202,14 @@ export default {
             });
 
         if (guidelineArea.length > 3) {
-            let areaPoints = guidelineArea.map(p => ({ ...p, X: p.x / this.transform.k, Y: p.y / this.transform.k })), // scale X,Y for areaOfFace calc
-                areaSize = Math.abs(Math.round(geometryHelpers.areaOfFace(areaPoints))),
-                areaText = areaSize ? areaSize.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") + " m²" : "",
-                { x, y } = this.polygonLabelPosition(areaPoints);
+            let areaPoints = guidelineArea.map(p => ({ ...p, X: p.x / this.transform.k, Y: p.y / this.transform.k })), // scale X,Y for correct area calc
+                { x, y, area } = this.polygonLabelPosition(areaPoints),
+                areaText = area ? area.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") + " m²" : "";
+
+            if (x === null || y === null) {
+                // either polygon has 0 area or something went wrong --> don't draw area text
+                return;
+            }
 
             // scale/translate label position
             x = (x - this.transform.x) / this.transform.k;
@@ -401,6 +405,11 @@ export default {
             // add label
             .select(function (poly) {
                 let { x, y } = that.polygonLabelPosition(poly.points);
+
+                // either polygon has 0 area or something went wrong --> don't draw name
+                if (x === null || y === null) {
+                    return;
+                }
 
                 d3.select('#grid svg')
                     .append('text')
@@ -825,12 +834,10 @@ export default {
     */
     polygonLabelPosition (pointsIn) {
         const points = [pointsIn.map(p => [this.rwuToGrid(p.x, 'x'), this.rwuToGrid(p.y, 'y')])],
-            out = polylabel(points, 1.0);
+            area = Math.abs(Math.round(geometryHelpers.areaOfFace(pointsIn))), // calculate are in RWU, not grid units
+            [ x, y ] = area ? polylabel(points, 1.0) : [null, null];
 
-        return {
-            x: out[0],
-            y: out[1]
-        };
+        return { x, y, area };
     },
 
     /*
