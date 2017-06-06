@@ -170,32 +170,24 @@ const helpers = {
         }
     },
 
-    generateName: (() => {
-        const counters = {};
+    /*
+    * Generate new unique name
+    */
+    generateName (state, type, story){
+        const objs = libraryObjectsWithType(state, type),
+            prefix = map[type].displayName + (story ? " " + story.storyId + " - " : " ");
 
-        return (state, type) => {
-            const objs = libraryObjectsWithType(state, type),
-                displayName = map[type].displayName;
+        // Make sure name is unique
+        for (let name = null, count = 1; name === null; count++) {
+            name = prefix + count;
 
-            var name = null;
-
-            // init type counter, if needed
-            if (counters[type] === undefined) {
-                counters[type] = 1;
+            if (objs.find(o => o.name === name)) {
+                // try again
+                name = null;
+            } else {
+                return [name,count];
             }
-
-            // Make sure name is unique
-            while (name === null) {
-                name = displayName + " " + counters[type]++;
-
-                if (objs.find(o => o.name === name)) {
-                    // try again
-                    name = null;
-                } else {
-                    return name;
-                }
-            }
-        };
+        }
 
         function libraryObjectsWithType(state, type) {
             switch (type) {
@@ -229,6 +221,6 @@ const helpers = {
                     return out[type];
             }
         };
-    })()
+    }
 };
 export default helpers;

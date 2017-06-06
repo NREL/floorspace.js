@@ -8,6 +8,7 @@ export default {
             id: idFactory.generate(),
             handle: null,
             name: opts.name,
+            storyId: opts.storyId,
             geometry_id: null,
             below_floor_plenum_height: 0,
             floor_to_ceiling_height: 0,
