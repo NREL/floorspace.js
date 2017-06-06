@@ -202,26 +202,23 @@ export default {
                     reader = new FileReader();
 
                 reader.addEventListener("load", () => {
-                const img = new Image();
-                var _this = this;
-                img.onload = () => {
+                    const img = new Image();
 
-                    this.$store.dispatch('models/createImageForStory', {
-                        story_id: _this.currentStory.id,
-                        src: img.src,
-                        name: "Image " + (_this.images.length + 1 + i),
-                        // translate image dimensions to rwu
-                        height: _this.scaleY(img.height),
-                        width: _this.scaleX(img.width),
+                    img.onload = () => {
+                        this.$store.dispatch('models/createImageForStory', {
+                            story_id: this.currentStory.id,
+                            src: img.src,
+                            name: "Image " + (this.images.length + 1 + i),
+                            // translate image dimensions to rwu
+                            height: this.scaleY(img.height),
+                            width: this.scaleX(img.width),
+                            // center in svg
+                            x: this.min_x + (this.max_x - this.min_x)/2 - this.scaleY(img.width/2),
+                            y: this.min_y + (this.max_y - this.min_y)/2 - this.scaleY(img.height/2)
+                        });
+                    };
 
-                        y: (_this.max_y - _this.min_y - _this.scaleY(img.height)) * Math.random(),
-                        x: (_this.max_x - _this.min_x - _this.scaleX(img.width)) * Math.random()
-                    });
-
-                };
-                img.src = reader.result;
-
-
+                    img.src = reader.result;
                 }, false);
 
                 if (file) { reader.readAsDataURL(file); }

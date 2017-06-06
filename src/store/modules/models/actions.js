@@ -4,8 +4,8 @@ import helpers from './helpers.js'
 
 export default {
     initStory (context) {
-        const name = helpers.generateName(context.state, 'stories'),
-            story = new factory.Story({ name });
+        const [name, storyId] = helpers.generateName(context.state, 'stories'),
+            story = new factory.Story({ name, storyId });
 
         // create story/geometry
         context.commit('initStory', { story });
@@ -16,19 +16,19 @@ export default {
     },
 
     initSpace (context, payload) {
-        const name = helpers.generateName(context.state, 'spaces'),
-            story = context.state.stories.find(s => s.id === payload.story.id),
+        const story = context.state.stories.find(s => s.id === payload.story.id),
+            [name] = helpers.generateName(context.state, 'spaces', story),
             space = new factory.Space({ name });
 
         context.commit('initSpace', { story, space });
     },
 
     initShading (context, payload) {
-        const name = helpers.generateName(context.state, 'shading'),
-            story = context.state.stories.find(s => s.id === payload.story.id),
+        const story = context.state.stories.find(s => s.id === payload.story.id),
+            [name] = helpers.generateName(context.state, 'shading', story),
             shading = new factory.Shading({ name });
 
-        context.commit('initShading', { story, space });
+        context.commit('initShading', { story, shading });
     },
 
     destroyStory (context, payload) {
@@ -176,7 +176,7 @@ export default {
     },
 
     createImageForStory (context, payload) {
-        const name = helpers.generateName(context.state, 'images'),
+        const [name] = helpers.generateName(context.state, 'images'),
             img = new Image();
 
         img.onload = () => {
@@ -198,7 +198,7 @@ export default {
 
     createObjectWithType (context, payload) {
         const type = payload.type,
-            name = helpers.generateName(context.state, type),
+            [name] = helpers.generateName(context.state, type),
             object = new helpers.map[type].init({ name });
 
         context.commit('initObject', { type, object });

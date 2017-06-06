@@ -1,12 +1,23 @@
 export default {
     name (object, store, value) {
-        if (value.length < 5) {
+        let objs = store.getters['models/all'],
+            objSameName = objs.find(s => s.name === value);
+
+        if (objSameName && objSameName.id !== object.id) {
+            return {
+                success: false,
+                error: 'Names must be unique.'
+            };
+        } else  if (value.length < 5) {
             return {
                 success: false,
                 error: 'Names must be at least 5 characters long.'
             };
+        } else {
+            return {
+                success: true
+            };
         }
-        return { success: true };
     },
 
     number (object, store, value) {

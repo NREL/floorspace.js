@@ -16,5 +16,19 @@ export default {
         return rootState.models.stories.reduce((images, story) => {
             return images.concat(story.images)
         }, []);
+    },
+    all (state, getters, rootState, rootGetters) {
+        let objs = {
+            ...rootState.models.library,
+            stories: rootState.models.stories,
+            spaces: getters.allSpaces,
+            shading: getters.allShading,
+            images: getters.allImages
+        };
+
+        return Object.keys(objs).reduce((out,key) => {
+            out.push(...objs[key]);
+            return out;
+        }, []);
     }
 }

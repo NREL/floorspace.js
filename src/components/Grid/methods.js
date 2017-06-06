@@ -202,10 +202,14 @@ export default {
             });
 
         if (guidelineArea.length > 3) {
-            let areaPoints = guidelineArea.map(p => ({ ...p, X: p.x / this.transform.k, Y: p.y / this.transform.k })), // scale X,Y for areaOfFace calc
-                areaSize = Math.abs(Math.round(geometryHelpers.areaOfFace(areaPoints))),
-                areaText = areaSize ? areaSize.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") + " m²" : "",
-                { x, y } = this.polygonLabelPosition(areaPoints);
+            let areaPoints = guidelineArea.map(p => ({ ...p, X: p.x / this.transform.k, Y: p.y / this.transform.k })), // scale X,Y for correct area calc
+                { x, y, area } = this.polygonLabelPosition(areaPoints),
+                areaText = area ? area.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") + " m²" : "";
+
+            if (x === null || y === null) {
+                // either polygon has 0 area or something went wrong --> don't draw area text
+                return;
+            }
 
             // scale/translate label position
             x = (x - this.transform.x) / this.transform.k;
@@ -401,6 +405,11 @@ export default {
             // add label
             .select(function (poly) {
                 let { x, y } = that.polygonLabelPosition(poly.points);
+
+                // either polygon has 0 area or something went wrong --> don't draw name
+                if (x === null || y === null) {
+                    return;
+                }
 
                 d3.select('#grid svg')
                     .append('text')
@@ -668,31 +677,37 @@ export default {
         this.axis_generator.x = d3.axisBottom(zoomScaleX)
             .ticks(rwuWidth / this.spacing)
             .tickSize(rwuHeight)
-            .tickPadding(this.scaleY(-20));
+            .tickPadding(this.scaleY(-20))
+            .tickFormat(this.formatTickX.bind(this,Math.floor(10 * this.$refs.grid.clientWidth / this.$refs.grid.clientHeight)));
+
         this.axis_generator.y = d3.axisRight(zoomScaleY)
             .ticks(rwuHeight / this.spacing)
             .tickSize(rwuWidth)
-            .tickPadding(this.scaleX(-20));
+            .tickFormat(this.formatTickY.bind(this,10));
 
         this.axis.x = svg.append('g')
             .attr('class', 'axis axis--x')
             .attr('stroke-width', this.scaleY(1))
+            .style('font-size', this.scaleY(1) + 'em')
             .style('display', this.gridVisible ? 'inline' : 'none')
             .call(this.axis_generator.x);
         this.axis.y = svg.append('g')
             .attr('class', 'axis axis--y')
+            .style('font-size', this.scaleY(1) + 'em')
             .attr('stroke-width', this.scaleX(1))
             .style('display', this.gridVisible ? 'inline' : 'none')
             .call(this.axis_generator.y);
 
-
         // configure zoom behavior in rwu
         this.zoomBehavior = d3.zoom()
+            .scaleExtent([0.02,Infinity])
             .on('zoom', () => {
                 const lastTransform = this.transform,
                     newTransform = d3.event.transform;
 
                 this.transform = newTransform;
+                // hide grid if zoomed out enough
+                this.forceGridHide = (newTransform.k < 0.1);
 
                 // cancel current drawing action if actual zoom and not justu accidental drag
                 if (newTransform.k !== lastTransform.k || Math.abs(lastTransform.y - newTransform.y) > 3 || Math.abs(lastTransform.x - newTransform.x) > 3) {
@@ -704,7 +719,7 @@ export default {
                 // NOTE: don't change the original scale or you'll get exponential growth
                 const newScaleX = d3.event.transform.rescaleX(zoomScaleX),
                     newScaleY = d3.event.transform.rescaleY(zoomScaleY);
-                    
+
                 [this.min_x, this.max_x] = newScaleX.domain();
                 [this.min_y, this.max_y] = newScaleY.domain();
 
@@ -719,15 +734,25 @@ export default {
                 this.axis.x.call(this.axis_generator.x.scale(newScaleX));
                 this.axis.y.call(this.axis_generator.y.scale(newScaleY));
 
+                // axis padding
+                this.padTickY(-12);
+
                 // redraw the saved geometry
                 this.drawPolygons();
             });
 
         svg.call(this.zoomBehavior);
+        this.centerGrid();
+    },
+    centerGrid () {
+        const x = this.min_x + (this.max_x - this.min_x)/2,
+            y = this.min_y + (this.max_y - this.min_y)/2;
+
+        d3.select('#grid svg').call(this.zoomBehavior.transform, d3.zoomIdentity.translate(x, y));
     },
     updateGrid () {
-        this.axis.x.style('display', this.gridVisible ? 'inline' : 'none');
-        this.axis.y.style('display', this.gridVisible ? 'inline' : 'none');
+        this.axis.x.style('display', this.gridVisible && !this.forceGridHide ? 'inline' : 'none');
+        this.axis.y.style('display', this.gridVisible && !this.forceGridHide ? 'inline' : 'none');
 
         const rwuHeight = this.max_y - this.min_y,
             rwuWidth = this.max_x - this.min_x;
@@ -810,11 +835,38 @@ export default {
     */
     polygonLabelPosition (pointsIn) {
         const points = [pointsIn.map(p => [this.rwuToGrid(p.x, 'x'), this.rwuToGrid(p.y, 'y')])],
-            out = polylabel(points, 1.0);
+            area = Math.abs(Math.round(geometryHelpers.areaOfFace(pointsIn))), // calculate are in RWU, not grid units
+            [ x, y ] = area ? polylabel(points, 1.0) : [null, null];
 
-        return {
-            x: out[0],
-            y: out[1]
-        };
+        return { x, y, area };
+    },
+
+    /*
+    * Format tick labels to maintain legibility
+    */
+    formatTickX (maxTicks, val) {
+        const rangeX = this.max_x - this.min_x,
+            spacing = this.spacing,
+            spacingScaled = Math.ceil((rangeX / maxTicks) / spacing) * spacing;
+
+        return (spacingScaled === 0 || val % spacingScaled === 0) ? val : "";
+    },
+    formatTickY (maxTicks, val) {
+        const rangeY = this.max_y - this.min_y,
+            spacing = this.spacing,
+            spacingScaled = Math.ceil((rangeY / maxTicks) / spacing) * spacing;
+
+        return (spacingScaled === 0 || val % spacingScaled === 0) ? val : "";
+    },
+    /*
+    * Adjust padding to ensure full label is visible
+    */
+    padTickY (paddingPerDigit) {
+        let min = Math.abs(this.min_y),
+            max = Math.abs(this.max_y),
+            numDigits = (min < max ? max : min).toFixed(0).length,
+            yPadding = this.scaleX(paddingPerDigit*numDigits);
+
+        this.axis.y.call(this.axis_generator.y.tickPadding(yPadding));
     }
 }
