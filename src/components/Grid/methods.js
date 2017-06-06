@@ -696,6 +696,8 @@ export default {
                     newTransform = d3.event.transform;
 
                 this.transform = newTransform;
+                // hide grid if zoomed out enough
+                this.forceGridHide = (newTransform.k < 0.1);
 
                 // cancel current drawing action if actual zoom and not justu accidental drag
                 if (newTransform.k !== lastTransform.k || Math.abs(lastTransform.y - newTransform.y) > 3 || Math.abs(lastTransform.x - newTransform.x) > 3) {
@@ -739,8 +741,8 @@ export default {
         d3.select('#grid svg').call(this.zoomBehavior.transform, d3.zoomIdentity.translate(x, y));
     },
     updateGrid () {
-        this.axis.x.style('display', this.gridVisible ? 'inline' : 'none');
-        this.axis.y.style('display', this.gridVisible ? 'inline' : 'none');
+        this.axis.x.style('display', this.gridVisible && !this.forceGridHide ? 'inline' : 'none');
+        this.axis.y.style('display', this.gridVisible && !this.forceGridHide ? 'inline' : 'none');
 
         const rwuHeight = this.max_y - this.min_y,
             rwuWidth = this.max_x - this.min_x;

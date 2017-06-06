@@ -45,7 +45,8 @@ export default {
                 y: 0,
                 k: 1
             },
-            handleMouseMove() {} // placeholder --> overwritten in mounted()
+            handleMouseMove() {}, // placeholder --> overwritten in mounted()
+            forceGridHide: false
         };
     },
     mounted() {
@@ -265,6 +266,9 @@ export default {
         },
         points() {
             this.drawPoints();
+        },
+        forceGridHide() {
+            this.updateGrid();
         }
     },
     methods: methods
