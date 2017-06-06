@@ -2,27 +2,23 @@ import ClipperLib from 'js-clipper'
 
 const helpers = {
     // ************************************ CLIPPER ************************************ //
+	// scaling - see https://sourceforge.net/p/jsclipper/wiki/documentation/#clipperlibclipperoffsetexecute
     clipScale: 100,
+	// prevent floating point inaccuracies by expanding faces by the offset before performing a clip operation, and then scaling the result back down
+	// https://sourceforge.net/p/jsclipper/wiki/documentation/#clipperoffset
 	offset: 0.01,
-    differenceOfFaces(f1Points, f2Points) {
-		return this.setOperation('difference', f1Points, f2Points);
-    },
-    intersectionOfFaces(f1Points, f2Points) {
-		return this.setOperation('intersection', f1Points, f2Points);
-    },
-    unionOfFaces(f1Points, f2Points) {
-		return this.setOperation('union', f1Points, f2Points);
-    },
 
 	/*
-	* given a set of points
+	* given two sets of points defining two faces
+	* perform the specified operation (intersection, difference, union), return the resulting set of points
+	* return false if the result contains multiple faces (a face was divided in two during the operation)
 	*/
 	setOperation (type, f1Points, f2Points) {
 		// translate points for each face into a clipper path
 		const f1Path = f1Points.map(p => ({ X: p.x, Y: p.y })),
         	f2Path = f2Points.map(p => ({ X: p.x, Y: p.y }));
 
-		// offset both paths to prevent floating point inaccuracies from causing incorrect intersections
+		// offset both paths prior to executing clipper operation to acount for tiny floating point inaccuracies
 		const offset = new ClipperLib.ClipperOffset(),
 			f1PathsOffsetted = new ClipperLib.Paths(),
 			f2PathsOffsetted = new ClipperLib.Paths();
@@ -45,37 +41,28 @@ const helpers = {
         cpr.AddPaths(f2PathsOffsetted, ClipperLib.PolyType.ptClip, true);
 
 		var operation;
-		switch (type) {
-			case 'union':
-				operation = ClipperLib.ClipType.ctUnion;
-				break;
-			case 'intersection':
-				operation = ClipperLib.ClipType.ctIntersection;
-				break;
-			case 'difference':
-				operation = ClipperLib.ClipType.ctDifference;
-				break;
-		}
+		if (type === 'union') { operation = ClipperLib.ClipType.ctUnion; }
+		else if (type === 'intersection') { operation = ClipperLib.ClipType.ctIntersection; }
+		else if (type === 'difference') { operation = ClipperLib.ClipType.ctDifference; }
 
         cpr.Execute(operation, resultPathsOffsetted, ClipperLib.PolyFillType.pftEvenOdd, ClipperLib.PolyFillType.pftEvenOdd);
 
 		// scale down path
-		ClipperLib.JS.ScaleUpPaths(resultPathsOffsetted, 1 / this.clipScale);
+		ClipperLib.JS.ScaleDownPaths(resultPathsOffsetted, this.clipScale);
 
-		// undo offset
+		// undo offset on resulting path
 		const resultPaths = new ClipperLib.Paths();
 		offset.AddPaths(resultPathsOffsetted, ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
 		offset.Execute(resultPaths, -this.offset);
 
+		// if multiple paths were created, a face has been split and the operation should fail
         if (resultPaths.length === 1) {
 			// translate into points
 			return resultPaths[0].map(p => ({ x: p.X, y: p.Y }));
         } else if (resultPaths.length === 0) {
         	return [];
         } else if (resultPaths.length > 1) {
-			// TODO: the operation created multiple faces, we need to handle this case
-			throw new Error('The operation resulted in multiple closed faces, we need to handle this case.');
-        	return false;
+			return false;
         }
 	},
 
@@ -154,59 +141,7 @@ const helpers = {
             dy = Math.abs(p1.y - p2.y);
         return Math.sqrt((dx * dx) + (dy * dy));
     },
-
-    // ************************************ EDGES ************************************ //
-    /*
-     * run through all edges on a face, sort them, and set the reverse property logically
-     * this actually mutates faces, call it from a data store mutation
-     */
-    normalizedEdges(face, geometry) {
-        // initialize the set with the first edge, we assume the reverse property is correctly set for this one
-        const normalizedEdgeRefs = [];
-        normalizedEdgeRefs.push(face.edgeRefs[0]);
-
-        // there will be exactly two edges on the face referencing each vertex
-        for (var i = 0; i < face.edgeRefs.length - 1; i++) {
-            const currentEdgeRef = normalizedEdgeRefs[i],
-                currentEdge = this.edgeForId(currentEdgeRef.edge_id, geometry),
-
-                // each edgeref's edge will have a startpoint and an endpoint, v1 or v2 depending on the reverse property
-                currentEdgeEndpoint = currentEdgeRef.reverse ? currentEdge.v1 : currentEdge.v2;
-
-            var reverse;
-            // find the next edge by looking up the second edge with a reference to the endpoint of the current edge
-            const nextEdgeRef = face.edgeRefs.find((edgeRef) => {
-                // skip current edge
-                if (edgeRef.edge_id === currentEdge.id) {
-                    return;
-                }
-
-                const nextEdge = this.edgeForId(edgeRef.edge_id, geometry);
-                const currentEdgeEndpointVertex = this.vertexForId(currentEdgeEndpoint, geometry),
-                    nextEdgeVertex1 = this.vertexForId(nextEdge.v1, geometry),
-                    nextEdgeVertex2 = this.vertexForId(nextEdge.v2, geometry);
-
-                if ((nextEdgeVertex1.x === currentEdgeEndpointVertex.x && nextEdgeVertex1.y === currentEdgeEndpointVertex.y) ||
-                    (nextEdgeVertex2.x === currentEdgeEndpointVertex.x && nextEdgeVertex2.y === currentEdgeEndpointVertex.y)) {
-                    if (normalizedEdgeRefs.map(eR => eR.edge_id).indexOf(nextEdge.id) !== -1) {
-                        return;
-                    }
-                    reverse = (nextEdgeVertex1.x === currentEdgeEndpointVertex.x && nextEdgeVertex1.y === currentEdgeEndpointVertex.y) ? false : true;
-                    return true;
-                }
-            });
-            // prevent direct mutation of state
-            const nextEdgeRefCopy = JSON.parse(JSON.stringify(nextEdgeRef));
-            // set the reverse property on the next edge depending on whether its v1 or v2 references the endpoint of the current edge
-            // we want the startpoint of the next edge to be the endpoint of the currentEdge
-            nextEdgeRefCopy.reverse = reverse;
-            normalizedEdgeRefs.push(nextEdgeRefCopy);
-        }
-        return normalizedEdgeRefs;
-    },
-
-
-    // ************************************ GEOMETRY LOOKUP ************************************ //
+     // ************************************ GEOMETRY LOOKUP ************************************ //
 
     // given a vertex id, find the vertex on the geometry set with that id
     vertexForId(vertex_id, geometry) {

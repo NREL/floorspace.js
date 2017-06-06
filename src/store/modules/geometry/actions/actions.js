@@ -40,32 +40,36 @@ export default {
         */
         const intersectedFaces = currentStoryGeometry.faces.filter((face) => {
 			const faceVertices = geometryHelpers.verticesForFaceId(face.id, currentStoryGeometry),
-				intersection = geometryHelpers.intersectionOfFaces(faceVertices , clipSelection, currentStoryGeometry);
+				intersection = geometryHelpers.setOperation('intersection', faceVertices, clipSelection);
 			return intersection.length;
 		}).forEach((existingFace) => {
             const existingFaceVertices = geometryHelpers.verticesForFaceId(existingFace.id, currentStoryGeometry),
                 affectedModel = modelHelpers.modelForFace(context.rootState.models, existingFace.id);
 
-            // destroy existing face
-            context.dispatch(affectedModel.type === 'space' ? 'models/updateSpaceWithData' : 'models/updateShadingWithData', {
-                [affectedModel.type]: affectedModel,
-                face_id: null
-            }, { root: true });
-
-            context.dispatch('destroyFaceAndDescendents', {
-                geometry_id: currentStoryGeometry.id,
-                face: existingFace
-            });
-
             // create new face by subtracting overlap (intersection) from the existing face's original area
-            const differenceOfFaces = geometryHelpers.differenceOfFaces(existingFaceVertices, clipSelection, currentStoryGeometry);
-            if (differenceOfFaces) {
+            const differenceOfFaces = geometryHelpers.setOperation('difference', existingFaceVertices, clipSelection);
+			if (differenceOfFaces) {
+				// destroy existing face
+	            context.dispatch(affectedModel.type === 'space' ? 'models/updateSpaceWithData' : 'models/updateShadingWithData', {
+	                [affectedModel.type]: affectedModel,
+	                face_id: null
+	            }, { root: true });
+
+	            context.dispatch('destroyFaceAndDescendents', {
+	                geometry_id: currentStoryGeometry.id,
+	                face: existingFace
+	            });
+
 				context.dispatch('createFaceFromPoints', {
 					type: affectedModel.type,
 		            model_id: affectedModel.id,
 		            points: differenceOfFaces
 		        });
-            }
+			} else {
+				debugger
+				return false;
+			}
+
         });
     },
 

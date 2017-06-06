@@ -17,17 +17,23 @@ export default function createFaceFromPoints (context, payload) {
     if (points.length < 3 || !geometryHelpers.areaOfSelection(points)) { return; }
 
 	// if target already has an existing face, destroy existing face and calculate a new set of points
-	const facePoints = target.face_id ? mergeWithExistingFace(points, currentStoryGeometry, target, context) : points;
-
+	var facePoints;
+	if (target.face_id) {
+		facePoints = mergeWithExistingFace(points, currentStoryGeometry, target, context);
+		if (!facePoints) { return; }
+	} else {
+		facePoints = points
+	}
     // prevent overlapping faces by erasing existing geometry covered by the points defining the new face
-    context.dispatch('eraseSelection', { points: facePoints });
+    // context.dispatch('eraseSelection', { points: facePoints });
+
+    if (!eraseSelection(context, { points: facePoints })) { return; }
 
     // create and save vertices and edges to be referenced by the face
     const face = createFaceGeometry(facePoints, currentStoryGeometry, context);
 
     // validate and save the face, destroy saved vertices and edges and abort face creation if validation fails
-    const validFace = validateAndSaveFace(face, currentStoryGeometry, target, context);
-    if (!validFace) { return; }
+    if (!validateAndSaveFace(face, currentStoryGeometry, target, context)) { return; }
 
     // split edges where vertices touch them
     splitEdges(currentStoryGeometry, context);
@@ -60,15 +66,14 @@ function mergeWithExistingFace (points, currentStoryGeometry, target, context) {
                 return geometryHelpers.distanceBetweenPoints(vertex, projection) <= (1 / geometryHelpers.clipScale);
             });
         if ((points[i].splittingEdge && ~existingFace.edgeRefs.map(e => e.edge_id).indexOf(points[i].splittingEdge.id)) || verticesOnEdge.length) {
-            points = geometryHelpers.unionOfFaces(existingFaceVertices, points, currentStoryGeometry);
+            points = geometryHelpers.setOperation('union', existingFaceVertices, points);
             break;
         }
     }
 
-    // check if new and existing face intersect
-    if (geometryHelpers.intersectionOfFaces(existingFaceVertices, points, currentStoryGeometry)) {
-        points = geometryHelpers.unionOfFaces(existingFaceVertices, points, currentStoryGeometry);
-    }
+    // check that new and existing face intersect
+	points = geometryHelpers.setOperation('union', existingFaceVertices, points);
+	if (!points) { return false; }
 
     // destroy the existing face and remove references to it
     context.dispatch(target.type === 'space' ? 'models/updateSpaceWithData' : 'models/updateShadingWithData', {
@@ -83,6 +88,70 @@ function mergeWithExistingFace (points, currentStoryGeometry, target, context) {
 
     return points;
 }
+
+/*
+* Erase the selection defined by a set of points on all faces on the current story
+* used by the eraser tool and by the createFaceFromPoints action (to prevent overlapping faces)
+*/
+function eraseSelection (context, payload) {
+	const { points } = payload;
+
+	const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'];
+
+	// validation - a selection must have at least 3 vertices and area
+	if (points.length < 3 || !geometryHelpers.areaOfSelection(points)) { return; }
+
+	/*
+	* find all existing faces that have an intersection with the selection being erased
+	* destroy faces intersecting the eraser selection and recreate them
+	* from the difference between their original area and the eraser selection
+	*/
+	const intersectedFaces = currentStoryGeometry.faces.filter((face) => {
+		const faceVertices = geometryHelpers.verticesForFaceId(face.id, currentStoryGeometry),
+			intersection = geometryHelpers.setOperation('intersection', faceVertices, points);
+		return intersection.length;
+	});
+
+	// check that the operation is valid
+	var validOperation = true;
+	intersectedFaces.forEach((existingFace) => {
+		const existingFaceVertices = geometryHelpers.verticesForFaceId(existingFace.id, currentStoryGeometry);
+		if (!geometryHelpers.setOperation('difference', existingFaceVertices, points)) { validOperation = false; }
+	});
+
+	if (validOperation) {
+		/*
+		* destroy faces intersecting the eraser selection and recreate them
+		* from the difference between their original area and the eraser selection
+		*/
+		intersectedFaces.forEach((existingFace) => {
+			const existingFaceVertices = geometryHelpers.verticesForFaceId(existingFace.id, currentStoryGeometry),
+				affectedModel = modelHelpers.modelForFace(context.rootState.models, existingFace.id);
+
+			// create new face by subtracting overlap (intersection) from the existing face's original area
+			const differenceOfFaces = geometryHelpers.setOperation('difference', existingFaceVertices, points);
+			// destroy existing face
+			context.dispatch(affectedModel.type === 'space' ? 'models/updateSpaceWithData' : 'models/updateShadingWithData', {
+				[affectedModel.type]: affectedModel,
+				face_id: null
+			}, { root: true });
+
+			context.dispatch('destroyFaceAndDescendents', {
+				geometry_id: currentStoryGeometry.id,
+				face: existingFace
+			});
+
+			context.dispatch('createFaceFromPoints', {
+				type: affectedModel.type,
+				model_id: affectedModel.id,
+				points: differenceOfFaces
+			});
+		});
+		return true;
+	} else {
+		return false;
+	}
+};
 
 /*
 * instantiate vertices, edges, and face for the set of points defining the face being created
