@@ -700,6 +700,7 @@ export default {
 
         // configure zoom behavior in rwu
         this.zoomBehavior = d3.zoom()
+            .scaleExtent([0.02,Infinity])
             .on('zoom', () => {
                 const lastTransform = this.transform,
                     newTransform = d3.event.transform;
@@ -718,7 +719,7 @@ export default {
                 // NOTE: don't change the original scale or you'll get exponential growth
                 const newScaleX = d3.event.transform.rescaleX(zoomScaleX),
                     newScaleY = d3.event.transform.rescaleY(zoomScaleY);
-                    
+
                 [this.min_x, this.max_x] = newScaleX.domain();
                 [this.min_y, this.max_y] = newScaleY.domain();
 
