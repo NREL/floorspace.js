@@ -92,7 +92,7 @@ function mergeWithExistingFace (points, currentStoryGeometry, target, context) {
 * used by the eraser tool and by the createFaceFromPoints action (to prevent overlapping faces)
 */
 export function eraseSelection (context, payload) {
-	
+
 	const { points } = payload;
 
 	const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'];
@@ -115,9 +115,7 @@ export function eraseSelection (context, payload) {
 	var validOperation = true;
 	intersectedFaces.forEach((existingFace) => {
 		const existingFaceVertices = geometryHelpers.verticesForFaceId(existingFace.id, currentStoryGeometry);
-		if (!geometryHelpers.setOperation('difference', existingFaceVertices, points)) {
-debugger
-			validOperation = false; }
+		if (!geometryHelpers.setOperation('difference', existingFaceVertices, points)) { validOperation = false; }
 	});
 
 	if (validOperation) {
