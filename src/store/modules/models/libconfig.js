@@ -114,22 +114,7 @@ const map = {
                 readonly: false,
                 input_type: 'text',
                 private: false,
-                validator (object, store, value) {
-                    // if (~store.getters['models/allWindows'].map(w => w.name).indexOf(value)) {
-                    //     return {
-                    //         success: false,
-                    //         error: 'Names must be unique.'
-                    //     };
-                    // }
-
-                    if (value.length < 5) {
-                        return {
-                            success: false,
-                            error: 'Names must be at least 5 characters long.'
-                        };
-                    }
-                    return { success: true };
-                }
+                validator: validators.name
             },
             story: {
                 displayName: 'Story',
@@ -170,6 +155,10 @@ const map = {
                 displayName: 'ID',
                 readonly: true,
                 private: false
+            },
+            storyId: {
+                readonly: true,
+                private: true
             },
             name: {
                 displayName: 'Name',
@@ -250,22 +239,7 @@ const map = {
                 readonly: false,
                 input_type: 'text',
                 private: false,
-                validator (object, store, value) {
-                    if (~store.getters['models/allSpaces'].map(s => s.name).indexOf(value)) {
-                        return {
-                            success: false,
-                            error: 'Names must be unique.'
-                        };
-                    }
-
-                    if (value.length < 5) {
-                        return {
-                            success: false,
-                            error: 'Names must be at least 5 characters long.'
-                        };
-                    }
-                    return { success: true };
-                }
+                validator: validators.name
             },
             handle: {
                 readonly: true,
@@ -376,22 +350,7 @@ const map = {
                 readonly: false,
                 input_type: 'text',
                 private: false,
-                validator (object, store, value) {
-                    if (~store.getters['models/allShading'].map(s => s.name).indexOf(value)) {
-                        return {
-                            success: false,
-                            error: 'Names must be unique.'
-                        };
-                    }
-
-                    if (value.length < 5) {
-                        return {
-                            success: false,
-                            error: 'Names must be at least 5 characters long.'
-                        };
-                    }
-                    return { success: true };
-                }
+                validator: validators.name
             },
             handle: {
                 readonly: true,
@@ -420,22 +379,7 @@ const map = {
                 readonly: false,
                 input_type: 'text',
                 private: false,
-                validator (object, store, value) {
-                    if (~store.getters['models/allImages'].map(i => i.name).indexOf(value)) {
-                        return {
-                            success: false,
-                            error: 'Names must be unique.'
-                        };
-                    }
-
-                    if (value.length < 5) {
-                        return {
-                            success: false,
-                            error: 'Names must be at least 5 characters long.'
-                        };
-                    }
-                    return { success: true };
-                }
+                validator: validators.name
             },
             height: {
                 displayName: 'Height',

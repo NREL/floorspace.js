@@ -7,6 +7,8 @@
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 const d3 = require('d3');
+const polylabel = require('polylabel');
+
 import geometryHelpers from './../../store/modules/geometry/helpers.js'
 import modelHelpers from './../../store/modules/models/helpers.js'
 
@@ -121,15 +123,16 @@ export default {
     drawGuideLines (e, guidePoint) {
         if (!this.points.length) { return; }
 
-        // remove expired guideline paths
+        // remove expired guideline paths and text
         d3.selectAll('#grid .guideline').remove();
 
-        var guidelinePoints;
+        var guidelinePoints, guidelinePaths;
 
         // if the polygon tool is active, draw a line connecting the last point in the polygon to the guide point
         // if the rectangle or eraser tool is active, infer a rectangle from the first point that was drawn and the guide point
         if (this.currentTool === 'Polygon') {
             guidelinePoints = [guidePoint, this.points[this.points.length - 1]];
+            guidelinePaths = [guidelinePoints];
         } else if (this.currentTool === 'Rectangle' || this.currentTool === 'Eraser') {
             guidelinePoints = [
                 this.points[0],
@@ -138,18 +141,92 @@ export default {
                 { x: this.points[0].x, y: guidePoint.y },
                 this.points[0]
             ];
+
+            guidelinePaths = [
+                [guidelinePoints[0],guidelinePoints[1]],
+                [guidelinePoints[1],guidelinePoints[2]]
+            ];
         }
 
+        const guidelineArea = this.currentTool === 'Polygon' ? [...this.points, guidePoint, this.points[0]] : guidelinePoints,
+            guidelinePolys = [guidelineArea,this.points],
+            svg = d3.select('#grid svg');
+
         // render a guideline or rectangle
-        d3.select('#grid svg').append('path')
+        svg.selectAll('.guideline-line')
+            .append('path')
             .datum(guidelinePoints)
             .attr('fill', 'none')
-            .classed('guideline', true)
+            .classed('guideline guideline-line', true)
             .attr('vector-effect', 'non-scaling-stroke')
-            .attr('d', d3.line()
-                .x((d) => { return d.x; })
-                .y((d) => { return d.y; }))
+            .attr('d', d3.line().x(d => d.x).y(d => d.y))
             .lower();
+
+        // render gridline distance(s)
+        svg.selectAll('.guideline-text')
+            .data(guidelinePaths)
+            .enter()
+            .append('text')
+            .attr('x', d => d[0].x + (d[1].x - d[0].x)/2)
+            .attr('y', d => d[0].y + (d[1].y - d[0].y)/2)
+            .attr('dx', - 1.25 * (this.transform.k > 1 ? 1 : this.transform.k) + "em")
+            .text(d => {
+                let zoom = this.transform.k,
+                    dist = this.distanceBetweenPoints({
+                        x: d[0].x / zoom,
+                        y: d[0].y / zoom
+                    },
+                    {
+                        x: d[1].x / zoom,
+                        y: d[1].y / zoom
+                    });
+
+                return dist ? dist.toFixed(2) : "";
+            })
+            .classed('guideline guideline-text',true)
+            .attr("font-family", "sans-serif")
+            .attr("fill", "red")
+            .attr("font-size","1em");
+
+        // render unfinished area polygon(s)
+        svg.selectAll('.guideline-area')
+            .data(guidelinePolys)
+            .enter()
+            .append('polygon')
+            .attr('points',d => d.map(p => [p.x,p.y].join(",")).join(" "))
+            .classed('guideline guideline-area previousStory',true)
+            .attr('vector-effect', 'non-scaling-stroke')
+            .attr('fill', () => {
+                if (this.currentSpace) { return this.currentSpace.color; }
+                else if (this.currentShading) { return this.currentShading.color; }
+            });
+
+        if (guidelineArea.length > 3) {
+            let areaPoints = guidelineArea.map(p => ({ ...p, X: p.x / this.transform.k, Y: p.y / this.transform.k })), // scale X,Y for correct area calc
+                { x, y, area } = this.polygonLabelPosition(areaPoints),
+                areaText = area ? area.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") + " m²" : "";
+
+            if (x === null || y === null) {
+                // either polygon has 0 area or something went wrong --> don't draw area text
+                return;
+            }
+
+            // scale/translate label position
+            x = (x - this.transform.x) / this.transform.k;
+            y = (y - this.transform.y) / this.transform.k;
+
+            // render unfinished area #
+            svg.append('text')
+                .attr('x', x)
+                .attr('y', y)
+                .text(areaText)
+                .classed('guideline guideline-text previousStory',true)
+                .attr("text-anchor", "middle")
+                .attr("font-family", "sans-serif")
+                .attr("fill", "red")
+                .attr("font-size","1em")
+                .raise();
+        }
 
         d3.selectAll('.vertical, .horizontal').lower();
     },
@@ -159,6 +236,7 @@ export default {
     escapeAction (e) {
         if (e.code === 'Escape' || e.which === 27) {
             this.points = [];
+            d3.selectAll('.guideline').remove();
         }
     },
 
@@ -295,10 +373,10 @@ export default {
     * handle clicks to select faces
     */
     drawPolygons () {
-        let that = this;
+        const that = this;
 
         // remove expired polygons
-        d3.select('#grid svg').selectAll('polygon, text').remove();
+        d3.select('#grid svg').selectAll('polygon, .polygon-text, .guideline').remove();
 
         // draw polygons
         d3.select('#grid svg').selectAll('polygon')
@@ -326,63 +404,34 @@ export default {
             .attr('vector-effect', 'non-scaling-stroke')
             // add label
             .select(function (poly) {
-                // let bbox = this.getBBox(),
-                //     x = bbox.x + bbox.width/2,
-                //     y = bbox.y + bbox.height/2;
-                let { x, y } = getCentroid(poly.points);
+                let { x, y } = that.polygonLabelPosition(poly.points);
+
+                // either polygon has 0 area or something went wrong --> don't draw name
+                if (x === null || y === null) {
+                    return;
+                }
 
                 d3.select('#grid svg')
                     .append('text')
+                    .classed('polygon-text',true)
                     .attr('x',x)
                     .attr('y',y)
+                    // scaling
+                    .attr("font-size", () => 0.6 * that.transform.k + "em")
+                    .attr('dy', () => 0.25 * (that.transform.k > 1 ? 1 : that.transform.k) + "em")
+                    // styling
+                    .text(poly.name)
                     .attr("text-anchor", "middle")
-                    .text(() => poly.name)
                     .attr("font-family", "sans-serif")
-                    .attr("font-size", "2em")
                     .attr("fill", "red")
                     .style("font-weight","bold")
-                    .attr('class', (t, i) => {
-                        return this.getAttribute('class');
-                        // if ((that.currentSpace && poly.face_id === that.currentSpace.face_id) || (that.currentShading && poly.face_id === that.currentShading.face_id)) { return 'current'; }
-                        // if (poly.previous_story) { return 'previousStory'}
-                    });
+                    .attr('class', () => this.getAttribute('class'))
+                    .classed('polygon-text',true);
             });
 
         // render the selected model's face above the other polygons so that the border is not obscured
         d3.select('.current').raise();
         d3.select('text.current').raise();
-
-        function getCentroid(points) {
-            var numPoints = points.length,
-                first = points[0],
-                last = points[points.length-1],
-                x = 0,
-                y = 0,
-                acc = 0,
-                f;
-
-            if (first.x !== last.x || first.y !== last.y) {
-                // ensure closed
-                points.push(first);
-            }
-
-            for (let i=0, j=numPoints-1; i<numPoints; j=i++) {
-                let p1 = points[i],
-                    p2 = points[j];
-
-                f = p1.x*p2.y - p2.x*p1.y;
-                acc += f;
-                x += (p1.x + p2.x)*f;
-                y += (p1.y + p2.y)*f;
-            }
-
-            f = acc * 3;
-
-            return {
-                x: x/f,
-                y: y/f
-            };
-        };
     },
 
     // ****************** SNAPPING TO EXISTING GEOMETRY ****************** //
@@ -628,37 +677,49 @@ export default {
         this.axis_generator.x = d3.axisBottom(zoomScaleX)
             .ticks(rwuWidth / this.spacing)
             .tickSize(rwuHeight)
-            .tickPadding(this.scaleY(-20));
+            .tickPadding(this.scaleY(-20))
+            .tickFormat(this.formatTickX.bind(this,Math.floor(10 * this.$refs.grid.clientWidth / this.$refs.grid.clientHeight)));
+
         this.axis_generator.y = d3.axisRight(zoomScaleY)
             .ticks(rwuHeight / this.spacing)
             .tickSize(rwuWidth)
-            .tickPadding(this.scaleX(-20));
+            .tickFormat(this.formatTickY.bind(this,10));
 
         this.axis.x = svg.append('g')
             .attr('class', 'axis axis--x')
             .attr('stroke-width', this.scaleY(1))
+            .style('font-size', this.scaleY(1) + 'em')
             .style('display', this.gridVisible ? 'inline' : 'none')
             .call(this.axis_generator.x);
         this.axis.y = svg.append('g')
             .attr('class', 'axis axis--y')
+            .style('font-size', this.scaleY(1) + 'em')
             .attr('stroke-width', this.scaleX(1))
             .style('display', this.gridVisible ? 'inline' : 'none')
             .call(this.axis_generator.y);
 
-
         // configure zoom behavior in rwu
         this.zoomBehavior = d3.zoom()
+            .scaleExtent([0.02,Infinity])
             .on('zoom', () => {
+                const lastTransform = this.transform,
+                    newTransform = d3.event.transform;
 
-                // only allow zooming when the Pan tool is active
-                if (this.currentTool !== "Pan") { return; }
+                this.transform = newTransform;
+                // hide grid if zoomed out enough
+                this.forceGridHide = (newTransform.k < 0.1);
+
+                // cancel current drawing action if actual zoom and not justu accidental drag
+                if (newTransform.k !== lastTransform.k || Math.abs(lastTransform.y - newTransform.y) > 3 || Math.abs(lastTransform.x - newTransform.x) > 3) {
+                    this.points = [];
+                }
 
                 // create updated copies of the scales based on the zoom transformation
                 // the transformed scales are only used to obtain the new rwu grid dimensions and redraw the axes
                 // NOTE: don't change the original scale or you'll get exponential growth
                 const newScaleX = d3.event.transform.rescaleX(zoomScaleX),
                     newScaleY = d3.event.transform.rescaleY(zoomScaleY);
-                    
+
                 [this.min_x, this.max_x] = newScaleX.domain();
                 [this.min_y, this.max_y] = newScaleY.domain();
 
@@ -673,15 +734,25 @@ export default {
                 this.axis.x.call(this.axis_generator.x.scale(newScaleX));
                 this.axis.y.call(this.axis_generator.y.scale(newScaleY));
 
+                // axis padding
+                this.padTickY(-12);
+
                 // redraw the saved geometry
                 this.drawPolygons();
             });
 
         svg.call(this.zoomBehavior);
+        this.centerGrid();
+    },
+    centerGrid () {
+        const x = this.min_x + (this.max_x - this.min_x)/2,
+            y = this.min_y + (this.max_y - this.min_y)/2;
+
+        d3.select('#grid svg').call(this.zoomBehavior.transform, d3.zoomIdentity.translate(x, y));
     },
     updateGrid () {
-        this.axis.x.style('display', this.gridVisible ? 'inline' : 'none');
-        this.axis.y.style('display', this.gridVisible ? 'inline' : 'none');
+        this.axis.x.style('display', this.gridVisible && !this.forceGridHide ? 'inline' : 'none');
+        this.axis.y.style('display', this.gridVisible && !this.forceGridHide ? 'inline' : 'none');
 
         const rwuHeight = this.max_y - this.min_y,
             rwuWidth = this.max_x - this.min_x;
@@ -757,5 +828,45 @@ export default {
                 pxValue = this.scaleY.invert(gridValue);
             return currentScaleY(pxValue);
         }
+    },
+
+    /*
+    * determine label x,y for given polygon
+    */
+    polygonLabelPosition (pointsIn) {
+        const points = [pointsIn.map(p => [this.rwuToGrid(p.x, 'x'), this.rwuToGrid(p.y, 'y')])],
+            area = Math.abs(Math.round(geometryHelpers.areaOfFace(pointsIn))), // calculate are in RWU, not grid units
+            [ x, y ] = area ? polylabel(points, 1.0) : [null, null];
+
+        return { x, y, area };
+    },
+
+    /*
+    * Format tick labels to maintain legibility
+    */
+    formatTickX (maxTicks, val) {
+        const rangeX = this.max_x - this.min_x,
+            spacing = this.spacing,
+            spacingScaled = Math.ceil((rangeX / maxTicks) / spacing) * spacing;
+
+        return (spacingScaled === 0 || val % spacingScaled === 0) ? val : "";
+    },
+    formatTickY (maxTicks, val) {
+        const rangeY = this.max_y - this.min_y,
+            spacing = this.spacing,
+            spacingScaled = Math.ceil((rangeY / maxTicks) / spacing) * spacing;
+
+        return (spacingScaled === 0 || val % spacingScaled === 0) ? val : "";
+    },
+    /*
+    * Adjust padding to ensure full label is visible
+    */
+    padTickY (paddingPerDigit) {
+        let min = Math.abs(this.min_y),
+            max = Math.abs(this.max_y),
+            numDigits = (min < max ? max : min).toFixed(0).length,
+            yPadding = this.scaleX(paddingPerDigit*numDigits);
+
+        this.axis.y.call(this.axis_generator.y.tickPadding(yPadding));
     }
 }

@@ -3,12 +3,12 @@ import generateColor from './../../utilities/generateColor'
 import appconfig from './../application/appconfig.js'
 
 export default {
-    Story: function () {
-        const id = idFactory.generate();
+    Story: function (opts = {}) {
         return {
-            id: id,
+            id: idFactory.generate(),
             handle: null,
-            name: "Story " + id,
+            name: opts.name,
+            storyId: opts.storyId,
             geometry_id: null,
             below_floor_plenum_height: 0,
             floor_to_ceiling_height: 0,
@@ -19,12 +19,11 @@ export default {
             images: []
         }
     },
-    Space: function () {
-        const id = idFactory.generate();
+    Space: function (opts = {}) {
         return {
-            id: id,
+            id: idFactory.generate(),
             color: generateColor('space'),
-            name: 'Space ' + id,
+            name: opts.name,
             handle: null,
             face_id: null,
             daylighting_controls: [],
@@ -34,22 +33,20 @@ export default {
             construction_set_id: null
         };
     },
-    Shading: function () {
-        const id = idFactory.generate();
+    Shading: function (opts = {}) {
         return {
-            id: id,
+            id: idFactory.generate(),
             color: appconfig.palette.shading,
-            name: 'Shading ' + id,
+            name: opts.name,
             handle: null,
             face_id: null
         };
     },
-    Image: function (src) {
-        const id = idFactory.generate();
+    Image: function (opts = {}) {
         return {
-            id: id,
-            src: src,
-            name: 'Image ' + id,
+            id: idFactory.generate(),
+            src: opts.src,
+            name: opts.name,
             visible: true,
             height: 100,
             width: 100,
@@ -60,49 +57,43 @@ export default {
             opacity: 1
         };
     },
-    BuildingUnit: function () {
-        const id = idFactory.generate();
+    BuildingUnit: function (opts = {}) {
         return {
-            id: id,
+            id: idFactory.generate(),
             color: generateColor('building_unit'),
-            name: 'Building Unit ' + id
+            name: opts.name
         };
     },
-    ThermalZone: function () {
-        const id = idFactory.generate();
+    ThermalZone: function (opts = {}) {
         return {
-            id: id,
+            id: idFactory.generate(),
             color: generateColor('thermal_zone'),
-            name: 'Thermal Zone ' + id
+            name: opts.name
         };
     },
-    SpaceType: function () {
-        const id = idFactory.generate();
+    SpaceType: function (opts = {}) {
         return {
-            id: id,
+            id: idFactory.generate(),
             color: generateColor('space_type'),
-            name: 'Space Type ' + id
+            name: opts.name
         };
     },
-    ConstructionSet: function () {
-        const id = idFactory.generate();
+    ConstructionSet: function (opts = {}) {
         return {
-            id: id,
-            name: 'Construction Set ' + id
+            id: idFactory.generate(),
+            name: opts.name
         };
     },
-    Window: function () {
-        const id = idFactory.generate();
+    Window: function (opts = {}) {
         return {
-            id: id,
-            name: 'Window ' + id
+            id: idFactory.generate(),
+            name: opts.name
         };
     },
-    DaylightingControl: function () {
-        const id = idFactory.generate();
+    DaylightingControl: function (opts = {}) {
         return {
-            id: id,
-            name: 'Daylighting Control ' + id
+            id: idFactory.generate(),
+            name: opts.name
         };
     }
 }
