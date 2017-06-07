@@ -36,14 +36,7 @@ export default {
         return {}
     },
     beforeCreate () {
-        // create a default story, set as current story
         this.$store.dispatch('models/initStory');
-        this.$store.dispatch('models/initSpace', {
-            story: this.$store.state.application.currentSelections.story
-        });
-        this.$store.dispatch('application/setCurrentSpace', {
-            space:  this.$store.state.application.currentSelections.story.spaces[0]
-        });
     },
     methods: {
 

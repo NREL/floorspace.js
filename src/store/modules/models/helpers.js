@@ -168,6 +168,59 @@ const helpers = {
                 return space;
             }
         }
+    },
+
+    /*
+    * Generate new unique name
+    */
+    generateName (state, type, story){
+        const objs = libraryObjectsWithType(state, type),
+            prefix = map[type].displayName + (story ? " " + story.storyId + " - " : " ");
+
+        // Make sure name is unique
+        for (let name = null, count = 1; name === null; count++) {
+            name = prefix + count;
+
+            if (objs.find(o => o.name === name)) {
+                // try again
+                name = null;
+            } else {
+                return [name,count];
+            }
+        }
+
+        function libraryObjectsWithType(state, type) {
+            switch (type) {
+                case 'stories':
+                    return state.stories;
+                case 'building_units':
+                case 'thermal_zones':
+                case 'space_types':
+                case 'construction_sets':
+                case 'windows':
+                case 'daylighting_controls':
+                    return state.library[type];
+                default:
+                    const out = {
+                        spaces: [],
+                        shading: [],
+                        images: []
+                    };
+
+                    for (let i = 0; i < state.stories.length; i++) {
+                        let story = state.stories[i],
+                            spaces = story.spaces || [],
+                            shading = story.shading || [],
+                            images = story.images || [];
+
+                        out.spaces.push(...spaces);
+                        out.shading.push(...shading);
+                        out.images.push(...images);
+                    }
+
+                    return out[type];
+            }
+        };
     }
 };
 export default helpers;

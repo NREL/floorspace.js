@@ -100,7 +100,7 @@ export default {
         };
     },
     mounted () {
-        this.type = Object.keys(this.extendedLibrary)[8];
+        this.type = "spaces";
         this.configurePickers();
     },
     computed: {
@@ -215,7 +215,7 @@ export default {
             switch (this.type) {
                 case 'stories':
                     this.$store.dispatch('models/initStory');
-                    break;
+                    return;
                 case 'spaces':
                     this.$store.dispatch('models/initSpace', {
                         story: this.$store.state.application.currentSelections.story
@@ -232,10 +232,8 @@ export default {
                 case 'construction_sets':
                 case 'windows':
                 case 'daylighting_controls':
-                    const newObject = new helpers.map[this.type].init(this.displayTypeForType(this.type) + " " + (1 + this.displayObjects.length));
                     this.$store.dispatch('models/createObjectWithType', {
                         type: this.type,
-                        object: newObject
                     });
                     break;
             }
@@ -276,6 +274,9 @@ export default {
         setValueForKey (object, key, value) {
             // must update the object so that the input field value does not reset
             const result = helpers.setValueForKey(object, this.$store, this.type, key, value);
+            // remove existing errors for object
+            this.validationErrors = this.validationErrors.filter(e => e.object_id !== object.id);
+
             if (!result.success) {
                 this.validationErrors.push({
                     object_id: object.id,
@@ -304,7 +305,7 @@ export default {
         * dispatches destroyStory, destroySpace, destroyShading, or destroyObject depending on the object's type
         */
         destroyObject (object) {
-            if (this.type === 'stories' && this.$store.state.models.stories.length > 1) {
+            if (this.type === 'stories') {
                 this.$store.dispatch('models/destroyStory', {
                     story: object
                 });
@@ -396,7 +397,7 @@ export default {
 
 #library {
     background-color: $gray-darkest;
-    overflow: scroll;
+    overflow: auto;
 
     header {
         display: flex;
