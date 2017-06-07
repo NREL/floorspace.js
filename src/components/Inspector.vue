@@ -8,13 +8,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
 <section id="inspector">
-    <section class="tabs">
-        <span :class="{ active: tab === 'attributes' }" @click="tab = 'attributes'">Attributes</span>
-        <span :class="{ active: tab === 'components' }" @click="tab = 'components'">Components</span>
-        <span :class="{ active: tab === 'geometry' }" @click="tab = 'geometry'">Geometry</span>
-    </section>
-
-    <section v-if="tab === 'geometry'" id="geometry-list" class="list">
+    <section id="geometry-list" class="list">
         <template v-if="!currentSpace && !currentShading" v-for="face in currentStoryGeometry.faces">
             <header>
                 <h3>Face {{face.id}}</h3>
@@ -37,123 +31,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             </div>
         </template>
     </section>
-
-    <section v-if="tab === 'attributes'" id="attributes-list" class="list">
-        <template v-if="!currentSpace && !currentShading">
-            <h3>{{ currentStory.name }}</h3>
-
-            <label>name</label>
-            <div class="input-text">
-                <input :value="currentStory.name" @change="updatecurrentStory('name', $event)">
-            </div>
-
-            <label>below_floor_plenum_height</label>
-            <div class="input-text">
-                <input :value="currentStory.below_floor_plenum_height" @change="updatecurrentStory('below_floor_plenum_height', $event)">
-            </div>
-
-            <label>floor_to_ceiling_height</label>
-            <div class="input-text">
-                <input :value="currentStory.floor_to_ceiling_height" @change="updatecurrentStory('floor_to_ceiling_height', $event)">
-            </div>
-
-            <label>multiplier</label>
-            <div class="input-text">
-                <input :value="currentStory.multiplier" @change="updatecurrentStory('multiplier', $event)">
-            </div>
-        </template>
-
-        <template v-if="currentSpace">
-            <h3>{{ currentSpace.name }}</h3>
-
-            <label>name</label>
-            <div class="input-text">
-                <input :value="currentSpace.name" @change="updatecurrentSpace('name', $event)">
-            </div>
-
-            <div class="list-item">
-                <h4>{{ displayTypeForType('building_units') }}</h4>
-                <span v-for="(val, key) in getComponent(currentSpace.building_unit_id, 'building_units')">
-                    {{ key }}: {{ val }}
-                </span>
-                <button @click="assignObject('building_units', currentSpace)">Add {{ displayTypeForType('building_units') }}</button>
-            </div>
-            <div class="list-item">
-                <h4>{{ displayTypeForType('thermal_zones') }}</h4>
-                <span v-for="(val, key) in getComponent(currentSpace.thermal_zone_id, 'thermal_zones')">
-                    {{ key }}: {{ val }}
-                </span>
-                <button @click="assignObject('thermal_zones', currentSpace)">Add {{ displayTypeForType('thermal_zones') }}</button>
-            </div>
-            <div class="list-item">
-                <h4>{{ displayTypeForType('space_types') }}</h4>
-                <span v-for="(val, key) in getComponent(currentSpace.space_type_id, 'space_types')">
-                    {{ key }}: {{ val }}
-                </span>
-                <button @click="assignObject('space_types', currentSpace)">Add {{ displayTypeForType('space_types') }}</button>
-            </div>
-            <div class="list-item">
-                <h4>{{ displayTypeForType('construction_sets') }}</h4>
-                <span v-for="(val, key) in getComponent(currentSpace.construction_set_id, 'construction_sets')">
-                    {{ key }}: {{ val }}
-                </span>
-                <button @click="assignObject('construction_sets', currentSpace)">Add {{ displayTypeForType('construction_sets') }}</button>
-            </div>
-        </template>
-
-        <template v-if="currentShading">
-            <h3>{{ currentShading.name }}</h3>
-            <label>name</label>
-            <div class="input-text">
-                <input :value="currentShading.name" @change="updatecurrentShading('name', $event)">
-            </div>
-        </template>
-    </section>
-
-    <section v-if="tab === 'components'" id="components-list" class="list">
-        <template v-if="!currentSpace && !currentShading">
-            <header>
-                <h3>{{ currentStory.name }}</h3>
-            </header>
-            <div class="list-item">
-                <h4>Windows</h4>
-                <div v-for="(window, index) in currentStory.windows">
-                    <span v-for="(val, key) in window">
-                        {{ key }}: {{ val }}
-                    </span>
-
-                    <svg @click="destroyWindow(index)" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
-                    </svg>
-                </div>
-                <button @click="assignObject('windows', currentStory)">Add Window</button>
-            </div>
-        </template>
-
-        <template v-if="currentSpace">
-            <header>
-                <h3>{{ currentSpace.name }}</h3>
-            </header>
-
-            <div class="list-item">
-                <h4>Daylighting Controls</h4>
-                <div v-for="(daylighting_control, index) in currentSpace.daylighting_controls">
-                    <span v-for="(val, key) in daylighting_control">
-                        {{ key }}: {{ val }}
-                    </span>
-
-                    <svg @click="destroyDaylightingControl(index)" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
-                    </svg>
-                </div>
-                <button @click="assignObject('daylighting_controls', currentSpace)">Add {{ displayTypeForType('daylighting_controls') }}</button>
-            </div>
-        </template>
-
-        <template v-if="currentShading">
-            <h3>{{ currentShading.name }}</h3>
-        </template>
-    </section>
 </section>
 </template>
 
@@ -167,32 +44,12 @@ export default {
     name: 'inspector',
     data() {
         return {
-            tab: 'geometry',
             geometryInspector: true,
             storyInspector: false
         }
     },
     methods: {
-        destroyWindow (index) {
-            const windowsCopy = this.currentStory.windows.slice();
-            windowsCopy.splice(index, 1);
-
-            this.$store.dispatch('models/updateStoryWithData', {
-                story: this.currentStory,
-                windows: windowsCopy
-            });
-        },
-        destroyDaylightingControl(index) {
-            const daylightingControlsCopy = this.currentSpace.daylighting_controls.slice();
-            daylightingControlsCopy.splice(index, 1);
-            this.$store.dispatch('models/updateSpaceWithData', {
-                space: this.currentSpace,
-                daylighting_controls: daylightingControlsCopy
-            });
-        },
-        getComponent (id, type) { return this.library[type].find(c => c.id === id); },
-        displayTypeForType (type) { return modelHelpers.map[type].displayName; },
-        startpoint (edgeRef) {
+		startpoint (edgeRef) {
             const edge = this.edgeForId(edgeRef.edge_id);
             if (edgeRef.reverse) {
                 const vertex = this.vertexForId(edge.v2);
@@ -216,33 +73,6 @@ export default {
         vertexForId (vertex_id) {
             const vertex = geometryHelpers.vertexForId(vertex_id, this.currentStoryGeometry);
             return vertex;
-        },
-        updatecurrentStory (key, event) {
-            var payload = { story: this.currentStory };
-            payload[key] = event.target.value;
-            // required to prevent input field value from containing incorrect data
-            event.target.value = this.currentStory[key];
-            this.$store.dispatch('models/updateStoryWithData', payload);
-        },
-        updatecurrentSpace (key, event) {
-            var payload = { space: this.currentSpace };
-            payload[key] = event.target.value;
-            // required to prevent input field value from containing incorrect data
-            event.target.value = this.currentSpace[key];
-            this.$store.dispatch('models/updateSpaceWithData', payload);
-        },
-        updatecurrentShading (key, event) {
-            var payload = { shading: this.currentShading };
-            payload[key] = event.target.value;
-            // required to prevent input field value from containing incorrect data
-            event.target.value = this.currentShading[key];
-            this.$store.dispatch('models/updateShadingWithData', payload);
-        },
-        assignObject (type, target) {
-            this.$emit('assignObject', {
-                type: type,
-                target: target
-            });
         }
     },
     computed: {
@@ -251,9 +81,7 @@ export default {
         ...mapState({
             currentStory: state => state.application.currentSelections.story,
             currentSpace: state => state.application.currentSelections.space,
-            currentShading: state => state.application.currentSelections.shading,
-
-            library: state => state.models.library
+            currentShading: state => state.application.currentSelections.shading
         })
     },
 }
@@ -272,7 +100,7 @@ export default {
 	    top: 5rem;
 
         .list {
-            height: calc(100vh - 6.75rem);
+            height: calc(100vh - 4.75rem);
             overflow: scroll;
 
             header {
@@ -294,38 +122,6 @@ export default {
                 }
                 button {
                     margin-top: .5rem;
-                }
-            }
-        }
-
-        #attributes-list {
-            h3, label {
-                margin-left: 1rem;
-            }
-            label {
-                font-size: .625rem;
-                text-transform: uppercase;
-            }
-            .input-text {
-                margin: .25rem 0 .5rem 0;
-                padding: 0 1rem;
-            }
-        }
-
-        #components-list {
-            .list-item > div {
-                border-top: 1px solid $gray-medium-light;
-                padding: .5rem 0;
-                position: relative;
-                svg {
-                    cursor: pointer;
-                    height: 1rem;
-                    position: absolute;
-                    right: 0;
-                    top: calc(50% - .5rem);
-                    path {
-                        fill: $gray-lightest;
-                    }
                 }
             }
         }
