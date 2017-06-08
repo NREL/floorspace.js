@@ -170,10 +170,8 @@ export default {
 
 		if (this.currentSpace) {
             payload.model_id = this.currentSpace.id;
-			payload.type = "space";
         } else if (this.currentShading) {
             payload.model_id = this.currentShading.id;
-			payload.type = "shading";
         }
 
         this.$store.dispatch('geometry/createFaceFromPoints', payload);
@@ -203,10 +201,8 @@ export default {
 
         if (this.currentSpace) {
             payload.model_id = this.currentSpace.id;
-			payload.type = "space";
         } else if (this.currentShading) {
             payload.model_id = this.currentShading.id;
-			payload.type = "shading";
         }
         this.$store.dispatch('geometry/createFaceFromPoints', payload);
 
