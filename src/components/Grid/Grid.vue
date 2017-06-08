@@ -8,7 +8,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
 <div id="grid" :style="{ 'pointer-events': (currentTool === 'Drag' || currentTool === 'Map') ? 'none': 'all' }">
-    <svg ref="grid" @mousedown="gridClicked" @mousemove="handleMouseMove" preserveAspectRatio="none" id="svg-grid"></svg>
+    <svg ref="grid" preserveAspectRatio="none" id="svg-grid"></svg>
 </div>
 </template>
 
@@ -45,7 +45,7 @@ export default {
                 y: 0,
                 k: 1
             },
-            handleMouseMove() {}, // placeholder --> overwritten in mounted()
+            handleMouseMove: null, // placeholder --> overwritten in mounted()
             forceGridHide: false
         };
     },
@@ -65,7 +65,13 @@ export default {
         this.calcGrid();
         this.drawPolygons();
 
+        // throttle mouse move
+        this.handleMouseMove = throttle(this.highlightSnapTarget,100);
+
+        // add event listeners
         this.$refs.grid.addEventListener('reloadGrid', this.reloadGrid);
+        this.$refs.grid.addEventListener('click', this.gridClicked);
+        this.$refs.grid.addEventListener('mousemove', this.handleMouseMove);
         // recalculate the grid when the window resizes
         // const _this = this;
         // window.addEventListener('resize', () => {
@@ -77,9 +83,6 @@ export default {
 
         // watch escape to cancel current drawing action
         window.addEventListener('keyup',this.escapeAction);
-
-        // throttle mouse move
-        this.handleMouseMove = throttle(this.highlightSnapTarget,100);
 
         function throttle(func, wait) {
             var start = Date.now();
@@ -96,6 +99,8 @@ export default {
     },
     beforeDestroy () {
         this.$refs.grid.removeEventListener('reloadGrid', this.reloadGrid);
+        this.$refs.grid.removeEventListener('click', this.gridClicked);
+        this.$refs.grid.removeEventListener('mousemove', this.handleMouseMove);
         // window.removeEventListener('resize', this.resize());
         window.removeEventListener('keyup', this.escapeAction);
     },
@@ -266,6 +271,10 @@ export default {
             this.drawPolygons();
         },
         points() {
+            if (this.points.length === 0) {
+                this.eraseGuidelines();
+            }
+
             this.drawPoints();
         },
         forceGridHide() {

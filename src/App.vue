@@ -13,7 +13,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <canvas-view></canvas-view>
             <grid-view></grid-view>
         </main>
-		<inspector-view></inspector-view>
+		<!-- <inspector-view></inspector-view> -->
         <library :class="{ 'disabled-component': tool === 'Map' }"></library>
     </div>
 </template>

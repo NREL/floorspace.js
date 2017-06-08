@@ -123,7 +123,7 @@ export default {
         if (!this.points.length) { return; }
 
         // remove expired guideline paths and text
-        d3.selectAll('#grid .guideline').remove();
+        this.eraseGuidelines();
 
         var guidelinePoints, guidelinePaths;
 
@@ -161,6 +161,23 @@ export default {
             .attr('d', d3.line().x(d => d.x).y(d => d.y))
             .lower();
 
+        // render unfinished area polygon(s)
+        svg.selectAll('.guideline-area')
+            .data(guidelinePolys)
+            .enter()
+            .append('polygon')
+            .attr('points',d => d.map(p => [p.x,p.y].join(",")).join(" "))
+            .classed('guideline guideline-area previousStory',true)
+            .attr('vector-effect', 'non-scaling-stroke')
+            .attr('fill', () => {
+                if (this.currentTool === 'Eraser') { return 'none'; }
+                else if (this.currentSpace) { return this.currentSpace.color; }
+                else if (this.currentShading) { return this.currentShading.color; }
+            });
+
+        // don't render area/distance when erasing
+        if (this.currentTool === 'Eraser') { return; }
+
         // render gridline distance(s)
         svg.selectAll('.guideline-text')
             .data(guidelinePaths)
@@ -187,18 +204,6 @@ export default {
             .attr("fill", "red")
             .attr("font-size","1em");
 
-        // render unfinished area polygon(s)
-        svg.selectAll('.guideline-area')
-            .data(guidelinePolys)
-            .enter()
-            .append('polygon')
-            .attr('points',d => d.map(p => [p.x,p.y].join(",")).join(" "))
-            .classed('guideline guideline-area previousStory',true)
-            .attr('vector-effect', 'non-scaling-stroke')
-            .attr('fill', () => {
-                if (this.currentSpace) { return this.currentSpace.color; }
-                else if (this.currentShading) { return this.currentShading.color; }
-            });
 
         if (guidelineArea.length > 3) {
             let areaPoints = guidelineArea.map(p => ({ ...p, X: p.x / this.transform.k, Y: p.y / this.transform.k })), // scale X,Y for correct area calc
@@ -230,12 +235,17 @@ export default {
         d3.selectAll('.vertical, .horizontal').lower();
     },
     /*
+    * Erase any drawn guidelines
+    */
+    eraseGuidelines () {
+        d3.selectAll('#grid .guideline').remove();
+    },
+    /*
     * Handle escape key presses to cancel current drawing operation
     */
     escapeAction (e) {
         if (e.code === 'Escape' || e.which === 27) {
             this.points = [];
-            d3.selectAll('.guideline').remove();
         }
     },
 
@@ -377,7 +387,7 @@ export default {
         const that = this;
 
         // remove expired polygons
-        d3.select('#grid svg').selectAll('polygon, .polygon-text, .guideline').remove();
+        d3.select('#grid svg').selectAll('polygon, .polygon-text').remove();
 
         // store total drag offset (grid units)
         var dx = 0,
@@ -491,11 +501,18 @@ export default {
                 xTickSpacing = this.rwuToGrid(this.spacing + this.min_x, 'x'),
                 yTickSpacing = this.rwuToGrid(this.spacing + this.min_y, 'y');
 
-            // round point RWU coordinates to nearest gridline, adjust by grid offset, add 0.5 grid units to account for width of gridlines
+            // // round point RWU coordinates to nearest gridline, adjust by grid offset, add 0.5 grid units to account for width of gridlines
+            // const snapTarget = {
+            //     type: 'gridpoint',
+            //     x: this.round(gridPoint.x, this.rwuToGrid(this.spacing + this.min_x, 'x')) + xOffset - 0.5,
+            //     y: this.round(gridPoint.y, this.rwuToGrid(this.spacing + this.min_y, 'y')) + yOffset - 0.5
+            // };
+
+            // round point RWU coordinates to nearest gridline, adjust by grid offset
             const snapTarget = {
                 type: 'gridpoint',
-                x: this.round(gridPoint.x, this.rwuToGrid(this.spacing + this.min_x, 'x')) + xOffset - 0.5,
-                y: this.round(gridPoint.y, this.rwuToGrid(this.spacing + this.min_y, 'y')) + yOffset - 0.5
+                x: this.round(gridPoint.x, this.rwuToGrid(this.spacing + this.min_x, 'x')) + xOffset,
+                y: this.round(gridPoint.y, this.rwuToGrid(this.spacing + this.min_y, 'y')) + yOffset
             };
 
             // pick closest point
