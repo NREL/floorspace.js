@@ -18,7 +18,7 @@ export default {
 
     // GRID
     setGridVisible (state, payload) {
-        if ('visible' in payload) {
+		if ('visible' in payload) {
             state.grid.visible = payload.visible;
         }
     },

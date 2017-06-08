@@ -152,7 +152,7 @@ export default {
             } else {
                 // cleanup
                 svg.select("#reticle path").remove();
-                this.$store.dispatch('project/setGridVisible', { visible: true });
+                // this.$store.dispatch('project/setGridVisible', { visible: true });
             }
         }
     },
