@@ -7,9 +7,10 @@ export default {
         const [name, storyId] = helpers.generateName(context.state, 'stories'),
             story = new factory.Story({ name, storyId });
 
-        // create story/geometry
+        // create story
         context.commit('initStory', { story });
-        context.dispatch('geometry/initGeometry', { story }, { root: true });
+        // create geometry
+        context.dispatch('geometry/initGeometry', { story_id: story.id }, { root: true });
         // create space and select
         context.dispatch('initSpace', { story });
         context.dispatch('selectStoryAndSpace', { story });
@@ -58,7 +59,7 @@ export default {
             // destroy face associated with the space
             context.dispatch('geometry/destroyFaceAndDescendents', {
                 face: face,
-                geometry: context.rootGetters['application/currentStoryGeometry']
+                geometry_id: context.rootGetters['application/currentStoryGeometry'].id
             }, { root: true });
         }
     },
@@ -72,13 +73,12 @@ export default {
             story: story
         });
 
-        // TODO: update destroyFaceAndDescendents to work with shading
         const face = context.rootGetters['application/currentStoryGeometry'].faces.find(f => f.id === shading.face_id);
         if (face) {
             // destroy face associated with the space
             context.dispatch('geometry/destroyFaceAndDescendents', {
                 face: face,
-                geometry: context.rootGetters['application/currentStoryGeometry']
+                geometry_id: context.rootGetters['application/currentStoryGeometry'].id
             }, { root: true });
         }
     },

@@ -49,7 +49,6 @@ export default {
         // create the point
         var newPoint = snapTarget.type === 'edge' ? snapTarget.projection : snapTarget;
         this.points.push(newPoint);
-
         // if the Rectangle or Eraser tool is active and two points have been drawn (to define a rectangle)
         // complete the corresponding operation for the tool
         if (this.currentTool === 'Eraser' && this.points.length === 2) { this.eraseRectangularSelection(); }
@@ -124,7 +123,7 @@ export default {
         if (!this.points.length) { return; }
 
         // remove expired guideline paths and text
-        d3.selectAll('#grid .guideline').remove();
+        this.eraseGuidelines();
 
         var guidelinePoints, guidelinePaths;
 
@@ -162,6 +161,23 @@ export default {
             .attr('d', d3.line().x(d => d.x).y(d => d.y))
             .lower();
 
+        // render unfinished area polygon(s)
+        svg.selectAll('.guideline-area')
+            .data(guidelinePolys)
+            .enter()
+            .append('polygon')
+            .attr('points',d => d.map(p => [p.x,p.y].join(",")).join(" "))
+            .classed('guideline guideline-area previousStory',true)
+            .attr('vector-effect', 'non-scaling-stroke')
+            .attr('fill', () => {
+                if (this.currentTool === 'Eraser') { return 'none'; }
+                else if (this.currentSpace) { return this.currentSpace.color; }
+                else if (this.currentShading) { return this.currentShading.color; }
+            });
+
+        // don't render area/distance when erasing
+        if (this.currentTool === 'Eraser') { return; }
+
         // render gridline distance(s)
         svg.selectAll('.guideline-text')
             .data(guidelinePaths)
@@ -188,18 +204,6 @@ export default {
             .attr("fill", "red")
             .attr("font-size","1em");
 
-        // render unfinished area polygon(s)
-        svg.selectAll('.guideline-area')
-            .data(guidelinePolys)
-            .enter()
-            .append('polygon')
-            .attr('points',d => d.map(p => [p.x,p.y].join(",")).join(" "))
-            .classed('guideline guideline-area previousStory',true)
-            .attr('vector-effect', 'non-scaling-stroke')
-            .attr('fill', () => {
-                if (this.currentSpace) { return this.currentSpace.color; }
-                else if (this.currentShading) { return this.currentShading.color; }
-            });
 
         if (guidelineArea.length > 3) {
             let areaPoints = guidelineArea.map(p => ({ ...p, X: p.x / this.transform.k, Y: p.y / this.transform.k })), // scale X,Y for correct area calc
@@ -231,12 +235,17 @@ export default {
         d3.selectAll('.vertical, .horizontal').lower();
     },
     /*
+    * Erase any drawn guidelines
+    */
+    eraseGuidelines () {
+        d3.selectAll('#grid .guideline').remove();
+    },
+    /*
     * Handle escape key presses to cancel current drawing operation
     */
     escapeAction (e) {
         if (e.code === 'Escape' || e.which === 27) {
             this.points = [];
-            d3.selectAll('.guideline').remove();
         }
     },
 
@@ -246,6 +255,7 @@ export default {
     * translate the points into RWU and save the face for the selected space or shading
     */
     savePolygonFace () {
+
         const payload = {
             // translate grid points from grid units to RWU
             points: this.points.map(p => ({
@@ -254,10 +264,12 @@ export default {
             }))
         };
 
-        if (this.currentSpace) {
-            payload.space = this.currentSpace;
+		if (this.currentSpace) {
+            payload.model_id = this.currentSpace.id;
+			payload.type = "space";
         } else if (this.currentShading) {
-            payload.shading = this.currentShading;
+            payload.model_id = this.currentShading.id;
+			payload.type = "shading";
         }
 
         this.$store.dispatch('geometry/createFaceFromPoints', payload);
@@ -272,27 +284,26 @@ export default {
     */
     saveRectuangularFace () {
         // infer 4 corners of the rectangle based on the two points that have been drawn
-        const payload = {
-            points: [
-                this.points[0],
-                { x: this.points[1].x, y: this.points[0].y },
-                this.points[1],
-                { x: this.points[0].x, y: this.points[1].y }
-            ]
-        };
+        const payload = {};
 
         // translate points from grid units to RWU
-        payload.points = payload.points.map(p => ({
-            x: this.gridToRWU(p.x, 'x'),
-            y: this.gridToRWU(p.y, 'y')
-        }));
+        payload.points = [
+	            this.points[0],
+	            { x: this.points[1].x, y: this.points[0].y },
+	            this.points[1],
+	            { x: this.points[0].x, y: this.points[1].y }
+	        ].map(p => ({
+	            x: this.gridToRWU(p.x, 'x'),
+	            y: this.gridToRWU(p.y, 'y')
+	        }));
 
         if (this.currentSpace) {
-            payload.space = this.currentSpace;
+            payload.model_id = this.currentSpace.id;
+			payload.type = "space";
         } else if (this.currentShading) {
-            payload.shading = this.currentShading;
+            payload.model_id = this.currentShading.id;
+			payload.type = "shading";
         }
-
         this.$store.dispatch('geometry/createFaceFromPoints', payload);
 
         // clear points from the grid
@@ -376,12 +387,38 @@ export default {
         const that = this;
 
         // remove expired polygons
-        d3.select('#grid svg').selectAll('polygon, .polygon-text, .guideline').remove();
+        d3.select('#grid svg').selectAll('polygon, .polygon-text').remove();
+
+        // store total drag offset (grid units)
+        var dx = 0,
+            dy = 0;
+
+        var _this = this;
+        
+        // polygon drag handler
+        const drag = d3.drag()
+            .on('drag', function (d) {
+                if (_this.currentTool !== 'Select' || d.previous_story) { return; }
+                dx += d3.event.dx;
+                dy += d3.event.dy;
+                d3.select(this)
+                    .attr('transform', (d) => 'translate(' + [dx, dy] + ')');
+            })
+            .on('end', (d, i) => {
+                if (this.currentTool !== 'Select' || d.previous_story) { return; }
+                // when the drag is finished, update the face in the store with the total offset in RWU
+                this.$store.dispatch('geometry/moveFaceByOffset', {
+                    face_id: d.face_id,
+                    dx: this.gridToRWU(dx, 'x'),
+                    dy: this.gridToRWU(dy, 'y')
+                });
+            });
 
         // draw polygons
         d3.select('#grid svg').selectAll('polygon')
             .data(this.polygons).enter()
             .append('polygon')
+            .call(drag)
             // if a face is clicked while the Select tool is active, lookup its corresponding model (space/shading) and select it
             .on('click', (d) => {
                 if (this.currentTool === 'Select') {
@@ -394,7 +431,7 @@ export default {
                     }
                 }
             })
-            .attr("points", d => d.points.map(p => [this.rwuToGrid(p.x, 'x'), this.rwuToGrid(p.y, 'y')].join(",")).join(" "))
+            .attr('points', d => d.points.map(p => [this.rwuToGrid(p.x, 'x'), this.rwuToGrid(p.y, 'y')].join(',')).join(' '))
             .attr('class', (d, i) => {
                 if ((this.currentSpace && d.face_id === this.currentSpace.face_id) ||
                     (this.currentShading && d.face_id === this.currentShading.face_id)) { return 'current'; }
@@ -463,6 +500,13 @@ export default {
                 // spacing between ticks in grid units
                 xTickSpacing = this.rwuToGrid(this.spacing + this.min_x, 'x'),
                 yTickSpacing = this.rwuToGrid(this.spacing + this.min_y, 'y');
+
+            // // round point RWU coordinates to nearest gridline, adjust by grid offset, add 0.5 grid units to account for width of gridlines
+            // const snapTarget = {
+            //     type: 'gridpoint',
+            //     x: this.round(gridPoint.x, this.rwuToGrid(this.spacing + this.min_x, 'x')) + xOffset - 0.5,
+            //     y: this.round(gridPoint.y, this.rwuToGrid(this.spacing + this.min_y, 'y')) + yOffset - 0.5
+            // };
 
             // round point RWU coordinates to nearest gridline, adjust by grid offset
             const snapTarget = {
@@ -562,12 +606,12 @@ export default {
                 bV2 = geometryHelpers.vertexForId(b.v2, bStoryGeometry),
 
                 // project point being tested to each edge
-                aProjection = geometryHelpers.projectToEdge(point, aV1, aV2).projection,
-                bProjection = geometryHelpers.projectToEdge(point, bV1, bV2).projection,
+                aProjection = geometryHelpers.projectionOfPointToLine(point, { p1: aV1, p2: aV2 }),
+                bProjection = geometryHelpers.projectionOfPointToLine(point, { p1: bV1, p2: bV2 }),
 
                 // look up distance between projection and point being tested
-                aDist = this.distanceBetweenPoints(aProjection, point),
-                bDist = this.distanceBetweenPoints(bProjection, point);
+                aDist = geometryHelpers.distanceBetweenPoints(aProjection, point),
+                bDist = geometryHelpers.distanceBetweenPoints(bProjection, point);
 
             // return data for the edge with the closest projection to the point being tested
             return aDist < bDist ? a : b;
@@ -579,7 +623,7 @@ export default {
             nearestEdgeV2 = geometryHelpers.vertexForId(nearestEdge.v2, nearestEdgeStoryGeometry),
 
             // project point being tested to nearest edge
-            projection = geometryHelpers.projectToEdge(point, nearestEdgeV1, nearestEdgeV2).projection,
+            projection = geometryHelpers.projectionOfPointToLine(point, { p1: nearestEdgeV1, p2: nearestEdgeV2 }),
 
             // look up distance between projection and point being tested
             dist = this.distanceBetweenPoints(projection, point);
@@ -621,7 +665,8 @@ export default {
             result = n + x - (n % x);
         }
         // handle negatives
-        return result *= sign;
+        result *= sign;
+		return result
     },
 
     /*
@@ -815,19 +860,22 @@ export default {
     * take a grid value (from some point already rendered to the grid) and translate it into RWU for persistence to the datastore
     */
     gridToRWU (gridValue, axis) {
+		var result;
         if (axis === 'x') {
             const currentScaleX = d3.scaleLinear()
                     .domain([0, this.$refs.grid.clientWidth])
                     .range([this.min_x, this.max_x]),
                 pxValue = this.scaleX.invert(gridValue);
-            return currentScaleX(pxValue);
+            result = currentScaleX(pxValue);
         } else if (axis === 'y') {
             const currentScaleY = d3.scaleLinear()
                    .domain([0, this.$refs.grid.clientHeight])
                    .range([this.min_y, this.max_y]),
                 pxValue = this.scaleY.invert(gridValue);
-            return currentScaleY(pxValue);
+            result = currentScaleY(pxValue);
         }
+		// prevent floating point inaccuracies in stored numbers
+		return (Math.round(result * 100000000000))/100000000000;
     },
 
     /*
@@ -835,7 +883,7 @@ export default {
     */
     polygonLabelPosition (pointsIn) {
         const points = [pointsIn.map(p => [this.rwuToGrid(p.x, 'x'), this.rwuToGrid(p.y, 'y')])],
-            area = Math.abs(Math.round(geometryHelpers.areaOfFace(pointsIn))), // calculate are in RWU, not grid units
+            area = Math.abs(Math.round(geometryHelpers.areaOfSelection(pointsIn))), // calculate area in RWU, not grid units
             [ x, y ] = area ? polylabel(points, 1.0) : [null, null];
 
         return { x, y, area };

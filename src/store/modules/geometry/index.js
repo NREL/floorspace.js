@@ -4,7 +4,7 @@ import getters from './getters'
 
 export default {
     namespaced: true,
-    // each story owns a geometry object with a unique set of vertices, edges, and faces
+    // each story references a geometry object in this state array
     state: [/*{
         id: null,
         vertices: [{

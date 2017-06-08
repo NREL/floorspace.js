@@ -13,6 +13,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <canvas-view></canvas-view>
             <grid-view></grid-view>
         </main>
+		<!-- <inspector-view></inspector-view> -->
         <library :class="{ 'disabled-component': tool === 'Map' }"></library>
     </div>
 </template>
@@ -24,6 +25,7 @@ import Navigation from './components/Navigation'
 import Grid from './components/Grid/Grid'
 import Canvas from './components/Canvas/Canvas'
 import Toolbar from './components/Toolbar'
+import Inspector from './components/Inspector'
 import Library from './components/Library'
 
 import { mapState } from 'vuex'
@@ -45,6 +47,7 @@ export default {
     components: {
         'grid-view': Grid,
         'canvas-view': Canvas,
+        'inspector-view': Inspector,
         'library': Library,
         'navigation': Navigation,
         'toolbar': Toolbar,
