@@ -7,11 +7,10 @@ export default {
         const [name, storyId] = helpers.generateName(context.state, 'stories'),
             story = new factory.Story({ name, storyId });
 
-        // create story/geometry
+        // create story
         context.commit('initStory', { story });
-        context.dispatch('geometry/initGeometry', {
-			story_id: story.id
-		}, { root: true });
+        // create geometry
+        context.dispatch('geometry/initGeometry', { story_id: story.id }, { root: true });
         // create space and select
         context.dispatch('initSpace', { story });
         context.dispatch('selectStoryAndSpace', { story });

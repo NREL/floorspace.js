@@ -383,7 +383,8 @@ export default {
         var dx = 0,
             dy = 0;
 
-            var _this = this;
+        var _this = this;
+        
         // polygon drag handler
         const drag = d3.drag()
             .on('drag', function (d) {
@@ -402,7 +403,6 @@ export default {
                     dy: this.gridToRWU(dy, 'y')
                 });
             });
-
 
         // draw polygons
         d3.select('#grid svg').selectAll('polygon')
