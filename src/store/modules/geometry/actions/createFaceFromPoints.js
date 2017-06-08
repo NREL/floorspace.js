@@ -25,8 +25,6 @@ export default function createFaceFromPoints (context, payload) {
 		facePoints = points
 	}
     // prevent overlapping faces by erasing existing geometry covered by the points defining the new face
-    // context.dispatch('eraseSelection', { points: facePoints });
-
     if (!eraseSelection(context, { points: facePoints })) { return; }
 
     // create and save vertices and edges to be referenced by the face
@@ -93,7 +91,8 @@ function mergeWithExistingFace (points, currentStoryGeometry, target, context) {
 * Erase the selection defined by a set of points on all faces on the current story
 * used by the eraser tool and by the createFaceFromPoints action (to prevent overlapping faces)
 */
-function eraseSelection (context, payload) {
+export function eraseSelection (context, payload) {
+
 	const { points } = payload;
 
 	const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'];

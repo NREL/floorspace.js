@@ -1,7 +1,7 @@
 import factory from './../factory.js'
 import geometryHelpers from './../helpers'
 import modelHelpers from './../../models/helpers'
-import createFaceFromPoints from './createFaceFromPoints'
+import createFaceFromPoints, { eraseSelection } from './createFaceFromPoints'
 
 export default {
     /*
@@ -23,55 +23,7 @@ export default {
     * Erase the selection defined by a set of points on all faces on the current story
     * Dispatched by the eraser tool and by the createFaceFromPoints action (to prevent overlapping faces)
     */
-    eraseSelection (context, payload) {
-        const { points } = payload;
-
-        // set of points defining the selection, formatted for clipper
-        const clipSelection = points.map(p => ({ ...p, X: p.x, Y: p.y })),
-            currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'];
-
-        // validation - a selection must have at least 3 vertices and area
-        if (clipSelection.length < 3 || !geometryHelpers.areaOfSelection(clipSelection)) { return; }
-
-        /*
-        * find all existing faces that have an intersection with the selection being erased
-        * destroy faces intersecting the eraser selection and recreate them
-        * from the difference between their original area and the eraser selection
-        */
-        const intersectedFaces = currentStoryGeometry.faces.filter((face) => {
-			const faceVertices = geometryHelpers.verticesForFaceId(face.id, currentStoryGeometry),
-				intersection = geometryHelpers.setOperation('intersection', faceVertices, clipSelection);
-			return intersection.length;
-		}).forEach((existingFace) => {
-            const existingFaceVertices = geometryHelpers.verticesForFaceId(existingFace.id, currentStoryGeometry),
-                affectedModel = modelHelpers.modelForFace(context.rootState.models, existingFace.id);
-
-            // create new face by subtracting overlap (intersection) from the existing face's original area
-            const differenceOfFaces = geometryHelpers.setOperation('difference', existingFaceVertices, clipSelection);
-			if (differenceOfFaces) {
-				// destroy existing face
-	            context.dispatch(affectedModel.type === 'space' ? 'models/updateSpaceWithData' : 'models/updateShadingWithData', {
-	                [affectedModel.type]: affectedModel,
-	                face_id: null
-	            }, { root: true });
-
-	            context.dispatch('destroyFaceAndDescendents', {
-	                geometry_id: currentStoryGeometry.id,
-	                face: existingFace
-	            });
-
-				context.dispatch('createFaceFromPoints', {
-					type: affectedModel.type,
-		            model_id: affectedModel.id,
-		            points: differenceOfFaces
-		        });
-			} else {
-				debugger
-				return false;
-			}
-
-        });
-    },
+    eraseSelection: eraseSelection,
 
     /*
     * Given a dx, dy, and face
