@@ -1,14 +1,8 @@
 @import "./../config";
 
 main {
-    #canvas {
-        #images .konvajs-content {
-            z-index: 1;
-        }
-
-        #map {
-            height: 100%;
-        }
+     #images .konvajs-content {
+        z-index: 1;
     }
 
     #images, #map-container {

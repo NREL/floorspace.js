@@ -248,7 +248,6 @@ export default {
             this.points = [];
         }
     },
-
     // ****************** SAVING FACES ****************** //
     /*
     * The origin of the polygon being drawn was clicked, create a polygon face from all points on the grid
@@ -669,42 +668,72 @@ export default {
 		return result
     },
 
-    /*
-    * If the min_x, max_x, min_y, max_y are changed by some non zoom event (like window resize or model import)
-    * like a window resize or a data import adjust the zoom identity
-    */
-    reloadGrid (dx, dy, dz) {
-        d3.select('#grid svg')
-            .call(this.zoomBehavior.transform, () => {
-                // the zoom identity scale is calculated from original_bounds,
-                // so we can infer a new zoom identity by taking the ratio between the original x range and new x range
-                d3.zoomIdentity.k = (this.original_bounds.max_x - this.original_bounds.min_x) / (this.max_x - this.min_x);
-                d3.zoomIdentity.x = -this.min_x * d3.zoomIdentity.k;
-                d3.zoomIdentity.y = -this.min_y * d3.zoomIdentity.k;
+    // /*
+    // * If the min_x, max_x, min_y, max_y are changed by some non zoom event (like window resize or model import)
+    // * like a window resize or a data import adjust the zoom identity
+    // */
+    // reloadGrid (dx, dy, dz) {
+    //     d3.select('#grid svg')
+    //         .call(this.zoomBehavior.transform, () => {
+    //             // the zoom identity scale is calculated from original_bounds,
+    //             // so we can infer a new zoom identity by taking the ratio between the original x range and new x range
+    //             d3.zoomIdentity.k = (this.original_bounds.max_x - this.original_bounds.min_x) / (this.max_x - this.min_x);
+    //             d3.zoomIdentity.x = -this.min_x * d3.zoomIdentity.k;
+    //             d3.zoomIdentity.y = -this.min_y * d3.zoomIdentity.k;
 
-                d3.select('#grid svg').call(this.zoomBehavior.transform, d3.zoomIdentity);
-                return d3.zoomIdentity;
-            });
-    },
+    //             d3.select('#grid svg').call(this.zoomBehavior.transform, d3.zoomIdentity);
+    //             return d3.zoomIdentity;
+    //         });
+    // },
 
     // ****************** GRID ****************** //
-    calcGrid () {
+    renderGrid () {
+        console.log("render");
+
+        const w = this.$refs.grid.clientWidth,
+            h = this.$refs.grid.clientHeight;
+
+        if (this.original_bounds) {
+            this.max_x -= this.min_x;
+            this.min_x = 0;
+
+            this.max_y -= this.min_y;
+            this.min_y = 0;
+        }
+
+        this.original_bounds = {
+            min_x: this.min_x,
+            min_y: this.min_y,
+            max_x: this.max_x,
+            max_y: this.max_y,
+            pxWidth: w,
+            pxHeight: h
+        };
+
+        // initialize the y dimensions in RWU based on the aspect ratio of the grid on the screen
+        this.max_y = (h / w) * this.max_x;
+
         // set viewbox on svg in rwu so drawing coordinates are in rwu and not pixels
         this.$refs.grid.setAttribute('viewBox', `0 0 ${this.max_x - this.min_x} ${this.max_y - this.min_y}`);
 
         // scaleX amd scaleY are used during drawing to translate from px to RWU given the current grid dimensions in rwu
-        // these are initialized here and never changed
         this.$store.dispatch('application/setScaleX', {
             scaleX: d3.scaleLinear()
-                .domain([0, this.$refs.grid.clientWidth])
+                .domain([0, w])
                 .range([this.min_x, this.max_x])
         });
+
         this.$store.dispatch('application/setScaleY', {
             scaleY: d3.scaleLinear()
-                .domain([0, this.$refs.grid.clientHeight])
+                .domain([0, h])
                 .range([this.min_y, this.max_y])
         });
 
+        this.calcGrid();
+        this.centerGrid();
+        this.drawPolygons();
+    },
+    calcGrid () {
         const svg = d3.select('#grid svg'),
             // rwu dimensions (coordinates used within grid)
             rwuHeight = this.max_y - this.min_y,
@@ -716,7 +745,15 @@ export default {
                 .range([this.min_x, this.max_x]),
             zoomScaleY = d3.scaleLinear()
                 .domain([this.min_y, this.max_y])
-                .range([this.min_y, this.max_y]);
+                .range([this.min_y, this.max_y]),
+
+            // determine stroke width to ensure consistency when resizing/zooming
+            existingAxis = svg.select('.axis.axis--x'),
+            strokeWidth = existingAxis.empty() ? 1 : existingAxis.attr('stroke-width') / this.transform.k;
+
+        // console.log(strokeWidth);
+
+        svg.selectAll('*').remove();
 
         // generator functions for axes
         this.axis_generator.x = d3.axisBottom(zoomScaleX)
@@ -732,14 +769,15 @@ export default {
 
         this.axis.x = svg.append('g')
             .attr('class', 'axis axis--x')
-            .attr('stroke-width', this.scaleY(1))
-            .style('font-size', this.scaleY(1) + 'em')
+            .attr('stroke-width', strokeWidth)
+            .attr('font-size', '1em')
             .style('display', this.gridVisible ? 'inline' : 'none')
             .call(this.axis_generator.x);
+
         this.axis.y = svg.append('g')
             .attr('class', 'axis axis--y')
-            .style('font-size', this.scaleY(1) + 'em')
-            .attr('stroke-width', this.scaleX(1))
+            .attr('stroke-width', strokeWidth)
+            .attr('font-size', '1em')
             .style('display', this.gridVisible ? 'inline' : 'none')
             .call(this.axis_generator.y);
 
@@ -787,7 +825,6 @@ export default {
             });
 
         svg.call(this.zoomBehavior);
-        this.centerGrid();
     },
     centerGrid () {
         const x = this.min_x + (this.max_x - this.min_x)/2,

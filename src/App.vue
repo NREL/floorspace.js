@@ -35,8 +35,7 @@ import Canvas from './components/Canvas/Canvas'
 import Toolbar from './components/Toolbar'
 import Inspector from './components/Inspector'
 import Library from './components/Library'
-import Resize from './components/Resize'
-import ResizeGroup from './components/ResizeGroup'
+import { Resize, ResizeGroup } from './components/Resize'
 
 import { mapState } from 'vuex'
 

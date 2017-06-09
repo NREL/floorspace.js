@@ -12,6 +12,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 </template>
 
 <script>
+
+import ResizeEvents from './ResizeEvents'
+
 export default {
     name: 'resizegroup',
     props: ['vertical','horizontal'],
@@ -19,7 +22,10 @@ export default {
         return {}
     },
     mounted () {
-        this.$on('resize-resize',this.handleResize);
+        ResizeEvents.$on('resize-resize',this.handleResize);
+    },
+    beforeDestroy () {
+        ResizeEvents.$off('resize-resize',this.handleResize);
     },
     methods: {
         handleResize (e) {
@@ -30,19 +36,22 @@ export default {
                     let child = this.$el.children[i];
 
                     if (~child.className.indexOf('resize')) {
-                        top = child.style.top.match(/\d+/)[0];
+                        top = child.style.top.match(/\d+/);
+                        top = top && top[0];
                         break;
                     }
                 }
 
-                for (let i=this.$el.children.length; i--; ) {
-                    let child = this.$el.children[i];
+                if (top) {
+                    for (let i=this.$el.children.length; i--; ) {
+                        let child = this.$el.children[i];
 
-                    if (~child.className.indexOf('resize')) {
-                        continue;
+                        if (~child.className.indexOf('resize')) {
+                            continue;
+                        }
+
+                        child.style.bottom = window.innerHeight - top + "px";
                     }
-
-                    child.style.bottom = window.innerHeight - top + "px";
                 }
             }
 
@@ -53,19 +62,22 @@ export default {
                     let child = this.$el.children[i];
 
                     if (~child.className.indexOf('resize')) {
-                        width = child.style.width.match(/\d+/)[0];
+                        width = child.style.width.match(/\d+/);
+                        width = width && width[0];
                         break;
                     }
                 }
 
-                for (let i=this.$el.children.length; i--; ) {
-                    let child = this.$el.children[i];
+                if (width) {
+                    for (let i=this.$el.children.length; i--; ) {
+                        let child = this.$el.children[i];
 
-                    if (~child.className.indexOf('resize')) {
-                        continue;
+                        if (~child.className.indexOf('resize')) {
+                            continue;
+                        }
+
+                        child.style.left = width + "px";
                     }
-
-                    child.style.left = width + "px";
                 }
             }
         }

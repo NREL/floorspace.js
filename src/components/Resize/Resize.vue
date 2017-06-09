@@ -16,6 +16,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 </template>
 
 <script>
+
+import ResizeEvents from './ResizeEvents'
+
 export default {
     name: 'resize',
     data () {
@@ -74,7 +77,7 @@ export default {
             }
         },
         notify () {
-            this.$parent.$emit('resize-resize',{
+            ResizeEvents.$emit('resize-resize',{
                 top: this.resizeTop && this.$el.style.top,
                 right: this.resizeRight && this.$el.style.width,
             });
