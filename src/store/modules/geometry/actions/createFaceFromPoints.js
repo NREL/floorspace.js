@@ -169,10 +169,39 @@ function createFaceGeometry (points, currentStoryGeometry, context) {
 
 function validatePoints (facePoints, currentStoryGeometry, context) {
 	// loop through all new points, merge with existing points if they have the same coordinates
+	// build an array of vertices for the face being created, setting the same ID for points with the same coordinates to prevent overlapping vertices
+	var xRange = context.rootState.project.view.max_x - context.rootState.project.view.min_x;
+	const faceVertices = points.map((point) => {
+        // if a point was snapped to an existing vertex during drawing, it will have a vertex id
+        var vertex = point.id && geometryHelpers.vertexForId(point.id, currentStoryGeometry);
+		if (vertex) {
+			// TODO: is this ever being reached?
+			debugger }
+		return geometryHelpers.vertexForCoordinates(point.id, xRange, currentStoryGeometry) || new factory.Vertex(point.x, point.y);
+
+    });
+
 	// create edges connecting each vertex in order
-		// if an edge referencing both vertices already exists
-		// reference that edge on the face instead of creating and referencing a new edge
-		// set reverse accordingly
+	const faceEdges = faceVertices.map((v1, i) => {
+        // v2 is the first vertex in the array when the face is being closed
+        const v2 = i + 1 < faceVertices.length ? faceVertices[i + 1] : faceVertices[0];
+        // check if an edge referencing these two vertices already exists
+        var sharedEdge = currentStoryGeometry.edges.find((e) => {
+            return (e.v1 === v1.id && e.v2 === v2.id) ||
+				(e.v2 === v1.id && e.v1 === v2.id);
+        });
+
+        if (sharedEdge) {
+            // if a shared edge exists, check if its direction matches the edge direction required for the face being created
+            return {
+				...sharedEdge,
+	            reverse: sharedEdge.v1 !== v1.id
+			};
+        } else {
+            // create and store a new edge with the vertices
+            return new factory.Edge(v1.id, v2.id);
+        }
+    });
 
 	// check for duplicate vertices - these will not be considered splitting vertices bc they are endpoints
 	// loop through face edges and validate against splittingvertices or intersecting edges

@@ -148,6 +148,14 @@ const helpers = {
         return geometry.vertices.find(v => v.id === vertex_id);
     },
 
+    // given a set of coordinates, find the vertex on the geometry set within their tolerance zone
+	vertexForCoordinates (coordinates, xRange, geometry) {
+		const { x, y } = coordinates;
+		// tolerance is calculated based on the grid's horizontal range (RWU)
+		const tolerance = xRange * this.offset;
+	    return geometry.vertices.find(v => this.distanceBetweenPoints(coordinates, v) < tolerance );
+	},
+
     // given a face id, returns the populated vertex objects reference by edges on that face
     verticesForFaceId(face_id, geometry) {
         return geometry.faces.find(f => f.id === face_id)
