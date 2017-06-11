@@ -13,24 +13,30 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 </template>
 
 <script>
+
+const d3 = require('d3');
+
+import { throttle, debounce } from 'src/utilities'
 import methods from './methods'
 import { mapState } from 'vuex'
 import geometryHelpers from './../../store/modules/geometry/helpers.js'
 import modelHelpers from './../../store/modules/models/helpers.js'
 import applicationHelpers from './../../store/modules/application/helpers.js'
+import { ResizeEvents } from 'src/components/Resize'
 
 export default {
     name: 'grid',
     data() {
         return {
-            original_bounds: {
-                min_x: null,
-                min_y: null,
-                max_x: null,
-                max_y: null,
-                pxWidth: null,
-                pxHeight: null
-            },
+            // original_bounds: {
+            //     min_x: null,
+            //     min_y: null,
+            //     max_x: null,
+            //     max_y: null,
+            //     pxWidth: null,
+            //     pxHeight: null
+            // },
+            original_bounds: null,
             axis: {
                 x: null,
                 y: null,
@@ -50,59 +56,32 @@ export default {
         };
     },
     mounted() {
-        // initialize the y dimensions in RWU based on the aspect ratio of the grid on the screen
-        this.max_y = (this.$refs.grid.clientHeight / this.$refs.grid.clientWidth) * this.max_x;
-
-        this.original_bounds = {
-            min_x: this.min_x,
-            min_y: this.min_y,
-            max_x: this.max_x,
-            max_y: this.max_y,
-            pxWidth: this.$refs.grid.clientWidth,
-            pxHeight: this.$refs.grid.clientHeight
-        };
-
-        this.calcGrid();
-        this.drawPolygons();
-
-        // throttle mouse move
+        // throttle/debounce event handlers
         this.handleMouseMove = throttle(this.highlightSnapTarget,100);
+        this.renderGrid = debounce(this.renderGrid,5);
 
         // add event listeners
-        this.$refs.grid.addEventListener('reloadGrid', this.reloadGrid);
+        this.$refs.grid.addEventListener('reloadGrid', this.renderGrid);
         this.$refs.grid.addEventListener('click', this.gridClicked);
         this.$refs.grid.addEventListener('mousemove', this.handleMouseMove);
-        // recalculate the grid when the window resizes
-        // const _this = this;
-        // window.addEventListener('resize', () => {
-        //     _this.max_y = _this.original_bounds.max_y * (_this.$refs.grid.clientHeight / _this.original_bounds.pxHeight);
-        //     _this.max_x = _this.original_bounds.max_x * (_this.$refs.grid.clientWidth / _this.original_bounds.pxWidth);
-        //
-        //     _this.reloadGrid();
-        // });
 
-        // watch escape to cancel current drawing action
         window.addEventListener('keyup',this.escapeAction);
+        window.addEventListener('resize',this.renderGrid);
 
-        function throttle(func, wait) {
-            var start = Date.now();
+        ResizeEvents.$on('resize-resize',this.renderGrid);
 
-            return function(...args) {
-                let now = Date.now()
-
-                if (start + wait < now) {
-                    start = now;
-                    func.apply(this,args);
-                }
-            }
-        };
+        // render grid first time
+        this.renderGrid();
     },
     beforeDestroy () {
-        this.$refs.grid.removeEventListener('reloadGrid', this.reloadGrid);
+        this.$refs.grid.removeEventListener('reloadGrid', this.renderGrid);
         this.$refs.grid.removeEventListener('click', this.gridClicked);
         this.$refs.grid.removeEventListener('mousemove', this.handleMouseMove);
-        // window.removeEventListener('resize', this.resize());
+
         window.removeEventListener('keyup', this.escapeAction);
+        window.removeEventListener('resize', this.renderGrid);
+
+        ResizeEvents.$off('resize-resize',this.renderGrid)
     },
     computed: {
         ...mapState({
@@ -145,7 +124,6 @@ export default {
         currentStoryGeometry() {
             return this.$store.getters['application/currentStoryGeometry'];
         },
-
         previousStory () {
             const currentStoryNumber = this.$store.state.models.stories.findIndex(s => s.id === this.$store.state.application.currentSelections.story.id);
             if (currentStoryNumber > 0) {
@@ -198,7 +176,6 @@ export default {
             }
             return [];
         },
-
 
         /*
          * map all faces for the current story to polygon representations (sets of ordered points) for d3 to render

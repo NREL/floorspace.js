@@ -6,68 +6,87 @@ Redistribution and use in source and binary forms, with or without modification,
 (4) Other than as required in clauses (1) and (2), distributions in any form of modifications or other derivative works may not use the "OpenStudio" trademark, "OS", "os", or any other confusingly similar designation without specific prior written permission from Alliance for Sustainable Energy, LLC.
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 <template>
-    <div id="app">
-        <toolbar :class="{ 'disabled-component': tool === 'Map' }"></toolbar>
-        <resize-group :vertical="true">
-            <resize-group :horizontal="true" id="layout-main">
-                <resize id="layout-navigation" :resize-right="true" :resize-right-min="200">
-                    <navigation :class="{ 'disabled-component': tool === 'Map' }"></navigation>
-                </resize>
-                <main>
-                    <canvas-view></canvas-view>
-                    <grid-view></grid-view>
-                </main>
-                <!-- <inspector-view></inspector-view> -->
-            </resize-group>
-            <resize id="layout-library" :resize-top="true" :resize-top-min="100">
-                <library :class="{ 'disabled-component': tool === 'Map' }"></library>
-            </resize>
-        </resize-group>
+    <div>
+        <slot></slot>
     </div>
 </template>
 
 <script>
 
-// this import order is important, if the grid is loaded before the other elements or after the toolbar, it ends up warped
-import Navigation from './components/Navigation'
-import Grid from './components/Grid/Grid'
-import Canvas from './components/Canvas/Canvas'
-import Toolbar from './components/Toolbar'
-import Inspector from './components/Inspector'
-import Library from './components/Library'
-import { Resize, ResizeGroup } from './components/Resize'
-
-import { mapState } from 'vuex'
+import ResizeEvents from './ResizeEvents'
 
 export default {
-    name: 'app',
+    name: 'resizegroup',
+    props: ['vertical','horizontal'],
     data () {
         return {}
     },
-    beforeCreate () {
-        this.$store.dispatch('models/initStory');
+    mounted () {
+        ResizeEvents.$on('resize-resize',this.handleResize);
+    },
+    beforeDestroy () {
+        ResizeEvents.$off('resize-resize',this.handleResize);
     },
     methods: {
+        handleResize (e) {
+            if (this.vertical) {
+                var top;
 
-    },
-    computed: {
-        ...mapState({ tool: state => state.application.currentSelections.tool })
-    },
-    components: {
-        'grid-view': Grid,
-        'canvas-view': Canvas,
-        'inspector-view': Inspector,
-        'library': Library,
-        'navigation': Navigation,
-        'toolbar': Toolbar,
-        'resize': Resize,
-        'resize-group': ResizeGroup
+                for (let i=this.$el.children.length; i--; ) {
+                    let child = this.$el.children[i];
+
+                    if (~child.className.indexOf('resize')) {
+                        top = child.style.top.match(/\d+/);
+                        top = top && top[0];
+                        break;
+                    }
+                }
+
+                if (top) {
+                    for (let i=this.$el.children.length; i--; ) {
+                        let child = this.$el.children[i];
+
+                        if (~child.className.indexOf('resize')) {
+                            continue;
+                        }
+
+                        child.style.bottom = window.innerHeight - top + "px";
+                    }
+                }
+            }
+
+            if (this.horizontal) {
+                var width;
+
+                for (let i=this.$el.children.length; i--; ) {
+                    let child = this.$el.children[i];
+
+                    if (~child.className.indexOf('resize')) {
+                        width = child.style.width.match(/\d+/);
+                        width = width && width[0];
+                        break;
+                    }
+                }
+
+                if (width) {
+                    for (let i=this.$el.children.length; i--; ) {
+                        let child = this.$el.children[i];
+
+                        if (~child.className.indexOf('resize')) {
+                            continue;
+                        }
+
+                        child.style.left = width + "px";
+                    }
+                }
+            }
+        }
     }
 }
 </script>
 
-<style src="./scss/main.scss" lang="scss"></style>
+<style src="src/scss/main.scss" lang="scss"></style>
 <style lang="scss" scoped>
-@import "./scss/config";
+@import "src/scss/config";
 
 </style>
