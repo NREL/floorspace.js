@@ -397,6 +397,10 @@ export default {
         
         // polygon drag handler
         const drag = d3.drag()
+            .on('start', function (d) {
+                // remove text label when dragging
+                d3.select('#text-' + d.face_id).remove();
+            })
             .on('drag', function (d) {
                 if (_this.currentTool !== 'Select' || d.previous_story) { return; }
                 dx += d3.event.dx;
@@ -409,8 +413,8 @@ export default {
                 // when the drag is finished, update the face in the store with the total offset in RWU
                 this.$store.dispatch('geometry/moveFaceByOffset', {
                     face_id: d.face_id,
-                    dx: this.gridToRWU(dx, 'x'),
-                    dy: this.gridToRWU(dy, 'y')
+                    dx: this.gridToRWU(dx, 'x') - this.min_x,
+                    dy: this.gridToRWU(dy, 'y') - this.max_y // inverted y axis
                 });
             });
 
@@ -450,6 +454,7 @@ export default {
 
                 d3.select('#grid svg')
                     .append('text')
+                    .attr('id','text-' + poly.face_id)
                     .classed('polygon-text',true)
                     .attr('x',x)
                     .attr('y',y)
@@ -868,9 +873,9 @@ export default {
     */
     pxToGrid (px, axis) {
         if (axis === 'x') {
-            return this.scaleX(px);
+            return this.scaleX && this.scaleX(px);
         } else if (axis === 'y') {
-            return this.scaleY(px);
+            return this.scaleY && this.scaleY(px);
         }
     },
 
