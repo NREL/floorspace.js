@@ -206,7 +206,12 @@ export default {
 
 
         if (guidelineArea.length > 3) {
-            let areaPoints = guidelineArea.map(p => ({ ...p, X: p.x / this.transform.k, Y: p.y / this.transform.k })), // scale X,Y for correct area calc
+            let areaPoints = guidelineArea.map(p => {
+                    let x = this.gridToRWU(p.x,'x'),
+                        y = this.gridToRWU(p.y,'y');
+
+                    return { x, y, X: x, Y: y };
+                }),
                 { x, y, area } = this.polygonLabelPosition(areaPoints),
                 areaText = area ? area.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") + " m²" : "";
 
@@ -214,10 +219,6 @@ export default {
                 // either polygon has 0 area or something went wrong --> don't draw area text
                 return;
             }
-
-            // scale/translate label position
-            x = (x - this.transform.x) / this.transform.k;
-            y = (y - this.transform.y) / this.transform.k;
 
             // render unfinished area #
             svg.append('text')
@@ -248,7 +249,6 @@ export default {
             this.points = [];
         }
     },
-
     // ****************** SAVING FACES ****************** //
     /*
     * The origin of the polygon being drawn was clicked, create a polygon face from all points on the grid
@@ -397,6 +397,10 @@ export default {
         
         // polygon drag handler
         const drag = d3.drag()
+            .on('start', function (d) {
+                // remove text label when dragging
+                d3.select('#text-' + d.face_id).remove();
+            })
             .on('drag', function (d) {
                 if (_this.currentTool !== 'Select' || d.previous_story) { return; }
                 dx += d3.event.dx;
@@ -409,8 +413,8 @@ export default {
                 // when the drag is finished, update the face in the store with the total offset in RWU
                 this.$store.dispatch('geometry/moveFaceByOffset', {
                     face_id: d.face_id,
-                    dx: this.gridToRWU(dx, 'x'),
-                    dy: this.gridToRWU(dy, 'y')
+                    dx: this.gridToRWU(dx, 'x') - this.min_x,
+                    dy: this.gridToRWU(dy, 'y') - this.max_y // inverted y axis
                 });
             });
 
@@ -450,6 +454,7 @@ export default {
 
                 d3.select('#grid svg')
                     .append('text')
+                    .attr('id','text-' + poly.face_id)
                     .classed('polygon-text',true)
                     .attr('x',x)
                     .attr('y',y)
@@ -478,6 +483,8 @@ export default {
     * if the grid is inactive, returns the or the location of the point
     */
     findSnapTarget (gridPoint) {
+
+
         // translate grid point to real world units to check for snapping targets
         const rwuPoint = {
             x: this.gridToRWU(gridPoint.x, 'x'),
@@ -499,20 +506,15 @@ export default {
 
                 // spacing between ticks in grid units
                 xTickSpacing = this.rwuToGrid(this.spacing + this.min_x, 'x'),
-                yTickSpacing = this.rwuToGrid(this.spacing + this.min_y, 'y');
-
-            // // round point RWU coordinates to nearest gridline, adjust by grid offset, add 0.5 grid units to account for width of gridlines
-            // const snapTarget = {
-            //     type: 'gridpoint',
-            //     x: this.round(gridPoint.x, this.rwuToGrid(this.spacing + this.min_x, 'x')) + xOffset - 0.5,
-            //     y: this.round(gridPoint.y, this.rwuToGrid(this.spacing + this.min_y, 'y')) + yOffset - 0.5
-            // };
+                // yTickSpacing = this.rwuToGrid(this.spacing + this.min_y, 'y');
+                yTickSpacing = this.rwuToGrid(this.max_y - this.spacing, 'y'); // inverted y axis
 
             // round point RWU coordinates to nearest gridline, adjust by grid offset
             const snapTarget = {
                 type: 'gridpoint',
                 x: this.round(gridPoint.x, this.rwuToGrid(this.spacing + this.min_x, 'x')) + xOffset,
-                y: this.round(gridPoint.y, this.rwuToGrid(this.spacing + this.min_y, 'y')) + yOffset
+                // y: this.round(gridPoint.y, this.rwuToGrid(this.spacing + this.min_y, 'y')) + yOffset
+                y: this.round(gridPoint.y, this.rwuToGrid(this.max_y - this.spacing, 'y')) + yOffset // inverted y axis
             };
 
             // pick closest point
@@ -669,42 +671,70 @@ export default {
 		return result
     },
 
-    /*
-    * If the min_x, max_x, min_y, max_y are changed by some non zoom event (like window resize or model import)
-    * like a window resize or a data import adjust the zoom identity
-    */
-    reloadGrid (dx, dy, dz) {
-        d3.select('#grid svg')
-            .call(this.zoomBehavior.transform, () => {
-                // the zoom identity scale is calculated from original_bounds,
-                // so we can infer a new zoom identity by taking the ratio between the original x range and new x range
-                d3.zoomIdentity.k = (this.original_bounds.max_x - this.original_bounds.min_x) / (this.max_x - this.min_x);
-                d3.zoomIdentity.x = -this.min_x * d3.zoomIdentity.k;
-                d3.zoomIdentity.y = -this.min_y * d3.zoomIdentity.k;
+    // /*
+    // * If the min_x, max_x, min_y, max_y are changed by some non zoom event (like window resize or model import)
+    // * like a window resize or a data import adjust the zoom identity
+    // */
+    // reloadGrid (dx, dy, dz) {
+    //     d3.select('#grid svg')
+    //         .call(this.zoomBehavior.transform, () => {
+    //             // the zoom identity scale is calculated from original_bounds,
+    //             // so we can infer a new zoom identity by taking the ratio between the original x range and new x range
+    //             d3.zoomIdentity.k = (this.original_bounds.max_x - this.original_bounds.min_x) / (this.max_x - this.min_x);
+    //             d3.zoomIdentity.x = -this.min_x * d3.zoomIdentity.k;
+    //             d3.zoomIdentity.y = -this.min_y * d3.zoomIdentity.k;
 
-                d3.select('#grid svg').call(this.zoomBehavior.transform, d3.zoomIdentity);
-                return d3.zoomIdentity;
-            });
-    },
+    //             d3.select('#grid svg').call(this.zoomBehavior.transform, d3.zoomIdentity);
+    //             return d3.zoomIdentity;
+    //         });
+    // },
 
     // ****************** GRID ****************** //
-    calcGrid () {
+    renderGrid () {
+        const w = this.$refs.grid.clientWidth,
+            h = this.$refs.grid.clientHeight;
+
+        if (this.original_bounds) {
+            this.max_x -= this.min_x;
+            this.min_x = 0;
+
+            this.max_y -= this.min_y;
+            this.min_y = 0;
+        }
+
+        this.original_bounds = {
+            min_x: this.min_x,
+            min_y: this.min_y,
+            max_x: this.max_x,
+            max_y: this.max_y,
+            pxWidth: w,
+            pxHeight: h
+        };
+
+        // initialize the y dimensions in RWU based on the aspect ratio of the grid on the screen
+        this.max_y = (h / w) * this.max_x;
+
         // set viewbox on svg in rwu so drawing coordinates are in rwu and not pixels
         this.$refs.grid.setAttribute('viewBox', `0 0 ${this.max_x - this.min_x} ${this.max_y - this.min_y}`);
 
         // scaleX amd scaleY are used during drawing to translate from px to RWU given the current grid dimensions in rwu
-        // these are initialized here and never changed
         this.$store.dispatch('application/setScaleX', {
             scaleX: d3.scaleLinear()
-                .domain([0, this.$refs.grid.clientWidth])
+                .domain([0, w])
                 .range([this.min_x, this.max_x])
         });
+
         this.$store.dispatch('application/setScaleY', {
             scaleY: d3.scaleLinear()
-                .domain([0, this.$refs.grid.clientHeight])
+                .domain([0, h])
                 .range([this.min_y, this.max_y])
         });
 
+        this.calcGrid();
+        this.centerGrid();
+        this.drawPolygons();
+    },
+    calcGrid () {
         const svg = d3.select('#grid svg'),
             // rwu dimensions (coordinates used within grid)
             rwuHeight = this.max_y - this.min_y,
@@ -715,8 +745,17 @@ export default {
                 .domain([this.min_x, this.max_x])
                 .range([this.min_x, this.max_x]),
             zoomScaleY = d3.scaleLinear()
-                .domain([this.min_y, this.max_y])
-                .range([this.min_y, this.max_y]);
+                // .domain([this.min_y, this.max_y])
+                .domain([this.max_y,this.min_y]) // inverted y axis
+                .range([this.min_y, this.max_y]),
+
+            // determine stroke width to ensure consistency when resizing/zooming
+            existingAxis = svg.select('.axis.axis--x'),
+            strokeWidth = existingAxis.empty() ? 1 : existingAxis.attr('stroke-width') / this.transform.k;
+
+        // console.log(strokeWidth);
+
+        svg.selectAll('*').remove();
 
         // generator functions for axes
         this.axis_generator.x = d3.axisBottom(zoomScaleX)
@@ -732,14 +771,15 @@ export default {
 
         this.axis.x = svg.append('g')
             .attr('class', 'axis axis--x')
-            .attr('stroke-width', this.scaleY(1))
-            .style('font-size', this.scaleY(1) + 'em')
+            .attr('stroke-width', strokeWidth)
+            .attr('font-size', '1em')
             .style('display', this.gridVisible ? 'inline' : 'none')
             .call(this.axis_generator.x);
+
         this.axis.y = svg.append('g')
             .attr('class', 'axis axis--y')
-            .style('font-size', this.scaleY(1) + 'em')
-            .attr('stroke-width', this.scaleX(1))
+            .attr('stroke-width', strokeWidth)
+            .attr('font-size', '1em')
             .style('display', this.gridVisible ? 'inline' : 'none')
             .call(this.axis_generator.y);
 
@@ -766,7 +806,8 @@ export default {
                     newScaleY = d3.event.transform.rescaleY(zoomScaleY);
 
                 [this.min_x, this.max_x] = newScaleX.domain();
-                [this.min_y, this.max_y] = newScaleY.domain();
+                // [this.min_y, this.max_y] = newScaleY.domain();
+                [this.max_y, this.min_y] = newScaleY.domain(); // inverted y axis
 
                 const scaledRwuHeight = this.max_y - this.min_y,
                     scaledRwuWidth = this.max_x - this.min_x;
@@ -787,11 +828,11 @@ export default {
             });
 
         svg.call(this.zoomBehavior);
-        this.centerGrid();
     },
     centerGrid () {
         const x = this.min_x + (this.max_x - this.min_x)/2,
-            y = this.min_y + (this.max_y - this.min_y)/2;
+            // y = this.min_y + (this.max_y - this.min_y)/2;
+            y = this.min_y - (this.max_y - this.min_y)/2; // inverted y axis
 
         d3.select('#grid svg').call(this.zoomBehavior.transform, d3.zoomIdentity.translate(x, y));
     },
@@ -820,7 +861,8 @@ export default {
             return currentScaleX(px);
         } else if (axis === 'y') {
             const currentScaleY = d3.scaleLinear()
-                   .domain([0, this.$refs.grid.clientHeight])
+                   // .domain([0, this.$refs.grid.clientHeight])
+                   .domain([this.$refs.grid.clientHeight,0]) // inverted y axis
                    .range([this.min_y, this.max_y]);
             return currentScaleY(px);
         }
@@ -831,9 +873,9 @@ export default {
     */
     pxToGrid (px, axis) {
         if (axis === 'x') {
-            return this.scaleX(px);
+            return this.scaleX && this.scaleX(px);
         } else if (axis === 'y') {
-            return this.scaleY(px);
+            return this.scaleY && this.scaleY(px);
         }
     },
 
@@ -849,7 +891,8 @@ export default {
             return this.pxToGrid(pxValue, axis);
         } else if (axis === 'y') {
             const currentScaleY = d3.scaleLinear()
-                   .domain([0, this.$refs.grid.clientHeight])
+                   // .domain([0, this.$refs.grid.clientHeight])
+                   .domain([this.$refs.grid.clientHeight,0]) // inverted y axis
                    .range([this.min_y, this.max_y]),
                 pxValue = currentScaleY.invert(rwu);
             return this.pxToGrid(pxValue, axis);
@@ -869,7 +912,8 @@ export default {
             result = currentScaleX(pxValue);
         } else if (axis === 'y') {
             const currentScaleY = d3.scaleLinear()
-                   .domain([0, this.$refs.grid.clientHeight])
+                   // .domain([0, this.$refs.grid.clientHeight])
+                   .domain([this.$refs.grid.clientHeight,0]) // inverted y axis
                    .range([this.min_y, this.max_y]),
                 pxValue = this.scaleY.invert(gridValue);
             result = currentScaleY(pxValue);

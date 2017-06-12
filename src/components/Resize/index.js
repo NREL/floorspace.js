@@ -6,63 +6,12 @@
 // (4) Other than as required in clauses (1) and (2), distributions in any form of modifications or other derivative works may not use the "OpenStudio" trademark, "OS", "os", or any other confusingly similar designation without specific prior written permission from Alliance for Sustainable Energy, LLC.
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-@import "./../config";
+import ResizeEvents from './ResizeEvents'
+import Resize from './Resize'
+import ResizeGroup from './ResizeGroup'
 
-// styling for svg elements created by d3
-// Vue's inline template styling will not work with dynamically created markup
-#grid svg {
-    * {
-        // prevent glitchy points caused by moving mouse over overlapping svg paths
-        pointer-events: none;
-    }
-    // points
-    ellipse:not(.origin) {
-        fill: $gray-light;
-        stroke: $gray-light;
-        &.gridpoint {}
-        &.highlight {
-            stroke: red;
-            fill: red;
-        }
-    }
-    ellipse.origin {
-        stroke: $gray-light;
-    }
-    // gridlines
-    line.horizontal, line.vertical {
-        stroke: red;
-        opacity: .25;
-    }
-    line.highlight {
-        stroke: yellow;
-        z-index: 10;
-    }
-
-    // shapes
-    polygon, rect, path {
-        fill-opacity: .9;
-        z-index: 3;
-        pointer-events: all;
-        stroke: $gray-light;
-        &.current {
-            stroke: $secondary;
-            stroke-width: 2px;
-        }
-        &.previousStory {
-            z-index: -1;
-            fill-opacity: 0.3;
-
-        }
-    }
-    rect.view {
-      fill-opacity: 0;
-    }
-    .axis line {
-      stroke-opacity: 0.3;
-      shape-rendering: crispEdges;
-      stroke: $gray-medium;
-    }
-    // .tick {
-    //     stroke-width:1px;
-    // }
-}
+export {
+  ResizeEvents,
+  Resize,
+  ResizeGroup
+};

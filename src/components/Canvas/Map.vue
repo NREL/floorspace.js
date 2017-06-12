@@ -34,6 +34,7 @@ const ol = require('openlayers'),
 
 import { mapState } from 'vuex'
 import MapModal from 'src/components/Modals/MapModal'
+import { ResizeEvents } from 'src/components/Resize'
 
 export default {
     name: 'map',
@@ -46,6 +47,8 @@ export default {
         };
     },
     mounted () {
+        ResizeEvents.$on('resize-resize',this.handleResize);
+
         if (window.google) {
             this.loadAutocomplete();
         } else {
@@ -60,7 +63,14 @@ export default {
 
         this.loadMap();
     },
+    beforeDestroy () {
+        ResizeEvents.$off('resize-resize',this.handleResize);
+    },
     methods: {
+        handleResize() {
+            // console.info("MAP RESIZE");
+            this.map.updateSize();
+        },
         loadMap() {
             const mapNode = document.getElementById("map");
 
@@ -95,8 +105,12 @@ export default {
 
             res = res * latitudeModifier;
 
-            center[0] += (deltaX * cosine + deltaY * sine) * latitudeModifier;
-            center[1] -= (deltaY * cosine - deltaX * sine) * latitudeModifier; // ol origin is bottom left
+            // center[0] += (deltaX * cosine + deltaY * sine) * latitudeModifier;
+            // center[1] -= (deltaY * cosine - deltaX * sine) * latitudeModifier; // ol origin is bottom left
+
+            // inverted y axis
+            center[0] += (deltaX * cosine - deltaY * sine) * latitudeModifier;
+            center[1] += (deltaY * cosine + deltaX * sine) * latitudeModifier; // ol origin is bottom left
 
             this.view.setResolution(res);
             this.view.setCenter(center);
@@ -201,6 +215,11 @@ export default {
     position: relative;
     height: 100%;
     width: 100%;
+
+    #map {
+        height: 100%;
+        min-width: 100%;
+    }
 }
 
 #autocomplete {
@@ -244,4 +263,5 @@ export default {
     height: 100%;
     pointer-events: none;
 }
+
 </style>
