@@ -18,6 +18,7 @@ const Konva = require('konva'),
 import { mapState } from 'vuex'
 import applicationHelpers from './../../store/modules/application/helpers.js'
 import modelHelpers from './../../store/modules/models/helpers.js'
+import { ResizeEvents } from 'src/components/Resize'
 
 export default {
     name: 'images',
@@ -29,10 +30,12 @@ export default {
         };
     },
     mounted () {
+        ResizeEvents.$on('resize-resize',this.renderImages);
         window.addEventListener('resize', this.renderImages);
         this.renderImages();
     },
     beforeDestroy () {
+        ResizeEvents.$on('resize-resize',this.renderImages);
         window.removeEventListener('resize', this.renderImages);
     },
     methods: {
@@ -352,29 +355,35 @@ export default {
                 // This is running before scales are set up, which means we don't need to reset anyway (and we can't, because there's no scale info yet)
                 return;
             }
-            const originalResFt = (this.scaleX.range()[1] - this.scaleX.range()[0])/(this.scaleX.domain()[1] - this.scaleX.domain()[0]);
-            // const mPerFt = ol.proj.METERS_PER_UNIT['us-ft']; // m/ft
-            const resFt = (this.view.max_x - this.view.min_x)/this.$refs.images.clientWidth; // ft/px
-            // const resM = resFt*mPerFt; // m/px
-            const scale = originalResFt/resFt;
 
-            // console.log(originalResFt);
+            const originalRes = (this.scaleX.range()[1] - this.scaleX.range()[0])/(this.scaleX.domain()[1] - this.scaleX.domain()[0]),
+                res = (this.view.max_x - this.view.min_x)/this.$refs.images.clientWidth,
+                scale = originalRes/res;
 
             if (this.stage) {
-                const panX = this.view.min_x/resFt; // px
-                const panY = this.view.min_y/resFt; // px
+                const x = this.rwuToPx(0,'x'),
+                    y = this.rwuToPx(0,'y');
 
-                this.stage.scale({
-                        x: scale,
-                        y: scale
-                    })
-                    .position({
-                        x: -panX,
-                        y: -panY
-                    })
+                this.stage.scale({ x: scale, y: scale })
+                    .position({ x, y })
                     .draw();
             }
-        }
+        },
+        rwuToPx (rwu, axis) {
+            const { clientWidth: w, clientHeight: h } = this.$refs.images;
+
+            if (axis === 'x') {
+                return d3.scaleLinear()
+                    .domain([0, w])
+                    .range([this.view.min_x, this.view.max_x])
+                    .invert(rwu);
+            } else if (axis === 'y') {
+                return d3.scaleLinear()
+                    .domain([h, 0]) // inverted y axis
+                    .range([this.view.min_y, this.view.max_y])
+                    .invert(rwu);
+            }
+        },
     },
     computed: {
         ...mapState({

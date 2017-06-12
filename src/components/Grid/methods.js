@@ -206,7 +206,12 @@ export default {
 
 
         if (guidelineArea.length > 3) {
-            let areaPoints = guidelineArea.map(p => ({ ...p, X: p.x / this.transform.k, Y: p.y / this.transform.k })), // scale X,Y for correct area calc
+            let areaPoints = guidelineArea.map(p => {
+                    let x = this.gridToRWU(p.x,'x'),
+                        y = this.gridToRWU(p.y,'y');
+
+                    return { x, y, X: x, Y: y };
+                }),
                 { x, y, area } = this.polygonLabelPosition(areaPoints),
                 areaText = area ? area.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") + " m²" : "";
 
@@ -214,10 +219,6 @@ export default {
                 // either polygon has 0 area or something went wrong --> don't draw area text
                 return;
             }
-
-            // scale/translate label position
-            x = (x - this.transform.x) / this.transform.k;
-            y = (y - this.transform.y) / this.transform.k;
 
             // render unfinished area #
             svg.append('text')
@@ -477,6 +478,8 @@ export default {
     * if the grid is inactive, returns the or the location of the point
     */
     findSnapTarget (gridPoint) {
+
+
         // translate grid point to real world units to check for snapping targets
         const rwuPoint = {
             x: this.gridToRWU(gridPoint.x, 'x'),
@@ -498,20 +501,15 @@ export default {
 
                 // spacing between ticks in grid units
                 xTickSpacing = this.rwuToGrid(this.spacing + this.min_x, 'x'),
-                yTickSpacing = this.rwuToGrid(this.spacing + this.min_y, 'y');
-
-            // // round point RWU coordinates to nearest gridline, adjust by grid offset, add 0.5 grid units to account for width of gridlines
-            // const snapTarget = {
-            //     type: 'gridpoint',
-            //     x: this.round(gridPoint.x, this.rwuToGrid(this.spacing + this.min_x, 'x')) + xOffset - 0.5,
-            //     y: this.round(gridPoint.y, this.rwuToGrid(this.spacing + this.min_y, 'y')) + yOffset - 0.5
-            // };
+                // yTickSpacing = this.rwuToGrid(this.spacing + this.min_y, 'y');
+                yTickSpacing = this.rwuToGrid(this.max_y - this.spacing, 'y'); // inverted y axis
 
             // round point RWU coordinates to nearest gridline, adjust by grid offset
             const snapTarget = {
                 type: 'gridpoint',
                 x: this.round(gridPoint.x, this.rwuToGrid(this.spacing + this.min_x, 'x')) + xOffset,
-                y: this.round(gridPoint.y, this.rwuToGrid(this.spacing + this.min_y, 'y')) + yOffset
+                // y: this.round(gridPoint.y, this.rwuToGrid(this.spacing + this.min_y, 'y')) + yOffset
+                y: this.round(gridPoint.y, this.rwuToGrid(this.max_y - this.spacing, 'y')) + yOffset // inverted y axis
             };
 
             // pick closest point
@@ -688,8 +686,6 @@ export default {
 
     // ****************** GRID ****************** //
     renderGrid () {
-        console.log("render");
-
         const w = this.$refs.grid.clientWidth,
             h = this.$refs.grid.clientHeight;
 
@@ -744,7 +740,8 @@ export default {
                 .domain([this.min_x, this.max_x])
                 .range([this.min_x, this.max_x]),
             zoomScaleY = d3.scaleLinear()
-                .domain([this.min_y, this.max_y])
+                // .domain([this.min_y, this.max_y])
+                .domain([this.max_y,this.min_y]) // inverted y axis
                 .range([this.min_y, this.max_y]),
 
             // determine stroke width to ensure consistency when resizing/zooming
@@ -804,7 +801,8 @@ export default {
                     newScaleY = d3.event.transform.rescaleY(zoomScaleY);
 
                 [this.min_x, this.max_x] = newScaleX.domain();
-                [this.min_y, this.max_y] = newScaleY.domain();
+                // [this.min_y, this.max_y] = newScaleY.domain();
+                [this.max_y, this.min_y] = newScaleY.domain(); // inverted y axis
 
                 const scaledRwuHeight = this.max_y - this.min_y,
                     scaledRwuWidth = this.max_x - this.min_x;
@@ -828,7 +826,8 @@ export default {
     },
     centerGrid () {
         const x = this.min_x + (this.max_x - this.min_x)/2,
-            y = this.min_y + (this.max_y - this.min_y)/2;
+            // y = this.min_y + (this.max_y - this.min_y)/2;
+            y = this.min_y - (this.max_y - this.min_y)/2; // inverted y axis
 
         d3.select('#grid svg').call(this.zoomBehavior.transform, d3.zoomIdentity.translate(x, y));
     },
@@ -857,7 +856,8 @@ export default {
             return currentScaleX(px);
         } else if (axis === 'y') {
             const currentScaleY = d3.scaleLinear()
-                   .domain([0, this.$refs.grid.clientHeight])
+                   // .domain([0, this.$refs.grid.clientHeight])
+                   .domain([this.$refs.grid.clientHeight,0]) // inverted y axis
                    .range([this.min_y, this.max_y]);
             return currentScaleY(px);
         }
@@ -886,7 +886,8 @@ export default {
             return this.pxToGrid(pxValue, axis);
         } else if (axis === 'y') {
             const currentScaleY = d3.scaleLinear()
-                   .domain([0, this.$refs.grid.clientHeight])
+                   // .domain([0, this.$refs.grid.clientHeight])
+                   .domain([this.$refs.grid.clientHeight,0]) // inverted y axis
                    .range([this.min_y, this.max_y]),
                 pxValue = currentScaleY.invert(rwu);
             return this.pxToGrid(pxValue, axis);
@@ -906,7 +907,8 @@ export default {
             result = currentScaleX(pxValue);
         } else if (axis === 'y') {
             const currentScaleY = d3.scaleLinear()
-                   .domain([0, this.$refs.grid.clientHeight])
+                   // .domain([0, this.$refs.grid.clientHeight])
+                   .domain([this.$refs.grid.clientHeight,0]) // inverted y axis
                    .range([this.min_y, this.max_y]),
                 pxValue = this.scaleY.invert(gridValue);
             result = currentScaleY(pxValue);

@@ -105,8 +105,12 @@ export default {
 
             res = res * latitudeModifier;
 
-            center[0] += (deltaX * cosine + deltaY * sine) * latitudeModifier;
-            center[1] -= (deltaY * cosine - deltaX * sine) * latitudeModifier; // ol origin is bottom left
+            // center[0] += (deltaX * cosine + deltaY * sine) * latitudeModifier;
+            // center[1] -= (deltaY * cosine - deltaX * sine) * latitudeModifier; // ol origin is bottom left
+
+            // inverted y axis
+            center[0] += (deltaX * cosine - deltaY * sine) * latitudeModifier;
+            center[1] += (deltaY * cosine + deltaX * sine) * latitudeModifier; // ol origin is bottom left
 
             this.view.setResolution(res);
             this.view.setCenter(center);
