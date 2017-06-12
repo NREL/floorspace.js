@@ -1,291 +1,285 @@
-import factory from './../factory.js'
+import factory from './../factory'
 import geometryHelpers from './../helpers'
 import modelHelpers from './../../models/helpers'
 
 /*
-* create a face and associated edges and vertices from an array of points
-* associate the face with the space or shading included in the payload
-*/
-export default function createFaceFromPoints (context, payload) {
-	const { model_id, points } = payload;
+ * create a face and associated edges and vertices from an array of points
+ * associate the face with the space or shading included in the payload
+ */
+export default function createFaceFromPoints(context, payload) {
+    const {
+        model_id,
+        points
+    } = payload;
 
-	// lookup target model and type for face assignment
+    // lookup target model and type for face assignment
     const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'],
         target = modelHelpers.libraryObjectWithId(context.rootState.models, model_id);
 
-    // validation - a face must have at least 3 vertices and area
-    if (points.length < 3 || !geometryHelpers.areaOfSelection(points)) { return; }
+    // if the target already has an existing face, use the union of the new and existing faces
+    const existingFace = target.face_id ? geometryHelpers.faceForId(target.face_id, currentStoryGeometry) : null;
+    var facePoints;
 
-	// if the target already has an existing face, use the union of the new and existing faces
-	const existingFace = target.face_id ? geometryHelpers.faceForId(target.face_id, currentStoryGeometry) : null;
-	var facePoints;
-	if (existingFace) {
-	    const existingFaceVertices = geometryHelpers.verticesForFaceId(existingFace.id, currentStoryGeometry);
-			facePoints = geometryHelpers.setOperation('union', existingFaceVertices, points);
-		if (!facePoints) { return; }
-	} else { facePoints = points; }
+    if (existingFace) {
+        const existingFaceVertices = geometryHelpers.verticesForFaceId(existingFace.id, currentStoryGeometry);
+        facePoints = geometryHelpers.setOperation('union', existingFaceVertices, points);
+        if (!facePoints) {
+            return;
+        }
+    } else {
+        facePoints = points;
+    }
+
+    const faceGeometry = validateFaceGeometry(facePoints, context);
+    if (!faceGeometry.success) {
+        console.error(faceGeometry.error);
+        return;
+    }
 
     // prevent overlapping faces by erasing existing geometry covered by the points defining the new face
     if (!eraseSelection(facePoints, context)) { return; }
 
-    // create and save vertices and edges to be referenced by the face
-    const face = createFaceGeometry(facePoints, currentStoryGeometry, context);
+    // save the face and its descendent geometry
+    storeFace(faceGeometry, target, context);
 
-    // validate and save the face, destroy saved vertices and edges and abort face creation if validation fails
-    if (!validateAndSaveFace(face, currentStoryGeometry, target, context)) { return; }
-
-    // split edges where vertices touch them
-    splitEdges(currentStoryGeometry, context);
-    connectEdges(currentStoryGeometry, context);
-};
+	// split edges where vertices touch them
+    splitEdges(context);
+    connectEdges(context);
+}
 
 //////////////////////// HELPERS //////////////////////////////
 
 /*
-* Erase the selection defined by a set of points on all faces on the current story
-* used by the eraser tool and by the createFaceFromPoints action (to prevent overlapping faces)
-*/
-export function eraseSelection (points, context) {
-	const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'];
+ * Erase the selection defined by a set of points on all faces on the current story
+ * used by the eraser tool and by the createFaceFromPoints action (to prevent overlapping faces)
+ * returns false if the erase operation splits an existing face
+ */
+export function eraseSelection(points, context) {
+    const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'];
 
-	// validation - a selection must have at least 3 vertices and area
-	if (points.length < 3 || !geometryHelpers.areaOfSelection(points)) { return; }
+    // validation - a selection must have at least 3 vertices and area
+    if (points.length < 3 || !geometryHelpers.areaOfSelection(points)) {
+        return;
+    }
 
-	/*
-	* find all existing faces that have an intersection with the selection being erased
-	* destroy faces intersecting the eraser selection and recreate them
-	* from the difference between their original area and the eraser selection
-	*/
-	const intersectedFaces = currentStoryGeometry.faces.filter((face) => {
-		const faceVertices = geometryHelpers.verticesForFaceId(face.id, currentStoryGeometry),
-			intersection = geometryHelpers.setOperation('intersection', faceVertices, points);
-		return intersection.length;
-	});
+    /*
+     * find all existing faces that have an intersection with the selection being erased
+     * destroy faces intersecting the eraser selection and recreate them
+     * from the difference between their original area and the eraser selection
+     */
+    const intersectedFaces = currentStoryGeometry.faces.filter((face) => {
+        const faceVertices = geometryHelpers.verticesForFaceId(face.id, currentStoryGeometry),
+            intersection = geometryHelpers.setOperation('intersection', faceVertices, points);
+        return intersection.length;
+    });
 
-	// check that the operation is valid
-	var validOperation = true;
-	intersectedFaces.forEach((existingFace) => {
-		const existingFaceVertices = geometryHelpers.verticesForFaceId(existingFace.id, currentStoryGeometry);
-		if (!geometryHelpers.setOperation('difference', existingFaceVertices, points)) { validOperation = false; }
-	});
+    // check that the operation is valid
+    var validOperation = true;
+    intersectedFaces.forEach((existingFace) => {
+        const existingFaceVertices = geometryHelpers.verticesForFaceId(existingFace.id, currentStoryGeometry);
+        if (!geometryHelpers.setOperation('difference', existingFaceVertices, points)) {
+            validOperation = false;
+        }
+    });
 
-	if (validOperation) {
-		/*
-		* destroy faces intersecting the eraser selection and recreate them
-		* from the difference between their original area and the eraser selection
-		*/
-		intersectedFaces.forEach((existingFace) => {
-			const existingFaceVertices = geometryHelpers.verticesForFaceId(existingFace.id, currentStoryGeometry),
-				affectedModel = modelHelpers.modelForFace(context.rootState.models, existingFace.id);
+    if (validOperation) {
+        /*
+         * destroy faces intersecting the eraser selection and recreate them
+         * from the difference between their original area and the eraser selection
+         */
+        intersectedFaces.forEach((existingFace) => {
+            const existingFaceVertices = geometryHelpers.verticesForFaceId(existingFace.id, currentStoryGeometry),
+                affectedModel = modelHelpers.modelForFace(context.rootState.models, existingFace.id);
 
-			// create new face by subtracting overlap (intersection) from the existing face's original area
-			const differenceOfFaces = geometryHelpers.setOperation('difference', existingFaceVertices, points);
-			// destroy existing face
-			context.dispatch(affectedModel.type === 'space' ? 'models/updateSpaceWithData' : 'models/updateShadingWithData', {
-				[affectedModel.type]: affectedModel,
-				face_id: null
-			}, { root: true });
+            // create new face by subtracting overlap (intersection) from the existing face's original area
+            const differenceOfFaces = geometryHelpers.setOperation('difference', existingFaceVertices, points);
+            // destroy existing face
+            context.dispatch(affectedModel.type === 'space' ? 'models/updateSpaceWithData' : 'models/updateShadingWithData', {
+                [affectedModel.type]: affectedModel,
+                face_id: null
+            }, {
+                root: true
+            });
 
-			context.dispatch('destroyFaceAndDescendents', {
-				geometry_id: currentStoryGeometry.id,
-				face: existingFace
-			});
+            context.dispatch('destroyFaceAndDescendents', {
+                geometry_id: currentStoryGeometry.id,
+                face: existingFace
+            });
 
-			context.dispatch('createFaceFromPoints', {
-				model_id: affectedModel.id,
-				points: differenceOfFaces
-			});
-		});
-		return true;
-	} else {
-		return false;
-	}
-};
+            context.dispatch('createFaceFromPoints', {
+                model_id: affectedModel.id,
+                points: differenceOfFaces
+            });
+        });
+        return true;
+    } else {
+        return false;
+    }
+}
 
 /*
-* instantiate vertices, edges, and face for the set of points defining the face being created
-* handle snapped vertiecs - points with an id property
-* and shared edges - edges referencing two vertices with matching ids
-* persist vertices and edges to datastore so that validation on the unsaved face can be done, they will be removed from the store if validation fails
+* saves the validated face geometry (edges and vertices) to the datastore
+* skips shared edges and vertices since they are already stored
+* creates and saves a face with edgeRefs, updates the target space or shading in the datastore
 */
-function createFaceGeometry (points, currentStoryGeometry, context) {
-    // build an array of vertices for the face being created, setting the same ID for points with the same coordinates to prevent overlapping vertices
-    const faceVertices = points.map((point) => {
-        // if a point was snapped to an existing vertex during drawing, it will have a vertex id
-        var vertex = point.id && geometryHelpers.vertexForId(point.id, currentStoryGeometry);
-        // reuse the existing vertex or create a new one
-        if (!vertex) {
-            vertex = new factory.Vertex(point.x, point.y);
-            // merge vertices with the same coordinates
-            points.filter(p => p !== point && p.x === vertex.x && p.y === vertex.y)
-                .forEach((mergePoint) => {
-					debugger
-					mergePoint.id = vertex.id;
+function storeFace(faceGeometry, target, context) {
+    const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'];
 
-				 });
-
+    faceGeometry.vertices.forEach((vertex) => {
+        if (!geometryHelpers.vertexForId(vertex.id, currentStoryGeometry)) {
             context.commit('createVertex', {
                 vertex: vertex,
                 geometry_id: currentStoryGeometry.id
             });
         }
-        return vertex;
     });
 
-    // build an array of edges for the face based on the set of vertices
-    const faceEdges = faceVertices.map((v1, i) => {
-        // v2 is the first vertex in the array when the face is being closed
-        const v2 = i + 1 < faceVertices.length ? faceVertices[i + 1] : faceVertices[0];
-        // check if an edge referencing the two vertices already exists
-        var sharedEdge = currentStoryGeometry.edges.find((e) => {
-            return (e.v1 === v1.id && e.v2 === v2.id) || (e.v2 === v1.id && e.v1 === v2.id);
-        });
+    const edgeRefs = faceGeometry.edges.map((edge) => {
+        var ref = {
+            edge_id: edge.id,
+            reverse: !!edge.reverse
+        };
+        delete edge.reverse;
+        return ref;
+    })
+    const face = new factory.Face(edgeRefs);
 
-        if (sharedEdge) {
-            // if a shared edge exists, check if its direction matches the edge direction required for the face being created
-            sharedEdge = JSON.parse(JSON.stringify(sharedEdge));
-            sharedEdge.reverse = (sharedEdge.v1 !== v1.id);
-            return sharedEdge;
-        } else {
-            // create and store a new edge with the vertices
-            const edge = new factory.Edge(v1.id, v2.id);
+    faceGeometry.edges.forEach((edge) => {
+        if (!geometryHelpers.edgeForId(edge.id, currentStoryGeometry)) {
             context.commit('createEdge', {
                 edge: edge,
                 geometry_id: currentStoryGeometry.id
             });
-            return edge;
         }
     });
 
-    // create a new face object with references to the edges
-    const face = new factory.Face(faceEdges.map(e => ({
-        edge_id: e.id,
-        reverse: !!e.reverse
-    })));
-
-    // return these, they will be used during validation
-    return face;
-}
-
-function validatePoints (facePoints, currentStoryGeometry, context) {
-	// loop through all new points, merge with existing points if they have the same coordinates
-	// build an array of vertices for the face being created, setting the same ID for points with the same coordinates to prevent overlapping vertices
-	var xRange = context.rootState.project.view.max_x - context.rootState.project.view.min_x;
-	const faceVertices = points.map((point) => {
-        // if a point was snapped to an existing vertex during drawing, it will have a vertex id
-        var vertex = point.id && geometryHelpers.vertexForId(point.id, currentStoryGeometry);
-		if (vertex) {
-			// TODO: is this ever being reached?
-			debugger }
-		return geometryHelpers.vertexForCoordinates(point.id, xRange, currentStoryGeometry) || new factory.Vertex(point.x, point.y);
-
+    context.dispatch(target.type === 'space' ? 'models/updateSpaceWithData' : 'models/updateShadingWithData', {
+        [target.type]: target,
+        face_id: face.id
+    }, {
+        root: true
     });
 
-	// create edges connecting each vertex in order
-	const faceEdges = faceVertices.map((v1, i) => {
+    context.commit('createFace', {
+        face: face,
+        geometry_id: currentStoryGeometry.id
+    });
+}
+
+/*
+ * Given a set of points, creates vertices and edges for the face defined by the points
+ * validates the face geometry for self intersection
+ * returns object with success boolean and face geometry or error message depending on validation results
+ */
+function validateFaceGeometry(points, context) {
+	const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'];
+    var error = false;
+
+    // build an array of vertices for the face being created
+    var xRange = context.rootState.project.view.max_x - context.rootState.project.view.min_x;
+    const faceVertices = points.map((point) => {
+        // if a point was snapped to an existing vertex during drawing, it will have a vertex id
+        var vertex = point.id && geometryHelpers.vertexForId(point.id, currentStoryGeometry);
+        if (vertex) {
+            // TODO: is this ever being reached?
+            debugger
+        }
+        // if a vertex already exists at a given location, reuse it
+        return geometryHelpers.vertexForCoordinates(point, xRange, currentStoryGeometry) || new factory.Vertex(point.x, point.y);
+    });
+
+    // create edges connecting each vertex in order
+    const faceEdges = faceVertices.map((v1, i) => {
         // v2 is the first vertex in the array when the face is being closed
         const v2 = i + 1 < faceVertices.length ? faceVertices[i + 1] : faceVertices[0];
         // check if an edge referencing these two vertices already exists
         var sharedEdge = currentStoryGeometry.edges.find((e) => {
             return (e.v1 === v1.id && e.v2 === v2.id) ||
-				(e.v2 === v1.id && e.v1 === v2.id);
+                (e.v2 === v1.id && e.v1 === v2.id);
         });
 
+        // if a shared edge exists, check if its direction matches the edge direction required for the face being created
         if (sharedEdge) {
-            // if a shared edge exists, check if its direction matches the edge direction required for the face being created
             return {
-				...sharedEdge,
-	            reverse: sharedEdge.v1 !== v1.id
-			};
+                ...sharedEdge,
+                // this property will be used (then deleted) when we create and save the face with edgeRefs
+                reverse: sharedEdge.v1 !== v1.id
+            };
         } else {
             // create and store a new edge with the vertices
             return new factory.Edge(v1.id, v2.id);
         }
     });
 
-	// check for duplicate vertices - these will not be considered splitting vertices bc they are endpoints
-	// loop through face edges and validate against splittingvertices or intersecting edges
+    // check for duplicate vertices - these will not be considered splitting vertices bc they are endpoints
+    faceVertices.some((vertex) => {
+        if (faceVertices.filter(v => (v.x === vertex.x && v.y === vertex.y))
+            .length >= 2) {
+            error = `Duplicate vertex at (${vertex.x}, ${vertex.y})`;
+            return true;
+        }
+    });
+    if (error) {
+        return error;
+    }
 
+    // loop through face edges and validate against splittingvertices or intersecting edges
+    faceEdges.some((e1) => {
+        const e1v1 = faceVertices.find(v => v.id === e1.v1),
+            e1v2 = faceVertices.find(v => v.id === e1.v2);
+
+        // check for vertices splitting an edge on the same face
+        const splittingVertices = faceVertices.filter((vertex) => {
+            // don't check if the endpoints of an edge are splitting that edge
+            if ((e1v1.id !== vertex.id && e1v2.id !== vertex.id) &&
+                !(e1v1.x === vertex.x && e1v1.y === vertex.y) &&
+                !(e1v2.x === vertex.x && e1v2.y === vertex.y)
+            ) {
+                const projection = geometryHelpers.projectionOfPointToLine(vertex, {
+                    p1: e1v1,
+                    p2: e1v2
+                });
+                return geometryHelpers.distanceBetweenPoints(vertex, projection) <= 1 / geometryHelpers.clipScale;
+            }
+        });
+
+        if (splittingVertices.length) {
+            error = `An edge is being touched by a vertex on the same face at (${splittingVertices[0].x}, ${splittingVertices[0].y})`;
+            return true;
+        }
+
+        // check for two edges on the same face that intersect
+        return faceEdges.some((e2) => {
+            const e2v1 = faceVertices.find(v => v.id === e2.v1),
+                e2v2 = faceVertices.find(v => v.id === e2.v2),
+                intersection = geometryHelpers.isIntersecting(e1v1, e1v2, e2v1, e2v2);
+            if (intersection) {
+                error = `Self intersection at ${intersection.x}, ${intersection.y}`;
+                return true;
+            }
+        });
+    });
+
+    return error ? {
+        success: false,
+        error: error
+    } : {
+        success: true,
+        vertices: faceVertices,
+        edges: faceEdges
+    }
 }
 
 /*
-* Validate the new face against self intersection by checking for:
-* folded (duplicate geometry) edges referencing the same two endpoints on the same face
-* vertex on the face splitting an edge on the face
-* vertex on the face snapped to another vertex on the face
-* TODO: prevent crossing edges on the same face
-* Save the fave if validation passes, destroy its vertices and edges if validation fails
-*/
-function validateAndSaveFace (face, currentStoryGeometry, target, context) {
-    // vertices and edges referenced by the face being created (already saved to the data store)
-    // these have already been saved to the data store
-    const faceEdges = face.edgeRefs.map(eR => geometryHelpers.edgeForId(eR.edge_id, currentStoryGeometry)),
-        faceVertices = face.edgeRefs.map((edgeRef) => {
-              const edge = geometryHelpers.edgeForId(edgeRef.edge_id, currentStoryGeometry),
-                // startpoint will be v1 unless the edge is reversed
-                vertexId = edgeRef.reverse ? edge.v2 : edge.v1;
-              return geometryHelpers.vertexForId(vertexId, currentStoryGeometry);
-          });
+ * loop through all edges on the currentStoryGeometry, checking if there are any vertices touching (splitting) them
+ * order the splitting vertices based on where they appear on the original edge
+ * build and store a new set of edges by connecting the ordered splitting vertices
+ * look up all faces referencing the original edge and replace those references with references to the new edges
+ * destroy the original edge
+ */
+function splitEdges(context) {
+    const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'];
 
-    // validate and save the face
-    var validFace = true;
-    for (var i = 0; i < faceEdges.length; i++) {
-        const edge = faceEdges[i];
-
-        // saved vertices which are touching the edge (excluding the edge's endpoints)
-        const splittingVertices = geometryHelpers.splittingVerticesForEdgeId(edge.id, currentStoryGeometry)
-
-        // if a vertex on the face touches an edge on the face, then the face is self intersecting and invalid
-        for (let j = 0; j < splittingVertices.length; j++) {
-            const vertex = splittingVertices[j];
-            if (faceVertices.indexOf(vertex) !== -1) {
-                validFace = false;
-            }
-        }
-
-        /*
-        * faceVertices will only include the startpoint for each edge,
-        * so multiple edges referencing the same vertex will result in duplicate vertices in the array,
-        * meaning that the face has snapped to itself (is self intersecting) - fail validation
-        */
-        for (let j = 0; j < faceVertices.length; j++) {
-            const vertex = faceVertices[j];
-            if (faceVertices.filter(v => v.id === vertex.id).length >= 2) {
-                validFace = false;
-            }
-        }
-    }
-
-    // save the face if it is valid, otherwise destroy the edges and vertices created earlier to prevent an invalid state
-    if (validFace) {
-        context.dispatch(target.type === 'space' ? 'models/updateSpaceWithData' : 'models/updateShadingWithData', {
-            [target.type]: target,
-            face_id: face.id
-        }, { root: true });
-
-        context.commit('createFace', {
-            face: face,
-            geometry_id: currentStoryGeometry.id
-        });
-    } else {
-        // dispatch destroyFaceAndDescendents to destroy edges and vertices created for the invalid face
-        context.dispatch('destroyFaceAndDescendents', {
-            geometry_id: currentStoryGeometry.id,
-            face: face
-        });
-    }
-    return validFace;
-}
-
-
-/*
-* loop through all edges on the currentStoryGeometry, checking if there are any vertices touching (splitting) them
-* order the splitting vertices based on where they appear on the original edge
-* build and store a new set of edges by connecting the ordered splitting vertices
-* look up all faces referencing the original edge and replace those references with references to the new edges
-* destroy the original edge
-*/
-function splitEdges (currentStoryGeometry, context) {
     currentStoryGeometry.edges.forEach((edge) => {
         const splittingVertices = geometryHelpers.splittingVerticesForEdgeId(edge.id, currentStoryGeometry);
         if (splittingVertices.length) {
@@ -350,18 +344,20 @@ function splitEdges (currentStoryGeometry, context) {
             });
 
             // destroy original edge
-            context.commit('destroyGeometry', { id: edge.id });
+            context.commit('destroyGeometry', {
+                id: edge.id
+            });
         }
         // connectEdges(currentStoryGeometry, context);
     });
 }
 
 /*
-* order the edgeRefs on each face on the currentStoryGeometry so that all edges are connected from startpoint to endpoint
-* set reverse property on edgeRefs as needed
-*/
-function connectEdges (currentStoryGeometry, context) {
-    currentStoryGeometry = context.state.find(g => g.id === currentStoryGeometry.id);
+ * order the edgeRefs on each face on the currentStoryGeometry so that all edges are connected from startpoint to endpoint
+ * set reverse property on edgeRefs as needed
+ */
+function connectEdges(context) {
+    const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'];
     currentStoryGeometry.faces.forEach((face) => {
         const faceEdges = geometryHelpers.edgesForFaceId(face.id, currentStoryGeometry);
 
@@ -384,8 +380,11 @@ function connectEdges (currentStoryGeometry, context) {
             // each vertex must be referenced by exactly two edges, it acts as the endpoint for the first edge and the startpoint for the next
             // look up the next edge by finding the edge on the face referencing the endpoint of the current edge
             nextEdge = faceEdges.find((e) => {
-                if (e.id === nextEdge.id) { return; }
-                if ((e.v2 === endpoint || e.v1 === endpoint) && e !== faceEdges[0] && ~connectedEdgeRefs.map(eR => eR.edge_id).indexOf(e.id)) {
+                if (e.id === nextEdge.id) {
+                    return;
+                }
+                if ((e.v2 === endpoint || e.v1 === endpoint) && e !== faceEdges[0] && ~connectedEdgeRefs.map(eR => eR.edge_id)
+                    .indexOf(e.id)) {
                     // TODO: sometimes multiple edges reference the same endpoint, causing duplicated in the connectedEdgeRefs array. not sure why this is happening.
                     return false;
                 }
@@ -399,7 +398,9 @@ function connectEdges (currentStoryGeometry, context) {
                     return true;
                 }
             });
-            if (nextEdge === faceEdges[0]) { break; }
+            if (nextEdge === faceEdges[0]) {
+                break;
+            }
         }
 
         // update the face with the ordered edge refs

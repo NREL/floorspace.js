@@ -1,29 +1,12 @@
 module.exports = {
-  root: true,
-  parser: 'babel-eslint',
-  parserOptions: {
-    sourceType: 'module'
-  },
-  // https://github.com/feross/standard/blob/master/RULES.md#javascript-standard-style
-  extends: 'standard',
-  // required to lint *.vue files
-  plugins: [
-    'html'
-  ],
-  // add your custom rules here
+  'extends': 'eslint-config-airbnb',
   'rules': {
-    // allow paren-less arrow functions
-    'arrow-parens': 0,
-    // allow async-await
-    'generator-star-spacing': 0,
-    // allow debugger during development
-    'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0,
-
-    'indent': ['error', 4],
-    'no-multiple-empty-lines': 0,
-    //'space-before-function-paren': ['error', 'never'],
-    'semi': 0,
-    'one-var': 0,
-    'camelcase': 0
-  }
+      'indent': ['error', 4],
+      'one-var': 0,
+	  'no-console': 0,
+	  'no-use-before-define': 0,
+	  'no-var': 0,
+  	  'no-tabs': 0,
+	  'max-len': 0
+    }
 }
