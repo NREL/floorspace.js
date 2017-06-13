@@ -91,7 +91,7 @@ export default {
 @import "./../scss/config";
     #inspector {
         // background-color: $gray-medium-dark;
-        background-color: rgba(0,0,0,0.5);
+        background-color: $gray-medium;
         border-left: 1px solid $gray-darkest;
         font-size: .85rem;
 		width: 18rem;

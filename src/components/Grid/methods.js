@@ -265,10 +265,8 @@ export default {
 
 		if (this.currentSpace) {
             payload.model_id = this.currentSpace.id;
-			payload.type = "space";
         } else if (this.currentShading) {
             payload.model_id = this.currentShading.id;
-			payload.type = "shading";
         }
 
         this.$store.dispatch('geometry/createFaceFromPoints', payload);
@@ -298,10 +296,8 @@ export default {
 
         if (this.currentSpace) {
             payload.model_id = this.currentSpace.id;
-			payload.type = "space";
         } else if (this.currentShading) {
             payload.model_id = this.currentShading.id;
-			payload.type = "shading";
         }
         this.$store.dispatch('geometry/createFaceFromPoints', payload);
 
@@ -393,7 +389,7 @@ export default {
             dy = 0;
 
         var _this = this;
-        
+
         // polygon drag handler
         const drag = d3.drag()
             .on('start', function (d) {
@@ -504,12 +500,11 @@ export default {
                 // yTickSpacing = this.rwuToGrid(this.spacing + this.min_y, 'y');
                 yTickSpacing = this.rwuToGrid(this.max_y - this.spacing, 'y'); // inverted y axis
 
-            // round point RWU coordinates to nearest gridline, adjust by grid offset
+			// round point RWU coordinates to nearest gridline, adjust by grid offset, add 0.5 grid units to account for width of gridlines
             const snapTarget = {
                 type: 'gridpoint',
-                x: this.round(gridPoint.x, this.rwuToGrid(this.spacing + this.min_x, 'x')) + xOffset,
-                // y: this.round(gridPoint.y, this.rwuToGrid(this.spacing + this.min_y, 'y')) + yOffset
-                y: this.round(gridPoint.y, this.rwuToGrid(this.max_y - this.spacing, 'y')) + yOffset // inverted y axis
+                x: this.round(gridPoint.x, this.rwuToGrid(this.spacing + this.min_x, 'x')) + xOffset - 0.5,
+                y: this.round(gridPoint.y, this.rwuToGrid(this.max_y - this.spacing, 'y')) + yOffset - 0.5
             };
 
             // pick closest point
