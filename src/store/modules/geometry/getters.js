@@ -6,6 +6,7 @@ export default {
     */
     exportData (state, getters, rootState, rootGetters) {
         return state.map(geometry => ({
+			id: geometry.id,
             vertices: geometry.vertices.map(vertex => ({
                 id: vertex.id,
                 x: Number(vertex.x),

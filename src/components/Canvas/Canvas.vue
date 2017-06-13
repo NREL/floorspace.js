@@ -40,5 +40,10 @@ export default {
 <style lang="scss" scoped>
 @import "./../../scss/config";
 
+#canvas {
+    background: white;
+    height: 100%;
+    width: 100%;
+}
 
 </style>

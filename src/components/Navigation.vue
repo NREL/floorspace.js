@@ -57,7 +57,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <section id="story-list">
             <div v-for="item in stories" :key="item.id" :class="{ active: currentStory && currentStory.id === item.id }" @click="selectItem(item, 'stories')" :style="{'background-color': item && item.color }">
                 {{item.name}}
-                <svg @click="destroyItem(item)" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                <svg @click="destroyItem(item, 'stories')" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
                     <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
                 </svg>
             </div>
@@ -202,26 +202,23 @@ export default {
                     reader = new FileReader();
 
                 reader.addEventListener("load", () => {
-                const img = new Image();
-                var _this = this;
-                img.onload = () => {
+                    const img = new Image();
 
-                    this.$store.dispatch('models/createImageForStory', {
-                        story_id: _this.currentStory.id,
-                        src: img.src,
-                        name: "Image " + (_this.images.length + 1 + i),
-                        // translate image dimensions to rwu
-                        height: _this.scaleY(img.height),
-                        width: _this.scaleX(img.width),
+                    img.onload = () => {
+                        this.$store.dispatch('models/createImageForStory', {
+                            story_id: this.currentStory.id,
+                            src: img.src,
+                            name: "Image " + (this.images.length + 1 + i),
+                            // translate image dimensions to rwu
+                            height: this.scaleY(img.height),
+                            width: this.scaleX(img.width),
+                            // center in svg
+                            x: this.min_x + (this.max_x - this.min_x)/2 - this.scaleY(img.width/2),
+                            y: this.min_y + (this.max_y - this.min_y)/2 - this.scaleY(img.height/2)
+                        });
+                    };
 
-                        y: (_this.max_y - _this.min_y - _this.scaleY(img.height)) * Math.random(),
-                        x: (_this.max_x - _this.min_x - _this.scaleX(img.width)) * Math.random()
-                    });
-
-                };
-                img.src = reader.result;
-
-
+                    img.src = reader.result;
                 }, false);
 
                 if (file) { reader.readAsDataURL(file); }
@@ -230,11 +227,13 @@ export default {
         },
         // initialize an empty story, space, shading, building_unit, or thermal_zone depending on the selected mode
         createItem (mode) {
+            var items = this.items,
+                mode = mode;
+
             switch (mode) {
                 case 'stories':
                     this.$store.dispatch('models/initStory');
                     return;
-                    break;
                 case 'spaces':
                     this.$store.dispatch('models/initSpace', {
                         story: this.$store.state.application.currentSelections.story
@@ -248,27 +247,24 @@ export default {
                 case 'building_units':
                 case 'thermal_zones':
                 case 'space_types':
-                    const newObject = new modelHelpers.map[this.mode].init(this.displayNameForMode(this.mode) + " " + (1 + this.items.length));
                     this.$store.dispatch('models/createObjectWithType', {
-                        type: this.mode,
-                        object: newObject
+                        type: mode,
                     });
                     break;
             }
-            this.selectItem(this.items[this.items.length - 1], this.mode);
+
+            this.selectItem(items[items.length - 1], mode);
         },
 
         /*
         * dispatch an action to destroy the currently selected item
         */
-        destroyItem (item) {
-            switch (this.mode) {
+        destroyItem (item, mode = this.mode) {
+            switch (mode) {
                 case 'stories':
-                    if (this.stories.length <= 1) { return; }
                     this.$store.dispatch('models/destroyStory', {
-                        story: item
+                        story: item,
                     });
-                    this.currentStory = this.stories[0];
                     break;
                 case 'spaces':
                     this.$store.dispatch('models/destroySpace', {
@@ -390,7 +386,7 @@ export default {
         }
 
         #story-list, #subselection-list {
-            overflow: scroll;
+            overflow: auto;
             height: calc(100% - 5rem);
             > div  {
                 border-bottom: 1px solid $gray-darkest;

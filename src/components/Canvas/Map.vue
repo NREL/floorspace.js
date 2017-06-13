@@ -23,14 +23,18 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <p>Drag the map and/or search to set desired location.  Use alt+shift to rotate the north axis. Click 'Done' when finished.</p>
         </div>
         <map-modal v-if="mapModalVisible && !mapInitialized" @close="mapModalVisible = false; loadMap();"></map-modal>
+        <svg id="reticle"></svg>
     </div>
 </template>
 
 <script>
 
-const ol = require('openlayers');
+const ol = require('openlayers'),
+    d3 = require('d3');
+
 import { mapState } from 'vuex'
 import MapModal from 'src/components/Modals/MapModal'
+import { ResizeEvents } from 'src/components/Resize'
 
 export default {
     name: 'map',
@@ -39,10 +43,12 @@ export default {
             view: null,
             map: null,
             autocomplete: null,
-            mapModalVisible: false//true
+            mapModalVisible: true
         };
     },
     mounted () {
+        ResizeEvents.$on('resize-resize',this.handleResize);
+
         if (window.google) {
             this.loadAutocomplete();
         } else {
@@ -57,7 +63,14 @@ export default {
 
         this.loadMap();
     },
+    beforeDestroy () {
+        ResizeEvents.$off('resize-resize',this.handleResize);
+    },
     methods: {
+        handleResize() {
+            // console.info("MAP RESIZE");
+            this.map.updateSize();
+        },
         loadMap() {
             const mapNode = document.getElementById("map");
 
@@ -76,19 +89,33 @@ export default {
         },
         updateMapView() {
             const mPerFt = ol.proj.METERS_PER_UNIT['us-ft'];
-            const res = (this.projectView.max_x - this.projectView.min_x)/this.$refs.map.clientWidth*mPerFt,
-                deltaXFt = this.projectView.min_x + (this.projectView.max_x - this.projectView.min_x)/2,
-                deltaYFt = this.projectView.min_y + (this.projectView.max_y - this.projectView.min_y)/2,
+            let res = (this.projectView.max_x - this.projectView.min_x)/this.$refs.map.clientWidth;
+            const deltaX = this.projectView.min_x + (this.projectView.max_x - this.projectView.min_x)/2,
+                deltaY = this.projectView.min_y + (this.projectView.max_y - this.projectView.min_y)/2,
                 center = ol.proj.fromLonLat([this.longitude,this.latitude]), // meters
                 sine = Math.sin(this.rotation),
                 cosine = Math.cos(this.rotation);
 
-            center[0] += mPerFt*(deltaXFt * cosine + deltaYFt * sine);
-            center[1] -= mPerFt*(deltaYFt * cosine - deltaXFt * sine); // ol origin is bottom left
+            let latitudeModifier = 1;
+            // Once map is loaded and we know where we are, then adjust scale by a modifier to account for skew based on latitude (because of how mercator projection works)
+            if (this.view.getCenter()) {
+              let projection = this.view.getProjection();
+              latitudeModifier = 1 / ol.proj.getPointResolution(projection, 1, this.view.getCenter());
+            }
+
+            res = res * latitudeModifier;
+
+            // center[0] += (deltaX * cosine + deltaY * sine) * latitudeModifier;
+            // center[1] -= (deltaY * cosine - deltaX * sine) * latitudeModifier; // ol origin is bottom left
+
+            // inverted y axis
+            center[0] += (deltaX * cosine - deltaY * sine) * latitudeModifier;
+            center[1] += (deltaY * cosine + deltaX * sine) * latitudeModifier; // ol origin is bottom left
 
             this.view.setResolution(res);
             this.view.setCenter(center);
             this.view.setRotation(this.rotation);
+            this.updateReticle();
         },
         // setup
         loadAutocomplete () {
@@ -111,6 +138,36 @@ export default {
             this.rotation = this.view.getRotation();
             this.tool = 'Rectangle';
             this.$store.dispatch('project/setMapInitialized', { initialized: true });
+            this.updateReticle();
+        },
+        updateReticle () {
+            const svg = d3.select('#reticle');
+
+            if (!this.mapModalVisible && this.mapSetup) {
+                // hide grid
+                this.$store.dispatch('project/setGridVisible', { visible: false });
+
+                // draw reticle
+                const size = 100,
+                    x = this.$refs.map.clientWidth/2,
+                    y = this.$refs.map.clientHeight/2;
+
+                svg.selectAll('#reticle path')
+                    .data([
+                        [{ x, y: y-size }, { x, y: y + size }],
+                        [{ x: x-size, y }, { x: x + size, y }]
+                    ])
+                    .enter()
+                    .append('path')
+                    .attr('stroke-width', '1')
+                    .attr('stroke','gray')
+                    .attr('d', d3.line().x(d => d.x).y(d => d.y));
+
+            } else {
+                // cleanup
+                svg.select("#reticle path").remove();
+                // this.$store.dispatch('project/setGridVisible', { visible: true });
+            }
         }
     },
     computed: {
@@ -134,7 +191,7 @@ export default {
         rotation: {
             get () { return this.$store.state.project.map.rotation; },
             set (val) { this.$store.dispatch('project/setMapRotation', { rotation: val }); }
-        },
+        }
     },
     watch: {
         latitude () { this.updateMapView(); },
@@ -155,8 +212,14 @@ export default {
 @import "./../../scss/config";
 
 #map-container {
+    position: relative;
     height: 100%;
     width: 100%;
+
+    #map {
+        height: 100%;
+        min-width: 100%;
+    }
 }
 
 #autocomplete {
@@ -192,4 +255,13 @@ export default {
         display: inline-block;
     }
 }
+
+#reticle {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
 </style>

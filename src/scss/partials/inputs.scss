@@ -8,6 +8,9 @@
 @import "./../config";
 
 .input-select, .input-number, .input-text, .input-checkbox {
+    align-items: center;
+    display: flex;
+
     label {
         font-size: 0.625rem;
         margin: 0 .5rem 0 0;
@@ -16,8 +19,6 @@
 }
 
 .input-number, .input-text {
-    display: flex;
-    align-items: center;
     input {
         background-color: $gray-dark;
         border: 0;
@@ -36,13 +37,8 @@
     width: 2.5rem;
 }
 
-
-
-
 // reusable select inputs
 .input-select {
-    align-items: center;
-    display: flex;
     position: relative;
 
     select {

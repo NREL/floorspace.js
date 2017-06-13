@@ -60,8 +60,9 @@
     .axis line {
       stroke-opacity: 0.3;
       shape-rendering: crispEdges;
+      stroke: $gray-medium;
     }
-    .tick {
-        stroke-width:1px;
-    }
+    // .tick {
+    //     stroke-width:1px;
+    // }
 }

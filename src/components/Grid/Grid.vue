@@ -8,29 +8,35 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
 <div id="grid" :style="{ 'pointer-events': (currentTool === 'Drag' || currentTool === 'Map') ? 'none': 'all' }">
-    <svg ref="grid" @click="gridClicked" @mousemove="highlightSnapTarget" preserveAspectRatio="none" id="svg-grid"></svg>
+    <svg ref="grid" preserveAspectRatio="none" id="svg-grid"></svg>
 </div>
 </template>
 
 <script>
+
+const d3 = require('d3');
+
+import { throttle, debounce } from 'src/utilities'
 import methods from './methods'
 import { mapState } from 'vuex'
 import geometryHelpers from './../../store/modules/geometry/helpers.js'
 import modelHelpers from './../../store/modules/models/helpers.js'
 import applicationHelpers from './../../store/modules/application/helpers.js'
+import { ResizeEvents } from 'src/components/Resize'
 
 export default {
     name: 'grid',
     data() {
         return {
-            original_bounds: {
-                min_x: null,
-                min_y: null,
-                max_x: null,
-                max_y: null,
-                pxWidth: null,
-                pxHeight: null
-            },
+            // original_bounds: {
+            //     min_x: null,
+            //     min_y: null,
+            //     max_x: null,
+            //     max_y: null,
+            //     pxWidth: null,
+            //     pxHeight: null
+            // },
+            original_bounds: null,
             axis: {
                 x: null,
                 y: null,
@@ -39,39 +45,43 @@ export default {
                 x: null,
                 y: null
             },
-            points: [] // points for the face currently being drawn
+            points: [], // points for the face currently being drawn
+            transform: {
+                x: 0,
+                y: 0,
+                k: 1
+            },
+            handleMouseMove: null, // placeholder --> overwritten in mounted()
+            forceGridHide: false
         };
     },
     mounted() {
-        // initialize the y dimensions in RWU based on the aspect ratio of the grid on the screen
-        this.max_y = (this.$refs.grid.clientHeight / this.$refs.grid.clientWidth) * this.max_x;
+        // throttle/debounce event handlers
+        this.handleMouseMove = throttle(this.highlightSnapTarget,100);
+        this.renderGrid = debounce(this.renderGrid,5);
 
-        this.original_bounds = {
-            min_x: this.min_x,
-            min_y: this.min_y,
-            max_x: this.max_x,
-            max_y: this.max_y,
-            pxWidth: this.$refs.grid.clientWidth,
-            pxHeight: this.$refs.grid.clientHeight
-        };
+        // add event listeners
+        this.$refs.grid.addEventListener('reloadGrid', this.renderGrid);
+        this.$refs.grid.addEventListener('click', this.gridClicked);
+        this.$refs.grid.addEventListener('mousemove', this.handleMouseMove);
 
-        this.calcGrid();
-        this.drawPolygons();
+        window.addEventListener('keyup',this.escapeAction);
+        window.addEventListener('resize',this.renderGrid);
 
-        this.$refs.grid.addEventListener('reloadGrid', this.reloadGrid);
-        // recalculate the grid when the window resizes
-        // const _this = this;
-        // window.addEventListener('resize', () => {
-        //     _this.max_y = _this.original_bounds.max_y * (_this.$refs.grid.clientHeight / _this.original_bounds.pxHeight);
-        //     _this.max_x = _this.original_bounds.max_x * (_this.$refs.grid.clientWidth / _this.original_bounds.pxWidth);
-        //
-        //     _this.reloadGrid();
-        // });
+        ResizeEvents.$on('resize-resize',this.renderGrid);
+
+        // render grid first time
+        this.renderGrid();
     },
     beforeDestroy () {
+        this.$refs.grid.removeEventListener('reloadGrid', this.renderGrid);
+        this.$refs.grid.removeEventListener('click', this.gridClicked);
+        this.$refs.grid.removeEventListener('mousemove', this.handleMouseMove);
 
-        this.$refs.grid.removeEventListener('reloadGrid', this.reloadGrid);
-        // window.removeEventListener('resize', this.resize());
+        window.removeEventListener('keyup', this.escapeAction);
+        window.removeEventListener('resize', this.renderGrid);
+
+        ResizeEvents.$off('resize-resize',this.renderGrid)
     },
     computed: {
         ...mapState({
@@ -114,7 +124,6 @@ export default {
         currentStoryGeometry() {
             return this.$store.getters['application/currentStoryGeometry'];
         },
-
         previousStory () {
             const currentStoryNumber = this.$store.state.models.stories.findIndex(s => s.id === this.$store.state.application.currentSelections.story.id);
             if (currentStoryNumber > 0) {
@@ -168,7 +177,6 @@ export default {
             return [];
         },
 
-
         /*
          * map all faces for the current story to polygon representations (sets of ordered points) for d3 to render
          */
@@ -178,6 +186,7 @@ export default {
                 const model = modelHelpers.modelForFace(this.$store.state.models, face.id),
                     polygon = {
                         face_id: face.id,
+                        name: model.name,
                         color: model.color,
                         points: face.edgeRefs.map((edgeRef) => {
                             const edge = geometryHelpers.edgeForId(edgeRef.edge_id, this.currentStoryGeometry),
@@ -239,7 +248,14 @@ export default {
             this.drawPolygons();
         },
         points() {
+            if (this.points.length === 0) {
+                this.eraseGuidelines();
+            }
+
             this.drawPoints();
+        },
+        forceGridHide() {
+            this.updateGrid();
         }
     },
     methods: methods

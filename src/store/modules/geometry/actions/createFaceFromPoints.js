@@ -30,6 +30,7 @@ export default function createFaceFromPoints(context, payload) {
         facePoints = points;
     }
 
+
     const faceGeometry = validateFaceGeometry(facePoints, context);
     if (!faceGeometry.success) {
         console.error(faceGeometry.error);

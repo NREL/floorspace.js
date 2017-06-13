@@ -6,56 +6,28 @@
 // (4) Other than as required in clauses (1) and (2), distributions in any form of modifications or other derivative works may not use the "OpenStudio" trademark, "OS", "os", or any other confusingly similar designation without specific prior written permission from Alliance for Sustainable Energy, LLC.
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-@import "./../config";
+export function throttle(func, wait) {
+    var start = Date.now();
 
-// base color and font configuration for the entire app
-html, body {
-    color: $gray-lightest;
-    font-size: 16px;
-    font-family: 'Roboto', sans-serif;
-    height: 100vh;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    margin: 0;
-    h1, h2, h3, h4 {
-        font-weight: 100;
-    }
-    a {
-        color: $primary;
-        &:hover {
-            cursor: pointer;
+    return function(...args) {
+        let now = Date.now()
+
+        if (start + wait < now) {
+            start = now;
+            func.apply(this, args);
         }
     }
-}
+};
 
-body {
-    overflow: hidden;
-}
+export function debounce(func, wait) {
+    var timeout;
 
-#toolbar {
-    background-color: $gray-dark;
-    border-bottom: 1px solid $gray-medium-light;
-}
+    return function(...args) {
+        clearTimeout(timeout);
 
-main {
-    background-color: $gray-darkest;
-    #navigation {
-        background-color: $gray-dark;
-        border-right: 1px solid $gray-medium-light;
-    }
-}
-
-.disabled-component {
-    position: relative;
-
-    > *:first-child::before {
-        position: absolute;
-        content: '';
-        left: 0;
-        right: 0;
-        top: 0;
-        bottom: 0;
-        background: rgba($gray-darkest,0.6);
-        z-index: 100;
-    }
-}
+        timeout = setTimeout(() => {
+            timeout = null;
+            func.apply(this, args);
+        }, wait);
+    };
+};
