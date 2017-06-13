@@ -11,7 +11,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <section class="settings">
 
             <div class="input-checkbox">
-                <label>Previous Story</label>
+                <label>Story Below</label>
                 <input type="checkbox" v-model="previousStoryVisible">
             </div>
 
