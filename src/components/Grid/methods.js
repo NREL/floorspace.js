@@ -202,8 +202,7 @@ export default {
             .classed('guideline guideline-text',true)
             .attr("font-family", "sans-serif")
             .attr("fill", "red")
-            .attr("font-size","1em");
-
+            .style("font-size","1em");
 
         if (guidelineArea.length > 3) {
             let areaPoints = guidelineArea.map(p => {
@@ -229,7 +228,7 @@ export default {
                 .attr("text-anchor", "middle")
                 .attr("font-family", "sans-serif")
                 .attr("fill", "red")
-                .attr("font-size","1em")
+                .style("font-size","1em")
                 .raise();
         }
 
@@ -455,18 +454,14 @@ export default {
                 d3.select('#grid svg')
                     .append('text')
                     .attr('id','text-' + poly.face_id)
-                    .classed('polygon-text',true)
                     .attr('x',x)
                     .attr('y',y)
-                    // scaling
-                    .attr("font-size", () => 0.6 * that.transform.k + "em")
-                    .attr('dy', () => 0.25 * (that.transform.k > 1 ? 1 : that.transform.k) + "em")
-                    // styling
                     .text(poly.name)
                     .attr("text-anchor", "middle")
+                    .style("font-size", that.scaleY(12) + 'px')
+                    .style("font-weight","bold")
                     .attr("font-family", "sans-serif")
                     .attr("fill", "red")
-                    .style("font-weight","bold")
                     .attr('class', () => this.getAttribute('class'))
                     .classed('polygon-text',true);
             });
@@ -748,12 +743,9 @@ export default {
                 // .domain([this.min_y, this.max_y])
                 .domain([this.max_y,this.min_y]) // inverted y axis
                 .range([this.min_y, this.max_y]),
-
-            // determine stroke width to ensure consistency when resizing/zooming
-            existingAxis = svg.select('.axis.axis--x'),
-            strokeWidth = existingAxis.empty() ? 1 : existingAxis.attr('stroke-width') / this.transform.k;
-
-        // console.log(strokeWidth);
+            // keep font size and stroke width visuall consistent
+            strokeWidth = this.scaleY(1),
+            fontSize = this.scaleY(12) + 'px';
 
         svg.selectAll('*').remove();
 
@@ -772,14 +764,14 @@ export default {
         this.axis.x = svg.append('g')
             .attr('class', 'axis axis--x')
             .attr('stroke-width', strokeWidth)
-            .attr('font-size', '1em')
+            .style('font-size',fontSize)
             .style('display', this.gridVisible ? 'inline' : 'none')
             .call(this.axis_generator.x);
 
         this.axis.y = svg.append('g')
             .attr('class', 'axis axis--y')
             .attr('stroke-width', strokeWidth)
-            .attr('font-size', '1em')
+            .style('font-size',fontSize)
             .style('display', this.gridVisible ? 'inline' : 'none')
             .call(this.axis_generator.y);
 
@@ -787,23 +779,17 @@ export default {
         this.zoomBehavior = d3.zoom()
             .scaleExtent([0.02,Infinity])
             .on('zoom', () => {
-                const lastTransform = this.transform,
-                    newTransform = d3.event.transform;
+                const transform = d3.event.transform,
+                    kAbs = transform.k/this.scaleX(1); // absolute zoom, regardless of resizing, etc.
 
-                this.transform = newTransform;
-                // hide grid if zoomed out enough
-                this.forceGridHide = (newTransform.k < 0.1);
-
-                // cancel current drawing action if actual zoom and not justu accidental drag
-                if (newTransform.k !== lastTransform.k || Math.abs(lastTransform.y - newTransform.y) > 3 || Math.abs(lastTransform.x - newTransform.x) > 3) {
-                    this.points = [];
-                }
+                // update stored transform for grid hiding, etc.
+                this.transform = { ...transform, kAbs };
 
                 // create updated copies of the scales based on the zoom transformation
                 // the transformed scales are only used to obtain the new rwu grid dimensions and redraw the axes
                 // NOTE: don't change the original scale or you'll get exponential growth
-                const newScaleX = d3.event.transform.rescaleX(zoomScaleX),
-                    newScaleY = d3.event.transform.rescaleY(zoomScaleY);
+                const newScaleX = transform.rescaleX(zoomScaleX),
+                    newScaleY = transform.rescaleY(zoomScaleY);
 
                 [this.min_x, this.max_x] = newScaleX.domain();
                 // [this.min_y, this.max_y] = newScaleY.domain();

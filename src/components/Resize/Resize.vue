@@ -46,6 +46,8 @@ export default {
             window.addEventListener('mouseup', stopResize);
 
             function doResize(e) {
+                e.preventDefault();
+
                 let windowHeight = window.innerHeight,
                     height = windowHeight - e.clientY;
 
@@ -67,6 +69,8 @@ export default {
             window.addEventListener('mouseup', stopResize);
 
             function doResize(e) {
+                e.preventDefault();
+
                 el.style.width = (e.clientX < min ? min : e.clientX) + 'px';
                 notify();
             };
