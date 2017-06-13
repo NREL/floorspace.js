@@ -480,7 +480,6 @@ export default {
     */
     findSnapTarget (gridPoint) {
 
-
         // translate grid point to real world units to check for snapping targets
         const rwuPoint = {
             x: this.gridToRWU(gridPoint.x, 'x'),
@@ -519,7 +518,7 @@ export default {
             return snapTarget;
         }
 
-        // nothing to snap to, just return the locatio of the point
+        // nothing to snap to, just return the location of the point
         return {
             type: 'gridpoint',
             ...gridPoint

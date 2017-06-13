@@ -177,7 +177,6 @@ function validateFaceGeometry(points, context) {
     var error = false;
 
     // build an array of vertices for the face being created
-    var xRange = context.rootState.project.view.max_x - context.rootState.project.view.min_x;
     const faceVertices = points.map((point) => {
         // if a point was snapped to an existing vertex during drawing, it will have a vertex id
         var vertex = point.id && geometryHelpers.vertexForId(point.id, currentStoryGeometry);
@@ -186,7 +185,7 @@ function validateFaceGeometry(points, context) {
             debugger
         }
         // if a vertex already exists at a given location, reuse it
-        return geometryHelpers.vertexForCoordinates(point, xRange, currentStoryGeometry) || new factory.Vertex(point.x, point.y);
+        return geometryHelpers.vertexForCoordinates(point, context.rootGetters['project/snapTolerance'], currentStoryGeometry) || new factory.Vertex(point.x, point.y);
     });
 
     // create edges connecting each vertex in order
