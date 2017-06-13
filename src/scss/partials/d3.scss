@@ -48,10 +48,14 @@
             stroke: $secondary;
             stroke-width: 2px;
         }
-        &.previousStory {
-            z-index: -1;
+        &.previousStory, &.guideLine {
             fill-opacity: 0.3;
-
+            z-index: -1;
+        }
+		&.previousStory {
+			stroke-dasharray: 10;
+			stroke: $black;
+			stroke-width: 2;
         }
     }
     rect.view {

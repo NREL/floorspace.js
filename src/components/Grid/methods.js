@@ -167,7 +167,7 @@ export default {
             .enter()
             .append('polygon')
             .attr('points',d => d.map(p => [p.x,p.y].join(",")).join(" "))
-            .classed('guideline guideline-area previousStory',true)
+            .classed('guideline guideline-area guideLine',true)
             .attr('vector-effect', 'non-scaling-stroke')
             .attr('fill', () => {
                 if (this.currentTool === 'Eraser') { return 'none'; }
@@ -224,7 +224,7 @@ export default {
                 .attr('x', x)
                 .attr('y', y)
                 .text(areaText)
-                .classed('guideline guideline-text previousStory',true)
+                .classed('guideline guideline-text guideLine',true)
                 .attr("text-anchor", "middle")
                 .attr("font-family", "sans-serif")
                 .attr("fill", "red")
