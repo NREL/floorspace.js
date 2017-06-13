@@ -225,10 +225,10 @@ const helpers = {
     },
 
     // given a set of coordinates, find the vertex on the geometry set within their tolerance zone
-	vertexForCoordinates (coordinates, xRange, geometry) {
+	vertexForCoordinates (coordinates, snapTolerance, geometry) {
 		const { x, y } = coordinates;
 		// tolerance is calculated based on the grid's horizontal range (RWU)
-		const tolerance = xRange * this.offset;
+		const tolerance = snapTolerance;
 	    return geometry.vertices.find(v => this.distanceBetweenPoints(coordinates, v) < tolerance );
 	},
 
