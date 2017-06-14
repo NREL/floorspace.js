@@ -18,10 +18,7 @@ export default {
     * handle a click on the svg grid
     */
     gridClicked (e) {
-        if (this.currentTool === 'Select') {
-            this.$store.dispatch('application/setCurrentSpace', { 'space': null });
-            this.$store.dispatch('application/setCurrentShading', { 'shading': null });
-        } else if (this.currentTool === 'Eraser' ||
+        if (this.currentTool === 'Eraser' ||
             ((this.currentTool === 'Rectangle' || this.currentTool === 'Polygon') && (this.currentSpace || this.currentShading))) {
             this.addPoint(e);
         }
@@ -388,13 +385,24 @@ export default {
         var dx = 0,
             dy = 0;
 
-        var _this = this;
 
         // polygon drag handler
+        var _this = this;
         const drag = d3.drag()
-            .on('start', function (d) {
+            .on('start', (d) => {
                 // remove text label when dragging
                 d3.select('#text-' + d.face_id).remove();
+
+				// if a face is clicked while the Select tool is active, lookup its corresponding model (space/shading) and select it
+				if (this.currentTool === 'Select' && !d.previous_story) {
+                    const model = modelHelpers.modelForFace(this.$store.state.models, d.face_id);
+					
+                    if (model.type === 'space') {
+                        this.$store.dispatch('application/setCurrentSpace', { space: model });
+                    } else if (model.type === 'shading') {
+                        this.$store.dispatch('application/setCurrentShading', { shading: model });
+                    }
+                }
             })
             .on('drag', function (d) {
                 if (_this.currentTool !== 'Select' || d.previous_story) { return; }
@@ -418,18 +426,6 @@ export default {
             .data(this.polygons).enter()
             .append('polygon')
             .call(drag)
-            // if a face is clicked while the Select tool is active, lookup its corresponding model (space/shading) and select it
-            .on('click', (d) => {
-                if (this.currentTool === 'Select') {
-                    d3.event.stopPropagation();
-                    const model = modelHelpers.modelForFace(this.$store.state.models, d.face_id);
-                    if (model.type === 'space') {
-                        this.$store.dispatch('application/setCurrentSpace', { 'space': model });
-                    } else if (model.type === 'shading') {
-                        this.$store.dispatch('application/setCurrentShading', { 'shading': model });
-                    }
-                }
-            })
             .attr('points', d => d.points.map(p => [this.rwuToGrid(p.x, 'x'), this.rwuToGrid(p.y, 'y')].join(',')).join(' '))
             .attr('class', (d, i) => {
                 if ((this.currentSpace && d.face_id === this.currentSpace.face_id) ||
@@ -453,11 +449,11 @@ export default {
                     .attr('x',x)
                     .attr('y',y)
                     .text(poly.name)
-                    .attr("text-anchor", "middle")
-                    .style("font-size", that.scaleY(12) + 'px')
-                    .style("font-weight","bold")
-                    .attr("font-family", "sans-serif")
-                    .attr("fill", "red")
+                    .attr('text-anchor', 'middle')
+                    .style('font-size', that.scaleY(12) + 'px')
+                    .style('font-weight','bold')
+                    .attr('font-family', 'sans-serif')
+                    .attr('fill', 'red')
                     .attr('class', () => this.getAttribute('class'))
                     .classed('polygon-text',true);
             });
@@ -921,14 +917,14 @@ export default {
             spacing = this.spacing,
             spacingScaled = Math.ceil((rangeX / maxTicks) / spacing) * spacing;
 
-        return (spacingScaled === 0 || val % spacingScaled === 0) ? val : "";
+        return (spacingScaled === 0 || val % spacingScaled === 0) ? val : '';
     },
     formatTickY (maxTicks, val) {
         const rangeY = this.max_y - this.min_y,
             spacing = this.spacing,
             spacingScaled = Math.ceil((rangeY / maxTicks) / spacing) * spacing;
 
-        return (spacingScaled === 0 || val % spacingScaled === 0) ? val : "";
+        return (spacingScaled === 0 || val % spacingScaled === 0) ? val : '';
     },
     /*
     * Adjust padding to ensure full label is visible
