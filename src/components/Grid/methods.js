@@ -396,7 +396,7 @@ export default {
 				// if a face is clicked while the Select tool is active, lookup its corresponding model (space/shading) and select it
 				if (this.currentTool === 'Select' && !d.previous_story) {
                     const model = modelHelpers.modelForFace(this.$store.state.models, d.face_id);
-					
+
                     if (model.type === 'space') {
                         this.$store.dispatch('application/setCurrentSpace', { space: model });
                     } else if (model.type === 'shading') {
@@ -508,6 +508,22 @@ export default {
 
             return snapTarget;
         }
+		// if grid is not active, check if we can snap to an angle
+		else if (this.points.length) {
+			const lastPoint = this.points[this.points.length - 1],
+				// angle between last point drawn and mouse (degrees)
+		 		theta = Math.atan2(lastPoint.y - gridPoint.y, lastPoint.x - gridPoint.x) * 180 / Math.PI;
+			// snap to -180, -90, 0, 90
+			for (var i = -2; i < 2; i++) {
+				var angle = i * 90;
+				if (Math.abs(theta - angle) < this.$store.getters['project/angleTolerance']) {
+					return {
+						type: 'gridpoint',
+						...this.rotatePoint(lastPoint, gridPoint, angle - theta)
+					}
+				}
+			}
+		}
 
         // nothing to snap to, just return the location of the point
         return {
@@ -655,6 +671,18 @@ export default {
         result *= sign;
 		return result
     },
+	rotatePoint (center, point, angle) {
+		const radians = angle * Math.PI / 180.0,
+			cos = Math.cos(radians),
+			sin = Math.sin(radians),
+			dX = point.x - center.x,
+			dY = point.y - center.y;
+
+		return {
+			x: cos * dX - sin * dY + center.x,
+			y: sin * dX + cos * dY + center.y
+		};
+	},
 
     // /*
     // * If the min_x, max_x, min_y, max_y are changed by some non zoom event (like window resize or model import)
@@ -879,6 +907,7 @@ export default {
     * take a grid value (from some point already rendered to the grid) and translate it into RWU for persistence to the datastore
     */
     gridToRWU (gridValue, axis) {
+		if (!this.scaleX || !this.scaleY) {return}
 		var result;
         if (axis === 'x') {
             const currentScaleX = d3.scaleLinear()
