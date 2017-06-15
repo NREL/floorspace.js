@@ -508,22 +508,44 @@ export default {
 
             return snapTarget;
         }
-		// if grid is not active, check if we can snap to an angle
-		else if (this.points.length) {
-			const lastPoint = this.points[this.points.length - 1],
-				// angle between last point drawn and mouse (degrees)
-		 		theta = Math.atan2(lastPoint.y - gridPoint.y, lastPoint.x - gridPoint.x) * 180 / Math.PI;
-			// snap to -180, -90, 0, 90
-			for (var i = -2; i < 2; i++) {
-				var angle = i * 90;
-				if (Math.abs(theta - angle) < this.$store.getters['project/angleTolerance']) {
-					return {
-						type: 'gridpoint',
-						...this.rotatePoint(lastPoint, gridPoint, angle - theta)
-					}
-				}
-			}
-		}
+        // if grid is not active, check if we can snap to an angle
+        else if (this.points.length) {
+          const snappableAngles = [-180, -90, 0, 90, 180];
+          const lastPoint = this.points[this.points.length - 1];
+          // angle between last point drawn and mouse (degrees)
+          const thetaDeg = Math.atan2(lastPoint.y - gridPoint.y, lastPoint.x - gridPoint.x)
+            * (180 / Math.PI);
+
+          // snap to -180, -90, 0, 90, 180
+          var snapCoords;
+          snappableAngles.some((angle) => {
+            // check if gridpoint is within snap tolerance of a vertical or horizontal angle
+            if (Math.abs(thetaDeg - angle) < this.$store.getters['project/angleTolerance']) {
+              // only take the x or y value from the rotated point
+              // we don't want to preserve the original radius
+              if (angle === -180 || angle === 0 || angle === 180) {
+                // horizontal snap - use original x value and adjust y
+                return {
+                  x: gridPoint.x,
+                  y: this.rotatePoint(lastPoint, gridPoint, angle - thetaDeg).y,
+                };
+              } else if (angle === -90 || angle === 90) {
+                // vertical snap - use original y value and adjust x
+                return {
+                  x: this.rotatePoint(lastPoint, gridPoint, angle - thetaDeg).x,
+                  y: gridPoint.y,
+                };
+              }
+            }
+          });
+
+          if (snapCoords) {
+            return {
+              type: 'gridpoint',
+              ...snapCoords,
+            };
+          }
+        }
 
         // nothing to snap to, just return the location of the point
         return {
@@ -621,15 +643,43 @@ export default {
         });
 
         // look up vertices associated with nearest edge
-        const nearestEdgeStoryGeometry = nearestEdge.previous_story ? this.previousStoryGeometry : this.currentStoryGeometry,
-            nearestEdgeV1 = geometryHelpers.vertexForId(nearestEdge.v1, nearestEdgeStoryGeometry),
-            nearestEdgeV2 = geometryHelpers.vertexForId(nearestEdge.v2, nearestEdgeStoryGeometry),
+        const nearestEdgeStoryGeometry = nearestEdge.previous_story ? this.previousStoryGeometry : this.currentStoryGeometry;
+        const nearestEdgeV1 = geometryHelpers.vertexForId(nearestEdge.v1, nearestEdgeStoryGeometry);
+        const nearestEdgeV2 = geometryHelpers.vertexForId(nearestEdge.v2, nearestEdgeStoryGeometry);
 
-            // project point being tested to nearest edge
-            projection = geometryHelpers.projectionOfPointToLine(point, { p1: nearestEdgeV1, p2: nearestEdgeV2 }),
+        // project point being tested to nearest edge
+        var projection = geometryHelpers.projectionOfPointToLine(point, { p1: nearestEdgeV1, p2: nearestEdgeV2 });
 
-            // look up distance between projection and point being tested
-            dist = this.distanceBetweenPoints(projection, point);
+        // look up distance between projection and point being tested
+        const dist = this.distanceBetweenPoints(projection, point);
+        // take the projection of the cursor to the edge
+        // check if the angle of the segment defined by the cursor and projection is < the angle snap tolerance
+        const snappableAngles = [-180, -90, 0, 90, 180];
+        // angle between projection and mouse (degrees)
+        const thetaDeg = Math.atan2(point.y - projection.y, point.x - projection.x)
+          * (180 / Math.PI);
+
+        // if the original projection is within the snap tolerance of one of the snapping angles
+        // adjust the projection so that it is exactly at the snap angle
+        // snap to -180, -90, 0, 90, 180
+        snappableAngles.some((angle) => {
+          // if the original projection is within the snap tolerance of one of the snapping angles
+          // adjust the projection so that it is exactly at the snap angle
+          if (Math.abs(thetaDeg - angle) < this.$store.getters['project/angleTolerance']) {
+            // infer a line defining the desired projection
+            var adjustedProjectionP1;
+            var adjustedProjectionP2;
+            if (angle === 180 || angle === 0 || angle === -180) {
+              adjustedProjectionP1 = { x: point.x - (2 * dist), y: point.y }
+              adjustedProjectionP2 = { x: point.x + (2 * dist), y: point.y }
+            } else if (angle === 90 || angle === -90) {
+              adjustedProjectionP1 = { x: point.x, y: point.y - (2 * dist) }
+              adjustedProjectionP2 = { x: point.x, y: point.y + (2 * dist) }
+            }
+            // adjust the projection to be the intersection of the desired projection line and the nearest edge
+            projection = geometryHelpers.intersectionOfLines(adjustedProjectionP1, adjustedProjectionP2, nearestEdgeV1, nearestEdgeV2);
+          }
+        });
 
         // return data for the edge if the projection is within the snap tolerance of the point
         if (dist < this.$store.getters['project/snapTolerance']) {
@@ -684,23 +734,6 @@ export default {
 		};
 	},
 
-    // /*
-    // * If the min_x, max_x, min_y, max_y are changed by some non zoom event (like window resize or model import)
-    // * like a window resize or a data import adjust the zoom identity
-    // */
-    // reloadGrid (dx, dy, dz) {
-    //     d3.select('#grid svg')
-    //         .call(this.zoomBehavior.transform, () => {
-    //             // the zoom identity scale is calculated from original_bounds,
-    //             // so we can infer a new zoom identity by taking the ratio between the original x range and new x range
-    //             d3.zoomIdentity.k = (this.original_bounds.max_x - this.original_bounds.min_x) / (this.max_x - this.min_x);
-    //             d3.zoomIdentity.x = -this.min_x * d3.zoomIdentity.k;
-    //             d3.zoomIdentity.y = -this.min_y * d3.zoomIdentity.k;
-
-    //             d3.select('#grid svg').call(this.zoomBehavior.transform, d3.zoomIdentity);
-    //             return d3.zoomIdentity;
-    //         });
-    // },
 
     // ****************** GRID ****************** //
     renderGrid () {

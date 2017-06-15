@@ -252,7 +252,7 @@ function validateFaceGeometry(points, context) {
         return faceEdges.some((e2) => {
             const e2v1 = faceVertices.find(v => v.id === e2.v1),
                 e2v2 = faceVertices.find(v => v.id === e2.v2),
-                intersection = geometryHelpers.isIntersecting(e1v1, e1v2, e2v1, e2v2);
+                intersection = geometryHelpers.intersectionOfLines(e1v1, e1v2, e2v1, e2v2);
             if (intersection) {
                 error = `Self intersection at ${intersection.x}, ${intersection.y}`;
                 return true;
