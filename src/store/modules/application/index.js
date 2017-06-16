@@ -16,12 +16,11 @@ export default {
             space_type: null,
 
             // current application mode and tool
-            tool: 'Polygon',
+            tool: 'Rectangle',
             mode: 'spaces'
         },
         modes: ['spaces', 'shading', 'building_units', 'thermal_zones', 'space_types', 'images'],
-        // tools: ['Drag', 'Pan', 'Rectangle', 'Polygon', 'Eraser', 'Select', 'Place Component', 'Apply Property', 'Map'],
-        tools: ['Drag', 'Rectangle', 'Polygon', 'Eraser', 'Select', 'Place Component', 'Apply Property', 'Map'],
+        tools: ['Drag', 'Rectangle', 'Polygon', 'Eraser', 'Select', 'Map', 'Clone'],//'Place Component', 'Apply Property'
         // d3 scale functions px -> rwu
         scale: {
             x: null,

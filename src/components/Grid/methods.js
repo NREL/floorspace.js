@@ -250,26 +250,25 @@ export default {
     * The origin of the polygon being drawn was clicked, create a polygon face from all points on the grid
     * translate the points into RWU and save the face for the selected space or shading
     */
-    savePolygonFace () {
+    savePolygonFace() {
+      const payload = {
+        // translate grid points from grid units to RWU
+        points: this.points.map(p => ({
+          x: this.gridToRWU(p.x, 'x'),
+          y: this.gridToRWU(p.y, 'y'),
+        })),
+      };
+      
+      if (this.currentSpace) {
+        payload.model_id = this.currentSpace.id;
+      } else if (this.currentShading) {
+        payload.model_id = this.currentShading.id;
+      }
 
-        const payload = {
-            // translate grid points from grid units to RWU
-            points: this.points.map(p => ({
-                x: this.gridToRWU(p.x, 'x'),
-                y: this.gridToRWU(p.y, 'y')
-            }))
-        };
+      this.$store.dispatch('geometry/createFaceFromPoints', payload);
 
-		if (this.currentSpace) {
-            payload.model_id = this.currentSpace.id;
-        } else if (this.currentShading) {
-            payload.model_id = this.currentShading.id;
-        }
-
-        this.$store.dispatch('geometry/createFaceFromPoints', payload);
-
-        // clear points from the grid
-        this.points = [];
+      // clear points from the grid
+      this.points = [];
     },
 
     /*
@@ -376,91 +375,94 @@ export default {
     * handle clicks to select faces
     */
     drawPolygons () {
-        const that = this;
+      // remove expired polygons
+      d3.select('#grid svg').selectAll('polygon, .polygon-text').remove();
 
-        // remove expired polygons
-        d3.select('#grid svg').selectAll('polygon, .polygon-text').remove();
+      // store total drag offset (grid units)
+      let dx = 0;
+      let dy = 0;
 
-        // store total drag offset (grid units)
-        var dx = 0,
-            dy = 0;
+      // polygon drag handler
+      const _this = this;
+      const drag = d3.drag()
+        .on('start', (d) => {
+          // remove text label when dragging
+          d3.select(`#text-${d.face_id}`).remove();
 
+          if (this.currentTool === 'Select' && !d.previous_story) {
+            // if a face on the current story is clicked while the Select tool is active
+            // lookup its corresponding model (space/shading) and select it
+            const model = modelHelpers.modelForFace(this.$store.state.models, d.face_id);
+            if (model.type === 'space') {
+              this.$store.dispatch('application/setCurrentSpace', { space: model });
+            } else if (model.type === 'shading') {
+              this.$store.dispatch('application/setCurrentShading', { shading: model });
+            }
+          } else if (this.currentTool === 'Clone' && (this.currentSpace || this.currentShading)) {
+            // if a face on the current story is clicked while the Select tool is active
+            // lookup its corresponding model (space/shading) and select it
+            this.points = d.points.map(p => ({
+              x: this.rwuToGrid(p.x, 'x'),
+              y: this.rwuToGrid(p.y, 'y'),
+            }));
+            this.savePolygonFace();
+          }
+        })
+        .on('drag', function (d) {
+          if (_this.currentTool !== 'Select' || d.previous_story) { return; }
+          dx += d3.event.dx;
+          dy += d3.event.dy;
+          d3.select(this)
+          .attr('transform', (d) => 'translate(' + [dx, dy] + ')');
+        })
+        .on('end', (d, i) => {
+          if (this.currentTool !== 'Select' || d.previous_story) { return; }
+          // when the drag is finished, update the face in the store with the total offset in RWU
+          this.$store.dispatch('geometry/moveFaceByOffset', {
+            face_id: d.face_id,
+            dx: this.gridToRWU(dx, 'x') - this.min_x,
+            dy: this.gridToRWU(dy, 'y') - this.max_y // inverted y axis
+          });
+        });
 
-        // polygon drag handler
-        var _this = this;
-        const drag = d3.drag()
-            .on('start', (d) => {
-                // remove text label when dragging
-                d3.select('#text-' + d.face_id).remove();
+      // draw polygons
+      d3.select('#grid svg').selectAll('polygon')
+      .data(this.polygons).enter()
+      .append('polygon')
+      .call(drag)
+      .attr('points', d => d.points.map(p => [this.rwuToGrid(p.x, 'x'), this.rwuToGrid(p.y, 'y')].join(',')).join(' '))
+      .attr('class', (d, i) => {
+        if ((this.currentSpace && d.face_id === this.currentSpace.face_id) ||
+        (this.currentShading && d.face_id === this.currentShading.face_id)) { return 'current'; }
+        if (d.previous_story) { return 'previousStory'}
+      })
+      .attr('fill', d => d.color)
+      .attr('vector-effect', 'non-scaling-stroke')
+      // add label
+      .select(function (poly) {
+        let { x, y } = _this.polygonLabelPosition(poly.points);
 
-				// if a face is clicked while the Select tool is active, lookup its corresponding model (space/shading) and select it
-				if (this.currentTool === 'Select' && !d.previous_story) {
-                    const model = modelHelpers.modelForFace(this.$store.state.models, d.face_id);
+        // either polygon has 0 area or something went wrong --> don't draw name
+        if (x === null || y === null) { debugger; }
 
-                    if (model.type === 'space') {
-                        this.$store.dispatch('application/setCurrentSpace', { space: model });
-                    } else if (model.type === 'shading') {
-                        this.$store.dispatch('application/setCurrentShading', { shading: model });
-                    }
-                }
-            })
-            .on('drag', function (d) {
-                if (_this.currentTool !== 'Select' || d.previous_story) { return; }
-                dx += d3.event.dx;
-                dy += d3.event.dy;
-                d3.select(this)
-                    .attr('transform', (d) => 'translate(' + [dx, dy] + ')');
-            })
-            .on('end', (d, i) => {
-                if (this.currentTool !== 'Select' || d.previous_story) { return; }
-                // when the drag is finished, update the face in the store with the total offset in RWU
-                this.$store.dispatch('geometry/moveFaceByOffset', {
-                    face_id: d.face_id,
-                    dx: this.gridToRWU(dx, 'x') - this.min_x,
-                    dy: this.gridToRWU(dy, 'y') - this.max_y // inverted y axis
-                });
-            });
+        d3.select('#grid svg')
+        .append('text')
+        .attr('id', `text-${poly.face_id}`)
+        .attr('x', x)
+        .attr('y', y)
+        .text(poly.name)
+        .attr('text-anchor', 'middle')
+        .style('font-size', `${_this.scaleY(12)} px`)
+        .style('font-weight', 'bold')
+        .attr('font-family', 'sans-serif')
+        .attr('fill', 'red')
+        .attr('class', () => this.getAttribute('class'))
+        .classed('polygon-text', true);
+      });
 
-        // draw polygons
-        d3.select('#grid svg').selectAll('polygon')
-            .data(this.polygons).enter()
-            .append('polygon')
-            .call(drag)
-            .attr('points', d => d.points.map(p => [this.rwuToGrid(p.x, 'x'), this.rwuToGrid(p.y, 'y')].join(',')).join(' '))
-            .attr('class', (d, i) => {
-                if ((this.currentSpace && d.face_id === this.currentSpace.face_id) ||
-                    (this.currentShading && d.face_id === this.currentShading.face_id)) { return 'current'; }
-                if (d.previous_story) { return 'previousStory'}
-            })
-            .attr('fill', d => d.color)
-            .attr('vector-effect', 'non-scaling-stroke')
-            // add label
-            .select(function (poly) {
-                let { x, y } = that.polygonLabelPosition(poly.points);
-
-                // either polygon has 0 area or something went wrong --> don't draw name
-                if (x === null || y === null) {
-                    return;
-                }
-
-                d3.select('#grid svg')
-                    .append('text')
-                    .attr('id','text-' + poly.face_id)
-                    .attr('x',x)
-                    .attr('y',y)
-                    .text(poly.name)
-                    .attr('text-anchor', 'middle')
-                    .style('font-size', that.scaleY(12) + 'px')
-                    .style('font-weight','bold')
-                    .attr('font-family', 'sans-serif')
-                    .attr('fill', 'red')
-                    .attr('class', () => this.getAttribute('class'))
-                    .classed('polygon-text',true);
-            });
-
-        // render the selected model's face above the other polygons so that the border is not obscured
-        d3.select('.current').raise();
-        d3.select('text.current').raise();
+      // render the selected model's face above the other polygons so that the border is not obscured
+      d3.select('.current').raise();
+      d3.select('text.current').raise();
     },
 
     // ****************** SNAPPING TO EXISTING GEOMETRY ****************** //
