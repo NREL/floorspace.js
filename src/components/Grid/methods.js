@@ -18,10 +18,7 @@ export default {
     * handle a click on the svg grid
     */
     gridClicked (e) {
-        if (this.currentTool === 'Select') {
-            this.$store.dispatch('application/setCurrentSpace', { 'space': null });
-            this.$store.dispatch('application/setCurrentShading', { 'shading': null });
-        } else if (this.currentTool === 'Eraser' ||
+        if (this.currentTool === 'Eraser' ||
             ((this.currentTool === 'Rectangle' || this.currentTool === 'Polygon') && (this.currentSpace || this.currentShading))) {
             this.addPoint(e);
         }
@@ -253,26 +250,25 @@ export default {
     * The origin of the polygon being drawn was clicked, create a polygon face from all points on the grid
     * translate the points into RWU and save the face for the selected space or shading
     */
-    savePolygonFace () {
+    savePolygonFace() {
+      const payload = {
+        // translate grid points from grid units to RWU
+        points: this.points.map(p => ({
+          x: this.gridToRWU(p.x, 'x'),
+          y: this.gridToRWU(p.y, 'y'),
+        })),
+      };
+      
+      if (this.currentSpace) {
+        payload.model_id = this.currentSpace.id;
+      } else if (this.currentShading) {
+        payload.model_id = this.currentShading.id;
+      }
 
-        const payload = {
-            // translate grid points from grid units to RWU
-            points: this.points.map(p => ({
-                x: this.gridToRWU(p.x, 'x'),
-                y: this.gridToRWU(p.y, 'y')
-            }))
-        };
+      this.$store.dispatch('geometry/createFaceFromPoints', payload);
 
-		if (this.currentSpace) {
-            payload.model_id = this.currentSpace.id;
-        } else if (this.currentShading) {
-            payload.model_id = this.currentShading.id;
-        }
-
-        this.$store.dispatch('geometry/createFaceFromPoints', payload);
-
-        // clear points from the grid
-        this.points = [];
+      // clear points from the grid
+      this.points = [];
     },
 
     /*
@@ -379,92 +375,94 @@ export default {
     * handle clicks to select faces
     */
     drawPolygons () {
-        const that = this;
+      // remove expired polygons
+      d3.select('#grid svg').selectAll('polygon, .polygon-text').remove();
 
-        // remove expired polygons
-        d3.select('#grid svg').selectAll('polygon, .polygon-text').remove();
+      // store total drag offset (grid units)
+      let dx = 0;
+      let dy = 0;
 
-        // store total drag offset (grid units)
-        var dx = 0,
-            dy = 0;
+      // polygon drag handler
+      const _this = this;
+      const drag = d3.drag()
+        .on('start', (d) => {
+          // remove text label when dragging
+          d3.select(`#text-${d.face_id}`).remove();
 
-        var _this = this;
+          if (this.currentTool === 'Select' && !d.previous_story) {
+            // if a face on the current story is clicked while the Select tool is active
+            // lookup its corresponding model (space/shading) and select it
+            const model = modelHelpers.modelForFace(this.$store.state.models, d.face_id);
+            if (model.type === 'space') {
+              this.$store.dispatch('application/setCurrentSpace', { space: model });
+            } else if (model.type === 'shading') {
+              this.$store.dispatch('application/setCurrentShading', { shading: model });
+            }
+          } else if (this.currentTool === 'Clone' && (this.currentSpace || this.currentShading)) {
+            // if a face on the current story is clicked while the Select tool is active
+            // lookup its corresponding model (space/shading) and select it
+            this.points = d.points.map(p => ({
+              x: this.rwuToGrid(p.x, 'x'),
+              y: this.rwuToGrid(p.y, 'y'),
+            }));
+            this.savePolygonFace();
+          }
+        })
+        .on('drag', function (d) {
+          if (_this.currentTool !== 'Select' || d.previous_story) { return; }
+          dx += d3.event.dx;
+          dy += d3.event.dy;
+          d3.select(this)
+          .attr('transform', (d) => 'translate(' + [dx, dy] + ')');
+        })
+        .on('end', (d, i) => {
+          if (this.currentTool !== 'Select' || d.previous_story) { return; }
+          // when the drag is finished, update the face in the store with the total offset in RWU
+          this.$store.dispatch('geometry/moveFaceByOffset', {
+            face_id: d.face_id,
+            dx: this.gridToRWU(dx, 'x') - this.min_x,
+            dy: this.gridToRWU(dy, 'y') - this.max_y // inverted y axis
+          });
+        });
 
-        // polygon drag handler
-        const drag = d3.drag()
-            .on('start', function (d) {
-                // remove text label when dragging
-                d3.select('#text-' + d.face_id).remove();
-            })
-            .on('drag', function (d) {
-                if (_this.currentTool !== 'Select' || d.previous_story) { return; }
-                dx += d3.event.dx;
-                dy += d3.event.dy;
-                d3.select(this)
-                    .attr('transform', (d) => 'translate(' + [dx, dy] + ')');
-            })
-            .on('end', (d, i) => {
-                if (this.currentTool !== 'Select' || d.previous_story) { return; }
-                // when the drag is finished, update the face in the store with the total offset in RWU
-                this.$store.dispatch('geometry/moveFaceByOffset', {
-                    face_id: d.face_id,
-                    dx: this.gridToRWU(dx, 'x') - this.min_x,
-                    dy: this.gridToRWU(dy, 'y') - this.max_y // inverted y axis
-                });
-            });
+      // draw polygons
+      d3.select('#grid svg').selectAll('polygon')
+      .data(this.polygons).enter()
+      .append('polygon')
+      .call(drag)
+      .attr('points', d => d.points.map(p => [this.rwuToGrid(p.x, 'x'), this.rwuToGrid(p.y, 'y')].join(',')).join(' '))
+      .attr('class', (d, i) => {
+        if ((this.currentSpace && d.face_id === this.currentSpace.face_id) ||
+        (this.currentShading && d.face_id === this.currentShading.face_id)) { return 'current'; }
+        if (d.previous_story) { return 'previousStory'}
+      })
+      .attr('fill', d => d.color)
+      .attr('vector-effect', 'non-scaling-stroke')
+      // add label
+      .select(function (poly) {
+        let { x, y } = _this.polygonLabelPosition(poly.points);
 
-        // draw polygons
-        d3.select('#grid svg').selectAll('polygon')
-            .data(this.polygons).enter()
-            .append('polygon')
-            .call(drag)
-            // if a face is clicked while the Select tool is active, lookup its corresponding model (space/shading) and select it
-            .on('click', (d) => {
-                if (this.currentTool === 'Select') {
-                    d3.event.stopPropagation();
-                    const model = modelHelpers.modelForFace(this.$store.state.models, d.face_id);
-                    if (model.type === 'space') {
-                        this.$store.dispatch('application/setCurrentSpace', { 'space': model });
-                    } else if (model.type === 'shading') {
-                        this.$store.dispatch('application/setCurrentShading', { 'shading': model });
-                    }
-                }
-            })
-            .attr('points', d => d.points.map(p => [this.rwuToGrid(p.x, 'x'), this.rwuToGrid(p.y, 'y')].join(',')).join(' '))
-            .attr('class', (d, i) => {
-                if ((this.currentSpace && d.face_id === this.currentSpace.face_id) ||
-                    (this.currentShading && d.face_id === this.currentShading.face_id)) { return 'current'; }
-                if (d.previous_story) { return 'previousStory'}
-            })
-            .attr('fill', d => d.color)
-            .attr('vector-effect', 'non-scaling-stroke')
-            // add label
-            .select(function (poly) {
-                let { x, y } = that.polygonLabelPosition(poly.points);
+        // either polygon has 0 area or something went wrong --> don't draw name
+        if (x === null || y === null) { debugger; }
 
-                // either polygon has 0 area or something went wrong --> don't draw name
-                if (x === null || y === null) {
-                    return;
-                }
+        d3.select('#grid svg')
+        .append('text')
+        .attr('id', `text-${poly.face_id}`)
+        .attr('x', x)
+        .attr('y', y)
+        .text(poly.name)
+        .attr('text-anchor', 'middle')
+        .style('font-size', `${_this.scaleY(12)} px`)
+        .style('font-weight', 'bold')
+        .attr('font-family', 'sans-serif')
+        .attr('fill', 'red')
+        .attr('class', () => this.getAttribute('class'))
+        .classed('polygon-text', true);
+      });
 
-                d3.select('#grid svg')
-                    .append('text')
-                    .attr('id','text-' + poly.face_id)
-                    .attr('x',x)
-                    .attr('y',y)
-                    .text(poly.name)
-                    .attr("text-anchor", "middle")
-                    .style("font-size", that.scaleY(12) + 'px')
-                    .style("font-weight","bold")
-                    .attr("font-family", "sans-serif")
-                    .attr("fill", "red")
-                    .attr('class', () => this.getAttribute('class'))
-                    .classed('polygon-text',true);
-            });
-
-        // render the selected model's face above the other polygons so that the border is not obscured
-        d3.select('.current').raise();
-        d3.select('text.current').raise();
+      // render the selected model's face above the other polygons so that the border is not obscured
+      d3.select('.current').raise();
+      d3.select('text.current').raise();
     },
 
     // ****************** SNAPPING TO EXISTING GEOMETRY ****************** //
@@ -511,6 +509,44 @@ export default {
             snapTarget.y = Math.abs(gridPoint.y - (snapTarget.y - yTickSpacing)) > Math.abs(gridPoint.y - snapTarget.y) ? snapTarget.y : snapTarget.y - yTickSpacing;
 
             return snapTarget;
+        }
+        // if grid is not active, check if we can snap to an angle
+        else if (this.points.length) {
+          const snappableAngles = [-180, -90, 0, 90, 180];
+          const lastPoint = this.points[this.points.length - 1];
+          // angle between last point drawn and mouse (degrees)
+          const thetaDeg = Math.atan2(lastPoint.y - gridPoint.y, lastPoint.x - gridPoint.x)
+            * (180 / Math.PI);
+
+          // snap to -180, -90, 0, 90, 180
+          var snapCoords;
+          snappableAngles.some((angle) => {
+            // check if gridpoint is within snap tolerance of a vertical or horizontal angle
+            if (Math.abs(thetaDeg - angle) < this.$store.getters['project/angleTolerance']) {
+              // only take the x or y value from the rotated point
+              // we don't want to preserve the original radius
+              if (angle === -180 || angle === 0 || angle === 180) {
+                // horizontal snap - use original x value and adjust y
+                return {
+                  x: gridPoint.x,
+                  y: this.rotatePoint(lastPoint, gridPoint, angle - thetaDeg).y,
+                };
+              } else if (angle === -90 || angle === 90) {
+                // vertical snap - use original y value and adjust x
+                return {
+                  x: this.rotatePoint(lastPoint, gridPoint, angle - thetaDeg).x,
+                  y: gridPoint.y,
+                };
+              }
+            }
+          });
+
+          if (snapCoords) {
+            return {
+              type: 'gridpoint',
+              ...snapCoords,
+            };
+          }
         }
 
         // nothing to snap to, just return the location of the point
@@ -609,15 +645,43 @@ export default {
         });
 
         // look up vertices associated with nearest edge
-        const nearestEdgeStoryGeometry = nearestEdge.previous_story ? this.previousStoryGeometry : this.currentStoryGeometry,
-            nearestEdgeV1 = geometryHelpers.vertexForId(nearestEdge.v1, nearestEdgeStoryGeometry),
-            nearestEdgeV2 = geometryHelpers.vertexForId(nearestEdge.v2, nearestEdgeStoryGeometry),
+        const nearestEdgeStoryGeometry = nearestEdge.previous_story ? this.previousStoryGeometry : this.currentStoryGeometry;
+        const nearestEdgeV1 = geometryHelpers.vertexForId(nearestEdge.v1, nearestEdgeStoryGeometry);
+        const nearestEdgeV2 = geometryHelpers.vertexForId(nearestEdge.v2, nearestEdgeStoryGeometry);
 
-            // project point being tested to nearest edge
-            projection = geometryHelpers.projectionOfPointToLine(point, { p1: nearestEdgeV1, p2: nearestEdgeV2 }),
+        // project point being tested to nearest edge
+        var projection = geometryHelpers.projectionOfPointToLine(point, { p1: nearestEdgeV1, p2: nearestEdgeV2 });
 
-            // look up distance between projection and point being tested
-            dist = this.distanceBetweenPoints(projection, point);
+        // look up distance between projection and point being tested
+        const dist = this.distanceBetweenPoints(projection, point);
+        // take the projection of the cursor to the edge
+        // check if the angle of the segment defined by the cursor and projection is < the angle snap tolerance
+        const snappableAngles = [-180, -90, 0, 90, 180];
+        // angle between projection and mouse (degrees)
+        const thetaDeg = Math.atan2(point.y - projection.y, point.x - projection.x)
+          * (180 / Math.PI);
+
+        // if the original projection is within the snap tolerance of one of the snapping angles
+        // adjust the projection so that it is exactly at the snap angle
+        // snap to -180, -90, 0, 90, 180
+        snappableAngles.some((angle) => {
+          // if the original projection is within the snap tolerance of one of the snapping angles
+          // adjust the projection so that it is exactly at the snap angle
+          if (Math.abs(thetaDeg - angle) < this.$store.getters['project/angleTolerance']) {
+            // infer a line defining the desired projection
+            var adjustedProjectionP1;
+            var adjustedProjectionP2;
+            if (angle === 180 || angle === 0 || angle === -180) {
+              adjustedProjectionP1 = { x: point.x - (2 * dist), y: point.y }
+              adjustedProjectionP2 = { x: point.x + (2 * dist), y: point.y }
+            } else if (angle === 90 || angle === -90) {
+              adjustedProjectionP1 = { x: point.x, y: point.y - (2 * dist) }
+              adjustedProjectionP2 = { x: point.x, y: point.y + (2 * dist) }
+            }
+            // adjust the projection to be the intersection of the desired projection line and the nearest edge
+            projection = geometryHelpers.intersectionOfLines(adjustedProjectionP1, adjustedProjectionP2, nearestEdgeV1, nearestEdgeV2);
+          }
+        });
 
         // return data for the edge if the projection is within the snap tolerance of the point
         if (dist < this.$store.getters['project/snapTolerance']) {
@@ -659,24 +723,19 @@ export default {
         result *= sign;
 		return result
     },
+	rotatePoint (center, point, angle) {
+		const radians = angle * Math.PI / 180.0,
+			cos = Math.cos(radians),
+			sin = Math.sin(radians),
+			dX = point.x - center.x,
+			dY = point.y - center.y;
 
-    // /*
-    // * If the min_x, max_x, min_y, max_y are changed by some non zoom event (like window resize or model import)
-    // * like a window resize or a data import adjust the zoom identity
-    // */
-    // reloadGrid (dx, dy, dz) {
-    //     d3.select('#grid svg')
-    //         .call(this.zoomBehavior.transform, () => {
-    //             // the zoom identity scale is calculated from original_bounds,
-    //             // so we can infer a new zoom identity by taking the ratio between the original x range and new x range
-    //             d3.zoomIdentity.k = (this.original_bounds.max_x - this.original_bounds.min_x) / (this.max_x - this.min_x);
-    //             d3.zoomIdentity.x = -this.min_x * d3.zoomIdentity.k;
-    //             d3.zoomIdentity.y = -this.min_y * d3.zoomIdentity.k;
+		return {
+			x: cos * dX - sin * dY + center.x,
+			y: sin * dX + cos * dY + center.y
+		};
+	},
 
-    //             d3.select('#grid svg').call(this.zoomBehavior.transform, d3.zoomIdentity);
-    //             return d3.zoomIdentity;
-    //         });
-    // },
 
     // ****************** GRID ****************** //
     renderGrid () {
@@ -883,6 +942,7 @@ export default {
     * take a grid value (from some point already rendered to the grid) and translate it into RWU for persistence to the datastore
     */
     gridToRWU (gridValue, axis) {
+		if (!this.scaleX || !this.scaleY) {return}
 		var result;
         if (axis === 'x') {
             const currentScaleX = d3.scaleLinear()
@@ -921,14 +981,14 @@ export default {
             spacing = this.spacing,
             spacingScaled = Math.ceil((rangeX / maxTicks) / spacing) * spacing;
 
-        return (spacingScaled === 0 || val % spacingScaled === 0) ? val : "";
+        return (spacingScaled === 0 || val % spacingScaled === 0) ? val : '';
     },
     formatTickY (maxTicks, val) {
         const rangeY = this.max_y - this.min_y,
             spacing = this.spacing,
             spacingScaled = Math.ceil((rangeY / maxTicks) / spacing) * spacing;
 
-        return (spacingScaled === 0 || val % spacingScaled === 0) ? val : "";
+        return (spacingScaled === 0 || val % spacingScaled === 0) ? val : '';
     },
     /*
     * Adjust padding to ensure full label is visible

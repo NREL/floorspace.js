@@ -34,6 +34,9 @@ export default function createFaceFromPoints(context, payload) {
     const faceGeometry = validateFaceGeometry(facePoints, context);
     if (!faceGeometry.success) {
         console.error(faceGeometry.error);
+        if (!faceGeometry.error) {
+          debugger
+        }
         return;
     }
 
@@ -219,9 +222,7 @@ function validateFaceGeometry(points, context) {
             return true;
         }
     });
-    if (error) {
-        return error;
-    }
+
 
     // loop through face edges and validate against splittingvertices or intersecting edges
     faceEdges.some((e1) => {
@@ -244,15 +245,14 @@ function validateFaceGeometry(points, context) {
         });
 
         if (splittingVertices.length) {
-            error = `An edge is being touched by a vertex on the same face at (${splittingVertices[0].x}, ${splittingVertices[0].y})`;
-            return true;
+            error = `An edge is being touched by a vertex on the same face at (${splittingVertices[0].x}, ${splittingVertices[0].y})`;z
         }
 
         // check for two edges on the same face that intersect
         return faceEdges.some((e2) => {
             const e2v1 = faceVertices.find(v => v.id === e2.v1),
                 e2v2 = faceVertices.find(v => v.id === e2.v2),
-                intersection = geometryHelpers.isIntersecting(e1v1, e1v2, e2v1, e2v2);
+                intersection = geometryHelpers.intersectionOfLines(e1v1, e1v2, e2v1, e2v2);
             if (intersection) {
                 error = `Self intersection at ${intersection.x}, ${intersection.y}`;
                 return true;
@@ -261,12 +261,12 @@ function validateFaceGeometry(points, context) {
     });
 
     return error ? {
-        success: false,
-        error: error
+      success: false,
+      error,
     } : {
-        success: true,
-        vertices: faceVertices,
-        edges: faceEdges
+      success: true,
+      vertices: faceVertices,
+      edges: faceEdges,
     }
 }
 

@@ -12,7 +12,7 @@ export default {
             north_axis: 0
         },
         grid: {
-            visible: true,
+            visible: false,
             spacing: 50
         },
         view: {
@@ -24,7 +24,7 @@ export default {
         },
         map: {
             initialized: false,
-            enabled: true,
+            enabled: false,
             visible: true,
             latitude: 39.7653,
             longitude: -104.9863,

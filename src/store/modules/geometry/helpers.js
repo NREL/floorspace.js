@@ -143,17 +143,7 @@ const helpers = {
         return Math.sqrt((dx * dx) + (dy * dy));
     },
 
-
-	// isIntersecting(p1, p2, p3, p4) {
-	// 	function Turn(p1, p2, p3) {
-	// 		const A = (p3.x - p1.x) * (p2.y - p1.y),
-	// 			B = (p2.x - p1.x) * (p3.y - p1.y);
-	// 		return (A > B + Number.EPSILON) ? 1 : (A + Number.EPSILON < B) ? -1 : 0;
-	// 	}
-	// 	return (Turn(p1, p3, p4) != Turn(p2, p3, p4)) && (Turn(p1, p2, p3) != Turn(p1, p2, p4));
-	//
-	// },
-	isIntersecting(p1, p2, p3, p4) {
+	intersectionOfLines(p1, p2, p3, p4) {
 	    var eps = 0.0000001;
 
 	    const between = (a, b, c) => {
