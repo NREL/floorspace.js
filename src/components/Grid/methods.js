@@ -398,7 +398,7 @@ export default {
             } else if (model.type === 'shading') {
               this.$store.dispatch('application/setCurrentShading', { shading: model });
             }
-          } else if (this.currentTool === 'Clone' && (this.currentSpace || this.currentShading)) {
+          } else if (this.currentTool === 'Fill' && (this.currentSpace || this.currentShading)) {
             // if a face on the current story is clicked while the Select tool is active
             // lookup its corresponding model (space/shading) and select it
             this.points = d.points.map(p => ({
