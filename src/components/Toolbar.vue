@@ -114,7 +114,7 @@ export default {
                 } else if ( t === 'Drag') {
                     // only allow dragging in image mode
                     return (this.currentMode === 'images');
-                }  else if ( t === 'Clone') {
+                }  else if ( t === 'Fill') {
                     // only allow cloning in space and shade mode if previousStoryVisible
                     return this.previousStoryVisible && (this.currentMode === 'spaces' || this.currentMode === 'shading');
                 } else {

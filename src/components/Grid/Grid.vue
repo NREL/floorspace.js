@@ -96,6 +96,7 @@ export default {
             previousStoryVisible: state => state.project.previous_story.visible,
 
             gridVisible: state => state.project.grid.visible,
+            units: state => state.project.config.units,
 
             spacing: state => state.project.grid.spacing,
 

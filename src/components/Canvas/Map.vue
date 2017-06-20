@@ -8,204 +8,238 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
     <div id="map-container">
-        <div id="map" ref="map" :style="{ 'pointer-events': mapSetup ? 'all': 'none' }"></div>
-        <div id="autocomplete" v-show="mapSetup">
+        <div id="map" ref="map" :style="{ 'pointer-events': tool === 'Map' ? 'all': 'none' }"></div>
+
+        <div v-show="tool === 'Map'" id="autocomplete">
             <span class="input-text">
-                <input
-                    ref="autocompleteText"
-                    type="text"
-                    placeholder="Search for a location"
-                />
+                <input ref="addressSearch" type="text" placeholder="Search for a location"/>
             </span>
             <button @click="finishSetup">Done</button>
         </div>
-        <div v-if="mapSetup" id="help-text">
+        <div v-show="tool === 'Map'" id="help-text">
             <p>Drag the map and/or search to set desired location.  Use alt+shift to rotate the north axis. Click 'Done' when finished.</p>
         </div>
-        <map-modal v-if="mapModalVisible && !mapInitialized" @close="mapModalVisible = false; loadMap();"></map-modal>
+
+        <map-modal v-if="mapModalVisible && !mapInitialized" @close="mapModalVisible = false; showReticle()"></map-modal>
         <svg id="reticle"></svg>
     </div>
 </template>
 
 <script>
 
-const ol = require('openlayers'),
-    d3 = require('d3');
-
-import { mapState } from 'vuex'
-import MapModal from 'src/components/Modals/MapModal'
+import { mapState } from 'vuex';
 import { ResizeEvents } from 'src/components/Resize'
+import MapModal from 'src/components/Modals/MapModal'
+
+const googleMaps = require('google-maps-api')('AIzaSyDIja3lnhq63SxukBm9_mA-jn5R0Bj9RN8', ['places']);
+const ol = require('openlayers');
+const d3 = require('d3');
 
 export default {
-    name: 'map',
-    data () {
-        return {
-            view: null,
-            map: null,
-            autocomplete: null,
-            mapModalVisible: true
-        };
+  name: 'map',
+  data() {
+    return {
+      view: null,
+      map: null,
+      autocomplete: null,
+      mapModalVisible: true,
+      showGrid: false,
+    };
+  },
+
+  /*
+  * load the openlayers map, google maps autocomplete, and register a listener for view resizing
+  */
+  mounted() {
+    this.showGrid = this.gridVisible;
+
+    this.initAutoComplete();
+    this.loadMap();
+    ResizeEvents.$on('resize-resize', this.map.updateSize);
+  },
+
+  /*
+  * remove listener for view resizing
+  */
+  beforeDestroy() {
+    ResizeEvents.$off('resize-resize', this.map.updateSize);
+  },
+
+  methods: {
+    /*
+    * Asynchronously load google maps autocomplete
+    * attatch to address search field
+    */
+    initAutoComplete() {
+      googleMaps().then((maps) => {
+        // attatch to address search field
+        const autocomplete = new maps.places.Autocomplete(this.$refs.addressSearch);
+        // when an address is selected from the dropdown update the component lat/long coordinates
+        autocomplete.addListener('place_changed', () => {
+          // check that the selected place has associated lat/log data
+          const place = autocomplete.getPlace();
+          if (place.geometry) {
+            // changing component lat/long will trigger updateMapView, placing the map at the updated location
+            this.latitude = place.geometry.location.lat();
+            this.longitude = place.geometry.location.lng();
+          }
+        });
+      });
     },
-    mounted () {
-        ResizeEvents.$on('resize-resize',this.handleResize);
 
-        if (window.google) {
-            this.loadAutocomplete();
-        } else {
-            const script = document.createElement('script');
+    /*
+    * empty the map element and (re)load openlayers map canvas inside of it
+    */
+    loadMap() {
+      this.$refs.map.innerHTML = '';
+      this.view = new ol.View();
+      this.map = new ol.Map({
+        layers: [new ol.layer.Tile({ source: new ol.source.OSM() })],
+        target: 'map',
+        view: this.view,
+      });
 
-            window.googPlacesReady = this.loadAutocomplete;
-
-            script.type = 'text/javascript';
-            script.src = 'https://maps.googleapis.com/maps/api/js?libraries=places&callback=googPlacesReady';
-            document.body.appendChild(script);
-        }
-
-        this.loadMap();
+      this.updateMapView();
     },
-    beforeDestroy () {
-        ResizeEvents.$off('resize-resize',this.handleResize);
+
+    /*
+    * position the map
+    */
+    updateMapView() {
+      // center of grid in RWU
+      let gridCenterX = (this.min_x + this.max_x) / 2;
+      let gridCenterY = (this.min_y + this.max_y) / 2;
+
+      // default map resolution RWU/px
+      let resolution = (this.max_x - this.min_x) / this.$refs.map.clientWidth;
+
+      // translate units from ft to meters
+      if (this.units === 'ft') {
+        // meters in a foot
+        const mPerFt = ol.proj.METERS_PER_UNIT['us-ft'];
+        resolution *= mPerFt;
+        gridCenterX *= mPerFt;
+        gridCenterY *= mPerFt;
+      }
+
+      // current long/lat map position in meters
+      const mapCenter = ol.proj.fromLonLat([this.longitude, this.latitude]);
+
+      // openlayers places the center in the bottom left of the screen, so add the grid center (m) to the openlayers center
+      // adjust for rotation
+      // subtract the vertical grid center from the y adjustment because the y axis is inverted
+      let deltaY = ((gridCenterX * Math.cos(this.rotation)) - (gridCenterY * Math.sin(this.rotation)));
+      let deltaX = ((gridCenterY * Math.cos(this.rotation)) + (gridCenterX * Math.sin(this.rotation)));
+
+      // Web Mercator projections use different resolutions at different latitudes
+      // if the map has been placed, adjust the values for the current latitude
+      if (this.view.getCenter()) {
+        const resolutionAdjustment = 1 / ol.proj.getPointResolution(this.view.getProjection(), 1, this.view.getCenter());
+
+        resolution *= resolutionAdjustment;
+        deltaY *= resolutionAdjustment;
+        deltaX *= resolutionAdjustment;
+      }
+
+      // adjust map position based on size of grid
+      mapCenter[0] += deltaY;
+      mapCenter[1] += deltaX;
+
+      this.view.setResolution(resolution);
+      this.view.setCenter(mapCenter);
+      this.view.setRotation(this.rotation);
+
     },
-    methods: {
-        handleResize() {
-            // console.info("MAP RESIZE");
-            this.map.updateSize();
-        },
-        loadMap() {
-            const mapNode = document.getElementById("map");
 
-            while (mapNode.firstChild) {
-                mapNode.removeChild(mapNode.firstChild);
-            }
+    /*
+    * after the user places the map, save the latitude, longitude, and rotation
+    */
+    finishSetup() {
+      const center = ol.proj.transform(this.view.getCenter(), 'EPSG:3857', 'EPSG:4326')
+      this.longitude = center[0];
+      this.latitude = center[1];
 
-            this.view = new ol.View();
-            this.map = new ol.Map({
-                layers: [new ol.layer.Tile({ source: new ol.source.OSM() })],
-                target: 'map',
-                view: this.view
-            });
+      this.rotation = this.view.getRotation();
 
-            this.updateMapView();
-        },
-        updateMapView() {
-            const mPerFt = ol.proj.METERS_PER_UNIT['us-ft'];
-            let res = (this.projectView.max_x - this.projectView.min_x)/this.$refs.map.clientWidth;
-            const deltaX = this.projectView.min_x + (this.projectView.max_x - this.projectView.min_x)/2,
-                deltaY = this.projectView.min_y + (this.projectView.max_y - this.projectView.min_y)/2,
-                center = ol.proj.fromLonLat([this.longitude,this.latitude]), // meters
-                sine = Math.sin(this.rotation),
-                cosine = Math.cos(this.rotation);
+      this.$store.dispatch('project/setMapInitialized', { initialized: true });
+      this.tool = 'Rectangle';
 
-            let latitudeModifier = 1;
-            // Once map is loaded and we know where we are, then adjust scale by a modifier to account for skew based on latitude (because of how mercator projection works)
-            if (this.view.getCenter()) {
-              let projection = this.view.getProjection();
-              latitudeModifier = 1 / ol.proj.getPointResolution(projection, 1, this.view.getCenter());
-            }
+      // remove reticle
+      d3.select('#reticle').remove();
 
-            res = res * latitudeModifier;
-
-            // center[0] += (deltaX * cosine + deltaY * sine) * latitudeModifier;
-            // center[1] -= (deltaY * cosine - deltaX * sine) * latitudeModifier; // ol origin is bottom left
-
-            // inverted y axis
-            center[0] += (deltaX * cosine - deltaY * sine) * latitudeModifier;
-            center[1] += (deltaY * cosine + deltaX * sine) * latitudeModifier; // ol origin is bottom left
-
-            this.view.setResolution(res);
-            this.view.setCenter(center);
-            this.view.setRotation(this.rotation);
-            this.updateReticle();
-        },
-        // setup
-        loadAutocomplete () {
-            this.autocomplete = new google.maps.places.Autocomplete(this.$refs.autocompleteText);
-            this.autocomplete.addListener('place_changed', this.selectLocation);
-        },
-        selectLocation () {
-            var place = this.autocomplete.getPlace();
-
-            if (place.geometry) {
-                this.latitude = place.geometry.location.lat(),
-                this.longitude = place.geometry.location.lng();
-            }
-        },
-        finishSetup () {
-            const center = ol.proj.transform(this.view.getCenter(), 'EPSG:3857', 'EPSG:4326')
-
-            this.longitude = center[0];
-            this.latitude = center[1];
-            this.rotation = this.view.getRotation();
-            this.tool = 'Rectangle';
-            this.$store.dispatch('project/setMapInitialized', { initialized: true });
-            this.updateReticle();
-        },
-        updateReticle () {
-            const svg = d3.select('#reticle');
-
-            if (!this.mapModalVisible && this.mapSetup) {
-                // hide grid
-                this.$store.dispatch('project/setGridVisible', { visible: false });
-
-                // draw reticle
-                const size = 100,
-                    x = this.$refs.map.clientWidth/2,
-                    y = this.$refs.map.clientHeight/2;
-
-                svg.selectAll('#reticle path')
-                    .data([
-                        [{ x, y: y-size }, { x, y: y + size }],
-                        [{ x: x-size, y }, { x: x + size, y }]
-                    ])
-                    .enter()
-                    .append('path')
-                    .attr('stroke-width', '1')
-                    .attr('stroke','gray')
-                    .attr('d', d3.line().x(d => d.x).y(d => d.y));
-
-            } else {
-                // cleanup
-                svg.select("#reticle path").remove();
-                // this.$store.dispatch('project/setGridVisible', { visible: true });
-            }
-        }
+      this.gridVisible = this.showGrid;
     },
-    computed: {
-        ...mapState({
-            projectView: state => state.project.view,
-            mapInitialized: state => state.project.map.initialized,
-        }),
-        tool: {
-            get () { return this.$store.state.application.currentSelections.tool; },
-            set (val) { this.$store.dispatch('application/setApplicationTool', { tool: val }); }
-        },
-        mapSetup () { return this.tool === 'Map'; },
-        latitude: {
-            get () { return this.$store.state.project.map.latitude; },
-            set (val) { this.$store.dispatch('project/setMapLatitude', { latitude: val }); }
-        },
-        longitude: {
-            get () { return this.$store.state.project.map.longitude; },
-            set (val) { this.$store.dispatch('project/setMapLongitude', { longitude: val }); }
-        },
-        rotation: {
-            get () { return this.$store.state.project.map.rotation; },
-            set (val) { this.$store.dispatch('project/setMapRotation', { rotation: val }); }
-        }
+
+    /*
+    * render an svg reticle, hide the grid
+    */
+    showReticle() {
+      if (this.tool !== 'Map') { return; }
+      // hide grid
+      this.gridVisible = false;
+
+      // draw reticle
+      const size = 100;
+      const x = this.$refs.map.clientWidth / 2;
+      const y = this.$refs.map.clientHeight / 2;
+
+      d3.select('#reticle')
+        .selectAll('#reticle path')
+        .data([
+          [{ x, y: y - size }, { x, y: y + size }],
+          [{ x: x - size, y }, { x: x + size, y }],
+        ])
+        .enter()
+        .append('path')
+        .attr('stroke-width', '1')
+        .attr('stroke', 'gray')
+        .attr('d', d3.line().x(d => d.x).y(d => d.y));
     },
-    watch: {
-        latitude () { this.updateMapView(); },
-        longitude () { this.updateMapView(); },
-        rotation () { this.updateMapView(); },
-        projectView: {
-            handler () { this.updateMapView(); },
-            deep: true
-        }
+  },
+  computed: {
+    ...mapState({
+      projectView: state => state.project.view,
+      min_x: state => state.project.view.min_x,
+      max_x: state => state.project.view.max_x,
+      min_y: state => state.project.view.min_y,
+      max_y: state => state.project.view.max_y,
+      units: state => state.project.config.units,
+      mapInitialized: state => state.project.map.initialized,
+    }),
+    gridVisible: {
+      get() { return this.$store.state.project.grid.visible; },
+      set(val) { this.$store.dispatch('project/setGridVisible', { visible: val }); },
     },
-    components: {
-        MapModal
-    }
-}
+    tool: {
+      get() { return this.$store.state.application.currentSelections.tool; },
+      set(val) { this.$store.dispatch('application/setApplicationTool', { tool: val }); },
+    },
+    latitude: {
+      get() { return this.$store.state.project.map.latitude; },
+      set(val) { this.$store.dispatch('project/setMapLatitude', { latitude: val }); },
+    },
+    longitude: {
+      get() { return this.$store.state.project.map.longitude; },
+      set(val) { this.$store.dispatch('project/setMapLongitude', { longitude: val }); },
+    },
+    rotation: {
+      get() { return this.$store.state.project.map.rotation; },
+      set(val) { this.$store.dispatch('project/setMapRotation', { rotation: val }); },
+    },
+  },
+  watch: {
+    latitude() { this.updateMapView(); },
+    longitude() { this.updateMapView(); },
+    rotation() { this.updateMapView(); },
+    projectView: {
+      handler() { this.updateMapView(); },
+      deep: true,
+    },
+  },
+  components: {
+    MapModal,
+  },
+};
 
 </script>
 <style lang="scss" scoped>
