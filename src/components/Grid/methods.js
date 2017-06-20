@@ -209,7 +209,8 @@ export default {
                     return { x, y, X: x, Y: y };
                 }),
                 { x, y, area } = this.polygonLabelPosition(areaPoints),
-                areaText = area ? area.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") + " m²" : "";
+                areaText = area ? area.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,"): "";
+                areaText += ` ${this.units}²`;
 
             if (x === null || y === null) {
                 // either polygon has 0 area or something went wrong --> don't draw area text
@@ -258,7 +259,7 @@ export default {
           y: this.gridToRWU(p.y, 'y'),
         })),
       };
-      
+
       if (this.currentSpace) {
         payload.model_id = this.currentSpace.id;
       } else if (this.currentShading) {
