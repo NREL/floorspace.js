@@ -20,7 +20,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <p>Drag the map and/or search to set desired location.  Use alt+shift to rotate the north axis. Click 'Done' when finished.</p>
         </div>
 
-        <map-modal v-if="mapModalVisible && !mapInitialized" @close="mapModalVisible = false;  "></map-modal>
+        <map-modal v-if="mapModalVisible && !mapInitialized" @close="mapModalVisible = false; showReticle()"></map-modal>
         <svg id="reticle"></svg>
     </div>
 </template>
@@ -43,6 +43,7 @@ export default {
       map: null,
       autocomplete: null,
       mapModalVisible: true,
+      showGrid: false,
     };
   },
 
@@ -50,6 +51,8 @@ export default {
   * load the openlayers map, google maps autocomplete, and register a listener for view resizing
   */
   mounted() {
+    this.showGrid = this.gridVisible;
+
     this.initAutoComplete();
     this.loadMap();
     ResizeEvents.$on('resize-resize', this.map.updateSize);
@@ -121,11 +124,12 @@ export default {
 
       // current long/lat map position in meters
       const mapCenter = ol.proj.fromLonLat([this.longitude, this.latitude]);
+
       // openlayers places the center in the bottom left of the screen, so add the grid center (m) to the openlayers center
       // adjust for rotation
       // subtract the vertical grid center from the y adjustment because the y axis is inverted
       let deltaY = ((gridCenterX * Math.cos(this.rotation)) - (gridCenterY * Math.sin(this.rotation)));
-      let deltaX = ((gridCenterY * Math.cos(this.rotation)) + (gridCenterX * Math.sin(this.rotation))); 
+      let deltaX = ((gridCenterY * Math.cos(this.rotation)) + (gridCenterX * Math.sin(this.rotation)));
 
       // Web Mercator projections use different resolutions at different latitudes
       // if the map has been placed, adjust the values for the current latitude
@@ -136,54 +140,61 @@ export default {
         deltaY *= resolutionAdjustment;
         deltaX *= resolutionAdjustment;
       }
-      // adjust mapcenter based on rotation and center of grid
+
+      // adjust map position based on size of grid
       mapCenter[0] += deltaY;
       mapCenter[1] += deltaX;
 
       this.view.setResolution(resolution);
       this.view.setCenter(mapCenter);
       this.view.setRotation(this.rotation);
-      this.updateReticle();
+
     },
+
+    /*
+    * after the user places the map, save the latitude, longitude, and rotation
+    */
     finishSetup() {
       const center = ol.proj.transform(this.view.getCenter(), 'EPSG:3857', 'EPSG:4326')
-
       this.longitude = center[0];
       this.latitude = center[1];
+
       this.rotation = this.view.getRotation();
-      this.tool = 'Rectangle';
+
       this.$store.dispatch('project/setMapInitialized', { initialized: true });
-      this.updateReticle();
+      this.tool = 'Rectangle';
+
+      // remove reticle
+      d3.select('#reticle').remove();
+
+      this.gridVisible = this.showGrid;
     },
-    updateReticle() {
-      const svg = d3.select('#reticle');
 
-      if (!this.mapModalVisible && this.tool === 'Map') {
-          // hide grid
-          this.$store.dispatch('project/setGridVisible', { visible: false });
+    /*
+    * render an svg reticle, hide the grid
+    */
+    showReticle() {
+      if (this.tool !== 'Map') { return; }
+      // hide grid
+      this.gridVisible = false;
 
-          // draw reticle
-          const size = 100,
-              x = this.$refs.map.clientWidth/2,
-              y = this.$refs.map.clientHeight/2;
+      // draw reticle
+      const size = 100;
+      const x = this.$refs.map.clientWidth / 2;
+      const y = this.$refs.map.clientHeight / 2;
 
-          svg.selectAll('#reticle path')
-              .data([
-                  [{ x, y: y-size }, { x, y: y + size }],
-                  [{ x: x-size, y }, { x: x + size, y }]
-              ])
-              .enter()
-              .append('path')
-              .attr('stroke-width', '1')
-              .attr('stroke','gray')
-              .attr('d', d3.line().x(d => d.x).y(d => d.y));
-
-      } else {
-          // cleanup
-          svg.select("#reticle path").remove();
-          // this.$store.dispatch('project/setGridVisible', { visible: true });
-      }
-    }
+      d3.select('#reticle')
+        .selectAll('#reticle path')
+        .data([
+          [{ x, y: y - size }, { x, y: y + size }],
+          [{ x: x - size, y }, { x: x + size, y }],
+        ])
+        .enter()
+        .append('path')
+        .attr('stroke-width', '1')
+        .attr('stroke', 'gray')
+        .attr('d', d3.line().x(d => d.x).y(d => d.y));
+    },
   },
   computed: {
     ...mapState({
@@ -195,6 +206,10 @@ export default {
       units: state => state.project.config.units,
       mapInitialized: state => state.project.map.initialized,
     }),
+    gridVisible: {
+      get() { return this.$store.state.project.grid.visible; },
+      set(val) { this.$store.dispatch('project/setGridVisible', { visible: val }); },
+    },
     tool: {
       get() { return this.$store.state.application.currentSelections.tool; },
       set(val) { this.$store.dispatch('application/setApplicationTool', { tool: val }); },
@@ -210,21 +225,21 @@ export default {
     rotation: {
       get() { return this.$store.state.project.map.rotation; },
       set(val) { this.$store.dispatch('project/setMapRotation', { rotation: val }); },
-    }
-  },
-    watch: {
-        latitude () { this.updateMapView(); },
-        longitude () { this.updateMapView(); },
-        rotation () { this.updateMapView(); },
-        projectView: {
-            handler () { this.updateMapView(); },
-            deep: true
-        }
     },
-    components: {
-        MapModal
-    }
-}
+  },
+  watch: {
+    latitude() { this.updateMapView(); },
+    longitude() { this.updateMapView(); },
+    rotation() { this.updateMapView(); },
+    projectView: {
+      handler() { this.updateMapView(); },
+      deep: true,
+    },
+  },
+  components: {
+    MapModal,
+  },
+};
 
 </script>
 <style lang="scss" scoped>
