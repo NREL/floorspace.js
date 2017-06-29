@@ -310,10 +310,10 @@ export default {
   watch: {
     mode() { this.clearSubSelections(); },
     currentStory() { this.clearSubSelections(); },
-    currentSubSelection () {
+    currentSubSelection() {
       if (!this.currentSubSelection && this[this.mode][0]) {
         this.$nextTick(() => {
-           this.selectItem(this[this.mode][0]);
+          this.selectItem(this[this.mode][0]);
         });
       }
     },

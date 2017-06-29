@@ -29,44 +29,42 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <script>
 
 export default {
-    name: 'MapModal',
-    data () {
-        return {
-            address: ""
-        }
+  name: 'MapModal',
+  data() {
+    return {
+      address: '',
+    };
+  },
+  computed: {
+    mapEnabled: {
+      get() { return this.$store.state.project.map.enabled; },
+      set(val) { this.$store.dispatch('project/setMapEnabled', { enabled: val }); },
     },
-    computed: {
-        mapEnabled: {
-            get () { return this.$store.state.project.map.enabled; },
-            set (val) { this.$store.dispatch('project/setMapEnabled', { enabled: val }); }
-        },
-
-        tool: {
-            get () { return this.$store.state.application.currentSelections.tool; },
-            set (val) { this.$store.dispatch('application/setApplicationTool', { tool: val }); }
-        }
+    tool: {
+      get() { return this.$store.state.application.currentSelections.tool; },
+      set(val) { this.$store.dispatch('application/setApplicationTool', { tool: val }); },
     },
-    methods: {
-        importModelAsFile (event) {
-            const file = event.target.files[0],
-                reader = new FileReader();
-            reader.addEventListener("load", () => {
-                this.importModel(reader.result);
-            }, false);
+  },
+  methods: {
+    importModelAsFile(event) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+      reader.addEventListener('load', () => {
+        this.importModel(reader.result);
+      }, false);
 
-            if (file) { reader.readAsText(file); }
-        },
-        importModel (data) {
-            this.$store.dispatch('importModel', {
-                clientWidth: document.getElementById('svg-grid').clientWidth,
-                clientHeight: document.getElementById('svg-grid').clientHeight,
-                data: JSON.parse(data)
-            });
-            this.$emit('close');
-        }
-    }
-
-}
+      if (file) { reader.readAsText(file); }
+    },
+    importModel(data) {
+      this.$store.dispatch('importModel', {
+        clientWidth: document.getElementById('svg-grid').clientWidth,
+        clientHeight: document.getElementById('svg-grid').clientHeight,
+        data: JSON.parse(data),
+      });
+      this.$emit('close');
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>
