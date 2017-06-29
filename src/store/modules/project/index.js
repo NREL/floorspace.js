@@ -24,7 +24,7 @@ export default {
         },
         map: {
             initialized: false,
-            enabled: true,
+            enabled: false,
             visible: true,
             latitude: 39.7653,
             longitude: -104.9863,

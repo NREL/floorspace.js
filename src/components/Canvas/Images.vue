@@ -59,8 +59,9 @@ export default {
             // layer.draw();
         },
         renderImage (layer, image) {
+          let { width: w, height: h, x, y } = image;
+          y *= -1; // inverted y axis
             const imageReader = new Image(),
-                { width: w, height: h, x, y } = image,
                 imageGroup = new Konva.Group({
                     x: this.scaleX.invert(x + w/2),
                     y: this.scaleY.invert(y + h/2),

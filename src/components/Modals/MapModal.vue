@@ -11,15 +11,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     <div @click="$emit('close')" class="overlay"></div>
     <div class="modal">
         <header>
-            <h2>Enable the Map?</h2>
+            <h2>Quick Start</h2>
         </header>
 
         <div class="content">
-            <p>If you would like to geolocate your floorplan, place the map at your desired location now.</p>
-            <button @click="mapEnabled = true; tool='Map'; $emit('close')">Place Map</button>
-            <button @click="mapEnabled = false; mapVisible = false; $emit('close')">Disable Map</button>
-            <input ref="importInput" @change="importModelAsFile" type="file"/>
+            <p>Choose to either open an existing floorplan, start a new floorplan without a map, or start a new floorplan with a geolocated map.</p>
+
             <button @click="$refs.importInput.click()" id="import">Open Floorplan</button>
+            <button @click="mapEnabled = false; mapVisible = false; $emit('close')">New Floorplan</button>
+            <button @click="mapEnabled = true; tool='Map'; $emit('close')">New Floorplan w/ Map</button>
+            <input ref="importInput" @change="importModelAsFile" type="file"/>
         </div>
     </div>
 </aside>
@@ -28,44 +29,42 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <script>
 
 export default {
-    name: 'MapModal',
-    data () {
-        return {
-            address: ""
-        }
+  name: 'MapModal',
+  data() {
+    return {
+      address: '',
+    };
+  },
+  computed: {
+    mapEnabled: {
+      get() { return this.$store.state.project.map.enabled; },
+      set(val) { this.$store.dispatch('project/setMapEnabled', { enabled: val }); },
     },
-    computed: {
-        mapEnabled: {
-            get () { return this.$store.state.project.map.enabled; },
-            set (val) { this.$store.dispatch('project/setMapEnabled', { enabled: val }); }
-        },
-
-        tool: {
-            get () { return this.$store.state.application.currentSelections.tool; },
-            set (val) { this.$store.dispatch('application/setApplicationTool', { tool: val }); }
-        }
+    tool: {
+      get() { return this.$store.state.application.currentSelections.tool; },
+      set(val) { this.$store.dispatch('application/setApplicationTool', { tool: val }); },
     },
-    methods: {
-        importModelAsFile (event) {
-            const file = event.target.files[0],
-                reader = new FileReader();
-            reader.addEventListener("load", () => {
-                this.importModel(reader.result);
-            }, false);
+  },
+  methods: {
+    importModelAsFile(event) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+      reader.addEventListener('load', () => {
+        this.importModel(reader.result);
+      }, false);
 
-            if (file) { reader.readAsText(file); }
-        },
-        importModel (data) {
-            this.$store.dispatch('importModel', {
-                clientWidth: document.getElementById('svg-grid').clientWidth,
-                clientHeight: document.getElementById('svg-grid').clientHeight,
-                data: JSON.parse(data)
-            });
-            this.$emit('close');
-        }
-    }
-
-}
+      if (file) { reader.readAsText(file); }
+    },
+    importModel(data) {
+      this.$store.dispatch('importModel', {
+        clientWidth: document.getElementById('svg-grid').clientWidth,
+        clientHeight: document.getElementById('svg-grid').clientHeight,
+        data: JSON.parse(data),
+      });
+      this.$emit('close');
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>
