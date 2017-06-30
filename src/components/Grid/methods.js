@@ -402,27 +402,29 @@ export default {
           this.savePolygonFace();
         }
       })
-      .on('drag', function (d) {
+      .on('drag', (d) => {
         if (that.currentTool !== 'Select' || d.previous_story) { return; }
         dx += d3.event.dx;
         dy += d3.event.dy;
-        d3.select(this)
-        .attr('transform', (d) => 'translate(' + [dx, dy] + ')');
+        d3.select(`#face-${d.face_id}`)
+          .attr('transform', () => `translate(${[dx, dy]})`);
+
+        d3.select(`#text-${d.face_id}`)
+          .attr('transform', () => `translate(${[dx, dy]})`);
       })
-      .on('end', (d, i) => {
+      .on('end', (d) => {
         if (this.currentTool !== 'Select' || d.previous_story) { return; }
         // when the drag is finished, update the face in the store with the total offset in RWU
         this.$store.dispatch('geometry/moveFaceByOffset', {
           face_id: d.face_id,
           dx: this.gridToRWU(dx, 'x') - this.min_x,
-          dy: this.gridToRWU(dy, 'y') - this.max_y // inverted y axis
+          dy: this.gridToRWU(dy, 'y') - this.max_y,
         });
       });
 
-      if (this.currentTool === 'Select') {
-        console.log("  polygons.call(drag);")
-        polygons.call(drag);
-      }
+    if (this.currentTool === 'Select') {
+      polygons.call(drag);
+    }
   },
   /*
   * render saved faces as polygons
@@ -437,6 +439,7 @@ export default {
     d3.select('#grid svg').selectAll('polygon')
       .data(this.polygons).enter()
       .append('polygon')
+      .attr('id', d => `face-${d.face_id}`)
       .attr('points', d => d.points.map(p => [this.rwuToGrid(p.x, 'x'), this.rwuToGrid(p.y, 'y')].join(',')).join(' '))
       .attr('class', (d) => {
         if ((this.currentSpace && d.face_id === this.currentSpace.face_id) ||
