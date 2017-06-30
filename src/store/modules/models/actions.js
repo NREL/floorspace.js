@@ -180,7 +180,7 @@ export default {
     const img = new Image();
 
     img.onload = () => {
-      const image = new factory.Image(payload.src, name);
+      const image = new factory.Image(name, payload.src);
 
       image.height = payload.height;
       image.width = payload.width;
