@@ -1,10 +1,15 @@
 const api = {
     doImport (data) {
-        window.application.$store.dispatch('importModel', {
-            clientWidth: document.getElementById('svg-grid').clientWidth,
-            clientHeight: document.getElementById('svg-grid').clientHeight,
-            data: JSON.parse(data)
-        });
+        try { 
+            window.application.$store.dispatch('importModel', {
+                clientWidth: document.getElementById('svg-grid').clientWidth,
+                clientHeight: document.getElementById('svg-grid').clientHeight,
+                data: JSON.parse(data)
+            });
+        }catch(err){
+            return false;
+        }
+        return true;
     },
 
     doExport () {
@@ -13,5 +18,6 @@ const api = {
 
     setConfig (config) {
         console.log(config);
+        return true;
     }
 };
