@@ -15,6 +15,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                     <navigation :class="{ 'disabled-component': tool === 'Map' }"></navigation>
                 </resize>
                 <main>
+                  <div id="error-text" v-show="error">
+                      <p>{{ error }}</p>
+                  </div>
                     <canvas-view></canvas-view>
                     <grid-view></grid-view>
                 </main>
@@ -29,46 +32,69 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <script>
 
-// this import order is important, if the grid is loaded before the other elements or after the toolbar, it ends up warped
-import Navigation from './components/Navigation'
-import Grid from './components/Grid/Grid'
-import Canvas from './components/Canvas/Canvas'
-import Toolbar from './components/Toolbar'
-import Inspector from './components/Inspector'
-import Library from './components/Library'
-import { Resize, ResizeGroup } from './components/Resize'
+import { mapState } from 'vuex';
 
-import { mapState } from 'vuex'
+// this import order is important, if the grid is loaded before the other elements or after the toolbar, it ends up warped
+import Navigation from './components/Navigation.vue';
+import Grid from './components/Grid/Grid.vue';
+import Canvas from './components/Canvas/Canvas.vue';
+import Toolbar from './components/Toolbar.vue';
+import Inspector from './components/Inspector.vue';
+import Library from './components/Library.vue';
+import { Resize, ResizeGroup } from './components/Resize';
+
 
 export default {
-    name: 'app',
-    data () {
-        return {}
-    },
-    beforeCreate () {
-        this.$store.dispatch('models/initStory');
-    },
-    methods: {
-
-    },
-    computed: {
-        ...mapState({ tool: state => state.application.currentSelections.tool })
-    },
-    components: {
-        'grid-view': Grid,
-        'canvas-view': Canvas,
-        'inspector-view': Inspector,
-        'library': Library,
-        'navigation': Navigation,
-        'toolbar': Toolbar,
-        'resize': Resize,
-        'resize-group': ResizeGroup
-    }
-}
+  name: 'app',
+  data() {
+    return {
+      error: null,
+    };
+  },
+  beforeCreate() {
+    this.$store.dispatch('models/initStory');
+  },
+  mounted() {
+    // App will act as the eventBus for the application
+    this.$on('error', (err) => {
+      this.error = err;
+      setTimeout(() => { this.error = null; }, 5000);
+    });
+  },
+  computed: {
+    ...mapState({ tool: state => state.application.currentSelections.tool }),
+  },
+  components: {
+    'grid-view': Grid,
+    'canvas-view': Canvas,
+    'inspector-view': Inspector,
+    library: Library,
+    navigation: Navigation,
+    toolbar: Toolbar,
+    resize: Resize,
+    'resize-group': ResizeGroup,
+  },
+};
 </script>
 
 <style src="./scss/main.scss" lang="scss"></style>
 <style lang="scss" scoped>
 @import "./scss/config";
+#error-text {
+    position: absolute;
+    top: 1rem;
+    left: 0;
+    right: 0;
+    text-align: center;
+    z-index: 3;
 
+    p {
+        color: $white;
+        background: $secondary;
+        padding: 2px 4px;
+        margin: 10px;
+        border: 2px solid $gray-darkest;
+        display: inline-block;
+    }
+}
 </style>

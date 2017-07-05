@@ -24,6 +24,7 @@ export default function createFaceFromPoints(context, payload) {
         const existingFaceVertices = geometryHelpers.verticesForFaceId(existingFace.id, currentStoryGeometry);
         facePoints = geometryHelpers.setOperation('union', existingFaceVertices, points);
         if (!facePoints) {
+            window.eventBus.$emit('error', "no split faces");
             return;
         }
     } else {
@@ -33,6 +34,7 @@ export default function createFaceFromPoints(context, payload) {
 
     const faceGeometry = validateFaceGeometry(facePoints, context);
     if (!faceGeometry.success) {
+        window.eventBus.$emit('error', faceGeometry.error);
         console.error(faceGeometry.error);
         if (!faceGeometry.error) {
           debugger
@@ -41,7 +43,9 @@ export default function createFaceFromPoints(context, payload) {
     }
 
     // prevent overlapping faces by erasing existing geometry covered by the points defining the new face
-    if (!eraseSelection(facePoints, context)) { return; }
+    if (!eraseSelection(facePoints, context)) {
+      window.eventBus.$emit('error', "no split faces");
+      return; }
 
     // save the face and its descendent geometry
     storeFace(faceGeometry, target, context);
