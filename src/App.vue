@@ -15,8 +15,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                     <navigation :class="{ 'disabled-component': tool === 'Map' }"></navigation>
                 </resize>
                 <main>
-                  <div id="error-text" v-show="error">
-                      <p>{{ error }}</p>
+                  <div id="alert-text" v-show="error || success" :class="{ error, success }">
+                      <p>{{ error || success }}</p>
                   </div>
                     <canvas-view></canvas-view>
                     <grid-view></grid-view>
@@ -49,6 +49,7 @@ export default {
   data() {
     return {
       error: null,
+      success: null,
     };
   },
   beforeCreate() {
@@ -59,6 +60,10 @@ export default {
     this.$on('error', (err) => {
       this.error = err;
       setTimeout(() => { this.error = null; }, 5000);
+    });
+    this.$on('success', (msg) => {
+      this.success = msg;
+      setTimeout(() => { this.success = null; }, 5000);
     });
   },
   computed: {
@@ -80,7 +85,7 @@ export default {
 <style src="./scss/main.scss" lang="scss"></style>
 <style lang="scss" scoped>
 @import "./scss/config";
-#error-text {
+#alert-text {
     position: absolute;
     top: 1rem;
     left: 0;
@@ -90,11 +95,17 @@ export default {
 
     p {
         color: $white;
-        background: $secondary;
         padding: 2px 4px;
         margin: 10px;
         border: 2px solid $gray-darkest;
         display: inline-block;
     }
+    &.success p {
+      background: $primary;
+    }
+    &.error p {
+      background: $secondary;
+    }
 }
+
 </style>

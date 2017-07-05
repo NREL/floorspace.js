@@ -78,20 +78,31 @@ export default {
         importLibraryAsFile (event) {
             const file = event.target.files[0],
                 reader = new FileReader();
+
+
             reader.addEventListener("load", () => {
-                this.$store.dispatch('importLibrary', {
-                    data: JSON.parse(reader.result)
-                });
+              try {
+                  this.$store.dispatch('importLibrary', {
+                      data: JSON.parse(reader.result)
+                  });
+              } catch (e) {
+                window.eventBus.$emit('error', 'Invalid JSON');
+              }
             }, false);
 
             if (file) { reader.readAsText(file); }
         },
         importModel (data) {
+          try {
             this.$store.dispatch('importModel', {
-                clientWidth: document.getElementById('svg-grid').clientWidth,
-                clientHeight: document.getElementById('svg-grid').clientHeight,
-                data: JSON.parse(data)
+              clientWidth: document.getElementById('svg-grid').clientWidth,
+              clientHeight: document.getElementById('svg-grid').clientHeight,
+              data: JSON.parse(data)
             });
+          } catch (e) {
+            window.eventBus.$emit('error', 'Invalid JSON');
+          }
+
         },
         checkTool () {
             // only allow dragging in images mode

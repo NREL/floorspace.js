@@ -27,7 +27,7 @@ export default {
   		const { points } = payload;
   		const eraseResult = eraseSelection(points, context);
       if (!eraseResult) {
-        window.eventBus.$emit('error', "no split faces");
+        window.eventBus.$emit('error', 'Operation cancelled - no split faces');
       }
   	},
 
