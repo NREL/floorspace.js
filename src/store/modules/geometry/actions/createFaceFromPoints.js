@@ -1,20 +1,21 @@
-import factory from './../factory'
-import geometryHelpers from './../helpers'
-import modelHelpers from './../../models/helpers'
+import factory from './../factory';
+import geometryHelpers from './../helpers';
+import modelHelpers from './../../models/helpers';
 
 /*
  * create a face and associated edges and vertices from an array of points
  * associate the face with the space or shading included in the payload
  */
 export default function createFaceFromPoints(context, payload) {
-    const {
-        model_id,
-        points
-    } = payload;
+  const {
+    model_id,
+    points,
+  } = payload;
 
-    // lookup target model and type for face assignment
-    const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'],
-        target = modelHelpers.libraryObjectWithId(context.rootState.models, model_id);
+  if (points.length < 3) { return; }
+  // lookup target model and type for face assignment
+  const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'];
+  const target = modelHelpers.libraryObjectWithId(context.rootState.models, model_id);
 
     // if the target already has an existing face, use the union of the new and existing faces
     const existingFace = target.face_id ? geometryHelpers.faceForId(target.face_id, currentStoryGeometry) : null;
@@ -24,6 +25,7 @@ export default function createFaceFromPoints(context, payload) {
         const existingFaceVertices = geometryHelpers.verticesForFaceId(existingFace.id, currentStoryGeometry);
         facePoints = geometryHelpers.setOperation('union', existingFaceVertices, points);
         if (!facePoints) {
+            window.eventBus.$emit('error', 'Operation cancelled - no split faces');
             return;
         }
     } else {
@@ -33,6 +35,7 @@ export default function createFaceFromPoints(context, payload) {
 
     const faceGeometry = validateFaceGeometry(facePoints, context);
     if (!faceGeometry.success) {
+        window.eventBus.$emit('error', faceGeometry.error);
         console.error(faceGeometry.error);
         if (!faceGeometry.error) {
           debugger
@@ -41,7 +44,10 @@ export default function createFaceFromPoints(context, payload) {
     }
 
     // prevent overlapping faces by erasing existing geometry covered by the points defining the new face
-    if (!eraseSelection(facePoints, context)) { return; }
+    if (!eraseSelection(facePoints, context) && !existingFace) {
+      window.eventBus.$emit('error', 'Operation cancelled - no split faces');
+      return;
+    }
 
     // save the face and its descendent geometry
     storeFace(faceGeometry, target, context);

@@ -9,14 +9,16 @@
 /* eslint-disable no-new */
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
-import store from './store/index'
-import Vue from 'vue'
-import App from './App'
+import Vue from 'vue';
+import store from './store/index';
+import App from './App.vue';
 
 // mount the root vue instance
 window.application = new Vue({
-    store: store,
-    el: '#app',
-    template: '<App/>',
-    components: { App }
-})
+  store,
+  el: '#app',
+  template: '<App/>',
+  components: { App },
+});
+
+window.eventBus = window.application.$children[0];

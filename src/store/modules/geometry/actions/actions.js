@@ -24,9 +24,12 @@ export default {
     * Dispatched by the eraser tool
     */
     eraseSelection (context, payload) {
-		const { points } = payload;
-		eraseSelection(points, context);
-	},
+  		const { points } = payload;
+  		const eraseResult = eraseSelection(points, context);
+      if (!eraseResult) {
+        window.eventBus.$emit('error', 'Operation cancelled - no split faces');
+      }
+  	},
 
     /*
     * Given a dx, dy, and face
