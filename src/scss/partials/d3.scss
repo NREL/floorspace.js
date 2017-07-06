@@ -8,6 +8,10 @@
 
 @import "./../config";
 
+.tool_select polygon {
+  cursor: pointer;
+}
+
 // styling for svg elements created by d3
 // Vue's inline template styling will not work with dynamically created markup
 #grid svg {
@@ -66,7 +70,5 @@
       shape-rendering: crispEdges;
       stroke: $gray-medium;
     }
-    // .tick {
-    //     stroke-width:1px;
-    // }
+
 }
