@@ -384,6 +384,7 @@ export default {
         d3.select(`#text-${d.face_id}`).remove();
 
         if (this.currentTool === 'Select' && !d.previous_story) {
+
           // if a face on the current story is clicked while the Select tool is active
           // lookup its corresponding model (space/shading) and select it
           const model = modelHelpers.modelForFace(this.$store.state.models, d.face_id);
@@ -404,6 +405,7 @@ export default {
       })
       .on('drag', (d) => {
         if (that.currentTool !== 'Select' || d.previous_story) { return; }
+        
         dx += d3.event.dx;
         dy += d3.event.dy;
         d3.select(`#face-${d.face_id}`)
@@ -414,6 +416,7 @@ export default {
       })
       .on('end', (d) => {
         if (this.currentTool !== 'Select' || d.previous_story) { return; }
+
         // when the drag is finished, update the face in the store with the total offset in RWU
         this.$store.dispatch('geometry/moveFaceByOffset', {
           face_id: d.face_id,

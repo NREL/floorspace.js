@@ -81,9 +81,10 @@ export default {
 
 
             reader.addEventListener("load", () => {
+              const result = reader.result;
               try {
                   this.$store.dispatch('importLibrary', {
-                      data: JSON.parse(reader.result)
+                      data: JSON.parse(result)
                   });
               } catch (e) {
                 window.eventBus.$emit('error', 'Invalid JSON');
