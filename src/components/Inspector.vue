@@ -90,15 +90,14 @@ export default {
 <style lang="scss" scoped>
 @import "./../scss/config";
     #inspector {
-        // background-color: $gray-medium-dark;
-        background-color: $gray-medium;
+        background-color: $gray-medium-dark;
         border-left: 1px solid $gray-darkest;
         font-size: .85rem;
 		width: 18rem;
 	    position: absolute;
 	    right: 0;
 	    z-index: 2;
-	    top: 0;
+	    top: 5rem;
 
         .list {
             height: calc(100vh - 4.75rem);

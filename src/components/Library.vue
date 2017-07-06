@@ -8,6 +8,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
 
 <template>
 <section id='library'>
+
     <header>
         <div class="input-text">
             <label>Search</label>
@@ -30,7 +31,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
             <tr>
                 <th v-for="column in columns" @click="sortBy(column)">
                     <span>
-                        <span>{{ displayNameForKey(column) }}</span>
+                        <span>{{ displayNameForKey(column)}}</span>
                         <svg v-show="column === sortKey && sortDescending" viewBox="0 0 10 3" xmlns="http://www.w3.org/2000/svg">
                             <path d="M0 .5l5 5 5-5H0z"/>
                         </svg>
@@ -44,7 +45,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
         </thead>
 
         <tbody>
-            <tr v-for='object in displayObjects' :key="object.id" @click="selectedObject = object" :style="{ 'background-color': (selectedObject && selectedObject.id === object.id) ? '#008500' : '' }"><!-- :class="{ current: selectedObject.id === object.id }" -->
+            <tr v-for='object in displayObjects' :key="object.id" @click="currentObject = object" :class="classForObjectRow(object)">
                 <td v-for="column in columns" @mouseover="toggleError(object, column, true)" @mouseout="toggleError(object, column, false)">
                     <div v-if="errorForObjectAndKey(object, column) && errorForObjectAndKey(object, column).visible " class="tooltip-error">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14">
@@ -68,6 +69,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
                             <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
                         </svg>
                     </div>
+
                 </td>
                 <td class="destroy">
                     <svg @click="destroyObject(object)" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
@@ -82,234 +84,188 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
 </template>
 
 <script>
-import { mapState } from 'vuex';
-import helpers from './../store/modules/models/helpers';
+import helpers from './../store/modules/models/helpers'
 
 const Huebee = require('huebee');
-
 export default {
-  name: 'library',
-  data() {
-    return {
-      search: '',
-      sortKey: 'id',
-      sortDescending: true,
-      type: null, // object type being viewed
-      validationErrors: [],
-      huebs: {},
-    };
-  },
-  mounted() {
-    // initialize the library to view objects of the same type being viewed in the navigation
-    this.type = this.mode;
-    this.configurePickers();
-  },
-  computed: {
-    ...mapState({
-      mode: state => state.application.currentSelections.mode,
-      stories: state => state.models.stories,
-    }),
-    // current selection getters and setters - these dispatch actions to update the data store when a new item is selected
-    currentStory: {
-      get() { return this.$store.state.application.currentSelections.story; },
-      set(item) { this.$store.dispatch('application/setCurrentStory', { story: item }); },
+    name: 'library',
+    data() {
+        return {
+            search: '',
+            sortKey: 'id',
+            sortDescending: true,
+            type: null,
+            validationErrors: [],
+            huebs: {}
+        };
     },
-    currentSpace: {
-      get() { return this.$store.state.application.currentSelections.space; },
-      set(item) { this.$store.dispatch('application/setCurrentSpace', { space: item }); },
+    mounted () {
+        this.type = "spaces";
+        this.configurePickers();
     },
-    currentShading: {
-      get() { return this.$store.state.application.currentSelections.shading; },
-      set(item) { this.$store.dispatch('application/setCurrentShading', { shading: item }); },
-    },
-    currentImage: {
-      get() { return this.$store.state.application.currentSelections.image; },
-      set(item) { this.$store.dispatch('application/setCurrentImage', { image: item }); },
-    },
-    currentThermalZone: {
-      get() { return this.$store.state.application.currentSelections.thermal_zone; },
-      set(item) { this.$store.dispatch('application/setCurrentThermalZone', { thermal_zone: item }); },
-    },
-    currentBuildingUnit: {
-      get() { return this.$store.state.application.currentSelections.building_unit; },
-      set(item) { this.$store.dispatch('application/setCurrentBuildingUnit', { building_unit: item }); },
-    },
-    currentSpaceType: {
-      get() { return this.$store.state.application.currentSelections.space_type; },
-      set(item) { this.$store.dispatch('application/setCurrentSpaceType', { space_type: item }); },
-    },
-    /*
-    * returns the currently selected object in the library
-    * when set, dispatches an action to update the application's currentSelections in the store
-    */
-    selectedObject: {
-      get() {
-        if (this.type === 'story') {
-          return this.currentStory;
+    computed: {
+        /*
+        * returns the currently selected object, giving lowest priority to stories because a story must be selected to select a lower level object
+        * when set, dispatches an action to update the application's currentSelections in the store
+        */
+        currentObject: {
+            get () {
+                switch (this.type) {
+                    case 'stories':
+                        return this.$store.state.application.currentSelections.story;
+                    case 'spaces':
+                        return this.$store.state.application.currentSelections.space;
+                    case 'shading':
+                        return this.$store.state.application.currentSelections.shading;
+                    case 'building_units':
+                        return this.$store.state.application.currentSelections.building_unit;
+                    case 'thermal_zones':
+                        return this.$store.state.application.currentSelections.thermal_zone;
+                    case 'space_types':
+                        return this.$store.state.application.currentSelections.space_type;
+                }
+            },
+            set (object) {
+                switch (this.type) {
+                    case 'stories':
+                        this.$store.dispatch('application/setCurrentStory', { 'story': object });
+                        break;
+                    case 'spaces':
+                        this.$store.dispatch('application/setCurrentSpace', { 'space': object });
+                        break;
+                    case 'shading':
+                        this.$store.dispatch('application/setCurrentShading', { 'shading': object });
+                        break;
+                    case 'building_units':
+                        this.$store.dispatch('application/setCurrentBuildingUnit', { 'building_unit': object });
+                        break;
+                    case 'thermal_zones':
+                        this.$store.dispatch('application/setCurrentThermalZone', { 'thermal_zone': object });
+                        break;
+                    case 'space_types':
+                        this.$store.dispatch('application/setCurrentSpaceType', { 'space_type': object });
+                        break;
+                }
+            }
+        },
+
+        /*
+        * state.models.library extended to include stories, spaces, shading and images
+        * objects are deep copies to avoid mutating the store
+        */
+        extendedLibrary () {
+            var spaces = [],
+                shading = [],
+                images = [];
+
+            for (var i = 0; i < this.$store.state.models.stories.length; i++) {
+                spaces = spaces.concat(this.$store.state.models.stories[i].spaces);
+                shading = shading.concat(this.$store.state.models.stories[i].shading);
+                images = images.concat(this.$store.state.models.stories[i].images);
+            }
+
+            return JSON.parse(JSON.stringify({
+                ...this.$store.state.models.library,
+                stories: this.$store.state.models.stories,
+                spaces: spaces,
+                shading: shading,
+                images: images
+            }));
+        },
+
+        /*
+        * return all objects in the extended library for a given type to be displayed at one time
+        * filters by the search term
+        * objects are deep copies to avoid mutating the store
+        */
+        displayObjects () {
+            var objects = this.extendedLibrary[this.type] || [];
+            return objects
+                .filter((object) => {
+                    // check if the lowercased key values on the object are matches for the search
+                    return Object.keys(object).find( key => ~String(this.valueForKey(object, key)).toLowerCase().indexOf(this.search.toLowerCase()) )
+
+                })
+                .sort((a, b) => {
+                    return this.sortDescending ? a[this.sortKey] > b[this.sortKey] : a[this.sortKey] < b[this.sortKey]
+                });
+        },
+
+        /*
+        * return all unique non private keys for the set of displayObjects
+        */
+        columns () {
+            const columns = [];
+            this.displayObjects.forEach((o) => {
+                Object.keys(o).forEach((k) => {
+                    if (!~columns.indexOf(k) && !this.keyIsPrivate(this.type, k)) { columns.push(k); }
+                })
+            });
+            // look up additional keys (computed properties)
+            const additionalKeys = helpers.defaultKeysForType(this.type)
+            additionalKeys.forEach((k) => {
+                if (!~columns.indexOf(k) && !this.keyIsPrivate(this.type, k)) { columns.push(k); }
+            });
+            return columns;
         }
-        return this.currentImage ||
-          this.currentSpace ||
-          this.currentShading ||
-          this.currentBuildingUnit ||
-          this.currentThermalZone ||
-          this.currentSpaceType;
-      },
-      set(item) {
-        switch (this.type) {
-          case 'stories':
-            this.currentStory = item;
-            break;
-          case 'building_units':
-            this.currentBuildingUnit = item;
-            break;
-          case 'thermal_zones':
-            this.currentThermalZone = item;
-            break;
-          case 'space_types':
-            this.currentSpaceType = item;
-            break;
-          case 'spaces':
-            this.currentStory = this.stories.find(s => s.spaces.find(sp => sp.id === item.id));
-            this.currentSpace = item;
-            break;
-          case 'shading':
-            this.currentStory = this.stories.find(s => s.spaces.find(sp => sp.id === item.id));
-            this.currentShading = item;
-            break;
-          case 'images':
-            this.currentStory = this.stories.find(s => s.images.find(img => img.id === img.id));
-            this.currentImage = item;
-            break;
-          default:
-            break;
-        }
-      },
     },
+    methods: {
+        // initialize an empty story, space, shading, building_unit, or thermal_zone depending on the selected mode
+        createItem () {
+            switch (this.type) {
+                case 'stories':
+                    this.$store.dispatch('models/initStory');
+                    return;
+                case 'spaces':
+                    this.$store.dispatch('models/initSpace', {
+                        story: this.$store.state.application.currentSelections.story
+                    });
+                    break;
+                case 'shading':
+                    this.$store.dispatch('models/initShading', {
+                        story: this.$store.state.application.currentSelections.story
+                    });
+                    break;
+                case 'building_units':
+                case 'thermal_zones':
+                case 'space_types':
+                case 'construction_sets':
+                case 'windows':
+                case 'daylighting_controls':
+                    this.$store.dispatch('models/createObjectWithType', {
+                        type: this.type,
+                    });
+                    break;
+            }
+            this.currentObject = this.displayObjects[this.displayObjects.length - 1];
+        },
 
-  /*
-  * state.models.library extended to include stories, spaces, shading and images
-  * objects are deep copies to avoid mutating the store
-  */
-    extendedLibrary() {
-      let spaces = [];
-      let shading = [];
-      let images = [];
+        /*
+        * returns the formatted displayName for types defined in the library config
+        */
+        displayTypeForType (type) { return helpers.map[type].displayName; },
 
-      for (let i = 0; i < this.$store.state.models.stories.length; i++) {
-        spaces = spaces.concat(this.$store.state.models.stories[i].spaces);
-        shading = shading.concat(this.$store.state.models.stories[i].shading);
-        images = images.concat(this.$store.state.models.stories[i].images);
-      }
+        /*
+        * returns the formatted displayName for keys defined in the library config
+        * only returns null for private keys - use to check if a key is private
+        * custom user defined keys which do not exist in the config keymap will be returned unchanged
+        */
+        displayNameForKey (key) { return helpers.displayNameForKey(this.type, key); },
 
-      return JSON.parse(JSON.stringify({
-        ...this.$store.state.models.library,
-        stories: this.$store.state.models.stories,
-        spaces,
-        shading,
-        images,
-      }));
-    },
+        /*
+        * returns the readonly/private properties for keys defined in the library config
+        * returns false for custom user defined keys
+        */
+        keyIsReadonly (object, key) { return helpers.keyIsReadonly(this.type, key); },
+        keyIsPrivate (object, key) { return helpers.keyIsPrivate(this.type, key); },
 
-    /*
-    * return all objects in the extended library for a given type to be displayed at one time
-    * filters by the search term
-    * objects are deep copies to avoid mutating the store
-    */
-    displayObjects() {
-      return (this.extendedLibrary[this.type] || [])
-        .filter(object =>
-          // check if the value for any key on the object contains the search term
-          Object.keys(object).some((key) => {
-            // coerce key values to strings, use lowercase version of search term and key value
-            const value = String(this.valueForKey(object, key)).toLowerCase();
-            return value.includes(this.search.toLowerCase());
-          }))
-        .sort((a, b) => {
-          if (a[this.sortKey] === b[this.sortKey]) { return 0; }
-          if (this.sortDescending) {
-            return a[this.sortKey] > b[this.sortKey] ? -1 : 1;
-          }
-          return a[this.sortKey] < b[this.sortKey] ? -1 : 1;
-        });
-    },
-
-    /*
-    * return all unique non private keys for the set of displayObjects
-    */
-    columns() {
-      const columns = [];
-      this.displayObjects.forEach((o) => {
-        Object.keys(o).forEach((k) => {
-          if ((columns.indexOf(k) === -1) && !this.keyIsPrivate(this.type, k)) { columns.push(k); }
-        });
-      });
-      // look up additional keys (computed properties)
-      const additionalKeys = helpers.defaultKeysForType(this.type);
-      additionalKeys.forEach((k) => {
-        if ((columns.indexOf(k) === -1) && !this.keyIsPrivate(this.type, k)) { columns.push(k); }
-      });
-      return columns;
-    },
-  },
-  methods: {
-    // initialize an empty story, space, shading, building_unit, or thermal_zone depending on the selected mode
-    createItem() {
-      switch (this.type) {
-        case 'stories':
-          this.$store.dispatch('models/initStory');
-          return;
-        case 'spaces':
-          this.$store.dispatch('models/initSpace', {
-            story: this.$store.state.application.currentSelections.story,
-          });
-          break;
-        case 'shading':
-          this.$store.dispatch('models/initShading', {
-            story: this.$store.state.application.currentSelections.story,
-          });
-          break;
-        case 'building_units':
-        case 'thermal_zones':
-        case 'space_types':
-        case 'construction_sets':
-        case 'windows':
-        case 'daylighting_controls':
-          this.$store.dispatch('models/createObjectWithType', {
-            type: this.type,
-          });
-          break;
-        default:
-          break;
-      }
-      this.selectedObject = this.displayObjects[this.displayObjects.length - 1];
-    },
-
-    /*
-    * returns the formatted displayName for types defined in the library config
-    */
-    displayTypeForType(type) { return helpers.map[type].displayName; },
-
-    /*
-    * returns the formatted displayName for keys defined in the library config
-    * only returns null for private keys - use to check if a key is private
-    * custom user defined keys which do not exist in the config keymap will be returned unchanged
-    */
-    displayNameForKey(key) { return helpers.displayNameForKey(this.type, key); },
-
-    /*
-    * returns the readonly/private properties for keys defined in the library config
-    * returns false for custom user defined keys
-    */
-    keyIsReadonly(object, key) { return helpers.keyIsReadonly(this.type, key); },
-    keyIsPrivate(object, key) { return helpers.keyIsPrivate(this.type, key); },
-
-    /*
-    * returns the result of the getter defined for the key if one exists, otherwise
-    * returns the raw string value at obj[key] for custom user defined keys
-    */
-    valueForKey (object, key) {
-        return this.errorForObjectAndKey(object, key) ? this.errorForObjectAndKey(object, key).value : helpers.valueForKey(object, this.$store.state, this.type, key);
-    },
+        /*
+        * returns the result of the getter defined for the key if one exists, otherwise
+        * returns the raw string value at obj[key] for custom user defined keys
+        */
+        valueForKey (object, key) {
+            return this.errorForObjectAndKey(object, key) ? this.errorForObjectAndKey(object, key).value : helpers.valueForKey(object, this.$store.state, this.type, key);
+        },
 
         /*
         * dispatch an update action for the supplied object
@@ -386,21 +342,21 @@ export default {
                 });
             }
         },
-        // classForObjectRow (object) {
-        //     var classList = "";
-        //     if (this.errorForObjectAndKey(object, null)) {
-        //         classList += " error"
-        //     }
-        //     if (this.selectedObject && this.selectedObject.id === object.id) {
-        //         classList += " current"
-        //     }
-        //     return classList;
-        // },
+        classForObjectRow (object) {
+            var classList = "";
+            if (this.errorForObjectAndKey(object, null)) {
+                classList += " error"
+            }
+            if (this.currentObject && this.currentObject.id === object.id) {
+                classList += " current"
+            }
+            return classList;
+        },
 
-    sortBy(key) {
-        this.sortDescending = this.sortKey === key ? !this.sortDescending : true;
-        this.sortKey = key;
-    },
+        sortBy (key) {
+            this.sortDescending = this.sortKey === key ? !this.sortDescending : true;
+            this.sortKey = key;
+        },
 
         inputTypeForKey (key) {
             return helpers.inputTypeForKey(this.type, key);
@@ -422,16 +378,17 @@ export default {
                 this.huebs[object_id].on('change', this.huebs[object_id].handler);
             }
         }
-  },
-  watch: {
-    displayObjects() { this.$nextTick(this.configurePickers); },
-    type() {
-      this.search = '';
-      this.sortKey = 'id';
-      this.sortDescending = true;
     },
-  },
-};
+    watch: {
+        displayObjects () { this.$nextTick(this.configurePickers); },
+        type () {
+            this.search = '';
+            this.sortKey = 'id';
+            this.sortDescending = true;
+        }
+
+    }
+}
 </script>
 
 <style lang='scss' scoped>
@@ -496,7 +453,7 @@ export default {
             }
 
             &.current {
-                background: red;//$gray-medium-light;
+                background: $gray-medium-light;
             }
 
             .input-select {

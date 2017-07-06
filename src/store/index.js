@@ -1,33 +1,35 @@
-import Vue from 'vue';
-import Vuex from 'vuex';
-
-// modules
-import application from './modules/application/index';
-import project from './modules/project/index';
-import geometry from './modules/geometry/index';
-import models from './modules/models/index';
-
-import exportData from './utilities/export';
-import importModel from './utilities/importModel';
-import importLibrary from './utilities/importLibrary';
-import mutations from './mutations';
-
+import Vue from 'vue'
+import Vuex from 'vuex'
 Vue.use(Vuex);
 
-export default new Vuex.Store({
-  strict: process.env.NODE_ENV !== 'production',
-  modules: {
-    application,
-    project,
-    geometry,
-    models,
-  },
-  getters: {
-    exportData,
-  },
-  actions: {
-    importModel,
-    importLibrary,
-  },
-  mutations,
+// modules
+import application from './modules/application/index.js'
+import project from './modules/project/index.js'
+import geometry from './modules/geometry/index.js'
+import models from './modules/models/index.js'
+
+import exportData from './utilities/export.js'
+import importModel from './utilities/importModel.js'
+import importLibrary from './utilities/importLibrary.js'
+import mutations from './mutations.js'
+
+const store = new Vuex.Store({
+    strict: process.env.NODE_ENV !== 'production',
+    modules: {
+        application: application,
+        project: project,
+        geometry: geometry,
+        models: models
+    },
+    getters: {
+        exportData: exportData
+    },
+    actions: {
+        importModel: importModel,
+        importLibrary: importLibrary
+    },
+    mutations: mutations
 });
+
+
+export default store;

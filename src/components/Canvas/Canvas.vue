@@ -41,9 +41,7 @@ export default {
 @import "./../../scss/config";
 
 #canvas {
-    background: white;
-    height: 100%;
-    width: 100%;
+    background: white;    
 }
 
 </style>

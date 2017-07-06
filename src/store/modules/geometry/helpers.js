@@ -69,7 +69,6 @@ const helpers = {
     // given an array of points return the area of the space they enclose
     areaOfSelection(points) {
 		const paths = points.map(p => ({ X: p.x, Y: p.y }))
-		// NOTE: clipper will sometimes return 0 area for self intersecting paths, this is fine because they'll fail validation regardless
 		return ClipperLib.JS.AreaOfPolygon(paths);
 	},
 
@@ -142,85 +141,12 @@ const helpers = {
             dy = Math.abs(p1.y - p2.y);
         return Math.sqrt((dx * dx) + (dy * dy));
     },
-
-	intersectionOfLines(p1, p2, p3, p4) {
-	    var eps = 0.0000001;
-
-	    const between = (a, b, c) => {
-			return ((a - eps) <= b) && (b <= (c + eps));
-		}
-
-        var x = ((p1.x * p2.y - p1.y * p2.x) * (p3.x - p4.x) - (p1.x - p2.x) * (p3.x * p4.y - p3.y * p4.x)) /
-            ((p1.x - p2.x) * (p3.y - p4.y) - (p1.y - p2.y) * (p3.x - p4.x));
-        var y = ((p1.x * p2.y - p1.y * p2.x) * (p3.y - p4.y) - (p1.y - p2.y) * (p3.x * p4.y - p3.y * p4.x)) /
-            ((p1.x - p2.x) * (p3.y - p4.y) - (p1.y - p2.y) * (p3.x - p4.x));
-
-        if (isNaN(x) || isNaN(y) ||
-			this.distanceBetweenPoints({ x, y }, p1) < eps ||
-			this.distanceBetweenPoints({ x, y }, p2) < eps ||
-			this.distanceBetweenPoints({ x, y }, p3) < eps ||
-			this.distanceBetweenPoints({ x, y }, p4) < eps) {
-            return false;
-        } else {
-            if (p1.x >= p2.x) {
-                if (!between(p2.x, x, p1.x)) {
-                    return false;
-                }
-            } else {
-                if (!between(p1.x, x, p2.x)) {
-                    return false;
-                }
-            }
-            if (p1.y >= p2.y) {
-                if (!between(p2.y, y, p1.y)) {
-                    return false;
-                }
-            } else {
-                if (!between(p1.y, y, p2.y)) {
-                    return false;
-                }
-            }
-            if (p3.x >= p4.x) {
-                if (!between(p4.x, x, p3.x)) {
-                    return false;
-                }
-            } else {
-                if (!between(p3.x, x, p4.x)) {
-                    return false;
-                }
-            }
-            if (p3.y >= p4.y) {
-                if (!between(p4.y, y, p3.y)) {
-                    return false;
-                }
-            } else {
-                if (!between(p3.y, y, p4.y)) {
-                    return false;
-                }
-            }
-        }
-        return {
-            x: x,
-            y: y
-        };
-
-	},
-
-
-    // ************************************ GEOMETRY LOOKUP ************************************ //
+     // ************************************ GEOMETRY LOOKUP ************************************ //
 
     // given a vertex id, find the vertex on the geometry set with that id
     vertexForId(vertex_id, geometry) {
         return geometry.vertices.find(v => v.id === vertex_id);
     },
-
-    // given a set of coordinates, find the vertex on the geometry set within their tolerance zone
-	vertexForCoordinates (coordinates, snapTolerance, geometry) {
-		const { x, y } = coordinates;
-		// tolerance is calculated based on the grid's horizontal range (RWU)
-		const tolerance = snapTolerance;
-	    return geometry.vertices.find(v => this.distanceBetweenPoints(coordinates, v) < tolerance );
-	},
 
     // given a face id, returns the populated vertex objects reference by edges on that face
     verticesForFaceId(face_id, geometry) {

@@ -11,16 +11,18 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     <div @click="$emit('close')" class="overlay"></div>
     <div class="modal">
         <header>
-            <h2>Quick Start</h2>
+            <h2>Enable the Map?</h2>
+            <svg @click="$emit('close')" class="close" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
+            </svg>
         </header>
 
         <div class="content">
-            <p>Choose to either open an existing floorplan, start a new floorplan without a map, or start a new floorplan with a geolocated map.</p>
-
-            <button @click="$refs.importInput.click()" id="import">Open Floorplan</button>
-            <button @click="mapEnabled = false; mapVisible = false; $emit('close')">New Floorplan</button>
-            <button @click="mapEnabled = true; tool='Map'; $emit('close')">New Floorplan w/ Map</button>
+            <p>If you would like to geolocate your floorplan, place the map at your desired location now.</p>
+            <button @click="mapEnabled = true; tool='Map'; $emit('close')">Place Map</button>
+            <button @click="mapEnabled = false; mapVisible = false; $emit('close')">Disable Map</button>
             <input ref="importInput" @change="importModelAsFile" type="file"/>
+            <button @click="$refs.importInput.click()" id="import">Open Floorplan</button>
         </div>
     </div>
 </aside>
@@ -29,42 +31,44 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <script>
 
 export default {
-  name: 'MapModal',
-  data() {
-    return {
-      address: '',
-    };
-  },
-  computed: {
-    mapEnabled: {
-      get() { return this.$store.state.project.map.enabled; },
-      set(val) { this.$store.dispatch('project/setMapEnabled', { enabled: val }); },
+    name: 'MapModal',
+    data () {
+        return {
+            address: ""
+        }
     },
-    tool: {
-      get() { return this.$store.state.application.currentSelections.tool; },
-      set(val) { this.$store.dispatch('application/setApplicationTool', { tool: val }); },
-    },
-  },
-  methods: {
-    importModelAsFile(event) {
-      const file = event.target.files[0];
-      const reader = new FileReader();
-      reader.addEventListener('load', () => {
-        this.importModel(reader.result);
-      }, false);
+    computed: {
+        mapEnabled: {
+            get () { return this.$store.state.project.map.enabled; },
+            set (val) { this.$store.dispatch('project/setMapEnabled', { enabled: val }); }
+        },
 
-      if (file) { reader.readAsText(file); }
+        tool: {
+            get () { return this.$store.state.application.currentSelections.tool; },
+            set (val) { this.$store.dispatch('application/setApplicationTool', { tool: val }); }
+        }
     },
-    importModel(data) {
-      this.$store.dispatch('importModel', {
-        clientWidth: document.getElementById('svg-grid').clientWidth,
-        clientHeight: document.getElementById('svg-grid').clientHeight,
-        data: JSON.parse(data),
-      });
-      this.$emit('close');
-    },
-  },
-};
+    methods: {
+        importModelAsFile (event) {
+            const file = event.target.files[0],
+                reader = new FileReader();
+            reader.addEventListener("load", () => {
+                this.importModel(reader.result);
+            }, false);
+
+            if (file) { reader.readAsText(file); }
+        },
+        importModel (data) {
+            this.$store.dispatch('importModel', {
+                clientWidth: document.getElementById('svg-grid').clientWidth,
+                clientHeight: document.getElementById('svg-grid').clientHeight,
+                data: JSON.parse(data)
+            });
+            this.$emit('close');
+        }
+    }
+
+}
 </script>
 
 <style lang="scss" scoped>

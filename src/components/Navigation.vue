@@ -11,7 +11,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     <section id="selections">
         <div class='input-select'>
             <select v-model='mode'>
-                <option v-for='mode in modes' :value="mode">{{displayNameForMode(mode)}}</option>
+                <option v-for='mode in modes' :value="mode">{{ displayNameForMode(mode) }}</option>
             </select>
             <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
                 <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
@@ -19,7 +19,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </div>
 
         <template v-if="mode=='images'">
-            <input ref="fileInput" @change="uploadImage" type="file"/>
+            <input ref="fileInput" @change="uploadImage" type="file" multiple/>
             <button @click="$refs.fileInput.click()">
                 <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
                     <path d="M208 122h-74V48c0-3.534-2.466-6.4-6-6.4s-6 2.866-6 6.4v74H48c-3.534 0-6.4 2.466-6.4 6s2.866 6 6.4 6h74v74c0 3.534 2.466 6.4 6 6.4s6-2.866 6-6.4v-74h74c3.534 0 6.4-2.466 6.4-6s-2.866-6-6.4-6z"/>
@@ -28,7 +28,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             </button>
         </template>
 
-        <button v-else @click="createItem()">
+        <button v-else @click="createItem(mode)">
             <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
                 <path d="M208 122h-74V48c0-3.534-2.466-6.4-6-6.4s-6 2.866-6 6.4v74H48c-3.534 0-6.4 2.466-6.4 6s2.866 6 6.4 6h74v74c0 3.534 2.466 6.4 6 6.4s6-2.866 6-6.4v-74h74c3.534 0 6.4-2.466 6.4-6s-2.866-6-6.4-6z"/>
             </svg>
@@ -43,7 +43,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             </svg>
             {{displayNameForMode('stories')}}
         </button>
-        <span>
+        <span @click="clearSubSelections">
             {{ currentStory.name }}
             <template v-if="currentSubSelection">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path d="M.5 0v14l11-7-11-7z"/></svg>
@@ -64,7 +64,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </section>
 
         <section id="subselection-list">
-            <div v-for="item in items" :key="item.id" :class="{ active: currentSubSelection && currentSubSelection.id === item.id }" @click="selectItem(item)" :style="{'background-color': item && currentSubSelection && currentSubSelection.id === item.id ? item.color : ''}">
+            <div v-for="item in items" :key="item.id" :class="{ active: currentSubSelection && currentSubSelection.id === item.id }" @click="selectItem(item, mode)" :style="{'background-color': item && currentSubSelection && currentSubSelection.id === item.id ? item.color : ''}">
                 <span :style="{'background-color': item && item.color }"></span>
                 {{item.name}}
                 <svg @click="destroyItem(item)" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
@@ -78,247 +78,263 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 </template>
 
 <script>
-import { mapState } from 'vuex';
-import applicationHelpers from './../store/modules/application/helpers';
-import modelHelpers from './../store/modules/models/helpers';
+import { mapState } from 'vuex'
+import modelHelpers from './../store/modules/models/helpers'
+import applicationHelpers from './../store/modules/application/helpers'
 
 export default {
-  name: 'navigation',
-  data() {
-    return {};
-  },
-  computed: {
-    ...mapState({
-      // available model types
-      modes: state => state.application.modes,
+    name: 'navigation',
+    data() {
+        return { };
+    },
+    computed: {
+        /*
+        * arrays of all stories, building_units, space_types, and thermal_zones (top level)
+        */
+        ...mapState({
+            building_units: state => state.models.library.building_units,
+            space_types: state => state.models.library.space_types,
+            thermal_zones: state => state.models.library.thermal_zones,
 
-      // top level models
-      stories: state => state.models.stories,
-      building_units: state => state.models.library.building_units,
-      space_types: state => state.models.library.space_types,
-      thermal_zones: state => state.models.library.thermal_zones,
+            max_x: state => state.project.view.max_x,
+            max_y: state => state.project.view.max_y,
+            min_x: state => state.project.view.min_x,
+            min_y: state => state.project.view.min_y,
 
-      // currentStory's child spaces, shading, and images
-      spaces: state => state.application.currentSelections.story.spaces,
-      shading: state => state.application.currentSelections.story.shading,
-      images: state => state.application.currentSelections.story.images,
+            scaleX: state => state.application.scale.x,
+            scaleY: state => state.application.scale.y,
+        }),
 
-      // for image upload placement
-      max_x: state => state.project.view.max_x,
-      max_y: state => state.project.view.max_y,
-      min_x: state => state.project.view.min_x,
-      min_y: state => state.project.view.min_y,
-      scaleX: state => state.application.scale.x,
-      scaleY: state => state.application.scale.y,
-    }),
+        stories() { return this.$store.state.models.stories; },
 
-    // list items to display for current mode
-    items() { return this[this.mode]; },
-    mode: {
-      get() { return this.$store.state.application.currentSelections.mode; },
-      set(mode) { this.$store.dispatch('application/setApplicationMode', { mode }); },
-    },
+        // spaces, shading, images for currently selected story
+        spaces () { return this.$store.state.application.currentSelections.story.spaces; },
+        shading () { return this.$store.state.application.currentSelections.story.shading; },
+        images () { return this.$store.state.application.currentSelections.story.images; },
 
-    /*
-    * current selection getters and setters
-    * these dispatch actions to update the data store when a new item is selected
-    */
-    currentStory: {
-      get() { return this.$store.state.application.currentSelections.story; },
-      set(item) { this.$store.dispatch('application/setCurrentStory', { story: item }); },
-    },
-    currentSpace: {
-      get() { return this.$store.state.application.currentSelections.space; },
-      set(item) { this.$store.dispatch('application/setCurrentSpace', { space: item }); },
-    },
-    currentShading: {
-      get() { return this.$store.state.application.currentSelections.shading; },
-      set(item) { this.$store.dispatch('application/setCurrentShading', { shading: item }); },
-    },
-    currentImage: {
-      get() { return this.$store.state.application.currentSelections.image; },
-      set(item) { this.$store.dispatch('application/setCurrentImage', { image: item }); },
-    },
-    currentThermalZone: {
-      get() { return this.$store.state.application.currentSelections.thermal_zone; },
-      set(item) { this.$store.dispatch('application/setCurrentThermalZone', { thermal_zone: item }); },
-    },
-    currentBuildingUnit: {
-      get() { return this.$store.state.application.currentSelections.building_unit; },
-      set(item) { this.$store.dispatch('application/setCurrentBuildingUnit', { building_unit: item }); },
-    },
-    currentSpaceType: {
-      get() { return this.$store.state.application.currentSelections.space_type; },
-      set(item) { this.$store.dispatch('application/setCurrentSpaceType', { space_type: item }); },
-    },
-    currentSubSelection() {
-      return this.currentImage ||
-        this.currentSpace ||
-        this.currentShading ||
-        this.currentBuildingUnit ||
-        this.currentThermalZone ||
-        this.currentSpaceType;
-    },
-  },
-  methods: {
-    uploadImage(event) {
-      const files = event.target.files;
-      const that = this;
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const reader = new FileReader();
+        // list items to display for current mode
+        items () {
+            var items = [];
+            switch (this.mode) {
+                case 'spaces':
+                    items = this.spaces;
+                    break;
+                case 'shading':
+                    items = this.shading;
+                    break;
+                case 'building_units':
+                    items = this.building_units;
+                    break;
+                case 'thermal_zones':
+                    items = this.thermal_zones;
+                    break;
+                case 'space_types':
+                    items = this.space_types;
+                    break;
+                case 'images':
+                    items = this.images;
+                    break;
+            }
+            return items;
+        },
+        mode: {
+            get () { return this.$store.state.application.currentSelections.mode; },
+            set (mode) { this.$store.dispatch('application/setApplicationMode', { 'mode': mode }); }
+        },
+        modes () { return this.$store.state.application.modes; },
 
-        reader.addEventListener('load', () => {
-          const image = new Image();
-          image.onload = () => {
-            const pxPerRWU = (document.getElementById('grid').clientWidth / (that.max_x - that.min_x));
-            const rwuHeight = (image.height / pxPerRWU) / 4;
-            const rwuWidth = (image.width / pxPerRWU) / 4;
+        /*
+        * current selection getters and setters
+        * these dispatch actions to update the data store when a new item is selected
+        */
+        currentStory: {
+            get () { return this.$store.state.application.currentSelections.story; },
+            set (item) { this.$store.dispatch('application/setCurrentStory', { 'story': item }); }
+        },
+        currentSpace: {
+            get () { return this.$store.state.application.currentSelections.space; },
+            set (item) { this.$store.dispatch('application/setCurrentSpace', { 'space': item }); }
+        },
+        currentShading: {
+            get () { return this.$store.state.application.currentSelections.shading; },
+            set (item) { this.$store.dispatch('application/setCurrentShading', { 'shading': item }); }
+        },
+        currentImage: {
+            get () { return this.$store.state.application.currentSelections.image; },
+            set (item) { this.$store.dispatch('application/setCurrentImage', { 'image': item }); }
+        },
+        currentThermalZone: {
+            get () { return this.$store.state.application.currentSelections.thermal_zone; },
+            set (item) { this.$store.dispatch('application/setCurrentThermalZone', { 'thermal_zone': item }); }
+        },
+        currentBuildingUnit: {
+            get () { return this.$store.state.application.currentSelections.building_unit; },
+            set (item) { this.$store.dispatch('application/setCurrentBuildingUnit', { 'building_unit': item }); }
+        },
+        currentSpaceType: {
+            get () { return this.$store.state.application.currentSelections.space_type; },
+            set (item) { this.$store.dispatch('application/setCurrentSpaceType', { 'space_type': item }); }
+        },
+        currentSubSelection () {
+            switch (this.mode) {
+                case 'stories':
+                    return;
+                case 'images':
+                    return this.currentImage;
+                case 'spaces':
+                    return this.currentSpace;
+                case 'shading':
+                    return this.currentShading;
+                case 'building_units':
+                    return this.currentBuildingUnit;
+                case 'thermal_zones':
+                    return this.currentThermalZone;
+                case 'space_types':
+                    return this.currentSpaceType;
+            }
+        }
 
-            that.$store.dispatch('models/createImageForStory', {
-              story_id: that.currentStory.id,
-              src: image.src,
-              // TODO: unique name
-              name: modelHelpers.generateName(that.$store.state.models, 'images', that.currentStory),
-              // translate image dimensions into rwu
-              height: rwuHeight,
-              width: rwuWidth,
-              x: that.min_x,
-              y: that.max_y,
-            });
-          };
-          image.src = reader.result;
-        }, false);
-        if (file) { reader.readAsDataURL(file); }
-      }
     },
+    methods: {
+        uploadImage (event) {
+            for (let i = 0; i < event.target.files.length; i++) {
+                const file = event.target.files[i],
+                    reader = new FileReader();
 
-    /*
-    * initialize an empty space, shading, building_unit, or thermal_zone depending on the selected mode
-    * if initializing a story, "story" will be passed in as the mode argument
-    */
-    createItem(mode = this.mode) {
-      switch (mode) {
-        case 'stories':
-          this.$store.dispatch('models/initStory');
-          return;
-        case 'spaces':
-          this.$store.dispatch('models/initSpace', { story: this.currentStory });
-          break;
-        case 'shading':
-          this.$store.dispatch('models/initShading', { story: this.currentStory });
-          break;
-        case 'building_units':
-        case 'thermal_zones':
-        case 'space_types':
-          this.$store.dispatch('models/createObjectWithType', { type: mode });
-          break;
-        default:
-          break;
-      }
-      // select the new item
-      this.selectItem(this.items[this.items.length - 1], mode);
+                reader.addEventListener("load", () => {
+                    const img = new Image();
+
+                    img.onload = () => {
+                        this.$store.dispatch('models/createImageForStory', {
+                            story_id: this.currentStory.id,
+                            src: img.src,
+                            name: "Image " + (this.images.length + 1 + i),
+                            // translate image dimensions to rwu
+                            height: this.scaleY(img.height),
+                            width: this.scaleX(img.width),
+                            // center in svg
+                            x: this.min_x + (this.max_x - this.min_x)/2 - this.scaleY(img.width/2),
+                            y: this.min_y + (this.max_y - this.min_y)/2 - this.scaleY(img.height/2)
+                        });
+                    };
+
+                    img.src = reader.result;
+                }, false);
+
+                if (file) { reader.readAsDataURL(file); }
+            }
+
+        },
+        // initialize an empty story, space, shading, building_unit, or thermal_zone depending on the selected mode
+        createItem (mode) {
+            var items = this.items,
+                mode = mode;
+
+            switch (mode) {
+                case 'stories':
+                    this.$store.dispatch('models/initStory');
+                    return;
+                case 'spaces':
+                    this.$store.dispatch('models/initSpace', {
+                        story: this.$store.state.application.currentSelections.story
+                    });
+                    break;
+                case 'shading':
+                    this.$store.dispatch('models/initShading', {
+                        story: this.$store.state.application.currentSelections.story
+                    });
+                    break;
+                case 'building_units':
+                case 'thermal_zones':
+                case 'space_types':
+                    this.$store.dispatch('models/createObjectWithType', {
+                        type: mode,
+                    });
+                    break;
+            }
+
+            this.selectItem(items[items.length - 1], mode);
+        },
+
+        /*
+        * dispatch an action to destroy the currently selected item
+        */
+        destroyItem (item, mode = this.mode) {
+            switch (mode) {
+                case 'stories':
+                    this.$store.dispatch('models/destroyStory', {
+                        story: item,
+                    });
+                    break;
+                case 'spaces':
+                    this.$store.dispatch('models/destroySpace', {
+                        space: item,
+                        story: this.$store.state.application.currentSelections.story
+                    });
+                    break;
+                case 'shading':
+                    this.$store.dispatch('models/destroyShading', {
+                        shading: item,
+                        story: this.$store.state.application.currentSelections.story
+                    });
+                    break;
+                case 'images':
+                    this.$store.dispatch('models/destroyImage', {
+                        image: item,
+                        story: this.$store.state.application.currentSelections.story
+                    });
+                    break;
+                case 'building_units':
+                case 'thermal_zones':
+                case 'space_types':
+                    this.$store.dispatch('models/destroyObject', { object: item });
+                    break;
+            }
+        },
+        selectItem (item, mode) {
+
+            switch (mode) {
+                case 'stories':
+                    this.currentStory = item;
+                    break;
+                case 'spaces':
+                    this.currentSpace = (this.currentSpace && this.currentSpace.id === item.id) ? null : item;
+                    break;
+                case 'shading':
+                    this.currentShading = (this.currentShading && this.currentShading.id === item.id) ? null : item;
+                    break;
+                case 'images':
+                    this.currentImage = (this.currentImage && this.currentImage.id === item.id) ? null : item;
+                    break;
+                case 'building_units':
+                    this.currentBuildingUnit = (this.currentBuildingUnit && this.currentBuildingUnit.id === item.id) ? null : item;
+                    break;
+                case 'thermal_zones':
+                    this.currentThermalZone = (this.currentThermalZone && this.currentThermalZone.id === item.id) ? null : item;
+                    break;
+                case 'space_types':
+                    this.currentSpaceType = (this.currentSpaceType && this.currentSpaceType.id === item.id) ? null : item;
+                    break;
+            }
+        },
+        clearSubSelections () {
+            this.currentShading = null;
+            this.currentImage = null;
+            this.currentSpace = null;
+            this.currentBuildingUnit = null;
+            this.currentThermalZone = null;
+            this.currentSpaceType = null;
+        },
+
+        // display name for library type (mode) selected
+        displayNameForMode (mode) { return applicationHelpers.displayNameForMode(mode); },
     },
-
-    /*
-    * dispatch an action to destroy the currently selected item
-    */
-    destroyItem(item, mode = this.mode) {
-      // don't allow deletion of the last item of a type
-      if (this[mode].length <= 1 && (mode === 'stories' || mode === 'spaces')) { return; }
-
-      switch (mode) {
-        case 'stories':
-          this.$store.dispatch('models/destroyStory', { story: item });
-          break;
-        case 'spaces':
-          this.$store.dispatch('models/destroySpace', {
-            space: item,
-            story: this.currentStory,
-          });
-          break;
-        case 'shading':
-          this.$store.dispatch('models/destroyShading', {
-            shading: item,
-            story: this.currentStory,
-          });
-          break;
-        case 'images':
-          this.$store.dispatch('models/destroyImage', {
-            image: item,
-            story: this.currentStory,
-          });
-          break;
-        case 'building_units':
-        case 'thermal_zones':
-        case 'space_types':
-          this.$store.dispatch('models/destroyObject', { object: item });
-          break;
-        default:
-          break;
-      }
-    },
-
-    /*
-    * set current selection for a type
-    */
-    selectItem(item, mode = this.mode) {
-      switch (mode) {
-        case 'stories':
-          this.currentStory = item;
-          break;
-        case 'spaces':
-          this.currentSpace = item;
-          break;
-        case 'shading':
-          this.currentShading = item;
-          break;
-        case 'images':
-          this.currentImage = item;
-          break;
-        case 'building_units':
-          this.currentBuildingUnit = item;
-          break;
-        case 'thermal_zones':
-          this.currentThermalZone = item;
-          break;
-        case 'space_types':
-          this.currentSpaceType = item;
-          break;
-        default:
-          break;
-      }
-    },
-
-    /*
-    * empty selections for all types except the current type
-    */
-    clearSubSelections() {
-      this.currentShading = this.mode === 'shading' ? this.shading[0] : null;
-      this.currentImage = this.mode === 'images' ? this.images[0] : null;
-      this.currentSpace = this.mode === 'spaces' ? this.spaces[0] : null;
-      this.currentBuildingUnit = this.mode === 'building_units' ? this.building_units[0] : null;
-      this.currentThermalZone = this.mode === 'thermal_zones' ? this.thermal_zones[0] : null;
-      this.currentSpaceType = this.mode === 'space_types' ? this.space_types[0] : null;
-    },
-
-    /*
-    * look up the display name for the selected mode (library type)
-    */
-    displayNameForMode(mode = this.mode) { return applicationHelpers.displayNameForMode(mode); },
-  },
-  watch: {
-    mode() { this.clearSubSelections(); },
-    currentStory() { this.clearSubSelections(); },
-    currentSubSelection() {
-      if (!this.currentSubSelection && this[this.mode][0]) {
-        this.$nextTick(() => {
-          this.selectItem(this[this.mode][0]);
-        });
-      }
-    },
-  },
-};
+    watch: {
+        mode () {
+            this.clearSubSelections();
+        }
+    }
+}
 </script>
 
 <style lang="scss" scoped>

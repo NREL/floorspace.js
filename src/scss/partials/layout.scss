@@ -1,53 +1,43 @@
 @import "./../config";
 
-main {
-     #images .konvajs-content {
-        z-index: 1;
-    }
-
-    #images, #map-container {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-    }
-}
-
+// basic layout structure for the entire application
 #toolbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
     height: 5rem;
 }
-
-#layout-main {
-    position: fixed;
-    top: 5rem;
-    left: 0;
-    right: 0;
-    bottom: 30%;
-
-    > * {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-    }
-
-    #layout-navigation {
-        left: 0;
+#app {
+    height: 100%;
+}
+main {
+    display: flex;
+    justify-content: space-between;
+    height: calc(70% - 5rem);
+    #navigation {
+        height: 100%;
         width: 17.5rem;
     }
 
-    main {
+    #grid, #canvas {
+        height: calc(70% - 5rem);
+        position: absolute;
         left: 17.5rem;
-        right: 0;
+        top: 5rem;
+        width: calc(100% - 17.5rem);
+    }
+    #grid {
+        background-color: transparent;
+    }
+
+    #canvas #images {
+        position: absolute;
+        top:0;
+        &.konvajs-content {
+            z-index: 1;
+        }
+    }
+    #canvas #map {
+        height: 100%;
     }
 }
-
-#layout-library {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    top: 70%;
+#library {
+    height: 30%;
 }

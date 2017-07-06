@@ -156,6 +156,10 @@ const map = {
                 readonly: true,
                 private: false
             },
+            storyId: {
+                readonly: true,
+                private: true
+            },
             name: {
                 displayName: 'Name',
                 readonly: false,
@@ -363,7 +367,7 @@ const map = {
         }
     },
     images: {
-        displayName: 'Image',
+        displayName: 'Images',
         keymap: {
             id: {
                 displayName: 'ID',

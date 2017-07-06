@@ -1,48 +1,49 @@
-import factory from './factory';
-import helpers from './helpers';
+import factory from './factory.js'
+import Validator from './../../utilities/validator.js'
+import helpers from './helpers.js'
 
 export default {
-  initStory(context) {
-      const name = helpers.generateName(context.state, 'stories');
-      const story = new factory.Story(name);
+    initStory (context) {
+        const [name, storyId] = helpers.generateName(context.state, 'stories'),
+            story = new factory.Story({ name, storyId });
 
-      // create story
-      context.commit('initStory', { story });
-      // create geometry
-      context.dispatch('geometry/initGeometry', { story_id: story.id }, { root: true });
-      // create space and select
-      context.dispatch('initSpace', { story });
-      context.dispatch('selectStoryAndSpace', { story });
+        // create story
+        context.commit('initStory', { story });
+        // create geometry
+        context.dispatch('geometry/initGeometry', { story_id: story.id }, { root: true });
+        // create space and select
+        context.dispatch('initSpace', { story });
+        context.dispatch('selectStoryAndSpace', { story });
     },
 
     initSpace (context, payload) {
         const story = context.state.stories.find(s => s.id === payload.story.id),
-            name = helpers.generateName(context.state, 'spaces', story),
-            space = new factory.Space(name);
+            [name] = helpers.generateName(context.state, 'spaces', story),
+            space = new factory.Space({ name });
 
         context.commit('initSpace', { story, space });
     },
 
     initShading (context, payload) {
         const story = context.state.stories.find(s => s.id === payload.story.id),
-            name = helpers.generateName(context.state, 'shading', story),
-            shading = new factory.Shading(name);
+            [name] = helpers.generateName(context.state, 'shading', story),
+            shading = new factory.Shading({ name });
 
         context.commit('initShading', { story, shading });
     },
 
-    destroyStory(context, payload) {
-      const stories = context.state.stories;
-      const storyIndex = stories.findIndex(s => s.id === payload.story.id);
-      const story = stories[storyIndex];
+    destroyStory (context, payload) {
+        const stories = context.state.stories,
+            storyIndex = stories.findIndex(s => s.id === payload.story.id),
+            story = stories[storyIndex];
 
-      context.commit('destroyStory', { story });
+        context.commit('destroyStory', { story });
 
-      if (stories.length === 0) {
-        context.dispatch('initStory');
-      } else {
-        context.dispatch('selectStoryAndSpace', { story: stories[storyIndex - 1] });
-      }
+        if (stories.length === 0) {
+            context.dispatch('initStory');
+        } else {
+            context.dispatch('selectStoryAndSpace',{ story: stories[storyIndex - 1] });
+        }
     },
 
     destroySpace (context, payload) {
@@ -174,30 +175,30 @@ export default {
         context.commit('updateObjectWithData', payload);
     },
 
-  createImageForStory(context, payload) {
-    const story = context.state.stories.find(s => s.id === payload.story_id);
-    const name = helpers.generateName(context.state, 'images', story);
-    const img = new Image();
+    createImageForStory (context, payload) {
+        const [name] = helpers.generateName(context.state, 'images'),
+            img = new Image();
 
-    img.onload = () => {
-      const image = new factory.Image(name, payload.src);
+        img.onload = () => {
+            const image = new factory.Image({ src: payload.src, name });
 
-      image.height = payload.height;
-      image.width = payload.width;
-      image.x = payload.x;
-      image.y = payload.y;
+            image.height = payload.height;
+            image.width = payload.width;
 
-      context.commit('createImageForStory', {
-        story_id: story.id,
-        image,
-      });
-    };
-    img.src = payload.src;
-  },
+            image.x = payload.x;
+            image.y = payload.y;
+
+            context.commit('createImageForStory', {
+                story_id: payload.story_id,
+                image: image
+            });
+        };
+        img.src = payload.src;
+    },
 
     createObjectWithType (context, payload) {
         const type = payload.type,
-            name = helpers.generateName(context.state, type),
+            [name] = helpers.generateName(context.state, type),
             object = new helpers.map[type].init({ name });
 
         context.commit('initObject', { type, object });
