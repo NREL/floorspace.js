@@ -8,55 +8,104 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
     <div id="app">
         <toolbar :class="{ 'disabled-component': tool === 'Map' }"></toolbar>
-        <main>
-            <navigation :class="{ 'disabled-component': tool === 'Map' }"></navigation>
-            <canvas-view></canvas-view>
-            <grid-view></grid-view>
-        </main>
-		<!-- <inspector-view></inspector-view> -->
-        <library :class="{ 'disabled-component': tool === 'Map' }"></library>
+
+        <resize-group :vertical="true">
+            <resize-group :horizontal="true" id="layout-main">
+                <resize id="layout-navigation" :resize-right="true" :resize-right-min="200">
+                    <navigation :class="{ 'disabled-component': tool === 'Map' }"></navigation>
+                </resize>
+                <main>
+                  <div id="alert-text" v-show="error || success" :class="{ error, success }">
+                      <p>{{ error || success }}</p>
+                  </div>
+                    <canvas-view></canvas-view>
+                    <grid-view></grid-view>
+                </main>
+                <!-- <inspector-view></inspector-view> -->
+            </resize-group>
+            <resize id="layout-library" :resize-top="true" :resize-top-min="100">
+                <library :class="{ 'disabled-component': tool === 'Map' }"></library>
+            </resize>
+        </resize-group>
     </div>
 </template>
 
 <script>
 
-// this import order is important, if the grid is loaded before the other elements or after the toolbar, it ends up warped
-import Navigation from './components/Navigation'
-import Grid from './components/Grid/Grid'
-import Canvas from './components/Canvas/Canvas'
-import Toolbar from './components/Toolbar'
-import Inspector from './components/Inspector'
-import Library from './components/Library'
+import { mapState } from 'vuex';
 
-import { mapState } from 'vuex'
+// this import order is important, if the grid is loaded before the other elements or after the toolbar, it ends up warped
+import Navigation from './components/Navigation.vue';
+import Grid from './components/Grid/Grid.vue';
+import Canvas from './components/Canvas/Canvas.vue';
+import Toolbar from './components/Toolbar.vue';
+import Inspector from './components/Inspector.vue';
+import Library from './components/Library.vue';
+import { Resize, ResizeGroup } from './components/Resize';
+
 
 export default {
-    name: 'app',
-    data () {
-        return {}
-    },
-    beforeCreate () {
-        this.$store.dispatch('models/initStory');
-    },
-    methods: {
-
-    },
-    computed: {
-        ...mapState({ tool: state => state.application.currentSelections.tool })
-    },
-    components: {
-        'grid-view': Grid,
-        'canvas-view': Canvas,
-        'inspector-view': Inspector,
-        'library': Library,
-        'navigation': Navigation,
-        'toolbar': Toolbar,
-    }
-}
+  name: 'app',
+  data() {
+    return {
+      error: null,
+      success: null,
+    };
+  },
+  beforeCreate() {
+    this.$store.dispatch('models/initStory');
+  },
+  mounted() {
+    // App will act as the eventBus for the application
+    this.$on('error', (err) => {
+      this.error = err;
+      setTimeout(() => { this.error = null; }, 5000);
+    });
+    this.$on('success', (msg) => {
+      this.success = msg;
+      setTimeout(() => { this.success = null; }, 5000);
+    });
+  },
+  computed: {
+    ...mapState({ tool: state => state.application.currentSelections.tool }),
+  },
+  components: {
+    'grid-view': Grid,
+    'canvas-view': Canvas,
+    'inspector-view': Inspector,
+    library: Library,
+    navigation: Navigation,
+    toolbar: Toolbar,
+    resize: Resize,
+    'resize-group': ResizeGroup,
+  },
+};
 </script>
 
 <style src="./scss/main.scss" lang="scss"></style>
 <style lang="scss" scoped>
 @import "./scss/config";
+#alert-text {
+    position: absolute;
+    top: 1rem;
+    left: 0;
+    right: 0;
+    text-align: center;
+    z-index: 3;
+
+    p {
+        color: $white;
+        padding: 2px 4px;
+        margin: 10px;
+        border: 2px solid $gray-darkest;
+        display: inline-block;
+    }
+    &.success p {
+      background: $primary;
+    }
+    &.error p {
+      background: $secondary;
+    }
+}
 
 </style>

@@ -1,62 +1,61 @@
-import idFactory from './../../utilities/generateId'
-import generateColor from './../../utilities/generateColor'
-import appconfig from './../application/appconfig.js'
+import idFactory from './../../utilities/generateId';
+import generateColor from './../../utilities/generateColor';
+import appconfig from './../application/appconfig';
 
 export default {
-    Story: function (opts = {}) {
-        return {
-            id: idFactory.generate(),
-            handle: null,
-            name: opts.name,
-            storyId: opts.storyId,
-            geometry_id: null,
-            below_floor_plenum_height: 0,
-            floor_to_ceiling_height: 0,
-            multiplier: 0,
-            spaces: [],
-            windows: [],
-            shading: [],
-            images: []
-        }
-    },
-    Space: function (opts = {}) {
-        return {
-            id: idFactory.generate(),
-            color: generateColor('space'),
-            name: opts.name,
-            handle: null,
-            face_id: null,
-            daylighting_controls: [],
-            building_unit_id: null,
-            thermal_zone_id: null,
-            space_type_id: null,
-            construction_set_id: null
-        };
-    },
-    Shading: function (opts = {}) {
-        return {
-            id: idFactory.generate(),
-            color: appconfig.palette.shading,
-            name: opts.name,
-            handle: null,
-            face_id: null
-        };
-    },
-    Image: function (opts = {}) {
-        return {
-            id: idFactory.generate(),
-            src: opts.src,
-            name: opts.name,
-            visible: true,
-            height: 100,
-            width: 100,
-            x: 0,
-            y: 0,
-            z: 0,
-            r: 0,
-            opacity: 1
-        };
-    },
+  Story(name) {
+    return {
+      id: idFactory.generate(),
+      name,
+      handle: null,
+      geometry_id: null,
+      below_floor_plenum_height: 0,
+      floor_to_ceiling_height: 0,
+      multiplier: 0,
+      spaces: [],
+      windows: [],
+      shading: [],
+      images: [],
+    };
+  },
+  Space(name) {
+    return {
+      id: idFactory.generate(),
+      name,
+      color: generateColor('space'),
+      handle: null,
+      face_id: null,
+      daylighting_controls: [],
+      building_unit_id: null,
+      thermal_zone_id: null,
+      space_type_id: null,
+      construction_set_id: null,
+    };
+  },
+  Shading(name) {
+    return {
+      id: idFactory.generate(),
+      name,
+      color: appconfig.palette.shading,
+      handle: null,
+      face_id: null,
+    };
+  },
+  Image(name, src) {
+    return {
+      id: idFactory.generate(),
+      src,
+      name,
+      visible: true,
+      height: 0,
+      width: 0,
+      x: 0,
+      y: 0,
+      z: 0,
+      r: 0,
+      opacity: 1,
+    };
+  },
     BuildingUnit: function (opts = {}) {
         return {
             id: idFactory.generate(),

@@ -1,7 +1,6 @@
 import factory from './../factory.js'
 import geometryHelpers from './../helpers'
 import modelHelpers from './../../models/helpers'
-// import createFaceFromPoints from './createFaceFromPoints'
 import createFaceFromPoints, { eraseSelection } from './createFaceFromPoints'
 
 export default {
@@ -22,9 +21,15 @@ export default {
 
     /*
     * Erase the selection defined by a set of points on all faces on the current story
-    * Dispatched by the eraser tool and by the createFaceFromPoints action (to prevent overlapping faces)
+    * Dispatched by the eraser tool
     */
-    eraseSelection: eraseSelection,
+    eraseSelection (context, payload) {
+  		const { points } = payload;
+  		const eraseResult = eraseSelection(points, context);
+      if (!eraseResult) {
+        window.eventBus.$emit('error', 'Operation cancelled - no split faces');
+      }
+  	},
 
     /*
     * Given a dx, dy, and face
@@ -54,7 +59,6 @@ export default {
 
         // create new face from adjusted points
         context.dispatch('createFaceFromPoints', {
-			type: affectedModel.Type,
             model_id: affectedModel.id,
             points: movedPoints
         });

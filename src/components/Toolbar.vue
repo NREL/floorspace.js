@@ -11,7 +11,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <section class="settings">
 
             <div class="input-checkbox">
-                <label>Previous Story</label>
+                <label>Story Below</label>
                 <input type="checkbox" v-model="previousStoryVisible">
             </div>
 
@@ -24,23 +24,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 <label>grid</label>
                 <input type="checkbox" v-model="gridVisible">
             </div>
-
-            <!-- <div class="input-number">
-                <label>min_x</label>
-                <input v-model.number.lazy="min_x">
-            </div>
-            <div class="input-number">
-                <label>min_y</label>
-                <input v-model.number.lazy="min_y">
-            </div>
-            <div class="input-number">
-                <label>max_x</label>
-                <input v-model.number.lazy="max_x">
-            </div>
-            <div class="input-number">
-                <label>max_y</label>
-                <input v-model.number.lazy="max_y">
-            </div> -->
 
             <div class="input-number">
                 <label>spacing</label>
@@ -95,20 +78,32 @@ export default {
         importLibraryAsFile (event) {
             const file = event.target.files[0],
                 reader = new FileReader();
+
+
             reader.addEventListener("load", () => {
-                this.$store.dispatch('importLibrary', {
-                    data: JSON.parse(reader.result)
-                });
+              const result = reader.result;
+              try {
+                  this.$store.dispatch('importLibrary', {
+                      data: JSON.parse(result)
+                  });
+              } catch (e) {
+                window.eventBus.$emit('error', 'Invalid JSON');
+              }
             }, false);
 
             if (file) { reader.readAsText(file); }
         },
         importModel (data) {
+          try {
             this.$store.dispatch('importModel', {
-                clientWidth: document.getElementById('svg-grid').clientWidth,
-                clientHeight: document.getElementById('svg-grid').clientHeight,
-                data: JSON.parse(data)
+              clientWidth: document.getElementById('svg-grid').clientWidth,
+              clientHeight: document.getElementById('svg-grid').clientHeight,
+              data: JSON.parse(data)
             });
+          } catch (e) {
+            window.eventBus.$emit('error', 'Invalid JSON');
+          }
+
         },
         checkTool () {
             // only allow dragging in images mode
@@ -125,23 +120,21 @@ export default {
         availableTools () {
             return this.$store.state.application.tools
             .filter((t) => {
-                if (t === 'Rectangle' || t === 'Polygon' || t === 'Eraser') {
+                if (t === 'Rectangle' || t === 'Polygon' || t === 'Eraser' || t === 'Select') {
                     // only allow drawing tools in space and shade mode
                     return (this.currentMode === 'spaces' || this.currentMode === 'shading');
                 } else if ( t === 'Drag') {
                     // only allow dragging in image mode
                     return (this.currentMode === 'images');
+                }  else if ( t === 'Fill') {
+                    // only allow cloning in space and shade mode if previousStoryVisible
+                    return this.previousStoryVisible && (this.currentMode === 'spaces' || this.currentMode === 'shading');
                 } else {
                     return true;
                 }
             })
-            .filter((t) => {
-                // never display the map tool, it is only used when the map is initialized
-                // return t !== 'Map';
-
-                // temp: also hide non-working tools
-                return !(t === 'Map' || t === 'Place Component' || t === 'Apply Property');
-            });
+            // never display the map tool, it is only used when the map is initialized
+            .filter(t => t !== 'Map');
         },
 
         gridVisible: {
@@ -165,23 +158,6 @@ export default {
         spacing: {
             get () { return this.$store.state.project.grid.spacing + ' ' + this.$store.state.project.config.units; },
             set (val) { this.$store.dispatch('project/setSpacing', { spacing: val }); }
-        },
-        // mix_x, min_y, max_x, and max_y are the grid dimensions in real world units
-        min_x: {
-            get () { return this.$store.state.project.view.min_x + ' ' + this.$store.state.project.config.units; },
-            set (val) { this.$store.dispatch('project/setViewMinX', { min_x: parseFloat(val) }); }
-        },
-        min_y: {
-            get () { return this.$store.state.project.view.min_y + ' ' + this.$store.state.project.config.units; },
-            set(val) { this.$store.dispatch('project/setViewMinY', { min_y: val }); }
-        },
-        max_x: {
-            get () { return this.$store.state.project.view.max_x + ' ' + this.$store.state.project.config.units; },
-            set (val) { this.$store.dispatch('project/setViewMaxX', { max_x: val }); }
-        },
-        max_y: {
-            get () { return this.$store.state.project.view.max_y + ' ' + this.$store.state.project.config.units;  },
-            set (val) { this.$store.dispatch('project/setViewMaxY', { max_y: val  }); }
         }
     },
     watch: {

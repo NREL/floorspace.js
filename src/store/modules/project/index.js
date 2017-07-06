@@ -7,12 +7,12 @@ export default {
     state: {
         // project
         config: {
-            units: 'm',
+            units: 'ft',
             language: 'EN-US',
             north_axis: 0
         },
         grid: {
-            visible: false,
+            visible: true,
             spacing: 50
         },
         view: {
