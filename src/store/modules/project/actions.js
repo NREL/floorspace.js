@@ -13,9 +13,9 @@ export default {
         }
     },
     setNorthAxis (context, payload) {
-        const validator = new Validator(payload);
-        validator.validateFloat('north_axis');
-        context.commit('setConfigNorthAxis', validator.validatedPayload);
+      const { north_axis } = payload;
+      if (north_axis > 360 || north_axis < 0) { return; }
+      context.commit('setConfigNorthAxis', { north_axis });
     },
     setMapVisible (context, payload) {
         if (typeof payload.visible === 'boolean') {
@@ -96,7 +96,9 @@ export default {
         context.commit('setMapZoom',  { zoom: payload.zoom });
     },
 
+
     setMapRotation (context, payload) {
+        context.dispatch('setNorthAxis', { north_axis: (payload.rotation/(2*Math.PI)) * 360 });
         context.commit('setMapRotation', { rotation: payload.rotation });
     },
 

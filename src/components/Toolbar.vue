@@ -29,6 +29,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 <label>spacing</label>
                 <input v-model.number.lazy="spacing">
             </div>
+            
+            <div class="input-number">
+                <label>north axis</label>
+                <input v-model.number.lazy="northAxis" :disabled="mapEnabled">
+            </div>
 
             <div id="import-export">
                 <input ref="importLibrary" @change="importLibraryAsFile" type="file"/>
@@ -136,7 +141,10 @@ export default {
             // never display the map tool, it is only used when the map is initialized
             .filter(t => t !== 'Map');
         },
-
+        northAxis: {
+            get () { return this.$store.state.project.config.north_axis + '°'; },
+            set (val) { this.$store.dispatch('project/setNorthAxis', { north_axis: val }); }
+        },
         gridVisible: {
             get () { return this.$store.state.project.grid.visible; },
             set (val) { this.$store.dispatch('project/setGridVisible', { visible: val }); }
