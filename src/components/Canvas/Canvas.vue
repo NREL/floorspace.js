@@ -7,6 +7,9 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 <template>
     <div id="canvas" ref="canvas">
+        <svg id="north_axis" height="1792" viewBox="0 0 1792 1792" width="1792" xmlns="http://www.w3.org/2000/svg" :transform="`rotate(${northAxis})`">
+          <path d="M1277 493q-9 19-29 19h-224v1248q0 14-9 23t-23 9H800q-14 0-23-9t-9-23V512H544q-21 0-29-19t5-35L870 74q10-10 23-10 14 0 24 10l355 384q13 16 5 35z"/>
+        </svg>
         <map-view v-if="mapEnabled" v-show="mapVisible"></map-view>
         <images-view></images-view>
     </div>
@@ -27,7 +30,8 @@ export default {
     computed: {
         ...mapState({
             mapEnabled: state => state.project.map.enabled,
-            mapVisible: state => state.project.map.visible
+            mapVisible: state => state.project.map.visible,
+            northAxis: state => state.project.config.north_axis,
         })
     },
     components: {
@@ -39,7 +43,14 @@ export default {
 
 <style lang="scss" scoped>
 @import "./../../scss/config";
-
+svg#north_axis {
+  height: 2.25rem;
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  width: 3rem;
+  z-index: 90;
+}
 #canvas {
     background: white;
     height: 100%;
