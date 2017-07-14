@@ -1,3 +1,13 @@
+const serializeState = (state) => {
+  const scaleX = state.application.scale.x;
+  const scaleY = state.application.scale.y;
+
+  const clone = JSON.parse(JSON.stringify(state));
+  clone.application.scale.x = scaleX;
+  clone.application.scale.y = scaleY;
+
+  return clone;
+};
 
 export default function configureTimetravel(store) {
   // monkey patch commit to store each version of the state
@@ -25,10 +35,10 @@ export default function configureTimetravel(store) {
 
     // if timetravelIndex < timetravelStates.length - 1, clear tail from states and then push at index
     if (timetravelIndex < timetravelStates.length - 1) {
-      timetravelStates = timetravelStates.slice(0, timetravelIndex)
+      timetravelStates = timetravelStates.slice(0, timetravelIndex);
     }
 
-    timetravelStates.push(JSON.parse(JSON.stringify(store.state)));
+    timetravelStates.push(serializeState(store.state));
     timetravelIndex += 1;
   };
 
