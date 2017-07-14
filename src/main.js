@@ -13,6 +13,23 @@ import Vue from 'vue';
 import store from './store/index';
 import App from './App.vue';
 
+
+// function override(object, methodName, callback) {
+//   object[methodName] = callback(object[methodName]);
+// }
+// function after(extraBehavior) {
+//   return function(original) {
+//     return function() {
+//       var returnValue = original.apply(this, arguments)
+//       extraBehavior.apply(this, arguments)
+//       return returnValue
+//     }
+//   }
+// }
+// override(store, 'commit', after((type, payload, options) => {
+//   console.log('committing', type, payload, options);
+// }))
+
 // mount the root vue instance
 window.application = new Vue({
   store,

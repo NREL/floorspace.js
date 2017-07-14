@@ -12,9 +12,11 @@ import importModel from './utilities/importModel';
 import importLibrary from './utilities/importLibrary';
 import mutations from './mutations';
 
+import configureTimetravel from './timetravel';
+
 Vue.use(Vuex);
 
-export default new Vuex.Store({
+const store = new Vuex.Store({
   strict: process.env.NODE_ENV !== 'production',
   modules: {
     application,
@@ -31,3 +33,7 @@ export default new Vuex.Store({
   },
   mutations,
 });
+
+configureTimetravel(store);
+
+export default store;
