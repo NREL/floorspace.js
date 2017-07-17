@@ -9,49 +9,61 @@ const serializeState = (state) => {
   return clone;
 };
 
-export default function configureTimetravel(store) {
-  // monkey patch commit to store each version of the state
-  let timetravelStates = [];
+export default {
+  timetravelStates: [],
+  timetravelIndex: 0,
+  store: null,
+  init(store) {
+    this.store = store;
 
-  let timetravelIndex = 0;
+    // this is reset for each action
+    let mutationsForAction = [];
+    // override commit to store names of mutations
+    const originalCommit = store.commit;
+    store.commit = function overrideCommit(...args) {
+      // console.log('committing', args);
+      mutationsForAction.push(args[0]);
+      originalCommit.apply(this, args);
+    };
 
-  const originalCommit = store.commit;
-  store.commit = function overrideCommit(...args) {
-    console.log('committing', args);
-    originalCommit.apply(this, args);
+    // monkey patch dispatch to store each version of the state
+    const that = this;
+    const originalDispatch = store.dispatch;
+    store.dispatch = function overrideDispatch(...args) {
+      const action = args[0];
+      console.log('dispatching', args[0]);
+      originalDispatch.apply(this, args);
 
-    // // filter by mutation type
-    // timetravelStates.push(JSON.parse(JSON.stringify(store.state)));
-    // // if timetravelIndex < timetravelStates.length - 1, clear tail from states and then push at index
-    // timetravelIndex += 1;
-  };
 
-  const originalDispatch = store.dispatch;
-  store.dispatch = function overrideDispatch(...args) {
-    console.log('\n\ndispatching', args);
-    originalDispatch.apply(this, args);
+      // TODO: filter by action type
 
-    // TODO: filter by action type
 
-    // if timetravelIndex < timetravelStates.length - 1, clear tail from states and then push at index
-    if (timetravelIndex < timetravelStates.length - 1) {
-      timetravelStates = timetravelStates.slice(0, timetravelIndex);
+      if (that.timetravelIndex < that.timetravelStates.length - 1) {
+        // clear tail from states and then push at index
+        that.timetravelStates = that.timetravelStates.slice(0, that.timetravelIndex);
+      }
+
+      that.timetravelStates.push({
+        meta: {
+          action: args[0],
+          mutations: mutationsForAction,
+        },
+        state: serializeState(store.state),
+      });
+      that.timetravelIndex += 1;
+      mutationsForAction = [];
+    };
+  },
+  undo() {
+    this.timetravelIndex -= 2;
+    this.store.replaceState(this.timetravelStates[this.timetravelIndex].state);
+    console.log('undo', this.timetravelIndex, this.timetravelStates[this.timetravelIndex]);
+  },
+  redo() {
+    if (this.timetravelIndex < this.timetravelStates.length - 1) {
+      this.timetravelIndex += 1;
+      this.store.replaceState(this.timetravelStates[this.timetravelIndex].state);
+      console.log('redo', this.timetravelIndex);
     }
-
-    timetravelStates.push(serializeState(store.state));
-    timetravelIndex += 1;
-  };
-
-  window.undo = () => {
-    timetravelIndex -= 1;
-    store.replaceState(timetravelStates[timetravelIndex]);
-    console.log('undo', timetravelIndex);
-  };
-  window.redo = () => {
-    if (timetravelIndex < timetravelStates.length - 1) {
-      timetravelIndex += 1;
-      store.replaceState(timetravelStates[timetravelIndex]);
-      console.log('redo', timetravelIndex);
-    }
-  };
-}
+  },
+};

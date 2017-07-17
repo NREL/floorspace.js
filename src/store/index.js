@@ -12,7 +12,7 @@ import importModel from './utilities/importModel';
 import importLibrary from './utilities/importLibrary';
 import mutations from './mutations';
 
-import configureTimetravel from './timetravel';
+import timetravel from './timetravel';
 
 Vue.use(Vuex);
 
@@ -34,6 +34,6 @@ const store = new Vuex.Store({
   mutations,
 });
 
-configureTimetravel(store);
+timetravel.init(store);
 
 export default store;

@@ -44,6 +44,7 @@ import Inspector from './components/Inspector.vue';
 import Library from './components/Library.vue';
 import { Resize, ResizeGroup } from './components/Resize';
 
+import timetravel from 'src/store/timetravel'
 
 export default {
   name: 'app',
@@ -69,14 +70,11 @@ export default {
 
     document.onkeydown = (e) => {
       if (e.keyCode === 90 && (e.ctrlKey || e.metaKey)) {
-        e.shiftKey ? this.redo() : this.undo();
+        e.shiftKey ? timetravel.redo() : timetravel.undo();
       }
     };
   },
-  methods: {
-    undo() { window.undo(); },
-    redo() { window.redo(); },
-  },
+
   computed: {
     ...mapState({ tool: state => state.application.currentSelections.tool }),
   },
