@@ -56,6 +56,8 @@ class ImportFloorplan < OpenStudio::Ruleset::ModelUserScript
       return false
     end
     
+    runner.registerInfo("path = #{path.get.to_s}")
+    
     json = nil
     File.open(path.get.to_s, 'r') do |file|
       json = file.read
@@ -68,6 +70,7 @@ class ImportFloorplan < OpenStudio::Ruleset::ModelUserScript
     end
 
     scene = floorplan.get.toThreeScene(true)
+    
     new_model = OpenStudio::Model::modelFromThreeJS(scene)
     
     if new_model.empty?
@@ -75,9 +78,18 @@ class ImportFloorplan < OpenStudio::Ruleset::ModelUserScript
       return false
     end
     
+    runner.registerInitialCondition("Initial model has #{model.getPlanarSurfaceGroups.size} planar surface groups")
+    
     # mega lame merge
-    model.getPlanarSurfaceGroups {|g| g.remove}
-    new_model.get.getPlanarSurfaceGroups {|g| g.clone(model)}
+    model.getPlanarSurfaceGroups.each do |g|
+      g.remove
+    end
+    
+    new_model.get.getPlanarSurfaceGroups.each do |g| 
+      g.clone(model)
+    end
+    
+    runner.registerFinalCondition("Final model has #{model.getPlanarSurfaceGroups.size} planar surface groups")
 
     return true
 
