@@ -21,6 +21,7 @@ export default {
     // override commit to store names of mutations
     const originalCommit = store.commit;
     store.commit = function overrideCommit(...args) {
+      if (window.api) { window.api.config.onChange(); }
       // console.log('committing', args);
       mutationsForAction.push(args[0]);
       originalCommit.apply(this, args);
@@ -31,12 +32,15 @@ export default {
     const originalDispatch = store.dispatch;
     store.dispatch = function overrideDispatch(...args) {
       const action = args[0];
-      console.log('dispatching', args[0]);
       originalDispatch.apply(this, args);
 
 
       // TODO: filter by action type
+      if (action.indexOf('project/') !== -1) {
+        return;
+      }
 
+      console.log('dispatching', args[0]);
 
       if (that.timetravelIndex < that.timetravelStates.length - 1) {
         // clear tail from states and then push at index

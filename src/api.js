@@ -21,7 +21,7 @@ window.api = {
     online = true,
     onChange = function change() {},
   }) {
-    this.config = { units, showMapDialogOnStart, online, onChange, };
+    this.config = { units, showMapDialogOnStart, online, onChange };
 
     startApp();
     // don't dispatch actions until the application and data store are instantiated
