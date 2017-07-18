@@ -6,15 +6,11 @@ webpack_output = File.open(dist_path + '/index.html') {|file| file.read}
 scripts = ''
 css = ''
 
-print "Loading geometry editor API script from: #{src_path + 'api.js'}\n\n"
-api_scripts = File.open(src_path + '/api.js') {|file| file.read}
-scripts << "\n\t<script>#{api_scripts}</script>"
-
 webpack_output.split('src=').drop(1).each do |js|
     jspath = js.split('></script>').first
     print "Loading scripts from: #{jspath}\n\n"
     js = File.open(dist_path + jspath) {|file| file.read}
-    scripts << "\n\t<script>#{js}</script>"
+    scripts << "\n\t#{js}"
 end
 
 webpack_output.split('<link href=').drop(1).each do |linktag|
@@ -23,8 +19,7 @@ webpack_output.split('<link href=').drop(1).each do |linktag|
     css = File.open(dist_path + csspath) {|file| file.read}
 end
 
-
-html =
+base_html =
 "<!DOCTYPE html>
 <html>
     <head>
@@ -37,10 +32,30 @@ html =
 
     <body>
         <div id=app></div>
-        #{scripts}
+"
+standalone_html = base_html + "
+    <script>#{scripts}</script>
     </body>
 </html>"
 
-output_file = File.new(dist_path + '/geometry_editor.html', 'w')
-output_file.write(html)
+output_file = File.new(dist_path + '/standalone_geometry_editor.html', 'w')
+output_file.write(standalone_html)
+output_file.close
+
+print "Loading geometry editor API script from: #{src_path + '/api.js'}\n\n"
+api_scripts = File.open(src_path + '/api.js') {|file| file.read}
+
+# the newline after #{scripts} is important, removing it causes everything after #{scripts} to be interpreted as a comment
+embeddable_html = base_html + "
+    <script> #{api_scripts} </script>
+    <script>
+      function startApp() {
+        #{scripts}
+      }
+    </script>
+    </body>
+</html>"
+
+output_file = File.new(dist_path + '/embeddable_geometry_editor.html', 'w')
+output_file.write(embeddable_html)
 output_file.close
