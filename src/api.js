@@ -26,7 +26,8 @@ window.api = {
       units: 'm',
       showMapDialogOnStart: true,
       online: true,
-      onChange: function change() { window.versionNumber += 1; },
+      // eslint-disable-line
+      onChange: () => { window.versionNumber += 1; },
     }, config);
 
     this.setConfigAlreadyRun = true;
