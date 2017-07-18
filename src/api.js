@@ -17,10 +17,11 @@ window.api = {
   doExport() {
     return window.application.$store.getters['exportData'];
   },
-  setConfig(config = {}) {
+  setConfig(config) {
     if (this.setConfigAlreadyRun) {
       throw new Error('This method can only be run once!');
     }
+    if (config === undefined) { config = {}; }
     this.config = Object.assign({
       units: 'm',
       showMapDialogOnStart: true,
