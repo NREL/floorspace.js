@@ -1,6 +1,5 @@
 window.api = {
   config: null,
-  setConfigAlreadyRun: false,
   initAlreadyRun: false,
   doImport: (data) => {
     try {
@@ -16,8 +15,8 @@ window.api = {
   },
   doExport: () => window.application.$store.getters['exportData'],
   setConfig: (config) => {
-    if (this.setConfigAlreadyRun) {
-      throw new Error('This method can only be run once!');
+    if (this.initAlreadyRun) {
+      throw new Error('The application has already been started, configuration cannot be changed.');
     }
     if (config === undefined) { config = {}; }
     window.api.config = Object.assign({
@@ -28,7 +27,6 @@ window.api = {
       onChange: () => { window.versionNumber += 1; },
     }, config);
 
-    this.setConfigAlreadyRun = true;
   },
   init: () => {
     if (this.initAlreadyRun) {
