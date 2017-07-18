@@ -21,8 +21,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                     <canvas-view></canvas-view>
                     <grid-view></grid-view>
                 </main>
-                <!-- TODO: remove -->
-                <button v-if="api" @click="api.config.onChange()" style="position: absolute; top: -4.75rem; left: 50%; ">Temp onChange Button For danmacumber</button>
                 <!-- <inspector-view></inspector-view> -->
             </resize-group>
             <resize id="layout-library" :resize-top="true" :resize-top-min="100">
@@ -50,7 +48,6 @@ export default {
   name: 'app',
   data() {
     return {
-      api: window.api ? window.api : null, // TODO: remove
       error: null,
       success: null,
     };

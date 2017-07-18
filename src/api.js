@@ -1,5 +1,7 @@
 window.api = {
-  config: {},
+  config: null,
+  setConfigAlreadyRun: false,
+  initAlreadyRun: false,
   doImport(data) {
     try {
       window.application.$store.dispatch('importModel', {
@@ -15,16 +17,28 @@ window.api = {
   doExport() {
     return window.application.$store.getters['exportData'];
   },
-  setConfig({
-    units = 'm',
-    showMapDialogOnStart = true,
-    online = true,
-    onChange = function change() {},
-  }) {
-    this.config = { units, showMapDialogOnStart, online, onChange, };
+  setConfig(config = {}) {
+    if (this.setConfigAlreadyRun) {
+      throw new Error('This method can only be run once!');
+    }
+    this.config = Object.assign({
+      units: 'm',
+      showMapDialogOnStart: true,
+      online: true,
+      onChange: function change() { window.versionNumber += 1; },
+    }, config);
 
-    startApp();
+    this.setConfigAlreadyRun = true;
+  },
+  init() {
+    if (this.initAlreadyRun) {
+      throw new Error('This method can only be run once!');
+    }
+    window.versionNumber = 0;
+    window.startApp();
+    delete window.startApp;
     // don't dispatch actions until the application and data store are instantiated
-    window.application.$store.dispatch('project/setUnits', { units });
+    window.application.$store.dispatch('project/setUnits', { units: this.config.units });
+    this.initAlreadyRun = true;
   },
 };
