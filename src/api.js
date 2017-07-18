@@ -2,7 +2,7 @@ window.api = {
   config: null,
   setConfigAlreadyRun: false,
   initAlreadyRun: false,
-  doImport(data) {
+  doImport: (data) => {
     try {
       window.application.$store.dispatch('importModel', {
         clientWidth: document.getElementById('svg-grid').clientWidth,
@@ -14,15 +14,13 @@ window.api = {
     }
     return true;
   },
-  doExport() {
-    return window.application.$store.getters['exportData'];
-  },
-  setConfig(config) {
+  doExport: () => window.application.$store.getters['exportData'],
+  setConfig: (config) => {
     if (this.setConfigAlreadyRun) {
       throw new Error('This method can only be run once!');
     }
     if (config === undefined) { config = {}; }
-    this.config = Object.assign({
+    window.api.config = Object.assign({
       units: 'm',
       showMapDialogOnStart: true,
       online: true,
@@ -32,7 +30,7 @@ window.api = {
 
     this.setConfigAlreadyRun = true;
   },
-  init() {
+  init: () => {
     if (this.initAlreadyRun) {
       throw new Error('This method can only be run once!');
     }
@@ -40,7 +38,7 @@ window.api = {
     window.startApp();
     delete window.startApp;
     // don't dispatch actions until the application and data store are instantiated
-    window.application.$store.dispatch('project/setUnits', { units: this.config.units });
+    window.application.$store.dispatch('project/setUnits', { units: window.api.config.units });
     this.initAlreadyRun = true;
   },
 };
