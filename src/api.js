@@ -1,6 +1,7 @@
 window.api = {
-  config: {},
-  doImport(data) {
+  config: null,
+  initAlreadyRun: false,
+  doImport: (data) => {
     try {
       window.application.$store.dispatch('importModel', {
         clientWidth: document.getElementById('svg-grid').clientWidth,
@@ -12,19 +13,30 @@ window.api = {
     }
     return true;
   },
-  doExport() {
-    return window.application.$store.getters['exportData'];
-  },
-  setConfig({
-    units = 'm',
-    showMapDialogOnStart = true,
-    online = true,
-    onChange = function change() {},
-  }) {
-    this.config = { units, showMapDialogOnStart, online, onChange };
+  doExport: () => window.application.$store.getters['exportData'],
+  setConfig: (config) => {
+    if (this.initAlreadyRun) {
+      throw new Error('The application has already been started, configuration cannot be changed.');
+    }
+    if (config === undefined) { config = {}; }
+    window.api.config = Object.assign({
+      units: 'm',
+      showMapDialogOnStart: true,
+      online: true,
+      // eslint-disable-line
+      onChange: () => { window.versionNumber += 1; },
+    }, config);
 
-    startApp();
+  },
+  init: () => {
+    if (this.initAlreadyRun) {
+      throw new Error('This method can only be run once!');
+    }
+    window.versionNumber = 0;
+    window.startApp();
+    delete window.startApp;
     // don't dispatch actions until the application and data store are instantiated
-    window.application.$store.dispatch('project/setUnits', { units });
+    window.application.$store.dispatch('project/setUnits', { units: window.api.config.units });
+    this.initAlreadyRun = true;
   },
 };

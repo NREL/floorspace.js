@@ -3,6 +3,7 @@ import idFactory from './generateId'
 const d3 = require('d3');
 
 export default function importModel (context, payload)  {
+    if (window.api) { window.versionNumber = 0; }
     // GEOMETRY
     const geometry = JSON.parse(JSON.stringify(payload.data.stories.map(s => s.geometry)));
     for (var i = 0; i < geometry.length; i++) {
@@ -89,6 +90,6 @@ export default function importModel (context, payload)  {
         },
         geometry: geometry
     });
-    
+
     document.getElementById("svg-grid").dispatchEvent(new Event('reloadGrid'));
 }
