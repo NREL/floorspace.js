@@ -18,15 +18,16 @@ window.api = {
     if (this.initAlreadyRun) {
       throw new Error('The application has already been started, configuration cannot be changed.');
     }
-    if (config === undefined) { config = {}; }
+
+    if (config === undefined) {
+      config = {}; // eslint-disable-line
+    }
     window.api.config = Object.assign({
       units: 'm',
       showMapDialogOnStart: true,
       online: true,
-      // eslint-disable-line
       onChange: () => { window.versionNumber += 1; },
     }, config);
-
   },
   init: () => {
     if (this.initAlreadyRun) {

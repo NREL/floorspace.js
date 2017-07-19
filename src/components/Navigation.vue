@@ -309,7 +309,7 @@ export default {
   },
   watch: {
     mode() { this.clearSubSelections(); },
-    'currentStory.id': () => { this.clearSubSelections(); },
+    'currentStory.id': function () { this.clearSubSelections(); },
     currentSubSelection() {
       if (!this.currentSubSelection && this[this.mode][0]) {
         this.$nextTick(() => {

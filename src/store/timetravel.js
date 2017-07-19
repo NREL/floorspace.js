@@ -36,26 +36,29 @@ export default {
 
 
       // TODO: filter by action type
-      if (action.indexOf('project/') !== -1) {
-        return;
-      }
+      // if (action.indexOf('project/') !== -1) {
+      //   return;
+      // }
 
-      console.log('dispatching', args[0]);
+      console.warn('dispatching', args[0]);
 
-      if (that.timetravelIndex < that.timetravelStates.length - 1) {
-        // clear tail from states and then push at index
-        that.timetravelStates = that.timetravelStates.slice(0, that.timetravelIndex);
-      }
-
-      that.timetravelStates.push({
-        meta: {
-          action: args[0],
-          mutations: mutationsForAction,
-        },
-        state: serializeState(store.state),
-      });
-      that.timetravelIndex += 1;
-      mutationsForAction = [];
+      clearTimeout(store.checkpointTimout);
+      store.checkpointTimout = setTimeout(() => {
+        if (that.timetravelIndex < that.timetravelStates.length - 1) {
+          // clear tail from states and then push at index
+          that.timetravelStates = that.timetravelStates.slice(0, that.timetravelIndex);
+        }
+        console.log("checkpointing");
+        that.timetravelStates.push({
+          meta: {
+            action: args[0],
+            mutations: mutationsForAction,
+          },
+          state: serializeState(store.state),
+        });
+        that.timetravelIndex += 1;
+        mutationsForAction = [];
+      }, 0);
     };
   },
   undo() {

@@ -6,8 +6,9 @@ module.exports = {
   'plugins': ['html'],
   'rules': {
     'no-param-reassign': ['error', {
-      'props': false
+      props: false
     }],
+    'dot-notation': 0,
     'no-plusplus': ['error', {
       'allowForLoopAfterthoughts': true
     }],
