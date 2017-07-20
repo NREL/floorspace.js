@@ -109,7 +109,7 @@ export default {
   // undoes an undo
   redo() {
     if (!this.initialized) { return; }
-    if (this.timetravelIndex < this.timetravelStates.length-1) {
+    if (this.timetravelIndex < this.timetravelStates.length - 1) {
       this.timetravelIndex += 1;
       this.store.replaceState(this.timetravelStates[this.timetravelIndex].state);
       // console.log('redo', this.timetravelIndex, this.timetravelStates[this.timetravelIndex]);
