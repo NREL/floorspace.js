@@ -10,67 +10,96 @@ const serializeState = (state) => {
 };
 
 export default {
+  initialized: false,
+  store: null,
   timetravelStates: [],
   timetravelIndex: 0,
-  store: null,
-  init(store) {
-    this.store = store;
+  // arrays to store the names of actions and commits that occurred in each checkpoint, this is reset for each save
+  mutationsForCurrentCheckpoint: [],
+  actionsForCurrentCheckpoint: [],
 
-    // this is reset for each action
-    let mutationsForAction = [];
+  init(store) {
+    const that = this;
+    this.store = store;
+    window.timetravel = this;
+
     // override commit to store names of mutations
     const originalCommit = store.commit;
     store.commit = function overrideCommit(...args) {
+      // data store has been changed, call config onChange method which can be supplied by parent application
       if (window.api) { window.api.config.onChange(); }
-      // console.log('committing', args);
-      mutationsForAction.push(args[0]);
+      that.mutationsForCurrentCheckpoint.push(args[0]);
       originalCommit.apply(this, args);
     };
 
     // monkey patch dispatch to store each version of the state
-    const that = this;
     const originalDispatch = store.dispatch;
     store.dispatch = function overrideDispatch(...args) {
       const action = args[0];
       originalDispatch.apply(this, args);
 
+      // ignore changes to view bounds
+      if (action === ('project/setViewMinX') || action === ('project/setViewMinY') ||
+      action === ('project/setViewMaxX') || action === ('project/setViewMaxY')) { return; }
 
-      // TODO: filter by action type
-      // if (action.indexOf('project/') !== -1) {
-      //   return;
-      // }
+      // after the map is placed or disabled, enable undo/redo by setting that.initialized to true and initializing the timetravel
+      if (action === 'project/setMapInitialized' ||
+        (action === 'project/setMapEnabled' && args[1].enabled === false) ||
+        // if map placement is disabled, immediately enable timetravel
+        (!that.initialized && window.api && !window.api.config.showMapDialogOnStart)
+      ) {
+        console.log('Initialized application, clearing timetravel');
+        that.initialized = true;
+        that.timetravelStates = [];
+        that.timetravelIndex = -1; // initialize index at -1, so that it will be at 0 when the first checkpoint is saved
+      }
 
+      that.actionsForCurrentCheckpoint.push(action);
       console.warn('dispatching', args[0]);
 
+      /*
+      * This timeout will prevent the store from saving if the event queue is not empty
+      * The result is that each checkpoint contains a set of related actions, so undo can't leave us in an invalid state
+      */
       clearTimeout(store.checkpointTimout);
-      store.checkpointTimout = setTimeout(() => {
-        if (that.timetravelIndex < that.timetravelStates.length - 1) {
-          // clear tail from states and then push at index
-          that.timetravelStates = that.timetravelStates.slice(0, that.timetravelIndex);
-        }
-        console.log("checkpointing");
-        that.timetravelStates.push({
-          meta: {
-            action: args[0],
-            mutations: mutationsForAction,
-          },
-          state: serializeState(store.state),
-        });
-        that.timetravelIndex += 1;
-        mutationsForAction = [];
-      }, 0);
+      store.checkpointTimout = setTimeout(that.saveCheckpoint.bind(that), 0);
     };
   },
+  saveCheckpoint() {
+    // if the user has just run undo, the timetravelIndex will be less than the length of the timetravelStates
+    // instead of pushing to the end of timetravelStates and keeping the last undone state, we should remove all undone state versions from the
+    // end of timetravelStates and then push the new state at the current index
+    if (this.timetravelIndex < this.timetravelStates.length - 1) {
+      this.timetravelStates = this.timetravelStates.slice(0, (this.timetravelIndex - 1 > 1) ? (this.timetravelIndex - 1) : 1);
+      this.timetravelIndex = (this.timetravelIndex - 1 < 0) ? 0 : this.timetravelIndex - 1;
+    }
+    this.timetravelStates.push({
+      meta: {
+        actions: this.actionsForCurrentCheckpoint,
+        mutations: this.mutationsForCurrentCheckpoint,
+      },
+      state: serializeState(this.store.state),
+    });
+
+    console.log('save checkpoint', this.timetravelStates[this.timetravelIndex]);
+    this.timetravelIndex += 1;
+    this.actionsForCurrentCheckpoint = [];
+    this.mutationsForCurrentCheckpoint = [];
+  },
+  // pop the last version of state off the timetravel array and revert the data store to it
   undo() {
-    this.timetravelIndex -= 2;
+    if (this.timetravelIndex === 0 || !this.initialized) { return; }
+    this.timetravelIndex -= 1;
     this.store.replaceState(this.timetravelStates[this.timetravelIndex].state);
     console.log('undo', this.timetravelIndex, this.timetravelStates[this.timetravelIndex]);
   },
+  // undoes an undo
   redo() {
-    if (this.timetravelIndex < this.timetravelStates.length - 1) {
+    if (!this.initialized) { return; }
+    if (this.timetravelIndex < this.timetravelStates.length) {
       this.timetravelIndex += 1;
       this.store.replaceState(this.timetravelStates[this.timetravelIndex].state);
-      console.log('redo', this.timetravelIndex);
+      console.log('redo', this.timetravelIndex, this.timetravelStates[this.timetravelIndex]);
     }
   },
 };
