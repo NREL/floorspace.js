@@ -6,8 +6,21 @@ const serializeState = (state) => {
   clone.application.scale.x = scaleX;
   clone.application.scale.y = scaleY;
 
+  const currentSelections = clone.application.currentSelections;
+  const currentStory = clone.models.stories.find(s => s.id === currentSelections.story.id);
+  currentSelections.story = currentStory;
+  currentSelections.space = currentSelections.space ? currentStory.spaces.find(s => s.id === currentSelections.space.id) : null;
+  currentSelections.shading = currentSelections.shading ? currentStory.shading.find(s => s.id === currentSelections.shading.id) : null;
+
+  currentSelections.building_unit = currentSelections.building_unit ? clone.models.library.building_units.find(b => b.id === currentSelections.building_unit.id) : null;
+  currentSelections.thermal_zone = currentSelections.thermal_zone ? clone.models.library.thermal_zones.find(t => t.id === currentSelections.thermal_zone.id) : null;
+  currentSelections.space_type = currentSelections.space_type ? clone.models.library.space_types.find(s => s.id === currentSelections.space_type.id) : null;
+
+  clone.application.currentSelections = currentSelections;
+
   return clone;
 };
+
 
 export default {
   initialized: false,
@@ -48,14 +61,14 @@ export default {
         // if map placement is disabled, immediately enable timetravel
         (!that.initialized && window.api && !window.api.config.showMapDialogOnStart)
       ) {
-        console.log('Initialized application, clearing timetravel');
+        // console.log('Initialized application, clearing timetravel');
         that.initialized = true;
         that.timetravelStates = [];
         that.timetravelIndex = -1; // initialize index at -1, so that it will be at 0 when the first checkpoint is saved
       }
 
       that.actionsForCurrentCheckpoint.push(action);
-      console.warn('dispatching', args[0]);
+      // console.warn('dispatching', args[0]);
 
       /*
       * This timeout will prevent the store from saving if the event queue is not empty
@@ -81,7 +94,7 @@ export default {
       state: serializeState(this.store.state),
     });
 
-    console.log('save checkpoint', this.timetravelStates[this.timetravelIndex]);
+    // console.log('save checkpoint', this.timetravelStates[this.timetravelIndex]);
     this.timetravelIndex += 1;
     this.actionsForCurrentCheckpoint = [];
     this.mutationsForCurrentCheckpoint = [];
@@ -91,7 +104,7 @@ export default {
     if (this.timetravelIndex === 0 || !this.initialized) { return; }
     this.timetravelIndex -= 1;
     this.store.replaceState(this.timetravelStates[this.timetravelIndex].state);
-    console.log('undo', this.timetravelIndex, this.timetravelStates[this.timetravelIndex]);
+    // console.log('undo', this.timetravelIndex, this.timetravelStates[this.timetravelIndex]);
   },
   // undoes an undo
   redo() {
@@ -99,7 +112,7 @@ export default {
     if (this.timetravelIndex < this.timetravelStates.length) {
       this.timetravelIndex += 1;
       this.store.replaceState(this.timetravelStates[this.timetravelIndex].state);
-      console.log('redo', this.timetravelIndex, this.timetravelStates[this.timetravelIndex]);
+      // console.log('redo', this.timetravelIndex, this.timetravelStates[this.timetravelIndex]);
     }
   },
 };
