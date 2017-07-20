@@ -424,9 +424,6 @@ export default {
         }
   },
   watch: {
-    extendedLibrary (nv, ov) {
-      console.log('extendedLibrary watcher', nv, ov);
-    },
     displayObjects() { this.$nextTick(this.configurePickers); },
     type() {
       this.search = '';

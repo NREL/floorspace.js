@@ -99,7 +99,6 @@ export default {
       thermal_zones: state => state.models.library.thermal_zones,
 
       // currentStory's child spaces, shading, and images
-      currentSelections: state => state.application.currentSelections,
       spaces: state => state.application.currentSelections.story.spaces,
       shading: state => state.application.currentSelections.story.shading,
       images: state => state.application.currentSelections.story.images,
@@ -309,14 +308,6 @@ export default {
     displayNameForMode(mode = this.mode) { return applicationHelpers.displayNameForMode(mode); },
   },
   watch: {
-    currentSelections (nv, ov) {
-      console.log('currentSelections watcher', nv, ov);
-    },
-    spaces (nv, ov) {
-      console.log('spaces watcher', nv);
-      console.log('currentSelections:', this.currentSelections.story.id, this.currentSelections.story.spaces);
-
-    },
     mode() { this.clearSubSelections(); },
     'currentStory.id': function () { this.clearSubSelections(); },
     currentSubSelection() {
