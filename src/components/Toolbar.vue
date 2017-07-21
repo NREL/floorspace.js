@@ -29,7 +29,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 <label>spacing</label>
                 <input v-model.number.lazy="spacing">
             </div>
-            
+
             <div class="input-number">
                 <label>north axis</label>
                 <input v-model.number.lazy="northAxis" :disabled="mapEnabled">
@@ -127,7 +127,7 @@ export default {
             .filter((t) => {
                 if (t === 'Rectangle' || t === 'Polygon' || t === 'Eraser' || t === 'Select') {
                     // only allow drawing tools in space and shade mode
-                    return (this.currentMode === 'spaces' || this.currentMode === 'shading');
+                    return (this.currentMode === 'spaces' || this.currentMode === 'shading' || this.currentMode === 'images'); // TODO: remove images and add a Pan tool
                 } else if ( t === 'Drag') {
                     // only allow dragging in image mode
                     return (this.currentMode === 'images');

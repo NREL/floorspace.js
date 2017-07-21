@@ -405,7 +405,7 @@ export default {
       })
       .on('drag', (d) => {
         if (that.currentTool !== 'Select' || d.previous_story) { return; }
-        
+
         dx += d3.event.dx;
         dy += d3.event.dy;
         d3.select(`#face-${d.face_id}`)
@@ -944,7 +944,7 @@ export default {
     } else if (axis === 'y') {
       const currentScaleY = d3.scaleLinear()
       // .domain([0, this.$refs.grid.clientHeight])
-      .domain([this.$refs.grid.clientHeight,0]) // inverted y axis
+      .domain([this.$refs.grid.clientHeight, 0]) // inverted y axis
       .range([this.min_y, this.max_y]),
       pxValue = currentScaleY.invert(rwu);
       return this.pxToGrid(pxValue, axis);
@@ -955,7 +955,6 @@ export default {
   * take a grid value (from some point already rendered to the grid) and translate it into RWU for persistence to the datastore
   */
   gridToRWU (gridValue, axis) {
-    if (!this.scaleX || !this.scaleY) {return}
     var result;
     if (axis === 'x') {
       const currentScaleX = d3.scaleLinear()

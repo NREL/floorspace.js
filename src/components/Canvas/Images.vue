@@ -7,433 +7,480 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 
 <template>
-    <div id="images" ref="images" :style="{ 'pointer-events': currentTool === 'Drag' ? 'all': 'none' }"></div>
+  <div id="images" ref="images" :style="{ 'pointer-events': currentTool === 'Drag' ? 'all': 'none' }"></div>
 </template>
 
 <script>
-const Konva = require('konva'),
-    ol = require('openlayers'),
-    d3 = require('d3');
+import { mapState } from 'vuex';
+import applicationHelpers from './../../store/modules/application/helpers';
+import ResizeEvents from '../../components/Resize/ResizeEvents';
 
-import { mapState } from 'vuex'
-import applicationHelpers from './../../store/modules/application/helpers.js'
-import modelHelpers from './../../store/modules/models/helpers.js'
-import { ResizeEvents } from 'src/components/Resize'
+const Konva = require('konva');
+const d3 = require('d3');
 
 export default {
-    name: 'images',
-    data () {
-        return {
-            stage: null,
-            // cache images on the component so that we can check which property was altered in the images watcher
-            imageCache: []
-        };
-    },
-    mounted () {
-        ResizeEvents.$on('resize-resize',this.renderImages);
-        window.addEventListener('resize', this.renderImages);
-        this.renderImages();
-    },
-    beforeDestroy () {
-        ResizeEvents.$on('resize-resize',this.renderImages);
-        window.removeEventListener('resize', this.renderImages);
-    },
-    methods: {
-        // render
-        renderImages () {
-            // udpate image cache
-            this.imageCache = JSON.parse(JSON.stringify(this.images));
+  name: 'images',
+  data() {
+    return {
+      stage: null,
+      layer: null,
+      // cache images on the component so that we can check which property was altered in the images watcher
+      imageCache: [],
+    };
+  },
+  mounted() {
+    ResizeEvents.$on('resize-resize', this.renderImages);
+    window.addEventListener('resize', this.renderImages);
+    this.renderImages(true);
+  },
+  beforeDestroy() {
+    ResizeEvents.$on('resize-resize', this.renderImages);
+    window.removeEventListener('resize', this.renderImages);
+  },
+  methods: {
+    // render
+    renderImages(firstRun) {
+      // keep a cache of images each time we render
+      // change detection on the images array will use this cache to determine which image property has changed
+      // and determine whether a rerender is required
+      this.imageCache = JSON.parse(JSON.stringify(this.images));
 
-            const stage = new Konva.Stage({
-                    container: 'images',
-                    width: document.getElementById('canvas').clientWidth,
-                    height: document.getElementById('canvas').clientHeight
-                }),
-                layer = new Konva.Layer();
+      // create stage
+      this.stage = new Konva.Stage({
+        container: 'images',
+        width: document.getElementById('canvas').clientWidth,
+        height: document.getElementById('canvas').clientHeight,
+      });
+      this.layer = new Konva.Layer();
+      this.stage.add(this.layer);
 
-            stage.add(layer);
+      // render each image in the store
+      this.images.forEach(img => this.renderImage(img));
 
-            this.stage = stage;
-            this.images.forEach(this.renderImage.bind(this,layer));
-            this.resetStage();
-            // layer.draw();
+      // place the stage based on the current viewbox (panned/zoomed view)
+      if (firstRun === true) {
+        this.scaleAndPlaceStage();
+      }
+    },
+    renderImage(image) {
+
+      const { width: w, height: h, x } = image;
+      const y = image.y; // inverted y axis
+
+      console.log("renderImage:",x,y, w,h);
+
+      const imageGroup = new Konva.Group({
+        // position (not sure if this is center or upper corner?)
+        x: this.scaleX(x + (w / 2)),
+        y: this.scaleY(y + (h / 2)),
+        // offset from center point and rotation point
+        offset: {
+          x: this.scaleX.invert(w / 2),
+          y: this.scaleY.invert(h / 2),
         },
-        renderImage (layer, image) {
-          let { width: w, height: h, x, y } = image;
-          y *= -1; // inverted y axis
-            const imageReader = new Image(),
-                imageGroup = new Konva.Group({
-                    x: this.scaleX.invert(x + w/2),
-                    y: this.scaleY.invert(y + h/2),
-                    offset: {
-                        x: this.scaleX.invert(w/2),
-                        y: this.scaleY.invert(h/2)
-                    },
-                    draggable: true
-                }),
-                imageObj = new Konva.Image({
-                    x: 0,
-                    y: 0,
-                    width: this.scaleX.invert(w),
-                    height: this.scaleY.invert(h),
-                    stroke: '#6AAC15',
-                    strokeWidth: 3,
-                    strokeEnabled: (this.currentImage && this.currentImage.id === image.id),
-                    opacity: image.opacity,
-                    name: 'image'
-                }),
-                imageCenter = new Konva.Circle({
-                    x: this.scaleX.invert(w/2),
-                    y: this.scaleY.invert(h/2),
-                    // fill: 'blue',
-                    // radius: 3,
-                    name: 'center',
-                    draggable: false
-                });
+        draggable: true,
+      });
+      const imageObj = new Konva.Image({
+        x: 0,
+        y: 0,
+        width: this.scaleX.invert(w),
+        height: this.scaleY.invert(h),
+        opacity: image.opacity,
+        name: 'image',
+        // add a green border to the currentImage
+        stroke: '#6AAC15',
+        strokeWidth: 3,
+        strokeEnabled: (this.currentImage && this.currentImage.id === image.id),
+      });
+      const imageCenter = new Konva.Circle({
+        x: this.scaleX.invert(x + (w / 2)),
+        y: this.scaleY.invert(y + (h / 2)),
+        fill: 'blue',
+        radius: 3,
+        name: 'center',
+      });
 
-            // store imageId on group to look up the associated image object when user interacts with group
-            imageGroup.imageId = image.id;
+      // store imageId on group to look up the associated image object when user interacts with group
+      imageGroup.imageId = image.id;
 
-            // layout
-            layer.add(imageGroup);
-            imageGroup
-                .add(imageObj)
-                .add(imageCenter)
-                .setZIndex(image.z)
-                .rotation(image.r);
+      // layout
+      this.layer.add(imageGroup);
+      imageGroup
+        .add(imageObj)
+        .add(imageCenter)
+        .setZIndex(image.z)
+        .rotation(image.r);
 
-            // load image
-            imageReader.onload = () => {
-                imageObj.image(imageReader);
-                layer.draw();
+      // load image
+      const imageReader = new Image();
+      imageReader.onload = () => {
+        imageObj.image(imageReader);
+        this.layer.draw();
+      };
+      imageReader.src = image.src;
+
+      // initialize rotate and resize controls on the image group
+      this.initRotation(imageGroup);
+      this.initResize(imageGroup);
+
+      // events
+      // set as currentImage when an image's group is clicked (or dragged)
+      imageGroup.on('click', () => { this.currentImage = image; });
+
+      imageGroup.on('dragend', (e) => {
+        this.currentImage = image;
+
+        // update store
+        const updatedWidth = imageObj.size().width;
+        const updatedHeight = imageObj.size().height;
+        const updatedRotation = imageGroup.rotation();
+        // get center relative to layer since group might be rotated
+        const updatedCenterX = imageCenter.getAbsolutePosition(this.layer).x;
+        const updatedCenterY = imageCenter.getAbsolutePosition(this.layer).y;
+
+        this.$store.dispatch('models/updateImageWithData', {
+          image,
+          x: this.scaleX(updatedCenterX - (updatedWidth / 2)),
+          y: this.scaleY(updatedCenterY - (updatedHeight / 2)),
+          r: updatedRotation,
+          width: this.scaleX(w),
+          height: this.scaleY(h),
+        });
+
+        // this.renderImages();
+      });
+    },
+    // set up rotation behavior
+    initRotation(group) {
+      const imageCenter = group.get('.center')[0];
+      // fixed anchor (visible)
+      const rotateAnchorCircle = new Konva.Circle({
+        radius: 6,
+        name: 'rotateAnchorCircle',
+        stroke: 'red',//applicationHelpers.config.palette.neutral,
+        strokeWidth: 2,
+      });
+
+      // line between center and fixed anchor
+      const rotateAnchorLine = new Konva.Line({
+        // stroke: applicationHelpers.config.palette.neutral,
+        stroke: 'blue',
+        strokeWidth: 2,
+        name: 'rotateAnchorLine'
+      });
+
+      // draggable anchor (invisible)
+      const rotateAnchor = rotateAnchorCircle.clone({
+        name: 'rotateAnchor',
+        draggable: true,
+        strokeEnabled: false,
+        fill: 'blue'
+      });
+
+      group
+      .add(rotateAnchorCircle)
+      .add(rotateAnchorLine)
+      .add(rotateAnchor);
+
+      rotateAnchorLine.setZIndex(-10);
+
+      // rotate on drag
+      rotateAnchor.on('dragmove', () => {
+        const {
+          x: anchorX,
+          y: anchorY,
+        } = rotateAnchor.position();
+        const {
+          x: imageCenterX,
+          y: imageCenterY,
+        } = imageCenter.position();
+        // current rotation of image in degrees
+        const rotationOffset = 270 + group.rotation();
+        const radToDeg = 180 / Math.PI;
+        const dragAngleDegrees = radToDeg * Math.atan((anchorY - imageCenterY) / (anchorX - imageCenterX));
+
+        let updatedAngle = rotationOffset + dragAngleDegrees;
+        if (anchorX < imageCenterX) { updatedAngle -= 180; }
+
+
+        group.rotation(updatedAngle % 360);
+      });
+
+      rotateAnchor.on('dragend', () => {
+        rotateAnchorCircle.setRadius(6);
+        // snap draggable rotation anchor to match visible, fixed rotation anchor
+        rotateAnchor.position(rotateAnchorCircle.position());
+        this.layer.draw();
+      });
+
+      // hover effect
+      rotateAnchor.on('dragstart mouseover mousedown', () => {
+        document.body.style.cursor = 'pointer';
+        rotateAnchorCircle.setRadius(10);
+        this.layer.draw();
+      });
+
+      rotateAnchor.on('mouseout', () => {
+        document.body.style.cursor = 'default';
+        rotateAnchorCircle.setRadius(6);
+        this.layer.draw();
+      });
+    },
+    // set up resize behavior
+    initResize(group) {
+      const imageObj = group.get('.image')[0],
+      {
+        width: w,
+        height: h
+      } = imageObj.size();
+
+      addResizeAnchor.call(this, group, 0, 0, 'topLeft');
+      addResizeAnchor.call(this, group, w, 0, 'topRight');
+      addResizeAnchor.call(this, group, w, h, 'bottomRight');
+      addResizeAnchor.call(this, group, 0, h, 'bottomLeft');
+      redrawAnchors();
+
+      function addResizeAnchor(group, w, h, name) {
+        const anchor = new Konva.Circle({
+          x: w,
+          y: h,
+          fill: applicationHelpers.config.palette.neutral,
+          // fill: 'red',
+          radius: 3,
+          name: name,
+          draggable: true
+        });
+
+        // resize on drag
+        anchor.on('dragmove', () => {
+          const topLeft = group.get('.topLeft')[0],
+          topRight = group.get('.topRight')[0],
+          bottomRight = group.get('.bottomRight')[0],
+          bottomLeft = group.get('.bottomLeft')[0],
+          {
+            x: anchorX,
+            y: anchorY
+          } = anchor.position(),
+          imageObj = group.get('.image')[0],
+          // look up the image in the data store by the imageID stored on the canvas group
+          image = this.images.find(i => i.id === group.imageId),
+          // maintain aspect ratio
+          ratio = image.width / image.height,
+          width = topRight.getX() - topLeft.getX(),
+          height = width / ratio;
+
+          var imagePos;
+
+          // update anchor positions
+          switch (anchor.getName()) {
+            case 'topLeft':
+            topLeft.position({
+              x: anchorX,
+              y: bottomRight.getY() - height
+            });
+            topRight.setY(bottomRight.getY() - height);
+            bottomLeft.setX(anchorX);
+
+            imagePos = {
+              x: bottomRight.getX() - width,
+              y: bottomRight.getY() - height
             };
-            imageReader.src = image.src;
+            break;
+            case 'topRight':
+            topLeft.setY(bottomRight.getY() - height);
+            topRight.setY(bottomRight.getY() - height)
+            bottomRight.setX(anchorX);
 
-            // load controls
-            this.initRotation(imageGroup);
-            this.initResize(imageGroup);
-
-            // events
-            imageGroup.on('click', (e) => {
-                // imageGroup.moveToTop();
-                this.currentImage = image;
-            });
-
-            imageGroup.on('dragend', (e) => {
-                this.currentImage = image;
-
-                // update store
-                const { width: w, height: h } = imageObj.size(),
-                    r = imageGroup.rotation(),
-                    // get center relative to layer since group might be rotated
-                    { x, y } = imageCenter.getAbsolutePosition(layer);
-
-                this.$store.dispatch('models/updateImageWithData', {
-                    image,
-                    x: this.scaleX(x - w/2),
-                    y: this.scaleY(y - h/2),
-                    r,
-                    width: this.scaleX(w),
-                    height: this.scaleY(h)
-                });
-
-                this.renderImages();
-            });
-        },
-        // set up rotation behavior
-        initRotation (group) {
-            const imageCenter = group.get('.center')[0],
-                layer = group.getLayer();
-
-            // fixed anchor (visible)
-            const rotateAnchorCircle = new Konva.Circle({
-                radius: 6,
-                draggable: false,
-                name: 'rotateAnchorCircle',
-                stroke: applicationHelpers.config.palette.neutral,
-                strokeWidth: 2,
-            });
-
-            // line between center and fixed anchor
-            const rotateAnchorLine = new Konva.Line({
-                stroke: applicationHelpers.config.palette.neutral,
-                // stroke: 'blue',
-                strokeWidth: 2,
-                name: 'rotateAnchorLine'
-            });
-
-            // draggable anchor (invisible)
-            const rotateAnchor = rotateAnchorCircle.clone({
-                name: 'rotateAnchor',
-                draggable: true,
-                strokeEnabled: false,
-                // fill: 'blue'
-            });
-
-            group
-                .add(rotateAnchorCircle)
-                .add(rotateAnchorLine)
-                .add(rotateAnchor);
-
-            rotateAnchorLine.setZIndex(-10);
-
-            // rotate on drag
-            rotateAnchor.on('dragmove', () => {
-                const { x: anchorX, y: anchorY } = rotateAnchor.position();
-                const { x: centerX, y: centerY } = imageCenter.position();
-                const rotationOffset = group.rotation();
-
-                var angle = 270 + (180/Math.PI)*Math.atan((anchorY - centerY)/(anchorX - centerX)) + rotationOffset;
-
-                if (anchorX < centerX) {
-                    angle -= 180;
-                }
-
-                angle %= 360;
-
-                group.rotation(angle%360);
-            });
-
-            rotateAnchor.on('dragend', () => {
-                rotateAnchorCircle.setRadius(6);
-                // snap draggable rotation anchor to match visible, fixed rotation anchor
-                rotateAnchor.position(rotateAnchorCircle.position());
-                layer.draw();
-            });
-
-            // hover effect
-            rotateAnchor.on('dragstart mouseover mousedown', () => {
-                document.body.style.cursor = 'pointer';
-                rotateAnchorCircle.setRadius(10);
-                layer.draw();
-            });
-
-            rotateAnchor.on('mouseout', () => {
-                document.body.style.cursor = 'default';
-                rotateAnchorCircle.setRadius(6);
-                layer.draw();
-            });
-        },
-        // set up resize behavior
-        initResize (group) {
-            const imageObj = group.get('.image')[0],
-                { width: w, height: h } = imageObj.size();
-
-            addResizeAnchor.call(this, group, 0, 0, 'topLeft');
-            addResizeAnchor.call(this, group, w, 0, 'topRight');
-            addResizeAnchor.call(this, group, w, h, 'bottomRight');
-            addResizeAnchor.call(this, group, 0, h, 'bottomLeft');
-            redrawAnchors();
-
-            function addResizeAnchor(group, w, h, name) {
-                const anchor = new Konva.Circle({
-                    x: w,
-                    y: h,
-                    fill: applicationHelpers.config.palette.neutral,
-                    // fill: 'red',
-                    radius: 3,
-                    name: name,
-                    draggable: true
-                });
-
-                // resize on drag
-                anchor.on('dragmove', () => {
-                    const topLeft = group.get('.topLeft')[0],
-                        topRight = group.get('.topRight')[0],
-                        bottomRight = group.get('.bottomRight')[0],
-                        bottomLeft = group.get('.bottomLeft')[0],
-                        { x: anchorX, y: anchorY } = anchor.position(),
-                        imageObj = group.get('.image')[0],
-                        // look up the image in the data store by the imageID stored on the canvas group
-                        image = this.images.find(i => i.id === group.imageId),
-                        // maintain aspect ratio
-                        ratio = image.width / image.height,
-                        width = topRight.getX() - topLeft.getX(),
-                        height = width / ratio;
-
-                    var imagePos;
-
-                    // update anchor positions
-                    switch (anchor.getName()) {
-                        case 'topLeft':
-                            topLeft.position({ x: anchorX, y: bottomRight.getY() - height });
-                            topRight.setY(bottomRight.getY() - height);
-                            bottomLeft.setX(anchorX);
-
-                            imagePos = {
-                                x: bottomRight.getX() - width,
-                                y: bottomRight.getY() - height
-                            };
-                            break;
-                        case 'topRight':
-                            topLeft.setY(bottomRight.getY() - height);
-                            topRight.setY(bottomRight.getY() - height)
-                            bottomRight.setX(anchorX);
-
-                            imagePos = {
-                                x: bottomLeft.getX(),
-                                y: bottomLeft.getY() - height
-                            };
-                            break;
-                        case 'bottomRight':
-                            topRight.setX(anchorX);
-                            bottomRight.position({ x: anchorX, y: height });
-                            bottomLeft.setY(height);
-
-                            imagePos = imageObj.position();
-                            break;
-                        case 'bottomLeft':
-                            topLeft.setX(anchorX);
-                            bottomRight.setY(height);
-                            bottomLeft.position({ x: anchorX, y: height });
-
-                            imagePos = {
-                                x: topRight.getX() - width,
-                                y: topRight.getY()
-                            };
-                            break;
-                    }
-
-                    // update image size and position
-                    imageObj.size({ width, height })
-                        .position(imagePos);
-
-                    redrawAnchors();
-                });
-
-                // hover effect
-                anchor.on('mouseover', () => {
-                    document.body.style.cursor = 'pointer';
-                    anchor.setRadius(6).draw();
-                });
-
-                anchor.on('mouseout', () => {
-                    document.body.style.cursor = 'default';
-                    anchor.setRadius(3).draw();
-                });
-
-                group.add(anchor);
+            imagePos = {
+              x: bottomLeft.getX(),
+              y: bottomLeft.getY() - height
             };
+            break;
+            case 'bottomRight':
+            topRight.setX(anchorX);
+            bottomRight.position({
+              x: anchorX,
+              y: height
+            });
+            bottomLeft.setY(height);
 
-            // recalc center and rotate anchors
-            function redrawAnchors() {
-                const center = group.get('.center')[0],
-                    rotateAnchor = group.get('.rotateAnchor')[0],
-                    rotateAnchorCircle = group.get('.rotateAnchorCircle')[0],
-                    rotateAnchorLine = group.get('.rotateAnchorLine')[0],
-                    topLeft = group.get('.topLeft')[0],
-                    topRight = group.get('.topRight')[0],
-                    bottomRight = group.get('.bottomRight')[0],
-                    bottomLeft = group.get('.bottomLeft')[0],
-                    pos = imageObj.position(),
-                    { width, height } = imageObj.size();
+            imagePos = imageObj.position();
+            break;
+            case 'bottomLeft':
+            topLeft.setX(anchorX);
+            bottomRight.setY(height);
+            bottomLeft.position({
+              x: anchorX,
+              y: height
+            });
 
-                center.position({
-                    x: pos.x + width/2,
-                    y: pos.y + height/2
-                });
-
-                rotateAnchorCircle.position({
-                    x: pos.x + width/2,
-                    y: pos.y + height*1.25
-                });
-
-                rotateAnchor.position({
-                    x: pos.x + width/2,
-                    y: pos.y + height*1.25
-                });
-
-                rotateAnchorLine.points([
-                    rotateAnchorCircle.getX(),rotateAnchorCircle.getY(),
-                    center.getX(),center.getY()
-                ]);
-
-                group.draw();
+            imagePos = {
+              x: topRight.getX() - width,
+              y: topRight.getY()
             };
-        },
-        resetStage () {
-            if (!this.scaleX) {
-                // This is running before scales are set up, which means we don't need to reset anyway (and we can't, because there's no scale info yet)
-                return;
-            }
+            break;
+          }
 
-            const originalRes = (this.scaleX.range()[1] - this.scaleX.range()[0])/(this.scaleX.domain()[1] - this.scaleX.domain()[0]),
-                res = (this.view.max_x - this.view.min_x)/this.$refs.images.clientWidth,
-                scale = originalRes/res;
+          // update image size and position
+          imageObj.size({
+            width,
+            height
+          })
+          .position(imagePos);
 
-            if (this.stage) {
-                const x = this.rwuToPx(0,'x'),
-                    y = this.rwuToPx(0,'y');
+          redrawAnchors();
+        });
 
-                this.stage.scale({ x: scale, y: scale })
-                    .position({ x, y })
-                    .draw();
-            }
-        },
-        rwuToPx (rwu, axis) {
-            const { clientWidth: w, clientHeight: h } = this.$refs.images;
+        // hover effect
+        anchor.on('mouseover', () => {
+          document.body.style.cursor = 'pointer';
+          anchor.setRadius(6)
+          .draw();
+        });
 
-            if (axis === 'x') {
-                return d3.scaleLinear()
-                    .domain([0, w])
-                    .range([this.view.min_x, this.view.max_x])
-                    .invert(rwu);
-            } else if (axis === 'y') {
-                return d3.scaleLinear()
-                    .domain([h, 0]) // inverted y axis
-                    .range([this.view.min_y, this.view.max_y])
-                    .invert(rwu);
-            }
-        },
+        anchor.on('mouseout', () => {
+          document.body.style.cursor = 'default';
+          anchor.setRadius(3)
+          .draw();
+        });
+
+        group.add(anchor);
+      };
+
+      // recalc center and rotate anchors
+      function redrawAnchors() {
+        const center = group.get('.center')[0],
+        rotateAnchor = group.get('.rotateAnchor')[0],
+        rotateAnchorCircle = group.get('.rotateAnchorCircle')[0],
+        rotateAnchorLine = group.get('.rotateAnchorLine')[0],
+        topLeft = group.get('.topLeft')[0],
+        topRight = group.get('.topRight')[0],
+        bottomRight = group.get('.bottomRight')[0],
+        bottomLeft = group.get('.bottomLeft')[0],
+        pos = imageObj.position(),
+        {
+          width,
+          height
+        } = imageObj.size();
+
+        center.position({
+          x: pos.x + width / 2,
+          y: pos.y + height / 2
+        });
+
+        rotateAnchorCircle.position({
+          x: pos.x + width / 2,
+          y: pos.y + height * 1.25
+        });
+
+        rotateAnchor.position({
+          x: pos.x + width / 2,
+          y: pos.y + height * 1.25
+        });
+
+        rotateAnchorLine.points([
+          rotateAnchorCircle.getX(), rotateAnchorCircle.getY(),
+          center.getX(), center.getY()
+        ]);
+
+        group.draw();
+      };
     },
-    computed: {
-        ...mapState({
-            currentTool: state => state.application.currentSelections.tool,
-            images: state => state.application.currentSelections.story.images,
-            scaleX: state => state.application.scale.x,
-            scaleY: state => state.application.scale.y,
-            view: state => state.project.view,
-        }),
+    /*
+    * Set the scale and position of the canvas based on the current viewbox
+    */
+    scaleAndPlaceStage() {
+      console.log("scaleAndPlaceStage");
+      // original rwu/px resolution when scales were set
+      const originalResolution = (this.scaleX.range()[1] - this.scaleX.range()[0]) / (this.scaleX.domain()[1] - this.scaleX.domain()[0]);
+      // current rwu/px resolution based on current viewbox (after panning and zooming)
+      const currentResolution = (this.view.max_x - this.view.min_x) / this.$refs.images.clientWidth;
+      // scaling factor to render canvas images at current resolution
+      const scale = originalResolution / currentResolution;
 
-        currentImage: {
-            get () { return this.$store.state.application.currentSelections.image; },
-            set (item) { this.$store.dispatch('application/setCurrentImage', { 'image': item }); }
-        }
+      this.stage
+        // scale will not be 1 if the user has zoomed in or out
+        .scale({
+          x: scale,
+          y: scale,
+        })
+        // place the canvas at the pixel value corresponding to our RWU 0
+        .position({
+          x: this.rwuToPx(0, 'x'),
+          y: this.rwuToPx(0, 'y'),
+        })
+        .draw();
     },
-    watch: {
-        /*
-        * Compare the new images to a cached copy of the images because Vue will not store the previous value of an object that has changed
-        * if 'height', 'width', 'x', or 'y' have been updated, the canvas will already be updated too so there is no need to re rendering
-        * if z index or opacity has changed, or an image has been added/removed, we must re render the canvas
-        */
-        images: {
-            handler (newImages) {
-                if (newImages.length !== this.imageCache.length) { this.renderImages(); }
+    rwuToPx(rwu, axis) {
+      let currentScale;
+      if (axis === 'x') {
+        currentScale = d3.scaleLinear()
+          .range([0, this.$refs.images.clientWidth])
+          .domain([this.view.min_x, this.view.max_x]);
+      } else if (axis === 'y') {
+        currentScale = d3.scaleLinear()
+          .range([this.$refs.images.clientHeight, 0]) // inverted y axis
+          .domain([this.view.min_y, this.view.max_y]);
+      }
+      return currentScale(rwu);
+    },
+  },
+  computed: {
+    ...mapState({
+      currentTool: state => state.application.currentSelections.tool,
+      images: state => state.application.currentSelections.story.images,
+      scaleX: state => state.application.scale.x,
+      scaleY: state => state.application.scale.y,
+      view: state => state.project.view,
+    }),
 
-                // no images were added or deleted, check if the property changed is one that should trigger a re-render
-                const ignoredProperties = ['height', 'width', 'x', 'y', 'r'];
-                for (var i = 0; i < newImages.length; i++) {
-                    const newImage = newImages[i],
-                        cachedImage = this.imageCache[i];
-                    Object.keys(newImage).forEach((k) => {
-                        if (newImage[k] !== cachedImage[k] && !~ignoredProperties.indexOf(k)) {
-                            this.renderImages();
-                        }
-                    });
-                }
-            },
-            // deep watch so that changes to properties on individual images trigger the handler
-            deep: true
-        },
-        currentImage() { this.renderImages(); },
-        view: {
-            handler(val) {
-                this.resetStage();
-            },
-            deep: true
-        }
-    }
-}
+    currentImage: {
+      get() { return this.$store.state.application.currentSelections.image; },
+      set(image) { this.$store.dispatch('application/setCurrentImage', { image }); },
+    },
+  },
+  watch: {
+    /*
+    * Compare the new images to a cached copy of the images because Vue will not store the previous value of an object that has changed
+    * konva will handle updating the canvas when the dimensions or location of an image are changed so don't rerender if
+    * if 'height', 'width', 'x', or 'y' have been updated
+    * if z index or opacity has changed, or an image has been added/removed, we must re render the canvas
+    */
+    images: {
+      handler(newImages) {
+        // an image has been added or removed
+        if (newImages.length !== this.imageCache.length) {
+           debugger;
+           this.renderImages();
+         }
+
+        // no images were added or deleted, check if the property changed is one that should trigger a re-render
+        const ignoredProperties = ['height', 'width', 'x', 'y', 'r'];
+        newImages.forEach((newImage, i) => {
+          const cachedImage = this.imageCache[i];
+          // compare properties of new image to corresponding cached image
+          Object.keys(newImage).forEach((k) => {
+            if (newImage[k] !== cachedImage[k] && ignoredProperties.indexOf(k) === -1) {
+              debugger
+              this.renderImages();
+            }
+          });
+        });
+      },
+      // deep watch so that changes to properties on individual images trigger the handler
+      deep: true,
+    },
+    // currentImage() {
+    //   debugger
+    //   this.renderImages();
+    // },
+    // if the view boundaries change
+    view: {
+      handler() { this.scaleAndPlaceStage(); },
+      deep: true,
+    },
+  },
+};
 </script>
 <style lang="scss" scoped>
 @import "./../../scss/config";
