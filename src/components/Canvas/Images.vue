@@ -66,14 +66,13 @@ export default {
       const x = this.scaleX.invert(image.x);
       const w = this.scaleX.invert(image.width);
       const h = this.scaleY.invert(image.height);
-      console.log("renderimage:", x, y);
 
       // (x, y) is the image center position in pixels
       // konva places image by their upper left corner, so adjust by half the height and half the width
       const imageGroup = new Konva.Group({
         // image center position in pixels
-        x: x,// - (w / 2),
-        y: y,// - (h / 2),
+        x,
+        y,
         // offset from center point and rotation point
         offset: {
           x: (w / 2),
@@ -96,7 +95,6 @@ export default {
       const imageCenter = new Konva.Circle({
         x: (w / 2),
         y: (h / 2),
-        fill: 'blue',
         radius: 3,
         name: 'center',
       });
@@ -138,7 +136,7 @@ export default {
         // get center relative to layer since group might be rotated
         const updatedCenterX = imageCenter.getAbsolutePosition(this.layer).x;
         const updatedCenterY = -1 * imageCenter.getAbsolutePosition(this.layer).y;
-        console.log("dragend", updatedCenterX, updatedCenterY);
+
         this.$store.dispatch('models/updateImageWithData', {
           image,
           x: this.scaleX(updatedCenterX),
@@ -158,14 +156,13 @@ export default {
       const rotateAnchorCircle = new Konva.Circle({
         radius: 6,
         name: 'rotateAnchorCircle',
-        stroke: 'red',//applicationHelpers.config.palette.neutral,
+        stroke: applicationHelpers.config.palette.neutral,
         strokeWidth: 2,
       });
 
       // line between center and fixed anchor
       const rotateAnchorLine = new Konva.Line({
-        // stroke: applicationHelpers.config.palette.neutral,
-        stroke: 'blue',
+        stroke: applicationHelpers.config.palette.neutral,
         strokeWidth: 2,
         name: 'rotateAnchorLine'
       });
@@ -175,13 +172,12 @@ export default {
         name: 'rotateAnchor',
         draggable: true,
         strokeEnabled: false,
-        fill: 'blue'
       });
 
       group
-      .add(rotateAnchorCircle)
-      .add(rotateAnchorLine)
-      .add(rotateAnchor);
+        .add(rotateAnchorCircle)
+        .add(rotateAnchorLine)
+        .add(rotateAnchor);
 
       rotateAnchorLine.setZIndex(-10);
 
@@ -246,7 +242,6 @@ export default {
           x: w,
           y: h,
           fill: applicationHelpers.config.palette.neutral,
-          // fill: 'red',
           radius: 3,
           name: name,
           draggable: true
