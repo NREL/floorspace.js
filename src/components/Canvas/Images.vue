@@ -31,7 +31,7 @@ export default {
   mounted() {
     ResizeEvents.$on('resize-resize', this.renderImages);
     window.addEventListener('resize', this.renderImages);
-    this.renderImages(true);
+    this.renderImages();
   },
   beforeDestroy() {
     ResizeEvents.$on('resize-resize', this.renderImages);
@@ -39,7 +39,7 @@ export default {
   },
   methods: {
     // render
-    renderImages(firstRun) {
+    renderImages() {
       // keep a cache of images each time we render
       // change detection on the images array will use this cache to determine which image property has changed
       // and determine whether a rerender is required
@@ -58,33 +58,34 @@ export default {
       this.images.forEach(img => this.renderImage(img));
 
       // place the stage based on the current viewbox (panned/zoomed view)
-      if (firstRun === true) {
-        this.scaleAndPlaceStage();
-      }
+      this.scaleAndPlaceStage();
     },
     renderImage(image) {
+      // values in pixels
+      const y = -1 * this.scaleY.invert(image.y);
+      const x = this.scaleX.invert(image.x);
+      const w = this.scaleX.invert(image.width);
+      const h = this.scaleY.invert(image.height);
+      console.log("renderimage:", x, y);
 
-      const { width: w, height: h, x } = image;
-      const y = image.y; // inverted y axis
-
-      console.log("renderImage:",x,y, w,h);
-
+      // (x, y) is the image center position in pixels
+      // konva places image by their upper left corner, so adjust by half the height and half the width
       const imageGroup = new Konva.Group({
-        // position (not sure if this is center or upper corner?)
-        x: this.scaleX(x + (w / 2)),
-        y: this.scaleY(y + (h / 2)),
+        // image center position in pixels
+        x: x,// - (w / 2),
+        y: y,// - (h / 2),
         // offset from center point and rotation point
         offset: {
-          x: this.scaleX.invert(w / 2),
-          y: this.scaleY.invert(h / 2),
+          x: (w / 2),
+          y: (h / 2),
         },
         draggable: true,
       });
       const imageObj = new Konva.Image({
         x: 0,
         y: 0,
-        width: this.scaleX.invert(w),
-        height: this.scaleY.invert(h),
+        width: w,
+        height: h,
         opacity: image.opacity,
         name: 'image',
         // add a green border to the currentImage
@@ -93,8 +94,8 @@ export default {
         strokeEnabled: (this.currentImage && this.currentImage.id === image.id),
       });
       const imageCenter = new Konva.Circle({
-        x: this.scaleX.invert(x + (w / 2)),
-        y: this.scaleY.invert(y + (h / 2)),
+        x: (w / 2),
+        y: (h / 2),
         fill: 'blue',
         radius: 3,
         name: 'center',
@@ -136,18 +137,18 @@ export default {
         const updatedRotation = imageGroup.rotation();
         // get center relative to layer since group might be rotated
         const updatedCenterX = imageCenter.getAbsolutePosition(this.layer).x;
-        const updatedCenterY = imageCenter.getAbsolutePosition(this.layer).y;
-
+        const updatedCenterY = -1 * imageCenter.getAbsolutePosition(this.layer).y;
+        console.log("dragend", updatedCenterX, updatedCenterY);
         this.$store.dispatch('models/updateImageWithData', {
           image,
-          x: this.scaleX(updatedCenterX - (updatedWidth / 2)),
-          y: this.scaleY(updatedCenterY - (updatedHeight / 2)),
+          x: this.scaleX(updatedCenterX),
+          y: this.scaleY(updatedCenterY),
           r: updatedRotation,
-          width: this.scaleX(w),
-          height: this.scaleY(h),
+          width: this.scaleX(updatedWidth),
+          height: this.scaleY(updatedHeight),
         });
 
-        // this.renderImages();
+        this.renderImages();
       });
     },
     // set up rotation behavior
@@ -390,7 +391,6 @@ export default {
     * Set the scale and position of the canvas based on the current viewbox
     */
     scaleAndPlaceStage() {
-      console.log("scaleAndPlaceStage");
       // original rwu/px resolution when scales were set
       const originalResolution = (this.scaleX.range()[1] - this.scaleX.range()[0]) / (this.scaleX.domain()[1] - this.scaleX.domain()[0]);
       // current rwu/px resolution based on current viewbox (after panning and zooming)
@@ -449,10 +449,7 @@ export default {
     images: {
       handler(newImages) {
         // an image has been added or removed
-        if (newImages.length !== this.imageCache.length) {
-           debugger;
-           this.renderImages();
-         }
+        if (newImages.length !== this.imageCache.length) { this.renderImages(); }
 
         // no images were added or deleted, check if the property changed is one that should trigger a re-render
         const ignoredProperties = ['height', 'width', 'x', 'y', 'r'];
@@ -461,7 +458,6 @@ export default {
           // compare properties of new image to corresponding cached image
           Object.keys(newImage).forEach((k) => {
             if (newImage[k] !== cachedImage[k] && ignoredProperties.indexOf(k) === -1) {
-              debugger
               this.renderImages();
             }
           });
@@ -470,10 +466,9 @@ export default {
       // deep watch so that changes to properties on individual images trigger the handler
       deep: true,
     },
-    // currentImage() {
-    //   debugger
-    //   this.renderImages();
-    // },
+    currentImage() {
+      this.renderImages();
+    },
     // if the view boundaries change
     view: {
       handler() { this.scaleAndPlaceStage(); },

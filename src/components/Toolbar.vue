@@ -127,8 +127,8 @@ export default {
             .filter((t) => {
                 if (t === 'Rectangle' || t === 'Polygon' || t === 'Eraser' || t === 'Select') {
                     // only allow drawing tools in space and shade mode
-                    return (this.currentMode === 'spaces' || this.currentMode === 'shading' || this.currentMode === 'images'); // TODO: remove images and add a Pan tool
-                } else if ( t === 'Drag') {
+                    return (this.currentMode === 'spaces' || this.currentMode === 'shading');
+                } else if ( t === 'Drag' || t === 'Pan') {
                     // only allow dragging in image mode
                     return (this.currentMode === 'images');
                 }  else if ( t === 'Fill') {
