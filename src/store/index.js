@@ -1,3 +1,12 @@
+// window.api = {
+//   config: {
+//     units: 'm',
+//     showMapDialogOnStart: false,
+//     online: true,
+//     onChange: () => { window.versionNumber += 1; },
+//   },
+// };
+
 import Vue from 'vue';
 import Vuex from 'vuex';
 
