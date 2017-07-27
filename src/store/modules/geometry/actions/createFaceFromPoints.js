@@ -251,7 +251,7 @@ function validateFaceGeometry(points, context) {
         });
 
         if (splittingVertices.length) {
-            error = `An edge is being touched by a vertex on the same face at (${splittingVertices[0].x}, ${splittingVertices[0].y})`;z
+            error = `An edge is being touched by a vertex on the same face at (${splittingVertices[0].x}, ${splittingVertices[0].y})`;
         }
 
         // check for two edges on the same face that intersect
