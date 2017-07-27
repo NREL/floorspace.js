@@ -23,7 +23,7 @@ export default {
       mode: 'spaces',
     },
     modes: ['spaces', 'shading', 'building_units', 'thermal_zones', 'space_types', 'images'],
-    tools: ['Drag', 'Rectangle', 'Polygon', 'Eraser', 'Select', 'Map', 'Fill', 'Pan'], // 'Place Component', 'Apply Property'
+    tools: ['Pan', 'Drag', 'Rectangle', 'Polygon', 'Eraser', 'Select', 'Map', 'Fill'], // 'Place Component', 'Apply Property'
     // d3 scale functions px -> rwu
     scale: {
       x: d3.scaleLinear().range([0, 0]).domain([0, 0]),

@@ -7,7 +7,7 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 
 <template>
-  <div id="images" ref="images" :style="{ 'pointer-events': currentTool === 'Drag' ? 'all': 'none' }"></div>
+  <div id="images" ref="images" :style="{ 'pointer-events': currentTool === 'Drag' ? 'auto': 'none' }"></div>
 </template>
 
 <script>
@@ -34,7 +34,7 @@ export default {
     this.renderImages();
   },
   beforeDestroy() {
-    ResizeEvents.$on('resize-resize', this.renderImages);
+    ResizeEvents.$off('resize-resize', this.renderImages);
     window.removeEventListener('resize', this.renderImages);
   },
   methods: {
@@ -126,7 +126,7 @@ export default {
       // set as currentImage when an image's group is clicked (or dragged)
       imageGroup.on('click', () => { this.currentImage = image; });
 
-      imageGroup.on('dragend', (e) => {
+      imageGroup.on('dragend', () => {
         this.currentImage = image;
 
         // update store
@@ -145,8 +145,6 @@ export default {
           width: this.scaleX(updatedWidth),
           height: this.scaleY(updatedHeight),
         });
-
-        this.renderImages();
       });
     },
     // set up rotation behavior
@@ -164,7 +162,7 @@ export default {
       const rotateAnchorLine = new Konva.Line({
         stroke: applicationHelpers.config.palette.neutral,
         strokeWidth: 2,
-        name: 'rotateAnchorLine'
+        name: 'rotateAnchorLine',
       });
 
       // draggable anchor (invisible)
@@ -225,162 +223,145 @@ export default {
     },
     // set up resize behavior
     initResize(group) {
-      const imageObj = group.get('.image')[0],
-      {
-        width: w,
-        height: h
-      } = imageObj.size();
+      const { width: w, height: h } = group.get('.image')[0].size();
 
-      addResizeAnchor.call(this, group, 0, 0, 'topLeft');
-      addResizeAnchor.call(this, group, w, 0, 'topRight');
-      addResizeAnchor.call(this, group, w, h, 'bottomRight');
-      addResizeAnchor.call(this, group, 0, h, 'bottomLeft');
-      redrawAnchors();
+      this.addResizeAnchor(group, 0, 0, 'topLeft');
+      this.addResizeAnchor(group, w, 0, 'topRight');
+      this.addResizeAnchor(group, w, h, 'bottomRight');
+      this.addResizeAnchor(group, 0, h, 'bottomLeft');
+      this.redrawAnchors(group);
+    },
+    // recalc center and rotate anchors
+    redrawAnchors(group) {
+      const imageObj = group.get('.image')[0];
+      const center = group.get('.center')[0];
+      const rotateAnchor = group.get('.rotateAnchor')[0];
+      const rotateAnchorCircle = group.get('.rotateAnchorCircle')[0];
+      const rotateAnchorLine = group.get('.rotateAnchorLine')[0];
+      const pos = imageObj.position();
+      const { width, height } = imageObj.size();
 
-      function addResizeAnchor(group, w, h, name) {
-        const anchor = new Konva.Circle({
-          x: w,
-          y: h,
-          fill: applicationHelpers.config.palette.neutral,
-          radius: 3,
-          name: name,
-          draggable: true
-        });
+      center.position({
+        x: pos.x + (width / 2),
+        y: pos.y + (height / 2),
+      });
 
-        // resize on drag
-        anchor.on('dragmove', () => {
-          const topLeft = group.get('.topLeft')[0],
-          topRight = group.get('.topRight')[0],
-          bottomRight = group.get('.bottomRight')[0],
-          bottomLeft = group.get('.bottomLeft')[0],
-          {
-            x: anchorX,
-            y: anchorY
-          } = anchor.position(),
-          imageObj = group.get('.image')[0],
-          // look up the image in the data store by the imageID stored on the canvas group
-          image = this.images.find(i => i.id === group.imageId),
-          // maintain aspect ratio
-          ratio = image.width / image.height,
-          width = topRight.getX() - topLeft.getX(),
-          height = width / ratio;
+      rotateAnchorCircle.position({
+        x: pos.x + (width / 2),
+        y: pos.y + (height * 1.25),
+      });
 
-          var imagePos;
+      rotateAnchor.position({
+        x: pos.x + (width / 2),
+        y: pos.y + (height * 1.25),
+      });
 
-          // update anchor positions
-          switch (anchor.getName()) {
-            case 'topLeft':
+      rotateAnchorLine.points([
+        rotateAnchorCircle.getX(), rotateAnchorCircle.getY(),
+        center.getX(), center.getY(),
+      ]);
+
+      group.draw();
+    },
+    addResizeAnchor(group, w, h, name) {
+      const anchor = new Konva.Circle({
+        x: w,
+        y: h,
+        fill: applicationHelpers.config.palette.neutral,
+        radius: 3,
+        name,
+        draggable: true,
+      });
+
+      // resize on drag
+      anchor.on('dragmove', () => {
+        const topLeft = group.get('.topLeft')[0];
+        const topRight = group.get('.topRight')[0];
+        const bottomRight = group.get('.bottomRight')[0];
+        const bottomLeft = group.get('.bottomLeft')[0];
+        const { x: anchorX } = anchor.position();
+        const imageObj = group.get('.image')[0];
+        // look up the image in the data store by the imageID stored on the canvas group
+        const image = this.images.find(i => i.id === group.imageId);
+        // maintain aspect ratio
+        const ratio = image.width / image.height;
+        const width = topRight.getX() - topLeft.getX();
+        const height = width / ratio;
+
+        let imagePos;
+
+        // update anchor positions
+        switch (anchor.getName()) {
+          case 'topLeft':
             topLeft.position({
               x: anchorX,
-              y: bottomRight.getY() - height
+              y: bottomRight.getY() - height,
             });
             topRight.setY(bottomRight.getY() - height);
             bottomLeft.setX(anchorX);
 
             imagePos = {
               x: bottomRight.getX() - width,
-              y: bottomRight.getY() - height
+              y: bottomRight.getY() - height,
             };
             break;
-            case 'topRight':
+          case 'topRight':
             topLeft.setY(bottomRight.getY() - height);
-            topRight.setY(bottomRight.getY() - height)
+            topRight.setY(bottomRight.getY() - height);
             bottomRight.setX(anchorX);
 
             imagePos = {
               x: bottomLeft.getX(),
-              y: bottomLeft.getY() - height
+              y: bottomLeft.getY() - height,
             };
             break;
-            case 'bottomRight':
+          case 'bottomRight':
             topRight.setX(anchorX);
             bottomRight.position({
               x: anchorX,
-              y: height
+              y: height,
             });
             bottomLeft.setY(height);
 
             imagePos = imageObj.position();
             break;
-            case 'bottomLeft':
+          case 'bottomLeft':
             topLeft.setX(anchorX);
             bottomRight.setY(height);
             bottomLeft.position({
               x: anchorX,
-              y: height
+              y: height,
             });
 
             imagePos = {
               x: topRight.getX() - width,
-              y: topRight.getY()
+              y: topRight.getY(),
             };
             break;
-          }
+          default:
+            break;
+        }
 
-          // update image size and position
-          imageObj.size({
-            width,
-            height
-          })
-          .position(imagePos);
+        // update image size and position
+        imageObj.size({ width, height }).position(imagePos);
 
-          redrawAnchors();
-        });
+        this.redrawAnchors(group);
+      });
 
-        // hover effect
-        anchor.on('mouseover', () => {
-          document.body.style.cursor = 'pointer';
-          anchor.setRadius(6)
-          .draw();
-        });
+      // hover effect
+      anchor.on('mouseover', () => {
+        document.body.style.cursor = 'pointer';
+        anchor.setRadius(6)
+        .draw();
+      });
 
-        anchor.on('mouseout', () => {
-          document.body.style.cursor = 'default';
-          anchor.setRadius(3)
-          .draw();
-        });
+      anchor.on('mouseout', () => {
+        document.body.style.cursor = 'default';
+        anchor.setRadius(3)
+        .draw();
+      });
 
-        group.add(anchor);
-      };
-
-      // recalc center and rotate anchors
-      function redrawAnchors() {
-        const center = group.get('.center')[0],
-        rotateAnchor = group.get('.rotateAnchor')[0],
-        rotateAnchorCircle = group.get('.rotateAnchorCircle')[0],
-        rotateAnchorLine = group.get('.rotateAnchorLine')[0],
-        topLeft = group.get('.topLeft')[0],
-        topRight = group.get('.topRight')[0],
-        bottomRight = group.get('.bottomRight')[0],
-        bottomLeft = group.get('.bottomLeft')[0],
-        pos = imageObj.position(),
-        {
-          width,
-          height
-        } = imageObj.size();
-
-        center.position({
-          x: pos.x + width / 2,
-          y: pos.y + height / 2
-        });
-
-        rotateAnchorCircle.position({
-          x: pos.x + width / 2,
-          y: pos.y + height * 1.25
-        });
-
-        rotateAnchor.position({
-          x: pos.x + width / 2,
-          y: pos.y + height * 1.25
-        });
-
-        rotateAnchorLine.points([
-          rotateAnchorCircle.getX(), rotateAnchorCircle.getY(),
-          center.getX(), center.getY()
-        ]);
-
-        group.draw();
-      };
+      group.add(anchor);
     },
     /*
     * Set the scale and position of the canvas based on the current viewbox
