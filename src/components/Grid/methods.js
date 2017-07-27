@@ -486,6 +486,14 @@ export default {
   */
   findSnapTarget (gridPoint) {
 
+    if (event.shiftKey) {
+      // disable snapping when shift is held down
+      return {
+        type: 'gridpoint',
+        ...gridPoint
+      };
+    }
+
     // translate grid point to real world units to check for snapping targets
     const rwuPoint = {
       x: this.gridToRWU(gridPoint.x, 'x'),
