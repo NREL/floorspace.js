@@ -11,24 +11,9 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue';
 import store from './store/index';
+
+import timetravel from './store/timetravel';
 import App from './App.vue';
-
-
-// function override(object, methodName, callback) {
-//   object[methodName] = callback(object[methodName]);
-// }
-// function after(extraBehavior) {
-//   return function(original) {
-//     return function() {
-//       var returnValue = original.apply(this, arguments)
-//       extraBehavior.apply(this, arguments)
-//       return returnValue
-//     }
-//   }
-// }
-// override(store, 'commit', after((type, payload, options) => {
-//   console.log('committing', type, payload, options);
-// }))
 
 // mount the root vue instance
 window.application = new Vue({
@@ -39,3 +24,7 @@ window.application = new Vue({
 });
 
 window.eventBus = window.application.$children[0];
+window.eventBus.$on('initTimetravel', () => {
+  if (store.timetravel) { throw new Error('initTimetravel can only be run once!'); }
+  timetravel.init(store);
+});

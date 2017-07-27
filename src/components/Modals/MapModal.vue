@@ -38,7 +38,11 @@ export default {
   computed: {
     mapEnabled: {
       get() { return this.$store.state.project.map.enabled; },
-      set(val) { this.$store.dispatch('project/setMapEnabled', { enabled: val }); },
+      set(enabled) {
+        this.$store.dispatch('project/setMapEnabled', { enabled });
+        // enable timetravel if map is disabled
+        if (!enabled) { window.eventBus.$emit('initTimetravel'); }
+      },
     },
     tool: {
       get() { return this.$store.state.application.currentSelections.tool; },

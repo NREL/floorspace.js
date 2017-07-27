@@ -405,7 +405,7 @@ export default {
       })
       .on('drag', (d) => {
         if (that.currentTool !== 'Select' || d.previous_story) { return; }
-        
+
         dx += d3.event.dx;
         dy += d3.event.dy;
         d3.select(`#face-${d.face_id}`)
@@ -790,6 +790,16 @@ export default {
       .domain([0, h])
       .range([this.min_y, this.max_y])
     });
+
+    // initialize timetravel after the scales are set
+    // if the map is enabled AND initialized
+    // or if the map is disabled
+    // we don't need to place the map and we haven't already intiailized timetravel
+    if (!this.$store.timetravel) {
+      if (!this.$store.state.project.map.enabled || (this.$store.state.project.map.enabled && this.$store.state.project.map.initialized)) {
+        window.eventBus.$emit('initTimetravel');
+      }
+    }
 
     this.calcGrid();
     this.centerGrid();

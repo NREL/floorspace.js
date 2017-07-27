@@ -23,10 +23,9 @@ const serializeState = (state) => {
 
 
 export default {
-  initialized: false,
   store: null,
   timetravelStates: [],
-  timetravelIndex: 0,
+  timetravelIndex: -1,
   // arrays to store the names of actions and commits that occurred in each checkpoint, this is reset for each save
   mutationsForCurrentCheckpoint: [],
   actionsForCurrentCheckpoint: [],
@@ -34,7 +33,7 @@ export default {
   init(store) {
     const that = this;
     this.store = store;
-    window.timetravel = this;
+    store.timetravel = this;
 
     // override replaceState to call onChange
     const originalReplaceState = store.replaceState;
@@ -64,17 +63,6 @@ export default {
       action === ('project/setViewMaxX') || action === ('project/setViewMaxY') ||
       action === ('application/setScaleX') || action === ('application/setScaleY')) { return; }
 
-      // after the map is placed or disabled, enable undo/redo by setting that.initialized to true and initializing the timetravel
-      if (action === 'project/setMapInitialized' ||
-        (action === 'project/setMapEnabled' && args[1].enabled === false) ||
-        // if map placement is disabled, immediately enable timetravel
-        (!that.initialized && window.api && !window.api.config.showMapDialogOnStart)
-      ) {
-        that.initialized = true;
-        that.timetravelStates = [];
-        that.timetravelIndex = -1; // initialize index at -1, so that it will be at 0 when the first checkpoint is saved
-      }
-
       that.actionsForCurrentCheckpoint.push(action);
       console.log('dispatching', args[0]);
 
@@ -85,6 +73,7 @@ export default {
       clearTimeout(store.checkpointTimout);
       store.checkpointTimout = setTimeout(that.saveCheckpoint.bind(that), 0);
     };
+    this.saveCheckpoint();
   },
   saveCheckpoint() {
     // if the user has just run undo, the timetravelIndex will be less than the length of the timetravelStates
@@ -114,14 +103,14 @@ export default {
   },
   // pop the last version of state off the timetravel array and revert the data store to it
   undo() {
-    if (this.timetravelIndex === 0 || !this.initialized) { return; }
+    // if (this.timetravelIndex === 0 || !this.initialized) { return; }
     this.timetravelIndex -= 1;
     this.store.replaceState(this.timetravelStates[this.timetravelIndex].state);
     console.warn('undo', this.timetravelIndex, this.timetravelStates[this.timetravelIndex]);
   },
   // undoes an undo
   redo() {
-    if (!this.initialized) { return; }
+    // if (!this.initialized) { return; }
     if (this.timetravelIndex < this.timetravelStates.length - 1) {
       this.timetravelIndex += 1;
       this.store.replaceState(this.timetravelStates[this.timetravelIndex].state);

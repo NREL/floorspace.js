@@ -1,12 +1,3 @@
-// window.api = {
-//   config: {
-//     units: 'm',
-//     showMapDialogOnStart: false,
-//     online: true,
-//     onChange: () => { window.versionNumber += 1; },
-//   },
-// };
-
 import Vue from 'vue';
 import Vuex from 'vuex';
 
@@ -20,8 +11,6 @@ import exportData from './utilities/export';
 import importModel from './utilities/importModel';
 import importLibrary from './utilities/importLibrary';
 import mutations from './mutations';
-
-import timetravel from './timetravel';
 
 Vue.use(Vuex);
 
@@ -42,7 +31,5 @@ const store = new Vuex.Store({
   },
   mutations,
 });
-
-timetravel.init(store);
 
 export default store;

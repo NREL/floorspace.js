@@ -36,8 +36,14 @@ window.api = {
     window.versionNumber = 0;
     window.startApp();
     delete window.startApp;
+
     // don't dispatch actions until the application and data store are instantiated
     window.application.$store.dispatch('project/setUnits', { units: window.api.config.units });
+
+    // if the map modal has been disabled, mark the map as initialized so that time travel can be initialized
+    // TODO: we may want to intitialize timetravel in the importModel action instead
+    this.$store.dispatch('project/setMapInitialized', { initialized: true });
+
     this.initAlreadyRun = true;
   },
 };
