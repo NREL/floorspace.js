@@ -20,101 +20,103 @@ const serializeState = (state) => {
 
   return clone;
 };
-
+const logState = (state) => {
+  return state.geometry[0].vertices.length;
+};
 
 export default {
   store: null,
-  timetravelStates: [],
-  timetravelIndex: -1,
-  // arrays to store the names of actions and commits that occurred in each checkpoint, this is reset for each save
-  mutationsForCurrentCheckpoint: [],
-  actionsForCurrentCheckpoint: [],
-
+  pastTimetravelStates: [],
+  futureTimetravelStates: [],
+  hasUndone: false,
   init(store) {
     const that = this;
     this.store = store;
     store.timetravel = this;
 
-    // override replaceState to call onChange
+    this.pastTimetravelStates = [];
+    this.futureTimetravelStates = [];
+
+    /*
+    * store.commit and store.replaceState mutate the data store
+    * monkey patch them to call the onChange function supplied in app config
+    */
     const originalReplaceState = store.replaceState;
     store.replaceState = function overrideReplaceState(...args) {
-      // data store has been changed, call config onChange method which can be supplied by parent application
       if (window.api) { window.api.config.onChange(); }
       originalReplaceState.apply(this, args);
     };
-
-    // override commit to store names of mutations
     const originalCommit = store.commit;
     store.commit = function overrideCommit(...args) {
-      // data store has been changed, call config onChange method which can be supplied by parent application
       if (window.api) { window.api.config.onChange(); }
-      that.mutationsForCurrentCheckpoint.push(args[0]);
       originalCommit.apply(this, args);
     };
 
-    // monkey patch dispatch to store each version of the state
+    /*
+    * monkey patch store.dispatch to store a new copy of the store.state for each
+    * set of actions dispatched
+    */
     const originalDispatch = store.dispatch;
     store.dispatch = function overrideDispatch(...args) {
       const action = args[0];
-      originalDispatch.apply(this, args);
 
       // ignore changes to view bounds
-      if (action === ('project/setViewMinX') || action === ('project/setViewMinY') ||
-      action === ('project/setViewMaxX') || action === ('project/setViewMaxY') ||
-      action === ('application/setScaleX') || action === ('application/setScaleY')) { return; }
+      if (action !== ('project/setViewMinX') && action !== ('project/setViewMinY') &&
+      action !== ('project/setViewMaxX') && action !== ('project/setViewMaxY') &&
+      action !== ('application/setScaleX') && action !== ('application/setScaleY')) {
+        /*
+        * This timeout will prevent the store from saving if the event queue is not empty
+        * The result is that each checkpoint contains a set of related actions, so undo can't leave us in an invalid state
+        */
+        // TODO: go over this with Brian again
+        if (that.hasUndone) {
+          console.log("the user has just undone something, we need to stick the current state to the end of paststates before dispatching the action and saving the new state");
+          that.pastTimetravelStates.push(serializeState(that.store.state));
+          that.hasUndone = false;
+        }
+        clearTimeout(store.checkpointTimout);
+        store.checkpointTimout = setTimeout(that.saveCheckpoint.bind(that), 0);
+      }
 
-      that.actionsForCurrentCheckpoint.push(action);
       console.log('dispatching', args[0]);
-
-      /*
-      * This timeout will prevent the store from saving if the event queue is not empty
-      * The result is that each checkpoint contains a set of related actions, so undo can't leave us in an invalid state
-      */
-      clearTimeout(store.checkpointTimout);
-      store.checkpointTimout = setTimeout(that.saveCheckpoint.bind(that), 0);
+      originalDispatch.apply(this, args);
     };
-    this.saveCheckpoint();
+    // initialize timetravel with a base state
+    this.pastTimetravelStates.push(serializeState(this.store.state))
   },
-  saveCheckpoint() {
-    // if the user has just run undo, the timetravelIndex will be less than the length of the timetravelStates
-    // instead of pushing to the end of timetravelStates and keeping the last undone state, we should remove all undone state versions from the
-    // end of timetravelStates and then push the new state at the current index
-
-    // TODO: FIX THIS IT IS ALTERING STATE[0]
-    if (this.timetravelIndex < this.timetravelStates.length - 1) {
-
-      let index = (this.timetravelIndex - 1 > 1) ? (this.timetravelIndex - 1) : 1;
-      this.timetravelStates = this.timetravelStates.slice(0, this.timetravelIndex + 1);
-      // this.timetravelIndex = (this.timetravelIndex - 1 < 0) ? 0 : this.timetravelIndex - 1;
-    }
-    this.timetravelStates.push({
-      meta: {
-        actions: this.actionsForCurrentCheckpoint,
-        mutations: this.mutationsForCurrentCheckpoint,
-      },
-      state: serializeState(this.store.state),
-    });
-
-    this.timetravelIndex += 1;
-    console.warn('save checkpoint', this.timetravelIndex, this.timetravelStates[this.timetravelIndex]);
-
-    this.actionsForCurrentCheckpoint = [];
-    this.mutationsForCurrentCheckpoint = [];
+  /*
+  * Empty future states and save the currentState to pastTimetravelStates
+  */
+  saveCheckpoint(currentState) {
+    this.pastTimetravelStates.push(serializeState(this.store.state));
+    this.futureTimetravelStates = [];
+    this.hasUndone = false;
   },
-  // pop the last version of state off the timetravel array and revert the data store to it
+
   undo() {
-    // if (this.timetravelIndex === 0 || !this.initialized) { return; }
-    this.timetravelIndex -= 1;
-    this.store.replaceState(this.timetravelStates[this.timetravelIndex].state);
-    console.warn('undo', this.timetravelIndex, this.timetravelStates[this.timetravelIndex]);
-  },
-  // undoes an undo
-  redo() {
-    // if (!this.initialized) { return; }
-    if (this.timetravelIndex < this.timetravelStates.length - 1) {
-      this.timetravelIndex += 1;
-      this.store.replaceState(this.timetravelStates[this.timetravelIndex].state);
-      console.warn('redo', this.timetravelIndex, this.timetravelStates[this.timetravelIndex]);
+    let replacementState = this.pastTimetravelStates.pop();
+    // the current state is also the last state on the pastTimetravelStates stack unless the user has just run undo()
+    // use the second to last state
+    if (!this.hasUndone) { replacementState = this.pastTimetravelStates.pop(); }
+    this.hasUndone = true;
+    if (replacementState) {
+      this.futureTimetravelStates.push(serializeState(this.store.state));
+      this.store.replaceState(replacementState);
+      // console.log('undo', this.pastTimetravelStates.map(s => logState(s)), logState(replacementState), this.futureTimetravelStates.map(s => logState(s)));
     }
+  },
+
+  redo() {
+    const replacementState = this.futureTimetravelStates.pop();
+    if (replacementState) {
+      this.pastTimetravelStates.push(serializeState(this.store.state));
+      this.store.replaceState(replacementState);
+      // console.log('redo', this.pastTimetravelStates.map(s => logState(s)), logState(replacementState), this.futureTimetravelStates.map(s => logState(s)));
+    }
+  },
+  logTimetravel() {
+    console.log('past:', this.pastTimetravelStates.map(s => logState(s)));
+    console.log('current', logState(this.store.state));
+    console.log('future:', this.futureTimetravelStates.map(s => logState(s)));
   },
 };

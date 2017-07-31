@@ -25,6 +25,7 @@ window.application = new Vue({
 
 window.eventBus = window.application.$children[0];
 window.eventBus.$on('initTimetravel', () => {
-  if (store.timetravel) { throw new Error('initTimetravel can only be run once!'); }
+  // if (store.timetravel) { throw new Error('initTimetravel can only be run once!'); }
+  console.warn("init timetravel");
   timetravel.init(store);
 });

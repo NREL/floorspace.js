@@ -42,7 +42,7 @@ window.api = {
 
     // if the map modal has been disabled, mark the map as initialized so that time travel can be initialized
     // TODO: we may want to intitialize timetravel in the importModel action instead
-    this.$store.dispatch('project/setMapInitialized', { initialized: true });
+    window.application.$store.dispatch('project/setMapInitialized', { initialized: true });
 
     this.initAlreadyRun = true;
   },
