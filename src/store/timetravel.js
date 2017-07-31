@@ -36,6 +36,14 @@ export default {
     this.store = store;
     window.timetravel = this;
 
+    // override replaceState to call onChange
+    const originalReplaceState = store.replaceState;
+    store.replaceState = function overrideReplaceState(...args) {
+      // data store has been changed, call config onChange method which can be supplied by parent application
+      if (window.api) { window.api.config.onChange(); }
+      originalReplaceState.apply(this, args);
+    };
+
     // override commit to store names of mutations
     const originalCommit = store.commit;
     store.commit = function overrideCommit(...args) {
@@ -53,7 +61,8 @@ export default {
 
       // ignore changes to view bounds
       if (action === ('project/setViewMinX') || action === ('project/setViewMinY') ||
-      action === ('project/setViewMaxX') || action === ('project/setViewMaxY')) { return; }
+      action === ('project/setViewMaxX') || action === ('project/setViewMaxY') ||
+      action === ('application/setScaleX') || action === ('application/setScaleY')) { return; }
 
       // after the map is placed or disabled, enable undo/redo by setting that.initialized to true and initializing the timetravel
       if (action === 'project/setMapInitialized' ||
@@ -61,14 +70,13 @@ export default {
         // if map placement is disabled, immediately enable timetravel
         (!that.initialized && window.api && !window.api.config.showMapDialogOnStart)
       ) {
-        // console.log('Initialized application, clearing timetravel');
         that.initialized = true;
         that.timetravelStates = [];
         that.timetravelIndex = -1; // initialize index at -1, so that it will be at 0 when the first checkpoint is saved
       }
 
       that.actionsForCurrentCheckpoint.push(action);
-      // console.warn('dispatching', args[0]);
+      console.log('dispatching', args[0]);
 
       /*
       * This timeout will prevent the store from saving if the event queue is not empty
@@ -82,9 +90,13 @@ export default {
     // if the user has just run undo, the timetravelIndex will be less than the length of the timetravelStates
     // instead of pushing to the end of timetravelStates and keeping the last undone state, we should remove all undone state versions from the
     // end of timetravelStates and then push the new state at the current index
+
+    // TODO: FIX THIS IT IS ALTERING STATE[0]
     if (this.timetravelIndex < this.timetravelStates.length - 1) {
-      this.timetravelStates = this.timetravelStates.slice(0, (this.timetravelIndex - 1 > 1) ? (this.timetravelIndex - 1) : 1);
-      this.timetravelIndex = (this.timetravelIndex - 1 < 0) ? 0 : this.timetravelIndex - 1;
+
+      let index = (this.timetravelIndex - 1 > 1) ? (this.timetravelIndex - 1) : 1;
+      this.timetravelStates = this.timetravelStates.slice(0, this.timetravelIndex + 1);
+      // this.timetravelIndex = (this.timetravelIndex - 1 < 0) ? 0 : this.timetravelIndex - 1;
     }
     this.timetravelStates.push({
       meta: {
@@ -94,8 +106,9 @@ export default {
       state: serializeState(this.store.state),
     });
 
-    // console.log('save checkpoint', this.timetravelStates[this.timetravelIndex]);
     this.timetravelIndex += 1;
+    console.warn('save checkpoint', this.timetravelIndex, this.timetravelStates[this.timetravelIndex]);
+
     this.actionsForCurrentCheckpoint = [];
     this.mutationsForCurrentCheckpoint = [];
   },
@@ -104,15 +117,15 @@ export default {
     if (this.timetravelIndex === 0 || !this.initialized) { return; }
     this.timetravelIndex -= 1;
     this.store.replaceState(this.timetravelStates[this.timetravelIndex].state);
-    // console.log('undo', this.timetravelIndex, this.timetravelStates[this.timetravelIndex]);
+    console.warn('undo', this.timetravelIndex, this.timetravelStates[this.timetravelIndex]);
   },
   // undoes an undo
   redo() {
     if (!this.initialized) { return; }
-    if (this.timetravelIndex < this.timetravelStates.length-1) {
+    if (this.timetravelIndex < this.timetravelStates.length - 1) {
       this.timetravelIndex += 1;
       this.store.replaceState(this.timetravelStates[this.timetravelIndex].state);
-      // console.log('redo', this.timetravelIndex, this.timetravelStates[this.timetravelIndex]);
+      console.warn('redo', this.timetravelIndex, this.timetravelStates[this.timetravelIndex]);
     }
   },
 };

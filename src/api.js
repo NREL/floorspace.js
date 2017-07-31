@@ -24,7 +24,7 @@ window.api = {
     }
     window.api.config = Object.assign({
       units: 'm',
-      showMapDialogOnStart: true,
+      showMapDialogOnStart: false,
       online: true,
       onChange: () => { window.versionNumber += 1; },
     }, config);

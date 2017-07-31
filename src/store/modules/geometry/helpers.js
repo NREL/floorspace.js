@@ -269,7 +269,14 @@ const helpers = {
     // given an edge id returns all faces referencing that edge
     facesForEdgeId(edge_id, geometry) {
         return geometry.faces.filter(face => face.edgeRefs.find(eR => eR.edge_id === edge_id));
-    }
+    },
+
+    ptsAreCollinear(p1, p2, p3) {
+      const [a, b] = [p1.x, p1.y],
+        [m, n] = [p2.x, p2.y],
+        {x, y} = p3;
+      return Math.abs((n - b) * (x - m) - (y - n) * (m - a)) < 0.00001;
+    },
 };
 
 export default helpers;

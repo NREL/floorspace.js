@@ -486,6 +486,14 @@ export default {
   */
   findSnapTarget (gridPoint) {
 
+    if (event.shiftKey) {
+      // disable snapping when shift is held down
+      return {
+        type: 'gridpoint',
+        ...gridPoint
+      };
+    }
+
     // translate grid point to real world units to check for snapping targets
     const rwuPoint = {
       x: this.gridToRWU(gridPoint.x, 'x'),
@@ -692,8 +700,16 @@ export default {
           adjustedProjectionP2 = { x: point.x, y: point.y + (2 * dist) }
         }
         // adjust the projection to be the intersection of the desired projection line and the nearest edge
-        projection = geometryHelpers.intersectionOfLines(adjustedProjectionP1, adjustedProjectionP2, nearestEdgeV1, nearestEdgeV2);
+        if (geometryHelpers.ptsAreCollinear(adjustedProjectionP1, nearestEdgeV1, adjustedProjectionP2)) {
+          projection = nearestEdgeV1;
+        } else if (geometryHelpers.ptsAreCollinear(adjustedProjectionP1, nearestEdgeV2, adjustedProjectionP2)) {
+          projection = nearestEdgeV2;
+        } else {
+          projection = geometryHelpers.intersectionOfLines(adjustedProjectionP1, adjustedProjectionP2, nearestEdgeV1, nearestEdgeV2);
+        }
+        return true;
       }
+      return false;
     });
 
     // return data for the edge if the projection is within the snap tolerance of the point
