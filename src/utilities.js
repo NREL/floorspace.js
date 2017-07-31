@@ -31,3 +31,16 @@ export function debounce(func, wait) {
         }, wait);
     };
 };
+
+export function uniq(arr, key = JSON.stringify) {
+  const alreadySeen = {};
+  return arr.filter((elem) => {
+    const theKey = key(elem);
+    if (alreadySeen[theKey]) {
+      return false;
+    } else {
+      alreadySeen[theKey] = true;
+      return true;
+    }
+  });
+}
