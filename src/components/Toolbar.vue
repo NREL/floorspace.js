@@ -144,8 +144,8 @@ export default {
     },
   },
   watch: {
-    tool() {
-      if (this.availableTools.indexOf(this.tool) === -1) { this.tool = this.availableTools[0]; } 
+    tool(val) {
+      if (this.availableTools.indexOf(val) === -1 && val !== 'Map') { this.tool = this.availableTools[0]; }
     },
     currentMode() { this.tool = this.availableTools[0]; },
   },
