@@ -20,9 +20,7 @@ const serializeState = (state) => {
 
   return clone;
 };
-const logState = (state) => {
-  return state.geometry[0].vertices.length;
-};
+const logState = state => state.geometry[0].vertices.length;
 
 export default {
   store: null,
@@ -70,7 +68,8 @@ export default {
         */
         // TODO: go over this with Brian again
         if (that.hasUndone) {
-          console.log("the user has just undone something, we need to stick the current state to the end of paststates before dispatching the action and saving the new state");
+          // the user has just undone something, we need to stick the current state to the
+          // end of paststates before dispatching the action and saving the new state
           that.pastTimetravelStates.push(serializeState(that.store.state));
           that.hasUndone = false;
         }
@@ -82,12 +81,12 @@ export default {
       originalDispatch.apply(this, args);
     };
     // initialize timetravel with a base state
-    this.pastTimetravelStates.push(serializeState(this.store.state))
+    this.pastTimetravelStates.push(serializeState(this.store.state));
   },
   /*
   * Empty future states and save the currentState to pastTimetravelStates
   */
-  saveCheckpoint(currentState) {
+  saveCheckpoint() {
     this.pastTimetravelStates.push(serializeState(this.store.state));
     this.futureTimetravelStates = [];
     this.hasUndone = false;
