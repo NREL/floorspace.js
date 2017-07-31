@@ -42,7 +42,7 @@ export default {
       view: null,
       map: null,
       autocomplete: null,
-      mapModalVisible: window.api ? window.api.config.showMapDialogOnStart : true,
+      mapModalVisible: false,//window.api ? window.api.config.showMapDialogOnStart : true,
       showGrid: false,
     };
   },
