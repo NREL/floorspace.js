@@ -20,6 +20,24 @@ const serializeState = (state) => {
 
   return clone;
 };
+const filteredActions = [
+  'application/setScaleX',
+  'application/setScaleY',
+  'project/setSpacing',
+  'project/setViewMinX',
+  'project/setViewMinY',
+  'project/setViewMaxX',
+  'project/setViewMaxY',
+  'application/clearSubSelections',
+  'application/setCurrentStory',
+  'application/setCurrentSpace',
+  'application/setCurrentShading',
+  'application/setCurrentImage',
+  'application/setCurrentBuildingUnit',
+  'application/setCurrentThermalZone',
+  'application/setCurrentSpaceType',
+];
+
 const logState = state => state;
 
 export default {
@@ -59,10 +77,7 @@ export default {
       const action = args[0];
 
       // ignore changes to view bounds
-      if (action !== ('project/setViewMinX') && action !== ('project/setViewMinY') &&
-      action !== ('project/setViewMaxX') && action !== ('project/setViewMaxY') &&
-      action !== ('application/setScaleX') && action !== ('application/setScaleY') &&
-      action !== 'project/setSpacing') {
+      if (filteredActions.indexOf(action) === -1) {
         /*
         * This timeout will prevent the store from saving if the event queue is not empty
         * The result is that each checkpoint contains a set of related actions, so undo can't leave us in an invalid state
@@ -89,7 +104,7 @@ export default {
   */
   saveCheckpoint() {
     this.pastTimetravelStates.push(serializeState(this.store.state));
-    console.log('saving state:', this.pastTimetravelStates[this.pastTimetravelStates.length - 1]);
+    console.warn('saving state:', this.pastTimetravelStates[this.pastTimetravelStates.length - 1]);
     this.futureTimetravelStates = [];
   },
 
@@ -98,7 +113,7 @@ export default {
     if (replacementState) {
       this.futureTimetravelStates.push(serializeState(this.store.state));
       this.store.replaceState(replacementState);
-      console.warn('undo', replacementState);
+      console.log('undo', replacementState);
       // console.log('undo', this.pastTimetravelStates.map(s => logState(s)), logState(replacementState), this.futureTimetravelStates.map(s => logState(s)));
     }
   },
@@ -108,7 +123,7 @@ export default {
     if (replacementState) {
       this.pastTimetravelStates.push(serializeState(this.store.state));
       this.store.replaceState(replacementState);
-      console.warn('redo', replacementState);
+      console.log('redo', replacementState);
       // console.log('redo', this.pastTimetravelStates.map(s => logState(s)), logState(replacementState), this.futureTimetravelStates.map(s => logState(s)));
     }
   },
