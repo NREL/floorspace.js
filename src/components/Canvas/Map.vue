@@ -162,6 +162,11 @@ export default {
       this.rotation = this.view.getRotation();
 
       this.$store.dispatch('project/setMapInitialized', { initialized: true });
+      if (!this.$store.timetravel) {
+        if (!this.$store.state.project.map.enabled || (this.$store.state.project.map.enabled && this.$store.state.project.map.initialized)) {
+          window.eventBus.$emit('initTimetravel');
+        }
+      }
       this.tool = 'Rectangle';
 
       // remove reticle
