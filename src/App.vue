@@ -68,8 +68,8 @@ export default {
     });
 
     document.addEventListener('keydown', (e) => {
-      if (e.keyCode === 90 && (e.ctrlKey || e.metaKey)) {
-        e.shiftKey ? timetravel.redo() : timetravel.undo();
+      if (e.keyCode === 90 && (e.ctrlKey || e.metaKey) && this.$store.timetravel) {
+        e.shiftKey ? this.$store.timetravel.redo() : this.$store.timetravel.undo();
       }
     });
   },

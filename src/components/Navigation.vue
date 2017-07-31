@@ -87,9 +87,6 @@ export default {
   data() {
     return {};
   },
-  mounted () {
-    this.mode = "images";
-  },
   computed: {
     ...mapState({
       // available model types

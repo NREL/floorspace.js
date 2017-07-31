@@ -42,7 +42,7 @@ export default {
       view: null,
       map: null,
       autocomplete: null,
-      mapModalVisible: false,//window.api ? window.api.config.showMapDialogOnStart : true,
+      mapModalVisible: window.api ? window.api.config.showMapDialogOnStart : true,
       showGrid: false,
     };
   },
@@ -162,17 +162,12 @@ export default {
       this.rotation = this.view.getRotation();
 
       this.$store.dispatch('project/setMapInitialized', { initialized: true });
-
       this.tool = 'Rectangle';
 
       // remove reticle
       d3.select('#reticle').remove();
 
       this.gridVisible = this.showGrid;
-      // enable timetravel after the map has been placed
-      if (!this.$store.timetravel && this.$store.state.project.map.enabled !== null) {
-        window.eventBus.$emit('initTimetravel');
-      }
     },
 
     /*
