@@ -5,6 +5,10 @@ module.exports = {
   },
   'plugins': ['html'],
   'rules': {
+    'no-param-reassign': ['error', {
+      props: false
+    }],
+    'dot-notation': 0,
     'no-plusplus': ['error', {
       'allowForLoopAfterthoughts': true
     }],
@@ -16,4 +20,4 @@ module.exports = {
       'ignoreTemplateLiterals': true
     }]
   }
-}
+};

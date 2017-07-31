@@ -87,6 +87,9 @@ export default {
   data() {
     return {};
   },
+  mounted () {
+    this.mode = "images";
+  },
   computed: {
     ...mapState({
       // available model types
@@ -116,7 +119,9 @@ export default {
     items() { return this[this.mode]; },
     mode: {
       get() { return this.$store.state.application.currentSelections.mode; },
-      set(mode) { this.$store.dispatch('application/setApplicationMode', { mode }); },
+      set(mode) {
+        this.$store.dispatch('application/setApplicationMode', { mode });
+      },
     },
 
     /*
@@ -183,8 +188,8 @@ export default {
               // translate image dimensions into rwu
               height: rwuHeight,
               width: rwuWidth,
-              x: that.min_x,
-              y: that.max_y,
+              x: that.min_x + (rwuWidth / 2),
+              y: that.max_y - (rwuHeight / 2),
             });
           };
           image.src = reader.result;
@@ -309,7 +314,7 @@ export default {
   },
   watch: {
     mode() { this.clearSubSelections(); },
-    currentStory() { this.clearSubSelections(); },
+    'currentStory.id': function () { this.clearSubSelections(); },
     currentSubSelection() {
       if (!this.currentSubSelection && this[this.mode][0]) {
         this.$nextTick(() => {
