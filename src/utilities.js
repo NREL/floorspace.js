@@ -44,3 +44,9 @@ export function uniq(arr, key = JSON.stringify) {
     }
   });
 }
+
+export function dropConsecutiveDups(arr, key = JSON.stringify) {
+  return arr.filter((item, pos) => (
+    pos === 0 || key(item) !== key(arr[pos - 1])
+  ));
+}
