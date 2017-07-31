@@ -463,7 +463,7 @@ export default {
           .attr('y', y)
           .text(poly.name)
           .attr('text-anchor', 'middle')
-          .style('font-size', `${that.scaleY(12)} px`)
+          .style('font-size', `${that.scaleY(12)}px`)
           .style('font-weight', 'bold')
           .attr('font-family', 'sans-serif')
           .attr('fill', 'red')
