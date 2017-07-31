@@ -26,7 +26,7 @@ export default {
   store: null,
   pastTimetravelStates: [],
   futureTimetravelStates: [],
-  hasUndone: false,
+  currentlyInBatch: false,
   init(store) {
     const that = this;
     this.store = store;
@@ -67,21 +67,23 @@ export default {
         * The result is that each checkpoint contains a set of related actions, so undo can't leave us in an invalid state
         */
         // TODO: go over this with Brian again
-        if (that.hasUndone) {
-          // the user has just undone something, we need to stick the current state to the
-          // end of paststates before dispatching the action and saving the new state
-          that.pastTimetravelStates.push(serializeState(that.store.state));
-          that.hasUndone = false;
-        }
-        clearTimeout(store.checkpointTimout);
-        store.checkpointTimout = setTimeout(that.saveCheckpoint.bind(that), 0);
+        that.maybeSaveCheckpoint();
       }
 
       console.log('dispatching', args[0]);
       originalDispatch.apply(this, args);
     };
     // initialize timetravel with a base state
-    this.pastTimetravelStates.push(serializeState(this.store.state));
+    //this.pastTimetravelStates.push(serializeState(this.store.state));
+  },
+  maybeSaveCheckpoint() {
+    if (!this.currentlyInBatch) {
+      this.saveCheckpoint();
+    }
+    // now, ignore the next few calls, until we clear the event loop.
+    this.currentlyInBatch = true;
+    clearTimeout(this.resetBatchFlag);
+    this.resetBatchFlag = setTimeout(() => { this.currentlyInBatch = false; }, 0);
   },
   /*
   * Empty future states and save the currentState to pastTimetravelStates
@@ -89,15 +91,10 @@ export default {
   saveCheckpoint() {
     this.pastTimetravelStates.push(serializeState(this.store.state));
     this.futureTimetravelStates = [];
-    this.hasUndone = false;
   },
 
   undo() {
-    let replacementState = this.pastTimetravelStates.pop();
-    // the current state is also the last state on the pastTimetravelStates stack unless the user has just run undo()
-    // use the second to last state
-    if (!this.hasUndone) { replacementState = this.pastTimetravelStates.pop(); }
-    this.hasUndone = true;
+    const replacementState = this.pastTimetravelStates.pop();
     if (replacementState) {
       this.futureTimetravelStates.push(serializeState(this.store.state));
       this.store.replaceState(replacementState);
