@@ -20,7 +20,7 @@ const serializeState = (state) => {
 
   return clone;
 };
-const logState = state => state.geometry[0].vertices.length;
+const logState = state => state;
 
 export default {
   store: null,
@@ -61,20 +61,19 @@ export default {
       // ignore changes to view bounds
       if (action !== ('project/setViewMinX') && action !== ('project/setViewMinY') &&
       action !== ('project/setViewMaxX') && action !== ('project/setViewMaxY') &&
-      action !== ('application/setScaleX') && action !== ('application/setScaleY')) {
+      action !== ('application/setScaleX') && action !== ('application/setScaleY') &&
+      action !== 'project/setSpacing') {
         /*
         * This timeout will prevent the store from saving if the event queue is not empty
         * The result is that each checkpoint contains a set of related actions, so undo can't leave us in an invalid state
         */
         // TODO: go over this with Brian again
         that.maybeSaveCheckpoint();
+        console.log('dispatching action:', args[0]);
       }
 
-      console.log('dispatching', args[0]);
       originalDispatch.apply(this, args);
     };
-    // initialize timetravel with a base state
-    //this.pastTimetravelStates.push(serializeState(this.store.state));
   },
   maybeSaveCheckpoint() {
     if (!this.currentlyInBatch) {
@@ -90,6 +89,7 @@ export default {
   */
   saveCheckpoint() {
     this.pastTimetravelStates.push(serializeState(this.store.state));
+    console.log('saving state:', this.pastTimetravelStates[this.pastTimetravelStates.length - 1]);
     this.futureTimetravelStates = [];
   },
 
@@ -98,6 +98,7 @@ export default {
     if (replacementState) {
       this.futureTimetravelStates.push(serializeState(this.store.state));
       this.store.replaceState(replacementState);
+      console.warn('undo', replacementState);
       // console.log('undo', this.pastTimetravelStates.map(s => logState(s)), logState(replacementState), this.futureTimetravelStates.map(s => logState(s)));
     }
   },
@@ -107,6 +108,7 @@ export default {
     if (replacementState) {
       this.pastTimetravelStates.push(serializeState(this.store.state));
       this.store.replaceState(replacementState);
+      console.warn('redo', replacementState);
       // console.log('redo', this.pastTimetravelStates.map(s => logState(s)), logState(replacementState), this.futureTimetravelStates.map(s => logState(s)));
     }
   },
