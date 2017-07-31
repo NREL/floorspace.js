@@ -1,6 +1,7 @@
 import factory from './../factory';
 import geometryHelpers from './../helpers';
 import modelHelpers from './../../models/helpers';
+import { uniq, dropConsecutiveDups } from './../../../../utilities';
 
 /*
  * create a face and associated edges and vertices from an array of points
@@ -12,7 +13,7 @@ export default function createFaceFromPoints(context, payload) {
     points,
   } = payload;
 
-  if (points.length < 3) { return; }
+  if (uniq(points).length < 3) { return; }
   // lookup target model and type for face assignment
   const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'];
   const target = modelHelpers.libraryObjectWithId(context.rootState.models, model_id);
@@ -186,13 +187,7 @@ function validateFaceGeometry(points, context) {
     var error = false;
 
     // build an array of vertices for the face being created
-    const faceVertices = points.map((point) => {
-        // if a point was snapped to an existing vertex during drawing, it will have a vertex id
-        var vertex = point.id && geometryHelpers.vertexForId(point.id, currentStoryGeometry);
-        if (vertex) {
-            // TODO: is this ever being reached?
-            debugger
-        }
+    let faceVertices = points.map((point) => {
         // if a vertex already exists at a given location, reuse it
         return geometryHelpers.vertexForCoordinates(point, context.rootGetters['project/snapTolerance'], currentStoryGeometry) || new factory.Vertex(point.x, point.y);
     });
@@ -221,6 +216,10 @@ function validateFaceGeometry(points, context) {
     });
 
     // check for duplicate vertices - these will not be considered splitting vertices bc they are endpoints
+    // first, we can just join together consecutive duplicates, since that doesn't change
+    // the geometry at all.
+    faceVertices = dropConsecutiveDups(faceVertices);
+
     faceVertices.some((vertex) => {
         if (faceVertices.filter(v => (v.x === vertex.x && v.y === vertex.y))
             .length >= 2) {

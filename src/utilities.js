@@ -31,3 +31,22 @@ export function debounce(func, wait) {
         }, wait);
     };
 };
+
+export function uniq(arr, key = JSON.stringify) {
+  const alreadySeen = {};
+  return arr.filter((elem) => {
+    const theKey = key(elem);
+    if (alreadySeen[theKey]) {
+      return false;
+    } else {
+      alreadySeen[theKey] = true;
+      return true;
+    }
+  });
+}
+
+export function dropConsecutiveDups(arr, key = JSON.stringify) {
+  return arr.filter((item, pos) => (
+    pos === 0 || key(item) !== key(arr[pos - 1])
+  ));
+}
