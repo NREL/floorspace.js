@@ -486,6 +486,14 @@ export default {
   */
   findSnapTarget (gridPoint) {
 
+    if (event.shiftKey) {
+      // disable snapping when shift is held down
+      return {
+        type: 'gridpoint',
+        ...gridPoint
+      };
+    }
+
     // translate grid point to real world units to check for snapping targets
     const rwuPoint = {
       x: this.gridToRWU(gridPoint.x, 'x'),
@@ -692,8 +700,16 @@ export default {
           adjustedProjectionP2 = { x: point.x, y: point.y + (2 * dist) }
         }
         // adjust the projection to be the intersection of the desired projection line and the nearest edge
-        projection = geometryHelpers.intersectionOfLines(adjustedProjectionP1, adjustedProjectionP2, nearestEdgeV1, nearestEdgeV2);
+        if (geometryHelpers.ptsAreCollinear(adjustedProjectionP1, nearestEdgeV1, adjustedProjectionP2)) {
+          projection = nearestEdgeV1;
+        } else if (geometryHelpers.ptsAreCollinear(adjustedProjectionP1, nearestEdgeV2, adjustedProjectionP2)) {
+          projection = nearestEdgeV2;
+        } else {
+          projection = geometryHelpers.intersectionOfLines(adjustedProjectionP1, adjustedProjectionP2, nearestEdgeV1, nearestEdgeV2);
+        }
+        return true;
       }
+      return false;
     });
 
     // return data for the edge if the projection is within the snap tolerance of the point
@@ -954,7 +970,7 @@ export default {
     } else if (axis === 'y') {
       const currentScaleY = d3.scaleLinear()
       // .domain([0, this.$refs.grid.clientHeight])
-      .domain([this.$refs.grid.clientHeight,0]) // inverted y axis
+      .domain([this.$refs.grid.clientHeight, 0]) // inverted y axis
       .range([this.min_y, this.max_y]),
       pxValue = currentScaleY.invert(rwu);
       return this.pxToGrid(pxValue, axis);
@@ -965,7 +981,6 @@ export default {
   * take a grid value (from some point already rendered to the grid) and translate it into RWU for persistence to the datastore
   */
   gridToRWU (gridValue, axis) {
-    if (!this.scaleX || !this.scaleY) {return}
     var result;
     if (axis === 'x') {
       const currentScaleX = d3.scaleLinear()
