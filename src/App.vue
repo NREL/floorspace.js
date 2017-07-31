@@ -67,12 +67,11 @@ export default {
       this.success = msg;
       setTimeout(() => { this.success = null; }, 5000);
     });
-
-    document.onkeydown = (e) => {
+    document.addEventListener('keydown', (e) => {
       if (e.keyCode === 90 && (e.ctrlKey || e.metaKey)) {
         e.shiftKey ? timetravel.redo() : timetravel.undo();
       }
-    };
+    });
   },
 
   computed: {

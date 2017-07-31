@@ -55,7 +55,7 @@ export default {
       this.stage.add(this.layer);
 
       // render each image in the store
-      this.images.forEach(img => this.renderImage(img));
+      this.images.forEach(this.renderImage);
 
       // place the stage based on the current viewbox (panned/zoomed view)
       this.scaleAndPlaceStage();
@@ -425,7 +425,10 @@ export default {
     images: {
       handler(newImages) {
         // an image has been added or removed
-        if (newImages.length !== this.imageCache.length) { this.renderImages(); }
+        if (newImages.length !== this.imageCache.length) {
+          this.renderImages();
+          return;
+        }
 
         // no images were added or deleted, check if the property changed is one that should trigger a re-render
         const ignoredProperties = ['height', 'width', 'x', 'y', 'r'];
