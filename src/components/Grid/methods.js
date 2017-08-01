@@ -582,10 +582,10 @@ export default {
   * if the vertex is within the snap tolerance of the point, return the coordinates of the vertex in grid units
   * and the distance from the vertex to the point
   */
-  snappingVertexData (point) {
+  snappingVertexData(point) {
     // build a list of vertices (in RWU) available for snapping
     // deep copy all vertices on the current story
-    var snappableVertices =  [...this.currentStoryGeometry.vertices];
+    let snappableVertices = [...this.currentStoryGeometry.vertices];
 
     // TODO: conditionally combine this list with vertices from the next story down if it is visible
     if (this.previousStoryGeometry) {
@@ -598,26 +598,38 @@ export default {
       snappableVertices.push({
         x: this.gridToRWU(this.points[0].x, 'x'),
         y: this.gridToRWU(this.points[0].y, 'y'),
-        origin: true // set a flag to mark the origin
+        origin: true, // set a flag to mark the origin
       });
+    }
+
+    if (this.points.length === 1 && this.currentTool === 'Rectangle') {
+      snappableVertices = snappableVertices.concat(
+        geometryHelpers.syntheticRectangleSnaps(
+          snappableVertices,
+          {
+            x: this.gridToRWU(this.points[0].x, 'x'),
+            y: this.gridToRWU(this.points[0].y, 'y'),
+          },
+          point),
+      );
     }
 
     if (!snappableVertices.length) { return; }
 
     // find the vertex closest to the point being tested
     const nearestVertex = snappableVertices.reduce((a, b) => {
-      const aDist = this.distanceBetweenPoints(a, point),
-      bDist = this.distanceBetweenPoints(b, point);
+      const aDist = this.distanceBetweenPoints(a, point);
+      const bDist = this.distanceBetweenPoints(b, point);
       return aDist < bDist ? a : b;
     });
 
     // return the nearest vertex if it is within the snap tolerance of the point
     if (this.distanceBetweenPoints(nearestVertex, point) < this.$store.getters['project/snapTolerance']) {
       return {
+        ...nearestVertex,
         x: this.rwuToGrid(nearestVertex.x, 'x'),
         y: this.rwuToGrid(nearestVertex.y, 'y'),
-        origin: nearestVertex.origin,
-        type: 'vertex'
+        type: 'vertex',
       };
     }
   },
