@@ -55,6 +55,7 @@ export default {
     this.pastTimetravelStates = [];
     this.futureTimetravelStates = [];
 
+    this.store.replaceState({ ...store.state, timetravelInitialized: true });
     /*
     * store.commit and store.replaceState mutate the data store
     * monkey patch them to call the onChange function supplied in app config
