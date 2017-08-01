@@ -215,12 +215,10 @@ const helpers = {
     },
 
     // given a set of coordinates, find the vertex on the geometry set within their tolerance zone
-	vertexForCoordinates (coordinates, snapTolerance, geometry) {
-		const { x, y } = coordinates;
-		// tolerance is calculated based on the grid's horizontal range (RWU)
-		const tolerance = snapTolerance;
-	    return geometry.vertices.find(v => this.distanceBetweenPoints(coordinates, v) < tolerance );
-	},
+  vertexForCoordinates(coordinates, geometry) {
+    const { x, y } = coordinates;
+    return geometry.vertices.find(v => v.x === x && v.y === y);
+  },
 
     // given a face id, returns the populated vertex objects reference by edges on that face
     verticesForFaceId(face_id, geometry) {
