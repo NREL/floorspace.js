@@ -65,6 +65,7 @@ export default {
     // unhighlight expired snap targets
     d3.selectAll('#grid .highlight, #grid .gridpoint').remove();
 
+
     // location of the mouse in grid units
     const gridPoint = {
       x: this.pxToGrid(e.offsetX, 'x'),
@@ -74,15 +75,19 @@ export default {
     const snapTarget = this.findSnapTarget(gridPoint);
 
     // render a line and point showing which geometry would be created with a click at this location
-    var guidePoint = snapTarget.type === 'edge' ? snapTarget.projection : snapTarget;
+    const guidePoint = snapTarget.type === 'edge' ? snapTarget.projection :
+      snapTarget;
+
+    const ellipsePoint = snapTarget.synthetic ? snapTarget.originalPt : guidePoint;
     this.drawGuideLines(e, guidePoint);
+
 
     // if snapping to an edisting edge or radius, draw a larger point, if snapping to the grid or just displaying the location of the pointer, create a small point
     if (snapTarget.type === 'edge' || snapTarget.type === 'vertex') {
       d3.select('#grid svg')
       .append('ellipse')
-      .attr('cx', guidePoint.x, 'x')
-      .attr('cy', guidePoint.y, 'y')
+      .attr('cx', ellipsePoint.x, 'x')
+      .attr('cy', ellipsePoint.y, 'y')
       .attr('rx', this.scaleX(5))
       .attr('ry', this.scaleY(5))
       .classed('highlight', true)
@@ -90,8 +95,8 @@ export default {
     } else {
       d3.select('#grid svg')
       .append('ellipse')
-      .attr('cx', guidePoint.x)
-      .attr('cy', guidePoint.y)
+      .attr('cx', ellipsePoint.x)
+      .attr('cy', ellipsePoint.y)
       .attr('rx', this.scaleX(2))
       .attr('ry', this.scaleY(2))
       .classed('gridpoint', true)
@@ -582,10 +587,10 @@ export default {
   * if the vertex is within the snap tolerance of the point, return the coordinates of the vertex in grid units
   * and the distance from the vertex to the point
   */
-  snappingVertexData (point) {
+  snappingVertexData(point) {
     // build a list of vertices (in RWU) available for snapping
     // deep copy all vertices on the current story
-    var snappableVertices =  [...this.currentStoryGeometry.vertices];
+    let snappableVertices = [...this.currentStoryGeometry.vertices];
 
     // TODO: conditionally combine this list with vertices from the next story down if it is visible
     if (this.previousStoryGeometry) {
@@ -598,27 +603,44 @@ export default {
       snappableVertices.push({
         x: this.gridToRWU(this.points[0].x, 'x'),
         y: this.gridToRWU(this.points[0].y, 'y'),
-        origin: true // set a flag to mark the origin
+        origin: true, // set a flag to mark the origin
       });
+    }
+
+    if (this.points.length === 1 && this.currentTool === 'Rectangle') {
+      snappableVertices = snappableVertices.concat(
+        geometryHelpers.syntheticRectangleSnaps(
+          snappableVertices,
+          {
+            x: this.gridToRWU(this.points[0].x, 'x'),
+            y: this.gridToRWU(this.points[0].y, 'y'),
+          },
+          point),
+      );
     }
 
     if (!snappableVertices.length) { return; }
 
     // find the vertex closest to the point being tested
     const nearestVertex = snappableVertices.reduce((a, b) => {
-      const aDist = this.distanceBetweenPoints(a, point),
-      bDist = this.distanceBetweenPoints(b, point);
+      const aDist = this.distanceBetweenPoints(a, point);
+      const bDist = this.distanceBetweenPoints(b, point);
       return aDist < bDist ? a : b;
     });
 
     // return the nearest vertex if it is within the snap tolerance of the point
     if (this.distanceBetweenPoints(nearestVertex, point) < this.$store.getters['project/snapTolerance']) {
-      return {
+      const retval = {
+        ...nearestVertex,
         x: this.rwuToGrid(nearestVertex.x, 'x'),
         y: this.rwuToGrid(nearestVertex.y, 'y'),
-        origin: nearestVertex.origin,
-        type: 'vertex'
+        type: 'vertex',
       };
+      if (retval.synthetic) {
+        retval.originalPt.x = this.rwuToGrid(retval.originalPt.x, 'x');
+        retval.originalPt.y = this.rwuToGrid(retval.originalPt.y, 'y');
+      }
+      return retval;
     }
   },
 
