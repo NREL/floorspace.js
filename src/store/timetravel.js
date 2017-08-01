@@ -47,6 +47,7 @@ export default {
   pastTimetravelStates: [],
   futureTimetravelStates: [],
   currentlyInBatch: false,
+  triggeringAction: '(none)',
   init(store) {
     const that = this;
     this.store = store;
@@ -86,16 +87,16 @@ export default {
         * The result is that each checkpoint contains a set of related actions, so undo can't leave us in an invalid state
         */
         // TODO: go over this with Brian again
-        that.maybeSaveCheckpoint();
+        that.maybeSaveCheckpoint(action);
         console.log('dispatching action:', args[0]);
       }
 
       originalDispatch.apply(this, args);
     };
   },
-  maybeSaveCheckpoint() {
+  maybeSaveCheckpoint(action) {
     if (!this.currentlyInBatch) {
-      this.saveCheckpoint();
+      this.saveCheckpoint(action);
     }
     // now, ignore the next few calls, until we clear the event loop.
     this.currentlyInBatch = true;
@@ -105,30 +106,43 @@ export default {
   /*
   * Empty future states and save the currentState to pastTimetravelStates
   */
-  saveCheckpoint() {
-    this.pastTimetravelStates.push(serializeState(this.store.state));
+  saveCheckpoint(action) {
+    this.pastTimetravelStates.push({
+      triggeringAction: this.triggeringAction,
+      state: serializeState(this.store.state)
+    });
+    this.triggeringAction = action;
     console.warn('saving state:', this.pastTimetravelStates[this.pastTimetravelStates.length - 1]);
     this.futureTimetravelStates = [];
   },
 
   undo() {
-    const replacementState = this.pastTimetravelStates.pop();
-    if (replacementState) {
-      this.futureTimetravelStates.push(serializeState(this.store.state));
-      this.store.replaceState(replacementState);
-      console.log('undo', replacementState);
-      // console.log('undo', this.pastTimetravelStates.map(s => logState(s)), logState(replacementState), this.futureTimetravelStates.map(s => logState(s)));
-    }
+    if (!this.pastTimetravelStates.length) { return; }
+    const { state: replacementState, triggeringAction } = this.pastTimetravelStates.pop();
+    const oldAction = this.triggeringAction;
+    this.futureTimetravelStates.push({
+      triggeringAction: this.triggeringAction,
+      state: serializeState(this.store.state),
+    });
+    this.triggeringAction = triggeringAction;
+    this.store.replaceState(replacementState);
+    console.log('undo', replacementState);
+    window.eventBus.$emit('success', `undo ${oldAction}`);
+    // console.log('undo', this.pastTimetravelStates.map(s => logState(s)), logState(replacementState), this.futureTimetravelStates.map(s => logState(s)));
   },
 
   redo() {
-    const replacementState = this.futureTimetravelStates.pop();
-    if (replacementState) {
-      this.pastTimetravelStates.push(serializeState(this.store.state));
-      this.store.replaceState(replacementState);
-      console.log('redo', replacementState);
-      // console.log('redo', this.pastTimetravelStates.map(s => logState(s)), logState(replacementState), this.futureTimetravelStates.map(s => logState(s)));
-    }
+    if (!this.futureTimetravelStates.length) { return; }
+    const { state: replacementState, triggeringAction } = this.futureTimetravelStates.pop();
+    this.pastTimetravelStates.push({
+      state: serializeState(this.store.state),
+      triggeringAction: this.triggeringAction,
+    });
+    this.triggeringAction = triggeringAction;
+    this.store.replaceState(replacementState);
+    window.eventBus.$emit('success', `redo ${triggeringAction}`);
+    console.log('redo', replacementState);
+    // console.log('redo', this.pastTimetravelStates.map(s => logState(s)), logState(replacementState), this.futureTimetravelStates.map(s => logState(s)));
   },
   logTimetravel() {
     console.log('past:', this.pastTimetravelStates.map(s => logState(s)));
