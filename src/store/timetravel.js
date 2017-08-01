@@ -36,6 +36,8 @@ const filteredActions = [
   'application/setCurrentBuildingUnit',
   'application/setCurrentThermalZone',
   'application/setCurrentSpaceType',
+  'project/setPreviousStoryVisible',
+  'project/setGridVisible',
 ];
 
 const logState = state => state;
