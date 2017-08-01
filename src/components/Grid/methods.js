@@ -65,6 +65,7 @@ export default {
     // unhighlight expired snap targets
     d3.selectAll('#grid .highlight, #grid .gridpoint').remove();
 
+
     // location of the mouse in grid units
     const gridPoint = {
       x: this.pxToGrid(e.offsetX, 'x'),
@@ -74,15 +75,19 @@ export default {
     const snapTarget = this.findSnapTarget(gridPoint);
 
     // render a line and point showing which geometry would be created with a click at this location
-    var guidePoint = snapTarget.type === 'edge' ? snapTarget.projection : snapTarget;
+    const guidePoint = snapTarget.type === 'edge' ? snapTarget.projection :
+      snapTarget;
+
+    const ellipsePoint = snapTarget.synthetic ? snapTarget.originalPt : guidePoint;
     this.drawGuideLines(e, guidePoint);
+
 
     // if snapping to an edisting edge or radius, draw a larger point, if snapping to the grid or just displaying the location of the pointer, create a small point
     if (snapTarget.type === 'edge' || snapTarget.type === 'vertex') {
       d3.select('#grid svg')
       .append('ellipse')
-      .attr('cx', guidePoint.x, 'x')
-      .attr('cy', guidePoint.y, 'y')
+      .attr('cx', ellipsePoint.x, 'x')
+      .attr('cy', ellipsePoint.y, 'y')
       .attr('rx', this.scaleX(5))
       .attr('ry', this.scaleY(5))
       .classed('highlight', true)
@@ -90,8 +95,8 @@ export default {
     } else {
       d3.select('#grid svg')
       .append('ellipse')
-      .attr('cx', guidePoint.x)
-      .attr('cy', guidePoint.y)
+      .attr('cx', ellipsePoint.x)
+      .attr('cy', ellipsePoint.y)
       .attr('rx', this.scaleX(2))
       .attr('ry', this.scaleY(2))
       .classed('gridpoint', true)
@@ -625,12 +630,17 @@ export default {
 
     // return the nearest vertex if it is within the snap tolerance of the point
     if (this.distanceBetweenPoints(nearestVertex, point) < this.$store.getters['project/snapTolerance']) {
-      return {
+      const retval = {
         ...nearestVertex,
         x: this.rwuToGrid(nearestVertex.x, 'x'),
         y: this.rwuToGrid(nearestVertex.y, 'y'),
         type: 'vertex',
       };
+      if (retval.synthetic) {
+        retval.originalPt.x = this.rwuToGrid(retval.originalPt.x, 'x');
+        retval.originalPt.y = this.rwuToGrid(retval.originalPt.y, 'y');
+      }
+      return retval;
     }
   },
 
