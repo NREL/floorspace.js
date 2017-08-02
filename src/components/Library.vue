@@ -22,7 +22,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
                 <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
             </svg>
         </div>
-        <button @click="createItem">New</button>
+        <button @click="createObject">New</button>
     </header>
 
     <table class="table">
@@ -45,13 +45,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
 
         <tbody>
             <tr v-for='object in displayObjects' :key="object.id" @click="selectedObject = object" :style="{ 'background-color': (selectedObject && selectedObject.id === object.id) ? '#008500' : '' }">
-                <td v-for="column in columns" @mouseover="toggleError(object, column, true)" @mouseout="toggleError(object, column, false)">
-                    <div v-if="errorForObjectAndKey(object, column) && errorForObjectAndKey(object, column).visible " class="tooltip-error">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14">
-                            <path d="M.5 0v14l11-7-11-7z"></path>
-                        </svg>
-                        <span>{{ errorForObjectAndKey(object, column).message }}</span>
-                    </div>
+                <td v-for="column in columns">
                     <input v-if="!inputTypeForKey(column)" :value="valueForKey(object, column)" @change="setValueForKey(object, column, $event.target.value)" readonly>
                     <input v-if="inputTypeForKey(column) === 'text'" :value="valueForKey(object, column)" @change="setValueForKey(object, column, $event.target.value)">
 
@@ -95,7 +89,6 @@ export default {
       sortKey: 'id',
       sortDescending: true,
       type: null, // object type being viewed
-      validationErrors: [],
       huebs: {},
     };
   },
@@ -252,33 +245,21 @@ export default {
     },
   },
   methods: {
-    // initialize an empty object
-    createItem() {
-      switch (this.type) {
-        case 'stories':
-          this.$store.dispatch('models/initStory');
-          return;
-        case 'spaces':
-          this.$store.dispatch('models/initSpace', { story: this.currentStory });
-          break;
-        case 'shading':
-          this.$store.dispatch('models/initShading', { story: this.currentStory });
-          break;
-        case 'building_units':
-        case 'thermal_zones':
-        case 'space_types':
-        case 'construction_sets':
-        case 'windows':
-        case 'daylighting_controls':
-          this.$store.dispatch('models/createObjectWithType', { type: this.type });
-          break;
-        default:
-          debugger
-          break;
+
+    configurePickers() {
+      const inputs = document.querySelectorAll('.input-color > input');
+      for (let i = 0; i < inputs.length; i++) {
+        const objectId = inputs[i].getAttribute('object-id');
+
+        this.huebs[objectId] = new Huebee(inputs[i], { saturations: 1 });
+        this.huebs[objectId].handler = (color) => {
+          const object = helpers.libraryObjectWithId(this.$store.state.models, objectId);
+          this.setValueForKey(object, 'color', color);
+        };
+        this.huebs[objectId].on('change', this.huebs[objectId].handler);
       }
-      // select the newly created object
-      this.selectedObject = this.displayObjects[this.displayObjects.length - 1];
     },
+
 
     /*
     * FORMATTERS
@@ -306,7 +287,34 @@ export default {
     // update a property on an object in the datastore
     // TODO: validation
     setValueForKey(object, key, value) {
-      helpers.setValueForKey(object, this.$store, this.type, key, value);
+      const result = helpers.setValueForKey(object, this.$store, this.type, key, value);
+      if (!result.success) {
+        window.eventBus.$emit('error');
+      }
+    },
+
+    // initialize an empty object
+    createObject() {
+      switch (this.type) {
+        case 'stories':
+          this.$store.dispatch('models/initStory');
+          return;
+        case 'spaces':
+          this.$store.dispatch('models/initSpace', { story: this.currentStory });
+          break;
+        case 'shading':
+          this.$store.dispatch('models/initShading', { story: this.currentStory });
+          break;
+        case 'images':
+          window.eventBus.$emit('uploadImage');
+          break;
+        default:
+          this.$store.dispatch('models/createObjectWithType', { type: this.type });
+          break;
+      }
+      // select the newly created object
+      let newObject =  this.displayObjects[this.displayObjects.length - 1];
+      if (newObject) { this.selectedObject = newObject; }
     },
 
     destroyObject(object) {
@@ -332,16 +340,8 @@ export default {
             story: this.$store.state.models.stories.find(story => story[this.type].find(o => o.id === object.id)),
           });
           break;
-        case 'building_units':
-        case 'thermal_zones':
-        case 'space_types':
-        case 'construction_sets':
-        case 'windows':
-        case 'daylighting_controls':
-          this.$store.dispatch('models/destroyObject', { object });
-          break;
         default:
-          debugger;
+          this.$store.dispatch('models/destroyObject', { object });
           break;
       }
     },
@@ -358,50 +358,7 @@ export default {
     selectOptionsForObjectAndKey(object, key) {
       return helpers.selectOptionsForKey(object, this.$store.state, this.type, key);
     },
-    configurePickers() {
-      const inputs = document.querySelectorAll('.input-color > input');
-      for (let i = 0; i < inputs.length; i++) {
-        const object_id = inputs[i].getAttribute("object-id");
 
-        this.huebs[object_id] = new Huebee(inputs[i], {
-          saturations: 1
-        });
-        this.huebs[object_id].handler = (color, h, s, l) => {
-          const object = helpers.libraryObjectWithId(this.$store.state.models, object_id);
-          this.setValueForKey(object, 'color', color);
-        }
-        this.huebs[object_id].on('change', this.huebs[object_id].handler);
-      }
-    },
-    // setValueForKey(object, key, value) {
-    //   // must update the object so that the input field value does not reset
-    //   const result = helpers.setValueForKey(object, this.$store, this.type, key, value);
-    //   // remove existing errors for object
-    //   this.validationErrors = this.validationErrors.filter(e => e.object_id !== object.id);
-    //
-    //   if (!result.success) {
-    //   this.validationErrors.push({
-    //   object_id: object.id,
-    //   key: key,
-    //   value: value,
-    //   message: result.error,
-    //   visible: false
-    //   });
-    //   }
-    // },
-    errorForObjectAndKey (object, key) {
-        if (key) {
-            return this.validationErrors.find(e => e.object_id === object.id && e.key === key);
-        } else {
-            return this.validationErrors.find(e => e.object_id === object.id);
-        }
-    },
-    toggleError(object, key, show) {
-        const error = this.errorForObjectAndKey(object, key);
-        if (error) {
-            error.visible = show;
-        }
-    },
     /*
     * destroy a library object
     * dispatches destroyStory, destroySpace, destroyShading, or destroyObject depending on the object's type

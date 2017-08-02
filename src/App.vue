@@ -57,6 +57,10 @@ export default {
     this.$store.dispatch('models/initStory');
   },
   mounted() {
+
+    this.$on('uploadImage', (event) => {
+      document.getElementById('upload-image-input').click();
+    });
     // App will act as the eventBus for the application
     this.$on('error', (err) => {
       this.error = err;

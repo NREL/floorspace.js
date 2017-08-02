@@ -46,7 +46,7 @@ const helpers = {
 
       // if a validator is defined for the key, run it and store the result
       if (this.map[type].keymap[key] && this.map[type].keymap[key].validator) {
-          const validationResult = this.map[type].keymap[key].validator(object, store, value);
+          const validationResult = this.map[type].keymap[key].validator(object, store, value, type);
           result.success = validationResult.success;
           if (!validationResult.success) {
               result.error = validationResult.error;
