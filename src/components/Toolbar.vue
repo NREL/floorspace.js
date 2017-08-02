@@ -202,19 +202,21 @@ export default {
     &.tools {
       background-color: $gray-medium-light;
       justify-content: flex-end;
-
+      button {
+        &:last-child {
+          margin: 0;
+        }
+        margin: 0 1rem 0 0;
+      }
+      .active {
+        border: 1px solid $primary;
+      }
       > .undo-redo {
         margin-right: auto;
       }
     }
 
-    > button,
-    > div {
-      margin: 0 1rem 0 0;
-      &.active {
-        border: 1px solid $primary;
-      }
-    }
+
   }
 }
 </style>

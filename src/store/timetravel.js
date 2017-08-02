@@ -22,6 +22,7 @@ const serializeState = (state) => {
 };
 const filteredActions = [
   'application/setScaleX',
+  'application/setApplicationTool',
   'application/setScaleY',
   'project/setSpacing',
   'project/setViewMinX',
@@ -127,6 +128,7 @@ export default {
     this.triggeringAction = triggeringAction;
     this.store.replaceState(replacementState);
     console.log('undo', replacementState);
+    document.getElementById("svg-grid").dispatchEvent(new Event('reloadGrid'));
     window.eventBus.$emit('success', `undo ${oldAction}`);
     // console.log('undo', this.pastTimetravelStates.map(s => logState(s)), logState(replacementState), this.futureTimetravelStates.map(s => logState(s)));
   },
@@ -142,6 +144,7 @@ export default {
     this.store.replaceState(replacementState);
     window.eventBus.$emit('success', `redo ${triggeringAction}`);
     console.log('redo', replacementState);
+    document.getElementById("svg-grid").dispatchEvent(new Event('reloadGrid'));
     // console.log('redo', this.pastTimetravelStates.map(s => logState(s)), logState(replacementState), this.futureTimetravelStates.map(s => logState(s)));
   },
   logTimetravel() {
