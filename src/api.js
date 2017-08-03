@@ -9,6 +9,7 @@ window.api = {
         data: JSON.parse(data),
       });
     } catch (err) {
+      console.log(err);
       return false;
     }
     return true;
