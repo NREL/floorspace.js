@@ -19,33 +19,21 @@ export default {
         objs = store.state.models.library[type];
         break;
     }
-    let objSameName = objs.filter(s => s.name === value);
-
-    console.log(objs, objSameName);
-    if (objSameName && objSameName.id !== object.id) {
-      debugger
-      return {
-        success: false,
-        error: 'Names must be unique.',
-      };
+    let error = '';
+    if (objs.filter(s => (s.name === value) && (s.id !== object.id)).length) {
+      error = 'Names must be unique.';
     } else if (value.length < 5) {
-      return {
-        success: false,
-        error: 'Names must be at least 5 characters long.',
-      };
+      error = 'Names must be at least 5 characters long.';
     }
-    return { success: true };
-  },
 
+    return error ? { success: false, error } : { success: true };
+  },
   number(object, store, value, type) {
+    let error = '';
     if (isNaN(value)) {
-      return {
-        success: false,
-        error: 'Value must be numeric'
-      };
+      error = 'Value must be numeric.';
     }
-    return {
-      success: true
-    };
-  }
-}
+
+    return error ? { success: false, error } : { success: true };
+  },
+};

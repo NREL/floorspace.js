@@ -245,7 +245,7 @@ export default {
     },
   },
   methods: {
-
+    // configure Huebee color pickers for each color picker input
     configurePickers() {
       const inputs = document.querySelectorAll('.input-color > input');
       for (let i = 0; i < inputs.length; i++) {
@@ -260,24 +260,9 @@ export default {
       }
     },
 
-
-    /*
-    * FORMATTERS
-    */
-    // used in the Type dropdown to get the display name for each object type
-    displayTypeForType(type) { return helpers.map[type].displayName; },
-
-    // used in column headers to get the display name for each object property
-    // private properties will return null
-    displayNameForKey(key) { return helpers.displayNameForKey(this.type, key); },
-
     /*
     * ACCESSORS
     */
-    // determine whether an object property is readonly or private
-    keyIsReadonly(object, key) { return helpers.keyIsReadonly(this.type, key); },
-    keyIsPrivate(object, key) { return helpers.keyIsPrivate(this.type, key); },
-
     // call the property getter if it exists, otherwise return the string value at obj[key]
     valueForKey(object, key) {
       // return this.errorForObjectAndKey(object, key) ? this.errorForObjectAndKey(object, key).value : helpers.valueForKey(object, this.$store.state, this.type, key);
@@ -289,11 +274,23 @@ export default {
     setValueForKey(object, key, value) {
       const result = helpers.setValueForKey(object, this.$store, this.type, key, value);
       if (!result.success) {
-        window.eventBus.$emit('error');
+        window.eventBus.$emit('error', result.error);
       }
     },
 
-    // initialize an empty object
+    // determine whether an object property is readonly or private
+    keyIsReadonly(object, key) { return helpers.keyIsReadonly(this.type, key); },
+    keyIsPrivate(object, key) { return helpers.keyIsPrivate(this.type, key); },
+    // input type to display in the column for a given key
+    inputTypeForKey(key) { return helpers.inputTypeForKey(this.type, key); },
+    // options to display in select dropdown
+    // this is only called from the template if the input type for the key is select
+    selectOptionsForObjectAndKey(object, key) { return helpers.selectOptionsForKey(object, this.$store.state, this.type, key); },
+
+    /*
+    * CREATE OBJECT
+    * initializes an empty object
+    */
     createObject() {
       switch (this.type) {
         case 'stories':
@@ -313,10 +310,12 @@ export default {
           break;
       }
       // select the newly created object
-      let newObject =  this.displayObjects[this.displayObjects.length - 1];
-      if (newObject) { this.selectedObject = newObject; }
+      if (this.displayObjects.length) { this.selectedObject = this.displayObjects[this.displayObjects.length - 1]; }
     },
 
+    /*
+    * DESTROY OBJECT
+    */
     destroyObject(object) {
       switch (this.type) {
         case 'stories':
@@ -346,33 +345,22 @@ export default {
       }
     },
 
+    /*
+    * UTILITIES
+    */
+    // used in the Type dropdown to get the display name for each object type
+    displayTypeForType(type) { return helpers.map[type].displayName; },
+
+    // used in column headers to get the display name for each object property
+    // private properties will return null
+    displayNameForKey(key) { return helpers.displayNameForKey(this.type, key); },
+
+    // when a sort arrow is clicked, set sort order and key
+    // this will trigger a recalculation of displayObjects
     sortBy(key) {
       this.sortDescending = this.sortKey === key ? !this.sortDescending : true;
       this.sortKey = key;
     },
-
-    inputTypeForKey(key) {
-      return helpers.inputTypeForKey(this.type, key);
-    },
-
-    selectOptionsForObjectAndKey(object, key) {
-      return helpers.selectOptionsForKey(object, this.$store.state, this.type, key);
-    },
-
-    /*
-    * destroy a library object
-    * dispatches destroyStory, destroySpace, destroyShading, or destroyObject depending on the object's type
-    */
-        // classForObjectRow (object) {
-        //     var classList = "";
-        //     if (this.errorForObjectAndKey(object, null)) {
-        //         classList += " error"
-        //     }
-        //     if (this.selectedObject && this.selectedObject.id === object.id) {
-        //         classList += " current"
-        //     }
-        //     return classList;
-        // },
   },
   watch: {
     displayObjects() { this.$nextTick(this.configurePickers); },
