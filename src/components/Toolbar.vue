@@ -46,7 +46,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     </section>
 
     <section class="tools">
-      <button @click="tool = item" :class="{ active: tool === item }" v-for="item in availableTools">{{ item }}</button>
+      <div class="undo-redo" v-if="timetravelInitialized">
+        <button @click="undo">Undo</button>
+        <button @click="redo">Redo</button>
+      </div>
+      <div>
+        <button @click="tool = item" :class="{ active: tool === item }" v-for="item in availableTools">{{ item }}</button>
+      </div>
     </section>
 
   </nav>
@@ -93,11 +99,18 @@ export default {
 
       if (file) { reader.readAsText(file); }
     },
+    undo() {
+      this.$store.timetravel.undo();
+    },
+    redo() {
+      this.$store.timetravel.redo();
+    },
   },
   computed: {
     ...mapState({
       currentMode: state => state.application.currentSelections.mode,
       mapEnabled: state => state.project.map.enabled,
+      timetravelInitialized: state => state.timetravelInitialized,
     }),
     availableTools() {
       return this.$store.state.application.tools
@@ -189,6 +202,10 @@ export default {
     &.tools {
       background-color: $gray-medium-light;
       justify-content: flex-end;
+
+      > .undo-redo {
+        margin-right: auto;
+      }
     }
 
     > button,

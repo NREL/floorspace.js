@@ -189,7 +189,7 @@ function validateFaceGeometry(points, context) {
     // build an array of vertices for the face being created
     let faceVertices = points.map((point) => {
         // if a vertex already exists at a given location, reuse it
-        return geometryHelpers.vertexForCoordinates(point, context.rootGetters['project/snapTolerance'], currentStoryGeometry) || new factory.Vertex(point.x, point.y);
+        return geometryHelpers.vertexForCoordinates(point, currentStoryGeometry) || new factory.Vertex(point.x, point.y);
     });
 
     // create edges connecting each vertex in order

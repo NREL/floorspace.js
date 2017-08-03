@@ -215,12 +215,10 @@ const helpers = {
     },
 
     // given a set of coordinates, find the vertex on the geometry set within their tolerance zone
-	vertexForCoordinates (coordinates, snapTolerance, geometry) {
-		const { x, y } = coordinates;
-		// tolerance is calculated based on the grid's horizontal range (RWU)
-		const tolerance = snapTolerance;
-	    return geometry.vertices.find(v => this.distanceBetweenPoints(coordinates, v) < tolerance );
-	},
+  vertexForCoordinates(coordinates, geometry) {
+    const { x, y } = coordinates;
+    return geometry.vertices.find(v => v.x === x && v.y === y);
+  },
 
     // given a face id, returns the populated vertex objects reference by edges on that face
     verticesForFaceId(face_id, geometry) {
@@ -277,6 +275,48 @@ const helpers = {
         {x, y} = p3;
       return Math.abs((n - b) * (x - m) - (y - n) * (m - a)) < 0.00001;
     },
+
+  syntheticRectangleSnaps(points, rectStart, cursorPt) {
+    // create synthetic snapping points by considering
+    // points that are near to the corners we're not drawing.
+    // Consider the diagram below. We're drawing a rectangle from the top-left
+    // corner ● to the bottom-right corner ○. The top-right, and bottom-left
+    // _could_ snap to nearby points @, but they're not where the cursor is.
+    // so we'll make synthetic points * and snap to those, even though they're
+    // not really part of the geometry.
+    /*
+
+       ●-------------------------------------   @
+       |                                     |    \
+       |                                     |     |
+       |                                     |     |
+       |                                     |     |
+       |                                     |     |
+       |                                     |     |
+       |                                     |     |
+       |                                     |     |
+       |                                     |     |
+       |                                     |    /
+        -------------------------------------○  *
+
+
+       @                                     *
+        \                                   /
+         -----------------------------------
+    */
+
+    // We will reflect each point across both the horizontal and vertical
+    // midlines of the rectangle.
+    const xMid = (rectStart.x + cursorPt.x) / 2;
+    const yMid = (rectStart.y + cursorPt.y) / 2;
+
+    return [
+      ...points.map(({ x, y }) => (
+        { y, x: x + (2 * (xMid - x)), synthetic: true, originalPt: { x, y } })),
+      ...points.map(({ x, y }) => (
+        { x, y: y + (2 * (yMid - y)), synthetic: true, originalPt: { x, y } }))
+    ];
+  }
 };
 
 export default helpers;

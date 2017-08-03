@@ -14,10 +14,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <span class="input-text">
                 <input ref="addressSearch" type="text" placeholder="Search for a location"/>
             </span>
-            <button @click="finishSetup">Done</button>
         </div>
         <div v-show="tool === 'Map'" id="help-text">
             <p>Drag the map and/or search to set desired location.  Use alt+shift to rotate the north axis. Click 'Done' when finished.</p>
+            <button @click="finishSetup">Done</button>
         </div>
 
         <map-modal v-if="mapModalVisible && !mapInitialized" @close="mapModalVisible = false; showReticle()"></map-modal>
@@ -291,8 +291,15 @@ export default {
         background: white;
         padding: 2px 4px;
         margin: 10px;
+        width: calc(100% - 110px);
         border: 2px solid $gray-darkest;
         display: inline-block;
+        // float: left;
+    }
+
+    button {
+      display: inline-block;
+      margin: 10px;
     }
 }
 
