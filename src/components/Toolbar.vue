@@ -177,22 +177,22 @@ export default {
     &.settings {
       background-color: $gray-medium-dark;
       text-align: right;
-      #modal-buttons {
-        margin-right: 2rem;
+      .input-number, .input-checkbox {
+        margin-right: 1.5rem;
       }
-
+      // buttons to trigger file inputs
       #import-export {
         position: absolute;
         right: 2.5rem;
         #import {
-          margin-right: 1rem;
           border: 1px solid $secondary;
         }
         #export {
+          margin-left: 1rem;
           border: 1px solid $primary;
         }
       }
-
+      // hidden file inputs
       input[type="file"],
       input[type="text"] {
         position: absolute;

@@ -1,11 +1,7 @@
 const serializeState = (state) => {
-  const scaleX = state.application.scale.x;
-  const scaleY = state.application.scale.y;
-
   const clone = JSON.parse(JSON.stringify(state));
-  clone.application.scale.x = scaleX;
-  clone.application.scale.y = scaleY;
 
+  // TODO: update these to be IDs and not references, then update importcode and serealization code
   const currentSelections = clone.application.currentSelections;
   const currentStory = clone.models.stories.find(s => s.id === currentSelections.story.id);
   currentSelections.story = currentStory;
@@ -65,6 +61,15 @@ export default {
     const originalReplaceState = store.replaceState;
     store.replaceState = function overrideReplaceState(...args) {
       if (window.api) { window.api.config.onChange(); }
+      const newState = args[0];
+
+      // non timetravel props
+      // TODO: ask brian about config syntax for this
+      newState.application.scale = this.state.application.scale;
+      newState.project.view = this.state.project.view;
+      newState.project.grid = this.state.project.grid;
+      newState.project.previous_story = this.state.project.previous_story;
+
       originalReplaceState.apply(this, args);
     };
     const originalCommit = store.commit;
@@ -128,9 +133,7 @@ export default {
     this.triggeringAction = triggeringAction;
     this.store.replaceState(replacementState);
     console.log('undo', replacementState);
-    document.getElementById("svg-grid").dispatchEvent(new Event('reloadGrid'));
     window.eventBus.$emit('success', `undo ${oldAction}`);
-    // console.log('undo', this.pastTimetravelStates.map(s => logState(s)), logState(replacementState), this.futureTimetravelStates.map(s => logState(s)));
   },
 
   redo() {
@@ -144,8 +147,6 @@ export default {
     this.store.replaceState(replacementState);
     window.eventBus.$emit('success', `redo ${triggeringAction}`);
     console.log('redo', replacementState);
-    document.getElementById("svg-grid").dispatchEvent(new Event('reloadGrid'));
-    // console.log('redo', this.pastTimetravelStates.map(s => logState(s)), logState(replacementState), this.futureTimetravelStates.map(s => logState(s)));
   },
   logTimetravel() {
     console.log('past:', this.pastTimetravelStates.map(s => logState(s)));
