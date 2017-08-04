@@ -22,7 +22,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
                 <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
             </svg>
         </div>
-        <button @click="createItem">New</button>
+        <button @click="createObject">New</button>
     </header>
 
     <table class="table">
@@ -44,14 +44,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
         </thead>
 
         <tbody>
-            <tr v-for='object in displayObjects' :key="object.id" @click="selectedObject = object" :style="{ 'background-color': (selectedObject && selectedObject.id === object.id) ? '#008500' : '' }"><!-- :class="{ current: selectedObject.id === object.id }" -->
-                <td v-for="column in columns" @mouseover="toggleError(object, column, true)" @mouseout="toggleError(object, column, false)">
-                    <div v-if="errorForObjectAndKey(object, column) && errorForObjectAndKey(object, column).visible " class="tooltip-error">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14">
-                            <path d="M.5 0v14l11-7-11-7z"></path>
-                        </svg>
-                        <span>{{ errorForObjectAndKey(object, column).message }}</span>
-                    </div>
+            <tr v-for='object in displayObjects' :key="object.id" @click="selectedObject = object" :style="{ 'background-color': (selectedObject && selectedObject.id === object.id) ? '#008500' : '' }">
+                <td v-for="column in columns">
                     <input v-if="!inputTypeForKey(column)" :value="valueForKey(object, column)" @change="setValueForKey(object, column, $event.target.value)" readonly>
                     <input v-if="inputTypeForKey(column) === 'text'" :value="valueForKey(object, column)" @change="setValueForKey(object, column, $event.target.value)">
 
@@ -70,7 +64,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
                     </div>
                 </td>
                 <td class="destroy">
-                    <svg @click="destroyObject(object)" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                    <svg @click.stop="destroyObject(object)" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
                         <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
                     </svg>
                 </td>
@@ -95,7 +89,6 @@ export default {
       sortKey: 'id',
       sortDescending: true,
       type: null, // object type being viewed
-      validationErrors: [],
       huebs: {},
     };
   },
@@ -186,10 +179,10 @@ export default {
       },
     },
 
-  /*
-  * state.models.library extended to include stories, spaces, shading and images
-  * objects are deep copies to avoid mutating the store
-  */
+    /*
+    * state.models.library extended to include stories, spaces, shading and images
+    * objects are deep copies to avoid mutating the store
+    */
     extendedLibrary() {
       let spaces = [];
       let shading = [];
@@ -252,176 +245,122 @@ export default {
     },
   },
   methods: {
-    // initialize an empty story, space, shading, building_unit, or thermal_zone depending on the selected mode
-    createItem() {
+    // configure Huebee color pickers for each color picker input
+    configurePickers() {
+      const inputs = document.querySelectorAll('.input-color > input');
+      for (let i = 0; i < inputs.length; i++) {
+        const objectId = inputs[i].getAttribute('object-id');
+
+        this.huebs[objectId] = new Huebee(inputs[i], { saturations: 1 });
+        this.huebs[objectId].handler = (color) => {
+          const object = helpers.libraryObjectWithId(this.$store.state.models, objectId);
+          this.setValueForKey(object, 'color', color);
+        };
+        this.huebs[objectId].on('change', this.huebs[objectId].handler);
+      }
+    },
+
+    /*
+    * ACCESSORS
+    */
+    // call the property getter if it exists, otherwise return the string value at obj[key]
+    valueForKey(object, key) {
+      // return this.errorForObjectAndKey(object, key) ? this.errorForObjectAndKey(object, key).value : helpers.valueForKey(object, this.$store.state, this.type, key);
+      return helpers.valueForKey(object, this.$store.state, this.type, key);
+    },
+
+    // update a property on an object in the datastore
+    // TODO: validation
+    setValueForKey(object, key, value) {
+      const result = helpers.setValueForKey(object, this.$store, this.type, key, value);
+      if (!result.success) {
+        window.eventBus.$emit('error', result.error);
+      }
+    },
+
+    // determine whether an object property is readonly or private
+    keyIsReadonly(object, key) { return helpers.keyIsReadonly(this.type, key); },
+    keyIsPrivate(object, key) { return helpers.keyIsPrivate(this.type, key); },
+    // input type to display in the column for a given key
+    inputTypeForKey(key) { return helpers.inputTypeForKey(this.type, key); },
+    // options to display in select dropdown
+    // this is only called from the template if the input type for the key is select
+    selectOptionsForObjectAndKey(object, key) { return helpers.selectOptionsForKey(object, this.$store.state, this.type, key); },
+
+    /*
+    * CREATE OBJECT
+    * initializes an empty object
+    */
+    createObject() {
       switch (this.type) {
         case 'stories':
           this.$store.dispatch('models/initStory');
           return;
         case 'spaces':
-          this.$store.dispatch('models/initSpace', {
-            story: this.$store.state.application.currentSelections.story,
+          this.$store.dispatch('models/initSpace', { story: this.currentStory });
+          break;
+        case 'shading':
+          this.$store.dispatch('models/initShading', { story: this.currentStory });
+          break;
+        case 'images':
+          window.eventBus.$emit('uploadImage');
+          break;
+        default:
+          this.$store.dispatch('models/createObjectWithType', { type: this.type });
+          break;
+      }
+      // select the newly created object
+      if (this.displayObjects.length) { this.selectedObject = this.displayObjects[this.displayObjects.length - 1]; }
+    },
+
+    /*
+    * DESTROY OBJECT
+    */
+    destroyObject(object) {
+      switch (this.type) {
+        case 'stories':
+          this.$store.dispatch('models/destroyStory', { story: object });
+          return;
+        case 'spaces':
+          this.$store.dispatch('models/destroySpace', {
+            space: object,
+            story: this.$store.state.models.stories.find(story => story[this.type].find(o => o.id === object.id)),
           });
           break;
         case 'shading':
-          this.$store.dispatch('models/initShading', {
-            story: this.$store.state.application.currentSelections.story,
+          this.$store.dispatch('models/destroyShading', {
+            shading: object,
+            story: this.$store.state.models.stories.find(story => story[this.type].find(o => o.id === object.id)),
           });
           break;
-        case 'building_units':
-        case 'thermal_zones':
-        case 'space_types':
-        case 'construction_sets':
-        case 'windows':
-        case 'daylighting_controls':
-          this.$store.dispatch('models/createObjectWithType', {
-            type: this.type,
+        case 'images':
+          this.$store.dispatch('models/destroyImage', {
+            image: object,
+            story: this.$store.state.models.stories.find(story => story[this.type].find(o => o.id === object.id)),
           });
           break;
         default:
+          this.$store.dispatch('models/destroyObject', { object });
           break;
       }
-      this.selectedObject = this.displayObjects[this.displayObjects.length - 1];
     },
 
     /*
-    * returns the formatted displayName for types defined in the library config
+    * UTILITIES
     */
+    // used in the Type dropdown to get the display name for each object type
     displayTypeForType(type) { return helpers.map[type].displayName; },
 
-    /*
-    * returns the formatted displayName for keys defined in the library config
-    * only returns null for private keys - use to check if a key is private
-    * custom user defined keys which do not exist in the config keymap will be returned unchanged
-    */
+    // used in column headers to get the display name for each object property
+    // private properties will return null
     displayNameForKey(key) { return helpers.displayNameForKey(this.type, key); },
 
-    /*
-    * returns the readonly/private properties for keys defined in the library config
-    * returns false for custom user defined keys
-    */
-    keyIsReadonly(object, key) { return helpers.keyIsReadonly(this.type, key); },
-    keyIsPrivate(object, key) { return helpers.keyIsPrivate(this.type, key); },
-
-    /*
-    * returns the result of the getter defined for the key if one exists, otherwise
-    * returns the raw string value at obj[key] for custom user defined keys
-    */
-    valueForKey (object, key) {
-        return this.errorForObjectAndKey(object, key) ? this.errorForObjectAndKey(object, key).value : helpers.valueForKey(object, this.$store.state, this.type, key);
-    },
-
-        /*
-        * dispatch an update action for the supplied object
-        * store errors if validation fails
-        */
-        setValueForKey (object, key, value) {
-            // must update the object so that the input field value does not reset
-            const result = helpers.setValueForKey(object, this.$store, this.type, key, value);
-            // remove existing errors for object
-            this.validationErrors = this.validationErrors.filter(e => e.object_id !== object.id);
-
-            if (!result.success) {
-                this.validationErrors.push({
-                    object_id: object.id,
-                    key: key,
-                    value: value,
-                    message: result.error,
-                    visible: false
-                });
-            }
-        },
-        errorForObjectAndKey (object, key) {
-            if (key) {
-                return this.validationErrors.find(e => e.object_id === object.id && e.key === key);
-            } else {
-                return this.validationErrors.find(e => e.object_id === object.id);
-            }
-        },
-        toggleError(object, key, show) {
-            const error = this.errorForObjectAndKey(object, key);
-            if (error) {
-                error.visible = show;
-            }
-        },
-        /*
-        * destroy a library object
-        * dispatches destroyStory, destroySpace, destroyShading, or destroyObject depending on the object's type
-        */
-        destroyObject (object) {
-            if (this.type === 'stories') {
-                this.$store.dispatch('models/destroyStory', {
-                    story: object
-                });
-            } else if (this.type === 'spaces') {
-                // look up the story referencing the space to be destroyed
-                const storyForSpace = this.$store.state.models.stories.find((story) => {
-                    return story.spaces.find(s => s.id === object.id);
-                });
-                this.$store.dispatch('models/destroySpace', {
-                    space: object,
-                    story: storyForSpace
-                });
-            }  else if (this.type === 'images') {
-                // look up the story referencing the space to be destroyed
-                const storyForImage = this.$store.state.models.stories.find((story) => {
-                    return story.images.find(i => i.id === object.id);
-                });
-                this.$store.dispatch('models/destroyImage', {
-                    image: object,
-                    story: storyForImage
-                });
-            } else if (this.type === 'shading') {
-                // look up the story referencing the shading to be destroyed
-                const storyForShading = this.$store.state.models.stories.find((story) => {
-                    return story.shading.find(s => s.id === object.id);
-                });
-                this.$store.dispatch('models/destroyShading', {
-                    shading: object,
-                    story: storyForShading
-                });
-            } else {
-                this.$store.dispatch('models/destroyObject', {
-                    object: object
-                });
-            }
-        },
-        // classForObjectRow (object) {
-        //     var classList = "";
-        //     if (this.errorForObjectAndKey(object, null)) {
-        //         classList += " error"
-        //     }
-        //     if (this.selectedObject && this.selectedObject.id === object.id) {
-        //         classList += " current"
-        //     }
-        //     return classList;
-        // },
-
+    // when a sort arrow is clicked, set sort order and key
+    // this will trigger a recalculation of displayObjects
     sortBy(key) {
-        this.sortDescending = this.sortKey === key ? !this.sortDescending : true;
-        this.sortKey = key;
+      this.sortDescending = this.sortKey === key ? !this.sortDescending : true;
+      this.sortKey = key;
     },
-
-        inputTypeForKey (key) {
-            return helpers.inputTypeForKey(this.type, key);
-        },
-
-        selectOptionsForObjectAndKey (object, key) {
-            return helpers.selectOptionsForKey(object, this.$store.state, this.type, key);
-        },
-        configurePickers () {
-            const inputs = document.querySelectorAll('.input-color > input');
-            for (let i = 0; i < inputs.length; i++) {
-                const object_id = inputs[i].getAttribute("object-id");
-
-                this.huebs[object_id] = new Huebee(inputs[i], { saturations: 1 });
-                this.huebs[object_id].handler = (color, h, s, l) => {
-                    const object = helpers.libraryObjectWithId(this.$store.state.models, object_id);
-                    this.setValueForKey(object, 'color', color);
-                }
-                this.huebs[object_id].on('change', this.huebs[object_id].handler);
-            }
-        }
   },
   watch: {
     displayObjects() { this.$nextTick(this.configurePickers); },

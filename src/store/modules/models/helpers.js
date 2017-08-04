@@ -1,6 +1,15 @@
 import map from './libconfig';
 
 const helpers = {
+
+  /*
+  * each library object type has
+  * displayName - for use in the type dropdown
+  * init - method to initialize a new object of the parent type (story and space do not have init functions and will be omitted from the CreateO)
+  * keymap - contains displayName and accessor for each property on objects of parent type
+  */
+  map: map,
+
   /*
   * returns the displayName for a given key on an object type
   * return null if the key is private
@@ -37,7 +46,7 @@ const helpers = {
 
       // if a validator is defined for the key, run it and store the result
       if (this.map[type].keymap[key] && this.map[type].keymap[key].validator) {
-          const validationResult = this.map[type].keymap[key].validator(object, store, value);
+          const validationResult = this.map[type].keymap[key].validator(object, store, value, type);
           result.success = validationResult.success;
           if (!validationResult.success) {
               result.error = validationResult.error;
@@ -103,13 +112,6 @@ const helpers = {
       return this.map[type].keymap[key] && !this.map[type].keymap[key].readonly && this.map[type].keymap[key].input_type === 'select' ? this.map[type].keymap[key].select_data(object, state) : [];
   },
 
-  /*
-  * each library object type has
-  * displayName - for use in the type dropdown
-  * init - method to initialize a new object of the parent type (story and space do not have init functions and will be omitted from the CreateO)
-  * keymap - contains displayName and accessor for each property on objects of parent type
-  */
-  map: map,
 
   /*
   * searches local state's library, stories, spaces, and shading for an object with a given id
