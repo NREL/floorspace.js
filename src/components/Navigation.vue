@@ -76,7 +76,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import applicationHelpers from './../store/modules/application/helpers';
 import modelHelpers from './../store/modules/models/helpers';
 
@@ -84,6 +84,9 @@ export default {
   name: 'navigation',
   data() {
     return {};
+  },
+  mounted() {
+    this.currentSubSelection = this.items[0];
   },
   computed: {
     ...mapState({
@@ -96,10 +99,6 @@ export default {
       space_types: state => state.models.library.space_types,
       thermal_zones: state => state.models.library.thermal_zones,
 
-      // currentStory's child spaces, shading, and images
-      spaces: state => state.application.currentSelections.story.spaces,
-      shading: state => state.application.currentSelections.story.shading,
-      images: state => state.application.currentSelections.story.images,
 
       // for image upload placement
       max_x: state => state.project.view.max_x,
@@ -110,6 +109,30 @@ export default {
       scaleY: state => state.application.scale.y,
     }),
 
+    ...mapGetters({
+      currentSpace: 'application/currentSpace',
+      currentShading: 'application/currentShading',
+      currentImage: 'application/currentImage',
+    }),
+
+    /*
+    * current selection getters and setters
+    * these dispatch actions to update the data store when a new item is selected
+    */
+    currentStory: {
+      get() { return this.$store.getters['application/currentStory']; },
+      set(story) { this.$store.dispatch('application/setCurrentStoryId', { id: story.id }); },
+    },
+    currentSubSelection: {
+      get() { return this.$store.getters['application/currentSubSelection']; },
+      set(item) { this.$store.dispatch('application/setCurrentSubSelectionId', { id: (item ? item.id : null) }); },
+    },
+
+    // currentStory's child spaces, shading, and images
+    spaces() { return this.currentStory.spaces; },
+    shading() { return this.currentStory.shading; },
+    images() { return this.currentStory.images; },
+
     // list items to display for current mode
     items() { return this[this.mode]; },
     mode: {
@@ -119,26 +142,6 @@ export default {
       },
     },
 
-    /*
-    * current selection getters and setters
-    * these dispatch actions to update the data store when a new item is selected
-    */
-    currentStory: {
-      get() { return this.$store.state.application.currentSelections.story; },
-      set(item) { this.$store.dispatch('application/setCurrentStory', { story: item }); },
-    },
-    currentSpace: {
-      get() { return this.$store.state.application.currentSelections.space; },
-      set(item) { this.$store.dispatch('application/setCurrentSpace', { space: item }); },
-    },
-    currentShading: {
-      get() { return this.$store.state.application.currentSelections.shading; },
-      set(item) { this.$store.dispatch('application/setCurrentShading', { shading: item }); },
-    },
-    currentImage: {
-      get() { return this.$store.state.application.currentSelections.image; },
-      set(item) { this.$store.dispatch('application/setCurrentImage', { image: item }); },
-    },
     currentThermalZone: {
       get() { return this.$store.state.application.currentSelections.thermal_zone; },
       set(item) { this.$store.dispatch('application/setCurrentThermalZone', { thermal_zone: item }); },
@@ -150,14 +153,6 @@ export default {
     currentSpaceType: {
       get() { return this.$store.state.application.currentSelections.space_type; },
       set(item) { this.$store.dispatch('application/setCurrentSpaceType', { space_type: item }); },
-    },
-    currentSubSelection() {
-      return this.currentImage ||
-        this.currentSpace ||
-        this.currentShading ||
-        this.currentBuildingUnit ||
-        this.currentThermalZone ||
-        this.currentSpaceType;
     },
   },
   methods: {
@@ -263,43 +258,51 @@ export default {
     * set current selection for a type
     */
     selectItem(item, mode = this.mode) {
-      switch (mode) {
-        case 'stories':
-          this.currentStory = item;
-          break;
-        case 'spaces':
-          this.currentSpace = item;
-          break;
-        case 'shading':
-          this.currentShading = item;
-          break;
-        case 'images':
-          this.currentImage = item;
-          break;
-        case 'building_units':
-          this.currentBuildingUnit = item;
-          break;
-        case 'thermal_zones':
-          this.currentThermalZone = item;
-          break;
-        case 'space_types':
-          this.currentSpaceType = item;
-          break;
-        default:
-          break;
+      if (mode === 'story') {
+        this.currentStory = item;
+      } else {
+        this.currentSubSelection = item;
       }
+      // switch (mode) {
+      //   case 'stories':
+      //     this.currentStory = item;
+      //     break;
+      //   case 'spaces':
+      //     this.currentSpace = item;
+      //     break;
+      //   case 'shading':
+      //     this.currentShading = item;
+      //     break;
+      //   case 'images':
+      //     this.currentImage = item;
+      //     break;
+      //   case 'building_units':
+      //     this.currentBuildingUnit = item;
+      //     break;
+      //   case 'thermal_zones':
+      //     this.currentThermalZone = item;
+      //     break;
+      //   case 'space_types':
+      //     this.currentSpaceType = item;
+      //     break;
+      //   default:
+      //     break;
+      // }
     },
 
     /*
     * empty selections for all types except the current type
     */
     clearSubSelections() {
-      this.currentShading = this.mode === 'shading' ? this.shading[0] : null;
-      this.currentImage = this.mode === 'images' ? this.images[0] : null;
-      this.currentSpace = this.mode === 'spaces' ? this.spaces[0] : null;
-      this.currentBuildingUnit = this.mode === 'building_units' ? this.building_units[0] : null;
-      this.currentThermalZone = this.mode === 'thermal_zones' ? this.thermal_zones[0] : null;
-      this.currentSpaceType = this.mode === 'space_types' ? this.space_types[0] : null;
+      //
+      // this.currentSubSelection = null;
+      //
+      // this.currentShading = this.mode === 'shading' ? this.shading[0] : null;
+      // this.currentImage = this.mode === 'images' ? this.images[0] : null;
+      // this.currentSpace = this.mode === 'spaces' ? this.spaces[0] : null;
+      // this.currentBuildingUnit = this.mode === 'building_units' ? this.building_units[0] : null;
+      // this.currentThermalZone = this.mode === 'thermal_zones' ? this.thermal_zones[0] : null;
+      // this.currentSpaceType = this.mode === 'space_types' ? this.space_types[0] : null;
     },
 
     /*
@@ -308,8 +311,8 @@ export default {
     displayNameForMode(mode = this.mode) { return applicationHelpers.displayNameForMode(mode); },
   },
   watch: {
-    mode() { this.clearSubSelections(); },
-    'currentStory.id': function () { this.clearSubSelections(); },
+    // mode() { this.clearSubSelections(); },
+    // 'currentStory.id': function () { this.clearSubSelections(); },
     currentSubSelection() {
       if (!this.currentSubSelection && this[this.mode][0]) {
         this.$nextTick(() => {

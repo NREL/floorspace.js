@@ -11,7 +11,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import applicationHelpers from './../../store/modules/application/helpers';
 import ResizeEvents from '../../components/Resize/ResizeEvents';
 
@@ -402,17 +402,22 @@ export default {
     },
   },
   computed: {
+    ...mapGetters({
+      currentStory: 'application/currentStory',
+      // currentSubSelection: 'application/currentSubSelection',
+      // currentSubSelectionType: 'application/currentSubSelectionType',
+    }),
     ...mapState({
       currentTool: state => state.application.currentSelections.tool,
-      images: state => state.application.currentSelections.story.images,
       scaleX: state => state.application.scale.x,
       scaleY: state => state.application.scale.y,
       view: state => state.project.view,
     }),
+    images() { return this.currentStory.images; },
 
     currentImage: {
-      get() { return this.$store.state.application.currentSelections.image; },
-      set(image) { this.$store.dispatch('application/setCurrentImage', { image }); },
+      get() { return this.$store.getters['application/currentImage']; },
+      set(item) { this.$store.dispatch('application/setCurrentSubSelectionId', { id: item.id }); },
     },
   },
   watch: {

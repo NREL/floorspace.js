@@ -1,18 +1,18 @@
 import actions from './actions';
 import mutations from './mutations';
 import getters from './getters';
+
 const d3 = require('d3');
 
 export default {
   namespaced: true,
   state: {
-    // TODO: refactor to use IDS
     currentSelections: {
       // models currently being edited
       story: null,
-      space: null,
-      shading: null,
-      image: null,
+      story_id: null,
+      subselection_id: null, // space, shading, image
+
       building_unit: null,
       thermal_zone: null,
       space_type: null,

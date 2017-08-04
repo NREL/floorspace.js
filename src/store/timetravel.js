@@ -3,10 +3,7 @@ const serializeState = (state) => {
 
   // TODO: update these to be IDs and not references, then update importcode and serealization code
   const currentSelections = clone.application.currentSelections;
-  const currentStory = clone.models.stories.find(s => s.id === currentSelections.story.id);
-  currentSelections.story = currentStory;
-  currentSelections.space = currentSelections.space ? currentStory.spaces.find(s => s.id === currentSelections.space.id) : null;
-  currentSelections.shading = currentSelections.shading ? currentStory.shading.find(s => s.id === currentSelections.shading.id) : null;
+  const currentStory = clone.models.stories.find(s => s.id === currentSelections.story_id);
 
   currentSelections.building_unit = currentSelections.building_unit ? clone.models.library.building_units.find(b => b.id === currentSelections.building_unit.id) : null;
   currentSelections.thermal_zone = currentSelections.thermal_zone ? clone.models.library.thermal_zones.find(t => t.id === currentSelections.thermal_zone.id) : null;
@@ -26,6 +23,7 @@ const filteredActions = [
   'project/setViewMaxX',
   'project/setViewMaxY',
   'application/clearSubSelections',
+  'application/setCurrentStoryId',
   'application/setCurrentStory',
   'application/setCurrentSpace',
   'application/setCurrentShading',
