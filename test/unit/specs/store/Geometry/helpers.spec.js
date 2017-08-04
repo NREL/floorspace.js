@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import helpers from '../../../../../src/store/modules/geometry/helpers';
 
 describe('syntheticRectangleSnaps', () => {
-  const resp = helpers.syntheticRectangleSnaps(
+  let resp = helpers.syntheticRectangleSnaps(
     /* points */ [
       { x: 3, y: -3 }, // @
       { x: 9, y: 11 }], // $
@@ -35,7 +35,7 @@ describe('syntheticRectangleSnaps', () => {
   ]);
 
   // now check with negative y vals
-  const resp = helpers.syntheticRectangleSnaps(
+  resp = helpers.syntheticRectangleSnaps(
     /* points */ [
       { x: 3, y: -15 }, // @
       { x: 9, y: -1 }], // $
@@ -67,5 +67,4 @@ describe('syntheticRectangleSnaps', () => {
     { x: 9, y: -14 }, // c
     { x: 2, y: -1 }, // d
   ]);
-
 });
