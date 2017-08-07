@@ -12,6 +12,8 @@ export function nearlyEqual(a, b, epsilon = 0.000001) {
 }
 
 export function assertProperty(...args) {
+  console.log('assertProperty args', args);
   const resp = check(property(...args));
+  console.log('resp', resp);
   assert(resp.result, `Property failed to verify! ${JSON.stringify(resp)}`);
 }

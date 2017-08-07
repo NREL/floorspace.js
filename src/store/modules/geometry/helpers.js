@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import ClipperLib from 'js-clipper'
 
 const helpers = {
@@ -331,10 +332,62 @@ const helpers = {
   areMergeable(edge1, edge2) {
     return this.endpointsNearby(edge1, edge2);
   },
+  oneEdgeCouldEatAnother(edge1, edge2) {
+    /*
+          o-------o
+     o--------------------------o
+    */
+    if (!this.haveSimilarAngles(edge1, edge2)) {
+      return false;
+    }
+    return (
+      this.leftEdgeEatsRight(edge1, edge2) ||
+      this.leftEdgeEatsRight(edge2, edge1));
+  },
+  leftEdgeEatsRight(left, right) {
+    const
+      { start, end } = right,
+      avgEdgeLen = this.avgEdgeLength(left, right),
+      { dist: startDist, proj: startProj } = this.pointDistanceToSegment(start, left),
+      { dist: endDist, proj: endProj } = this.pointDistanceToSegment(end, left);
+
+    if (!(Math.max(startDist, endDist) < 0.05 * avgEdgeLen)) {
+      return false;
+    }
+
+    return {
+      mergeType: 'oneEdgeEatsAnother',
+      newVertexOrder: this.consolidateVertices(left.start, left.end, startProj, endProj),
+    };
+  },
+  edgesCombineAndExtend(edge1, edge2) {
+    /*
+
+      o------------o
+           o---------------o
+    */
+    // if close enough
+
+
+    // project onto the direction with most variance to get order
+    // then output that order
+  },
+  avgEdgeLength({ start: start1, end: end1 }, { start: start2, end: end2 }) {
+    return (
+      this.distanceBetweenPoints(start1, end1) +
+      this.distanceBetweenPoints(start2, end2)
+    ) / 2;
+  },
   endpointsNearby(edge1, edge2) {
+    /*
+
+      o---------------------o
+     o----------------------o
+
+    */
     const { start: start1, end: end1 } = edge1;
     const { start: start2, end: end2 } = edge2;
-    const avgEdgeLen = (this.distanceBetweenPoints(start1, end1) + this.distanceBetweenPoints(start2, end2)) / 2;
+    const avgEdgeLen = this.avgEdgeLength(edge1, edge2);
 
     const startDist = this.distanceBetweenPoints(start1, start2);
     const endDist = this.distanceBetweenPoints(end1, end2);
@@ -352,6 +405,26 @@ const helpers = {
 
     return false;
   },
+  consolidateVertices(start, end, ...interveningPts) {
+    const distCutoff = 0.5 * this.distanceBetweenPoints(end, start),
+      finalPts = [start, end],
+      // First, make sure we're considering points in order left-to-right
+      intervening = _.sortBy(
+        interveningPts,
+        pt => this.distanceBetweenPoints(pt, start));
+
+    // now, consider each point for inclusion. A point will be included if it's
+    // farther than distCutoff from every point so far.
+    intervening.forEach((pt) => {
+      if (finalPts.all(fp => (this.distanceBetweenPoints(pt, fp) > distCutoff))) {
+        finalPts.push(pt);
+      }
+    });
+
+    // Now put the 'end' back at the end.
+    finalPts.push(finalPts.splice(1, 1));
+    return finalPts;
+  },
   edgeDirection({ start, end }) {
     // return the angle from east, in radians.
     const
@@ -368,9 +441,13 @@ const helpers = {
       );
     return correctedDiff < 0.05 * Math.PI;
   },
-  // pointLiesNearSegment(pt, segment) {
-  //
-  // },
+  pointDistanceToSegment(pt, segment) {
+    const proj = this.projectionOfPointToLine(pt, segment);
+    return {
+      dist: this.distanceBetweenPoints(pt, proj),
+      proj,
+    };
+  },
 };
 
 export default helpers;

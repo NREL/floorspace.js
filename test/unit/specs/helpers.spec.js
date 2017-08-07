@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { gen } from 'testcheck';
 import helpers from '../../../src/store/modules/geometry/helpers';
 import { assert, nearlyEqual, assertProperty } from '../test_helpers';
@@ -324,6 +325,73 @@ describe('projectionOfPointToLine', () => {
 
     proj = helpers.projectionOfPointToLine({ x: 8, y: 2 }, lineRt);
     assert(nearlyEqual(proj.x, 5) && nearlyEqual(proj.y, 3));
+  });
+});
+
+describe('consolidateVertices', () => {
+
+  const genVertices = gen.object({
+    startX: gen.numberWithin(-10000, 10000),
+    startY: gen.numberWithin(-10000, 10000),
+    endX: gen.numberWithin(-10000, 10000),
+    endY: gen.numberWithin(-10000, 10000),
+    pointsAlong: gen.array(gen.numberWithin(0, 1), { minSize: 0, maxSize: 10 }),
+  }).then(({ startX, startY, endX, endY, pointsAlong }) => {
+    const toPointOnLine = t => ({
+      x: startX + (t * (endX - startX)),
+      y: startY + (t * (endY - startY)),
+    });
+
+    const arr = [
+      /* start */{ x: startX, y: startY, identity: 'start' },
+      /* end */{ x: endX, y: endY, identity: 'end' },
+      /* verts */
+      ...pointsAlong.map(toPointOnLine),
+    ];
+    if (pointsAlong.length) {
+      /* and a duplicate out of order for good measure */
+      arr.push(toPointOnLine(pointsAlong[0]));
+    }
+    return arr;
+  });
+
+  it('puts the end point in the last position', () => {
+    assertProperty(genVertices, (verts) => {
+      const consolidated = this.consolidateVertices(...verts);
+      console.log('consolidated', consolidated);
+      return (
+        verts[1].identity === 'end' &&
+        consolidated[consolidated.length - 1].identity === 'blend'
+      );
+    });
+  });
+
+  it('drops duplicate points', () => {
+    assertProperty(genVertices, verts => (
+      this.consolidateVertices(...verts).length === 5 //_.uniqBy(verts, _.isEqual).length
+    ));
+  });
+
+  it('drops points that are close relative to the size of the edge', () => {
+
+  });
+
+  it("doesn't drop points that *aren't* close relative to the size of the edge", () => {
+
+  });
+});
+
+describe('oneEdgeCouldEatAnother', () => {
+  it('eats edges that are on top of one another', () => {
+
+  });
+
+  it('wont eat edges with a different angle, even if the points are close', () => {
+
+  });
+
+  it('eats edges when the small one starts near an endpoint', () => {
+
   });
 });
 
