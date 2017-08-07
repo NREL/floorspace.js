@@ -37,7 +37,7 @@ describe('syntheticRectangleSnaps', () => {
     ].forEach((entry) => {
       assert(
         resp.find(r => (r.x === entry.x && r.y === entry.y)),
-        `expected to find ${entry} in ${resp}`);
+        `expected to find ${JSON.stringify(entry)} in ${JSON.stringify(resp)}`);
     });
   });
 
@@ -77,7 +77,7 @@ describe('syntheticRectangleSnaps', () => {
     ].forEach((entry) => {
       assert(
         resp.find(r => (r.x === entry.x && r.y === entry.y)),
-        `expected to find ${entry} in ${resp}`);
+        `expected to find ${JSON.stringify(entry)} in ${JSON.stringify(resp)}`);
     });
   });
 });
