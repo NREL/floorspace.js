@@ -13,9 +13,13 @@ export default {
       story_id: null,
       subselection_id: null, // space, shading, image
 
-      building_unit: null,
-      thermal_zone: null,
-      space_type: null,
+      building_unit_id: null,
+      thermal_zone_id: null,
+      space_type_id: null,
+
+      // building_unit: null,
+      // thermal_zone: null,
+      // space_type: null,
 
       // current application mode and tool
       tool: 'Rectangle',

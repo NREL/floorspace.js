@@ -1,8 +1,6 @@
 export default {
   // full story object for the currentSelections story_id
-  currentStory(state, getters, rootState) {
-    return rootState.models.stories.find(s => s.id === state.currentSelections.story_id);
-  },
+  currentStory(state, getters, rootState) { return rootState.models.stories.find(s => s.id === state.currentSelections.story_id); },
 
   // full space, shading, or image object for the currentSelections subselection_id
   currentSubSelection(state, getters) {
@@ -30,6 +28,11 @@ export default {
   currentSpace(state, getters) { return getters.currentSubSelectionType === 'spaces' ? getters.currentSubSelection : null; },
   currentShading(state, getters) { return getters.currentSubSelectionType === 'shading' ? getters.currentSubSelection : null; },
   currentImage(state, getters) { return getters.currentSubSelectionType === 'images' ? getters.currentSubSelection : null; },
+
+
+  currentBuildingUnit(state, getters, rootState) { return rootState.models.library.building_units.find(i => i.id === state.currentSelections.building_unit_id); },
+  currentThermalZone(state, getters, rootState) { return rootState.models.library.thermal_zones.find(i => i.id === state.currentSelections.thermal_zone_id); },
+  currentSpaceType(state, getters, rootState) { return rootState.models.library.space_types.find(i => i.id === state.currentSelections.space_type_id); },
 
   // geometry for the story being edited
   currentStoryGeometry(state, getters, rootState) {

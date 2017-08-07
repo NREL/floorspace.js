@@ -1,15 +1,6 @@
 const serializeState = (state) => {
   const clone = JSON.parse(JSON.stringify(state));
 
-  // TODO: update these to be IDs and not references, then update importcode and serealization code
-  const currentSelections = clone.application.currentSelections;
-  const currentStory = clone.models.stories.find(s => s.id === currentSelections.story_id);
-
-  currentSelections.building_unit = currentSelections.building_unit ? clone.models.library.building_units.find(b => b.id === currentSelections.building_unit.id) : null;
-  currentSelections.thermal_zone = currentSelections.thermal_zone ? clone.models.library.thermal_zones.find(t => t.id === currentSelections.thermal_zone.id) : null;
-  currentSelections.space_type = currentSelections.space_type ? clone.models.library.space_types.find(s => s.id === currentSelections.space_type.id) : null;
-
-  clone.application.currentSelections = currentSelections;
 
   return clone;
 };

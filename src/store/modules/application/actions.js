@@ -1,17 +1,25 @@
 export default {
   setCurrentStoryId(context, payload) {
+    // TODO: clear subselections
     const { id } = payload;
-    context.commit('setCurrentStoryId', { id });
+    if (context.rootState.models.stories.map(s => s.id).indexOf(id) !== -1) {
+      context.commit('setCurrentStoryId', { id });
+    }
   },
 
   setCurrentSubSelectionId(context, payload) {
     const { id } = payload;
-    context.commit('setCurrentSubSelectionId', { id });
+    if (context.getters.currentStory && (
+      context.getters.currentStory.spaces.find(i => i.id === id) ||
+      context.getters.currentStory.shading.find(i => i.id === id) ||
+      context.getters.currentStory.images.find(i => i.id === id)
+    )) {
+      context.commit('setCurrentSubSelectionId', { id });
+    }
   },
 
   setCurrentTool(context, payload) {
     const { tool } = payload;
-    // check that the tool exists
     if (context.state.tools.indexOf(tool) !== -1) {
       context.commit('setCurrentTool', { tool });
     }
@@ -19,11 +27,32 @@ export default {
 
   setCurrentMode(context, payload) {
     const { mode } = payload;
-    // check that the mode exists
     if (context.state.modes.indexOf(mode) !== -1) {
       context.commit('setCurrentMode', { mode });
     }
   },
+
+  setCurrentBuildingUnitId(context, payload) {
+    const { id } = payload;
+    if (context.rootState.models.library.building_units.map(m => m.id).indexOf(id) !== -1) {
+      context.commit('setCurrentBuildingUnitId', { id });
+    }
+  },
+
+  setCurrentThermalZoneId(context, payload) {
+    const { id } = payload;
+    if (context.rootState.models.library.thermal_zones.map(m => m.id).indexOf(id) !== -1) {
+      context.commit('setCurrentThermalZoneId', { id });
+    }
+  },
+
+  setCurrentSpaceTypeId(context, payload) {
+    const { id } = payload;
+    if (context.rootState.models.library.space_types.map(m => m.id).indexOf(id) !== -1) {
+      context.commit('setCurrentSpaceTypeId', { id });
+    }
+  },
+
 
   setCurrentBuildingUnit(context, payload) {
     const building_unit = payload.building_unit ? context.rootState.models.library.building_units.find(b => b.id === payload.building_unit.id) : null;
