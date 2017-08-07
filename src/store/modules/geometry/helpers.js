@@ -359,6 +359,15 @@ const helpers = {
       deltaY = end.y - start.y;
     return deltaX === 0 ? 0.5 * Math.PI : Math.atan(deltaY / deltaX);
   },
+  haveSimilarAngles(edge1, edge2) {
+    const
+      angleDiff = this.edgeDirection(edge1) - this.edgeDirection(edge2),
+      correctedDiff = Math.min(
+        Math.abs(angleDiff),
+        Math.PI - angleDiff, // To catch angles that are very similar, but opposite directions
+      );
+    return correctedDiff < 0.05 * Math.PI;
+  },
 };
 
 export default helpers;

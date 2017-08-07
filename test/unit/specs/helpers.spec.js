@@ -188,3 +188,56 @@ describe('edgeDirection', () => {
       `expected 30-deg angle to be pi/6 (was ${angle})`);
   });
 });
+
+describe('haveSimilarAngles', () => {
+  it('finds that identical angles are similar', () => {
+    assert(
+      helpers.haveSimilarAngles(
+        { start: { x: 0, y: 0 }, end: { x: 1, y: 1 } },
+        { start: { x: 0, y: 0 }, end: { x: 1, y: 1 } },
+      ));
+
+    assert(
+      helpers.haveSimilarAngles(
+        { start: { x: 0, y: 0 }, end: { x: 1, y: 5 } },
+        { start: { x: -1, y: -5 }, end: { x: 0, y: 0 } },
+    ));
+  });
+
+  it('recognizes that right angles are not similar', () => {
+    assert(
+      !helpers.haveSimilarAngles(
+        { start: { x: 0, y: 0 }, end: { x: 1, y: 0 } },
+        { start: { x: 0, y: 0 }, end: { x: 0, y: 1 } },
+      ));
+  });
+
+  it('considers north and south similar', () => {
+    assert(
+      helpers.haveSimilarAngles(
+        { start: { x: 0, y: 0 }, end: { x: 0, y: 1 } },
+        { start: { x: 0, y: 0 }, end: { x: 0, y: -1 } },
+      ));
+  });
+
+  it('considers barely-north-of-east and barely-north-west similar', () => {
+    assert(
+      helpers.haveSimilarAngles(
+        { start: { x: 0, y: 0 }, end: { x: 100, y: 1 } },
+        { start: { x: 0, y: 0 }, end: { x: -100, y: -1 } },
+      ));
+  });
+
+  it('finds dissimilar angles dissimilar', () => {
+    assert(
+      !helpers.haveSimilarAngles(
+        { start: { x: 0, y: 0 }, end: { x: 3, y: 2 } },
+        { start: { x: 0, y: 0 }, end: { x: 2, y: 3 } },
+      ));
+    assert(
+      !helpers.haveSimilarAngles(
+        { start: { x: 12, y: 1 }, end: { x: 3, y: 18 } },
+        { start: { x: 1, y: 24 }, end: { x: 1, y: 10 } },
+      ));
+  });
+});
