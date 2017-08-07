@@ -15,7 +15,7 @@ const serializeState = (state) => {
 };
 const filteredActions = [
   'application/setScaleX',
-  'application/setApplicationTool',
+  'application/setCurrentTool',
   'application/setScaleY',
   'project/setSpacing',
   'project/setViewMinX',

@@ -103,13 +103,9 @@ export default {
       stories: state => state.models.stories,
     }),
     ...mapGetters({
-      // currentStory: 'application/currentStory',
       currentSpace: 'application/currentSpace',
       currentShading: 'application/currentShading',
       currentImage: 'application/currentImage',
-      // currentStoryGeometry: 'application/currentStoryGeometry',
-      // currentSubSelection: 'application/currentSubSelection',
-      // currentSubSelectionType: 'application/currentSubSelectionType',
     }),
 
     // current selection getters and setters - these dispatch actions to update the data store when a new item is selected

@@ -212,6 +212,6 @@ export default {
         context.dispatch('application/setCurrentStoryId', { id: story.id }, { root: true });
 
         context.dispatch('application/setCurrentSubSelectionId', { id: space.id }, { root: true });
-        context.dispatch('application/setApplicationMode', { mode: 'spaces' }, { root: true });
+        context.dispatch('application/setCurrentMode', { mode: 'spaces' }, { root: true });
     }
 }

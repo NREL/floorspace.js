@@ -20,11 +20,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </div>
       </template>
 
-      <template v-if="currentSelectionsFace">
+      <template v-if="currentSubSelectionFace">
         <header>
-          <h3>Face {{currentSelectionsFace.id}} on {{ currentSpace ? currentSpace.name : currentShading.name }}</h3>
+          <h3>Face {{currentSubSelectionFace.id}} on {{ currentSpace ? currentSpace.name : currentShading.name }}</h3>
         </header>
-        <div v-for="edgeRef in currentSelectionsFace.edgeRefs" class="list-item">
+        <div v-for="edgeRef in currentSubSelectionFace.edgeRefs" class="list-item">
           edge {{ edgeRef.edge_id }} {{ edgeRef.reverse ? 'reversed ' : '' }}
           <br>startpoint {{ startpoint(edgeRef) }}
           <br>endpoint {{ endpoint(edgeRef) }}
@@ -72,13 +72,11 @@ export default {
   computed: {
     ...mapGetters({
       currentStory: 'application/currentStory',
-      currentSelectionsFace: 'application/currentSelectionsFace',
+      currentSubSelectionFace: 'application/currentSubSelectionFace',
       currentStoryGeometry: 'application/currentStoryGeometry',
-      currentSubSelection: 'application/currentSubSelection',
-      currentSubSelectionType: 'application/currentSubSelectionType',
+      currentSpace: 'application/currentSpace',
+      currentShading: 'application/currentShading',
     }),
-    currentSpace() { return this.currentSubSelectionType === 'space' ? this.currentSubSelection : null; },
-    currentShading() { return this.currentSubSelectionType === 'shading' ? this.currentSubSelection : null; },
   },
 };
 </script>

@@ -37,7 +37,7 @@ export default {
   },
 
   // face for the shading or space being edited
-  currentSelectionsFace(state, getters) {
+  currentSubSelectionFace(state, getters) {
     // if the subselection is an image, there will not be an associated face
     if (getters['currentSubSelection'] && getters['currentSubSelection'].face_id) {
       return getters['currentStoryGeometry'].faces.find(f => f.id === getters['currentSubSelection'].face_id);

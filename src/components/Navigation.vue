@@ -138,7 +138,7 @@ export default {
     mode: {
       get() { return this.$store.state.application.currentSelections.mode; },
       set(mode) {
-        this.$store.dispatch('application/setApplicationMode', { mode });
+        this.$store.dispatch('application/setCurrentMode', { mode });
       },
     },
 

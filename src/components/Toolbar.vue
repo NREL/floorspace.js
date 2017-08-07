@@ -148,7 +148,7 @@ export default {
     },
     tool: {
       get() { return this.$store.state.application.currentSelections.tool; },
-      set(tool) { this.$store.dispatch('application/setApplicationTool', { tool }); },
+      set(tool) { this.$store.dispatch('application/setCurrentTool', { tool }); },
     },
     // spacing between gridlines, measured in RWU
     spacing: {

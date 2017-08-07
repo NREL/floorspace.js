@@ -46,7 +46,7 @@ export default {
     },
     tool: {
       get() { return this.$store.state.application.currentSelections.tool; },
-      set(val) { this.$store.dispatch('application/setApplicationTool', { tool: val }); },
+      set(val) { this.$store.dispatch('application/setCurrentTool', { tool: val }); },
     },
   },
   methods: {

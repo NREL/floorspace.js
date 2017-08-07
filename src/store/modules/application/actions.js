@@ -1,5 +1,4 @@
 export default {
-
   setCurrentStoryId(context, payload) {
     const { id } = payload;
     context.commit('setCurrentStoryId', { id });
@@ -8,6 +7,22 @@ export default {
   setCurrentSubSelectionId(context, payload) {
     const { id } = payload;
     context.commit('setCurrentSubSelectionId', { id });
+  },
+
+  setCurrentTool(context, payload) {
+    const { tool } = payload;
+    // check that the tool exists
+    if (context.state.tools.indexOf(tool) !== -1) {
+      context.commit('setCurrentTool', { tool });
+    }
+  },
+
+  setCurrentMode(context, payload) {
+    const { mode } = payload;
+    // check that the mode exists
+    if (context.state.modes.indexOf(mode) !== -1) {
+      context.commit('setCurrentMode', { mode });
+    }
   },
 
   setCurrentBuildingUnit(context, payload) {
@@ -37,33 +52,13 @@ export default {
     });
   },
 
-  setApplicationTool(context, payload) {
-    // check that the requested rendering tool exists
-    if (~context.state.tools.indexOf(payload.tool)) {
-      context.commit('setApplicationTool', {
-        tool: payload.tool
-      });
-    }
-  },
-
-  setApplicationMode(context, payload) {
-    // check that the requested rendering mode exists
-    if (~context.state.modes.indexOf(payload.mode)) {
-      context.commit('setApplicationMode', {
-        mode: payload.mode
-      });
-    }
-  },
-
   // update d3's scaling functions
   setScaleX(context, payload) {
-    context.commit('setScaleX', {
-      scaleX: payload.scaleX
-    });
+    const { scaleX } = payload;
+    context.commit('setScaleX', { scaleX });
   },
   setScaleY(context, payload) {
-    context.commit('setScaleY', {
-      scaleY: payload.scaleY
-    });
+    const { scaleY } = payload;
+    context.commit('setScaleY', { scaleY });
   },
 };
