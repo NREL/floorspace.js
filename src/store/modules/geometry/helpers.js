@@ -215,9 +215,11 @@ const helpers = {
     },
 
     // given a set of coordinates, find the vertex on the geometry set within their tolerance zone
-  vertexForCoordinates(coordinates, geometry) {
-    const { x, y } = coordinates;
-    return geometry.vertices.find(v => v.x === x && v.y === y);
+  vertexForCoordinates(coordinates, snapTolerance, geometry) {
+    // const { x, y } = coordinates;
+    // return geometry.vertices.find(v => v.x === x && v.y === y);
+    // TODO once PR#118 is merged, put this back
+    return geometry.vertices.find(v => this.distanceBetweenPoints(v, coordinates) < snapTolerance)
   },
 
     // given a face id, returns the populated vertex objects reference by edges on that face
