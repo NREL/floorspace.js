@@ -17,10 +17,6 @@ export default {
       thermal_zone_id: null,
       space_type_id: null,
 
-      // building_unit: null,
-      // thermal_zone: null,
-      // space_type: null,
-
       // current application mode and tool
       tool: 'Rectangle',
       mode: 'spaces',
