@@ -18,6 +18,7 @@ module.exports = {
       'ignoreRegExpLiterals': true,
       'ignoreStrings': true,
       'ignoreTemplateLiterals': true
-    }]
+    }],
+    'one-var': 0,
   }
 };

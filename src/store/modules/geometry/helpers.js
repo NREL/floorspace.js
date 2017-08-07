@@ -314,9 +314,44 @@ const helpers = {
       ...points.map(({ x, y }) => (
         { y, x: x + (2 * (xMid - x)), synthetic: true, originalPt: { x, y } })),
       ...points.map(({ x, y }) => (
-        { x, y: y + (2 * (yMid - y)), synthetic: true, originalPt: { x, y } }))
+        { x, y: y + (2 * (yMid - y)), synthetic: true, originalPt: { x, y } })),
     ];
-  }
+  },
+
+  findMergeableEdges(edges) {
+    // Find edges that are very near to one another, and the user might
+    // mistakenly think they are the same.
+
+    // mergeable edges are:
+    // - edges with whose endpoints are very near to one another
+    // - edges with similar angles where the vertices of one lie near the
+    // vertices of the other.
+
+  },
+  areMergeable(edge1, edge2) {
+    return this.endpointsNearby(edge1, edge2);
+  },
+  endpointsNearby(edge1, edge2) {
+    const { start: start1, end: end1 } = edge1;
+    const { start: start2, end: end2 } = edge2;
+    const avgEdgeLen = (this.distanceBetweenPoints(start1, end1) + this.distanceBetweenPoints(start2, end2)) / 2;
+
+    const startDist = this.distanceBetweenPoints(start1, start2);
+    const endDist = this.distanceBetweenPoints(end1, end2);
+
+    if (startDist < 0.05 * avgEdgeLen && endDist < 0.05 * avgEdgeLen) {
+      return { mergeType: 'sameEndpoints' };
+    }
+
+    const startEndDist = this.distanceBetweenPoints(start1, end2);
+    const endStartDist = this.distanceBetweenPoints(end1, start2);
+
+    if (startEndDist < 0.05 * avgEdgeLen && endStartDist < 0.05 * avgEdgeLen) {
+      return { mergeType: 'reverseEndpoints' };
+    }
+
+    return false;
+  },
 };
 
 export default helpers;
