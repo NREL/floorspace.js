@@ -368,6 +368,9 @@ const helpers = {
       );
     return correctedDiff < 0.05 * Math.PI;
   },
+  // pointLiesNearSegment(pt, segment) {
+  //
+  // },
 };
 
 export default helpers;

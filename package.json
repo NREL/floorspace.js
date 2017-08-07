@@ -82,6 +82,7 @@
     "shelljs": "^0.7.4",
     "sinon": "^2.3.4",
     "sinon-chai": "^2.8.0",
+    "testcheck": "^1.0.0-rc.2",
     "url-loader": "^0.5.7",
     "vue-loader": "^10.0.0",
     "vue-style-loader": "^1.0.0",
