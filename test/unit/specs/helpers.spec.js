@@ -1,5 +1,5 @@
 import helpers from '../../../src/store/modules/geometry/helpers';
-import { assert } from '../test_helpers';
+import { assert, nearlyEqual } from '../test_helpers';
 
 
 describe('syntheticRectangleSnaps', () => {
@@ -128,5 +128,63 @@ describe('endpointsNearby', () => {
     assert(
       res2 && res2.mergeType === 'sameEndpoints',
       'Those edges *are* nearby relative to the edge length');
+  });
+});
+
+describe('edgeDirection', () => {
+  it('can handle a 45-deg angle', () => {
+    const angle = helpers.edgeDirection({
+      start: { x: 0, y: 0 },
+      end: { x: 1, y: 1 },
+    });
+    assert(
+      nearlyEqual(angle, Math.PI / 4),
+      'expected an angle of 45-deg (PI/4 radians)');
+  });
+
+  it('can handle a straight up or straight down line', () => {
+    const
+      north = helpers.edgeDirection({
+        start: { x: 0, y: 0 },
+        end: { x: 0, y: 1 },
+      }),
+      south = helpers.edgeDirection({
+        start: { x: 0, y: 0 },
+        end: { x: 0, y: -1 },
+      });
+    assert(
+      nearlyEqual(north, 0.5 * Math.PI),
+      `expected angle of north to be pi/2 rad (was ${north})`);
+    assert(
+      nearlyEqual(south, 0.5 * Math.PI),
+      `expected angle of south to be pi/2 rad (was ${south})`);
+  });
+
+  it('can handle a west or east line', () => {
+    const
+      east = helpers.edgeDirection({
+        start: { x: 0, y: 0 },
+        end: { x: 1, y: 0 },
+      }),
+      west = helpers.edgeDirection({
+        start: { x: 0, y: 0 },
+        end: { x: -1, y: 0 },
+      });
+    assert(
+      nearlyEqual(east, 0),
+      'expected angle of east to be 0 rad');
+    assert(
+      nearlyEqual(west, 0),
+      `expected angle of west to be PI rad (was ${west})`);
+  });
+
+  it('can handle a 30-deg angle', () => {
+    const angle = helpers.edgeDirection({
+      start: { x: 0, y: 0 },
+      end: { x: Math.sqrt(3) / 2, y: 0.5 },
+    });
+    assert(
+      nearlyEqual(angle, Math.PI / 6),
+      `expected 30-deg angle to be pi/6 (was ${angle})`);
   });
 });

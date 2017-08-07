@@ -324,8 +324,8 @@ const helpers = {
 
     // mergeable edges are:
     // - edges with whose endpoints are very near to one another
-    // - edges with similar angles where the vertices of one lie near the
-    // vertices of the other.
+    // - edges with similar angles where the vertices of one/both lie near the
+    // edge of the other.
 
   },
   areMergeable(edge1, edge2) {
@@ -351,6 +351,13 @@ const helpers = {
     }
 
     return false;
+  },
+  edgeDirection({ start, end }) {
+    // return the angle from east, in radians.
+    const
+      deltaX = end.x - start.x,
+      deltaY = end.y - start.y;
+    return deltaX === 0 ? 0.5 * Math.PI : Math.atan(deltaY / deltaX);
   },
 };
 
