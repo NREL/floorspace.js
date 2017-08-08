@@ -540,19 +540,19 @@ describe('edgesExtend', () => {
   });
 
   it('ignores edges that almost overlap, but have different angles', () => {
-    // const merge = helpers.edgesExtend(
-    //   { start: { x: -30, y: -1 }, end: { x: 0, y: 0 } },
-    //   { start: { x: 31, y: 1 }, end: { x: 0.5, y: 0.5 } },
-    // );
-    // assert(merge);
+    const merge = helpers.edgesExtend(
+      { start: { x: -30, y: -1 }, end: { x: 0, y: 0 } },
+      { start: { x: 2, y: 31 }, end: { x: 0.5, y: 0.5 } },
+    );
+    refute(merge);
   });
 
   it('ignores edges that do not nearly-overlap', () => {
-    // const merge = helpers.edgesExtend(
-    //   { start: { x: -30, y: -1 }, end: { x: 0, y: 0 } },
-    //   { start: { x: 31, y: 1 }, end: { x: 0.5, y: 0.5 } },
-    // );
-    // assert(merge);
+    const merge = helpers.edgesExtend(
+      { start: { x: 0, y: 0 }, end: { x: 3, y: 0 } },
+      { start: { x: 4, y: 0 }, end: { x: 5, y: 0 } },
+    );
+    refute(merge);
   });
 });
 
