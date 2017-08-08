@@ -524,11 +524,19 @@ describe('edgesCombine', () => {
 
 describe('edgesExtend', () => {
   it('combines edges that almost overlap', () => {
-    // const merge = helpers.edgesExtend(
-    //   { start: { x: -30, y: -1 }, end: { x: 0, y: 0 } },
-    //   { start: { x: 31, y: 1 }, end: { x: 0.5, y: 0.5 } },
-    // );
-    // assert(merge);
+    const merge = helpers.edgesExtend(
+      { start: { x: -30, y: -1 }, end: { x: 0, y: 0 } },
+      { start: { x: 0.5, y: 0.5 }, end: { x: 31, y: 1 } },
+    );
+    assert(merge);
+  });
+
+  it('combines edges that almost overlap (even when one needs to reverse)', () => {
+    const merge = helpers.edgesExtend(
+      { start: { x: -30, y: -1 }, end: { x: 0, y: 0 } },
+      { start: { x: 31, y: 1 }, end: { x: 0.5, y: 0.5 } },
+    );
+    assert(merge);
   });
 
   it('ignores edges that almost overlap, but have different angles', () => {

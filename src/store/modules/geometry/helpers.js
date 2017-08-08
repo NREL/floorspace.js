@@ -369,21 +369,26 @@ const helpers = {
     }
     const distCutoff = 0.05 * this.avgEdgeLength(edge1, edge2);
 
-    let left, right; // eslint-disable-line one-var-declaration-per-line
-    if (this.distanceBetweenPoints(edge1.end, edge2.start) < distCutoff) {
-      left = edge1;
-      right = edge2;
-    } else if (this.distanceBetweenPoints(edge2.end, edge1.start) < distCutoff) {
-      left = edge2;
-      right = edge1;
-    } else {
-      return false;
+    const
+      allPts = [edge1.start, edge1.end, edge2.start, edge2.end],
+      lrPairs = [
+        [edge1.start, edge2.start],
+        [edge1.start, edge2.end],
+        [edge1.end, edge2.start],
+        [edge1.end, edge2.end],
+      ],
+      dists = _.map(lrPairs, ([p1, p2]) => this.distanceBetweenPoints(p1, p2)),
+      farthestPair = this.findFarthestApartPair(...allPts);
+    if (_.min(dists) < distCutoff) {
+      return {
+        mergeType: 'edgesExtend',
+        newVertexOrder: this.consolidateVertices(
+          ...farthestPair, ...allPts,
+        ),
+      };
     }
 
-    return {
-      mergeType: 'edgesExtend',
-      newVertexOrder: this.consolidateVertices(left.start, right.end, left.end, right.start),
-    };
+    return false;
   },
   edgesCombine(edge1, edge2) {
     /*
