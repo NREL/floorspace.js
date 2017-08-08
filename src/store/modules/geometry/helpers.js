@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import ClipperLib from 'js-clipper'
+import { allPairs } from '../../../utilities';
 
 const helpers = {
     // ************************************ CLIPPER ************************************ //
@@ -407,14 +408,15 @@ const helpers = {
 
     // project onto the direction with most variance to get order
     // then output that order
-    const
-      dirWithMostVar = { p1: left.start, p2: right.end },
+    const [p1, p2] = this.findFarthestApartPair(
+      left.start, left.end, right.start, right.end),
+      dirWithMostVar = { p1, p2 },
       leftMiddle = this.projectionOfPointToLine(right.start, dirWithMostVar),
       rightMiddle = this.projectionOfPointToLine(left.end, dirWithMostVar);
     return {
       mergeType: 'combine',
       newVertexOrder: this.consolidateVertices(
-        left.start, right.end, leftMiddle, rightMiddle),
+        p1, p2, left.start, right.end, leftMiddle, rightMiddle),
     };
   },
   edgesCombine_LeftBeforeRight(left, right) {
@@ -431,6 +433,10 @@ const helpers = {
       this.distanceBetweenPoints(start1, end1) +
       this.distanceBetweenPoints(start2, end2)
     ) / 2;
+  },
+  findFarthestApartPair(...points) {
+    const pairs = allPairs(points);
+    return _.maxBy(pairs, ([p1, p2]) => this.distanceBetweenPoints(p1, p2));
   },
   endpointsNearby(edge1, edge2) {
     /*

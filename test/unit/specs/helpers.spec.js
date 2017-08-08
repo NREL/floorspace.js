@@ -517,9 +517,6 @@ describe('edgesCombine', () => {
       { start: { x: -30, y: -1, id: 'earliest' }, end: { x: 0, y: 0 } },
       { start: { x: 30, y: 2, id: 'latest' }, end: { x: -16, y: 0.5 } },
     );
-    console.log('0:',JSON.stringify(merge.newVertexOrder[0]));
-    console.log('-1:',JSON.stringify(merge.newVertexOrder[merge.newVertexOrder.length - 1]));
-    console.log('all:', JSON.stringify(merge.newVertexOrder));
     assert(merge.newVertexOrder[0].id === 'earliest');
     assert(merge.newVertexOrder[merge.newVertexOrder.length - 1].id === 'latest');
   });
