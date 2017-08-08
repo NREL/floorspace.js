@@ -412,15 +412,70 @@ describe('consolidateVertices', () => {
 
 describe('oneEdgeCouldEatAnother', () => {
   it('eats edges that are on top of one another', () => {
+    const couldEat = helpers.oneEdgeCouldEatAnother(
+      { start: { x: 2, y: 3, id: 'a' }, end: { x: 22, y: 33, id: 'b' } },
+      { start: { x: 7, y: 10.5, id: 'c' }, end: { x: 17, y: 25.5, id: 'd' } },
+    );
+    assert(
+      couldEat && couldEat.mergeType === 'oneEdgeEatsAnother',
+      'expected these edges to combine');
+    assert(
+      couldEat.newVertexOrder[0].id === 'a' &&
+      couldEat.newVertexOrder[couldEat.newVertexOrder.length - 1].id === 'b',
+      'Expected larger edge to have the outer vertices.');
+  });
 
+  it('wont eat edges that are far apart, even if the angle is close', () => {
+    const couldEat = helpers.oneEdgeCouldEatAnother(
+      { start: { x: -1000, y: 0 }, end: { x: 1000, y: 0 } },
+      { start: { x: -1000, y: -100 }, end: { x: 1000, y: -100 } },
+    );
+    refute(couldEat);
   });
 
   it('wont eat edges with a different angle, even if the points are close', () => {
+    const couldEat = helpers.oneEdgeCouldEatAnother(
+      { start: { x: -1000, y: 0 }, end: { x: 1000, y: 0 } },
+      { start: { x: -3, y: -1 }, end: { x: 3, y: 1 } },
+    );
+    // The distance between the small edge's endpoints to the line is small
+    // compared with the average edge length. But the angle is different enough
+    // that we won't try and merge them. Angle is about 18 deg, vs 0 deg flat.
+    // The cutoff is 9 deg
+    refute(couldEat, 'expected angle difference to be too large to merge edges');
+  });
 
+  // A tool for making generic arguments for the oneEdgeCouldEatAnother
+  // function. (generative testing saves me from having to come up with
+  // my own examples).
+  const genEdgePairSmallNearEndpoint = gen.object({
+    startX: gen.numberWithin(-10000, 10000),
+    startY: gen.numberWithin(-10000, 10000),
+    endX: gen.numberWithin(-10000, 10000),
+    endY: gen.numberWithin(-10000, 10000),
+    smallEdgeStart: gen.numberWithin(0, 0.02),
+    smallEdgeEnd: gen.numberWithin(0.08, 1),
+  })
+  .suchThat(({ startX, startY, endX, endY }) => startX !== endX || startY !== endY)
+  .then(({ startX, startY, endX, endY, smallEdgeStart, smallEdgeEnd }) => {
+    const toPointOnLine = t => ({
+      x: startX + (t * (endX - startX)),
+      y: startY + (t * (endY - startY)),
+    });
+
+    const arr = [
+      { start: { x: startX, y: startY }, end: { x: endX, y: endY } },
+      { start: toPointOnLine(smallEdgeStart), end: toPointOnLine(smallEdgeEnd) },
+    ];
+
+    // sometimes (deterministically) reverse the array
+    return startX > startY ? arr : arr.reverse();
   });
 
   it('eats edges when the small one starts near an endpoint', () => {
-
+    assertProperty(genEdgePairSmallNearEndpoint, (edgePair) => {
+      assert(helpers.oneEdgeCouldEatAnother(...edgePair));
+    });
   });
 });
 

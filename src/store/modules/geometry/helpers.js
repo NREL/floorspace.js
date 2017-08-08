@@ -441,8 +441,8 @@ const helpers = {
       );
     return correctedDiff < 0.05 * Math.PI;
   },
-  pointDistanceToSegment(pt, segment) {
-    const proj = this.projectionOfPointToLine(pt, segment);
+  pointDistanceToSegment(pt, { start, end }) {
+    const proj = this.projectionOfPointToLine(pt, { p1: start, p2: end });
     return {
       dist: this.distanceBetweenPoints(pt, proj),
       proj,
