@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { gen } from 'testcheck';
 import helpers from '../../../src/store/modules/geometry/helpers';
-import { assert, nearlyEqual, assertProperty } from '../test_helpers';
+import { assert, refute, nearlyEqual, assertProperty } from '../test_helpers';
 
 
 describe('syntheticRectangleSnaps', () => {
@@ -385,11 +385,28 @@ describe('consolidateVertices', () => {
   });
 
   it('drops points that are close relative to the size of the edge', () => {
+    const
+      verts = [
+        { x: 0, y: 200, id: 'start' },
+        { x: 200, y: 0, id: 'end' },
+        { x: 2, y: 198, id: 'expect_gone' },
+        { x: 25, y: 175, id: 'expect_here' },
+        { x: 80, y: 120, id: 'expect_here' },
+        { x: 81, y: 119, id: 'expect_gone' },
+        { x: 198, y: 2, id: 'expect_gone' },
+      ],
+      consolidated = helpers.consolidateVertices(...verts);
 
-  });
+    refute(
+      _.find(consolidated, { id: 'expect_gone' }),
+      'Expected those verts to be omitted (too close to start or to one another)');
 
-  it("doesn't drop points that *aren't* close relative to the size of the edge", () => {
-
+    assert(
+      _.filter(consolidated, { id: 'expect_here' }).length === 2,
+      'Expected those two to still be present');
+    assert(
+      consolidated.length === 4,
+      'Expected to keep start, end, two intermediary verts');
   });
 });
 

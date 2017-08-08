@@ -7,13 +7,15 @@ export function assert(condition, message) {
   }
 }
 
+export function refute(condition, ...args) {
+  return assert(!condition, ...args);
+}
+
 export function nearlyEqual(a, b, epsilon = 0.000001) {
   return Math.abs(a - b) <= epsilon;
 }
 
 export function assertProperty(...args) {
-  console.log('assertProperty args', args);
   const resp = check(property(...args));
-  console.log('resp', resp);
   assert(resp.result, `Property failed to verify! ${JSON.stringify(resp)}`);
 }

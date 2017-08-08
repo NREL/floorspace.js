@@ -406,7 +406,7 @@ const helpers = {
     return false;
   },
   consolidateVertices(start, end, ...interveningPts) {
-    const distCutoff = 0.5 * this.distanceBetweenPoints(end, start),
+    const distCutoff = 0.05 * this.distanceBetweenPoints(end, start),
       finalPts = [start, end],
       // First, make sure we're considering points in order left-to-right
       intervening = _.sortBy(
@@ -416,7 +416,7 @@ const helpers = {
     // now, consider each point for inclusion. A point will be included if it's
     // farther than distCutoff from every point so far.
     intervening.forEach((pt) => {
-      if (finalPts.all(fp => (this.distanceBetweenPoints(pt, fp) > distCutoff))) {
+      if (_.every(finalPts, fp => (this.distanceBetweenPoints(pt, fp) > distCutoff))) {
         finalPts.push(pt);
       }
     });
