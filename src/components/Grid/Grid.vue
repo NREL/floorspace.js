@@ -83,13 +83,10 @@ export default {
     ResizeEvents.$off('resize-resize', this.renderGrid);
   },
   computed: {
+
     ...mapState({
       currentMode: state => state.application.currentSelections.mode,
       currentTool: state => state.application.currentSelections.tool,
-
-      currentSpace: state => state.application.currentSelections.space,
-      currentShading: state => state.application.currentSelections.shading,
-      currentStory: state => state.application.currentSelections.story,
 
       previousStoryVisible: state => state.project.previous_story.visible,
       gridVisible: state => state.project.grid.visible,
@@ -100,9 +97,15 @@ export default {
       scaleY: state => state.application.scale.y,
     }),
     ...mapGetters({
+      currentStory: 'application/currentStory',
       currentStoryGeometry: 'application/currentStoryGeometry',
+      currentSpace: 'application/currentSpace',
+      currentShading: 'application/currentShading',
     }),
-
+    currentSubSelection: {
+      get() { return this.$store.getters['application/currentSubSelection']; },
+      set(item) { this.$store.dispatch('application/setCurrentSubSelectionId', { id: item.id }); },
+    },
     // grid dimensions in real world units
     min_x: {
       get() { return this.$store.state.project.view.min_x; },
@@ -122,7 +125,7 @@ export default {
     },
     // previous story
     previousStory() {
-      const currentStoryNumber = this.$store.state.models.stories.findIndex(s => s.id === this.$store.state.application.currentSelections.story.id);
+      const currentStoryNumber = this.$store.state.models.stories.findIndex(s => s === this.currentStory);
       if (currentStoryNumber === 0) { return null; }
       return this.$store.state.models.stories[currentStoryNumber - 1];
     },

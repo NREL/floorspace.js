@@ -1,27 +1,12 @@
 const serializeState = (state) => {
-  const scaleX = state.application.scale.x;
-  const scaleY = state.application.scale.y;
-
   const clone = JSON.parse(JSON.stringify(state));
-  clone.application.scale.x = scaleX;
-  clone.application.scale.y = scaleY;
 
-  const currentSelections = clone.application.currentSelections;
-  const currentStory = clone.models.stories.find(s => s.id === currentSelections.story.id);
-  currentSelections.story = currentStory;
-  currentSelections.space = currentSelections.space ? currentStory.spaces.find(s => s.id === currentSelections.space.id) : null;
-  currentSelections.shading = currentSelections.shading ? currentStory.shading.find(s => s.id === currentSelections.shading.id) : null;
-
-  currentSelections.building_unit = currentSelections.building_unit ? clone.models.library.building_units.find(b => b.id === currentSelections.building_unit.id) : null;
-  currentSelections.thermal_zone = currentSelections.thermal_zone ? clone.models.library.thermal_zones.find(t => t.id === currentSelections.thermal_zone.id) : null;
-  currentSelections.space_type = currentSelections.space_type ? clone.models.library.space_types.find(s => s.id === currentSelections.space_type.id) : null;
-
-  clone.application.currentSelections = currentSelections;
 
   return clone;
 };
 const filteredActions = [
   'application/setScaleX',
+  'application/setCurrentTool',
   'application/setScaleY',
   'project/setSpacing',
   'project/setViewMinX',
@@ -29,6 +14,7 @@ const filteredActions = [
   'project/setViewMaxX',
   'project/setViewMaxY',
   'application/clearSubSelections',
+  'application/setCurrentStoryId',
   'application/setCurrentStory',
   'application/setCurrentSpace',
   'application/setCurrentShading',
@@ -64,6 +50,14 @@ export default {
     const originalReplaceState = store.replaceState;
     store.replaceState = function overrideReplaceState(...args) {
       if (window.api) { window.api.config.onChange(); }
+      const newState = args[0];
+
+      // non timetravel props
+      newState.application.scale = this.state.application.scale;
+      newState.project.view = this.state.project.view;
+      newState.project.grid = this.state.project.grid;
+      newState.project.previous_story = this.state.project.previous_story;
+
       originalReplaceState.apply(this, args);
     };
     const originalCommit = store.commit;
@@ -128,7 +122,6 @@ export default {
     this.store.replaceState(replacementState);
     console.log('undo', replacementState);
     window.eventBus.$emit('success', `undo ${oldAction}`);
-    // console.log('undo', this.pastTimetravelStates.map(s => logState(s)), logState(replacementState), this.futureTimetravelStates.map(s => logState(s)));
   },
 
   redo() {
@@ -142,7 +135,6 @@ export default {
     this.store.replaceState(replacementState);
     window.eventBus.$emit('success', `redo ${triggeringAction}`);
     console.log('redo', replacementState);
-    // console.log('redo', this.pastTimetravelStates.map(s => logState(s)), logState(replacementState), this.futureTimetravelStates.map(s => logState(s)));
   },
   logTimetravel() {
     console.log('past:', this.pastTimetravelStates.map(s => logState(s)));

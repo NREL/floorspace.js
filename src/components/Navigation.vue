@@ -43,9 +43,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </button>
         <span>
             {{ currentStory.name }}
-            <template v-if="currentSubSelection">
+            <template v-if="selectedObject">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path d="M.5 0v14l11-7-11-7z"/></svg>
-                {{ currentSubSelection.name }}
+                {{ selectedObject.name }}
             </template>
         </span>
 
@@ -62,7 +62,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </section>
 
         <section id="subselection-list">
-            <div v-for="item in items" :key="item.id" :class="{ active: currentSubSelection && currentSubSelection.id === item.id }" @click="selectItem(item)" :style="{'background-color': item && currentSubSelection && currentSubSelection.id === item.id ? item.color : ''}">
+            <div v-for="item in items" :key="item.id" :class="{ active: selectedObject && selectedObject.id === item.id }" @click="selectItem(item)" :style="{'background-color': item && selectedObject && selectedObject.id === item.id ? item.color : ''}">
                 <span :style="{'background-color': item && item.color }"></span>
                 {{item.name}}
                 <svg @click="destroyItem(item)" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
@@ -76,7 +76,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import applicationHelpers from './../store/modules/application/helpers';
 import modelHelpers from './../store/modules/models/helpers';
 
@@ -84,6 +84,9 @@ export default {
   name: 'navigation',
   data() {
     return {};
+  },
+  mounted() {
+    this.selectedObject = this.items[0];
   },
   computed: {
     ...mapState({
@@ -96,11 +99,6 @@ export default {
       space_types: state => state.models.library.space_types,
       thermal_zones: state => state.models.library.thermal_zones,
 
-      // currentStory's child spaces, shading, and images
-      spaces: state => state.application.currentSelections.story.spaces,
-      shading: state => state.application.currentSelections.story.shading,
-      images: state => state.application.currentSelections.story.images,
-
       // for image upload placement
       max_x: state => state.project.view.max_x,
       max_y: state => state.project.view.max_y,
@@ -110,54 +108,84 @@ export default {
       scaleY: state => state.application.scale.y,
     }),
 
-    // list items to display for current mode
-    items() { return this[this.mode]; },
-    mode: {
-      get() { return this.$store.state.application.currentSelections.mode; },
-      set(mode) {
-        this.$store.dispatch('application/setApplicationMode', { mode });
-      },
-    },
+    ...mapGetters({
+      currentSpace: 'application/currentSpace',
+      currentShading: 'application/currentShading',
+      currentImage: 'application/currentImage',
+    }),
 
     /*
     * current selection getters and setters
     * these dispatch actions to update the data store when a new item is selected
     */
     currentStory: {
-      get() { return this.$store.state.application.currentSelections.story; },
-      set(item) { this.$store.dispatch('application/setCurrentStory', { story: item }); },
+      get() { return this.$store.getters['application/currentStory']; },
+      set(story) { this.$store.dispatch('application/setCurrentStoryId', { id: story.id }); },
     },
-    currentSpace: {
-      get() { return this.$store.state.application.currentSelections.space; },
-      set(item) { this.$store.dispatch('application/setCurrentSpace', { space: item }); },
+    currentSubSelection: {
+      get() { return this.$store.getters['application/currentSubSelection']; },
+      set(item) { this.$store.dispatch('application/setCurrentSubSelectionId', { id: (item ? item.id : null) }); },
     },
-    currentShading: {
-      get() { return this.$store.state.application.currentSelections.shading; },
-      set(item) { this.$store.dispatch('application/setCurrentShading', { shading: item }); },
+
+    // currentStory's child spaces, shading, and images
+    spaces() { return this.currentStory.spaces; },
+    shading() { return this.currentStory.shading; },
+    images() { return this.currentStory.images; },
+
+    // list items to display for current mode
+    items() { return this[this.mode]; },
+    mode: {
+      get() { return this.$store.state.application.currentSelections.mode; },
+      set(mode) { this.$store.dispatch('application/setCurrentMode', { mode }); },
     },
-    currentImage: {
-      get() { return this.$store.state.application.currentSelections.image; },
-      set(item) { this.$store.dispatch('application/setCurrentImage', { image: item }); },
-    },
+
     currentThermalZone: {
-      get() { return this.$store.state.application.currentSelections.thermal_zone; },
-      set(item) { this.$store.dispatch('application/setCurrentThermalZone', { thermal_zone: item }); },
+      get() { return this.$store.getters['application/currentThermalZone']; },
+      set(item) { this.$store.dispatch('application/setCurrentThermalZoneId', { id: item.id }); },
     },
     currentBuildingUnit: {
-      get() { return this.$store.state.application.currentSelections.building_unit; },
-      set(item) { this.$store.dispatch('application/setCurrentBuildingUnit', { building_unit: item }); },
+      get() { return this.$store.getters['application/currentBuildingUnit']; },
+      set(item) { this.$store.dispatch('application/setCurrentBuildingUnitId', { id: item.id }); },
     },
     currentSpaceType: {
-      get() { return this.$store.state.application.currentSelections.space_type; },
-      set(item) { this.$store.dispatch('application/setCurrentSpaceType', { space_type: item }); },
+      get() { return this.$store.getters['application/currentSpaceType']; },
+      set(item) { this.$store.dispatch('application/setCurrentSpaceTypeId', { id: item.id }); },
     },
-    currentSubSelection() {
-      return this.currentImage ||
-        this.currentSpace ||
-        this.currentShading ||
-        this.currentBuildingUnit ||
-        this.currentThermalZone ||
-        this.currentSpaceType;
+
+    selectedObject: {
+      get() {
+        switch (this.mode) {
+          case 'stories':
+            return this.currentStory;
+          case 'building_units':
+            return this.currentBuildingUnit;
+          case 'thermal_zones':
+            return this.currentThermalZone;
+          case 'space_types':
+            return this.currentSpaceType;
+          default: // spaces, shading, images
+            return this.currentSubSelection;
+        }
+      },
+      set(item) {
+        switch (this.mode) {
+          case 'stories':
+            this.currentStory = item;
+            break;
+          case 'building_units':
+            this.currentBuildingUnit = item;
+            break;
+          case 'thermal_zones':
+            this.currentThermalZone = item;
+            break;
+          case 'space_types':
+            this.currentSpaceType = item;
+            break;
+          default: // spaces, shading, images
+            this.currentSubSelection = item;
+            break;
+        }
+      },
     },
   },
   methods: {
@@ -267,15 +295,6 @@ export default {
         case 'stories':
           this.currentStory = item;
           break;
-        case 'spaces':
-          this.currentSpace = item;
-          break;
-        case 'shading':
-          this.currentShading = item;
-          break;
-        case 'images':
-          this.currentImage = item;
-          break;
         case 'building_units':
           this.currentBuildingUnit = item;
           break;
@@ -285,21 +304,10 @@ export default {
         case 'space_types':
           this.currentSpaceType = item;
           break;
-        default:
+        default: // spaces, shading, images
+          this.currentSubSelection = item;
           break;
       }
-    },
-
-    /*
-    * empty selections for all types except the current type
-    */
-    clearSubSelections() {
-      this.currentShading = this.mode === 'shading' ? this.shading[0] : null;
-      this.currentImage = this.mode === 'images' ? this.images[0] : null;
-      this.currentSpace = this.mode === 'spaces' ? this.spaces[0] : null;
-      this.currentBuildingUnit = this.mode === 'building_units' ? this.building_units[0] : null;
-      this.currentThermalZone = this.mode === 'thermal_zones' ? this.thermal_zones[0] : null;
-      this.currentSpaceType = this.mode === 'space_types' ? this.space_types[0] : null;
     },
 
     /*
@@ -308,15 +316,13 @@ export default {
     displayNameForMode(mode = this.mode) { return applicationHelpers.displayNameForMode(mode); },
   },
   watch: {
-    mode() { this.clearSubSelections(); },
-    'currentStory.id': function () { this.clearSubSelections(); },
-    currentSubSelection() {
-      if (!this.currentSubSelection && this[this.mode][0]) {
-        this.$nextTick(() => {
-          this.selectItem(this[this.mode][0]);
-        });
-      }
-    },
+    // currentSubSelection() {
+    //   if (!this.currentSubSelection && this[this.mode][0]) {
+    //     this.$nextTick(() => {
+    //       this.selectItem(this[this.mode][0]);
+    //     });
+    //   }
+    // },
   },
 };
 </script>
