@@ -3,7 +3,6 @@ import { gen } from 'testcheck';
 import helpers from '../../../src/store/modules/geometry/helpers';
 import { assert, refute, nearlyEqual, assertProperty } from '../test_helpers';
 
-
 describe('syntheticRectangleSnaps', () => {
   it('should work', () => {
     const resp = helpers.syntheticRectangleSnaps(
@@ -476,6 +475,79 @@ describe('oneEdgeCouldEatAnother', () => {
     assertProperty(genEdgePairSmallNearEndpoint, (edgePair) => {
       assert(helpers.oneEdgeCouldEatAnother(...edgePair));
     });
+  });
+});
+
+describe('edgesCombine', () => {
+  it('combines edges that are parallel and nearby', () => {
+    const merge = helpers.edgesCombine(
+      { start: { x: -30, y: -1 }, end: { x: 0, y: 0 } },
+      { start: { x: 30, y: 2 }, end: { x: -15, y: 0.5 } },
+    );
+    assert(merge);
+  });
+
+  it('combines edges that have slightly different angles and are nearby', () => {
+    const merge = helpers.edgesCombine(
+      { start: { x: -30, y: -1 }, end: { x: 0, y: 0 } },
+      { start: { x: 30, y: 2 }, end: { x: -16, y: 0.5 } },
+    );
+    assert(merge);
+  });
+
+
+  it("won't combine edges that have too different angles", () => {
+    const merge = helpers.edgesCombine(
+      { start: { x: -30, y: -30 }, end: { x: 0, y: 0 } },
+      { start: { x: -0.3, y: -0.3 }, end: { x: 40, y: 20 } },
+    );
+    refute(merge);
+  });
+
+  it("won't combine edges that are too far apart", () => {
+    const merge = helpers.edgesCombine(
+      { start: { x: -5, y: 0 }, end: { x: 5, y: 10 } },
+      { start: { x: 0, y: 0 }, end: { x: 10, y: 10 } },
+    );
+    refute(merge);
+  });
+
+  it('creates a new edge by taking the direction of most variance', () => {
+    const merge = helpers.edgesCombine(
+      { start: { x: -30, y: -1, id: 'earliest' }, end: { x: 0, y: 0 } },
+      { start: { x: 30, y: 2, id: 'latest' }, end: { x: -16, y: 0.5 } },
+    );
+    console.log('0:',JSON.stringify(merge.newVertexOrder[0]));
+    console.log('-1:',JSON.stringify(merge.newVertexOrder[merge.newVertexOrder.length - 1]));
+    console.log('all:', JSON.stringify(merge.newVertexOrder));
+    assert(merge.newVertexOrder[0].id === 'earliest');
+    assert(merge.newVertexOrder[merge.newVertexOrder.length - 1].id === 'latest');
+  });
+});
+
+describe('edgesExtend', () => {
+  it('combines edges that almost overlap', () => {
+    // const merge = helpers.edgesExtend(
+    //   { start: { x: -30, y: -1 }, end: { x: 0, y: 0 } },
+    //   { start: { x: 31, y: 1 }, end: { x: 0.5, y: 0.5 } },
+    // );
+    // assert(merge);
+  });
+
+  it('ignores edges that almost overlap, but have different angles', () => {
+    // const merge = helpers.edgesExtend(
+    //   { start: { x: -30, y: -1 }, end: { x: 0, y: 0 } },
+    //   { start: { x: 31, y: 1 }, end: { x: 0.5, y: 0.5 } },
+    // );
+    // assert(merge);
+  });
+
+  it('ignores edges that do not nearly-overlap', () => {
+    // const merge = helpers.edgesExtend(
+    //   { start: { x: -30, y: -1 }, end: { x: 0, y: 0 } },
+    //   { start: { x: 31, y: 1 }, end: { x: 0.5, y: 0.5 } },
+    // );
+    // assert(merge);
   });
 });
 

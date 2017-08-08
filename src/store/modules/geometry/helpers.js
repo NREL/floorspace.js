@@ -113,7 +113,6 @@ const helpers = {
                 y: y2
             }
         } = line;
-
         const A = point.x - x1,
             B = point.y - y1,
             C = x2 - x1,
@@ -327,7 +326,6 @@ const helpers = {
     // - edges with whose endpoints are very near to one another
     // - edges with similar angles where the vertices of one/both lie near the
     // edge of the other.
-
   },
   areMergeable(edge1, edge2) {
     return this.endpointsNearby(edge1, edge2);
@@ -360,17 +358,73 @@ const helpers = {
       newVertexOrder: this.consolidateVertices(left.start, left.end, startProj, endProj),
     };
   },
-  edgesCombineAndExtend(edge1, edge2) {
+  edgesExtend(edge1, edge2) {
+    /*
+                  o----------------o
+        o--------o
+    */
+    if (!this.haveSimilarAngles(edge1, edge2)) {
+      return false;
+    }
+    const distCutoff = 0.05 * this.avgEdgeLength(edge1, edge2);
+
+    let left, right; // eslint-disable-line one-var-declaration-per-line
+    if (this.distanceBetweenPoints(edge1.end, edge2.start) < distCutoff) {
+      left = edge1;
+      right = edge2;
+    } else if (this.distanceBetweenPoints(edge2.end, edge1.start) < distCutoff) {
+      left = edge2;
+      right = edge1;
+    } else {
+      return false;
+    }
+
+    return {
+      mergeType: 'edgesExtend',
+      newVertexOrder: this.consolidateVertices(left.start, right.end, left.end, right.start),
+    };
+  },
+  edgesCombine(edge1, edge2) {
     /*
 
       o------------o
            o---------------o
     */
+    if (!this.haveSimilarAngles(edge1, edge2)) {
+      return false;
+    }
     // if close enough
-
+    let left, right; // eslint-disable-line one-var-declaration-per-line
+    if (this.edgesCombine_LeftBeforeRight(edge1, edge2)) {
+      left = edge1;
+      right = edge2;
+    } else if (this.edgesCombine_LeftBeforeRight(edge2, edge1)) {
+      left = edge1;
+      right = edge2;
+    } else {
+      return false;
+    }
 
     // project onto the direction with most variance to get order
     // then output that order
+    const
+      dirWithMostVar = { p1: left.start, p2: right.end },
+      leftMiddle = this.projectionOfPointToLine(right.start, dirWithMostVar),
+      rightMiddle = this.projectionOfPointToLine(left.end, dirWithMostVar);
+    return {
+      mergeType: 'combine',
+      newVertexOrder: this.consolidateVertices(
+        left.start, right.end, leftMiddle, rightMiddle),
+    };
+  },
+  edgesCombine_LeftBeforeRight(left, right) {
+    const
+      avgEdgeLength = this.avgEdgeLength(left, right),
+      distCutoff = 0.05 * avgEdgeLength,
+      { dist: leftEndDist } = this.pointDistanceToSegment(left.end, right),
+      { dist: rightStartDist } = this.pointDistanceToSegment(right.start, left);
+
+    return Math.min(leftEndDist, rightStartDist) < distCutoff;
   },
   avgEdgeLength({ start: start1, end: end1 }, { start: start2, end: end2 }) {
     return (
