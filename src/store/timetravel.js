@@ -53,7 +53,6 @@ export default {
       const newState = args[0];
 
       // non timetravel props
-      // TODO: ask brian about config syntax for this
       newState.application.scale = this.state.application.scale;
       newState.project.view = this.state.project.view;
       newState.project.grid = this.state.project.grid;

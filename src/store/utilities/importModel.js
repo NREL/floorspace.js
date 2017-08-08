@@ -32,8 +32,6 @@ export default function importModel(context, payload) {
         id: v.id,
         x: v.x,
         y: v.y,
-        X: v.x,
-        Y: v.y
       };
     });
   }
