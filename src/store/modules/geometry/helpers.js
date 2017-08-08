@@ -422,7 +422,7 @@ const helpers = {
     });
 
     // Now put the 'end' back at the end.
-    finalPts.push(finalPts.splice(1, 1));
+    finalPts.push(finalPts.splice(1, 1)[0]);
     return finalPts;
   },
   edgeDirection({ start, end }) {

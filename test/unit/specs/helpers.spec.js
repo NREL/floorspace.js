@@ -329,14 +329,18 @@ describe('projectionOfPointToLine', () => {
 });
 
 describe('consolidateVertices', () => {
-
+  // A tool for making generic arguments for the consolidateVertices
+  // function. (generative testing saves me from having to come up with
+  // my own examples).
   const genVertices = gen.object({
     startX: gen.numberWithin(-10000, 10000),
     startY: gen.numberWithin(-10000, 10000),
     endX: gen.numberWithin(-10000, 10000),
     endY: gen.numberWithin(-10000, 10000),
     pointsAlong: gen.array(gen.numberWithin(0, 1), { minSize: 0, maxSize: 10 }),
-  }).then(({ startX, startY, endX, endY, pointsAlong }) => {
+  })
+  .suchThat(({ startX, startY, endX, endY }) => startX !== endX || startY !== endY)
+  .then(({ startX, startY, endX, endY, pointsAlong }) => {
     const toPointOnLine = t => ({
       x: startX + (t * (endX - startX)),
       y: startY + (t * (endY - startY)),
@@ -357,19 +361,27 @@ describe('consolidateVertices', () => {
 
   it('puts the end point in the last position', () => {
     assertProperty(genVertices, (verts) => {
-      const consolidated = this.consolidateVertices(...verts);
-      console.log('consolidated', consolidated);
+      const consolidated = helpers.consolidateVertices(...verts);
       return (
         verts[1].identity === 'end' &&
-        consolidated[consolidated.length - 1].identity === 'blend'
-      );
+        consolidated[consolidated.length - 1].identity === 'end');
     });
   });
 
   it('drops duplicate points', () => {
-    assertProperty(genVertices, verts => (
-      this.consolidateVertices(...verts).length === 5 //_.uniqBy(verts, _.isEqual).length
-    ));
+    assertProperty(genVertices, (verts) => {
+      const
+        consolidated = helpers.consolidateVertices(...verts),
+        uniqVerts = _.uniqBy(verts, _.isEqual);
+      assert(consolidated.length >= uniqVerts.length);
+    });
+  });
+
+  it('never eats start and end', () => {
+    assertProperty(genVertices, (verts) => {
+      const consolidated = helpers.consolidateVertices(verts[0], verts[1]);
+      assert(consolidated.length === 2);
+    });
   });
 
   it('drops points that are close relative to the size of the edge', () => {
