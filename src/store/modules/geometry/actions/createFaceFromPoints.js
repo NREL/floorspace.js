@@ -177,12 +177,48 @@ function storeFace(faceGeometry, target, context) {
     });
 }
 
+export function matchOrCreateEdges(vertices, existingEdges) {
+  return vertices.map((v1, i) => {
+      // v2 is the first vertex in the array when the face is being closed
+      const v2 = i + 1 < vertices.length ? vertices[i + 1] : vertices[0];
+      // check if an edge referencing these two vertices already exists
+      var sharedEdge = existingEdges.find((e) => {
+          return (e.v1 === v1.id && e.v2 === v2.id) ||
+              (e.v2 === v1.id && e.v1 === v2.id);
+      });
+
+      // if a shared edge exists, check if its direction matches the edge direction required for the face being created
+      if (sharedEdge) {
+          return {
+              ...sharedEdge,
+              // this property will be used (then deleted) when we create and save the face with edgeRefs
+              reverse: sharedEdge.v1 !== v1.id
+          };
+      } else {
+          // create and store a new edge with the vertices
+          return new factory.Edge(v1.id, v2.id);
+      }
+  });
+}
+
 /*
  * Given a set of points, creates vertices and edges for the face defined by the points
  * validates the face geometry for self intersection
  * returns object with success boolean and face geometry or error message depending on validation results
  */
 export function validateFaceGeometry(points, currentStoryGeometry, snapTolerance) {
+  /* validation consists of:
+   - try and match each vertex to an existing one that is already in the geometry
+   - create edges, and try to re-use existing ones (reversed, if necessary)
+   - after snapping, check if any vertices were merged to the same point (consecutive is okay) Do we still even have a polygon? (need >= 3 distinct verts)
+   - Check if any vertices on the face lie on an edge in the face. Err out if they do.
+     (this would cause either a zero-area portion of the face,
+      eg: https://trello-attachments.s3.amazonaws.com/58d428743111af1d0a20cf28/598b740a2e569128b4392cb5/f71690195e4801010773652bac9d0a9c/capture.png
+      or a split face.
+      eg: https://trello-attachments.s3.amazonaws.com/58d428743111af1d0a20cf28/598b743607a58f375889faad/99ec60d5ddcf78c97db43e8628efa7b9/capture.png
+     )
+   - Check if two edges on the new face intersect. (again, to prevent split faces)
+  */
     var error = false;
     // build an array of vertices for the face being created
     let faceVertices = points.map((point) => {
@@ -192,27 +228,7 @@ export function validateFaceGeometry(points, currentStoryGeometry, snapTolerance
     });
 
     // create edges connecting each vertex in order
-    const faceEdges = faceVertices.map((v1, i) => {
-        // v2 is the first vertex in the array when the face is being closed
-        const v2 = i + 1 < faceVertices.length ? faceVertices[i + 1] : faceVertices[0];
-        // check if an edge referencing these two vertices already exists
-        var sharedEdge = currentStoryGeometry.edges.find((e) => {
-            return (e.v1 === v1.id && e.v2 === v2.id) ||
-                (e.v2 === v1.id && e.v1 === v2.id);
-        });
-
-        // if a shared edge exists, check if its direction matches the edge direction required for the face being created
-        if (sharedEdge) {
-            return {
-                ...sharedEdge,
-                // this property will be used (then deleted) when we create and save the face with edgeRefs
-                reverse: sharedEdge.v1 !== v1.id
-            };
-        } else {
-            // create and store a new edge with the vertices
-            return new factory.Edge(v1.id, v2.id);
-        }
-    });
+    const faceEdges = matchOrCreateEdges(faceVertices, currentStoryGeometry.edges);
 
     // check for duplicate vertices - these will not be considered splitting vertices bc they are endpoints
     // first, we can just join together consecutive duplicates, since that doesn't change
