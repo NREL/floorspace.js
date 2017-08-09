@@ -392,8 +392,8 @@ describe('edgesExtend', () => {
   });
 });
 
-// describe('findMergeableEdges', () => {
-//   it('preserves the edge that has more popular vertices', () => {
-//
-//   });
-// });
+describe('findMergeableEdges', () => {
+  it('preserves the edge that has more popular vertices', () => {
+
+  });
+});

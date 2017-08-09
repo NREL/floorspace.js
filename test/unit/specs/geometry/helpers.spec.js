@@ -1,6 +1,9 @@
+import _ from 'lodash';
 import { gen } from 'testcheck';
 import helpers from '../../../../src/store/modules/geometry/helpers';
-import { assert, nearlyEqual, assertProperty } from '../../test_helpers';
+import {
+  assert, nearlyEqual, refute, assertProperty, isNearlyEqual, genPoint,
+} from '../../test_helpers';
 
 describe('syntheticRectangleSnaps', () => {
   it('should work', () => {
@@ -163,5 +166,75 @@ describe('projectionOfPointToLine', () => {
 
     proj = helpers.projectionOfPointToLine({ x: 8, y: 2 }, lineRt);
     assert(nearlyEqual(proj.x, 5) && nearlyEqual(proj.y, 3));
+  });
+});
+
+describe('setOperation', () => {
+  const
+    genPointLeftOfOrigin = gen.object({ x: gen.sNegInt, y: gen.int }),
+    genTriangleLeftOfOrigin = gen.array(genPointLeftOfOrigin, { size: 3 })
+      .suchThat(pts => !helpers.ptsAreCollinear(...pts)),
+    genPointRightOfOrigin = gen.object({ x: gen.sPosInt, y: gen.int }),
+    genTriangleRightOfOrigin = gen.array(genPointRightOfOrigin, { size: 3 })
+      .suchThat(pts => !helpers.ptsAreCollinear(...pts)),
+    genTriangle = gen.array(genPoint, { size: 3 })
+      .suchThat(pts => !helpers.ptsAreCollinear(...pts));
+
+  it('union or intersection with self is self', () => {
+    assertProperty(
+      genTriangle,
+      (tri) => {
+        const union = helpers.setOperation('union', tri, tri);
+        const intersection = helpers.setOperation('intersection', tri, tri);
+
+        assert(union && intersection); // didn't cause error
+        _.chain([tri, union, intersection])
+        // sort the arrays so we can compare same points for equality
+        .map(arr => _.sortBy(arr, ['x', 'y']))
+        .unzip()
+        .forEach(
+          ([pt1, pt2, pt3]) => {
+            assert(
+              isNearlyEqual(pt1, pt2) && isNearlyEqual(pt2, pt3),
+              `expected original, union, and intersection to be equal.
+              instead: ${JSON.stringify([pt1, pt2, pt3])}`,
+            );
+          })
+        .value();
+      },
+    );
+  });
+
+  it('difference with self is nothing', () => {
+    assertProperty(
+      genTriangle,
+      (tri) => {
+        const difference = helpers.setOperation('difference', tri, tri);
+
+        assert(difference); // didn't cause error
+        assert(difference.length === 0);
+      },
+    );
+  });
+
+  it('union with disparate shape is split face (error)', () => {
+    assertProperty(
+      genTriangleLeftOfOrigin, genTriangleRightOfOrigin,
+      (tri1, tri2) => {
+        const union = helpers.setOperation('union', tri1, tri2);
+
+        refute(union);
+      });
+  });
+
+  it('intersection with disparate shape is nothing', () => {
+    assertProperty(
+      genTriangleLeftOfOrigin, genTriangleRightOfOrigin,
+      (tri1, tri2) => {
+        const intersection = helpers.setOperation('intersection', tri1, tri2);
+
+        assert(intersection);
+        assert(intersection.length === 0);
+      });
   });
 });
