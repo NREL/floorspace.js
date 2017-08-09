@@ -57,6 +57,10 @@ export default {
     this.$store.dispatch('models/initStory');
   },
   mounted() {
+
+    this.$on('uploadImage', (event) => {
+      document.getElementById('upload-image-input').click();
+    });
     // App will act as the eventBus for the application
     this.$on('error', (err) => {
       this.error = err;
@@ -68,8 +72,13 @@ export default {
     });
 
     document.addEventListener('keydown', (e) => {
-      if (e.keyCode === 90 && (e.ctrlKey || e.metaKey) && this.$store.timetravel) {
+      if (!this.$store.timetravel){
+        return;
+      }
+      if (e.keyCode === 90 && (e.ctrlKey || e.metaKey)) {
         e.shiftKey ? this.$store.timetravel.redo() : this.$store.timetravel.undo();
+      } else if (e.keyCode == 89 && (e.ctrlKey || e.metaKey)){
+        this.$store.timetravel.redo();
       }
     });
   },
