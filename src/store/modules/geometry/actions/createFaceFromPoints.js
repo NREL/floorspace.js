@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import factory from './../factory';
 import geometryHelpers from './../helpers';
 import modelHelpers from './../../models/helpers';
@@ -177,28 +178,24 @@ function storeFace(faceGeometry, target, context) {
     });
 }
 
-export function matchOrCreateEdges(vertices, existingEdges) {
-  return vertices.map((v1, i) => {
-      // v2 is the first vertex in the array when the face is being closed
-      const v2 = i + 1 < vertices.length ? vertices[i + 1] : vertices[0];
-      // check if an edge referencing these two vertices already exists
-      var sharedEdge = existingEdges.find((e) => {
-          return (e.v1 === v1.id && e.v2 === v2.id) ||
-              (e.v2 === v1.id && e.v1 === v2.id);
-      });
+export function findExistingEdge(v1, v2, edges) {
+  const sharedEdge = edges.find(e => (
+    (e.v1 === v1.id && e.v2 === v2.id) ||
+    (e.v2 === v1.id && e.v1 === v2.id)));
 
-      // if a shared edge exists, check if its direction matches the edge direction required for the face being created
-      if (sharedEdge) {
-          return {
-              ...sharedEdge,
-              // this property will be used (then deleted) when we create and save the face with edgeRefs
-              reverse: sharedEdge.v1 !== v1.id
-          };
-      } else {
-          // create and store a new edge with the vertices
-          return new factory.Edge(v1.id, v2.id);
-      }
-  });
+  // if a shared edge exists, check if its direction matches the edge direction required for the face being created
+  return sharedEdge && {
+    ...sharedEdge,
+    // this property will be used (then deleted) when we create and save the face with edgeRefs
+    reverse: sharedEdge.v1 === v2.id,
+  };
+}
+
+export function matchOrCreateEdges(vertices, existingEdges) {
+   // pair each vertex with the next (wrapping back to start at the end)
+  return _.zip(vertices, [...vertices.slice(1), vertices[0]])
+  // try and find a shared edge, but fall back to creating a new one
+    .map(([v1, v2]) => (findExistingEdge(v1, v2, existingEdges) || new factory.Edge(v1.id, v2.id)));
 }
 
 /*
@@ -229,7 +226,6 @@ export function validateFaceGeometry(points, currentStoryGeometry, snapTolerance
 
     // create edges connecting each vertex in order
     const faceEdges = matchOrCreateEdges(faceVertices, currentStoryGeometry.edges);
-
     // check for duplicate vertices - these will not be considered splitting vertices bc they are endpoints
     // first, we can just join together consecutive duplicates, since that doesn't change
     // the geometry at all.
