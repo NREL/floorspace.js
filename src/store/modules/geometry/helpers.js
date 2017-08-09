@@ -47,7 +47,7 @@ const helpers = {
       type === 'intersection' ? ClipperLib.ClipType.ctIntersection :
       type === 'difference' ? ClipperLib.ClipType.ctDifference :
       null;
-    if (!operation) {
+    if (operation === null) {
       throw new Error(`invalid operation "${type}". expected union, intersection, or difference`);
     }
 
