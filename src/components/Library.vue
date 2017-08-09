@@ -76,7 +76,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import helpers from './../store/modules/models/helpers';
 
 const Huebee = require('huebee');
@@ -102,34 +102,35 @@ export default {
       mode: state => state.application.currentSelections.mode,
       stories: state => state.models.stories,
     }),
+    ...mapGetters({
+      currentSpace: 'application/currentSpace',
+      currentShading: 'application/currentShading',
+      currentImage: 'application/currentImage',
+    }),
+
     // current selection getters and setters - these dispatch actions to update the data store when a new item is selected
     currentStory: {
-      get() { return this.$store.state.application.currentSelections.story; },
-      set(item) { this.$store.dispatch('application/setCurrentStory', { story: item }); },
+      get() { return this.$store.getters['application/currentStory']; },
+      set(story) { this.$store.dispatch('application/setCurrentStoryId', { id: story.id }); },
     },
-    currentSpace: {
-      get() { return this.$store.state.application.currentSelections.space; },
-      set(item) { this.$store.dispatch('application/setCurrentSpace', { space: item }); },
+
+    // current selection getters and setters - these dispatch actions to update the data store when a new item is selected
+    currentSubSelection: {
+      get() { return this.$store.getters['application/currentSubSelection']; },
+      set(item) { this.$store.dispatch('application/setCurrentSubSelectionId', { id: item.id }); },
     },
-    currentShading: {
-      get() { return this.$store.state.application.currentSelections.shading; },
-      set(item) { this.$store.dispatch('application/setCurrentShading', { shading: item }); },
-    },
-    currentImage: {
-      get() { return this.$store.state.application.currentSelections.image; },
-      set(item) { this.$store.dispatch('application/setCurrentImage', { image: item }); },
-    },
+
     currentThermalZone: {
-      get() { return this.$store.state.application.currentSelections.thermal_zone; },
-      set(item) { this.$store.dispatch('application/setCurrentThermalZone', { thermal_zone: item }); },
+      get() { return this.$store.getters['application/currentThermalZone']; },
+      set(item) { this.$store.dispatch('application/setCurrentThermalZoneId', { id: item.id }); },
     },
     currentBuildingUnit: {
-      get() { return this.$store.state.application.currentSelections.building_unit; },
-      set(item) { this.$store.dispatch('application/setCurrentBuildingUnit', { building_unit: item }); },
+      get() { return this.$store.getters['application/currentBuildingUnit']; },
+      set(item) { this.$store.dispatch('application/setCurrentBuildingUnitId', { id: item.id }); },
     },
     currentSpaceType: {
-      get() { return this.$store.state.application.currentSelections.space_type; },
-      set(item) { this.$store.dispatch('application/setCurrentSpaceType', { space_type: item }); },
+      get() { return this.$store.getters['application/currentSpaceType']; },
+      set(item) { this.$store.dispatch('application/setCurrentSpaceTypeId', { id: item.id }); },
     },
     /*
     * returns the currently selected object in the library
@@ -137,15 +138,18 @@ export default {
     */
     selectedObject: {
       get() {
-        if (this.type === 'story') {
-          return this.currentStory;
+        switch (this.type) {
+          case 'stories':
+            return this.currentStory;
+          case 'building_units':
+            return this.currentBuildingUnit;
+          case 'thermal_zones':
+            return this.currentThermalZone;
+          case 'space_types':
+            return this.currentSpaceType;
+          default: // spaces, shading, images
+            return this.currentSubSelection;
         }
-        return this.currentImage ||
-          this.currentSpace ||
-          this.currentShading ||
-          this.currentBuildingUnit ||
-          this.currentThermalZone ||
-          this.currentSpaceType;
       },
       set(item) {
         switch (this.type) {
@@ -161,19 +165,8 @@ export default {
           case 'space_types':
             this.currentSpaceType = item;
             break;
-          case 'spaces':
-            this.currentStory = this.stories.find(s => s.spaces.find(sp => sp.id === item.id));
-            this.currentSpace = item;
-            break;
-          case 'shading':
-            this.currentStory = this.stories.find(s => s.spaces.find(sp => sp.id === item.id));
-            this.currentShading = item;
-            break;
-          case 'images':
-            this.currentStory = this.stories.find(s => s.images.find(img => img.id === img.id));
-            this.currentImage = item;
-            break;
-          default:
+          default: // spaces, shading, images
+            this.currentSubSelection = item;
             break;
         }
       },

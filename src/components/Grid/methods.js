@@ -392,12 +392,8 @@ export default {
 
           // if a face on the current story is clicked while the Select tool is active
           // lookup its corresponding model (space/shading) and select it
-          const model = modelHelpers.modelForFace(this.$store.state.models, d.face_id);
-          if (model.type === 'space') {
-            this.$store.dispatch('application/setCurrentSpace', { space: model });
-          } else if (model.type === 'shading') {
-            this.$store.dispatch('application/setCurrentShading', { shading: model });
-          }
+          this.currentSubSelection = modelHelpers.modelForFace(this.$store.state.models, d.face_id);
+          
         } else if (this.currentTool === 'Fill' && (this.currentSpace || this.currentShading)) {
           // if a face on the current story is clicked while the Select tool is active
           // lookup its corresponding model (space/shading) and select it
@@ -607,7 +603,8 @@ export default {
       });
     }
 
-    if (this.points.length === 1 && this.currentTool === 'Rectangle') {
+    // TODO Remove this featureUnfinished business once PR#118 is merged.
+    if (!"featureUnfinished (shouldn't have been merged)" && this.points.length === 1 && this.currentTool === 'Rectangle') {
       snappableVertices = snappableVertices.concat(
         geometryHelpers.syntheticRectangleSnaps(
           snappableVertices,

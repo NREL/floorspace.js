@@ -208,8 +208,10 @@ export default {
             // select last space
             space = story.spaces[story.spaces.length - 1];
 
-        context.dispatch('application/setCurrentStory', { story }, { root: true });
-        context.dispatch('application/setCurrentSpace', { space }, { root: true });
-        context.dispatch('application/setApplicationMode', { mode: 'spaces' }, { root: true });
+
+        context.dispatch('application/setCurrentStoryId', { id: story.id }, { root: true });
+
+        context.dispatch('application/setCurrentSubSelectionId', { id: space.id }, { root: true });
+        context.dispatch('application/setCurrentMode', { mode: 'spaces' }, { root: true });
     }
 }
