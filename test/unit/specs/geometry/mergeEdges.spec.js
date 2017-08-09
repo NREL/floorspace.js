@@ -284,10 +284,10 @@ describe('oneEdgeCouldEatAnother', () => {
   // function. (generative testing saves me from having to come up with
   // my own examples).
   const genEdgePairSmallNearEndpoint = gen.object({
-    startX: gen.numberWithin(-10000, 10000),
-    startY: gen.numberWithin(-10000, 10000),
-    endX: gen.numberWithin(-10000, 10000),
-    endY: gen.numberWithin(-10000, 10000),
+    startX: gen.intWithin(-10000, 10000),
+    startY: gen.intWithin(-10000, 10000),
+    endX: gen.intWithin(-10000, 10000),
+    endY: gen.intWithin(-10000, 10000),
     smallEdgeStart: gen.numberWithin(0, 0.02),
     smallEdgeEnd: gen.numberWithin(0.08, 1),
   })
