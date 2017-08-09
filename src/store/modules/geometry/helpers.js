@@ -1,70 +1,75 @@
 import ClipperLib from 'js-clipper'
 
 const helpers = {
-    // ************************************ CLIPPER ************************************ //
-	// scaling - see https://sourceforge.net/p/jsclipper/wiki/documentation/#clipperlibclipperoffsetexecute
-    clipScale: 100,
-	// prevent floating point inaccuracies by expanding faces by the offset before performing a clip operation, and then scaling the result back down
-	// https://sourceforge.net/p/jsclipper/wiki/documentation/#clipperoffset
-	offset: 0.01,
+  // ************************************ CLIPPER ************************************ //
+  // scaling - see https://sourceforge.net/p/jsclipper/wiki/documentation/#clipperlibclipperoffsetexecute
+  clipScale: 100,
+  // prevent floating point inaccuracies by expanding faces by the offset before performing a clip operation, and then scaling the result back down
+  // https://sourceforge.net/p/jsclipper/wiki/documentation/#clipperoffset
+  offset: 0.01,
 
-	/*
-	* given two sets of points defining two faces
-	* perform the specified operation (intersection, difference, union), return the resulting set of points
-	* return false if the result contains multiple faces (a face was divided in two during the operation)
-	*/
-	setOperation (type, f1Points, f2Points) {
-		// translate points for each face into a clipper path
-		const f1Path = f1Points.map(p => ({ X: p.x, Y: p.y })),
-        	f2Path = f2Points.map(p => ({ X: p.x, Y: p.y }));
+  /*
+  * given two sets of points defining two faces
+  * perform the specified operation (intersection, difference, union), return the resulting set of points
+  * return false if the result contains multiple faces (a face was divided in two during the operation)
+  */
+  setOperation(type, f1Points, f2Points) {
+    // translate points for each face into a clipper path
+    const
+      f1Path = f1Points.map(p => ({ X: p.x, Y: p.y })),
+      f2Path = f2Points.map(p => ({ X: p.x, Y: p.y }));
 
-		// offset both paths prior to executing clipper operation to acount for tiny floating point inaccuracies
-		const offset = new ClipperLib.ClipperOffset(),
-			f1PathsOffsetted = new ClipperLib.Paths(),
-			f2PathsOffsetted = new ClipperLib.Paths();
+    // offset both paths prior to executing clipper operation to acount for tiny floating point inaccuracies
+    const offset = new ClipperLib.ClipperOffset(),
+      f1PathsOffsetted = new ClipperLib.Paths(),
+      f2PathsOffsetted = new ClipperLib.Paths();
 
-		offset.AddPaths([f1Path], ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
-		offset.Execute(f1PathsOffsetted, this.offset);
-		offset.Clear();
-		offset.AddPaths([f2Path], ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
-		offset.Execute(f2PathsOffsetted, this.offset);
-		offset.Clear();
+    offset.AddPaths([f1Path], ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
+    offset.Execute(f1PathsOffsetted, this.offset);
+    offset.Clear();
+    offset.AddPaths([f2Path], ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
+    offset.Execute(f2PathsOffsetted, this.offset);
+    offset.Clear();
 
-		// scale paths up before performing operation
-		ClipperLib.JS.ScaleUpPaths(f1PathsOffsetted, this.clipScale);
-		ClipperLib.JS.ScaleUpPaths(f2PathsOffsetted, this.clipScale);
+    // scale paths up before performing operation
+    ClipperLib.JS.ScaleUpPaths(f1PathsOffsetted, this.clipScale);
+    ClipperLib.JS.ScaleUpPaths(f2PathsOffsetted, this.clipScale);
 
-		const cpr = new ClipperLib.Clipper(),
-			resultPathsOffsetted = new ClipperLib.Paths();
+    const
+      cpr = new ClipperLib.Clipper(),
+      resultPathsOffsetted = new ClipperLib.Paths();
 
-        cpr.AddPaths(f1PathsOffsetted, ClipperLib.PolyType.ptSubject, true);
-        cpr.AddPaths(f2PathsOffsetted, ClipperLib.PolyType.ptClip, true);
+    cpr.AddPaths(f1PathsOffsetted, ClipperLib.PolyType.ptSubject, true);
+    cpr.AddPaths(f2PathsOffsetted, ClipperLib.PolyType.ptClip, true);
 
-		var operation;
-		if (type === 'union') { operation = ClipperLib.ClipType.ctUnion; }
-		else if (type === 'intersection') { operation = ClipperLib.ClipType.ctIntersection; }
-		else if (type === 'difference') { operation = ClipperLib.ClipType.ctDifference; }
+    const operation =
+      type === 'union' ? ClipperLib.ClipType.ctUnion :
+      type === 'intersection' ? ClipperLib.ClipType.ctIntersection :
+      type === 'difference' ? ClipperLib.ClipType.ctDifference :
+      null;
+    if (!operation) {
+      throw new Error(`invalid operation "${type}". expected union, intersection, or difference`);
+    }
 
-        cpr.Execute(operation, resultPathsOffsetted, ClipperLib.PolyFillType.pftEvenOdd, ClipperLib.PolyFillType.pftEvenOdd);
+    cpr.Execute(operation, resultPathsOffsetted, ClipperLib.PolyFillType.pftEvenOdd, ClipperLib.PolyFillType.pftEvenOdd);
 
-		// scale down path
-		ClipperLib.JS.ScaleDownPaths(resultPathsOffsetted, this.clipScale);
+    // scale down path
+    ClipperLib.JS.ScaleDownPaths(resultPathsOffsetted, this.clipScale);
 
-		// undo offset on resulting path
-		const resultPaths = new ClipperLib.Paths();
-		offset.AddPaths(resultPathsOffsetted, ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
-		offset.Execute(resultPaths, -this.offset);
+    // undo offset on resulting path
+    const resultPaths = new ClipperLib.Paths();
+    offset.AddPaths(resultPathsOffsetted, ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
+    offset.Execute(resultPaths, -this.offset);
 
-		// if multiple paths were created, a face has been split and the operation should fail
-        if (resultPaths.length === 1) {
-			// translate into points
-			return resultPaths[0].map(p => ({ x: p.X, y: p.Y }));
-        } else if (resultPaths.length === 0) {
-        	return [];
-        } else if (resultPaths.length > 1) {
-			return false;
-        }
-	},
+    // if multiple paths were created, a face has been split and the operation should fail
+    if (resultPaths.length === 1) {
+      // translate into points
+      return resultPaths[0].map(p => ({ x: p.X, y: p.Y }));
+    } else if (resultPaths.length === 0) {
+      return [];
+    }
+    return false;
+  },
 
     // given an array of points return the area of the space they enclose
     areaOfSelection(points) {

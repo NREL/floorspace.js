@@ -20,5 +20,6 @@ module.exports = {
       'ignoreTemplateLiterals': true
     }],
     'one-var': 0,
+    'no-nested-ternary': 0,
   }
 };
