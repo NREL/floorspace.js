@@ -50,6 +50,27 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <button @click="undo">Undo</button>
         <button @click="redo">Redo</button>
       </div>
+      <div id="component-menus" v-if="tool === 'Place Component'">
+        <div class='input-select'>
+            <label>Type</label>
+            <select v-model='componentType'>
+                <option v-for='(n, t) in componentTypes' :value="t">{{ n }}</option>
+            </select>
+            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
+                <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
+            </svg>
+        </div>
+        <div class='input-select'>
+            <label>Definition</label>
+            <select v-model='componentDefinition'>
+                <option v-for='definition in componentDefinitions' :value="componentDefinition">{{ definition.name }}</option>
+            </select>
+            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
+                <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
+            </svg>
+        </div>
+      </div>
+
       <div>
         <button @click="tool = item" :class="{ active: tool === item }" v-for="item in availableTools">{{ item }}</button>
       </div>
@@ -63,6 +84,20 @@ import { mapState } from 'vuex';
 
 export default {
   name: 'toolbar',
+  data() {
+    return {
+      componentType: 'daylighting_control_definitions',
+      componentDefinition: '',
+      componentTypes: {
+        daylighting_control_definitions: 'Daylighting Control Definitions',
+        window_definitions: 'Window Definitions',
+      },
+    }
+  },
+  mounted() {
+    this.componentType = Object.keys(this.componentTypes)[0];
+    this.componentDefinition = this.componentDefinitions[0];
+  },
   methods: {
     exportData() {
       const data = this.$store.getters['exportData'];
@@ -107,6 +142,7 @@ export default {
     },
   },
   computed: {
+    componentDefinitions() { return this.$store.state.models.library[this.componentType]; },
     ...mapState({
       currentMode: state => state.application.currentSelections.mode,
       mapEnabled: state => state.project.map.enabled,
@@ -214,9 +250,16 @@ export default {
       > .undo-redo {
         margin-right: auto;
       }
+      #component-menus {
+        margin: 0 auto;
+        .input-select {
+          display: inline-block;
+          &:last-child {
+            margin-left: 1rem;
+          }
+        }
+      }
     }
-
-
   }
 }
 </style>
