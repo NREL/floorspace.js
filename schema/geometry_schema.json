@@ -39,16 +39,16 @@
 				"$ref": "#/definitions/ConstructionSet"
 			}
 		},
-		"windows": {
+		"window_definitions": {
 			"type": "array",
 			"items": {
-				"$ref": "#/definitions/Window"
+				"$ref": "#/definitions/WindowDefinition"
 			}
 		},
 		"daylighting_controls": {
 			"type": "array",
 			"items": {
-				"$ref": "#/definitions/DaylightingControl"
+				"$ref": "#/definitions/DaylightingControlDefinition"
 			}
 		}
 	},
@@ -376,7 +376,7 @@
 						"null"
 					]
 				},
-				"daylighting_controls": {
+				"daylighting_control_definitions": {
 					"type": "array",
 					"items": {
 						"type": "object",
@@ -522,7 +522,7 @@
 				"id"
 			]
 		},
-		"Window": {
+		"WindowDefinition": {
 			"type": "object",
 			"properties": {
 				"id": {
@@ -551,7 +551,7 @@
 				"id"
 			]
 		},
-		"DaylightingControl": {
+		"DaylightingControlDefinition": {
 			"type": "object",
 			"properties": {
 				"id": {

@@ -71,8 +71,8 @@ export default function importModel(context, payload) {
         thermal_zones: payload.data.thermal_zones,
         space_types: payload.data.space_types,
         construction_sets: payload.data.construction_sets,
-        windows: payload.data.windows,
-        daylighting_controls: payload.data.daylighting_controls
+        window_definitions: payload.data.window_definitions,
+        daylighting_control_definitions: payload.data.daylighting_control_definitions
       }
     },
     geometry,

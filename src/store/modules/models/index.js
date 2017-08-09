@@ -43,6 +43,10 @@ export default {
                 y: 0,
                 z: 0,
                 opacity: 0
+            }],
+            windows: [{
+                window_id: null,
+                vertex_id: null
             }]
         }*/],
         // lib
@@ -51,8 +55,8 @@ export default {
             thermal_zones: [],
             space_types: [],
             construction_sets: [],
-            windows: [],
-            daylighting_controls: []
+            window_definitions: [],
+            daylighting_control_definitions: []
         }
     },
     actions: actions,

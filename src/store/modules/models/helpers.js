@@ -204,7 +204,7 @@ const helpers = {
       case 'spaces':
       case 'images':
         return state.stories.reduce((accum, s) => accum.concat(s[type]), []);
-      // 'building_units', 'thermal_zones', 'space_types', 'construction_sets', 'windows', 'daylighting_controls':
+      // 'building_units', 'thermal_zones', 'space_types', 'construction_sets', 'window_definitions', 'daylighting_control_definitions':
       default:
         return state.library[type];
     }

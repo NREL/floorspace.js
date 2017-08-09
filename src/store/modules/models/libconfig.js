@@ -58,6 +58,45 @@ const map = {
     },
     init: factory.ThermalZone,
   },
+  window_definitions: {
+    displayName: 'Window Definition',
+    keymap: {
+      id: {
+        displayName: 'ID',
+        readonly: true,
+        private: false,
+      },
+      name: {
+        displayName: 'Name',
+        readonly: false,
+        input_type: 'text',
+        private: false,
+        validator: validators.name,
+      },
+      height: {
+        displayName: 'Height',
+        readonly: false,
+        input_type: 'number',
+        private: false,
+        validator: validators.number,
+      },
+      width: {
+        displayName: 'Width',
+        readonly: false,
+        input_type: 'number',
+        private: false,
+        validator: validators.number,
+      },
+      sill_height: {
+        displayName: 'Sill Height',
+        readonly: false,
+        input_type: 'number',
+        private: false,
+        validator: validators.number,
+      },
+    },
+    init: factory.ThermalZone,
+  },
   space_types: {
     displayName: 'Space Type',
     keymap: {
@@ -102,19 +141,24 @@ const map = {
     init: factory.ConstructionSet,
   },
   windows: {
-    displayName: 'Window',
+    displayName: 'Window??',
     keymap: {
       id: {
         displayName: 'ID',
         readonly: true,
         private: false,
       },
-      name: {
-        displayName: 'Name',
+      definition_name: {
+        displayName: 'Definition Name',
         readonly: false,
         input_type: 'text',
         private: false,
         validator: validators.name,
+        get(windowObj, state) {
+          // look up story with a reference to the window
+          const window = state.models.library.window_definitions.find(w => w.id).indexOf(windowObj.id);
+          return window.name;
+        },
       },
       story: {
         displayName: 'Story',
@@ -129,8 +173,8 @@ const map = {
     },
     init: factory.Window,
   },
-  daylighting_controls: {
-    displayName: 'Daylighting Control',
+  daylighting_control_definitions: {
+    displayName: 'Daylighting Control Definition',
     keymap: {
       id: {
         displayName: 'ID',
@@ -197,14 +241,6 @@ const map = {
         private: false,
         get(story, state) {
           return story.spaces.map(s => s.name).join(', ');
-        },
-      },
-      windows: {
-        displayName: 'Windows',
-        readonly: true,
-        private: false,
-        get(story, state) {
-          return story.windows.map(w => w.name).join(', ');
         },
       },
       shading: {

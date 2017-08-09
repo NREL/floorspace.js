@@ -236,7 +236,7 @@
       "name": "189.1-2009 - CZ3 - Office"
     }
   ],
-  "windows": [
+  "window_definitions": [
     {
       "id": null,
       "name": "Window A",
@@ -280,7 +280,7 @@
       "sill_height": 3
     }
   ],
-  "daylighting_controls": [
+  "daylighting_control_definitions": [
     {
       "id": null,
       "name": "Daylighting Control A",

@@ -379,7 +379,8 @@ export default {
         padding: 1rem 1.5rem;
 
         .input-select {
-            margin-right: 3rem;
+            margin-right: 1rem;
+            padding-right: 4rem;
             width: 10rem;
         }
         .input-text {
