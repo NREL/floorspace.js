@@ -315,6 +315,11 @@ export function validateFaceGeometry(points, currentStoryGeometry, snapTolerance
      )
    - Check if two edges on the new face intersect. (again, to prevent split faces)
   */
+
+  if (points.length <= 2) {
+    return { success: false, error: 'need at least 3 points to make a face' };
+  }
+
   // build an array of vertices for the face being created
   let faceVertices = points.map(point => (
       // if a vertex already exists at a given location, reuse it

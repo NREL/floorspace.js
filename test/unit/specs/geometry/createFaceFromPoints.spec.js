@@ -1,5 +1,6 @@
 import _ from 'lodash';
-import { assert } from '../../test_helpers';
+import { gen } from 'testcheck';
+import { assert, refute, assertProperty, genPoint } from '../../test_helpers';
 import { validateFaceGeometry } from '../../../../src/store/modules/geometry/actions/createFaceFromPoints';
 
 describe('validateFaceGeometry', () => {
@@ -35,4 +36,52 @@ describe('validateFaceGeometry', () => {
 
     assert(newVerts.length === 3);
   });
+
+  const emptyStoryGeometry = { id: 2, vertices: [], edges: [], faces: [] };
+  const genTooFewVerts = gen.array(genPoint, { maxSize: 2 });
+
+  it('fails when given too few vertices', () => {
+    assertProperty(
+      genTooFewVerts, (verts) => {
+        const resp = validateFaceGeometry(verts, emptyStoryGeometry, 0);
+        refute(resp && resp.success);
+      });
+  });
+
+  // it('succeeds from empty on a triangle', () => {
+  //
+  // });
+  //
+  // it('succeeds from empty on a rectangle', () => {
+  //
+  // });
+  //
+  // it('succeeds from empty on a regular polygon', () => {
+  //
+  // });
+  //
+  // it('fails when given a zero-area polygon', () => {
+  //
+  // });
+  //
+  // it("fails when there's a zero-area portion of the polygon", () => {
+  //
+  // });
+  //
+  // it('fails when the polygon is self-intersecting', () => {
+  //
+  // });
+  //
+  // it('fails when a vertex lies an edge of which it is not an endpoint', () => {
+  //   // https://trello-attachments.s3.amazonaws.com/58d428743111af1d0a20cf28/598b740a2e569128b4392cb5/f71690195e4801010773652bac9d0a9c/capture.png
+  //
+  // });
+  //
+  // it('uses existing vertices when they perfectly overlap', () => {
+  //
+  // });
+  //
+  // it('uses existing edges when they perfectly overlap', () => {
+  //
+  // });
 });
