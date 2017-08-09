@@ -182,9 +182,8 @@ function storeFace(faceGeometry, target, context) {
  * validates the face geometry for self intersection
  * returns object with success boolean and face geometry or error message depending on validation results
  */
-function validateFaceGeometry(points, currentStoryGeometry, snapTolerance) {
+export function validateFaceGeometry(points, currentStoryGeometry, snapTolerance) {
     var error = false;
-
     // build an array of vertices for the face being created
     let faceVertices = points.map((point) => {
         // if a vertex already exists at a given location, reuse it
