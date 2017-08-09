@@ -2,7 +2,7 @@ import _ from 'lodash';
 import factory from './../factory';
 import geometryHelpers from './../helpers';
 import modelHelpers from './../../models/helpers';
-import { uniq, dropConsecutiveDups } from './../../../../utilities';
+import { uniq, dropConsecutiveDups, allPairs } from './../../../../utilities';
 
 /*
  * create a face and associated edges and vertices from an array of points
@@ -198,6 +198,75 @@ export function matchOrCreateEdges(vertices, existingEdges) {
     .map(([v1, v2]) => (findExistingEdge(v1, v2, existingEdges) || new factory.Edge(v1.id, v2.id)));
 }
 
+function InvalidFaceGeometry() {}
+InvalidFaceGeometry.prototype = new Error();
+
+export function errOnTooFewVerts(vertices) {
+  if (vertices.length < 3) {
+    throw new InvalidFaceGeometry(`can't make a polygon with fewer than three vertices: ${JSON.stringify(vertices)}`);
+  }
+}
+
+export function errOnDuplicateVerts(vertices) {
+  vertices.forEach((vertex) => {
+    if (
+      _.find(vertices, { x: vertex.x, y: vertex.y }).length >= 2
+    ) {
+      throw new InvalidFaceGeometry(`Duplicate vertex at (${vertex.x}, ${vertex.y})`);
+    }
+  });
+}
+
+export function errOnVertexIntersectsEdge(vertices, edges) {
+  edges.forEach(({ v1: v1id, v2: v2id }) => {
+    const
+      v1 = _.find(vertices, { id: v1id }),
+      v2 = _.find(vertices, { id: v2id });
+
+    vertices.forEach((v) => {
+      if (v.id === v1id || v.id === v2id) {
+        return; // this is an endpoint of an edge under consideration.
+      }
+
+      if (!geometryHelpers.ptsAreCollinear(v1, v2, v)) {
+        return;
+      }
+
+      // if the points *are* collinear, is v between v1 and v2?
+      const positionAlongEdge = _.reject(
+        [
+          (v.x - v1.x) / (v2.x - v1.x),
+          (v.y - v1.y) / (v2.y - v1.y),
+        ],
+        isNaN)[0];
+      // positionAlongEdge = 0 implies v == v1
+      // positionAlongEdge = 1 implies v == v2
+      // positionAlongEdge > 1 or < 0 implies not on the line segment
+      if (positionAlongEdge > 1 || positionAlongEdge < 0) {
+        return;
+      }
+      throw new InvalidFaceGeometry(
+        `An edge is being touched by a vertex on the same face at (${v.x}, ${v.y})`);
+    });
+  });
+}
+
+export function errOnEdgeIntersectsEdge(vertices, edges) {
+  allPairs(edges).forEach(([e1, e2]) => {
+    const
+      e1v1 = _.find(vertices, { id: e1.v1 }),
+      e1v2 = _.find(vertices, { id: e1.v2 }),
+      e2v1 = _.find(vertices, { id: e2.v1 }),
+      e2v2 = _.find(vertices, { id: e2.v2 });
+
+    const intersection = geometryHelpers.intersectionOfLines(e1v1, e1v2, e2v1, e2v2);
+    if (intersection) {
+      throw new InvalidFaceGeometry(
+        `Self intersection at ${intersection.x}, ${intersection.y}`);
+    }
+  });
+}
+
 /*
  * Given a set of points, creates vertices and edges for the face defined by the points
  * validates the face geometry for self intersection
@@ -207,7 +276,37 @@ export function validateFaceGeometry(points, currentStoryGeometry, snapTolerance
   /* validation consists of:
    - try and match each vertex to an existing one that is already in the geometry
    - create edges, and try to re-use existing ones (reversed, if necessary)
-   - after snapping, check if any vertices were merged to the same point (consecutive is okay) Do we still even have a polygon? (need >= 3 distinct verts)
+   - after snapping, check if any vertices were merged to the same point
+     Duplicate vertices can cause two problems:
+      1. zero-area portions of the face:
+
+       1
+        *---------------* 2
+        |               |
+        |               |3
+        |               *-----* 4
+        |               |5
+        |               |
+        *---------------* 6
+       7
+      2. not even actually a polygon:
+
+        *                         *
+        |\                         \
+        | \                        \\
+        |  \                       \\
+        |   \          ====>       \\
+        |    \                      \\
+        |     \                     \\
+        |      \                     \\
+        *---@---*                    **
+
+      @ is an existing point (on another face). Both * at the base of the triangle
+      were snapped to the location of @, causing a degenerate polygon (just a line).
+
+     Consecutive vertices are okay (we should combine them to a single example) as long
+     as the total number of distinct vertices is at least 3.
+
    - Check if any vertices on the face lie on an edge in the face. Err out if they do.
      (this would cause either a zero-area portion of the face,
       eg: https://trello-attachments.s3.amazonaws.com/58d428743111af1d0a20cf28/598b740a2e569128b4392cb5/f71690195e4801010773652bac9d0a9c/capture.png
@@ -216,74 +315,43 @@ export function validateFaceGeometry(points, currentStoryGeometry, snapTolerance
      )
    - Check if two edges on the new face intersect. (again, to prevent split faces)
   */
-    var error = false;
-    // build an array of vertices for the face being created
-    let faceVertices = points.map((point) => {
-        // if a vertex already exists at a given location, reuse it
-        // TODO once PR #118 is ready, remove snap tolerance again
-        return geometryHelpers.vertexForCoordinates(point, snapTolerance, currentStoryGeometry) || new factory.Vertex(point.x, point.y);
-    });
-
-    // create edges connecting each vertex in order
-    const faceEdges = matchOrCreateEdges(faceVertices, currentStoryGeometry.edges);
-    // check for duplicate vertices - these will not be considered splitting vertices bc they are endpoints
-    // first, we can just join together consecutive duplicates, since that doesn't change
-    // the geometry at all.
-    faceVertices = dropConsecutiveDups(faceVertices);
-
-    faceVertices.some((vertex) => {
-        if (faceVertices.filter(v => (v.x === vertex.x && v.y === vertex.y))
-            .length >= 2) {
-            error = `Duplicate vertex at (${vertex.x}, ${vertex.y})`;
-            return true;
-        }
-    });
+  // build an array of vertices for the face being created
+  let faceVertices = points.map(point => (
+      // if a vertex already exists at a given location, reuse it
+      // TODO once PR #118 is ready, remove snap tolerance again
+    geometryHelpers.vertexForCoordinates(point, snapTolerance, currentStoryGeometry) || new factory.Vertex(point.x, point.y)
+  ));
 
 
-    // loop through face edges and validate against splittingvertices or intersecting edges
-    faceEdges.some((e1) => {
-        const e1v1 = faceVertices.find(v => v.id === e1.v1),
-            e1v2 = faceVertices.find(v => v.id === e1.v2);
+  // first, we can just join together consecutive duplicates, since that doesn't change
+  // the geometry at all.
+  faceVertices = dropConsecutiveDups(faceVertices);
 
-        // check for vertices splitting an edge on the same face
-        const splittingVertices = faceVertices.filter((vertex) => {
-            // don't check if the endpoints of an edge are splitting that edge
-            if ((e1v1.id !== vertex.id && e1v2.id !== vertex.id) &&
-                !(e1v1.x === vertex.x && e1v1.y === vertex.y) &&
-                !(e1v2.x === vertex.x && e1v2.y === vertex.y)
-            ) {
-                const projection = geometryHelpers.projectionOfPointToLine(vertex, {
-                    p1: e1v1,
-                    p2: e1v2
-                });
-                return geometryHelpers.distanceBetweenPoints(vertex, projection) <= 1 / geometryHelpers.clipScale;
-            }
-        });
+  // create edges connecting each vertex in order
+  const faceEdges = matchOrCreateEdges(faceVertices, currentStoryGeometry.edges);
 
-        if (splittingVertices.length) {
-            error = `An edge is being touched by a vertex on the same face at (${splittingVertices[0].x}, ${splittingVertices[0].y})`;
-        }
-
-        // check for two edges on the same face that intersect
-        return faceEdges.some((e2) => {
-            const e2v1 = faceVertices.find(v => v.id === e2.v1),
-                e2v2 = faceVertices.find(v => v.id === e2.v2),
-                intersection = geometryHelpers.intersectionOfLines(e1v1, e1v2, e2v1, e2v2);
-            if (intersection) {
-                error = `Self intersection at ${intersection.x}, ${intersection.y}`;
-                return true;
-            }
-        });
-    });
-
-    return error ? {
-      success: false,
-      error,
-    } : {
-      success: true,
-      vertices: faceVertices,
-      edges: faceEdges,
+  try {
+    errOnTooFewVerts(faceVertices);
+    errOnDuplicateVerts(faceVertices);
+    errOnVertexIntersectsEdge(faceVertices, faceEdges);
+    errOnEdgeIntersectsEdge(faceVertices, faceEdges);
+  } catch (e) {
+    if (e instanceof InvalidFaceGeometry) {
+      return {
+        success: false,
+        error: `${e}`,
+      };
     }
+    // not an error we know about -- shouldn't have caught it
+    // (...grumble, grumble javascript's underpowered exceptions...)
+    throw e;
+  }
+
+  return {
+    success: true,
+    vertices: faceVertices,
+    edges: faceEdges,
+  };
 }
 
 /*
