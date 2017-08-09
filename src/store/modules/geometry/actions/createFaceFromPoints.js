@@ -34,7 +34,7 @@ export default function createFaceFromPoints(context, payload) {
     }
 
 
-    const faceGeometry = validateFaceGeometry(facePoints, context);
+    const faceGeometry = validateFaceGeometry(facePoints, context.rootGetters['application/currentStoryGeometry'], context.rootGetters['project/snapTolerance']);
     if (!faceGeometry.success) {
         window.eventBus.$emit('error', faceGeometry.error);
         console.error(faceGeometry.error);
@@ -182,15 +182,14 @@ function storeFace(faceGeometry, target, context) {
  * validates the face geometry for self intersection
  * returns object with success boolean and face geometry or error message depending on validation results
  */
-function validateFaceGeometry(points, context) {
-	const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'];
+function validateFaceGeometry(points, currentStoryGeometry, snapTolerance) {
     var error = false;
 
     // build an array of vertices for the face being created
     let faceVertices = points.map((point) => {
         // if a vertex already exists at a given location, reuse it
         // TODO once PR #118 is ready, remove snap tolerance again
-        return geometryHelpers.vertexForCoordinates(point, context.rootGetters['project/snapTolerance'], currentStoryGeometry) || new factory.Vertex(point.x, point.y);
+        return geometryHelpers.vertexForCoordinates(point, snapTolerance, currentStoryGeometry) || new factory.Vertex(point.x, point.y);
     });
 
     // create edges connecting each vertex in order
