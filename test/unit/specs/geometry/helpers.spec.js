@@ -2,7 +2,10 @@ import _ from 'lodash';
 import { gen } from 'testcheck';
 import helpers from '../../../../src/store/modules/geometry/helpers';
 import {
-  assert, nearlyEqual, refute, assertProperty, isNearlyEqual, genPoint,
+  assert, nearlyEqual, refute, assertProperty, isNearlyEqual,
+  genTriangleLeftOfOrigin,
+  genTriangleRightOfOrigin,
+  genTriangle,
 } from '../../test_helpers';
 
 describe('syntheticRectangleSnaps', () => {
@@ -170,16 +173,6 @@ describe('projectionOfPointToLine', () => {
 });
 
 describe('setOperation', () => {
-  const
-    genPointLeftOfOrigin = gen.object({ x: gen.sNegInt, y: gen.int }),
-    genTriangleLeftOfOrigin = gen.array(genPointLeftOfOrigin, { size: 3 })
-      .suchThat(pts => !helpers.ptsAreCollinear(...pts)),
-    genPointRightOfOrigin = gen.object({ x: gen.sPosInt, y: gen.int }),
-    genTriangleRightOfOrigin = gen.array(genPointRightOfOrigin, { size: 3 })
-      .suchThat(pts => !helpers.ptsAreCollinear(...pts)),
-    genTriangle = gen.array(genPoint, { size: 3 })
-      .suchThat(pts => !helpers.ptsAreCollinear(...pts));
-
   it('union or intersection with self is self', () => {
     assertProperty(
       genTriangle,
@@ -236,5 +229,116 @@ describe('setOperation', () => {
         assert(intersection);
         assert(intersection.length === 0);
       });
+  });
+});
+
+describe('edgeDirection', () => {
+  it('can handle a 45-deg angle', () => {
+    const angle = helpers.edgeDirection({
+      start: { x: 0, y: 0 },
+      end: { x: 1, y: 1 },
+    });
+    assert(
+      nearlyEqual(angle, Math.PI / 4),
+      'expected an angle of 45-deg (PI/4 radians)');
+  });
+
+  it('can handle a straight up or straight down line', () => {
+    const
+      north = helpers.edgeDirection({
+        start: { x: 0, y: 0 },
+        end: { x: 0, y: 1 },
+      }),
+      south = helpers.edgeDirection({
+        start: { x: 0, y: 0 },
+        end: { x: 0, y: -1 },
+      });
+    assert(
+      nearlyEqual(north, 0.5 * Math.PI),
+      `expected angle of north to be pi/2 rad (was ${north})`);
+    assert(
+      nearlyEqual(south, 0.5 * Math.PI),
+      `expected angle of south to be pi/2 rad (was ${south})`);
+  });
+
+  it('can handle a west or east line', () => {
+    const
+      east = helpers.edgeDirection({
+        start: { x: 0, y: 0 },
+        end: { x: 1, y: 0 },
+      }),
+      west = helpers.edgeDirection({
+        start: { x: 0, y: 0 },
+        end: { x: -1, y: 0 },
+      });
+    assert(
+      nearlyEqual(east, 0),
+      'expected angle of east to be 0 rad');
+    assert(
+      nearlyEqual(west, 0),
+      `expected angle of west to be PI rad (was ${west})`);
+  });
+
+  it('can handle a 30-deg angle', () => {
+    const angle = helpers.edgeDirection({
+      start: { x: 0, y: 0 },
+      end: { x: Math.sqrt(3) / 2, y: 0.5 },
+    });
+    assert(
+      nearlyEqual(angle, Math.PI / 6),
+      `expected 30-deg angle to be pi/6 (was ${angle})`);
+  });
+});
+
+describe('haveSimilarAngles', () => {
+  it('finds that identical angles are similar', () => {
+    assert(
+      helpers.haveSimilarAngles(
+        { start: { x: 0, y: 0 }, end: { x: 1, y: 1 } },
+        { start: { x: 0, y: 0 }, end: { x: 1, y: 1 } },
+      ));
+
+    assert(
+      helpers.haveSimilarAngles(
+        { start: { x: 0, y: 0 }, end: { x: 1, y: 5 } },
+        { start: { x: -1, y: -5 }, end: { x: 0, y: 0 } },
+    ));
+  });
+
+  it('recognizes that right angles are not similar', () => {
+    assert(
+      !helpers.haveSimilarAngles(
+        { start: { x: 0, y: 0 }, end: { x: 1, y: 0 } },
+        { start: { x: 0, y: 0 }, end: { x: 0, y: 1 } },
+      ));
+  });
+
+  it('considers north and south similar', () => {
+    assert(
+      helpers.haveSimilarAngles(
+        { start: { x: 0, y: 0 }, end: { x: 0, y: 1 } },
+        { start: { x: 0, y: 0 }, end: { x: 0, y: -1 } },
+      ));
+  });
+
+  it('considers barely-north-of-east and barely-north-west similar', () => {
+    assert(
+      helpers.haveSimilarAngles(
+        { start: { x: 0, y: 0 }, end: { x: 100, y: 1 } },
+        { start: { x: 0, y: 0 }, end: { x: -100, y: -1 } },
+      ));
+  });
+
+  it('finds dissimilar angles dissimilar', () => {
+    assert(
+      !helpers.haveSimilarAngles(
+        { start: { x: 0, y: 0 }, end: { x: 3, y: 2 } },
+        { start: { x: 0, y: 0 }, end: { x: 2, y: 3 } },
+      ));
+    assert(
+      !helpers.haveSimilarAngles(
+        { start: { x: 12, y: 1 }, end: { x: 3, y: 18 } },
+        { start: { x: 1, y: 24 }, end: { x: 1, y: 10 } },
+      ));
   });
 });

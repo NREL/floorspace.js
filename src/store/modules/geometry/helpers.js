@@ -323,6 +323,22 @@ const helpers = {
         { x, y: y + (2 * (yMid - y)), synthetic: true, originalPt: { x, y } })),
     ];
   },
+  edgeDirection({ start, end }) {
+    // return the angle from east, in radians.
+    const
+      deltaX = end.x - start.x,
+      deltaY = end.y - start.y;
+    return deltaX === 0 ? 0.5 * Math.PI : Math.atan(deltaY / deltaX);
+  },
+  haveSimilarAngles(edge1, edge2) {
+    const
+      angleDiff = this.edgeDirection(edge1) - this.edgeDirection(edge2),
+      correctedDiff = Math.min(
+        Math.abs(angleDiff),
+        Math.PI - angleDiff, // To catch angles that are very similar, but opposite directions
+      );
+    return correctedDiff < 0.05 * Math.PI;
+  },
 };
 
 export default helpers;

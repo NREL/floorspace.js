@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { check, property, gen } from 'testcheck';
+import helpers from '../../src/store/modules/geometry/helpers';
 
 
 export function assert(condition, message) {
@@ -38,3 +39,51 @@ export function isNearlyEqual(obj, oth) {
 }
 
 export const genPoint = gen.object({ x: gen.int, y: gen.int });
+
+export const
+  genPointLeftOfOrigin = gen.object({ x: gen.sNegInt, y: gen.int }),
+  genTriangleLeftOfOrigin = gen.array(genPointLeftOfOrigin, { size: 3 })
+    .suchThat(pts => !helpers.ptsAreCollinear(...pts)),
+  genPointRightOfOrigin = gen.object({ x: gen.sPosInt, y: gen.int }),
+  genTriangleRightOfOrigin = gen.array(genPointRightOfOrigin, { size: 3 })
+    .suchThat(pts => !helpers.ptsAreCollinear(...pts)),
+  genTriangle = gen.array(genPoint, { size: 3 })
+    .suchThat(pts => !helpers.ptsAreCollinear(...pts));
+
+
+export const genRectangle = gen.array(genPoint, { size: 2 })
+  .suchThat(([v1, v2]) => (v1.x !== v2.x && v1.y !== v2.y))
+  .then(([v1, v2]) => (
+    [
+      v1,
+      { x: v1.x, y: v2.y },
+      v2,
+      { x: v2.x, y: v1.y },
+    ]
+  ));
+
+export const createIrregularPolygon = ({ center, radii }) => {
+  const angleStep = (2 * Math.PI) / radii.length;
+
+  return radii
+    .map((radius, n) => ({
+      x: center.x + (radius * Math.sin(n * angleStep)),
+      y: center.y + (radius * Math.cos(n * angleStep)),
+    }));
+};
+
+export const genIrregularPolygon = gen.object({
+  center: genPoint,
+  radii: gen.array(gen.intWithin(5, 100), { minSize: 3, maxSize: 20 }),
+})
+.then(createIrregularPolygon);
+
+export const genRegularPolygon = gen.object({
+  center: genPoint,
+  radius: gen.intWithin(5, 100),
+  numEdges: gen.intWithin(3, 20),
+})
+.then(({ center, radius, numEdges }) => createIrregularPolygon({
+  radii: _.range(numEdges).map(_.constant(radius)),
+  center,
+}));

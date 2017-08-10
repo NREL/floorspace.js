@@ -1,6 +1,10 @@
 import _ from 'lodash';
 import { gen } from 'testcheck';
-import { assert, refute, assertProperty, genPoint } from '../../test_helpers';
+import {
+ assert, refute, assertProperty,
+ genPoint, genTriangle, genRectangle, genRegularPolygon, genIrregularPolygon,
+
+} from '../../test_helpers';
 import { validateFaceGeometry } from '../../../../src/store/modules/geometry/actions/createFaceFromPoints';
 
 describe('validateFaceGeometry', () => {
@@ -48,18 +52,39 @@ describe('validateFaceGeometry', () => {
       });
   });
 
-  // it('succeeds from empty on a triangle', () => {
-  //
-  // });
-  //
-  // it('succeeds from empty on a rectangle', () => {
-  //
-  // });
-  //
-  // it('succeeds from empty on a regular polygon', () => {
-  //
-  // });
-  //
+  it('succeeds from empty on a triangle', () => {
+    assertProperty(
+      genTriangle, (tri) => {
+        const resp = validateFaceGeometry(tri, emptyStoryGeometry, 0);
+        assert(resp && resp.success);
+      });
+  });
+
+  it('succeeds from empty on a rectangle', () => {
+    assertProperty(
+      genRectangle, (rect) => {
+        const resp = validateFaceGeometry(rect, emptyStoryGeometry, 0);
+        assert(resp && resp.success);
+      });
+  });
+
+  it('succeeds from empty on a regular polygon', () => {
+    assertProperty(
+      genRegularPolygon, (poly) => {
+        const resp = validateFaceGeometry(poly, emptyStoryGeometry, 0);
+        assert(resp && resp.success);
+      });
+  });
+
+  it('succeeds from empty on an irregular polygon', () => {
+    assertProperty(
+      genIrregularPolygon, (poly) => {
+        const resp = validateFaceGeometry(poly, emptyStoryGeometry, 0);
+        assert(resp && resp.success);
+      });
+  });
+
+
   // it('fails when given a zero-area polygon', () => {
   //
   // });

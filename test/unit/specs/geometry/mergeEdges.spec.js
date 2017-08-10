@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { gen } from 'testcheck';
-import { assert, refute, nearlyEqual, assertProperty } from '../../test_helpers';
+import { assert, refute, assertProperty } from '../../test_helpers';
 import mergeEdges from '../../../../src/store/modules/geometry/mergeEdges';
 
 describe('endpointsNearby', () => {
@@ -52,116 +52,6 @@ describe('endpointsNearby', () => {
   });
 });
 
-describe('edgeDirection', () => {
-  it('can handle a 45-deg angle', () => {
-    const angle = mergeEdges.edgeDirection({
-      start: { x: 0, y: 0 },
-      end: { x: 1, y: 1 },
-    });
-    assert(
-      nearlyEqual(angle, Math.PI / 4),
-      'expected an angle of 45-deg (PI/4 radians)');
-  });
-
-  it('can handle a straight up or straight down line', () => {
-    const
-      north = mergeEdges.edgeDirection({
-        start: { x: 0, y: 0 },
-        end: { x: 0, y: 1 },
-      }),
-      south = mergeEdges.edgeDirection({
-        start: { x: 0, y: 0 },
-        end: { x: 0, y: -1 },
-      });
-    assert(
-      nearlyEqual(north, 0.5 * Math.PI),
-      `expected angle of north to be pi/2 rad (was ${north})`);
-    assert(
-      nearlyEqual(south, 0.5 * Math.PI),
-      `expected angle of south to be pi/2 rad (was ${south})`);
-  });
-
-  it('can handle a west or east line', () => {
-    const
-      east = mergeEdges.edgeDirection({
-        start: { x: 0, y: 0 },
-        end: { x: 1, y: 0 },
-      }),
-      west = mergeEdges.edgeDirection({
-        start: { x: 0, y: 0 },
-        end: { x: -1, y: 0 },
-      });
-    assert(
-      nearlyEqual(east, 0),
-      'expected angle of east to be 0 rad');
-    assert(
-      nearlyEqual(west, 0),
-      `expected angle of west to be PI rad (was ${west})`);
-  });
-
-  it('can handle a 30-deg angle', () => {
-    const angle = mergeEdges.edgeDirection({
-      start: { x: 0, y: 0 },
-      end: { x: Math.sqrt(3) / 2, y: 0.5 },
-    });
-    assert(
-      nearlyEqual(angle, Math.PI / 6),
-      `expected 30-deg angle to be pi/6 (was ${angle})`);
-  });
-});
-
-describe('haveSimilarAngles', () => {
-  it('finds that identical angles are similar', () => {
-    assert(
-      mergeEdges.haveSimilarAngles(
-        { start: { x: 0, y: 0 }, end: { x: 1, y: 1 } },
-        { start: { x: 0, y: 0 }, end: { x: 1, y: 1 } },
-      ));
-
-    assert(
-      mergeEdges.haveSimilarAngles(
-        { start: { x: 0, y: 0 }, end: { x: 1, y: 5 } },
-        { start: { x: -1, y: -5 }, end: { x: 0, y: 0 } },
-    ));
-  });
-
-  it('recognizes that right angles are not similar', () => {
-    assert(
-      !mergeEdges.haveSimilarAngles(
-        { start: { x: 0, y: 0 }, end: { x: 1, y: 0 } },
-        { start: { x: 0, y: 0 }, end: { x: 0, y: 1 } },
-      ));
-  });
-
-  it('considers north and south similar', () => {
-    assert(
-      mergeEdges.haveSimilarAngles(
-        { start: { x: 0, y: 0 }, end: { x: 0, y: 1 } },
-        { start: { x: 0, y: 0 }, end: { x: 0, y: -1 } },
-      ));
-  });
-
-  it('considers barely-north-of-east and barely-north-west similar', () => {
-    assert(
-      mergeEdges.haveSimilarAngles(
-        { start: { x: 0, y: 0 }, end: { x: 100, y: 1 } },
-        { start: { x: 0, y: 0 }, end: { x: -100, y: -1 } },
-      ));
-  });
-
-  it('finds dissimilar angles dissimilar', () => {
-    assert(
-      !mergeEdges.haveSimilarAngles(
-        { start: { x: 0, y: 0 }, end: { x: 3, y: 2 } },
-        { start: { x: 0, y: 0 }, end: { x: 2, y: 3 } },
-      ));
-    assert(
-      !mergeEdges.haveSimilarAngles(
-        { start: { x: 12, y: 1 }, end: { x: 3, y: 18 } },
-        { start: { x: 1, y: 24 }, end: { x: 1, y: 10 } },
-      ));
-  });
-});
 
 describe('consolidateVertices', () => {
   // A tool for making generic arguments for the consolidateVertices
