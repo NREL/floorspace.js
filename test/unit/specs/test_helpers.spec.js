@@ -36,7 +36,7 @@ describe('genRectangle', () => {
         edgeLengths = rect.map((point, ix) => (
           helpers.distanceBetweenPoints(point, rect[(ix + 1) % rect.length])
         )),
-        distinctEdgeLengths = _.uniq(edgeLengths);
+        distinctEdgeLengths = _.uniqWith(edgeLengths, nearlyEqual);
 
       assert(
         distinctEdgeLengths.length <= 2,

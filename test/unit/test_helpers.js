@@ -51,7 +51,7 @@ export const
     .suchThat(pts => !helpers.ptsAreCollinear(...pts));
 
 
-export const genRectangle = gen.array(genPoint, { size: 2 })
+export const genRectilinearRectangle = gen.array(genPoint, { size: 2 })
   .suchThat(([v1, v2]) => (v1.x !== v2.x && v1.y !== v2.y))
   .then(([v1, v2]) => (
     [
@@ -71,6 +71,18 @@ export const createIrregularPolygon = ({ center, radii }) => {
       y: center.y + (radius * Math.cos(n * angleStep)),
     }));
 };
+
+export const genRectangle = gen.oneOf([
+  // boring old rectangles aligned with coordinate axes
+  genRectilinearRectangle,
+  // and square diamonds!
+  gen.object({
+    center: genPoint,
+    radii: gen.intWithin(5, 100)
+      .then(radius => _.range(4).map(_.constant(radius))),
+  })
+  .then(createIrregularPolygon),
+]);
 
 export const genIrregularPolygon = gen.object({
   center: genPoint,
