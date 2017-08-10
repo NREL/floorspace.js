@@ -13,6 +13,9 @@ export default {
       story_id: null,
       subselection_id: null, // space, shading, image
 
+      component_id: null,
+      component_definition_id: null,
+
       building_unit_id: null,
       thermal_zone_id: null,
       space_type_id: null,

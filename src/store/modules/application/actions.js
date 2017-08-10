@@ -1,6 +1,5 @@
 export default {
   setCurrentStoryId(context, payload) {
-    // TODO: clear subselections?
     const { id } = payload;
     if (context.rootState.models.stories.map(s => s.id).indexOf(id) !== -1) {
       context.commit('setCurrentStoryId', { id });
@@ -15,6 +14,24 @@ export default {
       context.getters.currentStory.images.find(i => i.id === id)
     )) {
       context.commit('setCurrentSubSelectionId', { id });
+    }
+  },
+
+  setCurrentComponentId(context, payload) {
+    const { id } = payload;
+    if (context.getters.currentStory && (
+      context.getters.currentStory.windows.find(i => i.id === id) ||
+      context.getters.currentStory.daylighting_controls.find(i => i.id === id)
+    )) {
+      context.commit('setCurrentComponentId', { id });
+    }
+  },
+
+  setCurrentComponentDefinitionId(context, payload) {
+    const { id } = payload;
+    if (context.rootState.models.library.daylighting_control_definitions.find(i => i.id === id) ||
+      context.rootState.models.library.window_definitions.find(i => i.id === id)) {
+      context.commit('setCurrentComponentDefinitionId', { id });
     }
   },
 

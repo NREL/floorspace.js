@@ -13,6 +13,7 @@ export default {
       floor_to_ceiling_height: 0,
       multiplier: 0,
       spaces: [],
+      daylighting_controls: [],
       windows: [],
       shading: [],
       images: [],

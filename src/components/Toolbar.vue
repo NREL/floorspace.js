@@ -62,8 +62,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </div>
         <div class='input-select'>
             <label>Definition</label>
-            <select v-model='componentDefinition'>
-                <option v-for='definition in componentDefinitions' :value="componentDefinition">{{ definition.name }}</option>
+            <select v-model='currentComponentDefinition'>
+                <option v-for='definition in componentDefinitions' :value="definition">{{ definition.name }}</option>
             </select>
             <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
                 <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
@@ -86,17 +86,17 @@ export default {
   name: 'toolbar',
   data() {
     return {
-      componentType: 'daylighting_control_definitions',
-      componentDefinition: '',
+      componentType: '',
+      // componentDefinition: '',
       componentTypes: {
         daylighting_control_definitions: 'Daylighting Control Definitions',
         window_definitions: 'Window Definitions',
       },
-    }
+    };
   },
   mounted() {
     this.componentType = Object.keys(this.componentTypes)[0];
-    this.componentDefinition = this.componentDefinitions[0];
+    this.currentComponentDefinition = this.componentDefinitions[0];
   },
   methods: {
     exportData() {
@@ -191,6 +191,19 @@ export default {
       get() { return `${this.$store.state.project.grid.spacing} ${this.$store.state.project.config.units}`; },
       set(spacing) { this.$store.dispatch('project/setSpacing', { spacing }); },
     },
+
+    currentComponentDefinition: {
+      get() { return this.$store.getters['application/currentComponentDefinition']; },
+      set(item) {
+        if (!item) { return; }
+        this.$store.dispatch('application/setCurrentComponentDefinitionId', { id: item.id });
+      },
+    },
+
+    // currentComponent: {
+    //   get() { return this.$store.getters['application/currentComponent']; },
+    //   set(item) { this.$store.dispatch('application/currentComponentId', { id: item.id }); },
+    // },
   },
   watch: {
     tool(val) {

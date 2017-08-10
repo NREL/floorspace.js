@@ -29,6 +29,20 @@ export default {
   currentShading(state, getters) { return getters.currentSubSelectionType === 'shading' ? getters.currentSubSelection : null; },
   currentImage(state, getters) { return getters.currentSubSelectionType === 'images' ? getters.currentSubSelection : null; },
 
+  // full component (window or daylighting_control) instance for the component_id, this will be stored on the currentStory
+  currentComponent(state, getters) {
+    const currentStory = getters['currentStory'];
+    const componentId = state.currentSelections.component_id;
+    return currentStory.windows.find(i => i.id === componentId) ||
+      currentStory.daylighting_controls.find(i => i.id === componentId);
+  },
+  // full component definition (window_definition or daylighting_control_definition) instance for the component_definition_id
+  // this will be stored in the top level library
+  currentComponentDefinition(state, getters, rootState) {
+    const componentDefinitionId = state.currentSelections.component_definition_id;
+    return rootState.models.library.window_definitions.find(i => i.id === componentDefinitionId) ||
+      rootState.models.library.daylighting_control_definitions.find(i => i.id === componentDefinitionId);
+  },
 
   currentBuildingUnit(state, getters, rootState) { return rootState.models.library.building_units.find(i => i.id === state.currentSelections.building_unit_id); },
   currentThermalZone(state, getters, rootState) { return rootState.models.library.thermal_zones.find(i => i.id === state.currentSelections.thermal_zone_id); },
