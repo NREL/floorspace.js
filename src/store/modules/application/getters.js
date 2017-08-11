@@ -29,6 +29,14 @@ export default {
   currentShading(state, getters) { return getters.currentSubSelectionType === 'shading' ? getters.currentSubSelection : null; },
   currentImage(state, getters) { return getters.currentSubSelectionType === 'images' ? getters.currentSubSelection : null; },
 
+  // the type of the component definition being instantiated
+  currentComponentType(state, getters, rootState) {
+    const componentDefinitionId = state.currentSelections.component_definition_id;
+    if (rootState.models.library.window_definitions.find(i => i.id === componentDefinitionId)) { return 'window_definitions'; }
+    if (rootState.models.library.daylighting_control_definitions.find(i => i.id === componentDefinitionId)) { return 'daylighting_control_definitions'; }
+    return null;
+  },
+
   // full component (window or daylighting_control) instance for the component_id, this will be stored on the currentStory
   currentComponent(state, getters) {
     const currentStory = getters['currentStory'];

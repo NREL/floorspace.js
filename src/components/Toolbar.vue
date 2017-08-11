@@ -54,6 +54,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <div class='input-select'>
             <label>Type</label>
             <select v-model='componentType'>
+                <option selected>--</option>
                 <option v-for='(n, t) in componentTypes' :value="t">{{ n }}</option>
             </select>
             <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
@@ -63,6 +64,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <div class='input-select'>
             <label>Definition</label>
             <select v-model='currentComponentDefinition'>
+                <option selected>--</option>
                 <option v-for='definition in componentDefinitions' :value="definition">{{ definition.name }}</option>
             </select>
             <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>

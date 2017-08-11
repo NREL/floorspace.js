@@ -271,6 +271,10 @@ const helpers = {
         return geometry.faces.filter(face => face.edgeRefs.find(eR => eR.edge_id === edge_id));
     },
 
+    pointInFace(point, faceVertices) {
+      return true;
+    },
+
     ptsAreCollinear(p1, p2, p3) {
       const [a, b] = [p1.x, p1.y],
         [m, n] = [p2.x, p2.y],

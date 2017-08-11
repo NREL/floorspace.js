@@ -83,7 +83,6 @@ export default {
     ResizeEvents.$off('resize-resize', this.renderGrid);
   },
   computed: {
-
     ...mapState({
       currentMode: state => state.application.currentSelections.mode,
       currentTool: state => state.application.currentSelections.tool,
@@ -101,6 +100,8 @@ export default {
       currentStoryGeometry: 'application/currentStoryGeometry',
       currentSpace: 'application/currentSpace',
       currentShading: 'application/currentShading',
+      currentComponentDefinition: 'application/currentComponentDefinition',
+      currentComponentType: 'application/currentComponentType',
     }),
     currentSubSelection: {
       get() { return this.$store.getters['application/currentSubSelection']; },

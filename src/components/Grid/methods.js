@@ -17,13 +17,50 @@ export default {
   /*
   * handle a click on the svg grid
   */
-  gridClicked (e) {
+  gridClicked(e) {
     if (this.currentTool === 'Eraser' ||
     ((this.currentTool === 'Rectangle' || this.currentTool === 'Polygon') && (this.currentSpace || this.currentShading))) {
       this.addPoint(e);
     }
+    if (this.currentTool === 'Place Component') {
+      if (this.currentComponentType === 'window_definitions') {
+        this.placeWindow(e);
+      } else if (this.currentComponentType === 'daylighting_control_definitions') {
+        this.placeDaylightingControl(e);
+      }
+    }
   },
+  placeWindow(e) {
+    const gridPoint = {
+      x: this.pxToGrid(e.offsetX, 'x'),
+      y: this.pxToGrid(e.offsetY, 'y'),
+    };
+    // snap only to edges
+    const snapTarget = this.findSnapTarget(gridPoint, { edge_component: true });
 
+    if (snapTarget.type === 'edge') {
+      window.eventBus.$emit('success', `Window created at (${snapTarget.projection.x}, ${snapTarget.projection.y})`);
+    } else {
+      window.eventBus.$emit('error', 'Windows must be on edges.');
+    }
+  },
+  placeDaylightingControl(e) {
+    const gridPoint = {
+      x: this.pxToGrid(e.offsetX, 'x'),
+      y: this.pxToGrid(e.offsetY, 'y'),
+    };
+    // check if control is being placed inside a space's face
+    let isInFace = false;
+    this.currentStoryGeometry.faces.forEach(({ id }) => {
+      if (geometryHelpers.pointInFace(gridPoint, geometryHelpers.verticesForFaceId(id))) { isInFace = true; }
+    });
+
+    if (isInFace) {
+      window.eventBus.$emit('success', `Daylighting control created at (${gridPoint.x}, ${gridPoint.y})`);
+    } else {
+      window.eventBus.$emit('error', 'Daylighting controls must be in spaces.');
+    }
+  },
   /*
   * If the grid is clicked when a drawing tool or the eraser tool is active, add a point to the component
   * if the new point completes a face being drawn, save the face
@@ -60,7 +97,9 @@ export default {
   */
   highlightSnapTarget (e) {
     // only highlight snap targets in drawing modes when a space or shading has been selected
-    if (this.currentTool !== 'Eraser' && ((this.currentTool !== 'Rectangle' && this.currentTool !== 'Polygon') || (!this.currentSpace && !this.currentShading))) { return; }
+    if (!(this.currentTool === 'Eraser' ||
+    (this.currentTool === 'Place Component' && this.currentComponentDefinition) ||
+    ((this.currentTool === 'Rectangle' || this.currentTool === 'Polygon') && (this.currentSpace || this.currentShading)))) { return; }
 
     // unhighlight expired snap targets
     d3.selectAll('#grid .highlight, #grid .gridpoint').remove();
@@ -72,7 +111,8 @@ export default {
       y: this.pxToGrid(e.offsetY, 'y')
     };
 
-    const snapTarget = this.findSnapTarget(gridPoint);
+    const options = { edge_component: (this.currentTool === 'Place Component' && this.currentComponentType === 'window_definitions') };
+    const snapTarget = this.findSnapTarget(gridPoint, options);
 
     // render a line and point showing which geometry would be created with a click at this location
     const guidePoint = snapTarget.type === 'edge' ? snapTarget.projection :
@@ -393,7 +433,7 @@ export default {
           // if a face on the current story is clicked while the Select tool is active
           // lookup its corresponding model (space/shading) and select it
           this.currentSubSelection = modelHelpers.modelForFace(this.$store.state.models, d.face_id);
-          
+
         } else if (this.currentTool === 'Fill' && (this.currentSpace || this.currentShading)) {
           // if a face on the current story is clicked while the Select tool is active
           // lookup its corresponding model (space/shading) and select it
@@ -485,22 +525,29 @@ export default {
   * if the grid is active and no vertex or edge is within the snap tolerance, returns the closest grid point
   * if the grid is inactive, returns the or the location of the point
   */
-  findSnapTarget (gridPoint) {
-
+  findSnapTarget(gridPoint, options = {}) {
+    const { edge_component: snapOnlyToEdges } = options;
     if (event.shiftKey) {
       // disable snapping when shift is held down
       return {
         type: 'gridpoint',
-        ...gridPoint
+        ...gridPoint,
       };
     }
 
     // translate grid point to real world units to check for snapping targets
     const rwuPoint = {
       x: this.gridToRWU(gridPoint.x, 'x'),
-      y: this.gridToRWU(gridPoint.y, 'y')
+      y: this.gridToRWU(gridPoint.y, 'y'),
     };
-
+    // if snapping only to edges (placing edge components, return either the snapping edge or original point)
+    if (snapOnlyToEdges) {
+      const snappingEdge = this.snappingEdgeData(rwuPoint);
+      return snappingEdge || {
+        type: 'gridpoint',
+        ...gridPoint,
+      };
+    }
     // if a snappable vertex exists, don't check for edges
     const snappingVertex = this.snappingVertexData(rwuPoint);
     if (snappingVertex) { return snappingVertex; }
@@ -1058,4 +1105,4 @@ export default {
 
     this.axis.y.call(this.axis_generator.y.tickPadding(yPadding));
   }
-}
+};
