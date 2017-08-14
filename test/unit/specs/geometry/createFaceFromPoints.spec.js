@@ -1,9 +1,9 @@
 import _ from 'lodash';
-import { gen } from 'testcheck';
+import { gen, sample } from 'testcheck';
 import {
  assert, refute, assertProperty,
  genPoint, genTriangle, genRectangle, genRegularPolygon, genIrregularPolygon,
-
+ createIrregularPolygon,
 } from '../../test_helpers';
 import { validateFaceGeometry } from '../../../../src/store/modules/geometry/actions/createFaceFromPoints';
 
@@ -42,6 +42,20 @@ describe('validateFaceGeometry', () => {
   });
 
   const emptyStoryGeometry = { id: 2, vertices: [], edges: [], faces: [] };
+  const neg5by5Rect = {
+    id: 3,
+    vertices: [
+      { x: 0, y: 0, id: 'origin' }, { x: -5, y: 0, id: '(-5, 0)' },
+      { x: -5, y: -5, id: '(-5, -5)' }, { x: 0, y: -5, id: '(0, -5)' }],
+    edges: [
+      { id: 'top', v1: 'origin', v2: '(-5, 0)' },
+      { id: 'left', v1: '(-5, 0)', v2: '(-5, -5)' },
+      { id: 'bottom', v1: '(-5, -5)', v2: '(0, -5)' },
+      { id: 'right', v1: '(0, -5)', v2: 'origin' }],
+    faces: [],
+  };
+
+
   const genTooFewVerts = gen.array(genPoint, { maxSize: 2 });
 
   it('fails when given too few vertices', () => {
@@ -84,29 +98,98 @@ describe('validateFaceGeometry', () => {
       });
   });
 
+  const
+    genZeroAreaTriangle = gen.array(genPoint, { size: 2 })
+      .then(([a, b]) => ([a, b, a])),
+    genZeroAreaRectangle = gen.array(genPoint, { size: 2 })
+      .then(([a, b]) => ([a, b, b, a])),
+    genZeroAreaPolygon = gen.oneOf([
+      genZeroAreaTriangle, genZeroAreaRectangle
+    ]);
 
-  // it('fails when given a zero-area polygon', () => {
-  //
-  // });
-  //
-  // it("fails when there's a zero-area portion of the polygon", () => {
-  //
-  // });
-  //
-  // it('fails when the polygon is self-intersecting', () => {
-  //
-  // });
-  //
-  // it('fails when a vertex lies an edge of which it is not an endpoint', () => {
-  //   // https://trello-attachments.s3.amazonaws.com/58d428743111af1d0a20cf28/598b740a2e569128b4392cb5/f71690195e4801010773652bac9d0a9c/capture.png
-  //
-  // });
-  //
-  // it('uses existing vertices when they perfectly overlap', () => {
-  //
-  // });
-  //
-  // it('uses existing edges when they perfectly overlap', () => {
-  //
-  // });
+  it('fails when given a zero-area polygon', () => {
+    assertProperty(
+      genZeroAreaPolygon, (poly) => {
+        const resp = validateFaceGeometry(poly, emptyStoryGeometry, 0);
+        refute(resp && resp.success);
+      });
+  });
+
+  const genPolygonWithSpur = gen.object({
+    center: genPoint,
+    radii: gen.array(gen.intWithin(5, 100), { minSize: 3, maxSize: 20 }),
+    spurPos: gen.sPosInt,
+  })
+  .then(({ center, radii, spurPos: spurPosBeforeMod }) => {
+    const
+      spurPos = spurPosBeforeMod % radii.length,
+      poly = createIrregularPolygon({ center, radii }),
+      spikyPoly = createIrregularPolygon({
+        center,
+        radii: [
+          ...radii.slice(0, spurPos),
+          radii[spurPos] + 20,
+          ...radii.slice(spurPos + 1),
+        ],
+      });
+    poly.splice(spurPos + 1, 0, spikyPoly[spurPos], poly[spurPos]);
+    return poly;
+  });
+
+  it("fails when there's a zero-area portion of the polygon", () => {
+    const resp = validateFaceGeometry(
+      [{ x: 0, y: 0 }, { x: 5, y: 0 }, { x: 20, y: 0 }, { x: 5, y: 0 },
+        { x: 5, y: 5 }, { x: 0, y: 5 }], emptyStoryGeometry, 0);
+    refute(resp && resp.success);
+
+    assertProperty(genPolygonWithSpur, (poly) => {
+      const resp2 = validateFaceGeometry(poly, emptyStoryGeometry, 0);
+      refute(resp2 && resp2.success);
+    });
+  });
+
+  it('fails when the polygon is self-intersecting', () => {
+    const resp = validateFaceGeometry(
+      [{ x: 0, y: 0 }, { x: 5, y: 0 }, { x: 0, y: 5 }, { x: 5, y: 5 }],
+      emptyStoryGeometry, 0);
+    refute(resp && resp.success);
+  });
+
+  it('fails when a vertex lies an edge of which it is not an endpoint', () => {
+    // https://trello-attachments.s3.amazonaws.com/58d428743111af1d0a20cf28/598b740a2e569128b4392cb5/f71690195e4801010773652bac9d0a9c/capture.png
+    const resp = validateFaceGeometry(
+      [{ x: 0, y: 0 }, { x: 5, y: 0 }, { x: 0, y: 3 }, { x: 0, y: 5 }],
+      emptyStoryGeometry, 0);
+
+    refute(resp && resp.success);
+  });
+
+  it('uses existing vertices when they perfectly overlap', () => {
+    const resp = validateFaceGeometry(
+      [{ x: 0, y: 0 }, { x: 5, y: 0 }, { x: 5, y: 5 }, { x: 0, y: 5 }],
+      neg5by5Rect, 0);
+    assert(resp && resp.success);
+    assert(_.find(resp.vertices, { x: 0, y: 0 }).id === 'origin');
+  });
+
+  it('uses existing edges when they perfectly overlap', () => {
+    const resp = validateFaceGeometry(
+      [{ x: 0, y: 0 }, { x: -5, y: 0 }, { x: -5, y: 5 }, { x: 0, y: 5 }],
+      neg5by5Rect, 0);
+    assert(resp && resp.success);
+    assert(_.find(resp.vertices, { x: 0, y: 0 }).id === 'origin');
+    assert(_.find(resp.vertices, { x: -5, y: 0 }).id === '(-5, 0)');
+    assert(_.find(resp.edges, { v1: 'origin', v2: '(-5, 0)' }).id === 'top');
+  });
+
+  it('uses existing edges when they perfectly overlap (even backwards)', () => {
+    const resp = validateFaceGeometry(
+      [{ x: 0, y: 5 }, { x: -5, y: 5 }, { x: -5, y: 0 }, { x: 0, y: 0 }],
+      neg5by5Rect, 0);
+    assert(resp && resp.success);
+    assert(_.find(resp.vertices, { x: 0, y: 0 }).id === 'origin');
+    assert(_.find(resp.vertices, { x: -5, y: 0 }).id === '(-5, 0)');
+    const edge = _.find(resp.edges, { v1: 'origin', v2: '(-5, 0)' });
+    assert(edge.id === 'top' && edge.reverse);
+  });
 });

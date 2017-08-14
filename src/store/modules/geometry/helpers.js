@@ -223,7 +223,7 @@ const helpers = {
     // const { x, y } = coordinates;
     // return geometry.vertices.find(v => v.x === x && v.y === y);
     // TODO once PR#118 is merged, put this back
-    return geometry.vertices.find(v => this.distanceBetweenPoints(v, coordinates) < snapTolerance)
+    return geometry.vertices.find(v => this.distanceBetweenPoints(v, coordinates) <= snapTolerance)
   },
 
     // given a face id, returns the populated vertex objects reference by edges on that face
