@@ -36,7 +36,7 @@ export default {
       y: this.pxToGrid(e.offsetY, 'y'),
     };
     // snap only to edges
-    const snapTarget = this.findSnapTarget(gridPoint, { edge_component: true });
+    const snapTarget = this.findSnapTarget(gridPoint/*, { edge_component: true }*/);
 
     if (snapTarget.type === 'edge') {
       window.eventBus.$emit('success', `Window created at (${snapTarget.projection.x}, ${snapTarget.projection.y})`);
@@ -112,7 +112,7 @@ export default {
     };
 
     const options = { edge_component: (this.currentTool === 'Place Component' && this.currentComponentType === 'window_definitions') };
-    const snapTarget = this.findSnapTarget(gridPoint, options);
+    const snapTarget = this.findSnapTarget(gridPoint/*, options*/);
 
     // render a line and point showing which geometry would be created with a click at this location
     const guidePoint = snapTarget.type === 'edge' ? snapTarget.projection :
