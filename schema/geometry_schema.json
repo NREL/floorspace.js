@@ -376,6 +376,12 @@
 						"null"
 					]
 				},
+				"pitched_roof_id": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
 				"daylighting_controls": {
 					"type": "array",
 					"items": {
@@ -393,6 +399,27 @@
 							"vertex_id"
 						]
 					}
+				},
+				"below_floor_plenum_height": {
+					"description": "Overrides story value if provided. Excludes height under a pitched roof.",
+					"type": [
+						"number",
+						"null"
+					]
+				},
+				"floor_to_ceiling_height": {
+					"description": "Overrides story value if provided. Excludes height under a pitched roof.",
+					"type": [
+						"number",
+						"null"
+					]
+				},
+				"above_ceiling_plenum_height": {
+					"description": "Overrides story value if provided. Excludes height under a pitched roof.",
+					"type": [
+						"number",
+						"null"
+					]
 				}
 			},
 			"required": [
@@ -575,6 +602,42 @@
 			},
 			"required": [
 				"id"
+			]
+		},
+		"PitchedRoof": {
+			"properties": {
+				"id": {
+					"type": "string"
+				},
+				"name": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"type": {
+					"type": "string",
+					"enum": [
+						"gable",
+						"hip",
+						"shed"
+					]
+				},
+				"pitch": {
+					"description": "Pitch of roof in ?/12",
+					"type": "number",
+					"minimum": 0,
+					"exclusiveMinimum": true
+				},
+				"shed_direction": {
+					"description": "Direction of shed roof, from low point to high point, in degrees.",
+					"type": "number"
+				}
+			},
+			"required": [
+				"id",
+				"type",
+				"pitch"
 			]
 		}
 	}
