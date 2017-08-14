@@ -35,7 +35,7 @@ describe('validateFaceGeometry', () => {
             `);
 
     const
-      res = validateFaceGeometry(points, currentGeometry, 2),
+      res = validateFaceGeometry(points, currentGeometry),
       newVerts = _.reject(res.vertices, v => currentGeometry.vertices.find(c => c.id === v.id));
 
     assert(newVerts.length === 3);
@@ -61,7 +61,7 @@ describe('validateFaceGeometry', () => {
   it('fails when given too few vertices', () => {
     assertProperty(
       genTooFewVerts, (verts) => {
-        const resp = validateFaceGeometry(verts, emptyStoryGeometry, 0);
+        const resp = validateFaceGeometry(verts, emptyStoryGeometry);
         refute(resp && resp.success);
       });
   });
@@ -69,7 +69,7 @@ describe('validateFaceGeometry', () => {
   it('succeeds from empty on a triangle', () => {
     assertProperty(
       genTriangle, (tri) => {
-        const resp = validateFaceGeometry(tri, emptyStoryGeometry, 0);
+        const resp = validateFaceGeometry(tri, emptyStoryGeometry);
         assert(resp && resp.success);
       });
   });
@@ -77,7 +77,7 @@ describe('validateFaceGeometry', () => {
   it('succeeds from empty on a rectangle', () => {
     assertProperty(
       genRectangle, (rect) => {
-        const resp = validateFaceGeometry(rect, emptyStoryGeometry, 0);
+        const resp = validateFaceGeometry(rect, emptyStoryGeometry);
         assert(resp && resp.success);
       });
   });
@@ -85,7 +85,7 @@ describe('validateFaceGeometry', () => {
   it('succeeds from empty on a regular polygon', () => {
     assertProperty(
       genRegularPolygon, (poly) => {
-        const resp = validateFaceGeometry(poly, emptyStoryGeometry, 0);
+        const resp = validateFaceGeometry(poly, emptyStoryGeometry);
         assert(resp && resp.success);
       });
   });
@@ -93,7 +93,7 @@ describe('validateFaceGeometry', () => {
   it('succeeds from empty on an irregular polygon', () => {
     assertProperty(
       genIrregularPolygon, (poly) => {
-        const resp = validateFaceGeometry(poly, emptyStoryGeometry, 0);
+        const resp = validateFaceGeometry(poly, emptyStoryGeometry);
         assert(resp && resp.success);
       });
   });
@@ -110,7 +110,7 @@ describe('validateFaceGeometry', () => {
   it('fails when given a zero-area polygon', () => {
     assertProperty(
       genZeroAreaPolygon, (poly) => {
-        const resp = validateFaceGeometry(poly, emptyStoryGeometry, 0);
+        const resp = validateFaceGeometry(poly, emptyStoryGeometry);
         refute(resp && resp.success);
       });
   });
@@ -139,11 +139,11 @@ describe('validateFaceGeometry', () => {
   it("fails when there's a zero-area portion of the polygon", () => {
     const resp = validateFaceGeometry(
       [{ x: 0, y: 0 }, { x: 5, y: 0 }, { x: 20, y: 0 }, { x: 5, y: 0 },
-        { x: 5, y: 5 }, { x: 0, y: 5 }], emptyStoryGeometry, 0);
+        { x: 5, y: 5 }, { x: 0, y: 5 }], emptyStoryGeometry);
     refute(resp && resp.success);
 
     assertProperty(genPolygonWithSpur, (poly) => {
-      const resp2 = validateFaceGeometry(poly, emptyStoryGeometry, 0);
+      const resp2 = validateFaceGeometry(poly, emptyStoryGeometry);
       refute(resp2 && resp2.success);
     });
   });
@@ -151,7 +151,7 @@ describe('validateFaceGeometry', () => {
   it('fails when the polygon is self-intersecting', () => {
     const resp = validateFaceGeometry(
       [{ x: 0, y: 0 }, { x: 5, y: 0 }, { x: 0, y: 5 }, { x: 5, y: 5 }],
-      emptyStoryGeometry, 0);
+      emptyStoryGeometry);
     refute(resp && resp.success);
   });
 
@@ -159,7 +159,7 @@ describe('validateFaceGeometry', () => {
     // https://trello-attachments.s3.amazonaws.com/58d428743111af1d0a20cf28/598b740a2e569128b4392cb5/f71690195e4801010773652bac9d0a9c/capture.png
     const resp = validateFaceGeometry(
       [{ x: 0, y: 0 }, { x: 5, y: 0 }, { x: 0, y: 3 }, { x: 0, y: 5 }],
-      emptyStoryGeometry, 0);
+      emptyStoryGeometry);
 
     refute(resp && resp.success);
   });
@@ -167,7 +167,7 @@ describe('validateFaceGeometry', () => {
   it('uses existing vertices when they perfectly overlap', () => {
     const resp = validateFaceGeometry(
       [{ x: 0, y: 0 }, { x: 5, y: 0 }, { x: 5, y: 5 }, { x: 0, y: 5 }],
-      neg5by5Rect, 0);
+      neg5by5Rect);
     assert(resp && resp.success);
     assert(_.find(resp.vertices, { x: 0, y: 0 }).id === 'origin');
   });
@@ -175,7 +175,7 @@ describe('validateFaceGeometry', () => {
   it('uses existing edges when they perfectly overlap', () => {
     const resp = validateFaceGeometry(
       [{ x: 0, y: 0 }, { x: -5, y: 0 }, { x: -5, y: 5 }, { x: 0, y: 5 }],
-      neg5by5Rect, 0);
+      neg5by5Rect);
     assert(resp && resp.success);
     assert(_.find(resp.vertices, { x: 0, y: 0 }).id === 'origin');
     assert(_.find(resp.vertices, { x: -5, y: 0 }).id === '(-5, 0)');
@@ -185,7 +185,7 @@ describe('validateFaceGeometry', () => {
   it('uses existing edges when they perfectly overlap (even backwards)', () => {
     const resp = validateFaceGeometry(
       [{ x: 0, y: 5 }, { x: -5, y: 5 }, { x: -5, y: 0 }, { x: 0, y: 0 }],
-      neg5by5Rect, 0);
+      neg5by5Rect);
     assert(resp && resp.success);
     assert(_.find(resp.vertices, { x: 0, y: 0 }).id === 'origin');
     assert(_.find(resp.vertices, { x: -5, y: 0 }).id === '(-5, 0)');
