@@ -10,7 +10,7 @@
     "openstudio-build": "npm run build; ruby build/build.rb",
     "unit": "karma start test/unit/karma.conf.js",
     "e2e": "node test/e2e/runner.js",
-    "test": "npm run unit && npm run e2e",
+    "test": "npm run unit #&& npm run e2e",
     "lint": "eslint --ext .js,.vue src test/unit/specs test/e2e/specs"
   },
   "dependencies": {
@@ -19,6 +19,7 @@
     "huebee": "^1.0.1",
     "js-clipper": "^1.0.1",
     "konva": "^1.5.0",
+    "lodash": "^4.17.4",
     "openlayers": "^4.1.0",
     "polylabel": "^1.0.2",
     "vue": "^2.1.0",
@@ -82,6 +83,7 @@
     "shelljs": "^0.7.4",
     "sinon": "^2.3.4",
     "sinon-chai": "^2.8.0",
+    "testcheck": "^1.0.0-rc.2",
     "url-loader": "^0.5.7",
     "vue-loader": "^10.0.0",
     "vue-style-loader": "^1.0.0",
