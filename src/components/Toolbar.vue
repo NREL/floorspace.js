@@ -212,6 +212,7 @@ export default {
       if (this.availableTools.indexOf(val) === -1 && val !== 'Map') { this.tool = this.availableTools[0]; }
     },
     currentMode() { this.tool = this.availableTools[0]; },
+    'componentDefinitions.length':function () { this.currentComponentDefinition = this.componentDefinitions[0]; },
   },
 };
 </script>

@@ -276,7 +276,9 @@ const helpers = {
     },
 
     pointInFace(point, faceVertices) {
-      return true;
+      const facePoints = faceVertices.map(p => ({ X: p.x, Y: p.y }));
+      const testPoint = { X: point.x, Y: point.y };
+      return !!ClipperLib.Clipper.PointInPolygon(testPoint, facePoints);
     },
 
     ptsAreCollinear(p1, p2, p3) {

@@ -49,10 +49,16 @@ export default {
       x: this.pxToGrid(e.offsetX, 'x'),
       y: this.pxToGrid(e.offsetY, 'y'),
     };
+
+    const rwuPoint = {
+      x: this.pxToRWU(e.offsetX, 'x'),
+      y: this.pxToRWU(e.offsetY, 'y'),
+    };
+
     // check if control is being placed inside a space's face
     let isInFace = false;
     this.currentStoryGeometry.faces.forEach(({ id }) => {
-      if (geometryHelpers.pointInFace(gridPoint, geometryHelpers.verticesForFaceId(id))) { isInFace = true; }
+      if (geometryHelpers.pointInFace(rwuPoint, geometryHelpers.verticesForFaceId(id, this.currentStoryGeometry))) { isInFace = true; }
     });
 
     if (isInFace) {
