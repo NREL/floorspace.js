@@ -437,16 +437,11 @@ export function edgesToSplit(geometry) {
 function splitEdges(context) {
   const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'];
   const edgeChanges = edgesToSplit(currentStoryGeometry);
-  edgeChanges.forEach(({ edgeToDelete, newEdges, dyingEdgeRefs, newEdgeRefs }) => {
-    newEdges.forEach(edge => context.commit('createEdge', {
-      edge,
-      geometry_id: currentStoryGeometry.id,
-    }));
-
-    dyingEdgeRefs.forEach(dyingEdgeRef => context.commit(dyingEdgeRef));
-    newEdgeRefs.forEach(newEdgeRef => context.commit(newEdgeRef));
-    context.commit('destroyGeometry', { id: edgeToDelete });
-  });
+  edgeChanges.forEach(payload => context.commit({
+    type: 'splitEdge',
+    geometry_id: currentStoryGeometry.id,
+    ...payload,
+  }));
 }
 
 /*
