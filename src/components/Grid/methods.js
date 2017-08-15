@@ -393,7 +393,7 @@ export default {
           // if a face on the current story is clicked while the Select tool is active
           // lookup its corresponding model (space/shading) and select it
           this.currentSubSelection = modelHelpers.modelForFace(this.$store.state.models, d.face_id);
-          
+
         } else if (this.currentTool === 'Fill' && (this.currentSpace || this.currentShading)) {
           // if a face on the current story is clicked while the Select tool is active
           // lookup its corresponding model (space/shading) and select it
