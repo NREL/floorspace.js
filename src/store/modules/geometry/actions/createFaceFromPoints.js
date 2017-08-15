@@ -360,7 +360,7 @@ export function validateFaceGeometry(points, currentStoryGeometry, snapTolerance
 }
 
 function edgesFromVerts(verts) {
-  return _.zip(verts, verts.slice(1))
+  return _.zip(verts.slice(0, verts.length - 1), verts.slice(1))
     .map(([v1, v2]) => factory.Edge(v1.id, v2.id));
 }
 
@@ -394,7 +394,7 @@ function replacementEdgeRefs(geometry, dyingEdgeId, newEdges) {
   };
 }
 
-function edgesToSplit(geometry) {
+export function edgesToSplit(geometry) {
   return _.compact(geometry.edges.map((edge) => {
     let splittingVertices = geometryHelpers.splittingVerticesForEdgeId(edge.id, geometry);
     if (!splittingVertices.length) {
@@ -413,7 +413,7 @@ function edgesToSplit(geometry) {
     // create new edges by connecting the original edge startpoint, ordered splitting vertices, and original edge endpoint
     // eg: startpoint -> SV1, SV1 -> SV2, SV2 -> SV3, SV3 -> endpoint
     const
-      newEdges = edgesFromVerts(geometry.id, splittingVertices),
+      newEdges = edgesFromVerts(splittingVertices),
       {
         dyingEdgeRefs,
         newEdgeRefs,

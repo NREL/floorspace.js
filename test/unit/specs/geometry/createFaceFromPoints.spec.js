@@ -5,7 +5,9 @@ import {
  genPoint, genTriangle, genRectangle, genRegularPolygon, genIrregularPolygon,
  createIrregularPolygon,
 } from '../../test_helpers';
-import { validateFaceGeometry } from '../../../../src/store/modules/geometry/actions/createFaceFromPoints';
+import {
+  validateFaceGeometry, edgesToSplit,
+} from '../../../../src/store/modules/geometry/actions/createFaceFromPoints';
 
 describe('validateFaceGeometry', () => {
   it('preserves rectangularity when possible (issue #72 )', () => {
@@ -192,4 +194,79 @@ describe('validateFaceGeometry', () => {
     const edge = _.find(resp.edges, { v1: 'origin', v2: '(-5, 0)' });
     assert(edge.id === 'top' && edge.reverse);
   });
+});
+
+describe('edgesToSplit', () => {
+  /*
+
+      a +---+ b
+        |   |
+        |   |
+      c +---+-----+ e
+        |   d     |
+        |         |
+        |         |
+      f +---------+ g
+
+  */
+  const simpleGeometry = {
+    /* eslint-disable */
+    id: 1,
+    vertices: [
+      {id: 'f', x: 0, y: 0},
+      {id: 'g', x: 10, y: 0},
+      {id: 'c', x: 0, y: 10},
+      {id: 'd', x: 4, y: 10},
+      {id: 'e', x: 10, y: 10},
+      {id: 'a', x: 0, y: 16},
+      {id: 'b', x: 4, y: 16},
+    ],
+    edges: [
+      'ab', 'ac', 'bd', 'cd', 'eg', 'gf', 'fc', 'ce',
+    ].map(id => ({ id, v1: id[0], v2: id[1] })),
+    faces: [
+      {id: 'top', edgeRefs: [
+        {edge_id: 'ab', reverse: false},
+        {edge_id: 'bd', reverse: false},
+        {edge_id: 'cd', reverse: true},
+        {edge_id: 'ac', reverse: true},
+      ]},
+      {id: 'bottom', edgeRefs: [
+        {edge_id: 'ce', reverse: false},
+        {edge_id: 'eg', reverse: false},
+        {edge_id: 'gf', reverse: false},
+        {edge_id: 'fc', reverse: false},
+      ]},
+    ],
+    /* eslint-enable */
+  };
+
+  it('splits an edge in a simple case', () => {
+    const edges = edgesToSplit(simpleGeometry);
+    assert(edges.length === 1);
+
+    const [{ edgeToDelete, newEdges, dyingEdgeRefs, newEdgeRefs }] = edges;
+    assert(edgeToDelete === 'ce');
+    assert(_.find(dyingEdgeRefs, { face_id: 'bottom', edge_id: 'ce' }));
+    const edgeDE = (
+      _.find(newEdges, { v1: 'd', v2: 'e' }) ||
+      _.find(newEdges, { v1: 'e', v2: 'd' }));
+
+    assert(_.find(newEdgeRefs, {
+      face_id: 'bottom',
+      edgeRef: { edge_id: edgeDE.id }
+    }));
+  });
+
+  // it('maintains order of existing vertices', () => {
+  //
+  // });
+  //
+  // it('skips edges that are not nearby', () => {
+  //
+  // });
+  //
+  // it('reverses new edges when the original was reversed', () => {
+  //
+  // });
 });
