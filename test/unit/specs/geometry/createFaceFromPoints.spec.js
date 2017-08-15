@@ -1,13 +1,15 @@
 import _ from 'lodash';
 import { gen } from 'testcheck';
 import {
- assert, refute, assertProperty,
+ assert, refute, assertProperty, assertEqual,
  genPoint, genTriangle, genRectangle, genRegularPolygon, genIrregularPolygon,
  createIrregularPolygon,
 } from '../../test_helpers';
 import {
   validateFaceGeometry, edgesToSplit,
 } from '../../../../src/store/modules/geometry/actions/createFaceFromPoints';
+import helpers from '../../../../src/store/modules/geometry/helpers';
+
 import { splitEdge } from '../../../../src/store/modules/geometry/mutations';
 import {
   preserveRectangularityGeometry, simpleGeometry, emptyGeometry, neg5by5Rect,
@@ -195,18 +197,42 @@ describe('edgesToSplit', () => {
     }));
   });
 
-  // it('maintains order of existing vertices', () => {
-  //   const
-  //     edges = edgesToSplit(simpleGeometry),
-  //     state = [_.cloneDeep(simpleGeometry)];
-  //
-  //   // modify our copy of geometry to see what it will look like after mutations
-  //   edges.forEach(
-  //     payload => splitEdge(state, { geometry_id: simpleGeometry.id, ...payload }));
-  //
-  //   const [newGeom] = state;
-  //   newGeom.
-  // });
+  it('maintains order of existing vertices', () => {
+    const
+      edges = edgesToSplit(simpleGeometry),
+      state = [_.cloneDeep(simpleGeometry)];
+
+    // modify our copy of geometry to see what it will look like after mutations
+    edges.forEach(
+      payload => splitEdge(state, { geometry_id: simpleGeometry.id, ...payload }));
+
+    const vertsIdsFromFace = face => (
+      _.chain(face.edges)
+        .flatMap(e => (
+          e.reverse ? [e.v2, e.v1] : [e.v1, e.v2]
+        ))
+        .map('id')
+        .uniq()
+        .value()
+    );
+
+    const
+      oldGeom = helpers.denormalize(simpleGeometry),
+      newGeom = helpers.denormalize(state[0]);
+    _.zip(
+      newGeom.faces.map(vertsIdsFromFace),
+      oldGeom.faces.map(vertsIdsFromFace),
+    ).forEach(([newVerts, oldVerts]) => {
+      // check that any old verts still around are in the same order.
+      assertEqual(
+        // from lodash docs:
+        // The order and references of result values
+        //  are determined by the first array.
+        _.intersection(newVerts, oldVerts),
+        _.intersection(oldVerts, newVerts),
+      );
+    });
+  });
 
   // it('skips edges that are not nearby', () => {
   //
