@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { gen, sample } from 'testcheck';
+import { gen } from 'testcheck';
 import {
  assert, refute, assertProperty,
  genPoint, genTriangle, genRectangle, genRegularPolygon, genIrregularPolygon,
@@ -104,7 +104,7 @@ describe('validateFaceGeometry', () => {
     genZeroAreaRectangle = gen.array(genPoint, { size: 2 })
       .then(([a, b]) => ([a, b, b, a])),
     genZeroAreaPolygon = gen.oneOf([
-      genZeroAreaTriangle, genZeroAreaRectangle
+      genZeroAreaTriangle, genZeroAreaRectangle,
     ]);
 
   it('fails when given a zero-area polygon', () => {
