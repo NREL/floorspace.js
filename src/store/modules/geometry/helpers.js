@@ -339,6 +339,13 @@ const helpers = {
       );
     return correctedDiff < 0.05 * Math.PI;
   },
+  pointDistanceToSegment(pt, { start, end }) {
+    const proj = helpers.projectionOfPointToLine(pt, { p1: start, p2: end });
+    return {
+      dist: helpers.distanceBetweenPoints(pt, proj),
+      proj,
+    };
+  },
 };
 
 export default helpers;
