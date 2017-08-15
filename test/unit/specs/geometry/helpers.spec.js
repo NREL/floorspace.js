@@ -1,12 +1,14 @@
 import _ from 'lodash';
-import { gen } from 'testcheck';
+import { gen, sample } from 'testcheck';
 import helpers from '../../../../src/store/modules/geometry/helpers';
 import {
   assert, nearlyEqual, refute, assertProperty, isNearlyEqual,
+  assertEqual,
   genTriangleLeftOfOrigin,
   genTriangleRightOfOrigin,
   genTriangle,
 } from '../../test_helpers';
+import * as geometryExamples from './examples';
 
 describe('syntheticRectangleSnaps', () => {
   it('should work', () => {
@@ -340,5 +342,18 @@ describe('haveSimilarAngles', () => {
         { start: { x: 12, y: 1 }, end: { x: 3, y: 18 } },
         { start: { x: 1, y: 24 }, end: { x: 1, y: 10 } },
       ));
+  });
+});
+
+describe('denormalize', () => {
+  it('is undone by normalize', () => {
+    assertProperty(
+      gen.oneOf(_.values(geometryExamples)),
+      (geom) => {
+        assertEqual(
+          geom,
+          helpers.normalize(helpers.denormalize(geom)),
+        );
+      });
   });
 });

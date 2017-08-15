@@ -9,6 +9,12 @@ export function assert(condition, message) {
   }
 }
 
+export function assertEqual(a, b) {
+  assert(
+    _.isEqual(a, b),
+    `expected ${JSON.stringify(a)} to equal ${JSON.stringify(b)}`);
+}
+
 export function refute(condition, ...args) {
   return assert(!condition, ...args);
 }

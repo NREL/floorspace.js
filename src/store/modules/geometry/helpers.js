@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import ClipperLib from 'js-clipper'
 
 const helpers = {
@@ -344,6 +345,59 @@ const helpers = {
     return {
       dist: helpers.distanceBetweenPoints(pt, proj),
       proj,
+    };
+  },
+
+  denormalize(geometry) {
+    const
+      edges = geometry.edges.map(edge => ({
+        ...edge,
+        v1: this.vertexForId(edge.v1, geometry),
+        v2: this.vertexForId(edge.v2, geometry),
+      })),
+      edgesById = _.zipObject(
+        _.map(edges, 'id'),
+        edges),
+      faces = geometry.faces.map(face => ({
+        id: face.id,
+        edges: face.edgeRefs.map(({ edge_id, reverse }) => ({
+          ...edgesById[edge_id],
+          edge_id,
+          reverse,
+        })),
+      }));
+    return {
+      ...geometry,
+      edges,
+      faces,
+    };
+  },
+
+  // probably best to use this only for testing
+  normalize(geometry) {
+    const
+      edges = _.uniqBy(
+        [
+          ...geometry.edges,
+          ..._.flatMap(geometry.faces, f => f.edges),
+        ], 'id'),
+      vertices = _.uniqBy(
+        [
+          ...geometry.vertices,
+          ..._.flatMap(edges, e => [e.v1, e.v2]),
+        ], 'id');
+    return {
+      id: geometry.id,
+      vertices: vertices.map(v => _.pick(v, ['id', 'x', 'y'])),
+      edges: edges.map(e => ({
+        id: e.id,
+        v1: e.v1.id,
+        v2: e.v2.id,
+      })),
+      faces: geometry.faces.map(f => ({
+        id: f.id,
+        edgeRefs: f.edges.map(er => _.pick(er, ['edge_id', 'reverse'])),
+      })),
     };
   },
 };

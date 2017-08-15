@@ -78,5 +78,4 @@ export function splitEdge(state, { geometry_id, edgeToDelete, newEdges, dyingEdg
   dyingEdgeRefs.forEach(dyingEdgeRef => destroyEdgeRef(state, dyingEdgeRef));
   newEdgeRefs.forEach(newEdgeRef => createEdgeRef(state, newEdgeRef));
   destroyGeometry(state, { id: edgeToDelete });
-  return state;
 }
