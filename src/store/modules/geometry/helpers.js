@@ -396,7 +396,7 @@ const helpers = {
       })),
       faces: geometry.faces.map(f => ({
         id: f.id,
-        edgeRefs: f.edges.map(er => _.pick(er, ['edge_id', 'reverse'])),
+        edgeRefs: f.edges.map(er => ({ edge_id: er.id, reverse: er.reverse })),
       })),
     };
   },

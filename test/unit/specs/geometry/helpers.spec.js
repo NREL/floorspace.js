@@ -356,4 +356,47 @@ describe('denormalize', () => {
         );
       });
   });
+
+  it('adding a face persists after normalization', () => {
+    assertProperty(
+      gen.oneOf(_.values(geometryExamples)),
+      (geom) => {
+        const denorm = helpers.denormalize(geom);
+        denorm.faces.push({
+          /* eslint-disable */
+          id: 'new_face',
+          edges: [
+            {id: 'new_edge1', reverse: false,
+             v1: {id: 'new_vert1', x: 0, y: 0},
+             v2: {id: 'new_vert2', x: 1, y: 0}},
+            {id: 'new_edge2', reverse: false,
+             v1: {id: 'new_vert2', x: 1, y: 0},
+             v2: {id: 'new_vert3', x: 1, y: 1}},
+            {id: 'new_edge3', reverse: false,
+             v1: {id: 'new_vert3', x: 1, y: 1},
+             v2: {id: 'new_vert1', x: 0, y: 0}},
+          ],
+          /* eslint-enable */
+        });
+
+        const
+          renorm = helpers.normalize(denorm),
+          vertIds = _.map(renorm.vertices, 'id'),
+          edgeIds = _.map(renorm.edges, 'id'),
+          faceInQuestion = _.find(renorm.faces, { id: 'new_face' });
+
+        assert(_.includes(vertIds, 'new_vert1'));
+        assert(_.includes(vertIds, 'new_vert2'));
+        assert(_.includes(vertIds, 'new_vert3'));
+
+        assert(_.includes(edgeIds, 'new_edge1'));
+        assert(_.includes(edgeIds, 'new_edge2'));
+        assert(_.includes(edgeIds, 'new_edge3'));
+
+        assert(faceInQuestion);
+        assertEqual(
+          _.map(faceInQuestion.edgeRefs, 'edge_id'),
+          ['new_edge1', 'new_edge2', 'new_edge3']);
+      });
+  });
 });
