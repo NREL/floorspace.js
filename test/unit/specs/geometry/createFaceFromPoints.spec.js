@@ -6,7 +6,7 @@ import {
  createIrregularPolygon,
 } from '../../test_helpers';
 import {
-  validateFaceGeometry, edgesToSplit,
+  validateFaceGeometry, edgesToSplit, newGeometriesOfOverlappedFaces,
 } from '../../../../src/store/modules/geometry/actions/createFaceFromPoints';
 import helpers from '../../../../src/store/modules/geometry/helpers';
 
@@ -268,5 +268,31 @@ describe('edgesToSplit:simpleGeometry', () => {
         ([v2OfPrev, v1OfNext]) => assertEqual(v2OfPrev, v1OfNext),
       );
     });
+  });
+});
+
+
+describe('newGeometriesOfOverlappedFaces', () => {
+  it('disallows faces to be split (as in issue #124)', () => {
+    const
+      geometry = helpers.normalize({
+        vertices: [],
+        edges: [],
+        id: 1,
+        faces: [
+          {
+            id: 'twelve',
+            edges: [
+              { id: 1, v1: { id: 'a', x: 2, y: 0 }, v2: { id: 'b', x: 2, y: 10 } },
+              { id: 2, v1: { id: 'b', x: 2, y: 10 }, v2: { id: 'c', x: 4, y: 10 } },
+              { id: 3, v1: { id: 'c', x: 4, y: 10 }, v2: { id: 'd', x: 4, y: 0 } },
+              { id: 4, v1: { id: 'd', x: 4, y: 0 }, v2: { id: 'a', x: 2, y: 0 } },
+            ],
+          },
+        ],
+      }),
+      points = [{ x: 0, y: 3 }, { x: 5, y: 3 }, { x: 5, y: 5 }, { x: 0, y: 5 }];
+
+    refute(newGeometriesOfOverlappedFaces(points, geometry));
   });
 });

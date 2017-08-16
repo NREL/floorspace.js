@@ -45,8 +45,7 @@ export default function createFaceFromPoints(context, payload) {
         return;
     }
 
-    const newGeoms = newGeometriesOfOverlappedFaces(
-      facePoints, context.rootGetters['application/currentStoryGeometry']);
+    const newGeoms = newGeometriesOfOverlappedFaces(facePoints, currentStoryGeometry);
 
     // prevent overlapping faces by erasing existing geometry covered by the points defining the new face
     if (!newGeoms) {
