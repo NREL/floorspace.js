@@ -89,7 +89,7 @@ export default {
         if (type === 'library') {
           this.$store.dispatch('importLibrary', { data });
         } else if (type === 'floorplan') {
-          this.$store.dispatch('importModel', {
+          this.$store.dispatch('importFloorplan', {
             clientWidth: document.getElementById('svg-grid').clientWidth,
             clientHeight: document.getElementById('svg-grid').clientHeight,
             data,

@@ -1,10 +1,10 @@
-import idFactory from './generateId'
+import idFactory from './generateId';
 
 export default function importLibrary(context, payload) {
   let count = 0;
   const types = Object.keys(payload.data);
   types.forEach((type) => {
-    if (type === 'project') { return; }
+    if (type === 'project' || !context.state.models.library[type]) { return; }
     const existingNames = context.state.models.library[type].map((o) => {
       // /_\d+[\w\s]?$/
       // if object name contains duplicate suffix, remove suffix
