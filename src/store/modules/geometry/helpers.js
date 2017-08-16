@@ -73,6 +73,17 @@ const helpers = {
     return false;
   },
 
+  // convenience functions for setOperation
+  intersection(f1, f2) {
+    return this.setOperation('intersection', f1, f2);
+  },
+  union(f1, f2) {
+    return this.setOperation('union', f1, f2);
+  },
+  difference(f1, f2) {
+    return this.setOperation('difference', f1, f2);
+  },
+
     // given an array of points return the area of the space they enclose
     areaOfSelection(points) {
 		const paths = points.map(p => ({ X: p.x, Y: p.y }))

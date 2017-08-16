@@ -45,11 +45,16 @@ export default function createFaceFromPoints(context, payload) {
         return;
     }
 
+    const newGeoms = newGeometriesOfOverlappedFaces(
+      facePoints, context.rootGetters['application/currentStoryGeometry']);
+
     // prevent overlapping faces by erasing existing geometry covered by the points defining the new face
-    if (!eraseSelection(facePoints, context)) {
+    if (!newGeoms) {
       window.eventBus.$emit('error', 'Operation cancelled - no split faces');
       return;
     }
+
+    newGeoms.forEach(newGeom => context.dispatch('replaceFacePoints', newGeom));
 
     // save the face and its descendent geometry
     storeFace(faceGeometry, target, context);
@@ -58,7 +63,32 @@ export default function createFaceFromPoints(context, payload) {
     splitEdges(context);
 }
 
-//////////////////////// HELPERS //////////////////////////////
+// ////////////////////// HELPERS //////////////////////////// //
+
+export function newGeometriesOfOverlappedFaces(points, geometry) {
+  if (points.length < 3 || !geometryHelpers.areaOfSelection(points)) {
+    return false;
+  }
+
+  const geom = geometryHelpers.denormalize(geometry);
+  const intersectedFaces = geom.faces
+    .filter(face => geometryHelpers.intersection(face.vertices, points).length > 0);
+
+  const newFaceGeometries = intersectedFaces.map(existingFace =>
+    geometryHelpers.difference(existingFace.vertices, points),
+  );
+
+  if (!newFaceGeometries.every(_.identity)) {
+    // difference caused split face.
+    return false;
+  }
+
+  return _.zip(intersectedFaces, newFaceGeometries).map(([face, newVerts]) => ({
+    geometry_id: geometry.id,
+    face,
+    newVerts,
+  }));
+}
 
 /*
  * Erase the selection defined by a set of points on all faces on the current story

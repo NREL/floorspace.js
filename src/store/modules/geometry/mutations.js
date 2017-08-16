@@ -96,3 +96,26 @@ export function splitEdge(state, { geometry_id, edgeToDelete, newEdges, replaceE
   replaceEdgeRefs.forEach(replacement => replaceEdgeRef(state, replacement));
   destroyGeometry(state, { id: edgeToDelete });
 }
+
+function ensureVertsExist(geometry, verts) {
+  verts.forEach((v) => {
+    _.find(geometry.vertices, { id: v.id }) || geometry.vertices.push(v);
+  });
+}
+
+function ensureEdgesExist(geometry, edges) {
+  edges.forEach((e) => {
+    _.find(geometry.edges, { id: e.id }) || geometry.edges.push(e);
+  });
+}
+
+export function replaceFacePoints(state, { geometry_id, verts, edges, face: { id: face_id } }) {
+  const geometry = _.find(state, { id: geometry_id });
+  ensureVertsExist(geometry, verts);
+  ensureEdgesExist(geometry, edges);
+  const face = _.find(geometry.faces, { id: face_id });
+  face.edgeRefs = edges.map(e => ({
+    edge_id: e.id,
+    reverse: !!e.reverse,
+  }));
+}
