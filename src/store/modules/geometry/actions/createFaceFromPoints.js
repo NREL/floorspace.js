@@ -46,7 +46,7 @@ export default function createFaceFromPoints(context, payload) {
     }
 
     // prevent overlapping faces by erasing existing geometry covered by the points defining the new face
-    if (!eraseSelection(facePoints, context) && !existingFace) {
+    if (!eraseSelection(facePoints, context)) {
       window.eventBus.$emit('error', 'Operation cancelled - no split faces');
       return;
     }
