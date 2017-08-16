@@ -6,9 +6,6 @@ model = vt.loadModel(ARGV[0]).get
 
 library = {}
 
-application = {}
-library[:application] = application
-
 project = {}
 config = {:units => 'ft', :language =>'en-us'} 
 project[:config] = config
