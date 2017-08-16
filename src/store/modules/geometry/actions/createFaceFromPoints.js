@@ -369,29 +369,15 @@ function replacementEdgeRefs(geometry, dyingEdgeId, newEdges) {
   const affectedFaces = geometryHelpers.facesForEdgeId(dyingEdgeId, geometry);
 
   // remove reference to old edge and add references to the new edges
-  const dyingEdgeRefs = affectedFaces.map(affectedFace => ({
-    type: 'destroyEdgeRef',
+  const replaceEdgeRefs = affectedFaces.map(affectedFace => ({
+    type: 'replaceEdgeRef',
     geometry_id: geometry.id,
     edge_id: dyingEdgeId,
     face_id: affectedFace.id,
+    newEdges: _.map(newEdges, 'id'),
   }));
 
-  const
-    newEdgeRefs = _.flatMap(
-      affectedFaces,
-      affectedFace => newEdges.map(newEdge => ({
-        type: 'createEdgeRef',
-        geometry_id: geometry.id,
-        face_id: affectedFace.id,
-        edgeRef: {
-          edge_id: newEdge.id,
-          reverse: false, // TODO pretty sure this should copy the dyingEdgeRef's reverse value.
-        },
-      })));
-  return {
-    dyingEdgeRefs,
-    newEdgeRefs,
-  };
+  return replaceEdgeRefs;
 }
 
 export function edgesToSplit(geometry) {
@@ -414,15 +400,11 @@ export function edgesToSplit(geometry) {
     // eg: startpoint -> SV1, SV1 -> SV2, SV2 -> SV3, SV3 -> endpoint
     const
       newEdges = edgesFromVerts(splittingVertices),
-      {
-        dyingEdgeRefs,
-        newEdgeRefs,
-      } = replacementEdgeRefs(geometry, edge.id, newEdges);
+      replaceEdgeRefs = replacementEdgeRefs(geometry, edge.id, newEdges);
     return {
       edgeToDelete: edge.id,
       newEdges,
-      dyingEdgeRefs,
-      newEdgeRefs,
+      replaceEdgeRefs,
     };
   }));
 }

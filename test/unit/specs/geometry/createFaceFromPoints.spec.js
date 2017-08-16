@@ -166,7 +166,7 @@ describe('validateFaceGeometry', () => {
   });
 });
 
-describe('edgesToSplit', () => {
+describe('edgesToSplit:simpleGeometry', () => {
   /*
 
       a +---+ b
@@ -179,49 +179,49 @@ describe('edgesToSplit', () => {
       f +---------+ g
 
   */
+  const
+    edges = edgesToSplit(simpleGeometry),
+    newSimpleGeometry = _.cloneDeep(simpleGeometry),
+    state = [newSimpleGeometry];
+
+  // modify our copy of geometry to see what it will look like after mutations
+  edges.forEach(
+    payload => splitEdge(state, { geometry_id: simpleGeometry.id, ...payload }));
+
+  const
+    oldGeom = helpers.denormalize(simpleGeometry),
+    newGeom = helpers.denormalize(newSimpleGeometry);
+
+  const vertsIdsFromFace = face => (
+    _.chain(face.edges)
+      .flatMap(e => (
+        e.reverse ? [e.v2, e.v1] : [e.v1, e.v2]
+      ))
+      .map('id')
+      .value()
+  );
 
   it('splits an edge in a simple case', () => {
-    const edges = edgesToSplit(simpleGeometry);
     assert(edges.length === 1);
 
-    const [{ edgeToDelete, newEdges, dyingEdgeRefs, newEdgeRefs }] = edges;
+    const [{ edgeToDelete, newEdges, replaceEdgeRefs }] = edges;
     assert(edgeToDelete === 'ce');
-    assert(_.find(dyingEdgeRefs, { face_id: 'bottom', edge_id: 'ce' }));
+
+    const replaceCE = _.find(replaceEdgeRefs, { face_id: 'bottom', edge_id: 'ce' });
+    assert(replaceCE);
+
     const edgeDE = (
       _.find(newEdges, { v1: 'd', v2: 'e' }) ||
       _.find(newEdges, { v1: 'e', v2: 'd' }));
 
-    assert(_.find(newEdgeRefs, {
-      face_id: 'bottom',
-      edgeRef: { edge_id: edgeDE.id },
-    }));
+    assert(_.includes(replaceCE.newEdges, edgeDE.id));
   });
 
   it('maintains order of existing vertices', () => {
-    const
-      edges = edgesToSplit(simpleGeometry),
-      state = [_.cloneDeep(simpleGeometry)];
 
-    // modify our copy of geometry to see what it will look like after mutations
-    edges.forEach(
-      payload => splitEdge(state, { geometry_id: simpleGeometry.id, ...payload }));
-
-    const vertsIdsFromFace = face => (
-      _.chain(face.edges)
-        .flatMap(e => (
-          e.reverse ? [e.v2, e.v1] : [e.v1, e.v2]
-        ))
-        .map('id')
-        .uniq()
-        .value()
-    );
-
-    const
-      oldGeom = helpers.denormalize(simpleGeometry),
-      newGeom = helpers.denormalize(state[0]);
     _.zip(
-      newGeom.faces.map(vertsIdsFromFace),
-      oldGeom.faces.map(vertsIdsFromFace),
+      _.uniq(newGeom.faces.map(vertsIdsFromFace)),
+      _.uniq(oldGeom.faces.map(vertsIdsFromFace)),
     ).forEach(([newVerts, oldVerts]) => {
       // check that any old verts still around are in the same order.
       assertEqual(
@@ -235,28 +235,38 @@ describe('edgesToSplit', () => {
   });
 
   it('skips edges that are not nearby', () => {
-    const edges = edgesToSplit(simpleGeometry);
-
     refute(_.find(edges, { id: 'eg' }));
   });
 
   it('reverses new edges when the original was reversed', () => {
-    const edges = edgesToSplit(simpleGeometry);
-
     edges.forEach((edge) => {
-      edge.dyingEdgeRefs.forEach((der) => {
-        const originalEdgeRef = _.find(
-          _.find(simpleGeometry.faces, { id: der.face_id }).edgeRefs,
-          { edge_id: der.edge_id });
-        _.filter(edge.newEdgeRefs, { face_id: der.face_id }).forEach((ner) => {
+      edge.replaceEdgeRefs.forEach((rer) => {
+        const
+          originalEdgeRef = _.find(
+            _.find(simpleGeometry.faces, { id: rer.face_id }).edgeRefs,
+            { edge_id: rer.edge_id }),
+          newEdgeRefs = _.filter(
+            _.find(newSimpleGeometry.faces, { id: rer.face_id }).edgeRefs,
+            er => _.includes(edge.newEdgeRefs, er.edge_id));
+        newEdgeRefs.forEach((ner) => {
           // expect that the newly created edge refs are in the same direction
-          // as the dying edge ref.
+          // as the replaced edge ref.
           assertEqual(
-            ner.edgeRef.reverse,
+            ner.reverse,
             originalEdgeRef.reverse,
           );
         });
       });
+    });
+  });
+
+  it('produces closed faces', () => {
+    newGeom.faces.forEach((face) => {
+      const verts = vertsIdsFromFace(face);
+      assertEqual(verts[0], verts[verts.length - 1]);
+      _.chunk(verts.slice(1, -1), 2).forEach(
+        ([v2OfPrev, v1OfNext]) => assertEqual(v2OfPrev, v1OfNext),
+      );
     });
   });
 });

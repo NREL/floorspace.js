@@ -1,4 +1,4 @@
-
+import _ from 'lodash';
     /*
     * create a new geometry set, face, edge, or vertex in the data store
     */
@@ -73,9 +73,26 @@ export function destroyEdgeRef(state, payload) {
         face.edgeRefs.splice(face.edgeRefs.findIndex(eR => eR.edge_id === edge_id), 1);
 }
 
-export function splitEdge(state, { geometry_id, edgeToDelete, newEdges, dyingEdgeRefs, newEdgeRefs }) {
+export function replaceEdgeRef(state, payload) {
+  const
+    { geometry_id, face_id, edge_id, newEdges } = payload,
+    geometry = state.find(g => g.id === geometry_id),
+    face = geometry.faces.find(f => f.id === face_id),
+    edgeRefIx = _.findIndex(face.edgeRefs, { edge_id }),
+    edgeRef = face.edgeRefs[edgeRefIx];
+
+  face.edgeRefs.splice(
+    edgeRefIx, 1, // remove existing edge
+    // replacing it with these ones, in the same direction.
+    ...newEdges.map(newEdgeId => ({
+      edge_id: newEdgeId,
+      reverse: edgeRef.reverse,
+    })),
+  );
+}
+
+export function splitEdge(state, { geometry_id, edgeToDelete, newEdges, replaceEdgeRefs }) {
   newEdges.forEach(edge => createEdge(state, { edge, geometry_id }));
-  dyingEdgeRefs.forEach(dyingEdgeRef => destroyEdgeRef(state, dyingEdgeRef));
-  newEdgeRefs.forEach(newEdgeRef => createEdgeRef(state, newEdgeRef));
+  replaceEdgeRefs.forEach(replacement => replaceEdgeRef(state, replacement));
   destroyGeometry(state, { id: edgeToDelete });
 }
