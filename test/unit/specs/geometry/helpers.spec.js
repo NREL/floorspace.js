@@ -357,6 +357,21 @@ describe('denormalize', () => {
       });
   });
 
+  it('provides a getter for face.vertices', () => {
+    assertProperty(
+      gen.oneOf(_.values(geometryExamples)),
+      (geom) => {
+        helpers.denormalize(geom).faces.forEach((face) => {
+          // one more vertex than edge, because vertices need to loop back around.
+          assertEqual(face.edges.length, face.vertices.length - 1);
+
+          face.vertices.forEach(v =>
+            assert(_.has(v, 'id') && _.has(v, 'x') && _.has(v, 'y')),
+          );
+        });
+      });
+  });
+
   it('adding a face persists after normalization', () => {
     assertProperty(
       gen.oneOf(_.values(geometryExamples)),

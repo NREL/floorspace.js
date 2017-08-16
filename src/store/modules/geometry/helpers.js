@@ -1,5 +1,6 @@
 import _ from 'lodash';
-import ClipperLib from 'js-clipper'
+import ClipperLib from 'js-clipper';
+import { dropConsecutiveDups } from '../../../utilities';
 
 const helpers = {
   // ************************************ CLIPPER ************************************ //
@@ -365,6 +366,11 @@ const helpers = {
           edge_id,
           reverse,
         })),
+        get vertices() {
+          return dropConsecutiveDups(
+            _.flatMap( this.edges, e => (e.reverse ? [e.v2, e.v1] : [e.v1, e.v2])),
+            v => v.id)
+        },
       }));
     return {
       ...geometry,
