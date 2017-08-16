@@ -234,11 +234,29 @@ describe('edgesToSplit', () => {
     });
   });
 
-  // it('skips edges that are not nearby', () => {
-  //
-  // });
-  //
-  // it('reverses new edges when the original was reversed', () => {
-  //
-  // });
+  it('skips edges that are not nearby', () => {
+    const edges = edgesToSplit(simpleGeometry);
+
+    refute(_.find(edges, { id: 'eg' }));
+  });
+
+  it('reverses new edges when the original was reversed', () => {
+    const edges = edgesToSplit(simpleGeometry);
+
+    edges.forEach((edge) => {
+      edge.dyingEdgeRefs.forEach((der) => {
+        const originalEdgeRef = _.find(
+          _.find(simpleGeometry.faces, { id: der.face_id }).edgeRefs,
+          { edge_id: der.edge_id });
+        _.filter(edge.newEdgeRefs, { face_id: der.face_id }).forEach((ner) => {
+          // expect that the newly created edge refs are in the same direction
+          // as the dying edge ref.
+          assertEqual(
+            ner.edgeRef.reverse,
+            originalEdgeRef.reverse,
+          );
+        });
+      });
+    });
+  });
 });
