@@ -1,30 +1,29 @@
-
-export default {
+import _ from 'lodash';
     /*
     * create a new geometry set, face, edge, or vertex in the data store
     */
-    initGeometry (state, payload) {
+export function initGeometry(state, payload) {
       const { geometry } = payload;
       state.push(geometry);
-    },
-    createVertex (state, payload) {
+}
+export function createVertex(state, payload) {
       const { geometry_id, vertex } = payload;
       state.find(g => g.id === geometry_id).vertices.push(vertex);
-    },
-    createEdge (state, payload) {
+}
+export function createEdge(state, payload) {
       const { geometry_id, edge } = payload;
       state.find(g => g.id === geometry_id).edges.push(edge);
-    },
-    createFace (state, payload) {
+}
+export function createFace(state, payload) {
       const { geometry_id, face } = payload;
       state.find(g => g.id === geometry_id).faces.push(face);
-    },
+}
 
     /*
     * removes an object with a given id from the datastore
     * the object can be a geometry set, face, edge, or vertex
     */
-    destroyGeometry (state, payload) {
+export function destroyGeometry(state, payload) {
         // id of the object to be destroyed
         const { id } = payload;
 
@@ -46,31 +45,54 @@ export default {
                 break;
             }
         }
-    },
+}
 
     // set a reference to an edge on a face
-    createEdgeRef (state, payload) {
+export function createEdgeRef(state, payload) {
         const { geometry_id, face_id, edgeRef } = payload,
             geometry = state.find(g => g.id === geometry_id),
             face = geometry.faces.find(f => f.id === face_id),
             edge = geometry.edges.find(e => e.id === edgeRef.edge_id);
 
         if (edge) { face.edgeRefs.push(edgeRef); }
-    },
+}
 
     // set the array of edgeRefs on a face
-    setEdgeRefsForFace (state, payload) {
+export function setEdgeRefsForFace(state, payload) {
         const { geometry_id, face_id, edgeRefs } = payload,
             geometry = state.find(g => g.id === geometry_id),
             face = geometry.faces.find(f => f.id === face_id);
         face.edgeRefs = edgeRefs.filter(ref => geometry.edges.find(e => e.id === ref.edge_id));
-    },
+}
 
     // remove a reference to an edge from a face
-    destroyEdgeRef (state, payload) {
+export function destroyEdgeRef(state, payload) {
         const { geometry_id, face_id, edge_id } = payload,
             geometry = state.find(g => g.id === geometry_id),
             face = geometry.faces.find(f => f.id === face_id);
         face.edgeRefs.splice(face.edgeRefs.findIndex(eR => eR.edge_id === edge_id), 1);
-    }
+}
+
+export function replaceEdgeRef(state, payload) {
+  const
+    { geometry_id, face_id, edge_id, newEdges } = payload,
+    geometry = state.find(g => g.id === geometry_id),
+    face = geometry.faces.find(f => f.id === face_id),
+    edgeRefIx = _.findIndex(face.edgeRefs, { edge_id }),
+    edgeRef = face.edgeRefs[edgeRefIx];
+
+  face.edgeRefs.splice(
+    edgeRefIx, 1, // remove existing edge
+    // replacing it with these ones, in the same direction.
+    ...newEdges.map(newEdgeId => ({
+      edge_id: newEdgeId,
+      reverse: edgeRef.reverse,
+    })),
+  );
+}
+
+export function splitEdge(state, { geometry_id, edgeToDelete, newEdges, replaceEdgeRefs }) {
+  newEdges.forEach(edge => createEdge(state, { edge, geometry_id }));
+  replaceEdgeRefs.forEach(replacement => replaceEdgeRef(state, replacement));
+  destroyGeometry(state, { id: edgeToDelete });
 }
