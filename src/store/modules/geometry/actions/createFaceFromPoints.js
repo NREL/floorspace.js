@@ -56,7 +56,6 @@ export default function createFaceFromPoints(context, payload) {
 
 	// split edges where vertices touch them
     splitEdges(context);
-    connectEdges(context);
 }
 
 //////////////////////// HELPERS //////////////////////////////
@@ -424,64 +423,4 @@ function splitEdges(context) {
     geometry_id: currentStoryGeometry.id,
     ...payload,
   }));
-}
-
-/*
- * order the edgeRefs on each face on the currentStoryGeometry so that all edges are connected from startpoint to endpoint
- * set reverse property on edgeRefs as needed
- */
-function connectEdges(context) {
-    const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'];
-    currentStoryGeometry.faces.forEach((face) => {
-        const faceEdges = geometryHelpers.edgesForFaceId(face.id, currentStoryGeometry);
-
-        // initialize ordered edgeRef array with our origin edge
-        const connectedEdgeRefs = [];
-        var reverse = false;
-
-        // pick an arbitrary edge (edges[0]) and treat its v2 as the endpoint
-        // all ordering will assume this edge's v1 as the origin of the face
-        var nextEdge = faceEdges[0],
-            endpoint = nextEdge.v2;
-
-        while (connectedEdgeRefs.length < faceEdges.length) {
-            connectedEdgeRefs.push({
-                edge_id: nextEdge.id,
-                reverse: reverse
-            });
-            reverse = false;
-
-            // each vertex must be referenced by exactly two edges, it acts as the endpoint for the first edge and the startpoint for the next
-            // look up the next edge by finding the edge on the face referencing the endpoint of the current edge
-            nextEdge = faceEdges.find((e) => {
-                if (e.id === nextEdge.id) {
-                    return;
-                }
-                if ((e.v2 === endpoint || e.v1 === endpoint) && e !== faceEdges[0] && ~connectedEdgeRefs.map(eR => eR.edge_id)
-                    .indexOf(e.id)) {
-                    // TODO: sometimes multiple edges reference the same endpoint, causing duplicated in the connectedEdgeRefs array. not sure why this is happening.
-                    return false;
-                }
-                // if the next edge is connected to the endpoint of the current edge by its v2 and not its v1, it is reversed
-                if (e.v2 === endpoint) {
-                    reverse = true;
-                    endpoint = e.v1;
-                    return true;
-                } else if (e.v1 === endpoint) {
-                    endpoint = e.v2;
-                    return true;
-                }
-            });
-            if (nextEdge === faceEdges[0]) {
-                break;
-            }
-        }
-
-        // update the face with the ordered edge refs
-        context.commit('setEdgeRefsForFace', {
-            geometry_id: currentStoryGeometry.id,
-            face_id: face.id,
-            edgeRefs: connectedEdgeRefs
-        });
-    });
 }
