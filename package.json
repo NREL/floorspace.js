@@ -10,7 +10,7 @@
     "openstudio-build": "npm run build; ruby build/build.rb",
     "unit": "karma start test/unit/karma.conf.js",
     "e2e": "node test/e2e/runner.js",
-    "test": "npm run unit #&& npm run e2e",
+    "test": "karma start test/unit/karma.conf.js --single-run",
     "lint": "eslint --ext .js,.vue src test/unit/specs test/e2e/specs"
   },
   "dependencies": {
