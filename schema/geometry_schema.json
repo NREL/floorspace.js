@@ -3,9 +3,6 @@
 	"description": "Comment describing your JSON Schema",
 	"type": "object",
 	"properties": {
-		"application": {
-			"$ref": "#/definitions/Application"
-		},
 		"project": {
 			"$ref": "#/definitions/Project"
 		},
@@ -52,6 +49,16 @@
 			}
 		}
 	},
+	"required": [
+		"project",
+		"stories",
+		"building_units",
+		"thermal_zones",
+		"space_types",
+		"construction_sets",
+		"windows",
+		"daylighting_controls"
+	],
 	"definitions": {
 		"Application": {
 			"type": "object"
