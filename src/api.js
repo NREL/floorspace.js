@@ -13,6 +13,14 @@ window.api = {
     }
     return true;
   },
+  importLibrary: (data) => {
+    try {
+      window.application.$store.dispatch('importLibrary', { data: JSON.parse(data) });
+    } catch (err) {
+      return false;
+    }
+    return true;
+  },
   doExport: () => window.application.$store.getters['exportData'],
   setConfig: (config) => {
     if (this.initAlreadyRun) {
