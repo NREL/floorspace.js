@@ -359,7 +359,7 @@ export function validateFaceGeometry(points, currentStoryGeometry, snapTolerance
 }
 
 function edgesFromVerts(verts) {
-  return _.zip(verts.slice(0, verts.length - 1), verts.slice(1))
+  return _.zip(verts.slice(0, -1), verts.slice(1))
     .map(([v1, v2]) => factory.Edge(v1.id, v2.id));
 }
 
