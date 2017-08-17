@@ -1,7 +1,13 @@
+import _ from 'lodash';
 import factory from './../factory.js'
 import geometryHelpers from './../helpers'
 import modelHelpers from './../../models/helpers'
-import createFaceFromPoints, { eraseSelection } from './createFaceFromPoints'
+import createFaceFromPoints, { matchOrCreateEdges, eraseSelection } from './createFaceFromPoints'
+
+function getOrCreateVertex(geometry, coords) {
+  return geometryHelpers.vertexForCoordinates(coords, 0, geometry) || factory.Vertex(coords.x, coords.y);
+}
+
 
 export default {
     /*
@@ -147,5 +153,18 @@ export default {
       context.commit('destroyGeometry', { id: face.id });
       expEdgeRefs.forEach(edgeRef => context.commit('destroyGeometry', { id: edgeRef.edge_id }));
       expVertices.forEach(vertex => context.commit('destroyGeometry', { id: vertex.id }));
-    }
+    },
+
+  replaceFacePoints(context, { geometry_id, face, newVerts }) {
+    const
+      geometry = _.find(context.state, { id: geometry_id }),
+      verts = _.map(newVerts, vert => getOrCreateVertex(geometry, vert)),
+      edges = matchOrCreateEdges(verts, geometry.edges);
+    context.commit('replaceFacePoints', {
+      geometry_id,
+      verts,
+      edges,
+      face,
+    });
+  },
 }

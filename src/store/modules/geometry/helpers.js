@@ -1,5 +1,6 @@
 import _ from 'lodash';
-import ClipperLib from 'js-clipper'
+import ClipperLib from 'js-clipper';
+import { dropConsecutiveDups } from '../../../utilities';
 
 const helpers = {
   // ************************************ CLIPPER ************************************ //
@@ -70,6 +71,17 @@ const helpers = {
       return [];
     }
     return false;
+  },
+
+  // convenience functions for setOperation
+  intersection(f1, f2) {
+    return this.setOperation('intersection', f1, f2);
+  },
+  union(f1, f2) {
+    return this.setOperation('union', f1, f2);
+  },
+  difference(f1, f2) {
+    return this.setOperation('difference', f1, f2);
   },
 
     // given an array of points return the area of the space they enclose
@@ -364,6 +376,11 @@ const helpers = {
           edge_id,
           reverse,
         })),
+        get vertices() {
+          return dropConsecutiveDups(
+            _.flatMap( this.edges, e => (e.reverse ? [e.v2, e.v1] : [e.v1, e.v2])),
+            v => v.id)
+        },
       }));
     return {
       ...geometry,
