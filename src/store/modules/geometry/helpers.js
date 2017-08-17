@@ -1,4 +1,6 @@
-import ClipperLib from 'js-clipper'
+import _ from 'lodash';
+import ClipperLib from 'js-clipper';
+import { dropConsecutiveDups } from '../../../utilities';
 
 const helpers = {
   // ************************************ CLIPPER ************************************ //
@@ -69,6 +71,17 @@ const helpers = {
       return [];
     }
     return false;
+  },
+
+  // convenience functions for setOperation
+  intersection(f1, f2) {
+    return this.setOperation('intersection', f1, f2);
+  },
+  union(f1, f2) {
+    return this.setOperation('union', f1, f2);
+  },
+  difference(f1, f2) {
+    return this.setOperation('difference', f1, f2);
   },
 
     // given an array of points return the area of the space they enclose
@@ -219,11 +232,10 @@ const helpers = {
     },
 
     // given a set of coordinates, find the vertex on the geometry set within their tolerance zone
-  vertexForCoordinates(coordinates, snapTolerance, geometry) {
-    // const { x, y } = coordinates;
+  vertexForCoordinates(coordinates, geometry) {
+    const { x, y } = coordinates;
     // return geometry.vertices.find(v => v.x === x && v.y === y);
-    // TODO once PR#118 is merged, put this back
-    return geometry.vertices.find(v => this.distanceBetweenPoints(v, coordinates) <= snapTolerance)
+    return geometry.vertices.find(v => this.distanceBetweenPoints(v, coordinates) < 0.00001)
   },
 
     // given a face id, returns the populated vertex objects reference by edges on that face
@@ -338,6 +350,71 @@ const helpers = {
         Math.PI - angleDiff, // To catch angles that are very similar, but opposite directions
       );
     return correctedDiff < 0.05 * Math.PI;
+  },
+  pointDistanceToSegment(pt, { start, end }) {
+    const proj = helpers.projectionOfPointToLine(pt, { p1: start, p2: end });
+    return {
+      dist: helpers.distanceBetweenPoints(pt, proj),
+      proj,
+    };
+  },
+
+  denormalize(geometry) {
+    const
+      edges = geometry.edges.map(edge => ({
+        ...edge,
+        v1: this.vertexForId(edge.v1, geometry),
+        v2: this.vertexForId(edge.v2, geometry),
+      })),
+      edgesById = _.zipObject(
+        _.map(edges, 'id'),
+        edges),
+      faces = geometry.faces.map(face => ({
+        id: face.id,
+        edges: face.edgeRefs.map(({ edge_id, reverse }) => ({
+          ...edgesById[edge_id],
+          edge_id,
+          reverse,
+        })),
+        get vertices() {
+          return dropConsecutiveDups(
+            _.flatMap( this.edges, e => (e.reverse ? [e.v2, e.v1] : [e.v1, e.v2])),
+            v => v.id)
+        },
+      }));
+    return {
+      ...geometry,
+      edges,
+      faces,
+    };
+  },
+
+  // probably best to use this only for testing
+  normalize(geometry) {
+    const
+      edges = _.uniqBy(
+        [
+          ...geometry.edges,
+          ..._.flatMap(geometry.faces, f => f.edges),
+        ], 'id'),
+      vertices = _.uniqBy(
+        [
+          ...geometry.vertices,
+          ..._.flatMap(edges, e => [e.v1, e.v2]),
+        ], 'id');
+    return {
+      id: geometry.id,
+      vertices: vertices.map(v => _.pick(v, ['id', 'x', 'y'])),
+      edges: edges.map(e => ({
+        id: e.id,
+        v1: e.v1.id,
+        v2: e.v2.id,
+      })),
+      faces: geometry.faces.map(f => ({
+        id: f.id,
+        edgeRefs: f.edges.map(er => ({ edge_id: er.id, reverse: er.reverse })),
+      })),
+    };
   },
 };
 

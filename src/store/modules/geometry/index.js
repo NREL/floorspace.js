@@ -1,5 +1,5 @@
 import actions from './actions/actions'
-import mutations from './mutations'
+import * as mutations from './mutations'
 import getters from './getters'
 
 export default {
