@@ -304,7 +304,7 @@ export function errOnEdgeIntersectsEdge(vertices, edges) {
  * validates the face geometry for self intersection
  * returns object with success boolean and face geometry or error message depending on validation results
  */
-export function validateFaceGeometry(points, currentStoryGeometry, snapTolerance) {
+export function validateFaceGeometry(points, currentStoryGeometry) {
   /* validation consists of:
    - try and match each vertex to an existing one that is already in the geometry
    - create edges, and try to re-use existing ones (reversed, if necessary)
@@ -355,8 +355,7 @@ export function validateFaceGeometry(points, currentStoryGeometry, snapTolerance
   // build an array of vertices for the face being created
   let faceVertices = points.map(point => (
       // if a vertex already exists at a given location, reuse it
-      // TODO once PR #118 is ready, remove snap tolerance again
-    geometryHelpers.vertexForCoordinates(point, snapTolerance, currentStoryGeometry) || new factory.Vertex(point.x, point.y)
+    geometryHelpers.vertexForCoordinates(point, currentStoryGeometry) || new factory.Vertex(point.x, point.y)
   ));
 
 
@@ -392,7 +391,7 @@ export function validateFaceGeometry(points, currentStoryGeometry, snapTolerance
 }
 
 function edgesFromVerts(verts) {
-  return _.zip(verts.slice(0, verts.length - 1), verts.slice(1))
+  return _.zip(verts.slice(0, -1), verts.slice(1))
     .map(([v1, v2]) => factory.Edge(v1.id, v2.id));
 }
 

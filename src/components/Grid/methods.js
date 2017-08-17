@@ -603,8 +603,7 @@ export default {
       });
     }
 
-    // TODO Remove this featureUnfinished business once PR#118 is merged.
-    if (!"featureUnfinished (shouldn't have been merged)" && this.points.length === 1 && this.currentTool === 'Rectangle') {
+    if (this.points.length === 1 && this.currentTool === 'Rectangle') {
       snappableVertices = snappableVertices.concat(
         geometryHelpers.syntheticRectangleSnaps(
           snappableVertices,
