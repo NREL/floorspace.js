@@ -2,7 +2,7 @@ import _ from 'lodash';
 import factory from './../factory.js'
 import geometryHelpers from './../helpers'
 import modelHelpers from './../../models/helpers'
-import createFaceFromPoints, { matchOrCreateEdges, eraseSelection } from './createFaceFromPoints'
+import createFaceFromPoints, { matchOrCreateEdges, eraseSelection, newGeometriesOfOverlappedFaces } from './createFaceFromPoints'
 
 function getOrCreateVertex(geometry, coords) {
   return geometryHelpers.vertexForCoordinates(coords, 0, geometry) || factory.Vertex(coords.x, coords.y);
@@ -37,43 +37,46 @@ export default {
       }
   	},
 
-    /*
-    * Given a dx, dy, and face
-    * clone the face with all points adjusted by the delta and destroy the original
-    * this will trigger all set operations
-    */
-    moveFaceByOffset (context, payload) {
-        const { face_id, dx, dy } = payload,
-            currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'],
-            face = geometryHelpers.faceForId(face_id, currentStoryGeometry),
-            movedPoints = geometryHelpers.verticesForFaceId(face.id, currentStoryGeometry).map(v => ({
-                x: v.x + dx,
-                y: v.y + dy
-            })),
-            affectedModel = modelHelpers.modelForFace(context.rootState.models, face.id);
+  /*
+  * Given a dx, dy, and face
+  * clone the face with all points adjusted by the delta and destroy the original
+  * this will trigger all set operations
+  */
+  moveFaceByOffset(context, payload) {
+    const
+      { face_id, dx, dy } = payload,
+      currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'],
+      face = geometryHelpers.faceForId(face_id, currentStoryGeometry),
+      movedPoints = geometryHelpers.verticesForFaceId(face.id, currentStoryGeometry).map(v => ({
+        x: v.x + dx,
+        y: v.y + dy,
+      })),
+      newGeoms = newGeometriesOfOverlappedFaces(
+        movedPoints,
+        // Don't consider face we're modifying as a reason to disqualify the action.
+        geometryHelpers.exceptFace(currentStoryGeometry, face_id),
+      );
 
-        // destroy existing face
-        context.dispatch(affectedModel.type === 'space' ? 'models/updateSpaceWithData' : 'models/updateShadingWithData', {
-            [affectedModel.type]: affectedModel,
-            face_id: null
-        }, { root: true });
+    if (!newGeoms) {
+      window.eventBus.$emit('error', 'Operation cancelled - no split faces');
 
-        context.dispatch('destroyFaceAndDescendents', {
-            geometry_id: currentStoryGeometry.id,
-            face: face
-        });
+      window.eventBus.$emit('reload-grid');
+      return;
+    }
 
-        // create new face from adjusted points
-        context.dispatch('createFaceFromPoints', {
-            model_id: affectedModel.id,
-            points: movedPoints
-        });
-    },
-    /*
-    * create a face and associated edges and vertices from an array of points
-    * associate the face with the space or shading included in the payload
-    */
-    createFaceFromPoints: createFaceFromPoints,
+    newGeoms.forEach(newGeom => context.dispatch('replaceFacePoints', newGeom));
+
+    context.dispatch('replaceFacePoints', {
+      geometry_id: currentStoryGeometry.id,
+      face_id,
+      movedPoints,
+    });
+  },
+  /*
+  * create a face and associated edges and vertices from an array of points
+  * associate the face with the space or shading included in the payload
+  */
+  createFaceFromPoints,
 
     // convert the splitting edge into two new edges
     splitEdge (context, payload) {
@@ -155,7 +158,7 @@ export default {
       expVertices.forEach(vertex => context.commit('destroyGeometry', { id: vertex.id }));
     },
 
-  replaceFacePoints(context, { geometry_id, face, newVerts }) {
+  replaceFacePoints(context, { geometry_id, face_id, newVerts }) {
     const
       geometry = _.find(context.state, { id: geometry_id }),
       verts = _.map(newVerts, vert => getOrCreateVertex(geometry, vert)),
@@ -164,7 +167,7 @@ export default {
       geometry_id,
       verts,
       edges,
-      face,
+      face_id,
     });
   },
 }

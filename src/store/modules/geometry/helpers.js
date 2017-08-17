@@ -360,6 +360,14 @@ const helpers = {
     };
   },
 
+  exceptFace(geometry, face_id) {
+    if (!face_id) { return geometry; }
+    return {
+      ...geometry,
+      faces: _.reject(geometry.faces, { id: face_id }),
+    };
+  },
+
   denormalize(geometry) {
     const
       edges = geometry.edges.map(edge => ({

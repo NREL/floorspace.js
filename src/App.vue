@@ -70,6 +70,11 @@ export default {
       this.success = msg;
       setTimeout(() => { this.success = null; }, 5000);
     });
+    this.$on('reload-grid', () => {
+      // This is unfortunate. oh well.
+      document.getElementById('svg-grid')
+        .dispatchEvent(new Event('reloadGrid'));
+    });
 
     document.addEventListener('keydown', (e) => {
       if (!this.$store.timetravel){
