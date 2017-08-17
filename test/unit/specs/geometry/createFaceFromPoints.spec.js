@@ -23,7 +23,7 @@ describe('validateFaceGeometry', () => {
 
     const
       res = validateFaceGeometry(points, preserveRectangularityGeometry),
-      newVerts = _.reject(res.vertices, v => preserveRectangularityGeometry.vertices.find(c => c.id === v.id));
+      newVerts = _.reject(res.vertices, v => preserveRectangularityGeometry.vertices.find(c => helpers.distanceBetweenPoints(v, c) < 0.0001));
 
     assert(newVerts.length === 3);
   });
