@@ -259,7 +259,7 @@ export default {
 #grid {
   button {
     position: absolute;
-    z-index: 1000;
+    z-index: 200;
   }
   img {
     position: absolute;
