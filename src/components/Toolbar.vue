@@ -203,12 +203,8 @@ export default {
       #import-export {
         position: absolute;
         right: 2.5rem;
-        #import {
-          border: 1px solid $secondary;
-        }
-        #export {
+        button {
           margin-left: 1rem;
-          border: 1px solid $primary;
         }
       }
       // hidden file inputs
@@ -228,7 +224,7 @@ export default {
         margin: 0 1rem 0 0;
       }
       .active {
-        border: 1px solid $primary;
+        border: 2px solid $primary;
       }
       > .undo-redo {
         margin-right: auto;
