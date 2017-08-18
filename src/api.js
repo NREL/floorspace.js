@@ -1,9 +1,9 @@
 window.api = {
   config: null,
   initAlreadyRun: false,
-  doImport: (data) => {
+  openFloorplan: (data) => {
     try {
-      window.application.$store.dispatch('importModel', {
+      window.application.$store.dispatch('importFloorplan', {
         clientWidth: document.getElementById('svg-grid').clientWidth,
         clientHeight: document.getElementById('svg-grid').clientHeight,
         data: JSON.parse(data),
@@ -21,7 +21,7 @@ window.api = {
     }
     return true;
   },
-  doExport: () => window.application.$store.getters['exportData'],
+  exportFloorplan: () => window.application.$store.getters['exportData'],
   setConfig: (config) => {
     if (this.initAlreadyRun) {
       throw new Error('The application has already been started, configuration cannot be changed.');
@@ -49,7 +49,7 @@ window.api = {
     window.application.$store.dispatch('project/setUnits', { units: window.api.config.units });
 
     // if the map modal has been disabled, mark the map as initialized so that time travel can be initialized
-    // TODO: we may want to intitialize timetravel in the importModel action instead
+    // TODO: we may want to intitialize timetravel in the importFloorplan action instead
     window.application.$store.dispatch('project/setMapInitialized', { initialized: true });
 
     this.initAlreadyRun = true;
