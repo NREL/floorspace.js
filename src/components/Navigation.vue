@@ -294,6 +294,18 @@ export default {
       switch (mode) {
         case 'stories':
           this.currentStory = item;
+          if (this.items.length) {
+            // in what universe was making special vars for
+            // this.currentBuildingUnit, this.currentThermalZone, etc a good choice?
+            // why not just use this.currentSubSelection always, and use this.mode
+            // to tell what type it is?
+            this[
+              this.mode === 'space_types' ? 'currentSpaceType' :
+              this.mode === 'building_units' ? 'currentBuildingUnit' :
+              this.mode === 'thermal_zones' ? 'currentThermalZone' :
+              'currentSubSelection'
+            ] = this.items[0];
+          }
           break;
         case 'building_units':
           this.currentBuildingUnit = item;
