@@ -44,7 +44,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
         </thead>
 
         <tbody>
-            <tr v-for='object in displayObjects' :key="object.id" @click="selectedObject = object" :style="{ 'background-color': (selectedObject && selectedObject.id === object.id) ? '#008500' : '' }">
+            <tr
+              v-for='object in displayObjects'
+              :key="object.id"
+              @click="selectedObject = object"
+              :style="{ 'background-color': (selectedObject && selectedObject.id === object.id) ? '#008500' : '' }"
+              :data-id="object.id"
+            >
                 <td v-for="column in columns">
                     <input v-if="!inputTypeForKey(column)" :value="valueForKey(object, column)" @change="setValueForKey(object, column, $event.target.value)" readonly>
                     <input v-if="inputTypeForKey(column) === 'text'" :value="valueForKey(object, column)" @change="setValueForKey(object, column, $event.target.value)">
@@ -361,6 +367,12 @@ export default {
       this.search = '';
       this.sortKey = 'id';
       this.sortDescending = true;
+    },
+    selectedObject(obj) {
+      const row = this.$el.querySelector(`[data-id="${obj.id}"]`);
+      if (row) {
+        row.scrollIntoView();
+      }
     },
   },
 };
