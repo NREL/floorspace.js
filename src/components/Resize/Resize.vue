@@ -26,8 +26,8 @@ export default {
     },
     props: ['resize-top','resize-right','resize-right-min','resize-top-min'],
     mounted () {
-        this.$el.classList.add('resize');
-
+        // this.$el.classList.add('resize');
+        this.$el.setAttribute('data-resizable', true);
         if (this.resizeTop) {
             this.$refs.topbar.addEventListener('mousedown', this.initTop);
         }
