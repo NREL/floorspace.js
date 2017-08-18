@@ -1,6 +1,6 @@
 import idFactory from './generateId';
 
-export default function importModel(context, payload) {
+export default function importFloorplan(context, payload) {
   // intializr a versionNumber if the app is running in embedded mode
   if (window.api) { window.versionNumber = 0; }
 
