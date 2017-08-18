@@ -19,6 +19,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <span class="input-text">
               <input ref="downloadName" type="text"
                 @keyup.enter="downloadFile"
+                :value="saveWhat.toLowerCase()"
+                spellcheck="false"
               />
               <button class="download-button" @click="downloadFile">download</button>
             </span>
@@ -32,6 +34,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 export default {
   name: 'save-as-modal',
   props: ['saveWhat', 'dataToDownload', 'onClose'],
+  mounted() {
+    this.$refs.downloadName.focus();
+  },
   methods: {
     downloadFile: function() {
       const a = document.createElement('a');
@@ -44,15 +49,6 @@ export default {
     },
     close: function() {
       this.onClose();
-    },
-  },
-  watch: {
-    'saveWhat': function(val, oldVal) {
-        debugger;
-        if (val.length) {
-          this.$refs.downloadName.value = val.toLowerCase();
-          this.$refs.downloadName.focus();
-        }
     },
   },
 };
