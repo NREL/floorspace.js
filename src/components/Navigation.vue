@@ -285,6 +285,7 @@ export default {
         default:
           break;
       }
+      this.setCurrentItem();
     },
 
     /*
@@ -294,18 +295,7 @@ export default {
       switch (mode) {
         case 'stories':
           this.currentStory = item;
-          if (this.items.length) {
-            // in what universe was making special vars for
-            // this.currentBuildingUnit, this.currentThermalZone, etc a good choice?
-            // why not just use this.currentSubSelection always, and use this.mode
-            // to tell what type it is?
-            this[
-              this.mode === 'space_types' ? 'currentSpaceType' :
-              this.mode === 'building_units' ? 'currentBuildingUnit' :
-              this.mode === 'thermal_zones' ? 'currentThermalZone' :
-              'currentSubSelection'
-            ] = this.items[0];
-          }
+          this.setCurrentItem();
           break;
         case 'building_units':
           this.currentBuildingUnit = item;
@@ -319,6 +309,17 @@ export default {
         default: // spaces, shading, images
           this.currentSubSelection = item;
           break;
+      }
+    },
+
+
+
+    setCurrentItem() {
+      // to be used when, ex changing stories or deleting an item.
+      // According to issue #134, we don't want to ever allow a situation
+      // where no item is selected.
+      if (this.items.length && !this.selectedObject) {
+        this.selectedObject = this.items[0];
       }
     },
 
