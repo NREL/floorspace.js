@@ -233,8 +233,6 @@ const helpers = {
 
     // given a set of coordinates, find the vertex on the geometry set within their tolerance zone
   vertexForCoordinates(coordinates, geometry) {
-    const { x, y } = coordinates;
-    // return geometry.vertices.find(v => v.x === x && v.y === y);
     return geometry.vertices.find(v => this.distanceBetweenPoints(v, coordinates) < 0.00001)
   },
 
