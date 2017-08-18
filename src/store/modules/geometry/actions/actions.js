@@ -4,8 +4,8 @@ import geometryHelpers from './../helpers'
 import modelHelpers from './../../models/helpers'
 import createFaceFromPoints, { matchOrCreateEdges, eraseSelection, newGeometriesOfOverlappedFaces } from './createFaceFromPoints'
 
-function getOrCreateVertex(geometry, coords) {
-  return geometryHelpers.vertexForCoordinates(coords, 0, geometry) || factory.Vertex(coords.x, coords.y);
+export function getOrCreateVertex(geometry, coords) {
+  return geometryHelpers.vertexForCoordinates(coords, geometry) || factory.Vertex(coords.x, coords.y);
 }
 
 
