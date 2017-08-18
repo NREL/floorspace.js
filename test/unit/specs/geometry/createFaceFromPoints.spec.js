@@ -345,7 +345,6 @@ describe('newGeometriesOfOverlappedFaces', () => {
     const newBigger = newGeoms[0];
     assert(newBigger.face_id === 'bigger');
 
-    console.log(JSON.stringify(newBigger.newVerts));
-    assertEqual(newBigger.newVerts.length, 8)
+    assertEqual(newBigger.vertices.length, 8);
   });
 });

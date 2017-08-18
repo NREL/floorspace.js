@@ -19,51 +19,48 @@ export default function createFaceFromPoints(context, payload) {
   const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'];
   const target = modelHelpers.libraryObjectWithId(context.rootState.models, model_id);
 
-    // if the target already has an existing face, use the union of the new and existing faces
-    const existingFace = target.face_id ? geometryHelpers.faceForId(target.face_id, currentStoryGeometry) : null;
-    var facePoints;
+  // if the target already has an existing face, use the union of the new and existing faces
+  const existingFace = target.face_id ? geometryHelpers.faceForId(target.face_id, currentStoryGeometry) : null;
+  let facePoints;
 
-    if (existingFace) {
-        const existingFaceVertices = geometryHelpers.verticesForFaceId(existingFace.id, currentStoryGeometry);
-        facePoints = geometryHelpers.setOperation('union', existingFaceVertices, points);
-        if (!facePoints) {
-            window.eventBus.$emit('error', 'Operation cancelled - no split faces');
-            return;
-        }
-    } else {
-        facePoints = points;
-    }
-
-
-    const faceGeometry = validateFaceGeometry(facePoints, context.rootGetters['application/currentStoryGeometry'], context.rootGetters['project/snapTolerance']);
-    if (!faceGeometry.success) {
-        window.eventBus.$emit('error', faceGeometry.error);
-        console.error(faceGeometry.error);
-        if (!faceGeometry.error) {
-          debugger
-        }
-        return;
-    }
-
-    const newGeoms = newGeometriesOfOverlappedFaces(
-      facePoints,
-      // Don't consider face we're modifying as a reason to disqualify the action.
-      geometryHelpers.exceptFace(currentStoryGeometry, existingFace && existingFace.id),
-    );
-
-    // prevent overlapping faces by erasing existing geometry covered by the points defining the new face
-    if (!newGeoms) {
+  if (existingFace) {
+    const existingFaceVertices = geometryHelpers.verticesForFaceId(existingFace.id, currentStoryGeometry);
+    facePoints = geometryHelpers.setOperation('union', existingFaceVertices, points);
+    if (!facePoints) {
       window.eventBus.$emit('error', 'Operation cancelled - no split faces');
       return;
     }
+  } else {
+    facePoints = points;
+  }
 
-    newGeoms.forEach(newGeom => context.dispatch('replaceFacePoints', newGeom));
 
-    // save the face and its descendent geometry
-    storeFace(faceGeometry, target, context);
+  const faceGeometry = validateFaceGeometry(facePoints, context.rootGetters['application/currentStoryGeometry'], context.rootGetters['project/snapTolerance']);
+  if (!faceGeometry.success) {
+    window.eventBus.$emit('error', faceGeometry.error);
+    console.error(faceGeometry.error);
+    return;
+  }
 
-	// split edges where vertices touch them
-    splitEdges(context);
+  const newGeoms = newGeometriesOfOverlappedFaces(
+    facePoints,
+    // Don't consider face we're modifying as a reason to disqualify the action.
+    geometryHelpers.exceptFace(currentStoryGeometry, existingFace && existingFace.id),
+  );
+
+  // prevent overlapping faces by erasing existing geometry covered by the points defining the new face
+  if (!newGeoms) {
+    window.eventBus.$emit('error', 'Operation cancelled - no split faces');
+    return;
+  }
+
+  newGeoms.forEach(newGeom => context.dispatch('replaceFacePoints', newGeom));
+
+  // save the face and its descendent geometry
+  storeFace(faceGeometry, target, context);
+
+  // split edges where vertices touch them
+  splitEdges(context);
 }
 
 // ////////////////////// HELPERS //////////////////////////// //
@@ -77,19 +74,28 @@ export function newGeometriesOfOverlappedFaces(points, geometry) {
   const intersectedFaces = geom.faces
     .filter(face => geometryHelpers.intersection(face.vertices, points).length > 0);
 
-  const newFaceGeometries = intersectedFaces.map(existingFace =>
+  const newFaceVertices = intersectedFaces.map(existingFace =>
     geometryHelpers.difference(existingFace.vertices, points),
   );
 
-  if (!newFaceGeometries.every(_.identity)) {
+  if (!newFaceVertices.every(_.identity)) {
     // difference caused split face.
     return false;
   }
 
-  return _.zip(intersectedFaces, newFaceGeometries).map(([face, newVerts]) => ({
+  const newFaceGeometries = newFaceVertices.map(
+    verts => validateFaceGeometry(verts, geometry));
+
+  if (!_.map(newFaceGeometries, 'success').every(_.identity)) {
+    // validation failed on one of the geometries
+    return false;
+  }
+
+  return _.zip(intersectedFaces, newFaceGeometries).map(([face, { vertices, edges }]) => ({
     geometry_id: geometry.id,
     face_id: face.id,
-    newVerts,
+    vertices,
+    edges,
   }));
 }
 
@@ -99,66 +105,27 @@ export function newGeometriesOfOverlappedFaces(points, geometry) {
  * returns false if the erase operation splits an existing face
  */
 export function eraseSelection(points, context) {
-    const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'];
+  const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'];
 
-    // validation - a selection must have at least 3 vertices and area
-    if (points.length < 3 || !geometryHelpers.areaOfSelection(points)) {
-        return;
-    }
+  // validation - a selection must have at least 3 vertices and area
+  if (points.length < 3 || !geometryHelpers.areaOfSelection(points)) {
+    return false;
+  }
 
-    /*
-     * find all existing faces that have an intersection with the selection being erased
-     * destroy faces intersecting the eraser selection and recreate them
-     * from the difference between their original area and the eraser selection
-     */
-    const intersectedFaces = currentStoryGeometry.faces.filter((face) => {
-        const faceVertices = geometryHelpers.verticesForFaceId(face.id, currentStoryGeometry),
-            intersection = geometryHelpers.setOperation('intersection', faceVertices, points);
-        return intersection.length;
-    });
+  /*
+   * find all existing faces that have an intersection with the selection being erased
+   * destroy faces intersecting the eraser selection and recreate them
+   * from the difference between their original area and the eraser selection
+  */
+  const newGeoms = newGeometriesOfOverlappedFaces(points, currentStoryGeometry);
+  // prevent overlapping faces by erasing existing geometry covered by the points defining the new face
+  if (!newGeoms) {
+    window.eventBus.$emit('error', 'Operation cancelled - no split faces');
+    return false;
+  }
 
-    // check that the operation is valid
-    var validOperation = true;
-    intersectedFaces.forEach((existingFace) => {
-        const existingFaceVertices = geometryHelpers.verticesForFaceId(existingFace.id, currentStoryGeometry);
-        if (!geometryHelpers.setOperation('difference', existingFaceVertices, points)) {
-            validOperation = false;
-        }
-    });
-
-    if (validOperation) {
-        /*
-         * destroy faces intersecting the eraser selection and recreate them
-         * from the difference between their original area and the eraser selection
-         */
-        intersectedFaces.forEach((existingFace) => {
-            const existingFaceVertices = geometryHelpers.verticesForFaceId(existingFace.id, currentStoryGeometry),
-                affectedModel = modelHelpers.modelForFace(context.rootState.models, existingFace.id);
-
-            // create new face by subtracting overlap (intersection) from the existing face's original area
-            const differenceOfFaces = geometryHelpers.setOperation('difference', existingFaceVertices, points);
-            // destroy existing face
-            context.dispatch(affectedModel.type === 'space' ? 'models/updateSpaceWithData' : 'models/updateShadingWithData', {
-                [affectedModel.type]: affectedModel,
-                face_id: null
-            }, {
-                root: true
-            });
-
-            context.dispatch('destroyFaceAndDescendents', {
-                geometry_id: currentStoryGeometry.id,
-                face: existingFace
-            });
-
-            context.dispatch('createFaceFromPoints', {
-                model_id: affectedModel.id,
-                points: differenceOfFaces
-            });
-        });
-        return true;
-    } else {
-        return false;
-    }
+  newGeoms.forEach(newGeom => context.dispatch('replaceFacePoints', newGeom));
+  return true;
 }
 
 /*
@@ -233,7 +200,9 @@ export function matchOrCreateEdges(vertices, existingEdges) {
     .map(([v1, v2]) => (findExistingEdge(v1, v2, existingEdges) || new factory.Edge(v1.id, v2.id)));
 }
 
-function InvalidFaceGeometry() {}
+function InvalidFaceGeometry(message) {
+  this.message = message;
+}
 InvalidFaceGeometry.prototype = new Error();
 
 export function errOnTooFewVerts(vertices) {
@@ -378,7 +347,7 @@ export function validateFaceGeometry(points, currentStoryGeometry) {
     if (e instanceof InvalidFaceGeometry) {
       return {
         success: false,
-        error: `${e}`,
+        error: e.message,
       };
     }
     // not an error we know about -- shouldn't have caught it

@@ -2,7 +2,7 @@ import _ from 'lodash';
 import factory from './../factory.js'
 import geometryHelpers from './../helpers'
 import modelHelpers from './../../models/helpers'
-import createFaceFromPoints, { matchOrCreateEdges, eraseSelection, newGeometriesOfOverlappedFaces } from './createFaceFromPoints'
+import createFaceFromPoints, { matchOrCreateEdges, eraseSelection, newGeometriesOfOverlappedFaces, validateFaceGeometry } from './createFaceFromPoints'
 
 export function getOrCreateVertex(geometry, coords) {
   return geometryHelpers.vertexForCoordinates(coords, geometry) || factory.Vertex(coords.x, coords.y);
@@ -64,12 +64,20 @@ export default {
       return;
     }
 
+    const movedGeom = validateFaceGeometry(movedPoints, currentStoryGeometry);
+    if (!movedGeom) {
+      window.eventBus.$emit('error', movedGeom.error);
+      window.eventBus.$emit('reload-grid');
+      return;
+    }
+
     newGeoms.forEach(newGeom => context.dispatch('replaceFacePoints', newGeom));
 
     context.dispatch('replaceFacePoints', {
       geometry_id: currentStoryGeometry.id,
       face_id,
-      newVerts: movedPoints,
+      vertices: movedGeom.vertices,
+      edges: movedGeom.edges,
     });
   },
   /*
@@ -158,15 +166,10 @@ export default {
       expVertices.forEach(vertex => context.commit('destroyGeometry', { id: vertex.id }));
     },
 
-  replaceFacePoints(context, { geometry_id, face_id, newVerts }) {
-    const
-      geometry = _.find(context.state, { id: geometry_id }),
-      verts = _.map(newVerts, vert => getOrCreateVertex(geometry, vert)),
-      edges = matchOrCreateEdges(verts, geometry.edges);
-
+  replaceFacePoints(context, { geometry_id, face_id, vertices, edges }) {
     context.commit('replaceFacePoints', {
       geometry_id,
-      verts,
+      vertices,
       edges,
       face_id,
     });
