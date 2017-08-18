@@ -69,7 +69,7 @@ export default {
     context.dispatch('replaceFacePoints', {
       geometry_id: currentStoryGeometry.id,
       face_id,
-      movedPoints,
+      newVerts: movedPoints,
     });
   },
   /*
@@ -163,6 +163,7 @@ export default {
       geometry = _.find(context.state, { id: geometry_id }),
       verts = _.map(newVerts, vert => getOrCreateVertex(geometry, vert)),
       edges = matchOrCreateEdges(verts, geometry.edges);
+
     context.commit('replaceFacePoints', {
       geometry_id,
       verts,
