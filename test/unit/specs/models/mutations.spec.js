@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { refute, assertEqual } from '../../test_helpers';
+import { refute, assert, assertEqual } from '../../test_helpers';
 import mutations from '../../../../src/store/modules/models/mutations';
 
 describe('destroyObject', () => {
@@ -18,11 +18,17 @@ describe('destroyObject', () => {
 
     const spaceTypeIds = _.map(goodState.library.space_types, 'id');
     refute(_.includes(spaceTypeIds, '23')); // the thing we're deleting is *not* a space type.
+
+    const thermalZoneIds = _.map(goodState.library.thermal_zones, 'id');
+    assert(_.includes(thermalZoneIds, '23'));
     mutations.destroyObject(goodState, { object: { color: '#000000', id: '23', name: 'Thermal Zone 2' } });
 
     // deleting an unrelated object shouldn't have caused a change in spaceTypes.
     assertEqual(
       spaceTypeIds,
       _.map(goodState.library.space_types, 'id'));
+
+    // but it should have deleted the one we wanted.
+    refute(_.includes(_.map(goodState.library.thermal_zones, 'id'), '23'));
   });
 });
