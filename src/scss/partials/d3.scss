@@ -12,6 +12,10 @@
   cursor: pointer;
 }
 
+.tool_fill polygon {
+  cursor: pointer;
+}
+
 .tool_drag #svg-grid {
   polygon, rect, path {
       pointer-events: none;
