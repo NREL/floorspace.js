@@ -225,6 +225,9 @@ export function findExistingEdge(v1, v2, edges) {
 
 export function matchOrCreateEdges(vertices, existingEdges) {
    // pair each vertex with the next (wrapping back to start at the end)
+  if (!vertices.length) {
+    return [];
+  }
   return _.zip(vertices, [...vertices.slice(1), vertices[0]])
   // try and find a shared edge, but fall back to creating a new one
     .map(([v1, v2]) => (findExistingEdge(v1, v2, existingEdges) || new factory.Edge(v1.id, v2.id)));
