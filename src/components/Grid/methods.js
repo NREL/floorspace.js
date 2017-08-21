@@ -8,9 +8,9 @@
 
 const d3 = require('d3');
 const polylabel = require('polylabel');
-
-import geometryHelpers from './../../store/modules/geometry/helpers.js'
-import modelHelpers from './../../store/modules/models/helpers.js'
+import { snapTargets } from './snapping';
+import geometryHelpers from './../../store/modules/geometry/helpers';
+import modelHelpers from './../../store/modules/models/helpers';
 
 export default {
   // ****************** USER INTERACTION EVENTS ****************** //
@@ -485,7 +485,20 @@ export default {
   * if the grid is active and no vertex or edge is within the snap tolerance, returns the closest grid point
   * if the grid is inactive, returns the or the location of the point
   */
-  findSnapTarget (gridPoint) {
+  findSnapTarget(gridPoint) {
+    // translate grid point to real world units to check for snapping targets
+    const rwuPoint = {
+      x: this.gridToRWU(gridPoint.x, 'x'),
+      y: this.gridToRWU(gridPoint.y, 'y')
+    };
+    if (true || this.snapMode === 'grid-strict') {
+      const gridSnap = this.strictSnapTargets(rwuPoint)[0];
+      return {
+        ...gridSnap,
+        x: this.rwuToGrid(gridSnap.x, 'x'),
+        y: this.rwuToGrid(gridSnap.y, 'y'),
+      };
+    }
 
     if (event.shiftKey) {
       // disable snapping when shift is held down
@@ -494,12 +507,6 @@ export default {
         ...gridPoint
       };
     }
-
-    // translate grid point to real world units to check for snapping targets
-    const rwuPoint = {
-      x: this.gridToRWU(gridPoint.x, 'x'),
-      y: this.gridToRWU(gridPoint.y, 'y')
-    };
 
     // if a snappable vertex exists, don't check for edges
     const snappingVertex = this.snappingVertexData(rwuPoint);
@@ -578,6 +585,14 @@ export default {
     };
   },
 
+  strictSnapTargets(location) {
+    const snappableVertices = [
+      ...this.currentStoryGeometry.vertices,
+      ...(this.previousStoryGeometry ? this.previousStoryGeometry.vertices : []),
+    ];
+
+    return snapTargets(snappableVertices, this.spacing, location);
+  },
   /*
   * given a point in RWU, look up the closest snappable vertex
   * if the vertex is within the snap tolerance of the point, return the coordinates of the vertex in grid units

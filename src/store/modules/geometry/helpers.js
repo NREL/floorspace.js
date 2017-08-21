@@ -2,6 +2,13 @@ import _ from 'lodash';
 import ClipperLib from 'js-clipper';
 import { dropConsecutiveDups } from '../../../utilities';
 
+export function distanceBetweenPoints(p1, p2) {
+  const
+    dx = Math.abs(p1.x - p2.x),
+    dy = Math.abs(p1.y - p2.y);
+  return Math.sqrt((dx * dx) + (dy * dy));
+}
+
 const helpers = {
   // ************************************ CLIPPER ************************************ //
   // scaling - see https://sourceforge.net/p/jsclipper/wiki/documentation/#clipperlibclipperoffsetexecute
@@ -154,11 +161,7 @@ const helpers = {
     /*
      * given two points return the distance between them
      */
-    distanceBetweenPoints(p1, p2) {
-        const dx = Math.abs(p1.x - p2.x),
-            dy = Math.abs(p1.y - p2.y);
-        return Math.sqrt((dx * dx) + (dy * dy));
-    },
+  distanceBetweenPoints,
 
 	intersectionOfLines(p1, p2, p3, p4) {
 	    var eps = 0.0000001;
