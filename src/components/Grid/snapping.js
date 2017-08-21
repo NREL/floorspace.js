@@ -28,5 +28,5 @@ export function snapTargets(vertices, gridSpacing, cursor) {
       dy: cursor.y - target.y,
     }));
 
-  return _.sortBy(targets, 'dist');
+  return _.orderBy(targets, ['dist', 'type'], ['asc', 'desc']);
 }
