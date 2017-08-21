@@ -25,7 +25,7 @@ export default {
     if (this.resizeTop) {
       this.$refs.topbar.addEventListener('mousedown', this.initTop);
     }
-    
+
     if (this.resizeRight) {
       this.$refs.rightbar.addEventListener('mousedown', this.initRight);
     }
@@ -75,13 +75,16 @@ export default {
       }
     },
     notify () {
-      ResizeEvents.$emit('resize-resize',{
+      console.log("resize:", {
+        top: this.resizeTop && this.$el.style.top,
+        right: this.resizeRight && this.$el.style.width,
+      })
+      ResizeEvents.$emit('resize', {
         top: this.resizeTop && this.$el.style.top,
         right: this.resizeRight && this.$el.style.width,
       });
     },
     showHide() {
-      debugger;
       this.notify();
     },
   }

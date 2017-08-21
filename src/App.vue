@@ -10,24 +10,22 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       :class="`tool_${tool.toLowerCase()}`">
         <toolbar :class="{ 'disabled-component': tool === 'Map' }"></toolbar>
 
-        <resize-group resize-target="library">
-            <resize-group resize-target="navigation" id="layout-main">
-                <resize id="layout-navigation" :resize-right="true" :resize-right-min="200">
-                    <navigation :class="{ 'disabled-component': tool === 'Map' }"></navigation>
-                </resize>
-                <main>
-                  <div id="alert-text" v-show="error || success" :class="{ error, success }">
-                      <p>{{ error || success }}</p>
-                  </div>
-                    <canvas-view></canvas-view>
-                    <grid-view></grid-view>
-                </main>
-                <!-- <inspector-view></inspector-view> -->
-            </resize-group>
-            <resize id="layout-library" :resize-top="true" :resize-top-min="100">
-                <library :class="{ 'disabled-component': tool === 'Map' }"></library>
+        <div id="layout-main">
+            <resize id="layout-navigation" :resize-right="true" :resize-right-min="200">
+                <navigation :class="{ 'disabled-component': tool === 'Map' }"></navigation>
             </resize>
-        </resize-group>
+            <main>
+              <div id="alert-text" v-show="error || success" :class="{ error, success }">
+                  <p>{{ error || success }}</p>
+              </div>
+                <canvas-view></canvas-view>
+                <grid-view></grid-view>
+            </main>
+            <!-- <inspector-view></inspector-view> -->
+        </div>
+        <resize id="layout-library" :resize-top="true" :resize-top-min="100">
+            <library :class="{ 'disabled-component': tool === 'Map' }"></library>
+        </resize>
     </div>
 </template>
 
@@ -42,7 +40,7 @@ import Canvas from './components/Canvas/Canvas.vue';
 import Toolbar from './components/Toolbar.vue';
 import Inspector from './components/Inspector.vue';
 import Library from './components/Library.vue';
-import { Resize, ResizeGroup } from './components/Resize';
+import { Resize } from './components/Resize';
 
 
 export default {
@@ -93,8 +91,7 @@ export default {
     library: Library,
     navigation: Navigation,
     toolbar: Toolbar,
-    resize: Resize,
-    'resize-group': ResizeGroup,
+    resize: Resize
   },
 };
 </script>

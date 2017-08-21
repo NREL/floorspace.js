@@ -55,14 +55,14 @@ export default {
 
     this.initAutoComplete();
     this.loadMap();
-    ResizeEvents.$on('resize-resize', this.map.updateSize);
+    ResizeEvents.$on('resize', this.updateMapView);
   },
 
   /*
   * remove listener for view resizing
   */
   beforeDestroy() {
-    ResizeEvents.$off('resize-resize', this.map.updateSize);
+    ResizeEvents.$off('resize', this.updateMapView);
   },
 
   methods: {
@@ -106,6 +106,7 @@ export default {
     * position the map
     */
     updateMapView() {
+      this.map.updateSize();
       // center of grid in RWU
       let gridCenterX = (this.min_x + this.max_x) / 2;
       let gridCenterY = (this.min_y + this.max_y) / 2;
@@ -148,7 +149,6 @@ export default {
       this.view.setResolution(resolution);
       this.view.setCenter(mapCenter);
       this.view.setRotation(this.rotation);
-
     },
 
     /*

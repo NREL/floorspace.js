@@ -90,17 +90,20 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <script>
 import { mapState, mapGetters } from 'vuex';
+import { getSiblings } from './../utilities';
 import applicationHelpers from './../store/modules/application/helpers';
 import modelHelpers from './../store/modules/models/helpers';
+import ResizeEvents from './Resize/ResizeEvents';
 
 export default {
   name: 'navigation',
-  data() {
-    return {};
-  },
   mounted() {
     this.selectedObject = this.items[0];
+    ResizeEvents.$on('resize', () => {
+      this.handleResize();
+    });
   },
+  beforeDestroy() { ResizeEvents.$off('resize', this.handleResize); },
   computed: {
     ...mapState({
       // available model types
@@ -327,6 +330,12 @@ export default {
     * look up the display name for the selected mode (library type)
     */
     displayNameForMode(mode = this.mode) { return applicationHelpers.displayNameForMode(mode); },
+
+    handleResize() {
+      const navigationWidth = document.getElementById('layout-navigation').offsetWidth;
+      // update the left positions of the navigation's sibling elements so that they display directly beside the resized navigation
+      getSiblings(document.getElementById('layout-navigation')).forEach((el) => { el.style.left = `${navigationWidth}px`; });
+    },
   },
   watch: {
     selectedObject(obj) {
@@ -334,7 +343,6 @@ export default {
       if (row) {
         row.scrollIntoView();
       }
-
     },
     currentStory(obj) {
       const row = this.$el.querySelector(`[data-id="${obj.id}"]`);
@@ -342,13 +350,6 @@ export default {
         row.scrollIntoView();
       }
     },
-    // currentSubSelection() {
-    //   if (!this.currentSubSelection && this[this.mode][0]) {
-    //     this.$nextTick(() => {
-    //       this.selectItem(this[this.mode][0]);
-    //     });
-    //   }
-    // },
   },
 };
 </script>

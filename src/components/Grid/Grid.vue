@@ -67,7 +67,7 @@ export default {
     window.addEventListener('keyup', this.escapeAction);
     window.addEventListener('resize', this.renderGrid);
 
-    ResizeEvents.$on('resize-resize', this.renderGrid);
+    ResizeEvents.$on('resize', this.renderGrid);
 
     // render grid first time
     this.renderGrid();
@@ -80,7 +80,7 @@ export default {
     window.removeEventListener('keyup', this.escapeAction);
     window.removeEventListener('resize', this.renderGrid);
 
-    ResizeEvents.$off('resize-resize', this.renderGrid);
+    ResizeEvents.$off('resize', this.renderGrid);
   },
   computed: {
 

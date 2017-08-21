@@ -83,7 +83,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
 
 <script>
 import { mapState, mapGetters } from 'vuex';
+import { getSiblings } from './../utilities';
 import helpers from './../store/modules/models/helpers';
+import ResizeEvents from './Resize/ResizeEvents';
 
 const Huebee = require('huebee');
 
@@ -102,7 +104,11 @@ export default {
     // initialize the library to view objects of the same type being viewed in the navigation
     this.type = this.mode;
     this.configurePickers();
+    ResizeEvents.$on('resize', () => {
+      this.handleResize();
+    });
   },
+  beforeDestroy() { ResizeEvents.$off('resize', this.handleResize); },
   computed: {
     ...mapState({
       mode: state => state.application.currentSelections.mode,
@@ -359,6 +365,16 @@ export default {
     sortBy(key) {
       this.sortDescending = this.sortKey === key ? !this.sortDescending : true;
       this.sortKey = key;
+    },
+
+    /*
+    * Resize the library and adjust the positions of sibling elements
+    */
+    handleResize() {
+      // get the updated height of the resized library component
+      const libraryTop = document.getElementById('layout-library').offsetTop;
+      // update the bottom positions of the library's sibling elements so that they display directly above the resized library
+      getSiblings(document.getElementById('layout-library')).forEach((el) => { el.style.bottom = `${window.innerHeight - libraryTop}px`; });
     },
   },
   watch: {

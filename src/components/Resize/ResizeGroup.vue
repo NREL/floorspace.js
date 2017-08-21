@@ -20,8 +20,8 @@ import ResizeEvents from './ResizeEvents';
 */
 export default {
   props: ['resizeTarget'],
-  mounted() { ResizeEvents.$on('resize-resize', this.handleResize); },
-  beforeDestroy() { ResizeEvents.$off('resize-resize', this.handleResize); },
+  mounted() { ResizeEvents.$on('resize', this.handleResize); },
+  beforeDestroy() { ResizeEvents.$off('resize', this.handleResize); },
   methods: {
     handleResize() {
       // get all sibling nodes for an element
@@ -33,16 +33,12 @@ export default {
         return siblings;
       }
 
-      if (this.resizeTarget === 'library') {
-        // get the updated height of the resized library component
-        const libraryTop = document.getElementById('layout-library').style.top.replace('px', '');
-        // update the bottom positions of the library's sibling elements so that they display directly above the resized library
-        getSiblings(document.getElementById('layout-library')).forEach((el) => { el.style.bottom = `${window.innerHeight - libraryTop}px`; });
-      } else if (this.resizeTarget === 'navigation') {
+
+
         const navigationWidth = document.getElementById('layout-navigation').style.width.replace('px', '');
         // update the left positions of the navigation's sibling elements so that they display directly beside the resized navigation
         getSiblings(document.getElementById('layout-navigation')).forEach((el) => { el.style.left = `${navigationWidth}px`; });
-      }
+
     },
   },
 };
