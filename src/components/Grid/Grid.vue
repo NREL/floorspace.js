@@ -87,7 +87,7 @@ export default {
     ...mapState({
       currentMode: state => state.application.currentSelections.mode,
       currentTool: state => state.application.currentSelections.tool,
-
+      snapMode: state => state.application.currentSelections.snapMode,
       previousStoryVisible: state => state.project.previous_story.visible,
       gridVisible: state => state.project.grid.visible,
       units: state => state.project.config.units,

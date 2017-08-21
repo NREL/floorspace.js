@@ -20,6 +20,7 @@ export default {
       // current application mode and tool
       tool: 'Rectangle',
       mode: 'spaces',
+      snapMode: 'grid-strict',
     },
     modes: ['spaces', 'shading', 'building_units', 'thermal_zones', 'space_types', 'images'],
     tools: ['Pan', 'Drag', 'Rectangle', 'Polygon', 'Eraser', 'Select', 'Map', 'Fill'], // 'Place Component', 'Apply Property'

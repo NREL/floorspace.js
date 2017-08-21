@@ -50,6 +50,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <button @click="undo">Undo</button>
         <button @click="redo">Redo</button>
       </div>
+      <div class="snapping-options">
+        <button @click="snapMode = 'grid-strict'" :class="{ active: snapMode === 'grid-strict' }">Strict Grid</button>
+        <button @click="snapMode = 'grid-verts-edges'" :class="{ active: snapMode === 'grid-verts-edges' }">Edges too</button>
+      </div>
       <div>
         <button @click="tool = item" :class="{ active: tool === item }" v-for="item in availableTools">{{ item }}</button>
       </div>
@@ -155,6 +159,10 @@ export default {
       get() { return `${this.$store.state.project.grid.spacing} ${this.$store.state.project.config.units}`; },
       set(spacing) { this.$store.dispatch('project/setSpacing', { spacing }); },
     },
+    snapMode: {
+      get() { return this.$store.state.application.currentSelections.snapMode; },
+      set(snapMode) { this.$store.dispatch('application/setCurrentSnapMode', { snapMode }); },
+    },
   },
   watch: {
     tool(val) {
@@ -213,6 +221,19 @@ export default {
       }
       > .undo-redo {
         margin-right: auto;
+      }
+      > .snapping-options {
+        margin-right: auto;
+        :first-child {
+          margin-right: 0;
+          border-bottom-right-radius: 0;
+          border-top-right-radius: 0;
+        }
+        :last-child {
+          margin-left: 0;
+          border-bottom-left-radius: 0;
+          border-top-left-radius: 0;
+        }
       }
     }
 

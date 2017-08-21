@@ -489,9 +489,9 @@ export default {
     // translate grid point to real world units to check for snapping targets
     const rwuPoint = {
       x: this.gridToRWU(gridPoint.x, 'x'),
-      y: this.gridToRWU(gridPoint.y, 'y')
+      y: this.gridToRWU(gridPoint.y, 'y'),
     };
-    if (true || this.snapMode === 'grid-strict') {
+    if (this.snapMode === 'grid-strict') {
       const gridSnap = this.strictSnapTargets(rwuPoint)[0];
       return {
         ...gridSnap,
@@ -504,7 +504,7 @@ export default {
       // disable snapping when shift is held down
       return {
         type: 'gridpoint',
-        ...gridPoint
+        ...gridPoint,
       };
     }
 
