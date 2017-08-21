@@ -106,5 +106,9 @@ export default {
     setPreviousStoryVisible (context, payload) {
         context.commit('setPreviousStoryVisible', { visible: payload.visible });
 
-    }
+    },
+
+    setShowImportExport(context, payload) {
+      context.commit('setShowImportExport', payload);
+    },
 }

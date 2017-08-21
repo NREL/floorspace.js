@@ -35,7 +35,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <input v-model.number.lazy="northAxis" :disabled="mapEnabled">
       </div>
 
-      <div id="import-export">
+      <div id="import-export" v-if="showImportExport">
         <input ref="importLibrary" @change="importDataAsFile($event, 'library')" type="file" />
         <button @click="$refs.importLibrary.click()">Import Library</button>
         <input ref="importInput" @change="importDataAsFile($event, 'floorplan')" type="file" />
@@ -46,9 +46,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     </section>
 
     <section class="tools">
-      <div class="undo-redo" v-if="timetravelInitialized">
-        <button @click="undo">Undo</button>
-        <button @click="redo">Redo</button>
+      <div class="undo-redo">
+        <button @click="undo" :disabled="!timetravelInitialized">Undo</button>
+        <button @click="redo" :disabled="!timetravelInitialized">Redo</button>
       </div>
       <div>
         <button @click="tool = item" :class="{ active: tool === item }" v-for="item in availableTools">{{ item }}</button>
@@ -111,6 +111,7 @@ export default {
       currentMode: state => state.application.currentSelections.mode,
       mapEnabled: state => state.project.map.enabled,
       timetravelInitialized: state => state.timetravelInitialized,
+      showImportExport: state => state.project.showImportExport,
     }),
     availableTools() {
       return this.$store.state.application.tools

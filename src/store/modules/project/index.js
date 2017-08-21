@@ -34,7 +34,8 @@ export default {
     },
     previous_story: {
       visible: true
-    }
+    },
+    showImportExport: true,
   },
   actions: actions,
   mutations: mutations,
