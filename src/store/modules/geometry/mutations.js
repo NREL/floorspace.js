@@ -109,9 +109,9 @@ function ensureEdgesExist(geometry, edges) {
   });
 }
 
-export function replaceFacePoints(state, { geometry_id, verts, edges, face_id }) {
+export function replaceFacePoints(state, { geometry_id, vertices, edges, face_id }) {
   const geometry = _.find(state, { id: geometry_id });
-  ensureVertsExist(geometry, verts);
+  ensureVertsExist(geometry, vertices);
   ensureEdgesExist(geometry, edges);
   const face = _.find(geometry.faces, { id: face_id });
   face.edgeRefs = edges.map(e => ({
