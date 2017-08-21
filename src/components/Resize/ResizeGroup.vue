@@ -13,43 +13,35 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <script>
 import ResizeEvents from './ResizeEvents';
-
+/*
+* <resize-group> wraps a <resize> component and the elements that should be moved when the component is resized
+* when a resize event is fired on the shared ResizeEvents Vue, the resize-group will
+* check the updated size of the resize component, and reposition its other children accordingly
+*/
 export default {
-  props: ['orientation'],
+  props: ['resizeTarget'],
   mounted() { ResizeEvents.$on('resize-resize', this.handleResize); },
   beforeDestroy() { ResizeEvents.$off('resize-resize', this.handleResize); },
   methods: {
     handleResize() {
-      if (this.orientation === 'vertical') {
-        // set the height of the resizable component
-        for (let i = this.$el.children.length; i--;) {
-          if (this.$el.children[i].hasAttribute('data-resizable')) {
-            const top = this.$el.children[i].style.top.replace('px', '');
-
-            // adjust the positions of the non resizable elements so that they remain adjacent to the resized component
-            for (let j = this.$el.children.length; j--;) {
-              if (!this.$el.children[j].hasAttribute('data-resizable')) {
-                this.$el.children[j].style.bottom = `${window.innerHeight - top}px`;
-              }
-            }
-            break;
-          }
+      // get all sibling nodes for an element
+      function getSiblings(el) {
+        const siblings = [];
+        for (let sibling = el.parentNode.firstChild; sibling; sibling = sibling.nextSibling) {
+          if (sibling.nodeType === 1 && sibling !== el) { siblings.push(sibling); }
         }
-      } else if (this.orientation === 'horizontal') {
-        // set the height of the resizable component
-        for (let i = this.$el.children.length; i--;) {
-          if (this.$el.children[i].hasAttribute('data-resizable')) {
-            const width = this.$el.children[i].style.width.replace('px', '');
+        return siblings;
+      }
 
-            // adjust the positions of the non resizable elements so that they remain adjacent to the resized component
-            for (let j = this.$el.children.length; j--;) {
-              if (!this.$el.children[j].hasAttribute('data-resizable')) {
-                this.$el.children[j].style.left = `${width}px`;
-              }
-            }
-            break;
-          }
-        }
+      if (this.resizeTarget === 'library') {
+        // get the updated height of the resized library component
+        const libraryTop = document.getElementById('layout-library').style.top.replace('px', '');
+        // update the bottom positions of the library's sibling elements so that they display directly above the resized library
+        getSiblings(document.getElementById('layout-library')).forEach((el) => { el.style.bottom = `${window.innerHeight - libraryTop}px`; });
+      } else if (this.resizeTarget === 'navigation') {
+        const navigationWidth = document.getElementById('layout-navigation').style.width.replace('px', '');
+        // update the left positions of the navigation's sibling elements so that they display directly beside the resized navigation
+        getSiblings(document.getElementById('layout-navigation')).forEach((el) => { el.style.left = `${navigationWidth}px`; });
       }
     },
   },

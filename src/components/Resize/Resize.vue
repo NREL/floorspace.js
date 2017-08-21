@@ -6,91 +6,85 @@ Redistribution and use in source and binary forms, with or without modification,
 (4) Other than as required in clauses (1) and (2), distributions in any form of modifications or other derivative works may not use the "OpenStudio" trademark, "OS", "os", or any other confusingly similar designation without specific prior written permission from Alliance for Sustainable Energy, LLC.
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 <template>
-    <div>
-        <div id="resize" v-on:dblclick="showHide">
-            <div id="top-bar" ref="topbar" class="resize-bar" v-if="resizeTop"></div>
-            <div id="right-bar" ref="rightbar" class="resize-bar" v-if="resizeRight"></div>
-            <slot></slot>
-        </div>
+  <div>
+    <div id="resize" v-on:dblclick="showHide">
+      <div id="top-bar" ref="topbar" class="resize-bar" v-if="resizeTop"></div>
+      <div id="right-bar" ref="rightbar" class="resize-bar" v-if="resizeRight"></div>
+      <slot></slot>
     </div>
+  </div>
 </template>
 
 <script>
-
-import ResizeEvents from './ResizeEvents'
+import ResizeEvents from './ResizeEvents';
 
 export default {
-    name: 'resize',
-    data () {
-        return {}
-    },
-    props: ['resize-top','resize-right','resize-right-min','resize-top-min'],
-    mounted () {
-        // this.$el.classList.add('resize');
-        this.$el.setAttribute('data-resizable', true);
-        if (this.resizeTop) {
-            this.$refs.topbar.addEventListener('mousedown', this.initTop);
-        }
-
-        if (this.resizeRight) {
-            this.$refs.rightbar.addEventListener('mousedown', this.initRight);
-        }
-    },
-    methods: {
-        initTop() {
-            const el = this.$el,
-                notify = this.notify,
-                min = this.resizeTopMin || 0;
-
-            window.addEventListener('mousemove', doResize);
-            window.addEventListener('mouseup', stopResize);
-
-            function doResize(e) {
-                e.preventDefault();
-
-                let windowHeight = window.innerHeight,
-                    height = windowHeight - e.clientY;
-
-                el.style.top = (height < min ? (windowHeight - min) : e.clientY) + 'px';
-                notify();
-            };
-
-            function stopResize(e) {
-                window.removeEventListener('mousemove', doResize);
-                window.removeEventListener('mouseup', stopResize);
-            }
-        },
-        initRight() {
-            const el = this.$el,
-                notify = this.notify,
-                min = this.resizeRightMin || 0;
-
-            window.addEventListener('mousemove', doResize);
-            window.addEventListener('mouseup', stopResize);
-
-            function doResize(e) {
-                e.preventDefault();
-
-                el.style.width = (e.clientX < min ? min : e.clientX) + 'px';
-                notify();
-            };
-
-            function stopResize(e) {
-                window.removeEventListener('mousemove', doResize);
-                window.removeEventListener('mouseup', stopResize);
-            }
-        },
-        notify () {
-            ResizeEvents.$emit('resize-resize',{
-                top: this.resizeTop && this.$el.style.top,
-                right: this.resizeRight && this.$el.style.width,
-            });
-        },
-        showHide() {
-          debugger;
-          this.notify();
-        },
+  props: ['resize-top', 'resize-right', 'resize-right-min', 'resize-top-min'],
+  mounted () {
+    this.$el.setAttribute('data-resizable', true);
+    if (this.resizeTop) {
+      this.$refs.topbar.addEventListener('mousedown', this.initTop);
     }
+    
+    if (this.resizeRight) {
+      this.$refs.rightbar.addEventListener('mousedown', this.initRight);
+    }
+  },
+  methods: {
+    initTop() {
+      const el = this.$el,
+      notify = this.notify,
+      min = this.resizeTopMin || 0;
+
+      window.addEventListener('mousemove', doResize);
+      window.addEventListener('mouseup', stopResize);
+
+      function doResize(e) {
+        e.preventDefault();
+
+        let windowHeight = window.innerHeight,
+        height = windowHeight - e.clientY;
+
+        el.style.top = (height < min ? (windowHeight - min) : e.clientY) + 'px';
+        notify();
+      };
+
+      function stopResize(e) {
+        window.removeEventListener('mousemove', doResize);
+        window.removeEventListener('mouseup', stopResize);
+      }
+    },
+    initRight() {
+      const el = this.$el,
+      notify = this.notify,
+      min = this.resizeRightMin || 0;
+
+      window.addEventListener('mousemove', doResize);
+      window.addEventListener('mouseup', stopResize);
+
+      function doResize(e) {
+        e.preventDefault();
+
+        el.style.width = (e.clientX < min ? min : e.clientX) + 'px';
+        notify();
+      };
+
+      function stopResize(e) {
+        window.removeEventListener('mousemove', doResize);
+        window.removeEventListener('mouseup', stopResize);
+      }
+    },
+    notify () {
+      ResizeEvents.$emit('resize-resize',{
+        top: this.resizeTop && this.$el.style.top,
+        right: this.resizeRight && this.$el.style.width,
+      });
+    },
+    showHide() {
+      debugger;
+      this.notify();
+    },
+  }
 }
 </script>
 
@@ -101,36 +95,36 @@ export default {
 $bar-width: 6px;
 
 #resize {
-    position: relative;
-    height: 100%;
+  position: relative;
+  height: 100%;
+  width: 100%;
+
+  > * {
     width: 100%;
+    height: 100%;
 
-    > * {
-        width: 100%;
-        height: 100%;
-
-        &#top-bar {
-            position: absolute;
-            height: $bar-width;
-            cursor: n-resize;
-        }
-
-        &#right-bar {
-            position: absolute;
-            cursor: n-resize;
-            right: 0;
-            width: $bar-width;
-            cursor: e-resize;
-        }
+    &#top-bar {
+      position: absolute;
+      height: $bar-width;
+      cursor: n-resize;
     }
 
-    .resize-bar {
-        transition: background 0.5s linear;
-
-        &:hover, &:active {
-          background-color: $gray-lightest
-        }
+    &#right-bar {
+      position: absolute;
+      cursor: n-resize;
+      right: 0;
+      width: $bar-width;
+      cursor: e-resize;
     }
+  }
+
+  .resize-bar {
+    transition: background 0.5s linear;
+
+    &:hover, &:active {
+      background-color: $gray-lightest
+    }
+  }
 }
 
 </style>

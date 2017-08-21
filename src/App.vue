@@ -10,8 +10,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       :class="`tool_${tool.toLowerCase()}`">
         <toolbar :class="{ 'disabled-component': tool === 'Map' }"></toolbar>
 
-        <resize-group orientation="vertical">
-            <resize-group orientation="horizontal" id="layout-main">
+        <resize-group resize-target="library">
+            <resize-group resize-target="navigation" id="layout-main">
                 <resize id="layout-navigation" :resize-right="true" :resize-right-min="200">
                     <navigation :class="{ 'disabled-component': tool === 'Map' }"></navigation>
                 </resize>
