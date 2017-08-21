@@ -225,12 +225,12 @@ export default {
       > .snapping-options {
         margin-right: auto;
         :first-child {
-          margin-right: 0;
+          margin-right: -2px;
           border-bottom-right-radius: 0;
           border-top-right-radius: 0;
         }
         :last-child {
-          margin-left: 0;
+          margin-left: -2px;
           border-bottom-left-radius: 0;
           border-top-left-radius: 0;
         }
