@@ -138,18 +138,18 @@ function storeFace({ vertices, edges }, target, context, existingFace) {
 
   const face = existingFace || new factory.Face([]);
 
-  context.dispatch(target.type === 'space' ? 'models/updateSpaceWithData' : 'models/updateShadingWithData', {
-    [target.type]: target,
-    face_id: face.id,
-  }, {
-    root: true,
-  });
-
   context.commit('replaceFacePoints', {
     face_id: face.id,
     geometry_id: currentStoryGeometry.id,
     vertices,
     edges,
+  });
+
+  context.dispatch(target.type === 'space' ? 'models/updateSpaceWithData' : 'models/updateShadingWithData', {
+    [target.type]: target,
+    face_id: face.id,
+  }, {
+    root: true,
   });
 }
 
