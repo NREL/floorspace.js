@@ -335,7 +335,8 @@
 				}
 			},
 			"required": [
-				"id"
+				"id",
+				"name"
 			]
 		},
 		"Space": {
@@ -404,6 +405,7 @@
 			},
 			"required": [
 				"id",
+				"name",
 				"face_id"
 			]
 		},
@@ -425,6 +427,7 @@
 			},
 			"required": [
 				"id",
+				"name",
 				"face_id"
 			]
 		},
@@ -451,7 +454,8 @@
 				}
 			},
 			"required": [
-				"id"
+				"id",
+				"name"
 			]
 		},
 		"SpaceType": {
@@ -477,7 +481,8 @@
 				}
 			},
 			"required": [
-				"id"
+				"id",
+				"name"
 			]
 		},
 		"BuildingUnit": {
@@ -503,7 +508,8 @@
 				}
 			},
 			"required": [
-				"id"
+				"id",
+				"name"
 			]
 		},
 		"ConstructionSet": {
@@ -526,7 +532,8 @@
 				}
 			},
 			"required": [
-				"id"
+				"id",
+				"name"
 			]
 		},
 		"Window": {
@@ -555,7 +562,8 @@
 				}
 			},
 			"required": [
-				"id"
+				"id",
+				"name"
 			]
 		},
 		"DaylightingControl": {
@@ -581,7 +589,8 @@
 				}
 			},
 			"required": [
-				"id"
+				"id",
+				"name"
 			]
 		}
 	}

@@ -272,6 +272,40 @@ describe('edgesToSplit:simpleGeometry', () => {
 
 
 describe('newGeometriesOfOverlappedFaces', () => {
+
+  const
+    geometry = helpers.normalize({
+      vertices: [],
+      edges: [],
+      id: 1,
+      faces: [
+        {
+          id: 'bigger',
+          edges: [
+            { id: 1, v1: { id: 'a', x: 2, y: 0 }, v2: { id: 'b', x: 2, y: 10 } },
+            { id: 2, v1: { id: 'b', x: 2, y: 10 }, v2: { id: 'c', x: 8, y: 10 } },
+            { id: 3, v1: { id: 'c', x: 8, y: 10 }, v2: { id: 'd', x: 8, y: 0 } },
+            { id: 4, v1: { id: 'd', x: 8, y: 0 }, v2: { id: 'a', x: 2, y: 0 } },
+          ],
+        },
+        {
+          id: 'being_moved',
+          edges: [
+            { id: 1, v1: { id: 'w', x: 12, y: 1 }, v2: { id: 'z', x: 12, y: 9 } },
+            { id: 2, v1: { id: 'z', x: 12, y: 9 }, v2: { id: 'm', x: 14, y: 9 } },
+            { id: 3, v1: { id: 'm', x: 14, y: 9 }, v2: { id: 'n', x: 14, y: 1 } },
+            { id: 4, v1: { id: 'n', x: 14, y: 1 }, v2: { id: 'w', x: 12, y: 1 } },
+          ],
+        },
+      ],
+    }),
+    beingMovedPositionedInCenterOfBigger = [
+      { x: 3, y: 1 }, { x: 5, y: 1 }, { x: 5, y: 9 }, { x: 3, y: 9 }],
+    beingMovedToSideOfBigger = [
+      { x: 7, y: 1 }, { x: 9, y: 1 }, { x: 9, y: 9 }, { x: 7, y: 9 }
+    ];
+
+
   it('disallows faces to be split (as in issue #124)', () => {
     const
       geometry = helpers.normalize({
@@ -293,5 +327,24 @@ describe('newGeometriesOfOverlappedFaces', () => {
       points = [{ x: 0, y: 3 }, { x: 5, y: 3 }, { x: 5, y: 5 }, { x: 0, y: 5 }];
 
     refute(newGeometriesOfOverlappedFaces(points, geometry));
+  });
+
+  it('disallows a space being moved to cause a split (as in issue #133)', () => {
+    refute(newGeometriesOfOverlappedFaces(
+      beingMovedPositionedInCenterOfBigger,
+      helpers.exceptFace(geometry, 'being_moved')));
+  });
+
+  it("permits a space to be moved if it doesn't cause a split face", () => {
+    const newGeoms = newGeometriesOfOverlappedFaces(
+      beingMovedToSideOfBigger,
+      helpers.exceptFace(geometry, 'being_moved'));
+
+    assert(newGeoms, 'Expected movement to succeed');
+    assert(newGeoms.length === 1);
+    const newBigger = newGeoms[0];
+    assert(newBigger.face_id === 'bigger');
+
+    assertEqual(newBigger.vertices.length, 8);
   });
 });

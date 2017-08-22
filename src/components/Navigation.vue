@@ -7,100 +7,84 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 
 <template>
-  <div id="layout-navigation">
-    <nav id="navigation" v-on:dblclick="showHide">
-      <div id="right-bar" @mousedown="resizeBarClicked" ref="resizebar" class="resize-bar"></div>
-        <section id="selections">
-            <div class='input-select'>
-                <select v-model='mode'>
-                    <option v-for='mode in modes' :value="mode">{{displayNameForMode(mode)}}</option>
-                </select>
-                <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
-                    <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
-                </svg>
-            </div>
-
-            <input id="upload-image-input" ref="fileInput" @change="uploadImage" type="file"/>
-            <button v-show="mode==='images'" @click="$refs.fileInput.click()">
-                <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M208 122h-74V48c0-3.534-2.466-6.4-6-6.4s-6 2.866-6 6.4v74H48c-3.534 0-6.4 2.466-6.4 6s2.866 6 6.4 6h74v74c0 3.534 2.466 6.4 6 6.4s6-2.866 6-6.4v-74h74c3.534 0 6.4-2.466 6.4-6s-2.866-6-6.4-6z"/>
-                </svg>
-                {{displayNameForMode(mode)}}
-            </button>
-
-            <button v-if="mode!=='images'" @click="createItem()">
-                <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M208 122h-74V48c0-3.534-2.466-6.4-6-6.4s-6 2.866-6 6.4v74H48c-3.534 0-6.4 2.466-6.4 6s2.866 6 6.4 6h74v74c0 3.534 2.466 6.4 6 6.4s6-2.866 6-6.4v-74h74c3.534 0 6.4-2.466 6.4-6s-2.866-6-6.4-6z"/>
-                </svg>
-                {{displayNameForMode(mode)}}
-            </button>
-        </section>
-
-        <section id="breadcrumbs">
-            <button @click="createItem('stories')">
-                <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M208 122h-74V48c0-3.534-2.466-6.4-6-6.4s-6 2.866-6 6.4v74H48c-3.534 0-6.4 2.466-6.4 6s2.866 6 6.4 6h74v74c0 3.534 2.466 6.4 6 6.4s6-2.866 6-6.4v-74h74c3.534 0 6.4-2.466 6.4-6s-2.866-6-6.4-6z"/>
-                </svg>
-                {{displayNameForMode('stories')}}
-            </button>
-            <span>
-                {{ currentStory.name }}
-                <template v-if="selectedObject">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path d="M.5 0v14l11-7-11-7z"/></svg>
-                    {{ selectedObject.name }}
-                </template>
-            </span>
-
-        </section>
-
-        <div id="list">
-            <section id="story-list">
-                <div
-                  v-for="item in stories"
-                  :key="item.id"
-                  :class="{ active: currentStory && currentStory.id === item.id }"
-                  @click="selectItem(item, 'stories')" :style="{'background-color': item && item.color }"
-                  :data-id="item.id"
-                >
-                    {{item.name}}
-                    <svg @click="destroyItem(item, 'stories')" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
-                    </svg>
-                </div>
-            </section>
-
-            <section id="subselection-list">
-                <div
-                  v-for="item in items"
-                  :key="item.id"
-                  :class="{ active: selectedObject && selectedObject.id === item.id }"
-                  @click="selectItem(item)"
-                  :style="{'background-color': item && selectedObject && selectedObject.id === item.id ? item.color : ''}"
-                  :data-id="item.id"
-                >
-                    <span :style="{'background-color': item && item.color }"></span>
-                    {{item.name}}
-                    <svg @click="destroyItem(item)" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
-                    </svg>
-                </div>
-            </section>
+<nav id="navigation">
+    <section id="selections">
+        <div class='input-select'>
+            <select v-model='mode'>
+                <option v-for='mode in modes' :value="mode">{{displayNameForMode(mode)}}</option>
+            </select>
+            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
+                <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
+            </svg>
         </div>
 
-    </nav>
+        <input id="upload-image-input" ref="fileInput" @change="uploadImage" type="file"/>
+        <button v-show="mode==='images'" @click="$refs.fileInput.click()">
+            <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                <path d="M208 122h-74V48c0-3.534-2.466-6.4-6-6.4s-6 2.866-6 6.4v74H48c-3.534 0-6.4 2.466-6.4 6s2.866 6 6.4 6h74v74c0 3.534 2.466 6.4 6 6.4s6-2.866 6-6.4v-74h74c3.534 0 6.4-2.466 6.4-6s-2.866-6-6.4-6z"/>
+            </svg>
+            {{displayNameForMode(mode)}}
+        </button>
 
-  </div>
+        <button v-if="mode!=='images'" @click="createItem()">
+            <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                <path d="M208 122h-74V48c0-3.534-2.466-6.4-6-6.4s-6 2.866-6 6.4v74H48c-3.534 0-6.4 2.466-6.4 6s2.866 6 6.4 6h74v74c0 3.534 2.466 6.4 6 6.4s6-2.866 6-6.4v-74h74c3.534 0 6.4-2.466 6.4-6s-2.866-6-6.4-6z"/>
+            </svg>
+            {{displayNameForMode(mode)}}
+        </button>
+    </section>
+
+    <section id="breadcrumbs">
+        <button @click="createItem('stories')">
+            <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                <path d="M208 122h-74V48c0-3.534-2.466-6.4-6-6.4s-6 2.866-6 6.4v74H48c-3.534 0-6.4 2.466-6.4 6s2.866 6 6.4 6h74v74c0 3.534 2.466 6.4 6 6.4s6-2.866 6-6.4v-74h74c3.534 0 6.4-2.466 6.4-6s-2.866-6-6.4-6z"/>
+            </svg>
+            {{displayNameForMode('stories')}}
+        </button>
+        <span>
+            {{ currentStory.name }}
+            <template v-if="selectedObject">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path d="M.5 0v14l11-7-11-7z"/></svg>
+                {{ selectedObject.name }}
+            </template>
+        </span>
+
+    </section>
+
+    <div id="list">
+        <section id="story-list">
+            <div v-for="item in stories" :key="item.id" :class="{ active: currentStory && currentStory.id === item.id }" @click="selectItem(item, 'stories')" :style="{'background-color': item && item.color }">
+                {{item.name}}
+                <svg @click="destroyItem(item, 'stories')" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
+                </svg>
+            </div>
+        </section>
+
+        <section id="subselection-list">
+            <div v-for="item in items" :key="item.id" :class="{ active: selectedObject && selectedObject.id === item.id }" @click="selectItem(item)" :style="{'background-color': item && selectedObject && selectedObject.id === item.id ? item.color : ''}">
+                <span :style="{'background-color': item && item.color }"></span>
+                {{item.name}}
+                <svg @click="destroyItem(item)" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
+                </svg>
+            </div>
+        </section>
+    </div>
+
+</nav>
 </template>
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { getSiblings } from './../utilities';
 import applicationHelpers from './../store/modules/application/helpers';
 import modelHelpers from './../store/modules/models/helpers';
-import ResizeEvents from './Resize/ResizeEvents';
 
 export default {
   name: 'navigation',
+  data() {
+    return {};
+  },
   mounted() {
     this.selectedObject = this.items[0];
   },
@@ -205,36 +189,6 @@ export default {
     },
   },
   methods: {
-    /*
-    * Resize the library and adjust the positions of sibling elements
-    */
-    resizeBarClicked() {
-      console.log('clicked', document.getElementById('layout-navigation').style.width);
-      const doResize = (e) => {
-        const newWidth = e.clientX > 6 ? e.clientX : 6;
-        document.getElementById('layout-navigation').style.width = `${newWidth}px`;
-        getSiblings(document.getElementById('layout-navigation')).forEach((el) => {
-          el.style.left = `${newWidth}px`;
-        });
-
-        ResizeEvents.$emit('resize');
-      };
-      const stopResize = () => {
-        window.removeEventListener('mousemove', doResize);
-        window.removeEventListener('mouseup', stopResize);
-      };
-      window.addEventListener('mousemove', doResize);
-      window.addEventListener('mouseup', stopResize);
-    },
-    showHide() {
-      const newWidth = document.getElementById('layout-navigation').offsetWidth === 6 ? 280 : 6;
-      document.getElementById('layout-navigation').style.width = `${newWidth}px`;
-      console.log(newWidth);
-      getSiblings(document.getElementById('layout-navigation')).forEach((el) => {
-        el.style.left = `${newWidth}px`;
-      });
-      ResizeEvents.$emit('resize');
-    },
     uploadImage(event) {
       const files = event.target.files;
       const that = this;
@@ -362,41 +316,24 @@ export default {
     displayNameForMode(mode = this.mode) { return applicationHelpers.displayNameForMode(mode); },
   },
   watch: {
-    selectedObject(obj) {
-      const row = this.$el.querySelector(`[data-id="${obj.id}"]`);
-      if (row) {
-        row.scrollIntoView();
-      }
-    },
-    currentStory(obj) {
-      const row = this.$el.querySelector(`[data-id="${obj.id}"]`);
-      if (row) {
-        row.scrollIntoView();
-      }
-    },
+    // currentSubSelection() {
+    //   if (!this.currentSubSelection && this[this.mode][0]) {
+    //     this.$nextTick(() => {
+    //       this.selectItem(this[this.mode][0]);
+    //     });
+    //   }
+    // },
   },
 };
 </script>
 
 <style lang="scss" scoped>
 @import "./../scss/config";
-#right-bar {
-  position: absolute;
-  right: 0;
-  width: 6px;
-  height: 100%;
-  transition: background 0.5s linear;
 
-  &:hover, &:active {
-    background-color: $gray-lightest;
-    cursor: e-resize;
-  }
-}
 #navigation {
     background-color: $gray-medium-dark;
     border-right: 1px solid $gray-darkest;
     font-size: 0.75rem;
-    height: 100%;
     #selections {
         display: flex;
         padding: .25rem;

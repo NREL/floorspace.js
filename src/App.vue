@@ -12,7 +12,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
         <div id="layout-main">
             <navigation :class="{ 'disabled-component': tool === 'Map' }"></navigation>
-            
+
             <main>
               <div id="alert-text" v-show="error || success" :class="{ error, success }">
                   <p>{{ error || success }}</p>
@@ -64,6 +64,11 @@ export default {
     this.$on('success', (msg) => {
       this.success = msg;
       setTimeout(() => { this.success = null; }, 5000);
+    });
+    this.$on('reload-grid', () => {
+      // This is unfortunate. oh well.
+      document.getElementById('svg-grid')
+        .dispatchEvent(new Event('reloadGrid'));
     });
 
     document.addEventListener('keydown', (e) => {

@@ -354,7 +354,9 @@ describe('denormalize', () => {
           geom,
           helpers.normalize(helpers.denormalize(geom)),
         );
-      });
+      },
+      { numTests: _.values(geometryExamples).length },
+    );
   });
 
   it('provides a getter for face.vertices', () => {
@@ -369,7 +371,9 @@ describe('denormalize', () => {
             assert(_.has(v, 'id') && _.has(v, 'x') && _.has(v, 'y')),
           );
         });
-      });
+      },
+      { numTests: _.values(geometryExamples).length },
+    );
   });
 
   it('adding a face persists after normalization', () => {
@@ -412,6 +416,8 @@ describe('denormalize', () => {
         assertEqual(
           _.map(faceInQuestion.edgeRefs, 'edge_id'),
           ['new_edge1', 'new_edge2', 'new_edge3']);
-      });
+      },
+      { numTests: _.values(geometryExamples).length },
+    );
   });
 });

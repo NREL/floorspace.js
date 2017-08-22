@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import helpers from './helpers.js'
 
 export default {
@@ -29,16 +30,13 @@ export default {
             return s.id === payload.story.id;
         }), 1);
     },
-    destroyObject (state, payload) {
-        // search the library
-        for (var type in state.library) {
-            if (state.library.hasOwnProperty(type)) {
-                state.library[type].splice(state.library[type].findIndex((i) => {
-                    return i.id === payload.object.id;
-                }), 1)
-            }
-        }
-    },
+  destroyObject(state, { object: { id } }) {
+    // search the library
+    state.library = _.mapValues(
+      state.library,
+      lst => _.reject(lst, { id }),
+    );
+  },
 
     updateStoryWithData (state, payload) {
         const story = payload.story;

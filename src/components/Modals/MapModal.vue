@@ -20,7 +20,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <button @click="$refs.importInput.click()" id="import">Open Floorplan</button>
             <button @click="mapEnabled = false; mapVisible = false; $emit('close')">New Floorplan</button>
             <button @click="mapEnabled = true; tool='Map'; $emit('close')">New Floorplan w/ Map</button>
-            <input ref="importInput" @change="importModelAsFile" type="file"/>
+            <input ref="importInput" @change="importFloorplanAsFile" type="file"/>
         </div>
     </div>
 </aside>
@@ -50,17 +50,17 @@ export default {
     },
   },
   methods: {
-    importModelAsFile(event) {
+    importFloorplanAsFile(event) {
       const file = event.target.files[0];
       const reader = new FileReader();
       reader.addEventListener('load', () => {
-        this.importModel(reader.result);
+        this.importFloorplan(reader.result);
       }, false);
 
       if (file) { reader.readAsText(file); }
     },
-    importModel(data) {
-      this.$store.dispatch('importModel', {
+    importFloorplan(data) {
+      this.$store.dispatch('importFloorplan', {
         clientWidth: document.getElementById('svg-grid').clientWidth,
         clientHeight: document.getElementById('svg-grid').clientHeight,
         data: JSON.parse(data),

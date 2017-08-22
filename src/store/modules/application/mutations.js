@@ -6,7 +6,8 @@ export default {
   setCurrentBuildingUnitId(state, payload) { state.currentSelections.building_unit_id = payload.id; },
   setCurrentThermalZoneId(state, payload) { state.currentSelections.thermal_zone_id = payload.id; },
   setCurrentSpaceTypeId(state, payload) { state.currentSelections.space_type_id = payload.id; },
-  
+
+  setCurrentSnapMode(state, payload) { state.currentSelections.snapMode = payload.snapMode; },
   // editor rendering/drawing tool
   setCurrentTool(state, payload) { state.currentSelections.tool = payload.tool; },
   setCurrentMode(state, payload) { state.currentSelections.mode = payload.mode; },

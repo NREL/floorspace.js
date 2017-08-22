@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 export default {
   setCurrentStoryId(context, payload) {
     // TODO: clear subselections?
@@ -16,6 +18,13 @@ export default {
     )) {
       context.commit('setCurrentSubSelectionId', { id });
     }
+  },
+
+  setCurrentSnapMode(context, { snapMode }) {
+    if (!_.includes(['grid-strict', 'grid-verts-edges'], snapMode)) {
+      throw new Error(`Unknown grid mode ${snapMode}`);
+    }
+    context.commit('setCurrentSnapMode', { snapMode });
   },
 
   setCurrentTool(context, payload) {
