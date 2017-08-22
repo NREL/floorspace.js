@@ -31,9 +31,12 @@ window.api = {
       config = {}; // eslint-disable-line
     }
     window.api.config = Object.assign({
+      showImportExport: true,
       units: 'm',
       showMapDialogOnStart: false,
       online: true,
+      initialGridSize: 50,
+      initialNorthAxis: 0,
       onChange: () => { window.versionNumber += 1; },
     }, config);
   },
@@ -47,6 +50,9 @@ window.api = {
 
     // don't dispatch actions until the application and data store are instantiated
     window.application.$store.dispatch('project/setUnits', { units: window.api.config.units });
+    window.application.$store.dispatch('project/setShowImportExport', window.api.config.showImportExport);
+    window.application.$store.dispatch('project/setSpacing', { spacing: window.api.config.initialGridSize });
+    window.application.$store.dispatch('project/setNorthAxis', { north_axis: window.api.config.initialNorthAxis });
 
     // if the map modal has been disabled, mark the map as initialized so that time travel can be initialized
     // TODO: we may want to intitialize timetravel in the importFloorplan action instead

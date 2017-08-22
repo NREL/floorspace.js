@@ -947,7 +947,11 @@ export default {
 
     d3.select('#grid svg').call(this.zoomBehavior.transform, d3.zoomIdentity.translate(x, y));
   },
-  updateGrid () {
+  updateGrid() {
+    if (!this.axis.x || !this.axis.y) {
+      // not yet initialized
+      return;
+    }
     this.axis.x.style('display', this.gridVisible && !this.forceGridHide ? 'inline' : 'none');
     this.axis.y.style('display', this.gridVisible && !this.forceGridHide ? 'inline' : 'none');
 
