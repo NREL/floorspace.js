@@ -11,9 +11,9 @@ describe('replaceFacePoints', () => {
       { x: 0, y: 1, id: '(0,1)' },
     ],
     edges: [
-      { id: 'a', v1: 'origin', v2: '(1, 0)' },
-      { id: 'b', v1: '(1, 0)', v2: '(0, 1)' },
-      { id: 'c', v1: '(0, 1)', v2: 'origin' },
+      { id: 'a', v1: 'origin', v2: '(1,0)' },
+      { id: 'b', v1: '(1,0)', v2: '(0,1)' },
+      { id: 'c', v1: '(0,1)', v2: 'origin' },
     ],
   };
 

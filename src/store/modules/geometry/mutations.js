@@ -13,6 +13,13 @@ export function trimGeometry(state, { geometry_id }) {
 
   geometry.edges = geometry.edges.filter(e => edgesInUse.has(e.id));
   geometry.vertices = geometry.vertices.filter(v => verticesInUse.has(v.id));
+
+  if (geometry.edges.length !== edgesInUse.length) {
+    console.error('An edge is referenced by a face, but does not exist!', geometry);
+  }
+  if (geometry.vertices.length !== verticesInUse.length) {
+    console.error('A vertex is referenced by a face, but does not exist!', geometry);
+  }
 }
 
 export function initGeometry(state, payload) {
