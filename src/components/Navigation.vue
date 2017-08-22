@@ -100,7 +100,7 @@ import modelHelpers from './../store/modules/models/helpers';
 import ResizeEvents from './Resize/ResizeEvents';
 
 let fullWidth;
-const collapsedWidth = 6;
+const collapsedWidth = 8;
 export default {
   name: 'navigation',
   mounted() {
@@ -395,7 +395,7 @@ export default {
 #right-bar {
   position: absolute;
   right: 0;
-  width: 6px;
+  width: 8px;
   height: 100%;
   transition: background 0.5s linear;
 

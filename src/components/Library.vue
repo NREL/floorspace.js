@@ -95,7 +95,7 @@ import ResizeEvents from './Resize/ResizeEvents';
 const Huebee = require('huebee');
 
 let fullHeight;
-const collapsedHeight = 6;
+const collapsedHeight = 8;
 export default {
   name: 'library',
   data() {
@@ -434,7 +434,7 @@ export default {
 
 #top-bar {
   position: absolute;
-  height: 6px;
+  height: 8px;
   width: 100%;
   cursor: n-resize;
   transition: background 0.5s linear;
