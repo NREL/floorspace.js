@@ -1,5 +1,6 @@
 import factory from './factory';
 import validators from './validators';
+import * as converters from './converters';
 
 /*
 * each library object type has
@@ -175,6 +176,15 @@ const map = {
         readonly: false,
         input_type: 'text',
         private: false,
+        converter: converters.number,
+        validator: validators.number,
+      },
+      above_floor_plenum_height: {
+        displayName: 'Above Floor Plenum Height',
+        readonly: false,
+        input_type: 'text',
+        private: false,
+        converter: converters.number,
         validator: validators.number,
       },
       floor_to_ceiling_height: {
@@ -182,6 +192,7 @@ const map = {
         readonly: false,
         input_type: 'text',
         private: false,
+        converter: converters.number,
         validator: validators.number,
       },
       multiplier: {

@@ -53,7 +53,9 @@ const helpers = {
               return result;
           }
       }
-
+      if (this.map[type].keymap[key] && this.map[type].keymap[key].converter) {
+        value = this.map[type].keymap[key].converter(value);
+      }
       // dispatch the correct action to update the specified type
       if (type === 'stories') {
           store.dispatch('models/updateStoryWithData', {
