@@ -75,10 +75,7 @@ export default {
       }
     },
     notify () {
-      console.log("resize:", {
-        top: this.resizeTop && this.$el.style.top,
-        right: this.resizeRight && this.$el.style.width,
-      })
+      
       ResizeEvents.$emit('resize', {
         top: this.resizeTop && this.$el.style.top,
         right: this.resizeRight && this.$el.style.width,

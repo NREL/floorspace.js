@@ -11,9 +11,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <toolbar :class="{ 'disabled-component': tool === 'Map' }"></toolbar>
 
         <div id="layout-main">
-            <resize id="layout-navigation" :resize-right="true" :resize-right-min="200">
-                <navigation :class="{ 'disabled-component': tool === 'Map' }"></navigation>
-            </resize>
+            <navigation :class="{ 'disabled-component': tool === 'Map' }"></navigation>
+            
             <main>
               <div id="alert-text" v-show="error || success" :class="{ error, success }">
                   <p>{{ error || success }}</p>
@@ -23,9 +22,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             </main>
             <!-- <inspector-view></inspector-view> -->
         </div>
-        <resize id="layout-library" :resize-top="true" :resize-top-min="100">
-            <library :class="{ 'disabled-component': tool === 'Map' }"></library>
-        </resize>
+        <library :class="{ 'disabled-component': tool === 'Map' }"></library>
     </div>
 </template>
 
@@ -90,8 +87,7 @@ export default {
     'inspector-view': Inspector,
     library: Library,
     navigation: Navigation,
-    toolbar: Toolbar,
-    resize: Resize
+    toolbar: Toolbar
   },
 };
 </script>

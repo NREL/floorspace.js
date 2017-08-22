@@ -7,78 +7,83 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 
 <template>
-<section id='library'>
-    <header>
-        <div class="input-text">
-            <label>Search</label>
-            <input v-model="search">
-        </div>
-        <div class='input-select'>
-            <label>Type</label>
-            <select v-model='type'>
-                <option v-for='(objects, type) in extendedLibrary' :value="type">{{ displayTypeForType(type) }}</option>
-            </select>
-            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
-                <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
-            </svg>
-        </div>
-        <button @click="createObject">New</button>
-    </header>
+  <div id="layout-library">
+    <section id='library' v-on:dblclick="showHide">
+    <div id="top-bar" ref="resizebar" class="resize-bar"></div>
+      <header>
+          <div class="input-text">
+              <label>Search</label>
+              <input v-model="search">
+          </div>
+          <div class='input-select'>
+              <label>Type</label>
+              <select v-model='type'>
+                  <option v-for='(objects, type) in extendedLibrary' :value="type">{{ displayTypeForType(type) }}</option>
+              </select>
+              <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
+                  <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
+              </svg>
+          </div>
+          <button @click="createObject">New</button>
+      </header>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th v-for="column in columns" @click="sortBy(column)">
-                    <span>
-                        <span>{{ displayNameForKey(column) }}</span>
-                        <svg v-show="column === sortKey && sortDescending" viewBox="0 0 10 3" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M0 .5l5 5 5-5H0z"/>
-                        </svg>
-                        <svg v-show="column === sortKey && !sortDescending" viewBox="0 0 10 3" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M0 5.5l5-5 5 5H0z"/>
-                        </svg>
-                    </span>
-                </th>
-                <th class="destroy"></th>
-            </tr>
-        </thead>
+      <table class="table">
+          <thead>
+              <tr>
+                  <th v-for="column in columns" @click="sortBy(column)">
+                      <span>
+                          <span>{{ displayNameForKey(column) }}</span>
+                          <svg v-show="column === sortKey && sortDescending" viewBox="0 0 10 3" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M0 .5l5 5 5-5H0z"/>
+                          </svg>
+                          <svg v-show="column === sortKey && !sortDescending" viewBox="0 0 10 3" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M0 5.5l5-5 5 5H0z"/>
+                          </svg>
+                      </span>
+                  </th>
+                  <th class="destroy"></th>
+              </tr>
+          </thead>
 
-        <tbody>
-            <tr
-              v-for='object in displayObjects'
-              :key="object.id"
-              @click="selectedObject = object"
-              :style="{ 'background-color': (selectedObject && selectedObject.id === object.id) ? '#008500' : '' }"
-              :data-id="object.id"
-            >
-                <td v-for="column in columns">
-                    <input v-if="!inputTypeForKey(column)" :value="valueForKey(object, column)" @change="setValueForKey(object, column, $event.target.value)" readonly>
-                    <input v-if="inputTypeForKey(column) === 'text'" :value="valueForKey(object, column)" @change="setValueForKey(object, column, $event.target.value)">
+          <tbody>
+              <tr
+                v-for='object in displayObjects'
+                :key="object.id"
+                @click="selectedObject = object"
+                :style="{ 'background-color': (selectedObject && selectedObject.id === object.id) ? '#008500' : '' }"
+                :data-id="object.id"
+              >
+                  <td v-for="column in columns">
+                      <input v-if="!inputTypeForKey(column)" :value="valueForKey(object, column)" @change="setValueForKey(object, column, $event.target.value)" readonly>
+                      <input v-if="inputTypeForKey(column) === 'text'" :value="valueForKey(object, column)" @change="setValueForKey(object, column, $event.target.value)">
 
-                    <div v-if="inputTypeForKey(column) === 'color'" class='input-color'>
-                        <input v-if="inputTypeForKey(column) === 'color'" :object-id="object.id" :value="valueForKey(object, column)" @change="setValueForKey(object, column, $event.target.value)">
-                    </div>
+                      <div v-if="inputTypeForKey(column) === 'color'" class='input-color'>
+                          <input v-if="inputTypeForKey(column) === 'color'" :object-id="object.id" :value="valueForKey(object, column)" @change="setValueForKey(object, column, $event.target.value)">
+                      </div>
 
-                    <div v-if="inputTypeForKey(column) === 'select'" class='input-select'>
-                        <select @change="setValueForKey(object, column, $event.target.value)" >
-                            <option :selected="!valueForKey(object, column)" value="null">None</option>
-                            <option v-for='(id, name) in selectOptionsForObjectAndKey(object, column)' :value="id" :selected="valueForKey(object, column)===name">{{ name }}</option>
-                        </select>
-                        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
-                            <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
-                        </svg>
-                    </div>
-                </td>
-                <td class="destroy">
-                    <svg @click.stop="destroyObject(object)" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
-                    </svg>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+                      <div v-if="inputTypeForKey(column) === 'select'" class='input-select'>
+                          <select @change="setValueForKey(object, column, $event.target.value)" >
+                              <option :selected="!valueForKey(object, column)" value="null">None</option>
+                              <option v-for='(id, name) in selectOptionsForObjectAndKey(object, column)' :value="id" :selected="valueForKey(object, column)===name">{{ name }}</option>
+                          </select>
+                          <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
+                              <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
+                          </svg>
+                      </div>
+                  </td>
+                  <td class="destroy">
+                      <svg @click.stop="destroyObject(object)" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
+                      </svg>
+                  </td>
+              </tr>
+          </tbody>
+      </table>
 
-</section>
+  </section>
+
+  </div>
+
 </template>
 
 <script>
@@ -104,11 +109,9 @@ export default {
     // initialize the library to view objects of the same type being viewed in the navigation
     this.type = this.mode;
     this.configurePickers();
-    ResizeEvents.$on('resize', () => {
-      this.handleResize();
-    });
+
+    this.$refs.resizebar.addEventListener('mousedown', this.resizeBarClicked);
   },
-  beforeDestroy() { ResizeEvents.$off('resize', this.handleResize); },
   computed: {
     ...mapState({
       mode: state => state.application.currentSelections.mode,
@@ -250,6 +253,30 @@ export default {
     },
   },
   methods: {
+
+    resizeBarClicked() {
+      /*
+      * Resize the library and adjust the positions of sibling elements
+      */
+      const doResize = (e) => {
+        document.getElementById('layout-library').style.top = `${e.clientY}px`;
+        getSiblings(document.getElementById('layout-library')).forEach((el) => {
+          el.style.bottom = `${window.innerHeight - e.clientY}px`;
+        });
+
+        ResizeEvents.$emit('resize');
+      };
+      const stopResize = () => {
+        window.removeEventListener('mousemove', doResize);
+        window.removeEventListener('mouseup', stopResize);
+      };
+      window.addEventListener('mousemove', doResize);
+      window.addEventListener('mouseup', stopResize);
+    },
+    showHide() {
+      this.notify();
+    },
+
     // configure Huebee color pickers for each color picker input
     configurePickers() {
       const inputs = document.querySelectorAll('.input-color > input');
@@ -367,15 +394,7 @@ export default {
       this.sortKey = key;
     },
 
-    /*
-    * Resize the library and adjust the positions of sibling elements
-    */
-    handleResize() {
-      // get the updated height of the resized library component
-      const libraryTop = document.getElementById('layout-library').offsetTop;
-      // update the bottom positions of the library's sibling elements so that they display directly above the resized library
-      getSiblings(document.getElementById('layout-library')).forEach((el) => { el.style.bottom = `${window.innerHeight - libraryTop}px`; });
-    },
+
   },
   watch: {
     displayObjects() { this.$nextTick(this.configurePickers); },
@@ -398,8 +417,21 @@ export default {
 @import './../scss/config';
 @import './../../node_modules/huebee/dist/huebee.min.css';
 
+#top-bar {
+  position: absolute;
+  height: 6px;
+  width: 100%;
+  cursor: n-resize;
+  transition: background 0.5s linear;
+
+  &:hover, &:active {
+    background-color: $gray-lightest
+  }
+}
+
 #library {
     background-color: $gray-darkest;
+    height: 100%;
     overflow: auto;
 
     header {
