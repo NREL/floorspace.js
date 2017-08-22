@@ -591,6 +591,15 @@ export default {
       ...(this.previousStoryGeometry ? this.previousStoryGeometry.vertices : []),
     ];
 
+    if (this.points.length >= 3 && this.currentTool === 'Polygon') {
+      // convert the polygon origin from grid units to real world units before adding it as a snappable vertex
+      snappableVertices.push({
+        x: this.gridToRWU(this.points[0].x, 'x'),
+        y: this.gridToRWU(this.points[0].y, 'y'),
+        origin: true, // set a flag to mark the origin
+      });
+    }
+
     return snapTargets(snappableVertices, this.spacing, location);
   },
   /*
