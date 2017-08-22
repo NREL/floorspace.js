@@ -67,7 +67,7 @@ export default {
     window.addEventListener('keyup', this.escapeAction);
     window.addEventListener('resize', this.renderGrid);
 
-    ResizeEvents.$on('resize-resize', this.renderGrid);
+    ResizeEvents.$on('resize', this.renderGrid);
 
     // render grid first time
     this.renderGrid();
@@ -80,7 +80,7 @@ export default {
     window.removeEventListener('keyup', this.escapeAction);
     window.removeEventListener('resize', this.renderGrid);
 
-    ResizeEvents.$off('resize-resize', this.renderGrid);
+    ResizeEvents.$off('resize', this.renderGrid);
   },
   computed: {
 
@@ -257,9 +257,11 @@ export default {
 <style lang="scss" scoped>@import "./../../scss/config";
 // styles for dynamically created d3 elements go into src/scss/partials/d3.scss
 #grid {
+  user-select: none;
+
   button {
     position: absolute;
-    z-index: 1000;
+    z-index: 200;
   }
   img {
     position: absolute;

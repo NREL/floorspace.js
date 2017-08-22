@@ -59,23 +59,34 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       </div>
     </section>
 
+    <section class="modals" v-if="showSaveModal">
+      <save-as-modal
+        :saveWhat="thingWereSaving"
+        :dataToDownload="dataToDownload"
+        :onClose="() => {showSaveModal = false; thingWereSaving = '';}"
+      />
+    </section>
   </nav>
 </template>
 
 <script>
 import { mapState } from 'vuex';
+import SaveAsModal from './Modals/SaveAsModal.vue';
+
 
 export default {
   name: 'toolbar',
+  data() {
+    return {
+      showSaveModal: false,
+      thingWereSaving: '',
+    };
+  },
   methods: {
     exportData() {
+      this.thingWereSaving = 'Floorplan';
+      this.showSaveModal = true;
       const data = this.$store.getters['exportData'];
-      const a = document.createElement('a');
-      a.setAttribute('href', `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(data))}`);
-      a.setAttribute('download', 'floorplan.json');
-      a.click();
-
-      console.log(`exporting:\n${JSON.stringify(data)}`); // eslint-disable-line
       return data;
     },
     importDataAsFile(event, type) {
@@ -164,12 +175,18 @@ export default {
       get() { return this.$store.state.application.currentSelections.snapMode; },
       set(snapMode) { this.$store.dispatch('application/setCurrentSnapMode', { snapMode }); },
     },
+    dataToDownload() {
+      return this.$store.getters['exportData'];
+    },
   },
   watch: {
     tool(val) {
       if (this.availableTools.indexOf(val) === -1 && val !== 'Map') { this.tool = this.availableTools[0]; }
     },
     currentMode() { this.tool = this.availableTools[0]; },
+  },
+  components: {
+    'save-as-modal': SaveAsModal,
   },
 };
 </script>
@@ -178,6 +195,8 @@ export default {
 @import "./../scss/config";
 
 #toolbar {
+  z-index: 3;
+
   section {
     align-items: center;
     display: flex;
@@ -193,12 +212,8 @@ export default {
       #import-export {
         position: absolute;
         right: 2.5rem;
-        #import {
-          border: 1px solid $secondary;
-        }
-        #export {
+        button {
           margin-left: 1rem;
-          border: 1px solid $primary;
         }
       }
       // hidden file inputs
@@ -218,7 +233,7 @@ export default {
         margin: 0 1rem 0 0;
       }
       .active {
-        border: 1px solid $primary;
+        border: 2px solid $primary;
       }
       > .undo-redo {
         margin-right: auto;

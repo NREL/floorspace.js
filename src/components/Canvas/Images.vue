@@ -29,12 +29,12 @@ export default {
     };
   },
   mounted() {
-    ResizeEvents.$on('resize-resize', this.renderImages);
+    ResizeEvents.$on('resize', this.renderImages);
     window.addEventListener('resize', this.renderImages);
     this.renderImages();
   },
   beforeDestroy() {
-    ResizeEvents.$off('resize-resize', this.renderImages);
+    ResizeEvents.$off('resize', this.renderImages);
     window.removeEventListener('resize', this.renderImages);
   },
   methods: {
