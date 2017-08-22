@@ -343,6 +343,7 @@ export default {
         default:
           break;
       }
+      this.setCurrentItem();
     },
 
     /*
@@ -352,6 +353,7 @@ export default {
       switch (mode) {
         case 'stories':
           this.currentStory = item;
+          this.setCurrentItem();
           break;
         case 'building_units':
           this.currentBuildingUnit = item;
@@ -365,6 +367,17 @@ export default {
         default: // spaces, shading, images
           this.currentSubSelection = item;
           break;
+      }
+    },
+
+
+
+    setCurrentItem() {
+      // to be used when, ex changing stories or deleting an item.
+      // According to issue #134, we don't want to ever allow a situation
+      // where no item is selected.
+      if (this.items.length && !this.selectedObject) {
+        this.selectedObject = this.items[0];
       }
     },
 
