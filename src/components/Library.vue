@@ -261,10 +261,11 @@ export default {
     */
     resizeBarClicked() {
       const doResize = (e) => {
-        const newHeight = e.clientY > collapsedHeight ? e.clientY : collapsedHeight;
+        const newHeight = e.clientY + collapsedHeight > window.innerHeight ? window.innerHeight - collapsedHeight : e.clientY;
+        console.log('e.clientY', e.clientY, 'innerHeight', window.innerHeight, 'newHeight', newHeight);
         document.getElementById('layout-library').style.top = `${newHeight}px`;
         getSiblings(document.getElementById('layout-library')).forEach((el) => {
-          el.style.bottom = `${window.innerHeight - e.clientY}px`;
+          el.style.bottom = `${window.innerHeight - newHeight}px`;
         });
 
         ResizeEvents.$emit('resize');
