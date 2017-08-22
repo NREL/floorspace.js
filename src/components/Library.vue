@@ -318,9 +318,6 @@ export default {
       }
     },
 
-    // determine whether an object property is readonly or private
-    keyIsReadonly(object, key) { return helpers.keyIsReadonly(this.type, key); },
-    keyIsPrivate(object, key) { return helpers.keyIsPrivate(this.type, key); },
     // input type to display in the column for a given key
     inputTypeForKey(key) { return helpers.inputTypeForKey(this.type, key); },
     // options to display in select dropdown

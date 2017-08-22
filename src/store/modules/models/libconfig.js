@@ -41,6 +41,7 @@ const map = {
         name: 'id',
         displayName: 'ID',
         readonly: true,
+        private: true,
       },
       {
         name: 'name',
@@ -64,6 +65,7 @@ const map = {
         name: 'id',
         displayName: 'ID',
         readonly: true,
+        private: true,
       },
       {
         name: 'name',
@@ -87,6 +89,7 @@ const map = {
         name: 'id',
         displayName: 'ID',
         readonly: true,
+        private: true,
       },
       {
         name: 'name',
@@ -104,6 +107,7 @@ const map = {
         name: 'id',
         displayName: 'ID',
         readonly: true,
+        private: true,
       },
       {
         name: 'name',
@@ -131,6 +135,7 @@ const map = {
         name: 'id',
         displayName: 'ID',
         readonly: true,
+        private: true,
       },
       {
         name: 'name',
@@ -148,6 +153,7 @@ const map = {
         name: 'id',
         displayName: 'ID',
         readonly: true,
+        private: true,
       },
       {
         name: 'name',
@@ -230,6 +236,7 @@ const map = {
         name: 'id',
         displayName: 'ID',
         readonly: true,
+        private: true,
       },
       {
         name: 'name',
@@ -339,6 +346,7 @@ const map = {
         name: 'id',
         displayName: 'ID',
         readonly: true,
+        private: true,
       },
       {
         name: 'name',
@@ -370,6 +378,7 @@ const map = {
         name: 'id',
         displayName: 'ID',
         readonly: true,
+        private: true,
       },
       {
         name: 'name',

@@ -87,13 +87,6 @@ const helpers = {
       return result;
   },
 
-  keyIsPrivate(type, key) {
-      return this.map[type].keymap[key] ? this.map[type].keymap[key].private : false;
-  },
-  keyIsReadonly(type, key) {
-      return this.map[type].keymap[key] ? this.map[type].keymap[key].readonly : false;
-  },
-
   inputTypeForKey(type, key) {
       return this.map[type].keymap[key] && !this.map[type].keymap[key].readonly ? this.map[type].keymap[key].input_type : null;
   },
