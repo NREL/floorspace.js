@@ -113,7 +113,13 @@ export function replaceFacePoints(state, { geometry_id, vertices, edges, face_id
   const geometry = _.find(state, { id: geometry_id });
   ensureVertsExist(geometry, vertices);
   ensureEdgesExist(geometry, edges);
-  const face = _.find(geometry.faces, { id: face_id });
+
+  let face = _.find(geometry.faces, { id: face_id });
+  if (!face) {
+    face = { id: face_id, edgeRefs: [] };
+    geometry.faces.push(face);
+  }
+
   face.edgeRefs = edges.map(e => ({
     edge_id: e.id,
     reverse: !!e.reverse,
