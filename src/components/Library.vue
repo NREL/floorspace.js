@@ -91,6 +91,7 @@ import { mapState, mapGetters } from 'vuex';
 import { getSiblings } from './../utilities';
 import helpers from './../store/modules/models/helpers';
 import ResizeEvents from './Resize/ResizeEvents';
+import libconfig from '../store/modules/models/libconfig';
 
 const Huebee = require('huebee');
 
@@ -241,18 +242,10 @@ export default {
     * return all unique non private keys for the set of displayObjects
     */
     columns() {
-      const columns = [];
-      this.displayObjects.forEach((o) => {
-        Object.keys(o).forEach((k) => {
-          if ((columns.indexOf(k) === -1) && !this.keyIsPrivate(this.type, k)) { columns.push(k); }
-        });
-      });
-      // look up additional keys (computed properties)
-      const additionalKeys = helpers.defaultKeysForType(this.type);
-      additionalKeys.forEach((k) => {
-        if ((columns.indexOf(k) === -1) && !this.keyIsPrivate(this.type, k)) { columns.push(k); }
-      });
-      return columns;
+      if (!this.type || !libconfig[this.type]) return;
+      return _.map(
+        _.reject(libconfig[this.type].columns, 'private'),
+        'name');
     },
   },
   methods: {
