@@ -57,7 +57,7 @@ export default function createFaceFromPoints(context, payload) {
   newGeoms.forEach(newGeom => context.dispatch('replaceFacePoints', newGeom));
 
   // save the face and its descendent geometry
-  storeFace(faceGeometry, target, context);
+  storeFace(faceGeometry, target, context, existingFace);
 
   // split edges where vertices touch them
   splitEdges(context);
@@ -133,48 +133,24 @@ export function eraseSelection(points, context) {
 * skips shared edges and vertices since they are already stored
 * creates and saves a face with edgeRefs, updates the target space or shading in the datastore
 */
-function storeFace(faceGeometry, target, context) {
-    const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'];
+function storeFace({ vertices, edges }, target, context, existingFace) {
+  const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'];
 
-    faceGeometry.vertices.forEach((vertex) => {
-        if (!geometryHelpers.vertexForId(vertex.id, currentStoryGeometry)) {
-            context.commit('createVertex', {
-                vertex: vertex,
-                geometry_id: currentStoryGeometry.id
-            });
-        }
-    });
+  const face = existingFace || new factory.Face([]);
 
-    const edgeRefs = faceGeometry.edges.map((edge) => {
-        var ref = {
-            edge_id: edge.id,
-            reverse: !!edge.reverse
-        };
-        delete edge.reverse;
-        return ref;
-    })
-    const face = new factory.Face(edgeRefs);
+  context.dispatch(target.type === 'space' ? 'models/updateSpaceWithData' : 'models/updateShadingWithData', {
+    [target.type]: target,
+    face_id: face.id,
+  }, {
+    root: true,
+  });
 
-    faceGeometry.edges.forEach((edge) => {
-        if (!geometryHelpers.edgeForId(edge.id, currentStoryGeometry)) {
-            context.commit('createEdge', {
-                edge: edge,
-                geometry_id: currentStoryGeometry.id
-            });
-        }
-    });
-
-    context.dispatch(target.type === 'space' ? 'models/updateSpaceWithData' : 'models/updateShadingWithData', {
-        [target.type]: target,
-        face_id: face.id
-    }, {
-        root: true
-    });
-
-    context.commit('createFace', {
-        face: face,
-        geometry_id: currentStoryGeometry.id
-    });
+  context.commit('replaceFacePoints', {
+    face_id: face.id,
+    geometry_id: currentStoryGeometry.id,
+    vertices,
+    edges,
+  });
 }
 
 export function findExistingEdge(v1, v2, edges) {
