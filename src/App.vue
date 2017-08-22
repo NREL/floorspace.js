@@ -107,11 +107,10 @@ export default {
 <style src="./scss/main.scss" lang="scss"></style>
 <style lang="scss" scoped>
 @import "./scss/config";
-.tool_select polygon {
-  cursor: pointer;
-}
 .tool_rectangle, .tool_polygon, .tool_eraser {
-  cursor: crosshair;
+  #grid {
+    cursor: crosshair;
+  }
 }
 .tool_drag {
   cursor: move;
