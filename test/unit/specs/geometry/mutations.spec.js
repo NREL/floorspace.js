@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import { refute, assert, assertEqual } from '../../test_helpers';
-import { emptyGeometry, neg5by5Rect } from './examples';
-import { replaceFacePoints } from '../../../../src/store/modules/geometry/mutations';
+import { assert, assertEqual } from '../../test_helpers';
+import { emptyGeometry, neg5by5Rect, simpleGeometry } from './examples';
+import { replaceFacePoints, trimGeometry } from '../../../../src/store/modules/geometry/mutations';
 
 describe('replaceFacePoints', () => {
   const triangle = {
@@ -58,5 +58,30 @@ describe('replaceFacePoints', () => {
     });
 
     assert(geometry.faces.length === 1);
+  });
+});
+
+describe('trimGeometry', () => {
+  it('leaves edges and verts that are in use', () => {
+    const geometry = _.cloneDeep(simpleGeometry);
+    trimGeometry([geometry], { geometry_id: geometry.id });
+
+    assertEqual(geometry, simpleGeometry);
+  });
+
+  it('removes edges and verts that are unused', () => {
+    const geometry = _.cloneDeep(simpleGeometry);
+    geometry.faces = [geometry.faces[0]];
+    trimGeometry([geometry], { geometry_id: geometry.id });
+
+    assert(geometry.vertices.length < simpleGeometry.vertices.length);
+    assert(geometry.edges.length === geometry.faces[0].edgeRefs.length);
+  });
+
+  it('leaves an empty geometry alone', () => {
+    const geometry = _.cloneDeep(emptyGeometry);
+
+    trimGeometry([geometry], { geometry_id: geometry.id });
+    assertEqual(geometry, emptyGeometry);
   });
 });

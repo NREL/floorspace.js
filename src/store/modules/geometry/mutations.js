@@ -2,6 +2,19 @@ import _ from 'lodash';
     /*
     * create a new geometry set, face, edge, or vertex in the data store
     */
+
+export function trimGeometry(state, { geometry_id }) {
+  const
+    geometry = _.find(state, { id: geometry_id }),
+    edgesInUse = new Set(_.flatMap(geometry.faces, f => _.map(f.edgeRefs, 'edge_id'))),
+    verticesInUse = new Set(_.flatMap(
+      geometry.edges.filter(e => edgesInUse.has(e.id)),
+      e => [e.v1, e.v2]));
+
+  geometry.edges = geometry.edges.filter(e => edgesInUse.has(e.id));
+  geometry.vertices = geometry.vertices.filter(v => verticesInUse.has(v.id));
+}
+
 export function initGeometry(state, payload) {
       const { geometry } = payload;
       state.push(geometry);
@@ -98,15 +111,15 @@ export function splitEdge(state, { geometry_id, edgeToDelete, newEdges, replaceE
 }
 
 function ensureVertsExist(geometry, verts) {
-  verts.forEach((v) => {
-    _.find(geometry.vertices, { id: v.id }) || geometry.vertices.push(v);
-  });
+  verts.forEach(v =>
+    _.find(geometry.vertices, { id: v.id }) || geometry.vertices.push(v)
+  );
 }
 
 function ensureEdgesExist(geometry, edges) {
-  edges.forEach((e) => {
-    _.find(geometry.edges, { id: e.id }) || geometry.edges.push(e);
-  });
+  edges.forEach(e =>
+    _.find(geometry.edges, { id: e.id }) || geometry.edges.push(e)
+  );
 }
 
 export function replaceFacePoints(state, { geometry_id, vertices, edges, face_id }) {
@@ -124,4 +137,5 @@ export function replaceFacePoints(state, { geometry_id, vertices, edges, face_id
     edge_id: e.id,
     reverse: !!e.reverse,
   }));
+  trimGeometry(state, { geometry_id });
 }
