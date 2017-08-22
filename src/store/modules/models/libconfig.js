@@ -210,6 +210,7 @@ const map = {
         name: 'windows',
         displayName: 'Windows',
         readonly: true,
+        private: true,
         get(story, state) {
           return story.windows.map(w => w.name).join(', ');
         },
@@ -258,6 +259,7 @@ const map = {
         name: 'daylighting_controls',
         displayName: 'Daylighting Controls',
         readonly: true,
+        private: true,
         get(space, state) {
           return space.daylighting_controls.map(d => d.name)
           .join(', ');
