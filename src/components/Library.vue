@@ -7,9 +7,9 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 
 <template>
-  <div id="layout-library">
-    <section id='library' v-on:dblclick="showHide">
-    <div id="top-bar" ref="resizebar" class="resize-bar"></div>
+  <div id="layout-library" v-on:dblclick="showHide">
+    <section id='library'>
+    <div @mousedown="resizeBarClicked" id="top-bar" ref="resizebar" class="resize-bar"></div>
       <header>
           <div class="input-text">
               <label>Search</label>
@@ -94,6 +94,8 @@ import ResizeEvents from './Resize/ResizeEvents';
 
 const Huebee = require('huebee');
 
+let fullHeight;
+const collapsedHeight = 6;
 export default {
   name: 'library',
   data() {
@@ -108,10 +110,11 @@ export default {
   mounted() {
     // initialize the library to view objects of the same type being viewed in the navigation
     this.type = this.mode;
+    fullHeight = document.getElementById('layout-library').offsetTop;
     this.configurePickers();
-
-    this.$refs.resizebar.addEventListener('mousedown', this.resizeBarClicked);
+    window.addEventListener('resize', this.resetSize);
   },
+  beforeDestroy() { window.removeEventListener('resize', this.resetSize); },
   computed: {
     ...mapState({
       mode: state => state.application.currentSelections.mode,
@@ -253,13 +256,13 @@ export default {
     },
   },
   methods: {
-
+    /*
+    * Resize the library and adjust the positions of sibling elements
+    */
     resizeBarClicked() {
-      /*
-      * Resize the library and adjust the positions of sibling elements
-      */
       const doResize = (e) => {
-        document.getElementById('layout-library').style.top = `${e.clientY}px`;
+        const newHeight = e.clientY > collapsedHeight ? e.clientY : collapsedHeight;
+        document.getElementById('layout-library').style.top = `${newHeight}px`;
         getSiblings(document.getElementById('layout-library')).forEach((el) => {
           el.style.bottom = `${window.innerHeight - e.clientY}px`;
         });
@@ -274,9 +277,21 @@ export default {
       window.addEventListener('mouseup', stopResize);
     },
     showHide() {
-      this.notify();
+      const newHeight = document.getElementById('layout-library').offsetTop === (window.innerHeight - collapsedHeight) ? fullHeight : (window.innerHeight - collapsedHeight);
+      document.getElementById('layout-library').style.top = `${newHeight}px`;
+      getSiblings(document.getElementById('layout-library')).forEach((el) => {
+        el.style.bottom = `${window.innerHeight - newHeight}px`;
+      });
+      ResizeEvents.$emit('resize');
     },
-
+    // reset the library size when the window is resized
+    resetSize() {
+      document.getElementById('layout-library').style.top = "";
+      getSiblings(document.getElementById('layout-library')).forEach((el) => {
+        el.style.bottom = "";
+      });
+      fullHeight = document.getElementById('layout-library').offsetTop;
+    },
     // configure Huebee color pickers for each color picker input
     configurePickers() {
       const inputs = document.querySelectorAll('.input-color > input');
