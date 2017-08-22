@@ -419,6 +419,7 @@ export default {
                 visibility: hidden;
             }
     }
+    user-select: none;
 
     #selections > button, #breadcrumbs > button {
         display: flex;
@@ -444,7 +445,7 @@ export default {
         display: flex;
         #story-list {
             border-right: 1px solid $gray-darkest;
-            width: 6rem;
+            flex-grow: 1;
         }
         #subselection-list {
             flex-grow: 2;

@@ -257,6 +257,8 @@ export default {
 <style lang="scss" scoped>@import "./../../scss/config";
 // styles for dynamically created d3 elements go into src/scss/partials/d3.scss
 #grid {
+  user-select: none;
+
   button {
     position: absolute;
     z-index: 200;
