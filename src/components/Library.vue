@@ -419,6 +419,7 @@ export default {
       this.sortDescending = true;
     },
     selectedObject(obj) {
+      if (!obj) return;
       const row = this.$el.querySelector(`[data-id="${obj.id}"]`);
       if (row) {
         row.scrollIntoView();
