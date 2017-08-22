@@ -1,3 +1,4 @@
+import libconfig from './libconfig';
 import factory from './factory';
 import helpers from './helpers';
 
@@ -101,7 +102,7 @@ export default {
 
     updateStoryWithData (context, payload) {
         const story = context.state.stories.find(s => s.id === payload.story.id),
-            validProperties = Object.keys(story),
+            validProperties = Object.keys(libconfig.stories.keymap),
             cleanedPayload = {};
 
         // remove extra properties from the payload
