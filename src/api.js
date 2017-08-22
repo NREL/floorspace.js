@@ -37,6 +37,10 @@ window.api = {
       online: true,
       initialGridSize: 50,
       initialNorthAxis: 0,
+      defaultLocation: {
+        latitude: 39.7653,
+        longitude: -104.9863,
+      },
       onChange: () => { window.versionNumber += 1; },
     }, config);
   },
@@ -54,9 +58,18 @@ window.api = {
     window.application.$store.dispatch('project/setSpacing', { spacing: window.api.config.initialGridSize });
     window.application.$store.dispatch('project/setNorthAxis', { north_axis: window.api.config.initialNorthAxis });
 
-    // if the map modal has been disabled, mark the map as initialized so that time travel can be initialized
-    // TODO: we may want to intitialize timetravel in the importFloorplan action instead
-    window.application.$store.dispatch('project/setMapInitialized', { initialized: true });
+    if (window.api.config.showMapDialogOnStart) {
+      window.application.$store.dispatch('project/setMapEnabled', { enabled: true });
+      window.application.$store.dispatch('project/setMapVisible', { visible: true });
+      window.application.$store.dispatch('project/setMapInitialized', { initialized: false });
+    } else {
+      window.application.$store.dispatch('project/setMapEnabled', { enabled: false });
+      window.application.$store.dispatch('project/setMapVisible', { visible: false });
+      window.application.$store.dispatch('project/setMapInitialized', { initialized: false });
+    }
+
+    window.application.$store.dispatch('project/setMapLatitude', { latitude: window.api.config.defaultLocation.latitude });
+    window.application.$store.dispatch('project/setMapLongitude', { longitude: window.api.config.defaultLocation.longitude });
 
     this.initAlreadyRun = true;
   },
