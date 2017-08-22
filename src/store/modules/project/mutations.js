@@ -95,6 +95,6 @@ export default {
         }
     },
     setShowImportExport(state, payload) {
-      state.setShowImportExport = payload;
+      state.showImportExport = payload;
     }
 }
