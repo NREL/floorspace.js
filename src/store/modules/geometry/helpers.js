@@ -429,4 +429,87 @@ const helpers = {
   },
 };
 
+function isPointCoord(coord) {
+  return coord.length === 2 && _.isNumber(coord[0]) && _.isNumber(coord[1]);
+}
+
+function isRingCoords(coords) {
+  return coords.length >= 1 && _.every(coords, isPointCoord);
+}
+
+function isPolygonCoords(coords) {
+  return coords.length >= 1 && _.every(coords, isRingCoords);
+}
+
+// Many of the below geometry functions are copyright 2017 TurfJS, MIT License.
+
+// http://en.wikipedia.org/wiki/Even%E2%80%93odd_rule
+// modified from: https://github.com/Turfjs/turf/blob/master/packages/turf-inside/index.js
+// which was modified from https://github.com/substack/point-in-polygon/blob/master/index.js
+// which was modified from http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
+helpers.inside = function (pt, poly, ignoreBoundary = false) {
+  // validation
+  if (!isPointCoord(pt)) throw new Error(`point does not have correct coords: ${pt}`);
+  if (!isPolygonCoords(poly)) throw new Error(`polygon does not have correct coords: ${poly}`);
+
+  const bbox = helpers.bboxOfRing(poly[0]);
+
+  // Quick elimination if point is not inside bbox
+  if (bbox && helpers.inBBox(pt, bbox) === false) return false;
+
+  let insidePoly = false;
+  for (let i = 0; i < poly.length && !insidePoly; i++) {
+    // check if it is in the outer ring first
+    if (helpers.inRing(pt, poly[0], ignoreBoundary)) {
+      let inHole = false;
+      let k = 1;
+      // check for the point in any of the holes
+      while (k < poly.length && !inHole) {
+        if (helpers.inRing(pt, poly[k], !ignoreBoundary)) {
+          inHole = true;
+        }
+        k++;
+      }
+      if (!inHole) insidePoly = true;
+    }
+  }
+  return insidePoly;
+};
+
+helpers.bboxOfRing = function (ring) {
+  // a bbox is [west, south, east, north]
+  return [
+    _.min(_.map(ring, 0)),
+    _.min(_.map(ring, 1)),
+    _.max(_.map(ring, 0)),
+    _.max(_.map(ring, 1)),
+  ];
+};
+
+/**
+ * inRing
+ *
+ * @private
+ * @param {[number, number]} pt [x,y]
+ * @param {Array<[number, number]>} ring [[x,y], [x,y],..]
+ * @param {boolean} ignoreBoundary ignoreBoundary
+ * @returns {boolean} inRing
+ */
+helpers.inRing = function (pt, ring, ignoreBoundary) {
+  let isInside = false;
+  if (ring[0][0] === ring[ring.length - 1][0] && ring[0][1] === ring[ring.length - 1][1]) ring = ring.slice(0, ring.length - 1);
+
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i][0], yi = ring[i][1];
+    const xj = ring[j][0], yj = ring[j][1];
+    const onBoundary = (pt[1] * (xi - xj) + yi * (xj - pt[0]) + yj * (pt[0] - xi) === 0) &&
+      ((xi - pt[0]) * (xj - pt[0]) <= 0) && ((yi - pt[1]) * (yj - pt[1]) <= 0);
+    if (onBoundary) return !ignoreBoundary;
+    const intersect = ((yi > pt[1]) !== (yj > pt[1])) &&
+      (pt[0] < (xj - xi) * (pt[1] - yi) / (yj - yi) + xi);
+    if (intersect) isInside = !isInside;
+  }
+  return isInside;
+};
+
 export default helpers;
