@@ -58,15 +58,8 @@ window.api = {
     window.application.$store.dispatch('project/setSpacing', { spacing: window.api.config.initialGridSize });
     window.application.$store.dispatch('project/setNorthAxis', { north_axis: window.api.config.initialNorthAxis });
 
-    if (window.api.config.showMapDialogOnStart) {
-      window.application.$store.dispatch('project/setMapEnabled', { enabled: true });
-      window.application.$store.dispatch('project/setMapVisible', { visible: true });
-      window.application.$store.dispatch('project/setMapInitialized', { initialized: false });
-    } else {
-      window.application.$store.dispatch('project/setMapEnabled', { enabled: false });
-      window.application.$store.dispatch('project/setMapVisible', { visible: false });
-      window.application.$store.dispatch('project/setMapInitialized', { initialized: false });
-    }
+    window.application.$store.dispatch('project/setMapEnabled', { enabled: window.api.config.showMapDialogOnStart });
+    window.application.$store.dispatch('project/setMapVisible', { visible: window.api.config.showMapDialogOnStart });
 
     window.application.$store.dispatch('project/setMapLatitude', { latitude: window.api.config.defaultLocation.latitude });
     window.application.$store.dispatch('project/setMapLongitude', { longitude: window.api.config.defaultLocation.longitude });
