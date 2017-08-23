@@ -77,7 +77,9 @@ const helpers = {
     } else if (resultPaths.length === 0) {
       return [];
     }
-    return false;
+    return {
+      error: 'no split faces',
+    };
   },
 
   // convenience functions for setOperation

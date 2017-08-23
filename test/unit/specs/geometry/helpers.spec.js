@@ -1,8 +1,8 @@
 import _ from 'lodash';
-import { gen, sample } from 'testcheck';
+import { gen } from 'testcheck';
 import helpers from '../../../../src/store/modules/geometry/helpers';
 import {
-  assert, nearlyEqual, refute, assertProperty, isNearlyEqual,
+  assert, nearlyEqual, assertProperty, isNearlyEqual,
   assertEqual,
   genTriangleLeftOfOrigin,
   genTriangleRightOfOrigin,
@@ -218,7 +218,7 @@ describe('setOperation', () => {
       (tri1, tri2) => {
         const union = helpers.setOperation('union', tri1, tri2);
 
-        refute(union);
+        assertEqual(union, { error: 'no split faces' });
       });
   });
 
