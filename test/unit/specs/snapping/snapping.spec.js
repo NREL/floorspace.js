@@ -73,4 +73,14 @@ describe('snapTargets', () => {
     assert(_.isMatch(first, { type: 'vertex', x: 0.4, y: 0.4, dist: 0.4 }));
     assert(_.isMatch(second, { type: 'grid', x: 0, y: 0, dist: 0.4 }));
   });
+
+  it('prioritizes the origin of a polygon over an existing vertex', () => {
+    const
+      targets = snapTargets([{ x: 0, y: 0 }, { x: 0, y: 0, origin: true }], 1, { x: 0.4, y: 0 }),
+      first = targets[0],
+      second = targets[1];
+
+    assert(_.isMatch(first, { type: 'vertex', x: 0, y: 0, origin: true }));
+    assert(_.isMatch(second, { type: 'vertex', x: 0, y: 0 }));
+  });
 });
