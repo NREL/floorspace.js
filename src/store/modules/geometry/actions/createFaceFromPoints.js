@@ -296,6 +296,13 @@ export function validateFaceGeometry(points, currentStoryGeometry) {
    - Check if two edges on the new face intersect. (again, to prevent split faces)
   */
 
+  if (points.length === 0) {
+    return {
+      success: true,
+      vertices: [],
+      edges: [],
+    };
+  }
   if (points.length <= 2) {
     return { success: false, error: 'need at least 3 points to make a face' };
   }
