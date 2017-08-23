@@ -1,10 +1,12 @@
-export default function exportData (state, getters) {
+import version from '../../version';
 
+export default function exportData(state, getters) {
     var exportObject = {
-        application: state.application,
-        project: state.project,
-        stories: state.models.stories,
-        ...state.models.library
+      application: state.application,
+      project: state.project,
+      stories: state.models.stories,
+      ...state.models.library,
+      version,
     };
     const geometrySets = getters['geometry/exportData']
     exportObject = JSON.parse(JSON.stringify(exportObject));

@@ -3,3 +3,4 @@ node_js:
   - "6"
 notifications:
   email: false
+script: npm run test && node check_version.js
