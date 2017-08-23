@@ -9,6 +9,7 @@ export function distanceBetweenPoints(p1, p2) {
   return Math.sqrt((dx * dx) + (dy * dy));
 }
 
+
 const helpers = {
   // ************************************ CLIPPER ************************************ //
   // scaling - see https://sourceforge.net/p/jsclipper/wiki/documentation/#clipperlibclipperoffsetexecute
@@ -78,8 +79,16 @@ const helpers = {
       return [];
     }
     return {
-      error: 'no split faces',
+      error: helpers.clipperPolygonHasHoles(resultPaths) ? 'no holes' : 'no split faces',
     };
+  },
+
+  clipperPolygonHasHoles(poly) {
+    const
+      outerRing = poly[0].map(r => [r.X, r.Y]),
+      ptFromNextRing = [poly[1][0].X, poly[1][0].Y];
+    // nextRing is either entirely within, or entirely without outerRing.
+    return helpers.inRing(ptFromNextRing, outerRing);
   },
 
   // convenience functions for setOperation
