@@ -117,7 +117,7 @@ export default {
     const store = this.store;
     _.defer(() => {
       // after save checkpoint and dust has settled
-      if (_.isEqual(serializeState(store.state), prevStates[prevStates.length - 1].state)) {
+      while (_.isEqual(serializeState(store.state), prevStates[prevStates.length - 1].state)) {
         console.log('current state matches previous, so rolling back', prevStates[prevStates.length - 1].triggeringAction);
         prevStates.pop();
       }
