@@ -19,7 +19,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
             <button @click="$refs.importInput.click()" id="import">Open Floorplan</button>
             <button @click="mapEnabled = false; mapVisible = false; $emit('close')">New Floorplan</button>
-            <button @click="mapEnabled = true; tool='Map'; $emit('close')">New Floorplan w/ Map</button>
+            <button @click="mapEnabled = true; tool='Map'; $emit('close')" :disabled="!online">New Floorplan w/ Map</button>
             <input ref="importInput" @change="importFloorplanAsFile" type="file"/>
         </div>
     </div>
@@ -36,6 +36,7 @@ export default {
     };
   },
   computed: {
+    online () { return window.api && window.api.config ? window.api.config.online : true; },
     mapEnabled: {
       get() { return this.$store.state.project.map.enabled; },
       set(enabled) {
