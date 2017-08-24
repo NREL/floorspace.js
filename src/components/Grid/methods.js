@@ -463,7 +463,7 @@ export default {
           .attr('y', y)
           .text(poly.name)
           .attr('text-anchor', 'middle')
-          .style('font-size', '18px')
+          .style('font-size', '14px')
           .style('font-weight', 'bold')
           .attr('font-family', 'sans-serif')
           .attr('fill', 'red')
@@ -871,7 +871,7 @@ export default {
       zoomYScale = this.yScale.copy(),
       // keep font size and stroke width visually consistent
       strokeWidth = 1,
-      fontSize = '18px';
+      fontSize = '14px';
 
     svg.selectAll('*').remove();
     svg.attr('height', height)
