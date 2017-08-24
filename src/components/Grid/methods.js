@@ -897,6 +897,8 @@ export default {
 
     this.axis.x = svg.append('g')
     .attr('class', 'axis axis--x')
+    .attr('transform', 'translate(-0.5, 0)') // this corrects some mistake elsewhere in the code that I can't track down.
+    // or potentially related to this, combined with our setting the viewBox: https://groups.google.com/forum/#!topic/d3-js/-Sw0Wdnkeko
     .attr('stroke-width', strokeWidth)
     .style('font-size',fontSize)
     .style('display', this.gridVisible ? 'inline' : 'none')
@@ -904,6 +906,7 @@ export default {
 
     this.axis.y = svg.append('g')
     .attr('class', 'axis axis--y')
+    .attr('transform', 'translate(0, -0.5)') // this corrects some mistake elsewhere in the code that I can't track down.
     .attr('stroke-width', strokeWidth)
     .style('font-size',fontSize)
     .style('display', this.gridVisible ? 'inline' : 'none')
