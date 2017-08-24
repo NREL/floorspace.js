@@ -807,17 +807,48 @@ export default {
     };
   },
 
+  resolveBounds() {
+    /*
+    After calling resolveBounds:
+     - (min_x, max_x) x  (min_y, max_y) will have the same aspect ratio
+     as width x height.
+     - (min_x, max_x) is the same or a larger interval
+     - (min_y, max_y) is the same or a larger interval
+    */
+    const
+      width = this.$refs.grid.clientWidth,
+      height = this.$refs.grid.clientHeight,
+      xSpan = this.max_x - this.min_x,
+      ySpan = this.max_y - this.min_y,
+      xAccordingToY = ySpan * (width / height),
+      yAccordingToX = xSpan * (height / width),
+      xDiff = xAccordingToY - xSpan,
+      yDiff = yAccordingToX - ySpan;
+
+    if (xDiff > 0) {
+      this.min_x -= xDiff / 2;
+      this.max_x += xDiff / 2;
+    } else if (yDiff > 0) {
+      this.min_y -= yDiff / 2;
+      this.max_y += yDiff / 2;
+    } else if (Math.abs(xDiff) > 0.0001 && Math.abs(yDiff) > 0.0001) {
+      throw new Error(`Expected to never see this case occur.
+        width: ${width}
+        height: ${height}
+        max_x: ${this.max_x}
+        min_x: ${this.min_x}
+        max_y: ${this.max_y}
+        min_y: ${this.min_y}`);
+    }
+  },
 
   // ****************** GRID ****************** //
   renderGrid() {
-
     const
       w = this.$refs.grid.clientWidth,
       h = this.$refs.grid.clientHeight;
 
-    // initialize the y dimensions in RWU based on the aspect ratio of the grid on the screen
-    this.max_y = (h / w) * this.max_x;
-
+    this.resolveBounds();
     // scaleX amd scaleY are used during drawing to translate from px to RWU given the current grid dimensions in rwu
     this.$store.dispatch('application/setScaleX', {
       scaleX: d3.scaleLinear()
