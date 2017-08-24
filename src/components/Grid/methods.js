@@ -86,8 +86,8 @@ export default {
       .append('ellipse')
       .attr('cx', ellipsePoint.x, 'x')
       .attr('cy', ellipsePoint.y, 'y')
-      .attr('rx', this.scaleX(5))
-      .attr('ry', this.scaleY(5))
+      .attr('rx', 5)
+      .attr('ry', 5)
       .classed('highlight', true)
       .attr('vector-effect', 'non-scaling-stroke');
     } else {
@@ -95,8 +95,8 @@ export default {
       .append('ellipse')
       .attr('cx', ellipsePoint.x)
       .attr('cy', ellipsePoint.y)
-      .attr('rx', this.scaleX(2))
-      .attr('ry', this.scaleY(2))
+      .attr('rx', 2)
+      .attr('ry', 2)
       .classed('gridpoint', true)
       .attr('vector-effect', 'non-scaling-stroke');
     }
@@ -349,14 +349,14 @@ export default {
     .enter().append('ellipse')
     .attr('cx', d => d.x)
     .attr('cy', d => d.y)
-    .attr('rx', this.scaleX(2))
-    .attr('ry', this.scaleY(2))
+    .attr('rx', 2)
+    .attr('ry', 2)
     .attr('vector-effect', 'non-scaling-stroke');
 
     // apply custom CSS for origin of polygons
     d3.select('#grid svg').select('ellipse')
-    .attr('rx', this.scaleX(7))
-    .attr('ry', this.scaleY(7))
+    .attr('rx', 7)
+    .attr('ry', 7)
     .classed('origin', true)
     .attr('vector-effect', 'non-scaling-stroke')
     .attr('fill', 'none');
@@ -978,17 +978,6 @@ export default {
   // ****************** SCALING FUNCTIONS ****************** //
 
   /*
-  * take a pixel value (from a mouse event), find the corresponding coordinates in the svg grid
-  */
-  pxToGrid (px, axis) {
-    if (axis === 'x') {
-      return this.scaleX && this.scaleX(px);
-    } else if (axis === 'y') {
-      return this.scaleY && this.scaleY(px);
-    }
-  },
-
-  /*
   * take a rwu value (from the datastore), find the corresponding coordinates in the svg grid
   */
   rwuToGrid (rwu, axis) {
@@ -1051,7 +1040,7 @@ export default {
     let min = Math.abs(this.min_y),
     max = Math.abs(this.max_y),
     numDigits = (min < max ? max : min).toFixed(0).length,
-    yPadding = this.scaleX(paddingPerDigit*numDigits);
+    yPadding = paddingPerDigit * numDigits;
 
     this.axis.y.call(this.axis_generator.y.tickPadding(yPadding));
   }
