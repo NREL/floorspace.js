@@ -341,7 +341,7 @@ describe('newGeometriesOfOverlappedFaces', () => {
       newGeometriesOfOverlappedFaces(
         beingMovedPositionedInCenterOfBigger,
         helpers.exceptFace(geometry, 'being_moved')),
-      { error: 'no split faces' });
+      { error: 'no holes' });
   });
 
   it("permits a space to be moved if it doesn't cause a split face", () => {

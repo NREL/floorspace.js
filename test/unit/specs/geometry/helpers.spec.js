@@ -2,11 +2,15 @@ import _ from 'lodash';
 import { gen } from 'testcheck';
 import helpers from '../../../../src/store/modules/geometry/helpers';
 import {
-  assert, nearlyEqual, assertProperty, isNearlyEqual,
+  assert, refute, nearlyEqual, assertProperty, isNearlyEqual,
   assertEqual,
   genTriangleLeftOfOrigin,
   genTriangleRightOfOrigin,
   genTriangle,
+  createIrregularPolygon,
+  genIrregularPolygonPieces,
+  genIrregularPolygon,
+  genRectangle,
 } from '../../test_helpers';
 import * as geometryExamples from './examples';
 
@@ -173,6 +177,44 @@ describe('projectionOfPointToLine', () => {
     assert(nearlyEqual(proj.x, 5) && nearlyEqual(proj.y, 3));
   });
 });
+
+describe('inRing', () => {
+  const ringFromPolygon = polygon => polygon.map(pt => [pt.x, pt.y]);
+  const xyPointToClipperPoint = p => [p.x, p.y];
+
+  it('returns true if a point is in a ring', () => {
+    assertProperty(genIrregularPolygonPieces, (polygonPieces) => {
+      const polygon = createIrregularPolygon(polygonPieces);
+      const ring = ringFromPolygon(polygon);
+      const ringCenter = xyPointToClipperPoint(polygonPieces.center);
+      // center
+      assert(helpers.inRing(ringCenter, ring, true));
+      assert(helpers.inRing(ringCenter, ring, false));
+
+      // random point
+      const point = [
+        (polygonPieces.center.x + ring[0][0]) / 2,
+        (polygonPieces.center.y + ring[0][1]) / 2,
+      ];
+      assert(helpers.inRing(point, ring, true));
+      assert(helpers.inRing(point, ring, false));
+    });
+
+    it('returns false if a point is outside of a ring', () => {
+      assertProperty(genIrregularPolygonPieces, (polygonPieces) => {
+        const polygon = createIrregularPolygon(polygonPieces);
+        const ring = ringFromPolygon(polygon);
+        const point = [
+          (polygonPieces.center.x + ring[0][0]),
+          (polygonPieces.center.y + ring[0][1]),
+        ];
+        refute(helpers.inRing(point, ring, true));
+        refute(helpers.inRing(point, ring, false));
+      });
+    });
+  });
+});
+
 
 describe('setOperation', () => {
   it('union or intersection with self is self', () => {
