@@ -17,10 +17,10 @@ export default {
   /*
   * handle a click on the svg grid
   */
-  gridClicked (e) {
+  gridClicked() {
     if (this.currentTool === 'Eraser' ||
     ((this.currentTool === 'Rectangle' || this.currentTool === 'Polygon') && (this.currentSpace || this.currentShading))) {
-      this.addPoint(e);
+      this.addPoint();
     }
   },
 
@@ -29,13 +29,12 @@ export default {
   * if the new point completes a face being drawn, save the face
   * if the new point completes an eraser selection, call the eraseRectangularSelection method
   */
-  addPoint (e) {
+  addPoint() {
     // location of the mouse in grid units
-    const gridPoint = {
-      x: this.pxToGrid(e.offsetX, 'x'),
-      y: this.pxToGrid(e.offsetY, 'y')
-    },
-    snapTarget = this.findSnapTarget(gridPoint);
+    const
+      gridCoords = d3.mouse(this.$refs.grid),
+      gridPoint = { x: gridCoords[0], y: gridCoords[1] },
+      snapTarget = this.findSnapTarget(gridPoint);
 
     // if the snapTarget is the origin of the face being drawn in Polygon mode, close the face and don't add a new point
     if (snapTarget.type === 'vertex' && snapTarget.origin && this.currentTool === 'Polygon') {
@@ -58,7 +57,7 @@ export default {
   * look up the snap target for the location of the event, highlight it, and render a guide point
   * if there is no snap target, use the event location
   */
-  highlightSnapTarget (e) {
+  highlightSnapTarget(e) {
     // only highlight snap targets in drawing modes when a space or shading has been selected
     if (this.currentTool !== 'Eraser' && ((this.currentTool !== 'Rectangle' && this.currentTool !== 'Polygon') || (!this.currentSpace && !this.currentShading))) { return; }
 
@@ -67,10 +66,8 @@ export default {
 
 
     // location of the mouse in grid units
-    const gridPoint = {
-      x: this.pxToGrid(e.offsetX, 'x'),
-      y: this.pxToGrid(e.offsetY, 'y')
-    };
+    const gridCoords = d3.mouse(this.$refs.grid),
+      gridPoint = { x: gridCoords[0], y: gridCoords[1] };
 
     const snapTarget = this.findSnapTarget(gridPoint);
 
@@ -809,26 +806,18 @@ export default {
 
 
   // ****************** GRID ****************** //
-  renderGrid () {
-    const w = this.$refs.grid.clientWidth,
-    h = this.$refs.grid.clientHeight;
+  renderGrid() {
+    // this.resolveBounds();
 
-    if (this.original_bounds) {
-      this.max_x -= this.min_x;
-      this.min_x = 0;
+    const
+      w = this.$refs.grid.clientWidth,
+      h = this.$refs.grid.clientHeight;
 
-      this.max_y -= this.min_y;
-      this.min_y = 0;
-    }
+    this.max_x -= this.min_x;
+    this.min_x = 0;
 
-    this.original_bounds = {
-      min_x: this.min_x,
-      min_y: this.min_y,
-      max_x: this.max_x,
-      max_y: this.max_y,
-      pxWidth: w,
-      pxHeight: h
-    };
+    this.max_y -= this.min_y;
+    this.min_y = 0;
 
     // initialize the y dimensions in RWU based on the aspect ratio of the grid on the screen
     this.max_y = (h / w) * this.max_x;
@@ -951,6 +940,9 @@ export default {
     });
 
     svg.call(this.zoomBehavior);
+    svg
+      .on('mousemove', this.handleMouseMove)
+      .on('click', this.gridClicked);
   },
   centerGrid () {
     const x = this.min_x + (this.max_x - this.min_x)/2,
@@ -976,24 +968,6 @@ export default {
   },
 
   // ****************** SCALING FUNCTIONS ****************** //
-  /*
-  * take a pixel value (from a mouse event), find the corresponding real world units (for snapping to saved geometry in RWU)
-  */
-  pxToRWU (px, axis) {
-    if (axis === 'x') {
-      // TODO: computed property for current scales?
-      const currentScaleX = d3.scaleLinear()
-      .domain([0, this.$refs.grid.clientWidth])
-      .range([this.min_x, this.max_x]);
-      return currentScaleX(px);
-    } else if (axis === 'y') {
-      const currentScaleY = d3.scaleLinear()
-      // .domain([0, this.$refs.grid.clientHeight])
-      .domain([this.$refs.grid.clientHeight,0]) // inverted y axis
-      .range([this.min_y, this.max_y]);
-      return currentScaleY(px);
-    }
-  },
 
   /*
   * take a pixel value (from a mouse event), find the corresponding coordinates in the svg grid

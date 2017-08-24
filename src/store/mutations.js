@@ -7,5 +7,5 @@ export default {
   },
   importLibrary(state, payload) {
     state.models.library = payload;
-  }
+  },
 };

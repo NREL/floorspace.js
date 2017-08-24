@@ -28,14 +28,6 @@ export default {
   data() {
     return {
       points: [], // points for the face currently being drawn
-      original_bounds: {
-        min_x: null,
-        min_y: null,
-        max_x: null,
-        max_y: null,
-        pxWidth: null,
-        pxHeight: null,
-      },
       axis: {
         x: null,
         y: null,
@@ -61,8 +53,6 @@ export default {
 
     // add event listeners
     this.$refs.grid.addEventListener('reloadGrid', this.renderGrid);
-    this.$refs.grid.addEventListener('click', this.gridClicked);
-    this.$refs.grid.addEventListener('mousemove', this.handleMouseMove);
 
     window.addEventListener('keyup', this.escapeAction);
     window.addEventListener('resize', this.renderGrid);
@@ -74,8 +64,6 @@ export default {
   },
   beforeDestroy() {
     this.$refs.grid.removeEventListener('reloadGrid', this.renderGrid);
-    this.$refs.grid.removeEventListener('click', this.gridClicked);
-    this.$refs.grid.removeEventListener('mousemove', this.handleMouseMove);
 
     window.removeEventListener('keyup', this.escapeAction);
     window.removeEventListener('resize', this.renderGrid);
