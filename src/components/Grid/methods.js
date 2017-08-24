@@ -873,7 +873,7 @@ export default {
     }
 
     this.calcGrid();
-    this.centerGrid();
+    //this.centerGrid();
     this.drawPolygons();
   },
   recalcScales() {
@@ -934,6 +934,7 @@ export default {
     .style('display', this.gridVisible ? 'inline' : 'none')
     .call(this.axis_generator.y);
 
+    console.log('should have grid now');
     // configure zoom behavior in rwu
     this.zoomBehavior = d3.zoom()
     .scaleExtent([0.02,Infinity])
@@ -982,10 +983,6 @@ export default {
     const
       width = this.$refs.grid.clientWidth,
       height = this.$refs.grid.clientHeight;
-
-    // const x = this.min_x + (this.max_x - this.min_x)/2,
-    // // y = this.min_y + (this.max_y - this.min_y)/2;
-    // y = this.min_y - (this.max_y - this.min_y)/2; // inverted y axis
 
     d3.select('#grid svg').call(this.zoomBehavior.transform, d3.zoomIdentity.translate(width / 2, height / 2));
   },
