@@ -807,25 +807,17 @@ export default {
 
   // ****************** GRID ****************** //
   renderGrid() {
-    const w = this.$refs.grid.clientWidth,
-    h = this.$refs.grid.clientHeight;
+    // this.resolveBounds();
 
-    if (this.original_bounds) {
-      this.max_x -= this.min_x;
-      this.min_x = 0;
+    const
+      w = this.$refs.grid.clientWidth,
+      h = this.$refs.grid.clientHeight;
 
-      this.max_y -= this.min_y;
-      this.min_y = 0;
-    }
+    this.max_x -= this.min_x;
+    this.min_x = 0;
 
-    this.original_bounds = {
-      min_x: this.min_x,
-      min_y: this.min_y,
-      max_x: this.max_x,
-      max_y: this.max_y,
-      pxWidth: w,
-      pxHeight: h,
-    };
+    this.max_y -= this.min_y;
+    this.min_y = 0;
 
     // initialize the y dimensions in RWU based on the aspect ratio of the grid on the screen
     this.max_y = (h / w) * this.max_x;

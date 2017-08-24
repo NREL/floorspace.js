@@ -28,14 +28,6 @@ export default {
   data() {
     return {
       points: [], // points for the face currently being drawn
-      original_bounds: {
-        min_x: null,
-        min_y: null,
-        max_x: null,
-        max_y: null,
-        pxWidth: null,
-        pxHeight: null,
-      },
       axis: {
         x: null,
         y: null,
