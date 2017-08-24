@@ -1,3 +1,4 @@
+import _ from 'lodash';
 const serializeState = (state) => {
   const clone = JSON.parse(JSON.stringify(state));
 
@@ -103,11 +104,25 @@ export default {
   saveCheckpoint(action) {
     this.pastTimetravelStates.push({
       triggeringAction: this.triggeringAction,
-      state: serializeState(this.store.state)
+      state: serializeState(this.store.state),
     });
     this.triggeringAction = action;
     console.warn('saving state:', this.pastTimetravelStates[this.pastTimetravelStates.length - 1]);
     this.futureTimetravelStates = [];
+    this.potentiallyRollbackCheckpoint();
+  },
+
+  potentiallyRollbackCheckpoint() {
+    const prevStates = this.pastTimetravelStates;
+    const store = this.store;
+    _.defer(() => {
+      // after save checkpoint and dust has settled
+      while (_.isEqual(serializeState(store.state), prevStates[prevStates.length - 1].state)) {
+        console.log('current state matches previous, so rolling back', prevStates[prevStates.length - 1].triggeringAction);
+        prevStates.pop();
+      }
+    });
+
   },
 
   undo() {
