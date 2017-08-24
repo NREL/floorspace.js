@@ -101,11 +101,12 @@ export const genIrregularPolygonPieces = gen.object({
 export const genIrregularPolygon = genIrregularPolygonPieces
 .then(createIrregularPolygon);
 
-export const genRegularPolygon = gen.object({
+export const genRegularPolygonPieces = gen.object({
   center: genPoint,
   radius: gen.intWithin(5, 100),
   numEdges: gen.intWithin(3, 20),
-})
+});
+export const genRegularPolygon = genRegularPolygonPieces
 .then(({ center, radius, numEdges }) => createIrregularPolygon({
   radii: _.range(numEdges).map(_.constant(radius)),
   center,

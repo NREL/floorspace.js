@@ -9,8 +9,7 @@ import {
   genTriangle,
   createIrregularPolygon,
   genIrregularPolygonPieces,
-  genIrregularPolygon,
-  genRectangle,
+  genRegularPolygonPieces,
 } from '../../test_helpers';
 import * as geometryExamples from './examples';
 
@@ -273,6 +272,28 @@ describe('setOperation', () => {
         assert(intersection);
         assert(intersection.length === 0);
       });
+  });
+
+  it('does not allow holes', () => {
+    assertProperty(
+      genRegularPolygonPieces,
+      gen.numberWithin(0.2, 0.8),
+      ({ numEdges, radius, center }, scalingFactor) => {
+        const polygon = createIrregularPolygon({
+          radii: _.range(numEdges).map(_.constant(radius)),
+          center,
+        });
+        const innerPolygon = createIrregularPolygon({
+          radii: _.range(numEdges).map(_.constant(radius * scalingFactor)),
+          center,
+        });
+
+        const difference = helpers.setOperation('difference', polygon, innerPolygon);
+
+        assert(difference.error);
+        assertEqual(difference.error, 'no holes');
+      },
+    );
   });
 });
 
