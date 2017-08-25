@@ -813,8 +813,8 @@ export default {
     After calling resolveBounds:
      - (min_x, max_x) x  (min_y, max_y) will have the same aspect ratio
      as width x height.
-     - (min_x, max_x) is the same or a larger interval
-     - (min_y, max_y) is the same or a larger interval
+     - (min_x, max_x) is the same or a smaller interval
+     - (min_y, max_y) is the same or a smaller interval
     */
     const
       width = this.$refs.grid.clientWidth,
@@ -826,20 +826,12 @@ export default {
       xDiff = xAccordingToY - xSpan,
       yDiff = yAccordingToX - ySpan;
 
-    if (xDiff > 0) {
+    if (xDiff < 0) {
       this.min_x -= xDiff / 2;
       this.max_x += xDiff / 2;
-    } else if (yDiff > 0) {
+    } else {
       this.min_y -= yDiff / 2;
       this.max_y += yDiff / 2;
-    } else if (Math.abs(xDiff) > 0.0001 && Math.abs(yDiff) > 0.0001) {
-      throw new Error(`Expected to never see this case occur.
-        width: ${width}
-        height: ${height}
-        max_x: ${this.max_x}
-        min_x: ${this.min_x}
-        max_y: ${this.max_y}
-        min_y: ${this.min_y}`);
     }
   },
 
@@ -875,6 +867,13 @@ export default {
 
     this.calcGrid();
     this.drawPolygons();
+  },
+  reloadGridAndScales() {
+    this.zoomXScale = null;
+    this.zoomYScale = null;
+    d3.select('#grid svg').selectAll('*').remove();
+    this.resolveBounds();
+    this.renderGrid();
   },
   recalcScales() {
     const
@@ -948,45 +947,41 @@ export default {
       return;
     }
     // configure zoom behavior in rwu
-    let kAbs = 1;
     this.zoomBehavior = d3.zoom()
     .scaleExtent([0.02,Infinity])
      .on('zoom', () => {
        const transform = d3.event.transform;
-       kAbs *= transform.k; // absolute zoom, regardless of resizing, etc.
-       console.log('kAbs', kAbs);
+       // update stored transform for grid hiding, etc.
+       this.transform = { ...transform };
 
-      // update stored transform for grid hiding, etc.
-      this.transform = { ...transform, kAbs };
+       // create updated copies of the scales based on the zoom transformation
+       // the transformed scales are only used to obtain the new rwu grid dimensions and redraw the axes
+       // NOTE: don't change the original scale or you'll get exponential growth
+       const
+         newScaleX = transform.rescaleX(this.zoomXScale),
+         newScaleY = transform.rescaleY(this.zoomYScale);
 
-      // create updated copies of the scales based on the zoom transformation
-      // the transformed scales are only used to obtain the new rwu grid dimensions and redraw the axes
-      // NOTE: don't change the original scale or you'll get exponential growth
-      const
-        newScaleX = transform.rescaleX(this.zoomXScale),
-        newScaleY = transform.rescaleY(this.zoomYScale);
+       [this.min_x, this.max_x] = newScaleX.domain();
+       [this.min_y, this.max_y] = newScaleY.domain(); // inverted y axis
 
-      [this.min_x, this.max_x] = newScaleX.domain();
-      [this.min_y, this.max_y] = newScaleY.domain(); // inverted y axis
+       const
+         scaledRwuHeight = this.max_y - this.min_y,
+         scaledRwuWidth = this.max_x - this.min_x;
 
-      const
-        scaledRwuHeight = this.max_y - this.min_y,
-        scaledRwuWidth = this.max_x - this.min_x;
+       // update the number of ticks to display based on the post zoom real world unit height and width
+       this.axis.y.call(this.axis_generator.y.ticks(scaledRwuHeight / this.spacing));
+       this.axis.x.call(this.axis_generator.x.ticks(scaledRwuWidth / this.spacing));
 
-      // update the number of ticks to display based on the post zoom real world unit height and width
-      this.axis.y.call(this.axis_generator.y.ticks(scaledRwuHeight / this.spacing));
-      this.axis.x.call(this.axis_generator.x.ticks(scaledRwuWidth / this.spacing));
+       // create transformed copies of the scales and apply them to the axes
+       this.axis.x.call(this.axis_generator.x.scale(newScaleX));
+       this.axis.y.call(this.axis_generator.y.scale(newScaleY));
 
-      // create transformed copies of the scales and apply them to the axes
-      this.axis.x.call(this.axis_generator.x.scale(newScaleX));
-      this.axis.y.call(this.axis_generator.y.scale(newScaleY));
+       // axis padding
+       this.padTickY(-12);
 
-      // axis padding
-      this.padTickY(-12);
-
-      // redraw the saved geometry
-      this.renderGrid();
-    });
+       // redraw the saved geometry
+       this.renderGrid();
+     });
 
     svg.call(this.zoomBehavior);
     svg

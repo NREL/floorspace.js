@@ -13,14 +13,14 @@ export default {
     },
     grid: {
       visible: true,
-      spacing: 50
+      spacing: 50,
     },
     view: {
       // grid boundaties in rwu
       min_x: 0,
       min_y: 0,
       max_x: 1000,
-      max_y: 1000
+      max_y: 1000,
     },
     map: {
       initialized: false,

@@ -40,7 +40,6 @@ export default {
         x: 0,
         y: 0,
         k: 1, // relative (to window after resize) zoom
-        kAbs: 1, // absolute zoom
       },
       handleMouseMove: null, // placeholder --> overwritten in mounted()
       forceGridHide: false,
@@ -53,6 +52,7 @@ export default {
 
     // add event listeners
     this.$refs.grid.addEventListener('reloadGrid', this.renderGrid);
+    this.$refs.grid.addEventListener('reloadGridScales', this.reloadGridAndScales);
 
     window.addEventListener('keyup', this.escapeAction);
     window.addEventListener('resize', this.renderGrid);
@@ -64,6 +64,7 @@ export default {
   },
   beforeDestroy() {
     this.$refs.grid.removeEventListener('reloadGrid', this.renderGrid);
+    this.$refs.grid.removeEventListener('reloadGridScales', this.reloadGridAndScales);
 
     window.removeEventListener('keyup', this.escapeAction);
     window.removeEventListener('resize', this.renderGrid);
@@ -227,15 +228,14 @@ export default {
       this.forceGridHide = (newTransform.k < 0.1);
 
       // hide polygon names if zoomed out enough
-      console.log('newTransform.kAbs', newTransform.kAbs);
-      if (newTransform.kAbs < 0.5) {
+      if (newTransform.k < 0.5) {
         d3.select('#svg-grid').selectAll('.polygon-text').style('display', 'none');
       } else {
         d3.select('#svg-grid').selectAll('.polygon-text').style('display', 'initial');
       }
 
       // cancel current drawing action if actual zoom and not just accidental drag
-      if (this.points.length && (newTransform.kAbs !== lastTransform.kAbs || Math.abs(lastTransform.y - newTransform.y) > 3 || Math.abs(lastTransform.x - newTransform.x) > 3)) {
+      if (this.points.length && (newTransform.k !== lastTransform.k || Math.abs(lastTransform.y - newTransform.y) > 3 || Math.abs(lastTransform.x - newTransform.x) > 3)) {
         this.points = [];
       }
     },
