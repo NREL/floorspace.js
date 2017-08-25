@@ -1,12 +1,15 @@
 import _ from 'lodash';
-import { gen, sample } from 'testcheck';
+import { gen } from 'testcheck';
 import helpers from '../../../../src/store/modules/geometry/helpers';
 import {
-  assert, nearlyEqual, refute, assertProperty, isNearlyEqual,
+  assert, refute, nearlyEqual, assertProperty, isNearlyEqual,
   assertEqual,
   genTriangleLeftOfOrigin,
   genTriangleRightOfOrigin,
   genTriangle,
+  createIrregularPolygon,
+  genIrregularPolygonPieces,
+  genRegularPolygonPieces,
 } from '../../test_helpers';
 import * as geometryExamples from './examples';
 
@@ -174,6 +177,44 @@ describe('projectionOfPointToLine', () => {
   });
 });
 
+describe('inRing', () => {
+  const ringFromPolygon = polygon => polygon.map(pt => [pt.x, pt.y]);
+  const xyPointToClipperPoint = p => [p.x, p.y];
+
+  it('returns true if a point is in a ring', () => {
+    assertProperty(genIrregularPolygonPieces, (polygonPieces) => {
+      const polygon = createIrregularPolygon(polygonPieces);
+      const ring = ringFromPolygon(polygon);
+      const ringCenter = xyPointToClipperPoint(polygonPieces.center);
+      // center
+      assert(helpers.inRing(ringCenter, ring, true));
+      assert(helpers.inRing(ringCenter, ring, false));
+
+      // random point
+      const point = [
+        (polygonPieces.center.x + ring[0][0]) / 2,
+        (polygonPieces.center.y + ring[0][1]) / 2,
+      ];
+      assert(helpers.inRing(point, ring, true));
+      assert(helpers.inRing(point, ring, false));
+    });
+
+    it('returns false if a point is outside of a ring', () => {
+      assertProperty(genIrregularPolygonPieces, (polygonPieces) => {
+        const polygon = createIrregularPolygon(polygonPieces);
+        const ring = ringFromPolygon(polygon);
+        const point = [
+          (polygonPieces.center.x + ring[0][0]),
+          (polygonPieces.center.y + ring[0][1]),
+        ];
+        refute(helpers.inRing(point, ring, true));
+        refute(helpers.inRing(point, ring, false));
+      });
+    });
+  });
+});
+
+
 describe('setOperation', () => {
   it('union or intersection with self is self', () => {
     assertProperty(
@@ -218,7 +259,7 @@ describe('setOperation', () => {
       (tri1, tri2) => {
         const union = helpers.setOperation('union', tri1, tri2);
 
-        refute(union);
+        assertEqual(union, { error: 'no split faces' });
       });
   });
 
@@ -231,6 +272,28 @@ describe('setOperation', () => {
         assert(intersection);
         assert(intersection.length === 0);
       });
+  });
+
+  it('does not allow holes', () => {
+    assertProperty(
+      genRegularPolygonPieces,
+      gen.numberWithin(0.2, 0.8),
+      ({ numEdges, radius, center }, scalingFactor) => {
+        const polygon = createIrregularPolygon({
+          radii: _.range(numEdges).map(_.constant(radius)),
+          center,
+        });
+        const innerPolygon = createIrregularPolygon({
+          radii: _.range(numEdges).map(_.constant(radius * scalingFactor)),
+          center,
+        });
+
+        const difference = helpers.setOperation('difference', polygon, innerPolygon);
+
+        assert(difference.error);
+        assertEqual(difference.error, 'no holes');
+      },
+    );
   });
 });
 

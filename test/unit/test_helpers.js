@@ -93,17 +93,20 @@ export const genRectangle = gen.oneOf([
   .then(createIrregularPolygon),
 ]);
 
-export const genIrregularPolygon = gen.object({
+export const genIrregularPolygonPieces = gen.object({
   center: genPoint,
   radii: gen.array(gen.intWithin(5, 100), { minSize: 3, maxSize: 20 }),
-})
+});
+
+export const genIrregularPolygon = genIrregularPolygonPieces
 .then(createIrregularPolygon);
 
-export const genRegularPolygon = gen.object({
+export const genRegularPolygonPieces = gen.object({
   center: genPoint,
   radius: gen.intWithin(5, 100),
   numEdges: gen.intWithin(3, 20),
-})
+});
+export const genRegularPolygon = genRegularPolygonPieces
 .then(({ center, radius, numEdges }) => createIrregularPolygon({
   radii: _.range(numEdges).map(_.constant(radius)),
   center,
