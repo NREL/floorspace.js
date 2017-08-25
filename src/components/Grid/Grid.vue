@@ -175,6 +175,7 @@ export default {
             return geometryHelpers.vertexForId(nextVertexId, this.currentStoryGeometry);
           }),
         };
+        polygon.labelPosition = this.polygonLabelPosition(polygon.points);
 
         // if the model is a space, set the polygon's color based on the current mode
         if (model.type === 'space') {
@@ -223,10 +224,10 @@ export default {
     },
     transform(newTransform, lastTransform) {
       // hide grid if zoomed out enough
-      this.forceGridHide = (newTransform.kAbs < 0.1);
+      this.forceGridHide = (newTransform.k < 0.1);
 
       // hide polygon names if zoomed out enough
-      if (newTransform.kAbs < 0.5) {
+      if (newTransform.k < 0.5) {
         d3.select('#svg-grid').selectAll('.polygon-text').style('display', 'none');
       } else {
         d3.select('#svg-grid').selectAll('.polgyon-text').style('display', 'initial');

@@ -376,22 +376,19 @@ export default {
   registerDrag() {
     const polygons = d3.select('#grid svg').selectAll('polygon');
     // store total drag offset (grid units)
-    let dx = 0;
-    let dy = 0;
+    let startX, startY;
 
     // polygon drag handler
     const that = this;
     const drag = d3.drag()
       .on('start', (d) => {
         // remove text label when dragging
-        d3.select(`#text-${d.face_id}`).remove();
-
+        [startX, startY] = d3.mouse(this.$refs.grid);
         if (this.currentTool === 'Select' && !d.previous_story) {
 
           // if a face on the current story is clicked while the Select tool is active
           // lookup its corresponding model (space/shading) and select it
           this.currentSubSelection = modelHelpers.modelForFace(this.$store.state.models, d.face_id);
-
         } else if (this.currentTool === 'Fill' && (this.currentSpace || this.currentShading)) {
           // if a face on the current story is clicked while the Select tool is active
           // lookup its corresponding model (space/shading) and select it
@@ -405,22 +402,19 @@ export default {
       .on('drag', (d) => {
         if (that.currentTool !== 'Select' || d.previous_story) { return; }
 
-        dx += d3.event.dx;
-        dy += d3.event.dy;
-        d3.select(`#face-${d.face_id}`)
-          .attr('transform', () => `translate(${[dx, dy]})`);
-
-        d3.select(`#text-${d.face_id}`)
-          .attr('transform', () => `translate(${[dx, dy]})`);
+        const [currX, currY] = d3.mouse(this.$refs.grid);
+        d3.select(`#poly-${d.face_id}`)
+          .attr('transform', () => `translate(${currX - startX}, ${currY - startY})`);
       })
       .on('end', (d) => {
         if (this.currentTool !== 'Select' || d.previous_story) { return; }
 
         // when the drag is finished, update the face in the store with the total offset in RWU
+        const [endX, endY] = d3.mouse(this.$refs.grid);
         this.$store.dispatch('geometry/moveFaceByOffset', {
           face_id: d.face_id,
-          dx: this.gridToRWU(dx, 'x') - this.min_x,
-          dy: this.gridToRWU(dy, 'y') - this.max_y,
+          dx: this.gridToRWU(endX, 'x') - this.gridToRWU(startX, 'x'),
+          dy: this.gridToRWU(endY, 'y') - this.gridToRWU(startY, 'y'),
         });
       });
 
@@ -434,48 +428,56 @@ export default {
   */
   drawPolygons() {
     this.recalcScales();
-    const that = this;
     // remove expired polygons
-    d3.select('#grid svg').selectAll('polygon, .polygon-text').remove();
+    const poly = d3.select('#grid svg').selectAll('g.poly')
+      .data(this.polygons, d => d.face_id);
+
+    poly.exit().remove();
+    const polyEnter = poly.enter().append('g').attr('class', 'poly');
+    polyEnter.append('polygon');
+    polyEnter.append('text').attr('class', 'polygon-text');
 
     // draw polygons
-    d3.select('#grid svg').selectAll('polygon')
-      .data(this.polygons).enter()
-      .append('polygon')
+    poly.attr('class', (d) => {
+      if ((this.currentSpace && d.face_id === this.currentSpace.face_id) ||
+      (this.currentShading && d.face_id === this.currentShading.face_id)) { return 'current'; }
+      if (d.previous_story) { return 'previousStory'; }
+      return null;
+    })
+    .classed('poly', true)
+    .attr('id', p => `poly-${p.face_id}`)
+    .attr('transform', null);
+
+    poly.select('polygon')
       .attr('id', d => `face-${d.face_id}`)
       .attr('points', d => d.points.map(p => [this.rwuToGrid(p.x, 'x'), this.rwuToGrid(p.y, 'y')].join(',')).join(' '))
-      .attr('class', (d) => {
-        if ((this.currentSpace && d.face_id === this.currentSpace.face_id) ||
-        (this.currentShading && d.face_id === this.currentShading.face_id)) { return 'current'; }
-        if (d.previous_story) { return 'previousStory'; }
-        return null;
-      })
       .attr('fill', d => d.color)
-      .attr('vector-effect', 'non-scaling-stroke')
-      // add label
-      .select(function (poly) {
-        const { x, y } = that.polygonLabelPosition(poly.points);
+      .attr('vector-effect', 'non-scaling-stroke');
 
-        d3.select('#grid svg')
-          .append('text')
-          .attr('id', `text-${poly.face_id}`)
-          .attr('x', x)
-          .attr('y', y)
-          .text(poly.name)
-          .attr('text-anchor', 'middle')
-          .style('font-size', '14px')
-          .style('font-weight', 'bold')
-          .attr('font-family', 'sans-serif')
-          .attr('fill', 'red')
-          .attr('class', () => this.getAttribute('class'))
-          .classed('polygon-text', true);
-      });
+    // add label
+    poly
+      .select('text')
+      .attr('id', p => `text-${p.face_id}`)
+      .attr('x', p => this.rwuToGrid(p.labelPosition.x, 'x'))
+      .attr('y', p => this.rwuToGrid(p.labelPosition.y, 'y'))
+      .text(p => p.name)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '14px')
+      .style('font-weight', 'bold')
+      .attr('font-family', 'sans-serif')
+      .attr('fill', 'red')
+      //.attr('class', () => this.getAttribute('class'))
+      .classed('polygon-text', true)
+      .raise();
 
     this.registerDrag();
 
     // render the selected model's face above the other polygons so that the border is not obscured
     d3.select('.current').raise();
-    d3.select('text.current').raise();
+
+    if (poly.nodes().length < this.polygons.length) {
+      _.defer(this.drawPolygons);
+    }
   },
 
   // ****************** SNAPPING TO EXISTING GEOMETRY ****************** //
@@ -874,10 +876,6 @@ export default {
     this.calcGrid();
     this.drawPolygons();
   },
-  debouncedRenderGrid() {
-    this._debouncedRenderGrid || (this._debouncedRenderGrid = _.debounce(this.renderGrid, 5));
-    this._debouncedRenderGrid();
-  },
   recalcScales() {
     const
       width = this.$refs.grid.clientWidth,
@@ -908,7 +906,6 @@ export default {
       strokeWidth = 1,
       fontSize = '14px';
 
-    svg.selectAll('*').remove();
     svg.attr('height', height)
       .attr('width', width);
     // generator functions for axes
@@ -922,23 +919,34 @@ export default {
     .ticks(rwuHeight / this.spacing)
     .tickSize(width)
     .tickPadding(-25)
-    .tickFormat(this.formatTickY.bind(this,10));
+    .tickFormat(this.formatTickY.bind(this, 10));
 
-    this.axis.x = svg.append('g')
-    .attr('class', 'axis axis--x')
+    this.axis.x = svg.selectAll('g.axis--x')
+      .data([undefined]);
+
+    this.axis.x.enter().append('g').attr('class', 'axis axis--x');
+
+    this.axis.x
     .attr('stroke-width', strokeWidth)
     .style('font-size', fontSize)
     .style('display', this.gridVisible ? 'inline' : 'none')
     .call(this.axis_generator.x);
 
-    this.axis.y = svg.append('g')
+    this.axis.y = svg.selectAll('g.axis--y')
+      .data([undefined]);
+
+    this.axis.y.enter().append('g').attr('class', 'axis axis--y');
+    this.axis.y
     .attr('class', 'axis axis--y')
     .attr('stroke-width', strokeWidth)
     .style('font-size', fontSize)
     .style('display', this.gridVisible ? 'inline' : 'none')
     .call(this.axis_generator.y);
 
-    console.log('should have grid now');
+    if (!this.axis.y.node()) {
+      _.defer(this.calcGrid);
+      return;
+    }
     // configure zoom behavior in rwu
     this.zoomBehavior = d3.zoom()
     .scaleExtent([0.02,Infinity])
@@ -975,7 +983,7 @@ export default {
       this.padTickY(-12);
 
       // redraw the saved geometry
-      this.debouncedRenderGrid();
+      this.renderGrid();
     });
 
     svg.call(this.zoomBehavior);
@@ -1033,10 +1041,11 @@ export default {
   /*
   * determine label x,y for given polygon
   */
-  polygonLabelPosition (pointsIn) {
-    const points = [pointsIn.map(p => [this.rwuToGrid(p.x, 'x'), this.rwuToGrid(p.y, 'y')])],
-    area = Math.abs(Math.round(geometryHelpers.areaOfSelection(pointsIn))), // calculate area in RWU, not grid units
-    [ x, y ] = area ? polylabel(points, 1.0) : [null, null];
+  polygonLabelPosition(pointsIn) {
+    const
+      points = [pointsIn.map(p => [p.x, p.y])],
+      area = Math.abs(Math.round(geometryHelpers.areaOfSelection(pointsIn))), // calculate area in RWU, not grid units
+      [x, y] = area ? polylabel(points, 1.0) : [null, null];
 
     return { x, y, area };
   },
