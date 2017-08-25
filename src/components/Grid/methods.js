@@ -8,7 +8,7 @@
 
 const d3 = require('d3');
 const polylabel = require('polylabel');
-
+import _ from 'lodash';
 import { snapTargets } from './snapping';
 import geometryHelpers from './../../store/modules/geometry/helpers';
 import modelHelpers from './../../store/modules/models/helpers';
@@ -486,7 +486,6 @@ export default {
   */
   findSnapTarget(gridPoint) {
     // translate grid point to real world units to check for snapping targets
-    window.theGrid = this;
     const rwuPoint = {
       x: this.gridToRWU(gridPoint.x, 'x'),
       y: this.gridToRWU(gridPoint.y, 'y'),
@@ -873,8 +872,11 @@ export default {
     }
 
     this.calcGrid();
-    //this.centerGrid();
     this.drawPolygons();
+  },
+  debouncedRenderGrid() {
+    this._debouncedRenderGrid || (this._debouncedRenderGrid = _.debounce(this.renderGrid, 5));
+    this._debouncedRenderGrid();
   },
   recalcScales() {
     const
@@ -887,6 +889,10 @@ export default {
     this.yScale = d3.scaleLinear()
       .domain([this.min_y, this.max_y])
       .range([height, 0]); // inverted y axis
+
+    // only copy once, or else zoom behavior is exponential
+    this.zoomXScale = this.zoomXScale || this.xScale.copy();
+    this.zoomYScale = this.zoomYScale || this.yScale.copy();
   },
   calcGrid() {
     this.recalcScales();
@@ -898,8 +904,6 @@ export default {
 
     const
       svg = d3.select('#grid svg'),
-      zoomXScale = this.xScale.copy(),
-      zoomYScale = this.yScale.copy(),
       // keep font size and stroke width visually consistent
       strokeWidth = 1,
       fontSize = '14px';
@@ -949,8 +953,8 @@ export default {
       // the transformed scales are only used to obtain the new rwu grid dimensions and redraw the axes
       // NOTE: don't change the original scale or you'll get exponential growth
       const
-        newScaleX = transform.rescaleX(zoomXScale),
-        newScaleY = transform.rescaleY(zoomYScale);
+        newScaleX = transform.rescaleX(this.zoomXScale),
+        newScaleY = transform.rescaleY(this.zoomYScale);
 
       [this.min_x, this.max_x] = newScaleX.domain();
       [this.min_y, this.max_y] = newScaleY.domain(); // inverted y axis
@@ -971,20 +975,13 @@ export default {
       this.padTickY(-12);
 
       // redraw the saved geometry
-      this.drawPolygons();
+      this.debouncedRenderGrid();
     });
 
     svg.call(this.zoomBehavior);
     svg
       .on('mousemove', this.handleMouseMove)
       .on('click', this.gridClicked);
-  },
-  centerGrid() {
-    const
-      width = this.$refs.grid.clientWidth,
-      height = this.$refs.grid.clientHeight;
-
-    d3.select('#grid svg').call(this.zoomBehavior.transform, d3.zoomIdentity.translate(width / 2, height / 2));
   },
   updateGrid() {
     if (!this.axis.x || !this.axis.y) {
