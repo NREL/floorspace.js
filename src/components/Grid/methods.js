@@ -429,7 +429,7 @@ export default {
   drawPolygons() {
     this.recalcScales();
     // remove expired polygons
-    const poly = d3.select('#grid svg').selectAll('g.poly')
+    let poly = d3.select('#grid svg').selectAll('g.poly')
       .data(this.polygons, d => d.face_id);
 
     poly.exit().remove();
@@ -438,7 +438,9 @@ export default {
     polyEnter.append('text').attr('class', 'polygon-text');
 
     // draw polygons
-    poly.attr('class', (d) => {
+    poly = polyEnter
+      .merge(poly)
+    .attr('class', (d) => {
       if ((this.currentSpace && d.face_id === this.currentSpace.face_id) ||
       (this.currentShading && d.face_id === this.currentShading.face_id)) { return 'current'; }
       if (d.previous_story) { return 'previousStory'; }
@@ -455,8 +457,7 @@ export default {
       .attr('vector-effect', 'non-scaling-stroke');
 
     // add label
-    poly
-      .select('text')
+    poly.select('text')
       .attr('id', p => `text-${p.face_id}`)
       .attr('x', p => this.rwuToGrid(p.labelPosition.x, 'x'))
       .attr('y', p => this.rwuToGrid(p.labelPosition.y, 'y'))
@@ -466,18 +467,12 @@ export default {
       .style('font-weight', 'bold')
       .attr('font-family', 'sans-serif')
       .attr('fill', 'red')
-      //.attr('class', () => this.getAttribute('class'))
-      .classed('polygon-text', true)
-      .raise();
+      .classed('polygon-text', true);
 
     this.registerDrag();
 
     // render the selected model's face above the other polygons so that the border is not obscured
     d3.select('.current').raise();
-
-    if (poly.nodes().length < this.polygons.length) {
-      _.defer(this.drawPolygons);
-    }
   },
 
   // ****************** SNAPPING TO EXISTING GEOMETRY ****************** //
@@ -923,9 +918,8 @@ export default {
     this.axis.x = svg.selectAll('g.axis--x')
       .data([undefined]);
 
-    this.axis.x.enter().append('g').attr('class', 'axis axis--x');
-
-    this.axis.x
+    this.axis.x.enter().append('g').attr('class', 'axis axis--x')
+      .merge(this.axis.x)
     .attr('stroke-width', strokeWidth)
     .style('font-size', fontSize)
     .style('display', this.gridVisible ? 'inline' : 'none')
@@ -934,21 +928,17 @@ export default {
     this.axis.y = svg.selectAll('g.axis--y')
       .data([undefined]);
 
-    this.axis.y.enter().append('g').attr('class', 'axis axis--y');
-    this.axis.y
+    this.axis.y.enter().append('g').attr('class', 'axis axis--y')
+      .merge(this.axis.y)
     .attr('class', 'axis axis--y')
     .attr('stroke-width', strokeWidth)
     .style('font-size', fontSize)
     .style('display', this.gridVisible ? 'inline' : 'none')
     .call(this.axis_generator.y);
 
-    if (!this.axis.y.node()) {
-      _.defer(this.calcGrid);
-      return;
-    }
     // configure zoom behavior in rwu
     this.zoomBehavior = d3.zoom()
-    .scaleExtent([0.02,Infinity])
+    .scaleExtent([0.02, Infinity])
      .on('zoom', () => {
        const transform = d3.event.transform;
        // update stored transform for grid hiding, etc.
