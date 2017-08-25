@@ -222,8 +222,8 @@ export default {
 
       // render unfinished area #
       svg.append('text')
-      .attr('x', x)
-      .attr('y', y)
+      .attr('x', this.rwuToGrid(x, 'x'))
+      .attr('y', this.rwuToGrid(y, 'y'))
       .text(areaText)
       .classed('guideline guideline-text guideLine',true)
       .attr("text-anchor", "middle")
@@ -948,11 +948,13 @@ export default {
       return;
     }
     // configure zoom behavior in rwu
+    let kAbs = 1;
     this.zoomBehavior = d3.zoom()
     .scaleExtent([0.02,Infinity])
      .on('zoom', () => {
-      const transform = d3.event.transform,
-      kAbs = transform.k/this.scaleX(1); // absolute zoom, regardless of resizing, etc.
+       const transform = d3.event.transform;
+       kAbs *= transform.k; // absolute zoom, regardless of resizing, etc.
+       console.log('kAbs', kAbs);
 
       // update stored transform for grid hiding, etc.
       this.transform = { ...transform, kAbs };

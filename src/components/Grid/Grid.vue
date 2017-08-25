@@ -227,10 +227,11 @@ export default {
       this.forceGridHide = (newTransform.k < 0.1);
 
       // hide polygon names if zoomed out enough
-      if (newTransform.k < 0.5) {
+      console.log('newTransform.kAbs', newTransform.kAbs);
+      if (newTransform.kAbs < 0.5) {
         d3.select('#svg-grid').selectAll('.polygon-text').style('display', 'none');
       } else {
-        d3.select('#svg-grid').selectAll('.polgyon-text').style('display', 'initial');
+        d3.select('#svg-grid').selectAll('.polygon-text').style('display', 'initial');
       }
 
       // cancel current drawing action if actual zoom and not just accidental drag
