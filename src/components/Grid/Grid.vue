@@ -42,7 +42,6 @@ export default {
         k: 1, // relative (to window after resize) zoom
       },
       handleMouseMove: null, // placeholder --> overwritten in mounted()
-      forceGridHide: false,
     };
   },
   mounted() {
@@ -197,10 +196,10 @@ export default {
     },
   },
   watch: {
+    // showTicks() { this.showOrHideAxes(); },
     // TODO: method for when new view dimensions are imported or the px dimensions change
-    gridVisible() { this.updateGrid(); },
+    gridVisible() { this.showOrHideAxes(); },
     spacing() { this.updateGrid(); },
-    forceGridHide() { this.updateGrid(); },
 
     currentMode() { this.drawPolygons(); },
     polygons() { this.drawPolygons(); },
@@ -224,9 +223,6 @@ export default {
       this.drawPoints();
     },
     transform(newTransform, lastTransform) {
-      // hide grid if zoomed out enough
-      this.forceGridHide = (newTransform.k < 0.1);
-
       // hide polygon names if zoomed out enough
       if (newTransform.k < 0.5) {
         d3.select('#svg-grid').selectAll('.polygon-text').style('display', 'none');

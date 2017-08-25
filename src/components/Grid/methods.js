@@ -890,9 +890,7 @@ export default {
     this.recalcScales();
     const
       width = this.$refs.grid.clientWidth,
-      height = this.$refs.grid.clientHeight,
-      rwuWidth = this.max_x - this.min_x,
-      rwuHeight = this.max_y - this.min_y;
+      height = this.$refs.grid.clientHeight;
 
     const
       svg = d3.select('#grid svg'),
@@ -902,39 +900,29 @@ export default {
 
     svg.attr('height', height)
       .attr('width', width);
-    // generator functions for axes
-    this.axis_generator.x = d3.axisBottom(this.xScale)
-    .ticks(rwuWidth / this.spacing)
-    .tickSize(height)
-    .tickPadding(-20)
-    .tickFormat(this.formatTickX.bind(this,Math.floor(10 * this.$refs.grid.clientWidth / this.$refs.grid.clientHeight)));
-
-    this.axis_generator.y = d3.axisRight(this.yScale)
-    .ticks(rwuHeight / this.spacing)
-    .tickSize(width)
-    .tickPadding(-25)
-    .tickFormat(this.formatTickY.bind(this, 10));
-
     this.axis.x = svg.selectAll('g.axis--x')
       .data([undefined]);
 
-    this.axis.x.enter().append('g').attr('class', 'axis axis--x')
-      .merge(this.axis.x)
+    this.axis.x = this.axis.x.merge(
+      this.axis.x.enter().append('g').attr('class', 'axis axis--x'),
+    )
     .attr('stroke-width', strokeWidth)
     .style('font-size', fontSize)
-    .style('display', this.gridVisible ? 'inline' : 'none')
-    .call(this.axis_generator.x);
+    .style('display', this.gridVisible ? 'inline' : 'none');
 
     this.axis.y = svg.selectAll('g.axis--y')
       .data([undefined]);
 
-    this.axis.y.enter().append('g').attr('class', 'axis axis--y')
-      .merge(this.axis.y)
+    this.axis.y = this.axis.y.merge(
+      this.axis.y.enter().append('g').attr('class', 'axis axis--y'),
+    )
     .attr('class', 'axis axis--y')
     .attr('stroke-width', strokeWidth)
     .style('font-size', fontSize)
-    .style('display', this.gridVisible ? 'inline' : 'none')
-    .call(this.axis_generator.y);
+    .style('display', this.gridVisible ? 'inline' : 'none');
+
+    // now that the axis g tags exist, call axis_generator on them.
+    this.updateGrid();
 
     // configure zoom behavior in rwu
     this.zoomBehavior = d3.zoom()
@@ -954,17 +942,10 @@ export default {
        [this.min_x, this.max_x] = newScaleX.domain();
        [this.min_y, this.max_y] = newScaleY.domain(); // inverted y axis
 
-       const
-         scaledRwuHeight = this.max_y - this.min_y,
-         scaledRwuWidth = this.max_x - this.min_x;
+       this.axis_generator.x.scale(newScaleX);
+       this.axis_generator.y.scale(newScaleY);
 
-       // update the number of ticks to display based on the post zoom real world unit height and width
-       this.axis.y.call(this.axis_generator.y.ticks(scaledRwuHeight / this.spacing));
-       this.axis.x.call(this.axis_generator.x.ticks(scaledRwuWidth / this.spacing));
-
-       // create transformed copies of the scales and apply them to the axes
-       this.axis.x.call(this.axis_generator.x.scale(newScaleX));
-       this.axis.y.call(this.axis_generator.y.scale(newScaleY));
+       this.updateGrid();
 
        // axis padding
        this.padTickY(-12);
@@ -978,21 +959,42 @@ export default {
       .on('mousemove', this.handleMouseMove)
       .on('click', this.gridClicked);
   },
+  showOrHideAxes() {
+    this.axis.x.style('visibility', this.gridVisible ? 'visible' : 'hidden');
+    this.axis.y.style('visibility', this.gridVisible ? 'visible' : 'hidden');
+  },
   updateGrid() {
     if (!this.axis.x || !this.axis.y) {
       // not yet initialized
       return;
     }
-    this.axis.x.style('display', this.gridVisible && !this.forceGridHide ? 'inline' : 'none');
-    this.axis.y.style('display', this.gridVisible && !this.forceGridHide ? 'inline' : 'none');
-
     const
+      width = this.$refs.grid.clientWidth,
+      height = this.$refs.grid.clientHeight,
+      rwuWidth = this.max_x - this.min_x,
       rwuHeight = this.max_y - this.min_y,
-      rwuWidth = this.max_x - this.min_x;
+      xTicks = rwuWidth / this.spacing,
+      yTicks = rwuHeight / this.spacing;
+
+    this.reduceTicks = yTicks > 250 || xTicks > 250;
+
+    this.axis_generator.x = this.axis_generator.x || d3.axisBottom(this.xScale);
+    this.axis_generator.x
+      .tickSize(height)
+      .tickPadding(-20)
+      .ticks(this.reduceTicks ? 5 * (rwuWidth / rwuHeight) : xTicks)
+      .tickFormat(this.reduceTicks ? _.identity : this.formatTickX.bind(this, Math.floor(10 * (width / height))));
+
+    this.axis_generator.y = this.axis_generator.y || d3.axisRight(this.yScale);
+    this.axis_generator.y
+      .tickSize(width)
+      .tickPadding(-25)
+      .ticks(this.reduceTicks ? 5 : yTicks)
+      .tickFormat(this.reduceTicks ? _.identity : this.formatTickY.bind(this, 10));
 
     // update the number of ticks to display based on the post zoom real world unit height and width
-    this.axis.y.call(this.axis_generator.y.ticks(rwuHeight / this.spacing));
-    this.axis.x.call(this.axis_generator.x.ticks(rwuWidth / this.spacing));
+    this.axis.y.call(this.axis_generator.y);
+    this.axis.x.call(this.axis_generator.x);
   },
 
   // ****************** SCALING FUNCTIONS ****************** //
