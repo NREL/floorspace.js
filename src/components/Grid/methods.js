@@ -926,7 +926,7 @@ export default {
 
     // configure zoom behavior in rwu
     this.zoomBehavior = d3.zoom()
-    .scaleExtent([0.02, Infinity])
+    .scaleExtent([0.02, 200])
      .on('zoom', () => {
        const transform = d3.event.transform;
        // update stored transform for grid hiding, etc.
