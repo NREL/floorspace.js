@@ -26,8 +26,8 @@ export default function createFaceFromPoints(context, payload) {
   if (existingFace) {
     const existingFaceVertices = geometryHelpers.verticesForFaceId(existingFace.id, currentStoryGeometry);
     facePoints = geometryHelpers.setOperation('union', existingFaceVertices, points);
-    if (!facePoints) {
-      window.eventBus.$emit('error', 'Operation cancelled - no split faces');
+    if (facePoints.error) {
+      window.eventBus.$emit('error', `Operation cancelled - ${facePoints.error}`);
       return;
     }
   } else {
@@ -49,8 +49,8 @@ export default function createFaceFromPoints(context, payload) {
   );
 
   // prevent overlapping faces by erasing existing geometry covered by the points defining the new face
-  if (!newGeoms) {
-    window.eventBus.$emit('error', 'Operation cancelled - no split faces');
+  if (newGeoms.error) {
+    window.eventBus.$emit('error', `Operation cancelled - ${newGeoms.error}`);
     return;
   }
 
@@ -72,23 +72,31 @@ export function newGeometriesOfOverlappedFaces(points, geometry) {
 
   const geom = geometryHelpers.denormalize(geometry);
   const intersectedFaces = geom.faces
-    .filter(face => geometryHelpers.intersection(face.vertices, points).length > 0);
+    .filter((face) => {
+      const inter = geometryHelpers.intersection(face.vertices, points);
+      // We care about faces have an intersection with the new one, or that
+      // cause errors (eg, split face) upon intersection
+      // eg of causing an error upon intersection: https://trello-attachments.s3.amazonaws.com/58d428743111af1d0a20cf28/599dca36956980d6eef2b009/3849c0e2a87c866fbf630cff073163ff/capture.png
+      return inter.error || inter.length > 0;
+    });
 
   const newFaceVertices = intersectedFaces.map(existingFace =>
     geometryHelpers.difference(existingFace.vertices, points),
   );
 
-  if (!newFaceVertices.every(_.identity)) {
-    // difference caused split face.
-    return false;
+  const errantCase = _.find(newFaceVertices, 'error');
+  if (errantCase) {
+    // difference caused split face or hole
+    return errantCase;
   }
 
   const newFaceGeometries = newFaceVertices.map(
     verts => validateFaceGeometry(verts, geometry));
 
-  if (!_.map(newFaceGeometries, 'success').every(_.identity)) {
+  const errantGeometry = _.find(newFaceGeometries, 'error');
+  if (errantGeometry) {
     // validation failed on one of the geometries
-    return false;
+    return errantGeometry;
   }
 
   return _.zip(intersectedFaces, newFaceGeometries).map(([face, { vertices, edges }]) => ({
@@ -119,8 +127,8 @@ export function eraseSelection(points, context) {
   */
   const newGeoms = newGeometriesOfOverlappedFaces(points, currentStoryGeometry);
   // prevent overlapping faces by erasing existing geometry covered by the points defining the new face
-  if (!newGeoms) {
-    window.eventBus.$emit('error', 'Operation cancelled - no split faces');
+  if (newGeoms.error) {
+    window.eventBus.$emit('error', `Operation cancelled - ${newGeoms.error}`);
     return false;
   }
 
@@ -296,6 +304,13 @@ export function validateFaceGeometry(points, currentStoryGeometry) {
    - Check if two edges on the new face intersect. (again, to prevent split faces)
   */
 
+  if (points.length === 0) {
+    return {
+      success: true,
+      vertices: [],
+      edges: [],
+    };
+  }
   if (points.length <= 2) {
     return { success: false, error: 'need at least 3 points to make a face' };
   }

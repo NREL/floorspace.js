@@ -28,7 +28,7 @@ describe('validateFaceGeometry', () => {
     assert(newVerts.length === 3);
   });
 
-  const genTooFewVerts = gen.array(genPoint, { maxSize: 2 });
+  const genTooFewVerts = gen.array(genPoint, { minSize: 1, maxSize: 2 });
 
   it('fails when given too few vertices', () => {
     assertProperty(
@@ -36,6 +36,11 @@ describe('validateFaceGeometry', () => {
         const resp = validateFaceGeometry(verts, emptyGeometry);
         refute(resp && resp.success);
       });
+  });
+
+  it('succeeds when given 0 vertices', () => {
+    const resp = validateFaceGeometry([], emptyGeometry);
+    assert(resp && resp.success);
   });
 
   it('succeeds from empty on a triangle', () => {
@@ -326,13 +331,17 @@ describe('newGeometriesOfOverlappedFaces', () => {
       }),
       points = [{ x: 0, y: 3 }, { x: 5, y: 3 }, { x: 5, y: 5 }, { x: 0, y: 5 }];
 
-    refute(newGeometriesOfOverlappedFaces(points, geometry));
+    assertEqual(
+      newGeometriesOfOverlappedFaces(points, geometry).error,
+      'no split faces');
   });
 
   it('disallows a space being moved to cause a split (as in issue #133)', () => {
-    refute(newGeometriesOfOverlappedFaces(
-      beingMovedPositionedInCenterOfBigger,
-      helpers.exceptFace(geometry, 'being_moved')));
+    assertEqual(
+      newGeometriesOfOverlappedFaces(
+        beingMovedPositionedInCenterOfBigger,
+        helpers.exceptFace(geometry, 'being_moved')),
+      { error: 'no holes' });
   });
 
   it("permits a space to be moved if it doesn't cause a split face", () => {
@@ -340,7 +349,7 @@ describe('newGeometriesOfOverlappedFaces', () => {
       beingMovedToSideOfBigger,
       helpers.exceptFace(geometry, 'being_moved'));
 
-    assert(newGeoms, 'Expected movement to succeed');
+    refute(newGeoms.error, 'Expected movement to succeed');
     assert(newGeoms.length === 1);
     const newBigger = newGeoms[0];
     assert(newBigger.face_id === 'bigger');

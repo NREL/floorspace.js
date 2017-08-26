@@ -57,8 +57,8 @@ export default {
         geometryHelpers.exceptFace(currentStoryGeometry, face_id),
       );
 
-    if (!newGeoms) {
-      window.eventBus.$emit('error', 'Operation cancelled - no split faces');
+    if (newGeoms.error) {
+      window.eventBus.$emit('error', `Operation cancelled - ${newGeoms.error}`);
 
       window.eventBus.$emit('reload-grid');
       return;
