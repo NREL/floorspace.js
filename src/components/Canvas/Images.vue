@@ -26,6 +26,7 @@ export default {
       layer: null,
       // cache images on the component so that we can check which property was altered in the images watcher
       imageCache: [],
+      originalStageResolution: null,
     };
   },
   mounted() {
@@ -51,6 +52,9 @@ export default {
         width: document.getElementById('canvas').clientWidth,
         height: document.getElementById('canvas').clientHeight,
       });
+      // original rwu/px resolution when scales were set
+      this.originalStageResolution =  (this.scaleX.range()[1] - this.scaleX.range()[0]) / (this.scaleX.domain()[1] - this.scaleX.domain()[0]);
+
       this.layer = new Konva.Layer();
       this.stage.add(this.layer);
 
@@ -367,12 +371,10 @@ export default {
     * Set the scale and position of the canvas based on the current viewbox
     */
     scaleAndPlaceStage() {
-      // original rwu/px resolution when scales were set
-      const originalResolution = (this.scaleX.range()[1] - this.scaleX.range()[0]) / (this.scaleX.domain()[1] - this.scaleX.domain()[0]);
       // current rwu/px resolution based on current viewbox (after panning and zooming)
       const currentResolution = (this.view.max_x - this.view.min_x) / this.$refs.images.clientWidth;
       // scaling factor to render canvas images at current resolution
-      const scale = originalResolution / currentResolution;
+      const scale = this.originalStageResolution / currentResolution;
 
       this.stage
         // scale will not be 1 if the user has zoomed in or out
