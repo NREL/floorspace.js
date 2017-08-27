@@ -91,10 +91,6 @@ export default {
       this.layer = new Konva.Layer();
       this.stage.add(this.layer);
 
-      this.layer.add(new Konva.Circle({ x: this.rwuXtoPx(0), y: this.rwuYtoPx(0), radius: 5, name: 'origin', fill: '#00f' }));
-      this.layer.add(new Konva.Circle({ x: this.rwuXtoPx(100), y: this.rwuYtoPx(0), radius: 5, name: '(100, 0)', fill: '#00f'  }));
-      this.layer.add(new Konva.Circle({ x: this.rwuXtoPx(-100), y: this.rwuYtoPx(0), radius: 5, name: '(-100, 0)', fill: '#00f'  }));
-      this.layer.add(new Konva.Circle({ x: this.rwuXtoPx(0), y: this.rwuYtoPx(100), radius: 5, name: '(0, 100)', fill: '#00f'  }));
       // render each image in the store
       this.images.forEach(this.renderImage);
 
