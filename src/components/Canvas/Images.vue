@@ -50,7 +50,6 @@ export default {
     };
   },
   mounted() {
-    window.canvas = this;
     this.debouncedRenderImages = _.debounce(this.renderImages, 10);
 
     ResizeEvents.$on('resize', this.renderImages);
@@ -401,9 +400,7 @@ export default {
     * Set the scale and position of the canvas based on the current viewbox
     */
     scaleAndPlaceStage() {
-      // console.log('at last render', this.transformAtLastRender);
       const transform = transformDiff(this.transformAtLastRender, this.transform);
-      console.log('resultant t', transform);
       // current rwu/px resolution based on current viewbox (after panning and zooming)
       this.stage
         // scale will not be 1 if the user has zoomed in or out
@@ -490,14 +487,12 @@ export default {
     },
     // if the view boundaries change
     pixelWidth() {
-      console.log('new canvas width,', this.pixelWidth);
       this.debouncedRenderImages();
     },
     pixelHeight() {
       this.debouncedRenderImages();
     },
     transform() {
-      console.log(JSON.stringify(this.transform));
       this.scaleAndPlaceStage();
     },
   },

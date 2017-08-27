@@ -40,7 +40,6 @@ export default {
     };
   },
   mounted() {
-    window.grid = this;
     // throttle/debounce event handlers
     this.handleMouseMove = throttle(this.highlightSnapTarget, 100);
     this.renderGrid = debounce(this.renderGrid, 5);
@@ -232,7 +231,6 @@ export default {
       if (this.points.length && (newTransform.k !== lastTransform.k || Math.abs(lastTransform.y - newTransform.y) > 3 || Math.abs(lastTransform.x - newTransform.x) > 3)) {
         this.points = [];
       }
-      console.log(JSON.stringify(newTransform));
     },
   },
   methods,
