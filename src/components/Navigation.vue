@@ -272,6 +272,7 @@ export default {
               x: that.min_x + (rwuWidth / 2),
               y: that.max_y - (rwuHeight / 2),
             });
+            console.log('initial img width', rwuWidth, 'img height', rwuHeight);
           };
           image.src = reader.result;
         }, false);

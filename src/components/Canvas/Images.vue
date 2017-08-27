@@ -27,6 +27,10 @@ export default {
       // cache images on the component so that we can check which property was altered in the images watcher
       imageCache: [],
       originalStageResolution: null,
+      scaleX: null,
+      scaleY: null,
+      rwuXtoPx: null,
+      rwuYtoPx: null,
     };
   },
   mounted() {
@@ -53,11 +57,22 @@ export default {
         height: document.getElementById('canvas').clientHeight,
       });
       // original rwu/px resolution when scales were set
-      this.originalStageResolution =  (this.scaleX.range()[1] - this.scaleX.range()[0]) / (this.scaleX.domain()[1] - this.scaleX.domain()[0]);
+      this.originalStageResolution =  (this.initialXScale.range()[1] - this.initialXScale.range()[0]) / (this.initialXScale.domain()[1] - this.initialXScale.domain()[0]);
+
+      this.rwuXtoPx = d3.scaleLinear()
+        .domain([this.view.min_x, this.view.max_x])
+        .range([0, this.$refs.images.clientWidth]);
+      this.rwuYtoPx = d3.scaleLinear()
+        .domain([this.view.min_y, this.view.max_y])
+        .range([this.$refs.images.clientHeight, 0]);
 
       this.layer = new Konva.Layer();
       this.stage.add(this.layer);
 
+      this.layer.add(new Konva.Circle({ x: this.rwuXtoPx(0), y: this.rwuYtoPx(0), radius: 5, name: 'origin', fill: '#00f' }));
+      this.layer.add(new Konva.Circle({ x: this.rwuXtoPx(100), y: this.rwuYtoPx(0), radius: 5, name: '(100, 0)', fill: '#00f'  }));
+      this.layer.add(new Konva.Circle({ x: this.rwuXtoPx(-100), y: this.rwuYtoPx(0), radius: 5, name: '(-100, 0)', fill: '#00f'  }));
+      this.layer.add(new Konva.Circle({ x: this.rwuXtoPx(0), y: this.rwuYtoPx(100), radius: 5, name: '(0, 100)', fill: '#00f'  }));
       // render each image in the store
       this.images.forEach(this.renderImage);
 
@@ -66,17 +81,19 @@ export default {
     },
     renderImage(image) {
       // values in pixels
-      const y = -1 * this.scaleY.invert(image.y);
-      const x = this.scaleX.invert(image.x);
-      const w = this.scaleX.invert(image.width);
-      const h = this.scaleY.invert(image.height);
-
+      const w = image.width * this.pxPerRWU;
+      const h = image.height * this.pxPerRWU;
       // (x, y) is the image center position in pixels
       // konva places image by their upper left corner, so adjust by half the height and half the width
+      console.log('Positioning image center at', this.rwuXtoPx(image.x), this.rwuYtoPx(image.y));
+      console.log('(rwu coords:', image.x, image.y, ')');
+      console.log('rwu image width, height', image.width, image.height);
+      console.log('pixel width, height', w, h);
+      console.log('pxPerRWU', this.pxPerRWU);
       const imageGroup = new Konva.Group({
         // image center position in pixels
-        x,
-        y,
+        x: this.rwuXtoPx(image.x),
+        y: this.rwuYtoPx(image.y),
         // offset from center point and rotation point
         offset: {
           x: (w / 2),
@@ -143,11 +160,11 @@ export default {
 
         this.$store.dispatch('models/updateImageWithData', {
           image,
-          x: this.scaleX(updatedCenterX),
-          y: this.scaleY(updatedCenterY),
+          x: this.rwuXtoPx.invert(updatedCenterX),
+          y: this.rwuYtoPx.invert(updatedCenterY),
           r: updatedRotation,
-          width: this.scaleX(updatedWidth),
-          height: this.scaleY(updatedHeight),
+          width: (updatedWidth / this.pxPerRWU),
+          height: (updatedHeight / this.pxPerRWU),
         });
       });
     },
@@ -378,16 +395,19 @@ export default {
 
       this.stage
         // scale will not be 1 if the user has zoomed in or out
-        .scale({
-          x: scale,
-          y: scale,
-        })
-        // place the canvas at the pixel value corresponding to our RWU 0
-        .position({
-          x: this.rwuToPx(0, 'x'),
-          y: this.rwuToPx(0, 'y'),
-        })
+        // .scale({
+        //   x: scale,
+        //   y: scale,
+        // })
+        // // place the canvas at the pixel value corresponding to our RWU 0
+        // .position({
+        //   x: this.rwuToPx(0, 'x'),
+        //   y: this.rwuToPx(0, 'y'),
+        // })
         .draw();
+    },
+    pxToRWU(rwu, axis) {
+
     },
     rwuToPx(rwu, axis) {
       let currentScale;
@@ -411,12 +431,12 @@ export default {
     }),
     ...mapState({
       currentTool: state => state.application.currentSelections.tool,
-      scaleX: state => state.application.scale.x,
-      scaleY: state => state.application.scale.y,
+      initialXScale: state => state.application.scale.x,
+      initialYScale: state => state.application.scale.y,
       view: state => state.project.view,
     }),
     images() { return this.currentStory.images; },
-
+    pxPerRWU() { return (this.rwuXtoPx(100) - this.rwuXtoPx(0)) / 100; },
     currentImage: {
       get() { return this.$store.getters['application/currentImage']; },
       set(item) { this.$store.dispatch('application/setCurrentSubSelectionId', { id: item.id }); },
@@ -436,6 +456,7 @@ export default {
           this.renderImages();
           return;
         }
+        this.renderImages();
 
         // no images were added or deleted, check if the property changed is one that should trigger a re-render
         const ignoredProperties = ['height', 'width', 'x', 'y', 'r'];
@@ -457,7 +478,10 @@ export default {
     },
     // if the view boundaries change
     view: {
-      handler() { this.scaleAndPlaceStage(); },
+      handler() {
+        this.renderImages();
+        // this.scaleAndPlaceStage();
+      },
       deep: true,
     },
   },
