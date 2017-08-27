@@ -883,7 +883,6 @@ export default {
   reloadGridAndScales() {
     this.zoomXScale = null;
     this.zoomYScale = null;
-    d3.select('#grid svg').selectAll('*').remove();
     this.resolveBounds();
     this.renderGrid();
   },
@@ -969,6 +968,9 @@ export default {
 
        // redraw the saved geometry
        this.drawPolygons();
+     })
+     .on('end', () => {
+       ResizeEvents.$emit('zoomStabilized');
      });
 
     svg.call(this.zoomBehavior);

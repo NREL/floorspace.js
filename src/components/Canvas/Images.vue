@@ -22,12 +22,15 @@ const d3 = require('d3');
 function transformDiff(t1, t2) {
   // returns a new transform that is sufficient to take you from
   // t1 to t2.
-  const retval = {
+
+  // boy was this a doozy to figure out. Tricky bit is that the
+  // translation is dependent on the scaling factor. So we have to
+  // divide that out before we can subtract.
+  return {
     k: t2.k / t1.k,
-    x: t2.x - t1.x,
-    y: t2.y - t1.y,
+    x: (t2.x / t2.k - t1.x / t1.k) * t2.k,
+    y: (t2.y / t2.k - t1.y / t1.k) * t2.k,
   };
-  return retval;
 }
 
 export default {
@@ -51,11 +54,14 @@ export default {
     this.debouncedRenderImages = _.debounce(this.renderImages, 10);
 
     ResizeEvents.$on('resize', this.renderImages);
+    ResizeEvents.$on('zoomStabilized', this.renderImages);
     window.addEventListener('resize', this.renderImages);
     this.renderImages();
   },
   beforeDestroy() {
     ResizeEvents.$off('resize', this.renderImages);
+    ResizeEvents.$off('zoomStabilized', this.renderImages);
+
     window.removeEventListener('resize', this.renderImages);
   },
   methods: {
@@ -74,7 +80,6 @@ export default {
       });
 
       this.transformAtLastRender = { ...this.transform };
-      console.log('recomputing scales (width is', this.$refs.images.clientWidth,')');
 
       this.rwuXtoPx = d3.scaleLinear()
         .domain([this.view.min_x, this.view.max_x])
@@ -400,7 +405,9 @@ export default {
     * Set the scale and position of the canvas based on the current viewbox
     */
     scaleAndPlaceStage() {
+      // console.log('at last render', this.transformAtLastRender);
       const transform = transformDiff(this.transformAtLastRender, this.transform);
+      console.log('resultant t', transform);
       // current rwu/px resolution based on current viewbox (after panning and zooming)
       this.stage
         // scale will not be 1 if the user has zoomed in or out
