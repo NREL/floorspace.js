@@ -36,39 +36,33 @@ export default {
         x: null,
         y: null,
       },
-      transform: {
-        x: 0,
-        y: 0,
-        k: 1, // relative (to window after resize) zoom
-      },
       handleMouseMove: null, // placeholder --> overwritten in mounted()
     };
   },
   mounted() {
+    window.grid = this;
     // throttle/debounce event handlers
     this.handleMouseMove = throttle(this.highlightSnapTarget, 100);
     this.renderGrid = debounce(this.renderGrid, 5);
 
     // add event listeners
-    this.$refs.grid.addEventListener('reloadGrid', this.renderGrid);
-    this.$refs.grid.addEventListener('reloadGridScales', this.reloadGridAndScales);
+    this.$refs.grid.addEventListener('reloadGrid', this.reloadGridAndScales);
 
     window.addEventListener('keyup', this.escapeAction);
-    window.addEventListener('resize', this.renderGrid);
+    window.addEventListener('resize', this.reloadGridAndScales);
 
-    ResizeEvents.$on('resize', this.renderGrid);
+    ResizeEvents.$on('resize', this.reloadGridAndScales);
 
     // render grid first time
     this.renderGrid();
   },
   beforeDestroy() {
-    this.$refs.grid.removeEventListener('reloadGrid', this.renderGrid);
-    this.$refs.grid.removeEventListener('reloadGridScales', this.reloadGridAndScales);
+    this.$refs.grid.removeEventListener('reloadGrid', this.reloadGridAndScales);
 
     window.removeEventListener('keyup', this.escapeAction);
-    window.removeEventListener('resize', this.renderGrid);
+    window.removeEventListener('resize', this.reloadGridAndScales);
 
-    ResizeEvents.$off('resize', this.renderGrid);
+    ResizeEvents.$off('resize', this.reloadGridAndScales);
   },
   computed: {
 
@@ -110,6 +104,10 @@ export default {
     max_y: {
       get() { return this.$store.state.project.view.max_y; },
       set(val) { this.$store.dispatch('project/setViewMaxY', { max_y: val }); },
+    },
+    transform: {
+      get() { return this.$store.state.project.transform; },
+      set(t) { this.$store.dispatch('project/setTransform', t); },
     },
     // previous story
     previousStory() {
@@ -234,6 +232,7 @@ export default {
       if (this.points.length && (newTransform.k !== lastTransform.k || Math.abs(lastTransform.y - newTransform.y) > 3 || Math.abs(lastTransform.x - newTransform.x) > 3)) {
         this.points = [];
       }
+      console.log(JSON.stringify(newTransform));
     },
   },
   methods,

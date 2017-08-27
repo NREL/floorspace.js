@@ -12,6 +12,8 @@ import _ from 'lodash';
 import { snapTargets } from './snapping';
 import geometryHelpers from './../../store/modules/geometry/helpers';
 import modelHelpers from './../../store/modules/models/helpers';
+import { ResizeEvents } from '../../components/Resize';
+
 
 export default {
   // ****************** USER INTERACTION EVENTS ****************** //
@@ -829,7 +831,9 @@ export default {
       this.max_y += yDiff / 2;
     }
   },
-
+  nullTransform() {
+    d3.select(this.$refs.grid).call(this.zoomBehavior.transform, d3.zoomIdentity);
+  },
   // ****************** GRID ****************** //
   renderGrid() {
     const
@@ -839,15 +843,17 @@ export default {
     this.resolveBounds();
     // scaleX amd scaleY are used during drawing to translate from px to RWU given the current grid dimensions in rwu
     this.$store.dispatch('application/setScaleX', {
-      scaleX: d3.scaleLinear()
-      .domain([0, w])
-      .range([this.min_x, this.max_x])
+      scaleX: {
+        pixels: w,
+        rwuRange: [this.min_x, this.max_x],
+      },
     });
 
     this.$store.dispatch('application/setScaleY', {
-      scaleY: d3.scaleLinear()
-      .domain([0, h])
-      .range([this.min_y, this.max_y])
+      scaleY: {
+        pixels: h,
+        rwuRange: [this.min_y, this.max_y],
+      },
     });
 
     // initialize timetravel after the scales are set
@@ -861,6 +867,17 @@ export default {
     }
 
     this.calcGrid();
+
+    // It took me some time to figure out why this line is necessary. It fixes a problem
+    // that sometimes appears when resizing the window. Here's a screenshot of what
+    // it can look like without that line:
+    // https://trello-attachments.s3.amazonaws.com/58d428743111af1d0a20cf28/59a225fd10e0a9d23fc0e1b2/30ea2c37407fe148a397295b748b6015/capture.png
+    // When it looks that way it's because the zoomXScale's range has not been updated to
+    // reflect the new clientWidth. reloadGridAndScales() updates the zoomXScale's range,
+    // but the axes don't re-render until the next zoom event. We use nullTransform()
+    // to force this to happen immediately.
+    this.nullTransform();
+
     this.drawPolygons();
   },
   reloadGridAndScales() {
@@ -951,7 +968,7 @@ export default {
        this.padTickY(-12);
 
        // redraw the saved geometry
-       this.renderGrid();
+       this.drawPolygons();
      });
 
     svg.call(this.zoomBehavior);

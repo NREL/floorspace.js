@@ -11,12 +11,24 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 </template>
 
 <script>
+import _ from 'lodash';
 import { mapState, mapGetters } from 'vuex';
 import applicationHelpers from './../../store/modules/application/helpers';
 import ResizeEvents from '../../components/Resize/ResizeEvents';
 
 const Konva = require('konva');
 const d3 = require('d3');
+
+function transformDiff(t1, t2) {
+  // returns a new transform that is sufficient to take you from
+  // t1 to t2.
+  const retval = {
+    k: t2.k / t1.k,
+    x: t2.x - t1.x,
+    y: t2.y - t1.y,
+  };
+  return retval;
+}
 
 export default {
   name: 'images',
@@ -26,14 +38,18 @@ export default {
       layer: null,
       // cache images on the component so that we can check which property was altered in the images watcher
       imageCache: [],
-      originalStageResolution: null,
       scaleX: null,
       scaleY: null,
       rwuXtoPx: null,
       rwuYtoPx: null,
+      debouncedRenderImages: null,
+      transformAtLastRender: null,
     };
   },
   mounted() {
+    window.canvas = this;
+    this.debouncedRenderImages = _.debounce(this.renderImages, 10);
+
     ResizeEvents.$on('resize', this.renderImages);
     window.addEventListener('resize', this.renderImages);
     this.renderImages();
@@ -56,8 +72,9 @@ export default {
         width: document.getElementById('canvas').clientWidth,
         height: document.getElementById('canvas').clientHeight,
       });
-      // original rwu/px resolution when scales were set
-      this.originalStageResolution =  (this.initialXScale.range()[1] - this.initialXScale.range()[0]) / (this.initialXScale.domain()[1] - this.initialXScale.domain()[0]);
+
+      this.transformAtLastRender = { ...this.transform };
+      console.log('recomputing scales (width is', this.$refs.images.clientWidth,')');
 
       this.rwuXtoPx = d3.scaleLinear()
         .domain([this.view.min_x, this.view.max_x])
@@ -85,11 +102,6 @@ export default {
       const h = image.height * this.pxPerRWU;
       // (x, y) is the image center position in pixels
       // konva places image by their upper left corner, so adjust by half the height and half the width
-      console.log('Positioning image center at', this.rwuXtoPx(image.x), this.rwuYtoPx(image.y));
-      console.log('(rwu coords:', image.x, image.y, ')');
-      console.log('rwu image width, height', image.width, image.height);
-      console.log('pixel width, height', w, h);
-      console.log('pxPerRWU', this.pxPerRWU);
       const imageGroup = new Konva.Group({
         // image center position in pixels
         x: this.rwuXtoPx(image.x),
@@ -156,7 +168,7 @@ export default {
         const updatedRotation = imageGroup.rotation();
         // get center relative to layer since group might be rotated
         const updatedCenterX = imageCenter.getAbsolutePosition(this.layer).x;
-        const updatedCenterY = -1 * imageCenter.getAbsolutePosition(this.layer).y;
+        const updatedCenterY = imageCenter.getAbsolutePosition(this.layer).y;
 
         this.$store.dispatch('models/updateImageWithData', {
           image,
@@ -388,26 +400,20 @@ export default {
     * Set the scale and position of the canvas based on the current viewbox
     */
     scaleAndPlaceStage() {
+      const transform = transformDiff(this.transformAtLastRender, this.transform);
       // current rwu/px resolution based on current viewbox (after panning and zooming)
-      const currentResolution = (this.view.max_x - this.view.min_x) / this.$refs.images.clientWidth;
-      // scaling factor to render canvas images at current resolution
-      const scale = this.originalStageResolution / currentResolution;
-
       this.stage
         // scale will not be 1 if the user has zoomed in or out
-        // .scale({
-        //   x: scale,
-        //   y: scale,
-        // })
-        // // place the canvas at the pixel value corresponding to our RWU 0
-        // .position({
-        //   x: this.rwuToPx(0, 'x'),
-        //   y: this.rwuToPx(0, 'y'),
-        // })
+        .scale({
+          x: transform.k,
+          y: transform.k,
+        })
+        // place the canvas at the pixel value corresponding to our RWU 0
+        .position({
+          x: transform.x,
+          y: transform.y,
+        })
         .draw();
-    },
-    pxToRWU(rwu, axis) {
-
     },
     rwuToPx(rwu, axis) {
       let currentScale;
@@ -431,9 +437,9 @@ export default {
     }),
     ...mapState({
       currentTool: state => state.application.currentSelections.tool,
-      initialXScale: state => state.application.scale.x,
-      initialYScale: state => state.application.scale.y,
       view: state => state.project.view,
+      pixelWidth: state => state.application.scale.x.pixels,
+      pixelHeight: state => state.application.scale.y.pixels,
     }),
     images() { return this.currentStory.images; },
     pxPerRWU() { return (this.rwuXtoPx(100) - this.rwuXtoPx(0)) / 100; },
@@ -441,6 +447,10 @@ export default {
       get() { return this.$store.getters['application/currentImage']; },
       set(item) { this.$store.dispatch('application/setCurrentSubSelectionId', { id: item.id }); },
     },
+    transform: {
+      get() { return this.$store.state.project.transform; },
+      set(t) { this.$store.dispatch('project/setTransform', t); },
+    }
   },
   watch: {
     /*
@@ -456,7 +466,6 @@ export default {
           this.renderImages();
           return;
         }
-        this.renderImages();
 
         // no images were added or deleted, check if the property changed is one that should trigger a re-render
         const ignoredProperties = ['height', 'width', 'x', 'y', 'r'];
@@ -477,12 +486,16 @@ export default {
       this.renderImages();
     },
     // if the view boundaries change
-    view: {
-      handler() {
-        this.renderImages();
-        // this.scaleAndPlaceStage();
-      },
-      deep: true,
+    pixelWidth() {
+      console.log('new canvas width,', this.pixelWidth);
+      this.debouncedRenderImages();
+    },
+    pixelHeight() {
+      this.debouncedRenderImages();
+    },
+    transform() {
+      console.log(JSON.stringify(this.transform));
+      this.scaleAndPlaceStage();
     },
   },
 };

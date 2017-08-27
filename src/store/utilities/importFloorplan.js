@@ -79,5 +79,5 @@ export default function importFloorplan(context, payload) {
     geometry,
   });
 
-  document.getElementById('svg-grid').dispatchEvent(new Event('reloadGridScales'));
+  document.getElementById('svg-grid').dispatchEvent(new Event('reloadGrid'));
 }

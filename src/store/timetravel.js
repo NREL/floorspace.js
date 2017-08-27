@@ -14,6 +14,7 @@ const filteredActions = [
   'project/setViewMinY',
   'project/setViewMaxX',
   'project/setViewMaxY',
+  'project/setTransform',
   'application/clearSubSelections',
   'application/setCurrentStoryId',
   'application/setCurrentStory',
@@ -117,7 +118,10 @@ export default {
     const store = this.store;
     _.defer(() => {
       // after save checkpoint and dust has settled
-      while (_.isEqual(serializeState(store.state), prevStates[prevStates.length - 1].state)) {
+      while (
+        prevStates.length > 0 &&
+        _.isEqual(serializeState(store.state), prevStates[prevStates.length - 1].state)
+      ) {
         console.log('current state matches previous, so rolling back', prevStates[prevStates.length - 1].triggeringAction);
         prevStates.pop();
       }

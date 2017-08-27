@@ -112,4 +112,8 @@ export default {
     setShowImportExport(context, payload) {
       context.commit('setShowImportExport', payload);
     },
+
+    setTransform(context, payload) {
+      context.commit('setTransform', payload);
+    },
 }

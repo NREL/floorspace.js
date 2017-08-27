@@ -36,6 +36,9 @@ export default {
       visible: true
     },
     showImportExport: true,
+    transform: {
+      k: 1, x: 0, y: 0,
+    },
   },
   actions: actions,
   mutations: mutations,
