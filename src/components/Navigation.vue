@@ -125,8 +125,6 @@ export default {
       max_y: state => state.project.view.max_y,
       min_x: state => state.project.view.min_x,
       min_y: state => state.project.view.min_y,
-      scaleX: state => state.application.scale.x,
-      scaleY: state => state.application.scale.y,
     }),
 
     ...mapGetters({

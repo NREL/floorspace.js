@@ -36,14 +36,7 @@ export default {
         x: null,
         y: null,
       },
-      transform: {
-        x: 0,
-        y: 0,
-        k: 1, // relative (to window after resize) zoom
-        kAbs: 1, // absolute zoom
-      },
       handleMouseMove: null, // placeholder --> overwritten in mounted()
-      forceGridHide: false,
     };
   },
   mounted() {
@@ -52,23 +45,23 @@ export default {
     this.renderGrid = debounce(this.renderGrid, 5);
 
     // add event listeners
-    this.$refs.grid.addEventListener('reloadGrid', this.renderGrid);
+    this.$refs.grid.addEventListener('reloadGrid', this.reloadGridAndScales);
 
     window.addEventListener('keyup', this.escapeAction);
-    window.addEventListener('resize', this.renderGrid);
+    window.addEventListener('resize', this.reloadGridAndScales);
 
-    ResizeEvents.$on('resize', this.renderGrid);
+    ResizeEvents.$on('resize', this.reloadGridAndScales);
 
     // render grid first time
     this.renderGrid();
   },
   beforeDestroy() {
-    this.$refs.grid.removeEventListener('reloadGrid', this.renderGrid);
+    this.$refs.grid.removeEventListener('reloadGrid', this.reloadGridAndScales);
 
     window.removeEventListener('keyup', this.escapeAction);
-    window.removeEventListener('resize', this.renderGrid);
+    window.removeEventListener('resize', this.reloadGridAndScales);
 
-    ResizeEvents.$off('resize', this.renderGrid);
+    ResizeEvents.$off('resize', this.reloadGridAndScales);
   },
   computed: {
 
@@ -110,6 +103,10 @@ export default {
     max_y: {
       get() { return this.$store.state.project.view.max_y; },
       set(val) { this.$store.dispatch('project/setViewMaxY', { max_y: val }); },
+    },
+    transform: {
+      get() { return this.$store.state.project.transform; },
+      set(t) { this.$store.dispatch('project/setTransform', t); },
     },
     // previous story
     previousStory() {
@@ -175,6 +172,7 @@ export default {
             return geometryHelpers.vertexForId(nextVertexId, this.currentStoryGeometry);
           }),
         };
+        polygon.labelPosition = this.polygonLabelPosition(polygon.points);
 
         // if the model is a space, set the polygon's color based on the current mode
         if (model.type === 'space') {
@@ -195,10 +193,10 @@ export default {
     },
   },
   watch: {
+    // showTicks() { this.showOrHideAxes(); },
     // TODO: method for when new view dimensions are imported or the px dimensions change
-    gridVisible() { this.updateGrid(); },
+    gridVisible() { this.showOrHideAxes(); },
     spacing() { this.updateGrid(); },
-    forceGridHide() { this.updateGrid(); },
 
     currentMode() { this.drawPolygons(); },
     polygons() { this.drawPolygons(); },
@@ -222,18 +220,15 @@ export default {
       this.drawPoints();
     },
     transform(newTransform, lastTransform) {
-      // hide grid if zoomed out enough
-      this.forceGridHide = (newTransform.kAbs < 0.1);
-
       // hide polygon names if zoomed out enough
-      if (newTransform.kAbs < 0.5) {
+      if (newTransform.k < 0.5) {
         d3.select('#svg-grid').selectAll('.polygon-text').style('display', 'none');
       } else {
-        d3.select('#svg-grid').selectAll('.polgyon-text').style('display', 'initial');
+        d3.select('#svg-grid').selectAll('.polygon-text').style('display', 'initial');
       }
 
       // cancel current drawing action if actual zoom and not just accidental drag
-      if (this.points.length && (newTransform.kAbs !== lastTransform.kAbs || Math.abs(lastTransform.y - newTransform.y) > 3 || Math.abs(lastTransform.x - newTransform.x) > 3)) {
+      if (this.points.length && (newTransform.k !== lastTransform.k || Math.abs(lastTransform.y - newTransform.y) > 3 || Math.abs(lastTransform.x - newTransform.x) > 3)) {
         this.points = [];
       }
     },
