@@ -386,12 +386,14 @@ export default {
   },
   watch: {
     selectedObject(obj) {
+      if (!obj) return;
       const row = this.$el.querySelector(`[data-id="${obj.id}"]`);
       if (row) {
         row.scrollIntoView();
       }
     },
     currentStory(obj) {
+      if (!obj) return;
       const row = this.$el.querySelector(`[data-id="${obj.id}"]`);
       if (row) {
         row.scrollIntoView();
