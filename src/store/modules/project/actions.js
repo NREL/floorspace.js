@@ -99,7 +99,7 @@ export default {
 
 
     setMapRotation (context, payload) {
-        context.commit('setNorthAxis', { north_axis: (payload.rotation/(2*Math.PI)) * 360 });
+        context.commit('setConfigNorthAxis', { north_axis: (payload.rotation/(2*Math.PI)) * 360 });
         context.commit('setMapRotation', { rotation: payload.rotation });
     },
 
