@@ -111,7 +111,7 @@ export default {
           x: (w / 2),
           y: (h / 2),
         },
-        draggable: true,
+        draggable: this.currentTool === 'Drag',
       });
       const imageObj = new Konva.Image({
         x: 0,
@@ -123,7 +123,7 @@ export default {
         // add a green border to the currentImage
         stroke: '#6AAC15',
         strokeWidth: 3,
-        strokeEnabled: (this.currentImage && this.currentImage.id === image.id),
+        strokeEnabled: (this.currentTool === 'Drag' && this.currentImage && this.currentImage.id === image.id),
       });
       const imageCenter = new Konva.Circle({
         x: (w / 2),
@@ -151,9 +151,11 @@ export default {
       };
       imageReader.src = image.src;
 
-      // initialize rotate and resize controls on the image group
-      this.initRotation(imageGroup);
-      this.initResize(imageGroup);
+      if (this.currentTool === 'Drag') {
+        // initialize rotate and resize controls on the image group
+        this.initRotation(imageGroup);
+        this.initResize(imageGroup);
+      }
 
       // events
       // set as currentImage when an image's group is clicked (or dragged)
@@ -495,6 +497,9 @@ export default {
     transform() {
       this.scaleAndPlaceStage();
     },
+    currentTool() {
+      this.renderImages();
+    }
   },
 };
 </script>
