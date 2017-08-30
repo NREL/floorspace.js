@@ -989,7 +989,6 @@ export default {
     this.axis.y.style('visibility', this.gridVisible ? 'visible' : 'hidden');
   },
   updateGrid() {
-    window.theGrid = this;
     if (!this.axis.x || !this.axis.y) {
       // not yet initialized
       return;
