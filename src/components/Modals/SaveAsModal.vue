@@ -10,7 +10,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <aside>
     <div @click="close" class="overlay"></div>
     <div class="modal">
-      <span class="close-button" @click="close">x</span>
+      <span>
+        <svg class="close-button" @click="close" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+            <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
+        </svg>
+      </span>
         <header>
             <h2>Save {{ saveWhat }} as</h2>
         </header>
@@ -22,7 +26,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 :value="saveWhat.toLowerCase()"
                 spellcheck="false"
               />
-              <button class="download-button" @click="downloadFile">download</button>
+              .json
+              <button class="download-button" @click="downloadFile">DOWNLOAD</button>
             </span>
         </div>
     </div>
@@ -77,6 +82,15 @@ export default {
 
     .close-button, .download-button {
       cursor: pointer;
+    }
+    svg {
+        margin-left: -0.25rem;
+        width: 1rem;
+        path {
+            fill: $gray-medium-light;
+            stroke-width: 2px;
+            stroke: $gray-medium-light
+        }
     }
 
     .close-button {
