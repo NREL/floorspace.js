@@ -27,7 +27,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 spellcheck="false"
               />
               .json
-              <button class="download-button" @click="downloadFile">DOWNLOAD</button>
+              <button class="download-button" @click="downloadFile">Download</button>
             </span>
         </div>
     </div>
@@ -82,6 +82,7 @@ export default {
 
     .close-button, .download-button {
       cursor: pointer;
+      text-transform: uppercase;
     }
     svg {
         margin-left: -0.25rem;
