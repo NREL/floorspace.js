@@ -14,6 +14,12 @@ import geometryHelpers from './../../store/modules/geometry/helpers';
 import modelHelpers from './../../store/modules/models/helpers';
 import { ResizeEvents } from '../../components/Resize';
 
+function ticksInRange(start, stop, spacing) {
+  return _.range(
+    Math.ceil(start / spacing) * spacing,
+    stop,
+    spacing);
+}
 
 export default {
   // ****************** USER INTERACTION EVENTS ****************** //
@@ -983,6 +989,7 @@ export default {
     this.axis.y.style('visibility', this.gridVisible ? 'visible' : 'hidden');
   },
   updateGrid() {
+    window.theGrid = this;
     if (!this.axis.x || !this.axis.y) {
       // not yet initialized
       return;
@@ -992,25 +999,39 @@ export default {
       height = this.$refs.grid.clientHeight,
       rwuWidth = this.max_x - this.min_x,
       rwuHeight = this.max_y - this.min_y,
-      xTicks = rwuWidth / this.spacing,
-      yTicks = rwuHeight / this.spacing;
+      xTicks = ticksInRange(this.min_x, this.max_x, this.spacing),
+      yTicks = ticksInRange(this.min_y, this.max_y, this.spacing);
 
-    this.reduceTicks = yTicks > 250 || xTicks > 250;
+    this.reduceTicks = yTicks.length > 250 || xTicks.length > 250;
 
+    console.log('xTicks', xTicks, 'yTicks', yTicks);
     this.axis_generator.x = this.axis_generator.x || d3.axisBottom(this.xScale);
     this.axis_generator.x
       .tickSize(height)
       .tickPadding(-20)
-      .ticks(this.reduceTicks ? 5 * (rwuWidth / rwuHeight) : xTicks)
       .tickFormat(this.reduceTicks ? _.identity : this.formatTickX.bind(this, Math.floor(10 * (width / height))));
 
     this.axis_generator.y = this.axis_generator.y || d3.axisRight(this.yScale);
     this.axis_generator.y
       .tickSize(width)
       .tickPadding(-25)
-      .ticks(this.reduceTicks ? 5 : yTicks)
       .tickFormat(this.reduceTicks ? _.identity : this.formatTickY.bind(this, 10));
 
+    if (this.reduceTicks) {
+      this.axis_generator.x
+        .tickValues(null)
+        .ticks(5 * (rwuWidth / rwuHeight));
+      this.axis_generator.y
+        .tickValues(null)
+        .ticks(5);
+    } else {
+      this.axis_generator.x
+        .ticks(null)
+        .tickValues(xTicks);
+      this.axis_generator.y
+        .ticks(null)
+        .tickValues(yTicks);
+    }
     // update the number of ticks to display based on the post zoom real world unit height and width
     this.axis.y.call(this.axis_generator.y);
     this.axis.x.call(this.axis_generator.x);
