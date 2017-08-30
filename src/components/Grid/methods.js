@@ -856,16 +856,6 @@ export default {
       },
     });
 
-    // initialize timetravel after the scales are set
-    // if the map is enabled AND initialized
-    // or if the map is disabled
-    // we don't need to place the map and we haven't already intiailized timetravel
-    if (!this.$store.timetravel) {
-      if (!this.$store.state.project.map.enabled || (this.$store.state.project.map.enabled && this.$store.state.project.map.initialized)) {
-        window.eventBus.$emit('initTimetravel');
-      }
-    }
-
     this.calcGrid();
 
     // It took me some time to figure out why this line is necessary. It fixes a problem
