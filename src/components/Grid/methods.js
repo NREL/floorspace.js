@@ -195,17 +195,17 @@ export default {
     .attr('y', d => d[0].y + (d[1].y - d[0].y)/2)
     .attr('dx', - 1.25 * (this.transform.k > 1 ? 1 : this.transform.k) + "em")
     .text(d => {
-      let zoom = this.transform.k,
-      dist = this.distanceBetweenPoints({
-        x: d[0].x / zoom,
-        y: d[0].y / zoom
-      },
-      {
-        x: d[1].x / zoom,
-        y: d[1].y / zoom
-      });
+      const dist = this.distanceBetweenPoints(
+        {
+          x: this.gridToRWU(d[0].x, 'x'),
+          y: this.gridToRWU(d[0].y, 'y'),
+        },
+        {
+          x: this.gridToRWU(d[1].x, 'x'),
+          y: this.gridToRWU(d[1].y, 'y'),
+        });
 
-      return dist ? dist.toFixed(2) : "";
+      return dist ? dist.toFixed(2) : '';
     })
     .classed('guideline guideline-text',true)
     .attr("font-family", "sans-serif")
