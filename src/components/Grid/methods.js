@@ -1003,7 +1003,6 @@ export default {
 
     this.reduceTicks = yTicks.length > 250 || xTicks.length > 250;
 
-    console.log('xTicks', xTicks, 'yTicks', yTicks);
     this.axis_generator.x = this.axis_generator.x || d3.axisBottom(this.xScale);
     this.axis_generator.x
       .tickSize(height)
