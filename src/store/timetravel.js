@@ -26,9 +26,14 @@ const filteredActions = [
   'application/setCurrentSpaceType',
   'project/setPreviousStoryVisible',
   'project/setGridVisible',
+  'project/setMapLatitude',
+  'project/setMapLongitude',
+  'project/setMapRotation',
 ];
 const permanentActions = [
   'importFloorplan',
+  'project/setMapEnabled',
+  'project/setMapInitialized',
 ];
 
 const logState = state => state;
