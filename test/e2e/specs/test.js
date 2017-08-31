@@ -1,6 +1,9 @@
 // For authoring Nightwatch tests, see
 // http://nightwatchjs.org/guide#usage
 const d3 = require('d3');
+const _ = require('lodash');
+
+const setFlagOnErr = 'window.errorOccurred = false; window.addEventListener("error", () => { window.errorOccurred = true; })';
 
 module.exports = {
   'make space and new story': (browser) => {
@@ -8,36 +11,73 @@ module.exports = {
 
     let yScale;
     let xScale;
+    let errorOccurred;
 
     browser
       .url(devServer)
       .waitForElementVisible('.modal .new-floorplan', 5000)
+      .execute(setFlagOnErr, [])
       .click('.modal .new-floorplan')
       .waitForElementVisible('#grid svg', 500)
       .execute(
         'return window.application.$store.state.application.scale', [],
         ({ value: scale }) => {
-          console.log('scale is', JSON.stringify(scale));
           xScale = d3.scaleLinear()
             .domain(scale.x.rwuRange)
-            .range([0, scale.x.pixel]);
+            .range([0, scale.x.pixels]);
           yScale = d3.scaleLinear()
             .domain(scale.y.rwuRange)
-            .range([scale.y.pixel, 0]);
+            .range([scale.y.pixels, 0]);
         })
       .perform((client, done) => {
+        console.log(`moving to ${xScale(-50)}, ${yScale(0)}`);
         client
-        .pause(100)
-        .moveTo('#grid svg', xScale(-50), yScale(0))
-        .pause(100)
+        .waitForElementVisible('#grid svg', 200)
+        .pause(10)
+        .moveToElement('#grid svg', xScale(-50), yScale(0))
+        .waitForElementVisible('#grid svg .gridpoint', 200)
+        .pause(10)
         .mouseButtonClick()
-        .pause(100)
-        .moveTo('#grid svg', xScale(0), yScale(50))
-        .pause(100)
-        .mouseButtonClick()
-        .waitForElementVisible('#grid svg g.poly', 200);
+        .pause(10)
+        .moveToElement('#grid svg', xScale(0), yScale(50))
+        .waitForElementVisible('.guideline-area-text', 100);
+
+        client.expect.element('.guideline-dist').text.to.contain('50');
+        client.expect.element('.guideline-area-text').text.to.contain('2,500');
+
+        client.mouseButtonClick()
+          .pause(10);
+
+        client.execute(
+          'return window.application.$store.state.geometry[0].vertices', [],
+          ({ value: verts }) => {
+            [{ x: -50, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 50 }, { x: -50, y: 50 }]
+            .forEach((vert) => {
+              client.assert.ok(_.find(verts, vert));
+            });
+          });
+
         done();
       })
-      .pause();
+      .perform((client, done) => {
+        client.click('.create-story')
+        .pause(10);
+
+        done();
+      })
+      .perform((client, done) => {
+        client.expect.element('.previousStory polygon')
+          .to.have.css('stroke-dasharray').which.contains('10');
+        client.expect.element('.previousStory polygon')
+          .to.have.css('fill-opacity').which.equals('0.3');
+        done();
+      })
+      .execute('return window.errorOccurred', [], ({ value }) => {
+        errorOccurred = value;
+      })
+      .perform((client, done) => {
+        client.assert.ok(!errorOccurred);
+        done();
+      });
   },
 };
