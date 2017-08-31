@@ -26,6 +26,14 @@ const filteredActions = [
   'application/setCurrentSpaceType',
   'project/setPreviousStoryVisible',
   'project/setGridVisible',
+  'project/setMapLatitude',
+  'project/setMapLongitude',
+  'project/setMapRotation',
+];
+const permanentActions = [
+  'importFloorplan',
+  'project/setMapEnabled',
+  'project/setMapInitialized',
 ];
 
 const logState = state => state;
@@ -77,12 +85,7 @@ export default {
       const action = args[0];
 
       // ignore changes to view bounds
-      if (filteredActions.indexOf(action) === -1) {
-        /*
-        * This timeout will prevent the store from saving if the event queue is not empty
-        * The result is that each checkpoint contains a set of related actions, so undo can't leave us in an invalid state
-        */
-        // TODO: go over this with Brian again
+      if (!_.includes(filteredActions, action)) {
         that.maybeSaveCheckpoint(action);
         console.log('dispatching action:', args[0]);
       }
@@ -110,12 +113,18 @@ export default {
     this.triggeringAction = action;
     console.warn('saving state:', this.pastTimetravelStates[this.pastTimetravelStates.length - 1]);
     this.futureTimetravelStates = [];
-    this.potentiallyRollbackCheckpoint();
+    this.potentiallyRollbackCheckpoint(action);
   },
 
-  potentiallyRollbackCheckpoint() {
+  potentiallyRollbackCheckpoint(action) {
     const prevStates = this.pastTimetravelStates;
     const store = this.store;
+    if (_.includes(permanentActions, action)) {
+      // roll back all the way.
+      this.pastTimetravelStates = [];
+      this.futureTimetravelStates = [];
+      return;
+    }
     _.defer(() => {
       // after save checkpoint and dust has settled
       while (
@@ -126,7 +135,6 @@ export default {
         prevStates.pop();
       }
     });
-
   },
 
   undo() {

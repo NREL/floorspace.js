@@ -41,8 +41,6 @@ export default {
       get() { return this.$store.state.project.map.enabled; },
       set(enabled) {
         this.$store.dispatch('project/setMapEnabled', { enabled });
-        // enable timetravel if map is disabled
-        if (!enabled) { window.eventBus.$emit('initTimetravel'); }
       },
     },
     tool: {
