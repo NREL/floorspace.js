@@ -134,6 +134,7 @@ export default {
               return geometryHelpers.vertexForId(nextVertexId, this.previousStoryGeometry);
             }),
           };
+          polygon.labelPosition = this.polygonLabelPosition(polygon.points);
 
           // if the model is a space, set the polygon's color based on the current mode
           if (model.type === 'space') {
