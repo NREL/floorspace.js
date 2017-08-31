@@ -90,6 +90,7 @@ module.exports = {
           .to.have.css('fill-opacity').which.equals('0.3');
         done();
       })
-      .checkForErrors();
+      .checkForErrors()
+      .end();
   },
 };
