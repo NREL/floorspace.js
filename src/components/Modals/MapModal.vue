@@ -17,10 +17,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <div class="content">
             <p>Choose to either open an existing floorplan, start a new floorplan without a map, or start a new floorplan with a geolocated map.</p>
 
-            <button @click="$refs.importInput.click()" id="import">Open Floorplan</button>
+            <button @click="$refs.importInput.click()" id="import" class="open-floorplan">Open Floorplan</button>
             <button @click="mapEnabled = false; mapVisible = false; $emit('close')" class="new-floorplan">New Floorplan</button>
             <button @click="mapEnabled = true; tool='Map'; $emit('close')" :disabled="!online">New Floorplan w/ Map</button>
-            <input ref="importInput" @change="importFloorplanAsFile" type="file"/>
+            <input id="importInput" ref="importInput" @change="importFloorplanAsFile" type="file"/>
         </div>
     </div>
 </aside>
