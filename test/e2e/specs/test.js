@@ -3,7 +3,26 @@
 const d3 = require('d3');
 const _ = require('lodash');
 
-const setFlagOnErr = 'window.errorOccurred = false; window.addEventListener("error", () => { window.errorOccurred = true; })';
+function failOnError(browser) {
+  let errorOccurred;
+  browser.setFlagOnError = () => {
+    browser.execute(
+      'window.errorOccurred = false; window.addEventListener("error", () => { window.errorOccurred = true; })',
+    );
+    return browser;
+  };
+  browser.checkForErrors = () => {
+    browser.execute('return window.errorOccurred', [], ({ value }) => {
+      errorOccurred = value;
+    })
+    .perform((client, done) => {
+      client.assert.ok(!errorOccurred);
+      done();
+    });
+    return browser;
+  };
+  return browser;
+}
 
 module.exports = {
   'make space and new story': (browser) => {
@@ -11,12 +30,11 @@ module.exports = {
 
     let yScale;
     let xScale;
-    let errorOccurred;
 
-    browser
+    failOnError(browser)
       .url(devServer)
       .waitForElementVisible('.modal .new-floorplan', 5000)
-      .execute(setFlagOnErr, [])
+      .setFlagOnError()
       .click('.modal .new-floorplan')
       .waitForElementVisible('#grid svg', 500)
       .execute(
@@ -72,12 +90,6 @@ module.exports = {
           .to.have.css('fill-opacity').which.equals('0.3');
         done();
       })
-      .execute('return window.errorOccurred', [], ({ value }) => {
-        errorOccurred = value;
-      })
-      .perform((client, done) => {
-        client.assert.ok(!errorOccurred);
-        done();
-      });
+      .checkForErrors();
   },
 };
