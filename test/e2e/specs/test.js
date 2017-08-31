@@ -33,6 +33,7 @@ module.exports = {
 
     failOnError(browser)
       .url(devServer)
+      .resizeWindow(1000, 800)
       .waitForElementVisible('.modal .new-floorplan', 5000)
       .setFlagOnError()
       .click('.modal .new-floorplan')
