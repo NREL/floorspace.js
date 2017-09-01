@@ -86,7 +86,7 @@ module.exports = {
       .click('#navigation #selections select option[value="shading"]')
       .click('.add-sub-selection')
       .click('#navigation #selections select option[value="spaces"]')
-      .assert.elementCount('.subselection-list .active', 1)
+      .assert.elementCount('#subselection-list .active', 1)
       .checkForErrors()
       .end();
   },

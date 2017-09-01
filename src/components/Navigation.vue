@@ -374,7 +374,7 @@ export default {
       // to be used when, ex changing stories or deleting an item.
       // According to issue #134, we don't want to ever allow a situation
       // where no item is selected.
-      if (this.items.length && !this.selectedObject) {
+      if (this.items.length && (!this.selectedObject || !_.includes(_.map(this.items, 'id'), this.selectedObject.id))) {
         this.selectedObject = this.items[0];
       }
     },
@@ -385,6 +385,9 @@ export default {
     displayNameForMode(mode = this.mode) { return applicationHelpers.displayNameForMode(mode); },
   },
   watch: {
+    mode() {
+      this.setCurrentItem();
+    },
     selectedObject(obj) {
       if (!obj) return;
       const row = this.$el.querySelector(`[data-id="${obj.id}"]`);
