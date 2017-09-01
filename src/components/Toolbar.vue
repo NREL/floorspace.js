@@ -28,6 +28,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       <div class="input-number">
         <label>spacing</label>
         <input v-model.number.lazy="spacing">
+        {{ rwUnits }}
       </div>
 
       <div class="input-number">
@@ -168,8 +169,11 @@ export default {
     },
     // spacing between gridlines, measured in RWU
     spacing: {
-      get() { return `${this.$store.state.project.grid.spacing} ${this.$store.state.project.config.units}`; },
+      get() { return this.$store.state.project.grid.spacing; },
       set(spacing) { this.$store.dispatch('project/setSpacing', { spacing }); },
+    },
+    rwUnits() {
+      return this.$store.state.project.config.units;
     },
     snapMode: {
       get() { return this.$store.state.application.currentSelections.snapMode; },
