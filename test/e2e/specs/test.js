@@ -51,7 +51,6 @@ module.exports = {
         .assert.elementCount('.poly', 0);
         done();
       })
-      .pause()
       .checkForErrors()
       .end();
   },
