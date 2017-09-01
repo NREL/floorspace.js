@@ -207,7 +207,7 @@ export default {
 
       return dist ? dist.toFixed(2) : '';
     })
-    .classed('guideline guideline-text',true)
+    .classed('guideline guideline-text guideline-dist',true)
     .attr("font-family", "sans-serif")
     .attr("fill", "red")
     .style("font-size","1em");
@@ -233,7 +233,7 @@ export default {
       .attr('x', this.rwuToGrid(x, 'x'))
       .attr('y', this.rwuToGrid(y, 'y'))
       .text(areaText)
-      .classed('guideline guideline-text guideLine',true)
+      .classed('guideline guideline-text guideline-area-text guideLine',true)
       .attr("text-anchor", "middle")
       .attr("font-family", "sans-serif")
       .attr("fill", "red")

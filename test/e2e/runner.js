@@ -1,6 +1,20 @@
 // 1. start the dev server using production config
-process.env.NODE_ENV = 'testing'
-var server = require('../../build/dev-server.js')
+process.env.NODE_ENV = 'testing';
+let server;
+process.on('uncaughtException', (err) => {
+  if (err.errno === 'EADDRINUSE') {
+    console.log('dev server already running');
+    // mock the close method
+    server = {
+      close: () => {},
+    };
+  } else {
+    console.log(err);
+    process.exit(1);
+  }
+});
+
+server = server || require('../../build/dev-server.js');
 
 // 2. run the nightwatch test suite against it
 // to run in additional browsers:
