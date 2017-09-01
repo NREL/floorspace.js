@@ -74,4 +74,20 @@ module.exports = {
       .checkForErrors()
       .end();
   },
+  'switch to spacing and back, preserve selected space': (browser) => {
+    const devServer = browser.globals.devServerURL;
+
+    failOnError(browser)
+      .url(devServer)
+      .resizeWindow(1000, 800)
+      .waitForElementVisible('.modal .new-floorplan', 5000)
+      .setFlagOnError()
+      .click('.modal .new-floorplan')
+      .click('#navigation #selections select option[value="shading"]')
+      .click('.add-sub-selection')
+      .click('#navigation #selections select option[value="spaces"]')
+      .assert.elementCount('#subselection-list .active', 1)
+      .checkForErrors()
+      .end();
+  },
 };
