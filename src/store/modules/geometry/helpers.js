@@ -398,8 +398,8 @@ const helpers = {
         })),
         get vertices() {
           return dropConsecutiveDups(
-            _.flatMap( this.edges, e => (e.reverse ? [e.v2, e.v1] : [e.v1, e.v2])),
-            v => v.id)
+            _.flatMap(this.edges, e => (e.reverse ? [e.v2, e.v1] : [e.v1, e.v2])),
+            v => v.id);
         },
       }));
     return {
