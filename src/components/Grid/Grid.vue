@@ -120,7 +120,7 @@ export default {
     },
     previousStoryPolygons() {
       if (this.previousStoryVisible && this.previousStoryGeometry) {
-        return this.polygonsFromGeometry(this.previousStoryGeometry);
+        return this.polygonsFromGeometry(this.previousStoryGeometry, { previous_story: true });
       }
       return [];
     },
@@ -176,7 +176,7 @@ export default {
   },
   methods: {
     ...methods,
-    polygonsFromGeometry(geometry) {
+    polygonsFromGeometry(geometry, extraPolygonAttrs = {}) {
       const geom = geometryHelpers.denormalize(geometry);
       const polygons = geom.faces.map((face) => {
         // look up the model (space or shading) associated with the face
@@ -190,6 +190,7 @@ export default {
             color: model.color,
             points,
             labelPosition: this.polygonLabelPosition(points),
+            ...extraPolygonAttrs,
           };
 
         // if the model is a space, set the polygon's color based on the current mode
