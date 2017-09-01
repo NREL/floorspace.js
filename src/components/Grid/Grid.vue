@@ -192,6 +192,9 @@ export default {
             labelPosition: this.polygonLabelPosition(points),
             ...extraPolygonAttrs,
           };
+        if (!points.length) {
+          return null; // don't render point-less polygons
+        }
 
         // if the model is a space, set the polygon's color based on the current mode
         if (model.type === 'space') {
@@ -209,7 +212,7 @@ export default {
         return polygon;
       });
 
-      return polygons;
+      return _.compact(polygons);
     }
   },
 };
