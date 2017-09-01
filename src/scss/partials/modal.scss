@@ -2,13 +2,15 @@
 
 .overlay {
     background-color: $gray-darkest;
-    height: 100vh;
-    left: 0;
     opacity: .5;
-    position: absolute;
+    position: fixed;
     top: 0;
+    left: 0;
     width: 100%;
+    height: 100%;
     z-index: 3;
+    pointer-events: all;
+    cursor: pointer;
 }
 .modal {
     background-color: $gray-medium;
