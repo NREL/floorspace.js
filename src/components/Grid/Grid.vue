@@ -120,37 +120,7 @@ export default {
     },
     previousStoryPolygons() {
       if (this.previousStoryVisible && this.previousStoryGeometry) {
-        return this.previousStoryGeometry.faces.map((face) => {
-          // look up the model (space or shading) associated with the face
-          const model = modelHelpers.modelForFace(this.$store.state.models, face.id);
-          const polygon = {
-            face_id: face.id,
-            previous_story: true,
-            color: model.color,
-            points: face.edgeRefs.map((edgeRef) => {
-              const edge = geometryHelpers.edgeForId(edgeRef.edge_id, this.previousStoryGeometry);
-              // use the vertex associated with v1 unless the edge reference on the face is reversed
-              const nextVertexId = edgeRef.reverse ? edge.v2 : edge.v1;
-              return geometryHelpers.vertexForId(nextVertexId, this.previousStoryGeometry);
-            }),
-          };
-          polygon.labelPosition = this.polygonLabelPosition(polygon.points);
-
-          // if the model is a space, set the polygon's color based on the current mode
-          if (model.type === 'space') {
-            if (this.currentMode === 'thermal_zones') {
-              const thermalZone = modelHelpers.libraryObjectWithId(this.$store.state.models, model.thermal_zone_id);
-              polygon.color = thermalZone ? thermalZone.color : applicationHelpers.config.palette.neutral;
-            } else if (this.currentMode === 'space_types') {
-              const spaceType = modelHelpers.libraryObjectWithId(this.$store.state.models, model.space_type_id);
-              polygon.color = spaceType ? spaceType.color : applicationHelpers.config.palette.neutral;
-            } else if (this.currentMode === 'building_units') {
-              const buildingUnit = modelHelpers.libraryObjectWithId(this.$store.state.models, model.building_unit_id);
-              polygon.color = buildingUnit ? buildingUnit.color : applicationHelpers.config.palette.neutral;
-            }
-          }
-          return polygon;
-        });
+        return this.polygonsFromGeometry(this.previousStoryGeometry, { previous_story: true });
       }
       return [];
     },
@@ -159,37 +129,7 @@ export default {
     * map all faces for the current story to polygon representations (sets of ordered points) for d3 to render
     */
     polygons() {
-      const currentStoryPolygons = this.currentStoryGeometry.faces.map((face) => {
-        // look up the model (space or shading) associated with the face
-        const model = modelHelpers.modelForFace(this.$store.state.models, face.id);
-        const polygon = {
-          face_id: face.id,
-          name: model.name,
-          color: model.color,
-          points: face.edgeRefs.map((edgeRef) => {
-            const edge = geometryHelpers.edgeForId(edgeRef.edge_id, this.currentStoryGeometry);
-            // use the vertex associated with v1 unless the edge reference on the face is reversed
-            const nextVertexId = edgeRef.reverse ? edge.v2 : edge.v1;
-            return geometryHelpers.vertexForId(nextVertexId, this.currentStoryGeometry);
-          }),
-        };
-        polygon.labelPosition = this.polygonLabelPosition(polygon.points);
-
-        // if the model is a space, set the polygon's color based on the current mode
-        if (model.type === 'space') {
-          if (this.currentMode === 'thermal_zones') {
-            const thermalZone = modelHelpers.libraryObjectWithId(this.$store.state.models, model.thermal_zone_id);
-            polygon.color = thermalZone ? thermalZone.color : applicationHelpers.config.palette.neutral;
-          } else if (this.currentMode === 'space_types') {
-            const spaceType = modelHelpers.libraryObjectWithId(this.$store.state.models, model.space_type_id);
-            polygon.color = spaceType ? spaceType.color : applicationHelpers.config.palette.neutral;
-          } else if (this.currentMode === 'building_units') {
-            const buildingUnit = modelHelpers.libraryObjectWithId(this.$store.state.models, model.building_unit_id);
-            polygon.color = buildingUnit ? buildingUnit.color : applicationHelpers.config.palette.neutral;
-          }
-        }
-        return polygon;
-      });
+      const currentStoryPolygons = this.polygonsFromGeometry(this.currentStoryGeometry);
       return this.previousStoryPolygons ? this.previousStoryPolygons.concat(currentStoryPolygons) : currentStoryPolygons;
     },
   },
@@ -234,7 +174,47 @@ export default {
       }
     },
   },
-  methods,
+  methods: {
+    ...methods,
+    polygonsFromGeometry(geometry, extraPolygonAttrs = {}) {
+      const geom = geometryHelpers.denormalize(geometry);
+      const polygons = geom.faces.map((face) => {
+        // look up the model (space or shading) associated with the face
+        const
+          model = modelHelpers.modelForFace(this.$store.state.models, face.id),
+          // <polygon> are automatically closed, so no need to repeat start vertex
+          points = face.vertices.slice(0, -1),
+          polygon = {
+            face_id: face.id,
+            name: model.name,
+            color: model.color,
+            points,
+            labelPosition: this.polygonLabelPosition(points),
+            ...extraPolygonAttrs,
+          };
+        if (!points.length) {
+          return null; // don't render point-less polygons
+        }
+
+        // if the model is a space, set the polygon's color based on the current mode
+        if (model.type === 'space') {
+          if (this.currentMode === 'thermal_zones') {
+            const thermalZone = modelHelpers.libraryObjectWithId(this.$store.state.models, model.thermal_zone_id);
+            polygon.color = thermalZone ? thermalZone.color : applicationHelpers.config.palette.neutral;
+          } else if (this.currentMode === 'space_types') {
+            const spaceType = modelHelpers.libraryObjectWithId(this.$store.state.models, model.space_type_id);
+            polygon.color = spaceType ? spaceType.color : applicationHelpers.config.palette.neutral;
+          } else if (this.currentMode === 'building_units') {
+            const buildingUnit = modelHelpers.libraryObjectWithId(this.$store.state.models, model.building_unit_id);
+            polygon.color = buildingUnit ? buildingUnit.color : applicationHelpers.config.palette.neutral;
+          }
+        }
+        return polygon;
+      });
+
+      return _.compact(polygons);
+    }
+  },
 };
 
 </script>

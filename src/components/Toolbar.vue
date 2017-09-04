@@ -55,7 +55,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <button @click="snapMode = 'grid-verts-edges'" :class="{ active: snapMode === 'grid-verts-edges' }">Edges too</button>
       </div>
       <div>
-        <button @click="tool = item" :class="{ active: tool === item }" v-for="item in availableTools">{{ item }}</button>
+        <button @click="tool = item" :class="{ active: tool === item }" v-for="item in availableTools" :data-tool="item">{{ item }}</button>
       </div>
     </section>
 
