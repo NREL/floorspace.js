@@ -25,10 +25,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <input type="checkbox" v-model="gridVisible">
       </div>
 
-      <div class="input-number">
+      <div class="input-number input-select">
         <label>spacing</label>
         <input v-model.number.lazy="spacing">
-        {{ rwUnits }}
+        <select ref="unitSelect" @change="updateUnits">
+          <option value="ft">ft</option>
+          <option value="m">m</option>
+        </select>
+        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
+            <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
+        </svg>
       </div>
 
       <div class="input-number">
@@ -121,6 +127,14 @@ export default {
     redo() {
       this.$store.timetravel.redo();
     },
+    updateUnits() {
+      if (this.allowSettingUnits) {
+        this.rwUnits = this.$refs.unitSelect.value;
+      } else {
+        window.eventBus.$emit('error', 'Units must be set before any geometry is drawn.');
+        this.$refs.unitSelect.value = this.rwUnits;
+      }
+    },
   },
   computed: {
     ...mapState({
@@ -128,6 +142,7 @@ export default {
       mapEnabled: state => state.project.map.enabled,
       timetravelInitialized: state => state.timetravelInitialized,
       showImportExport: state => state.project.showImportExport,
+      allowSettingUnits: state => state.geometry.length === 1 && state.geometry[0].vertices.length === 0,
     }),
     availableTools() {
       return this.$store.state.application.tools
@@ -172,8 +187,9 @@ export default {
       get() { return this.$store.state.project.grid.spacing; },
       set(spacing) { this.$store.dispatch('project/setSpacing', { spacing }); },
     },
-    rwUnits() {
-      return this.$store.state.project.config.units;
+    rwUnits: {
+      get() { return this.$store.state.project.config.units; },
+      set(units) { this.$store.dispatch('project/setUnits', { units }); },
     },
     snapMode: {
       get() { return this.$store.state.application.currentSelections.snapMode; },
