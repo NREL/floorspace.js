@@ -390,7 +390,6 @@ export default {
     const that = this;
     const drag = d3.drag()
       .on('start', (d) => {
-        // remove text label when dragging
         [startX, startY] = d3.mouse(this.$refs.grid);
         if (this.currentTool === 'Select' && !d.previous_story) {
 
@@ -426,7 +425,7 @@ export default {
         });
       });
 
-    if (this.currentTool === 'Select') {
+    if (this.currentTool === 'Select' || this.currentTool === 'Fill') {
       polygons.call(drag);
     }
   },
