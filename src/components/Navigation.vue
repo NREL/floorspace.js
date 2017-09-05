@@ -270,6 +270,7 @@ export default {
               x: that.min_x + (rwuWidth / 2),
               y: that.max_y - (rwuHeight / 2),
             });
+            that.$refs.fileInput.value = '';
           };
           image.src = reader.result;
         }, false);
@@ -285,6 +286,7 @@ export default {
       switch (mode) {
         case 'stories':
           this.$store.dispatch('models/initStory');
+          this.setCurrentItem();
           return;
         case 'spaces':
           this.$store.dispatch('models/initSpace', { story: this.currentStory });
@@ -314,6 +316,7 @@ export default {
       switch (mode) {
         case 'stories':
           this.$store.dispatch('models/destroyStory', { story: item });
+          this.setCurrentItem();
           break;
         case 'spaces':
           this.$store.dispatch('models/destroySpace', {

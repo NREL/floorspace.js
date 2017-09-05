@@ -140,7 +140,7 @@ export default {
       imageGroup
         .add(imageObj)
         .add(imageCenter)
-        .setZIndex(image.z)
+        .setZIndex(image.id)
         .rotation(image.r);
 
       // load image
