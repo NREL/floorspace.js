@@ -20,7 +20,7 @@
     "js-clipper": "^1.0.1",
     "konva": "^1.5.0",
     "lodash": "^4.17.4",
-    "openlayers": "^4.1.0",
+    "openlayers": "4.3.1",
     "polylabel": "^1.0.2",
     "vue": "^2.1.0",
     "vuex": "^2.1.1"
