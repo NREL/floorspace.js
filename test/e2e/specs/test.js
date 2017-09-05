@@ -70,4 +70,19 @@ module.exports = {
       .checkForErrors()
       .end();
   },
+  'switch to images, add story. should still be on images': (browser) => {
+    const devServer = browser.globals.devServerURL;
+
+    failOnError(browser)
+      .url(devServer)
+      .resizeWindow(1000, 800)
+      .waitForElementVisible('.modal .new-floorplan', 5000)
+      .setFlagOnError()
+      .click('.modal .new-floorplan')
+      .click('#navigation #selections select option[value="images"]')
+      .click('.create-story')
+      .assert.value('#navigation #selections select', 'images')
+      .checkForErrors()
+      .end();
+  },
 };
