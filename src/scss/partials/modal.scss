@@ -2,10 +2,10 @@
 
 .overlay {
     background-color: $gray-darkest;
-    height: 100vh;
+    height: 100%;
     left: 0;
     opacity: .5;
-    position: absolute;
+    position: fixed;
     top: 0;
     width: 100%;
     z-index: 3;
