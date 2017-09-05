@@ -58,20 +58,32 @@
         z-index: 3;
         pointer-events: all;
         stroke: $gray-light;
-        &.current {
-            stroke: $secondary;
-            stroke-width: 2px;
-        }
-        &.previousStory, &.guideLine {
-            fill-opacity: 0.3;
-            z-index: -1;
-        }
-		&.previousStory {
-			stroke-dasharray: 10;
-			stroke: $black;
-			stroke-width: 2;
+        &.domain {
+          stroke: #fff;
         }
     }
+
+    .current {
+      polygon, rect, path {
+        stroke: $secondary;
+        stroke-width: 2px;
+      }
+    }
+
+    .previousStory {
+      polygon, rect, path {
+        stroke-dasharray: 10;
+        stroke: $black;
+        stroke-width: 2;
+      }
+    }
+    .previousStory, .guideLine {
+      polygon, rect, path {
+        fill-opacity: 0.3;
+        z-index: -1;
+      }
+    }
+
     rect.view {
       fill-opacity: 0;
     }

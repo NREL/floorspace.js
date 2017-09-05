@@ -169,11 +169,6 @@ export default {
       d3.select('#reticle').remove();
 
       this.gridVisible = this.showGrid;
-      if (!this.$store.timetravel) {
-        if (!this.$store.state.project.map.enabled || (this.$store.state.project.map.enabled && this.$store.state.project.map.initialized)) {
-          window.eventBus.$emit('initTimetravel');
-        }
-      }
     },
 
     /*

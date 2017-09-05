@@ -1,5 +1,24 @@
 language: node_js
 node_js:
   - "6"
+sudo: required
+dist: trusty
+env:
+  - NODE_ENV=PROD
+before_install:
+  - export CHROME_BIN=/usr/bin/google-chrome
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  - sudo apt-get update
+  - sudo apt-get install -y libappindicator1 fonts-liberation
+  - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+  - sudo dpkg -i google-chrome*.deb
+install:
+  - npm install
+  - npm update
+script:
+  - jdk_switcher use oraclejdk8
+  - npm run test
 notifications:
   email: false
+script: npm run test && node check_version.js

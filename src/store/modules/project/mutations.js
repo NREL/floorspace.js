@@ -94,7 +94,10 @@ export default {
             state.previous_story.visible = payload.visible;
         }
     },
-    setShowImportExport(state, payload) {
-      state.showImportExport = payload;
-    }
+  setShowImportExport(state, payload) {
+    state.showImportExport = payload;
+  },
+  setTransform(state, payload) {
+    state.transform = payload;
+  },
 }

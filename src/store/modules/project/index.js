@@ -13,14 +13,14 @@ export default {
     },
     grid: {
       visible: true,
-      spacing: 50
+      spacing: 5,
     },
     view: {
       // grid boundaties in rwu
-      min_x: 0,
-      min_y: 0,
-      max_x: 1000,
-      max_y: 1000
+      min_x: -250,
+      min_y: -150,
+      max_x: 250,
+      max_y: 150,
     },
     map: {
       initialized: false,
@@ -36,6 +36,9 @@ export default {
       visible: true
     },
     showImportExport: true,
+    transform: {
+      k: 1, x: 0, y: 0,
+    },
   },
   actions: actions,
   mutations: mutations,

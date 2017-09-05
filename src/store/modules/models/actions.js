@@ -13,7 +13,7 @@ export default {
       context.dispatch('geometry/initGeometry', { story_id: story.id }, { root: true });
       // create space and select
       context.dispatch('initSpace', { story });
-      context.dispatch('selectStoryAndSpace', { story });
+      context.dispatch('selectStory', { story });
     },
 
     initSpace (context, payload) {
@@ -42,7 +42,7 @@ export default {
       if (stories.length === 0) {
         context.dispatch('initStory');
       } else {
-        context.dispatch('selectStoryAndSpace', { story: stories[storyIndex - 1] });
+        context.dispatch('selectStory', { story: stories[storyIndex - 1] });
       }
     },
 
@@ -178,22 +178,17 @@ export default {
   createImageForStory(context, payload) {
     const story = context.state.stories.find(s => s.id === payload.story_id);
     const name = helpers.generateName(context.state, 'images', story);
-    const img = new Image();
+    const image = new factory.Image(name, payload.src);
 
-    img.onload = () => {
-      const image = new factory.Image(name, payload.src);
+    image.height = payload.height;
+    image.width = payload.width;
+    image.x = payload.x;
+    image.y = payload.y;
 
-      image.height = payload.height;
-      image.width = payload.width;
-      image.x = payload.x;
-      image.y = payload.y;
-
-      context.commit('createImageForStory', {
-        story_id: story.id,
-        image,
-      });
-    };
-    img.src = payload.src;
+    context.commit('createImageForStory', {
+      story_id: story.id,
+      image,
+    });
   },
 
     createObjectWithType (context, payload) {
@@ -204,15 +199,8 @@ export default {
         context.commit('initObject', { type, object });
     },
 
-    selectStoryAndSpace (context, payload) {
-        const story = payload.story,
-            // select last space
-            space = story.spaces[story.spaces.length - 1];
-
-
-        context.dispatch('application/setCurrentStoryId', { id: story.id }, { root: true });
-
-        context.dispatch('application/setCurrentSubSelectionId', { id: space.id }, { root: true });
-        context.dispatch('application/setCurrentMode', { mode: 'spaces' }, { root: true });
-    }
+  selectStory(context, payload) {
+    const story = payload.story;
+    context.dispatch('application/setCurrentStoryId', { id: story.id }, { root: true });
+  },
 }

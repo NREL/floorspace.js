@@ -28,7 +28,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 {{displayNameForMode(mode)}}
             </button>
 
-            <button v-if="mode!=='images'" @click="createItem()">
+            <button v-if="mode!=='images'" @click="createItem()" class="add-sub-selection">
                 <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
                     <path d="M208 122h-74V48c0-3.534-2.466-6.4-6-6.4s-6 2.866-6 6.4v74H48c-3.534 0-6.4 2.466-6.4 6s2.866 6 6.4 6h74v74c0 3.534 2.466 6.4 6 6.4s6-2.866 6-6.4v-74h74c3.534 0 6.4-2.466 6.4-6s-2.866-6-6.4-6z"/>
                 </svg>
@@ -37,7 +37,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </section>
 
         <section id="breadcrumbs">
-            <button @click="createItem('stories')">
+            <button @click="createItem('stories')" class="create-story">
                 <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
                     <path d="M208 122h-74V48c0-3.534-2.466-6.4-6-6.4s-6 2.866-6 6.4v74H48c-3.534 0-6.4 2.466-6.4 6s2.866 6 6.4 6h74v74c0 3.534 2.466 6.4 6 6.4s6-2.866 6-6.4v-74h74c3.534 0 6.4-2.466 6.4-6s-2.866-6-6.4-6z"/>
                 </svg>
@@ -125,8 +125,6 @@ export default {
       max_y: state => state.project.view.max_y,
       min_x: state => state.project.view.min_x,
       min_y: state => state.project.view.min_y,
-      scaleX: state => state.application.scale.x,
-      scaleY: state => state.application.scale.y,
     }),
 
     ...mapGetters({
@@ -272,6 +270,7 @@ export default {
               x: that.min_x + (rwuWidth / 2),
               y: that.max_y - (rwuHeight / 2),
             });
+            that.$refs.fileInput.value = '';
           };
           image.src = reader.result;
         }, false);
@@ -287,6 +286,7 @@ export default {
       switch (mode) {
         case 'stories':
           this.$store.dispatch('models/initStory');
+          this.setCurrentItem();
           return;
         case 'spaces':
           this.$store.dispatch('models/initSpace', { story: this.currentStory });
@@ -316,6 +316,7 @@ export default {
       switch (mode) {
         case 'stories':
           this.$store.dispatch('models/destroyStory', { story: item });
+          this.setCurrentItem();
           break;
         case 'spaces':
           this.$store.dispatch('models/destroySpace', {
@@ -376,7 +377,7 @@ export default {
       // to be used when, ex changing stories or deleting an item.
       // According to issue #134, we don't want to ever allow a situation
       // where no item is selected.
-      if (this.items.length && !this.selectedObject) {
+      if (this.items.length && (!this.selectedObject || !_.includes(_.map(this.items, 'id'), this.selectedObject.id))) {
         this.selectedObject = this.items[0];
       }
     },
@@ -387,13 +388,18 @@ export default {
     displayNameForMode(mode = this.mode) { return applicationHelpers.displayNameForMode(mode); },
   },
   watch: {
+    mode() {
+      this.setCurrentItem();
+    },
     selectedObject(obj) {
+      if (!obj) return;
       const row = this.$el.querySelector(`[data-id="${obj.id}"]`);
       if (row) {
         row.scrollIntoView();
       }
     },
     currentStory(obj) {
+      if (!obj) return;
       const row = this.$el.querySelector(`[data-id="${obj.id}"]`);
       if (row) {
         row.scrollIntoView();

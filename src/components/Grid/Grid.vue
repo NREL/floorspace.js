@@ -28,14 +28,6 @@ export default {
   data() {
     return {
       points: [], // points for the face currently being drawn
-      original_bounds: {
-        min_x: null,
-        min_y: null,
-        max_x: null,
-        max_y: null,
-        pxWidth: null,
-        pxHeight: null,
-      },
       axis: {
         x: null,
         y: null,
@@ -44,14 +36,7 @@ export default {
         x: null,
         y: null,
       },
-      transform: {
-        x: 0,
-        y: 0,
-        k: 1, // relative (to window after resize) zoom
-        kAbs: 1, // absolute zoom
-      },
       handleMouseMove: null, // placeholder --> overwritten in mounted()
-      forceGridHide: false,
     };
   },
   mounted() {
@@ -60,27 +45,23 @@ export default {
     this.renderGrid = debounce(this.renderGrid, 5);
 
     // add event listeners
-    this.$refs.grid.addEventListener('reloadGrid', this.renderGrid);
-    this.$refs.grid.addEventListener('click', this.gridClicked);
-    this.$refs.grid.addEventListener('mousemove', this.handleMouseMove);
+    this.$refs.grid.addEventListener('reloadGrid', this.reloadGridAndScales);
 
     window.addEventListener('keyup', this.escapeAction);
-    window.addEventListener('resize', this.renderGrid);
+    window.addEventListener('resize', this.reloadGridAndScales);
 
-    ResizeEvents.$on('resize', this.renderGrid);
+    ResizeEvents.$on('resize', this.reloadGridAndScales);
 
     // render grid first time
     this.renderGrid();
   },
   beforeDestroy() {
-    this.$refs.grid.removeEventListener('reloadGrid', this.renderGrid);
-    this.$refs.grid.removeEventListener('click', this.gridClicked);
-    this.$refs.grid.removeEventListener('mousemove', this.handleMouseMove);
+    this.$refs.grid.removeEventListener('reloadGrid', this.reloadGridAndScales);
 
     window.removeEventListener('keyup', this.escapeAction);
-    window.removeEventListener('resize', this.renderGrid);
+    window.removeEventListener('resize', this.reloadGridAndScales);
 
-    ResizeEvents.$off('resize', this.renderGrid);
+    ResizeEvents.$off('resize', this.reloadGridAndScales);
   },
   computed: {
 
@@ -123,6 +104,10 @@ export default {
       get() { return this.$store.state.project.view.max_y; },
       set(val) { this.$store.dispatch('project/setViewMaxY', { max_y: val }); },
     },
+    transform: {
+      get() { return this.$store.state.project.transform; },
+      set(t) { this.$store.dispatch('project/setTransform', t); },
+    },
     // previous story
     previousStory() {
       const currentStoryNumber = this.$store.state.models.stories.findIndex(s => s === this.currentStory);
@@ -135,36 +120,7 @@ export default {
     },
     previousStoryPolygons() {
       if (this.previousStoryVisible && this.previousStoryGeometry) {
-        return this.previousStoryGeometry.faces.map((face) => {
-          // look up the model (space or shading) associated with the face
-          const model = modelHelpers.modelForFace(this.$store.state.models, face.id);
-          const polygon = {
-            face_id: face.id,
-            previous_story: true,
-            color: model.color,
-            points: face.edgeRefs.map((edgeRef) => {
-              const edge = geometryHelpers.edgeForId(edgeRef.edge_id, this.previousStoryGeometry);
-              // use the vertex associated with v1 unless the edge reference on the face is reversed
-              const nextVertexId = edgeRef.reverse ? edge.v2 : edge.v1;
-              return geometryHelpers.vertexForId(nextVertexId, this.previousStoryGeometry);
-            }),
-          };
-
-          // if the model is a space, set the polygon's color based on the current mode
-          if (model.type === 'space') {
-            if (this.currentMode === 'thermal_zones') {
-              const thermalZone = modelHelpers.libraryObjectWithId(this.$store.state.models, model.thermal_zone_id);
-              polygon.color = thermalZone ? thermalZone.color : applicationHelpers.config.palette.neutral;
-            } else if (this.currentMode === 'space_types') {
-              const spaceType = modelHelpers.libraryObjectWithId(this.$store.state.models, model.space_type_id);
-              polygon.color = spaceType ? spaceType.color : applicationHelpers.config.palette.neutral;
-            } else if (this.currentMode === 'building_units') {
-              const buildingUnit = modelHelpers.libraryObjectWithId(this.$store.state.models, model.building_unit_id);
-              polygon.color = buildingUnit ? buildingUnit.color : applicationHelpers.config.palette.neutral;
-            }
-          }
-          return polygon;
-        });
+        return this.polygonsFromGeometry(this.previousStoryGeometry, { previous_story: true });
       }
       return [];
     },
@@ -173,44 +129,15 @@ export default {
     * map all faces for the current story to polygon representations (sets of ordered points) for d3 to render
     */
     polygons() {
-      const currentStoryPolygons = this.currentStoryGeometry.faces.map((face) => {
-        // look up the model (space or shading) associated with the face
-        const model = modelHelpers.modelForFace(this.$store.state.models, face.id);
-        const polygon = {
-          face_id: face.id,
-          name: model.name,
-          color: model.color,
-          points: face.edgeRefs.map((edgeRef) => {
-            const edge = geometryHelpers.edgeForId(edgeRef.edge_id, this.currentStoryGeometry);
-            // use the vertex associated with v1 unless the edge reference on the face is reversed
-            const nextVertexId = edgeRef.reverse ? edge.v2 : edge.v1;
-            return geometryHelpers.vertexForId(nextVertexId, this.currentStoryGeometry);
-          }),
-        };
-
-        // if the model is a space, set the polygon's color based on the current mode
-        if (model.type === 'space') {
-          if (this.currentMode === 'thermal_zones') {
-            const thermalZone = modelHelpers.libraryObjectWithId(this.$store.state.models, model.thermal_zone_id);
-            polygon.color = thermalZone ? thermalZone.color : applicationHelpers.config.palette.neutral;
-          } else if (this.currentMode === 'space_types') {
-            const spaceType = modelHelpers.libraryObjectWithId(this.$store.state.models, model.space_type_id);
-            polygon.color = spaceType ? spaceType.color : applicationHelpers.config.palette.neutral;
-          } else if (this.currentMode === 'building_units') {
-            const buildingUnit = modelHelpers.libraryObjectWithId(this.$store.state.models, model.building_unit_id);
-            polygon.color = buildingUnit ? buildingUnit.color : applicationHelpers.config.palette.neutral;
-          }
-        }
-        return polygon;
-      });
+      const currentStoryPolygons = this.polygonsFromGeometry(this.currentStoryGeometry);
       return this.previousStoryPolygons ? this.previousStoryPolygons.concat(currentStoryPolygons) : currentStoryPolygons;
     },
   },
   watch: {
+    // showTicks() { this.showOrHideAxes(); },
     // TODO: method for when new view dimensions are imported or the px dimensions change
-    gridVisible() { this.updateGrid(); },
+    gridVisible() { this.showOrHideAxes(); },
     spacing() { this.updateGrid(); },
-    forceGridHide() { this.updateGrid(); },
 
     currentMode() { this.drawPolygons(); },
     polygons() { this.drawPolygons(); },
@@ -234,23 +161,60 @@ export default {
       this.drawPoints();
     },
     transform(newTransform, lastTransform) {
-      // hide grid if zoomed out enough
-      this.forceGridHide = (newTransform.kAbs < 0.1);
-
       // hide polygon names if zoomed out enough
-      if (newTransform.kAbs < 0.5) {
+      if (newTransform.k < 0.5) {
         d3.select('#svg-grid').selectAll('.polygon-text').style('display', 'none');
       } else {
-        d3.select('#svg-grid').selectAll('.polgyon-text').style('display', 'initial');
+        d3.select('#svg-grid').selectAll('.polygon-text').style('display', 'initial');
       }
 
       // cancel current drawing action if actual zoom and not just accidental drag
-      if (this.points.length && (newTransform.kAbs !== lastTransform.kAbs || Math.abs(lastTransform.y - newTransform.y) > 3 || Math.abs(lastTransform.x - newTransform.x) > 3)) {
+      if (this.points.length && (newTransform.k !== lastTransform.k || Math.abs(lastTransform.y - newTransform.y) > 3 || Math.abs(lastTransform.x - newTransform.x) > 3)) {
         this.points = [];
       }
     },
   },
-  methods,
+  methods: {
+    ...methods,
+    polygonsFromGeometry(geometry, extraPolygonAttrs = {}) {
+      const geom = geometryHelpers.denormalize(geometry);
+      const polygons = geom.faces.map((face) => {
+        // look up the model (space or shading) associated with the face
+        const
+          model = modelHelpers.modelForFace(this.$store.state.models, face.id),
+          // <polygon> are automatically closed, so no need to repeat start vertex
+          points = face.vertices.slice(0, -1),
+          polygon = {
+            face_id: face.id,
+            name: model.name,
+            color: model.color,
+            points,
+            labelPosition: this.polygonLabelPosition(points),
+            ...extraPolygonAttrs,
+          };
+        if (!points.length) {
+          return null; // don't render point-less polygons
+        }
+
+        // if the model is a space, set the polygon's color based on the current mode
+        if (model.type === 'space') {
+          if (this.currentMode === 'thermal_zones') {
+            const thermalZone = modelHelpers.libraryObjectWithId(this.$store.state.models, model.thermal_zone_id);
+            polygon.color = thermalZone ? thermalZone.color : applicationHelpers.config.palette.neutral;
+          } else if (this.currentMode === 'space_types') {
+            const spaceType = modelHelpers.libraryObjectWithId(this.$store.state.models, model.space_type_id);
+            polygon.color = spaceType ? spaceType.color : applicationHelpers.config.palette.neutral;
+          } else if (this.currentMode === 'building_units') {
+            const buildingUnit = modelHelpers.libraryObjectWithId(this.$store.state.models, model.building_unit_id);
+            polygon.color = buildingUnit ? buildingUnit.color : applicationHelpers.config.palette.neutral;
+          }
+        }
+        return polygon;
+      });
+
+      return _.compact(polygons);
+    }
+  },
 };
 
 </script>

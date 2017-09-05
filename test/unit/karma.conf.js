@@ -12,6 +12,10 @@ var projectRoot = path.resolve(__dirname, '../../')
 
 var webpackConfig = merge(baseConfig, {
   // use inline sourcemap for karma-sourcemap-loader
+  browser: {
+    child_process: 'empty',
+    fs: 'empty',
+  },
   module: {
     loaders: utils.styleLoaders()
   },
