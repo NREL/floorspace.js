@@ -383,6 +383,33 @@ export default {
   },
   registerDrag() {
     const polygons = d3.select('#grid svg').selectAll('polygon');
+
+    this.deregisterD3Events(polygons);
+    if (this.currentTool === 'Select') {
+      this.registerSelectEvents(polygons);
+    } else if (this.currentTool === 'Fill') {
+      this.registerFillEvents(polygons);
+    }
+  },
+  deregisterD3Events(polygons) {
+    polygons
+      .on('.drag', null)
+      .on('click', null);
+  },
+
+  registerFillEvents(polygons) {
+    polygons.on('click', (d) => {
+      if (this.currentTool === 'Fill' && (this.currentSpace || this.currentShading)) {
+        this.points = d.points.map(p => ({
+          x: this.rwuToGrid(p.x, 'x'),
+          y: this.rwuToGrid(p.y, 'y'),
+        }));
+        this.savePolygonFace();
+      }
+    });
+  },
+
+  registerSelectEvents(polygons) {
     // store total drag offset (grid units)
     let startX, startY;
 
@@ -392,18 +419,9 @@ export default {
       .on('start', (d) => {
         [startX, startY] = d3.mouse(this.$refs.grid);
         if (this.currentTool === 'Select' && !d.previous_story) {
-
           // if a face on the current story is clicked while the Select tool is active
           // lookup its corresponding model (space/shading) and select it
           this.currentSubSelection = modelHelpers.modelForFace(this.$store.state.models, d.face_id);
-        } else if (this.currentTool === 'Fill' && (this.currentSpace || this.currentShading)) {
-          // if a face on the current story is clicked while the Select tool is active
-          // lookup its corresponding model (space/shading) and select it
-          this.points = d.points.map(p => ({
-            x: this.rwuToGrid(p.x, 'x'),
-            y: this.rwuToGrid(p.y, 'y'),
-          }));
-          this.savePolygonFace();
         }
       })
       .on('drag', (d) => {
@@ -424,10 +442,7 @@ export default {
           dy: this.gridToRWU(endY, 'y') - this.gridToRWU(startY, 'y'),
         });
       });
-
-    if (this.currentTool === 'Select' || this.currentTool === 'Fill') {
-      polygons.call(drag);
-    }
+    polygons.call(drag);
   },
   /*
   * render saved faces as polygons
