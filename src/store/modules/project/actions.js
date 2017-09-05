@@ -2,11 +2,11 @@ import Validator from './../../utilities/validator.js'
 
 export default {
     // CONFIG
-    setUnits (context, payload) {
-        if (payload.units === 'm' || payload.units === 'ft') {
-            context.commit('setUnits', payload);
-        }
-    },
+  setUnits(context, payload) {
+    if (payload.units === 'm' || payload.units === 'ft') {
+      context.commit('setUnits', payload);
+    }
+  },
     setLanguage (context, payload) {
         if (payload.language === 'EN-US') {
             context.commit('setLanguage', payload);
