@@ -8,7 +8,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
 <aside>
-    <div @click="$emit('close')" class="overlay"></div>
+    <div class="overlay"></div>
     <div class="modal">
         <header>
             <h2>Quick Start</h2>
