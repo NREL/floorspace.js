@@ -286,6 +286,7 @@ export default {
       switch (mode) {
         case 'stories':
           this.$store.dispatch('models/initStory');
+          this.setCurrentItem();
           return;
         case 'spaces':
           this.$store.dispatch('models/initSpace', { story: this.currentStory });
@@ -315,6 +316,7 @@ export default {
       switch (mode) {
         case 'stories':
           this.$store.dispatch('models/destroyStory', { story: item });
+          this.setCurrentItem();
           break;
         case 'spaces':
           this.$store.dispatch('models/destroySpace', {
