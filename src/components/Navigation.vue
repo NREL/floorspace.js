@@ -270,6 +270,7 @@ export default {
               x: that.min_x + (rwuWidth / 2),
               y: that.max_y - (rwuHeight / 2),
             });
+            that.$refs.fileInput.value = '';
           };
           image.src = reader.result;
         }, false);
