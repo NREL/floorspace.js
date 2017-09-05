@@ -399,7 +399,7 @@ export default {
 
   registerFillEvents(polygons) {
     polygons.on('click', (d) => {
-      if (this.currentTool === 'Fill' && (this.currentSpace || this.currentShading)) {
+      if (this.currentSpace || this.currentShading) {
         this.points = d.points.map(p => ({
           x: this.rwuToGrid(p.x, 'x'),
           y: this.rwuToGrid(p.y, 'y'),
@@ -414,25 +414,23 @@ export default {
     let startX, startY;
 
     // polygon drag handler
-    const that = this;
     const drag = d3.drag()
       .on('start', (d) => {
         [startX, startY] = d3.mouse(this.$refs.grid);
-        if (this.currentTool === 'Select' && !d.previous_story) {
-          // if a face on the current story is clicked while the Select tool is active
-          // lookup its corresponding model (space/shading) and select it
-          this.currentSubSelection = modelHelpers.modelForFace(this.$store.state.models, d.face_id);
-        }
+        if (d.previous_story) { return; }
+        // if a face on the current story is clicked while the Select tool is active
+        // lookup its corresponding model (space/shading) and select it
+        this.currentSubSelection = modelHelpers.modelForFace(this.$store.state.models, d.face_id);
       })
       .on('drag', (d) => {
-        if (that.currentTool !== 'Select' || d.previous_story) { return; }
+        if (d.previous_story) { return; }
 
         const [currX, currY] = d3.mouse(this.$refs.grid);
         d3.select(`#poly-${d.face_id}`)
           .attr('transform', () => `translate(${currX - startX}, ${currY - startY})`);
       })
       .on('end', (d) => {
-        if (this.currentTool !== 'Select' || d.previous_story) { return; }
+        if (d.previous_story) { return; }
 
         // when the drag is finished, update the face in the store with the total offset in RWU
         const [endX, endY] = d3.mouse(this.$refs.grid);
