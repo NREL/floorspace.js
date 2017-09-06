@@ -1,7 +1,13 @@
+import _ from 'lodash';
 import factory from './../factory.js'
 import geometryHelpers from './../helpers'
 import modelHelpers from './../../models/helpers'
-import createFaceFromPoints, { eraseSelection } from './createFaceFromPoints'
+import createFaceFromPoints, { matchOrCreateEdges, eraseSelection, newGeometriesOfOverlappedFaces, validateFaceGeometry } from './createFaceFromPoints'
+
+export function getOrCreateVertex(geometry, coords) {
+  return geometryHelpers.vertexForCoordinates(coords, geometry) || factory.Vertex(coords.x, coords.y);
+}
+
 
 export default {
     /*
@@ -31,43 +37,54 @@ export default {
       }
   	},
 
-    /*
-    * Given a dx, dy, and face
-    * clone the face with all points adjusted by the delta and destroy the original
-    * this will trigger all set operations
-    */
-    moveFaceByOffset (context, payload) {
-        const { face_id, dx, dy } = payload,
-            currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'],
-            face = geometryHelpers.faceForId(face_id, currentStoryGeometry),
-            movedPoints = geometryHelpers.verticesForFaceId(face.id, currentStoryGeometry).map(v => ({
-                x: v.x + dx,
-                y: v.y + dy
-            })),
-            affectedModel = modelHelpers.modelForFace(context.rootState.models, face.id);
+  /*
+  * Given a dx, dy, and face
+  * clone the face with all points adjusted by the delta and destroy the original
+  * this will trigger all set operations
+  */
+  moveFaceByOffset(context, payload) {
+    const
+      { face_id, dx, dy } = payload,
+      currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'],
+      face = geometryHelpers.faceForId(face_id, currentStoryGeometry),
+      movedPoints = geometryHelpers.verticesForFaceId(face.id, currentStoryGeometry).map(v => ({
+        x: v.x + dx,
+        y: v.y + dy,
+      })),
+      newGeoms = newGeometriesOfOverlappedFaces(
+        movedPoints,
+        // Don't consider face we're modifying as a reason to disqualify the action.
+        geometryHelpers.exceptFace(currentStoryGeometry, face_id),
+      );
 
-        // destroy existing face
-        context.dispatch(affectedModel.type === 'space' ? 'models/updateSpaceWithData' : 'models/updateShadingWithData', {
-            [affectedModel.type]: affectedModel,
-            face_id: null
-        }, { root: true });
+    if (newGeoms.error) {
+      window.eventBus.$emit('error', `Operation cancelled - ${newGeoms.error}`);
 
-        context.dispatch('destroyFaceAndDescendents', {
-            geometry_id: currentStoryGeometry.id,
-            face: face
-        });
+      window.eventBus.$emit('reload-grid');
+      return;
+    }
 
-        // create new face from adjusted points
-        context.dispatch('createFaceFromPoints', {
-            model_id: affectedModel.id,
-            points: movedPoints
-        });
-    },
-    /*
-    * create a face and associated edges and vertices from an array of points
-    * associate the face with the space or shading included in the payload
-    */
-    createFaceFromPoints: createFaceFromPoints,
+    const movedGeom = validateFaceGeometry(movedPoints, currentStoryGeometry);
+    if (!movedGeom) {
+      window.eventBus.$emit('error', movedGeom.error);
+      window.eventBus.$emit('reload-grid');
+      return;
+    }
+
+    newGeoms.forEach(newGeom => context.dispatch('replaceFacePoints', newGeom));
+
+    context.dispatch('replaceFacePoints', {
+      geometry_id: currentStoryGeometry.id,
+      face_id,
+      vertices: movedGeom.vertices,
+      edges: movedGeom.edges,
+    });
+  },
+  /*
+  * create a face and associated edges and vertices from an array of points
+  * associate the face with the space or shading included in the payload
+  */
+  createFaceFromPoints,
 
     // convert the splitting edge into two new edges
     splitEdge (context, payload) {
@@ -147,5 +164,14 @@ export default {
       context.commit('destroyGeometry', { id: face.id });
       expEdgeRefs.forEach(edgeRef => context.commit('destroyGeometry', { id: edgeRef.edge_id }));
       expVertices.forEach(vertex => context.commit('destroyGeometry', { id: vertex.id }));
-    }
+    },
+
+  replaceFacePoints(context, { geometry_id, face_id, vertices, edges }) {
+    context.commit('replaceFacePoints', {
+      geometry_id,
+      vertices,
+      edges,
+      face_id,
+    });
+  },
 }

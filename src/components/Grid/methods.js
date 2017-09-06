@@ -8,33 +8,42 @@
 
 const d3 = require('d3');
 const polylabel = require('polylabel');
+import _ from 'lodash';
+import { snapTargets } from './snapping';
+import geometryHelpers from './../../store/modules/geometry/helpers';
+import modelHelpers from './../../store/modules/models/helpers';
+import { ResizeEvents } from '../../components/Resize';
 
-import geometryHelpers from './../../store/modules/geometry/helpers.js'
-import modelHelpers from './../../store/modules/models/helpers.js'
+function ticksInRange(start, stop, spacing) {
+  return _.range(
+    Math.ceil(start / spacing) * spacing,
+    stop,
+    spacing);
+}
 
 export default {
   // ****************** USER INTERACTION EVENTS ****************** //
   /*
   * handle a click on the svg grid
   */
-  gridClicked(e) {
+  gridClicked() {
     if (this.currentTool === 'Eraser' ||
     ((this.currentTool === 'Rectangle' || this.currentTool === 'Polygon') && (this.currentSpace || this.currentShading))) {
-      this.addPoint(e);
+      this.addPoint();
     }
     if (this.currentTool === 'Place Component') {
       if (this.currentComponentType === 'window_definitions') {
-        this.placeWindow(e);
+        this.placeWindow();
       } else if (this.currentComponentType === 'daylighting_control_definitions') {
-        this.placeDaylightingControl(e);
+        this.placeDaylightingControl();
       }
     }
   },
-  placeWindow(e) {
-    const gridPoint = {
-      x: this.pxToGrid(e.offsetX, 'x'),
-      y: this.pxToGrid(e.offsetY, 'y'),
-    };
+  placeWindow() {
+    const
+      gridCoords = d3.mouse(this.$refs.grid),
+      gridPoint = { x: gridCoords[0], y: gridCoords[1] };
+
     // snap only to edges
     const snapTarget = this.findSnapTarget(gridPoint/*, { edge_component: true }*/);
 
@@ -44,16 +53,14 @@ export default {
       window.eventBus.$emit('error', 'Windows must be on edges.');
     }
   },
-  placeDaylightingControl(e) {
-    const gridPoint = {
-      x: this.pxToGrid(e.offsetX, 'x'),
-      y: this.pxToGrid(e.offsetY, 'y'),
-    };
-
-    const rwuPoint = {
-      x: this.pxToRWU(e.offsetX, 'x'),
-      y: this.pxToRWU(e.offsetY, 'y'),
-    };
+  placeDaylightingControl() {
+    const
+      gridCoords = d3.mouse(this.$refs.grid),
+      gridPoint = { x: gridCoords[0], y: gridCoords[1] },
+      rwuPoint = {
+        x: this.gridToRWU(gridPoint.x, 'x'),
+        y: this.gridToRWU(gridPoint.y, 'y'),
+      };
 
     // check if control is being placed inside a space's face
     let isInFace = false;
@@ -72,13 +79,12 @@ export default {
   * if the new point completes a face being drawn, save the face
   * if the new point completes an eraser selection, call the eraseRectangularSelection method
   */
-  addPoint (e) {
+  addPoint() {
     // location of the mouse in grid units
-    const gridPoint = {
-      x: this.pxToGrid(e.offsetX, 'x'),
-      y: this.pxToGrid(e.offsetY, 'y')
-    },
-    snapTarget = this.findSnapTarget(gridPoint);
+    const
+      gridCoords = d3.mouse(this.$refs.grid),
+      gridPoint = { x: gridCoords[0], y: gridCoords[1] },
+      snapTarget = this.findSnapTarget(gridPoint);
 
     // if the snapTarget is the origin of the face being drawn in Polygon mode, close the face and don't add a new point
     if (snapTarget.type === 'vertex' && snapTarget.origin && this.currentTool === 'Polygon') {
@@ -101,7 +107,7 @@ export default {
   * look up the snap target for the location of the event, highlight it, and render a guide point
   * if there is no snap target, use the event location
   */
-  highlightSnapTarget (e) {
+  highlightSnapTarget(e) {
     // only highlight snap targets in drawing modes when a space or shading has been selected
     if (!(this.currentTool === 'Eraser' ||
     (this.currentTool === 'Place Component' && this.currentComponentDefinition) ||
@@ -112,10 +118,8 @@ export default {
 
 
     // location of the mouse in grid units
-    const gridPoint = {
-      x: this.pxToGrid(e.offsetX, 'x'),
-      y: this.pxToGrid(e.offsetY, 'y')
-    };
+    const gridCoords = d3.mouse(this.$refs.grid),
+      gridPoint = { x: gridCoords[0], y: gridCoords[1] };
 
     const options = { edge_component: (this.currentTool === 'Place Component' && this.currentComponentType === 'window_definitions') };
     const snapTarget = this.findSnapTarget(gridPoint/*, options*/);
@@ -134,8 +138,8 @@ export default {
       .append('ellipse')
       .attr('cx', ellipsePoint.x, 'x')
       .attr('cy', ellipsePoint.y, 'y')
-      .attr('rx', this.scaleX(5))
-      .attr('ry', this.scaleY(5))
+      .attr('rx', 5)
+      .attr('ry', 5)
       .classed('highlight', true)
       .attr('vector-effect', 'non-scaling-stroke');
     } else {
@@ -143,8 +147,8 @@ export default {
       .append('ellipse')
       .attr('cx', ellipsePoint.x)
       .attr('cy', ellipsePoint.y)
-      .attr('rx', this.scaleX(2))
-      .attr('ry', this.scaleY(2))
+      .attr('rx', 2)
+      .attr('ry', 2)
       .classed('gridpoint', true)
       .attr('vector-effect', 'non-scaling-stroke');
     }
@@ -235,19 +239,19 @@ export default {
     .attr('y', d => d[0].y + (d[1].y - d[0].y)/2)
     .attr('dx', - 1.25 * (this.transform.k > 1 ? 1 : this.transform.k) + "em")
     .text(d => {
-      let zoom = this.transform.k,
-      dist = this.distanceBetweenPoints({
-        x: d[0].x / zoom,
-        y: d[0].y / zoom
-      },
-      {
-        x: d[1].x / zoom,
-        y: d[1].y / zoom
-      });
+      const dist = this.distanceBetweenPoints(
+        {
+          x: this.gridToRWU(d[0].x, 'x'),
+          y: this.gridToRWU(d[0].y, 'y'),
+        },
+        {
+          x: this.gridToRWU(d[1].x, 'x'),
+          y: this.gridToRWU(d[1].y, 'y'),
+        });
 
-      return dist ? dist.toFixed(2) : "";
+      return dist ? dist.toFixed(2) : '';
     })
-    .classed('guideline guideline-text',true)
+    .classed('guideline guideline-text guideline-dist',true)
     .attr("font-family", "sans-serif")
     .attr("fill", "red")
     .style("font-size","1em");
@@ -270,10 +274,10 @@ export default {
 
       // render unfinished area #
       svg.append('text')
-      .attr('x', x)
-      .attr('y', y)
+      .attr('x', this.rwuToGrid(x, 'x'))
+      .attr('y', this.rwuToGrid(y, 'y'))
       .text(areaText)
-      .classed('guideline guideline-text guideLine',true)
+      .classed('guideline guideline-text guideline-area-text guideLine',true)
       .attr("text-anchor", "middle")
       .attr("font-family", "sans-serif")
       .attr("fill", "red")
@@ -397,14 +401,14 @@ export default {
     .enter().append('ellipse')
     .attr('cx', d => d.x)
     .attr('cy', d => d.y)
-    .attr('rx', this.scaleX(2))
-    .attr('ry', this.scaleY(2))
+    .attr('rx', 2)
+    .attr('ry', 2)
     .attr('vector-effect', 'non-scaling-stroke');
 
     // apply custom CSS for origin of polygons
     d3.select('#grid svg').select('ellipse')
-    .attr('rx', this.scaleX(7))
-    .attr('ry', this.scaleY(7))
+    .attr('rx', 7)
+    .attr('ry', 7)
     .classed('origin', true)
     .attr('vector-effect', 'non-scaling-stroke')
     .attr('fill', 'none');
@@ -423,106 +427,116 @@ export default {
   },
   registerDrag() {
     const polygons = d3.select('#grid svg').selectAll('polygon');
+
+    this.deregisterD3Events(polygons);
+    if (this.currentTool === 'Select') {
+      this.registerSelectEvents(polygons);
+    } else if (this.currentTool === 'Fill') {
+      this.registerFillEvents(polygons);
+    }
+  },
+  deregisterD3Events(polygons) {
+    polygons
+      .on('.drag', null)
+      .on('click', null);
+  },
+
+  registerFillEvents(polygons) {
+    polygons.on('click', (d) => {
+      if (this.currentSpace || this.currentShading) {
+        this.points = d.points.map(p => ({
+          x: this.rwuToGrid(p.x, 'x'),
+          y: this.rwuToGrid(p.y, 'y'),
+        }));
+        this.savePolygonFace();
+      }
+    });
+  },
+
+  registerSelectEvents(polygons) {
     // store total drag offset (grid units)
-    let dx = 0;
-    let dy = 0;
+    let startX, startY;
 
     // polygon drag handler
-    const that = this;
     const drag = d3.drag()
       .on('start', (d) => {
-        // remove text label when dragging
-        d3.select(`#text-${d.face_id}`).remove();
-
-        if (this.currentTool === 'Select' && !d.previous_story) {
-
-          // if a face on the current story is clicked while the Select tool is active
-          // lookup its corresponding model (space/shading) and select it
-          this.currentSubSelection = modelHelpers.modelForFace(this.$store.state.models, d.face_id);
-
-        } else if (this.currentTool === 'Fill' && (this.currentSpace || this.currentShading)) {
-          // if a face on the current story is clicked while the Select tool is active
-          // lookup its corresponding model (space/shading) and select it
-          this.points = d.points.map(p => ({
-            x: this.rwuToGrid(p.x, 'x'),
-            y: this.rwuToGrid(p.y, 'y'),
-          }));
-          this.savePolygonFace();
-        }
+        [startX, startY] = d3.mouse(this.$refs.grid);
+        if (d.previous_story) { return; }
+        // if a face on the current story is clicked while the Select tool is active
+        // lookup its corresponding model (space/shading) and select it
+        this.currentSubSelection = modelHelpers.modelForFace(this.$store.state.models, d.face_id);
       })
       .on('drag', (d) => {
-        if (that.currentTool !== 'Select' || d.previous_story) { return; }
+        if (d.previous_story) { return; }
 
-        dx += d3.event.dx;
-        dy += d3.event.dy;
-        d3.select(`#face-${d.face_id}`)
-          .attr('transform', () => `translate(${[dx, dy]})`);
-
-        d3.select(`#text-${d.face_id}`)
-          .attr('transform', () => `translate(${[dx, dy]})`);
+        const [currX, currY] = d3.mouse(this.$refs.grid);
+        d3.select(`#poly-${d.face_id}`)
+          .attr('transform', () => `translate(${currX - startX}, ${currY - startY})`);
       })
       .on('end', (d) => {
-        if (this.currentTool !== 'Select' || d.previous_story) { return; }
+        if (d.previous_story) { return; }
 
         // when the drag is finished, update the face in the store with the total offset in RWU
+        const [endX, endY] = d3.mouse(this.$refs.grid);
         this.$store.dispatch('geometry/moveFaceByOffset', {
           face_id: d.face_id,
-          dx: this.gridToRWU(dx, 'x') - this.min_x,
-          dy: this.gridToRWU(dy, 'y') - this.max_y,
+          dx: this.gridToRWU(endX, 'x') - this.gridToRWU(startX, 'x'),
+          dy: this.gridToRWU(endY, 'y') - this.gridToRWU(startY, 'y'),
         });
       });
-
-    if (this.currentTool === 'Select') {
-      polygons.call(drag);
-    }
+    polygons.call(drag);
   },
   /*
   * render saved faces as polygons
   * handle clicks to select faces
   */
   drawPolygons() {
-    const that = this;
+    this.recalcScales();
     // remove expired polygons
-    d3.select('#grid svg').selectAll('polygon, .polygon-text').remove();
+    let poly = d3.select('#grid svg').selectAll('g.poly')
+      .data(this.polygons, d => d.face_id);
+
+    poly.exit().remove();
+    const polyEnter = poly.enter().append('g').attr('class', 'poly');
+    polyEnter.append('polygon');
+    polyEnter.append('text').attr('class', 'polygon-text');
 
     // draw polygons
-    d3.select('#grid svg').selectAll('polygon')
-      .data(this.polygons).enter()
-      .append('polygon')
+    poly = polyEnter
+      .merge(poly)
+    .attr('class', (d) => {
+      if ((this.currentSpace && d.face_id === this.currentSpace.face_id) ||
+      (this.currentShading && d.face_id === this.currentShading.face_id)) { return 'current'; }
+      if (d.previous_story) { return 'previousStory'; }
+      return null;
+    })
+    .classed('poly', true)
+    .attr('id', p => `poly-${p.face_id}`)
+    .attr('transform', null);
+
+    poly.select('polygon')
       .attr('id', d => `face-${d.face_id}`)
       .attr('points', d => d.points.map(p => [this.rwuToGrid(p.x, 'x'), this.rwuToGrid(p.y, 'y')].join(',')).join(' '))
-      .attr('class', (d) => {
-        if ((this.currentSpace && d.face_id === this.currentSpace.face_id) ||
-        (this.currentShading && d.face_id === this.currentShading.face_id)) { return 'current'; }
-        if (d.previous_story) { return 'previousStory'; }
-        return null;
-      })
       .attr('fill', d => d.color)
-      .attr('vector-effect', 'non-scaling-stroke')
-      // add label
-      .select(function (poly) {
-        const { x, y } = that.polygonLabelPosition(poly.points);
+      .attr('vector-effect', 'non-scaling-stroke');
 
-        d3.select('#grid svg')
-          .append('text')
-          .attr('id', `text-${poly.face_id}`)
-          .attr('x', x)
-          .attr('y', y)
-          .text(poly.name)
-          .attr('text-anchor', 'middle')
-          .style('font-size', `${that.scaleY(12)}px`)
-          .style('font-weight', 'bold')
-          .attr('font-family', 'sans-serif')
-          .attr('fill', 'red')
-          .attr('class', () => this.getAttribute('class'))
-          .classed('polygon-text', true);
-      });
+    // add label
+    poly.select('text')
+      .attr('id', p => `text-${p.face_id}`)
+      .attr('x', p => this.rwuToGrid(p.labelPosition.x, 'x'))
+      .attr('y', p => this.rwuToGrid(p.labelPosition.y, 'y'))
+      .text(p => p.name)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '14px')
+      .style('font-weight', 'bold')
+      .attr('font-family', 'sans-serif')
+      .attr('fill', 'red')
+      .classed('polygon-text', true);
 
     this.registerDrag();
 
     // render the selected model's face above the other polygons so that the border is not obscured
     d3.select('.current').raise();
-    d3.select('text.current').raise();
   },
 
   // ****************** SNAPPING TO EXISTING GEOMETRY ****************** //
@@ -533,6 +547,20 @@ export default {
   */
   findSnapTarget(gridPoint, options = {}) {
     const { edge_component: snapOnlyToEdges } = options;
+    // translate grid point to real world units to check for snapping targets
+    const rwuPoint = {
+      x: this.gridToRWU(gridPoint.x, 'x'),
+      y: this.gridToRWU(gridPoint.y, 'y'),
+    };
+    if (this.snapMode === 'grid-strict') {
+      const gridSnap = this.strictSnapTargets(rwuPoint)[0];
+      return {
+        ...gridSnap,
+        x: this.rwuToGrid(gridSnap.x, 'x'),
+        y: this.rwuToGrid(gridSnap.y, 'y'),
+      };
+    }
+
     if (event.shiftKey) {
       // disable snapping when shift is held down
       return {
@@ -631,6 +659,23 @@ export default {
     };
   },
 
+  strictSnapTargets(location) {
+    const snappableVertices = [
+      ...this.currentStoryGeometry.vertices,
+      ...(this.previousStoryGeometry ? this.previousStoryGeometry.vertices : []),
+    ];
+
+    if (this.points.length >= 3 && this.currentTool === 'Polygon') {
+      // convert the polygon origin from grid units to real world units before adding it as a snappable vertex
+      snappableVertices.push({
+        x: this.gridToRWU(this.points[0].x, 'x'),
+        y: this.gridToRWU(this.points[0].y, 'y'),
+        origin: true, // set a flag to mark the origin
+      });
+    }
+
+    return snapTargets(snappableVertices, this.spacing, location);
+  },
   /*
   * given a point in RWU, look up the closest snappable vertex
   * if the vertex is within the snap tolerance of the point, return the coordinates of the vertex in grid units
@@ -656,8 +701,7 @@ export default {
       });
     }
 
-    // TODO Remove this featureUnfinished business once PR#118 is merged.
-    if (!"featureUnfinished (shouldn't have been merged)" && this.points.length === 1 && this.currentTool === 'Rectangle') {
+    if (this.points.length === 1 && this.currentTool === 'Rectangle') {
       snappableVertices = snappableVertices.concat(
         geometryHelpers.syntheticRectangleSnaps(
           snappableVertices,
@@ -837,237 +881,246 @@ export default {
     };
   },
 
+  resolveBounds() {
+    /*
+    After calling resolveBounds:
+     - (min_x, max_x) x  (min_y, max_y) will have the same aspect ratio
+     as width x height.
+     - (min_x, max_x) is the same or a smaller interval
+     - (min_y, max_y) is the same or a smaller interval
+    */
+    const
+      width = this.$refs.grid.clientWidth,
+      height = this.$refs.grid.clientHeight,
+      xSpan = this.max_x - this.min_x,
+      ySpan = this.max_y - this.min_y,
+      xAccordingToY = ySpan * (width / height),
+      yAccordingToX = xSpan * (height / width),
+      xDiff = xAccordingToY - xSpan,
+      yDiff = yAccordingToX - ySpan;
 
-  // ****************** GRID ****************** //
-  renderGrid () {
-    const w = this.$refs.grid.clientWidth,
-    h = this.$refs.grid.clientHeight;
-
-    if (this.original_bounds) {
-      this.max_x -= this.min_x;
-      this.min_x = 0;
-
-      this.max_y -= this.min_y;
-      this.min_y = 0;
+    if (xDiff < 0) {
+      this.min_x -= xDiff / 2;
+      this.max_x += xDiff / 2;
+    } else {
+      this.min_y -= yDiff / 2;
+      this.max_y += yDiff / 2;
     }
+  },
+  nullTransform() {
+    d3.select(this.$refs.grid).call(this.zoomBehavior.transform, d3.zoomIdentity);
+  },
+  // ****************** GRID ****************** //
+  renderGrid() {
+    const
+      w = this.$refs.grid.clientWidth,
+      h = this.$refs.grid.clientHeight;
 
-    this.original_bounds = {
-      min_x: this.min_x,
-      min_y: this.min_y,
-      max_x: this.max_x,
-      max_y: this.max_y,
-      pxWidth: w,
-      pxHeight: h
-    };
-
-    // initialize the y dimensions in RWU based on the aspect ratio of the grid on the screen
-    this.max_y = (h / w) * this.max_x;
-
-    // set viewbox on svg in rwu so drawing coordinates are in rwu and not pixels
-    this.$refs.grid.setAttribute('viewBox', `0 0 ${this.max_x - this.min_x} ${this.max_y - this.min_y}`);
-
+    this.resolveBounds();
     // scaleX amd scaleY are used during drawing to translate from px to RWU given the current grid dimensions in rwu
     this.$store.dispatch('application/setScaleX', {
-      scaleX: d3.scaleLinear()
-      .domain([0, w])
-      .range([this.min_x, this.max_x])
+      scaleX: {
+        pixels: w,
+        rwuRange: [this.min_x, this.max_x],
+      },
     });
 
     this.$store.dispatch('application/setScaleY', {
-      scaleY: d3.scaleLinear()
-      .domain([0, h])
-      .range([this.min_y, this.max_y])
+      scaleY: {
+        pixels: h,
+        rwuRange: [this.min_y, this.max_y],
+      },
     });
 
-    // initialize timetravel after the scales are set
-    // if the map is enabled AND initialized
-    // or if the map is disabled
-    // we don't need to place the map and we haven't already intiailized timetravel
-    if (!this.$store.timetravel) {
-      if (!this.$store.state.project.map.enabled || (this.$store.state.project.map.enabled && this.$store.state.project.map.initialized)) {
-        window.eventBus.$emit('initTimetravel');
-      }
-    }
-
     this.calcGrid();
-    this.centerGrid();
+
+    // It took me some time to figure out why this line is necessary. It fixes a problem
+    // that sometimes appears when resizing the window. Here's a screenshot of what
+    // it can look like without that line:
+    // https://trello-attachments.s3.amazonaws.com/58d428743111af1d0a20cf28/59a225fd10e0a9d23fc0e1b2/30ea2c37407fe148a397295b748b6015/capture.png
+    // When it looks that way it's because the zoomXScale's range has not been updated to
+    // reflect the new clientWidth. reloadGridAndScales() updates the zoomXScale's range,
+    // but the axes don't re-render until the next zoom event. We use nullTransform()
+    // to force this to happen immediately.
+    this.nullTransform();
+
     this.drawPolygons();
   },
-  calcGrid () {
-    const svg = d3.select('#grid svg'),
-    // rwu dimensions (coordinates used within grid)
-    rwuHeight = this.max_y - this.min_y,
-    rwuWidth = this.max_x - this.min_x,
+  reloadGridAndScales() {
+    this.zoomXScale = null;
+    this.zoomYScale = null;
+    this.resolveBounds();
+    this.renderGrid();
+  },
+  recalcScales() {
+    const
+      width = this.$refs.grid.clientWidth,
+      height = this.$refs.grid.clientHeight;
 
-    // these are essentially unit scales, but they span the full range that each axis should cover instead of just being 1 unit long
-    zoomScaleX = d3.scaleLinear()
-    .domain([this.min_x, this.max_x])
-    .range([this.min_x, this.max_x]),
-    zoomScaleY = d3.scaleLinear()
-    // .domain([this.min_y, this.max_y])
-    .domain([this.max_y,this.min_y]) // inverted y axis
-    .range([this.min_y, this.max_y]),
-    // keep font size and stroke width visuall consistent
-    strokeWidth = this.scaleY(1),
-    fontSize = this.scaleY(12) + 'px';
+    this.xScale = d3.scaleLinear()
+      .domain([this.min_x, this.max_x])
+      .range([0, width]);
+    this.yScale = d3.scaleLinear()
+      .domain([this.min_y, this.max_y])
+      .range([height, 0]); // inverted y axis
 
-    svg.selectAll('*').remove();
+    // only copy once, or else zoom behavior is exponential
+    this.zoomXScale = this.zoomXScale || this.xScale.copy();
+    this.zoomYScale = this.zoomYScale || this.yScale.copy();
+  },
+  calcGrid() {
+    this.recalcScales();
+    const
+      width = this.$refs.grid.clientWidth,
+      height = this.$refs.grid.clientHeight;
 
-    // generator functions for axes
-    this.axis_generator.x = d3.axisBottom(zoomScaleX)
-    .ticks(rwuWidth / this.spacing)
-    .tickSize(rwuHeight)
-    .tickPadding(this.scaleY(-20))
-    .tickFormat(this.formatTickX.bind(this,Math.floor(10 * this.$refs.grid.clientWidth / this.$refs.grid.clientHeight)));
+    const
+      svg = d3.select('#grid svg'),
+      // keep font size and stroke width visually consistent
+      strokeWidth = 1,
+      fontSize = '14px';
 
-    this.axis_generator.y = d3.axisRight(zoomScaleY)
-    .ticks(rwuHeight / this.spacing)
-    .tickSize(rwuWidth)
-    .tickFormat(this.formatTickY.bind(this,10));
+    svg.attr('height', height)
+      .attr('width', width);
+    this.axis.x = svg.selectAll('g.axis--x')
+      .data([undefined]);
 
-    this.axis.x = svg.append('g')
-    .attr('class', 'axis axis--x')
+    this.axis.x = this.axis.x.merge(
+      this.axis.x.enter().append('g').attr('class', 'axis axis--x'),
+    )
     .attr('stroke-width', strokeWidth)
-    .style('font-size',fontSize)
-    .style('display', this.gridVisible ? 'inline' : 'none')
-    .call(this.axis_generator.x);
+    .style('font-size', fontSize)
+    .style('display', this.gridVisible ? 'inline' : 'none');
 
-    this.axis.y = svg.append('g')
+    this.axis.y = svg.selectAll('g.axis--y')
+      .data([undefined]);
+
+    this.axis.y = this.axis.y.merge(
+      this.axis.y.enter().append('g').attr('class', 'axis axis--y'),
+    )
     .attr('class', 'axis axis--y')
     .attr('stroke-width', strokeWidth)
-    .style('font-size',fontSize)
-    .style('display', this.gridVisible ? 'inline' : 'none')
-    .call(this.axis_generator.y);
+    .style('font-size', fontSize)
+    .style('display', this.gridVisible ? 'inline' : 'none');
+
+    // now that the axis g tags exist, call axis_generator on them.
+    this.updateGrid();
 
     // configure zoom behavior in rwu
     this.zoomBehavior = d3.zoom()
-    .scaleExtent([0.02,Infinity])
-    .on('zoom', () => {
-      const transform = d3.event.transform,
-      kAbs = transform.k/this.scaleX(1); // absolute zoom, regardless of resizing, etc.
+    .scaleExtent([0.02, 200])
+     .on('zoom', () => {
+       const transform = d3.event.transform;
+       // update stored transform for grid hiding, etc.
+       this.transform = { ...transform };
 
-      // update stored transform for grid hiding, etc.
-      this.transform = { ...transform, kAbs };
+       // create updated copies of the scales based on the zoom transformation
+       // the transformed scales are only used to obtain the new rwu grid dimensions and redraw the axes
+       // NOTE: don't change the original scale or you'll get exponential growth
+       const
+         newScaleX = transform.rescaleX(this.zoomXScale),
+         newScaleY = transform.rescaleY(this.zoomYScale);
 
-      // create updated copies of the scales based on the zoom transformation
-      // the transformed scales are only used to obtain the new rwu grid dimensions and redraw the axes
-      // NOTE: don't change the original scale or you'll get exponential growth
-      const newScaleX = transform.rescaleX(zoomScaleX),
-      newScaleY = transform.rescaleY(zoomScaleY);
+       [this.min_x, this.max_x] = newScaleX.domain();
+       [this.min_y, this.max_y] = newScaleY.domain(); // inverted y axis
 
-      [this.min_x, this.max_x] = newScaleX.domain();
-      // [this.min_y, this.max_y] = newScaleY.domain();
-      [this.max_y, this.min_y] = newScaleY.domain(); // inverted y axis
+       this.axis_generator.x.scale(newScaleX);
+       this.axis_generator.y.scale(newScaleY);
 
-      const scaledRwuHeight = this.max_y - this.min_y,
-      scaledRwuWidth = this.max_x - this.min_x;
+       this.updateGrid();
 
-      // update the number of ticks to display based on the post zoom real world unit height and width
-      this.axis.y.call(this.axis_generator.y.ticks(scaledRwuHeight / this.spacing));
-      this.axis.x.call(this.axis_generator.x.ticks(scaledRwuWidth / this.spacing));
+       // axis padding
+       this.padTickY(-12);
 
-      // create transformed copies of the scales and apply them to the axes
-      this.axis.x.call(this.axis_generator.x.scale(newScaleX));
-      this.axis.y.call(this.axis_generator.y.scale(newScaleY));
-
-      // axis padding
-      this.padTickY(-12);
-
-      // redraw the saved geometry
-      this.drawPolygons();
-    });
+       // redraw the saved geometry
+       this.drawPolygons();
+     })
+     .on('end', () => {
+       ResizeEvents.$emit('zoomStabilized');
+     });
 
     svg.call(this.zoomBehavior);
+    svg
+      .on('mousemove', this.handleMouseMove)
+      .on('click', this.gridClicked);
   },
-  centerGrid () {
-    const x = this.min_x + (this.max_x - this.min_x)/2,
-    // y = this.min_y + (this.max_y - this.min_y)/2;
-    y = this.min_y - (this.max_y - this.min_y)/2; // inverted y axis
-
-    d3.select('#grid svg').call(this.zoomBehavior.transform, d3.zoomIdentity.translate(x, y));
+  showOrHideAxes() {
+    this.axis.x.style('visibility', this.gridVisible ? 'visible' : 'hidden');
+    this.axis.y.style('visibility', this.gridVisible ? 'visible' : 'hidden');
   },
-  updateGrid () {
-    this.axis.x.style('display', this.gridVisible && !this.forceGridHide ? 'inline' : 'none');
-    this.axis.y.style('display', this.gridVisible && !this.forceGridHide ? 'inline' : 'none');
+  updateGrid() {
+    if (!this.axis.x || !this.axis.y) {
+      // not yet initialized
+      return;
+    }
+    const
+      width = this.$refs.grid.clientWidth,
+      height = this.$refs.grid.clientHeight,
+      rwuWidth = this.max_x - this.min_x,
+      rwuHeight = this.max_y - this.min_y,
+      xTicks = ticksInRange(this.min_x, this.max_x, this.spacing),
+      yTicks = ticksInRange(this.min_y, this.max_y, this.spacing);
 
-    const rwuHeight = this.max_y - this.min_y,
-    rwuWidth = this.max_x - this.min_x;
+    this.reduceTicks = yTicks.length > 250 || xTicks.length > 250;
 
+    this.axis_generator.x = this.axis_generator.x || d3.axisBottom(this.xScale);
+    this.axis_generator.x
+      .tickSize(height)
+      .tickPadding(-20)
+      .tickFormat(this.reduceTicks ? _.identity : this.formatTickX.bind(this, Math.floor(10 * (width / height))));
+
+    this.axis_generator.y = this.axis_generator.y || d3.axisRight(this.yScale);
+    this.axis_generator.y
+      .tickSize(width)
+      .tickPadding(-25)
+      .tickFormat(this.reduceTicks ? _.identity : this.formatTickY.bind(this, 10));
+
+    if (this.reduceTicks) {
+      this.axis_generator.x
+        .tickValues(null)
+        .ticks(5 * (rwuWidth / rwuHeight));
+      this.axis_generator.y
+        .tickValues(null)
+        .ticks(5);
+    } else {
+      this.axis_generator.x
+        .ticks(null)
+        .tickValues(xTicks);
+      this.axis_generator.y
+        .ticks(null)
+        .tickValues(yTicks);
+    }
     // update the number of ticks to display based on the post zoom real world unit height and width
-    this.axis.y.call(this.axis_generator.y.ticks(rwuHeight / this.spacing));
-    this.axis.x.call(this.axis_generator.x.ticks(rwuWidth / this.spacing));
+    this.axis.y.call(this.axis_generator.y);
+    this.axis.x.call(this.axis_generator.x);
   },
 
   // ****************** SCALING FUNCTIONS ****************** //
-  /*
-  * take a pixel value (from a mouse event), find the corresponding real world units (for snapping to saved geometry in RWU)
-  */
-  pxToRWU (px, axis) {
-    if (axis === 'x') {
-      // TODO: computed property for current scales?
-      const currentScaleX = d3.scaleLinear()
-      .domain([0, this.$refs.grid.clientWidth])
-      .range([this.min_x, this.max_x]);
-      return currentScaleX(px);
-    } else if (axis === 'y') {
-      const currentScaleY = d3.scaleLinear()
-      // .domain([0, this.$refs.grid.clientHeight])
-      .domain([this.$refs.grid.clientHeight,0]) // inverted y axis
-      .range([this.min_y, this.max_y]);
-      return currentScaleY(px);
-    }
-  },
-
-  /*
-  * take a pixel value (from a mouse event), find the corresponding coordinates in the svg grid
-  */
-  pxToGrid (px, axis) {
-    if (axis === 'x') {
-      return this.scaleX && this.scaleX(px);
-    } else if (axis === 'y') {
-      return this.scaleY && this.scaleY(px);
-    }
-  },
 
   /*
   * take a rwu value (from the datastore), find the corresponding coordinates in the svg grid
   */
   rwuToGrid (rwu, axis) {
+    let scale;
     if (axis === 'x') {
-      const currentScaleX = d3.scaleLinear()
-      .domain([0, this.$refs.grid.clientWidth])
-      .range([this.min_x, this.max_x]),
-      pxValue = currentScaleX.invert(rwu);
-      return this.pxToGrid(pxValue, axis);
+      scale = this.xScale;
     } else if (axis === 'y') {
-      const currentScaleY = d3.scaleLinear()
-      // .domain([0, this.$refs.grid.clientHeight])
-      .domain([this.$refs.grid.clientHeight, 0]) // inverted y axis
-      .range([this.min_y, this.max_y]),
-      pxValue = currentScaleY.invert(rwu);
-      return this.pxToGrid(pxValue, axis);
+      scale = this.yScale;
     }
+    return scale(rwu);
   },
 
   /*
   * take a grid value (from some point already rendered to the grid) and translate it into RWU for persistence to the datastore
   */
-  gridToRWU (gridValue, axis) {
-    var result;
+  gridToRWU(gridValue, axis) {
+    let scale;
     if (axis === 'x') {
-      const currentScaleX = d3.scaleLinear()
-      .domain([0, this.$refs.grid.clientWidth])
-      .range([this.min_x, this.max_x]),
-      pxValue = this.scaleX.invert(gridValue);
-      result = currentScaleX(pxValue);
+      scale = this.xScale;
     } else if (axis === 'y') {
-      const currentScaleY = d3.scaleLinear()
-      // .domain([0, this.$refs.grid.clientHeight])
-      .domain([this.$refs.grid.clientHeight,0]) // inverted y axis
-      .range([this.min_y, this.max_y]),
-      pxValue = this.scaleY.invert(gridValue);
-      result = currentScaleY(pxValue);
+      scale = this.yScale;
     }
+    const result = scale.invert(gridValue);
     // prevent floating point inaccuracies in stored numbers
     return (Math.round(result * 100000000000))/100000000000;
   },
@@ -1075,10 +1128,11 @@ export default {
   /*
   * determine label x,y for given polygon
   */
-  polygonLabelPosition (pointsIn) {
-    const points = [pointsIn.map(p => [this.rwuToGrid(p.x, 'x'), this.rwuToGrid(p.y, 'y')])],
-    area = Math.abs(Math.round(geometryHelpers.areaOfSelection(pointsIn))), // calculate area in RWU, not grid units
-    [ x, y ] = area ? polylabel(points, 1.0) : [null, null];
+  polygonLabelPosition(pointsIn) {
+    const
+      points = [pointsIn.map(p => [p.x, p.y])],
+      area = Math.abs(Math.round(geometryHelpers.areaOfSelection(pointsIn))), // calculate area in RWU, not grid units
+      [x, y] = area ? polylabel(points, 1.0) : [null, null];
 
     return { x, y, area };
   },
@@ -1107,7 +1161,7 @@ export default {
     let min = Math.abs(this.min_y),
     max = Math.abs(this.max_y),
     numDigits = (min < max ? max : min).toFixed(0).length,
-    yPadding = this.scaleX(paddingPerDigit*numDigits);
+    yPadding = paddingPerDigit * numDigits;
 
     this.axis.y.call(this.axis_generator.y.tickPadding(yPadding));
   }

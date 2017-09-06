@@ -11,12 +11,27 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 </template>
 
 <script>
+import _ from 'lodash';
 import { mapState, mapGetters } from 'vuex';
 import applicationHelpers from './../../store/modules/application/helpers';
 import ResizeEvents from '../../components/Resize/ResizeEvents';
 
 const Konva = require('konva');
 const d3 = require('d3');
+
+function transformDiff(t1, t2) {
+  // returns a new transform that is sufficient to take you from
+  // t1 to t2.
+
+  // boy was this a doozy to figure out. Tricky bit is that the
+  // translation is dependent on the scaling factor. So we have to
+  // divide that out before we can subtract.
+  return {
+    k: t2.k / t1.k,
+    x: (t2.x / t2.k - t1.x / t1.k) * t2.k,
+    y: (t2.y / t2.k - t1.y / t1.k) * t2.k,
+  };
+}
 
 export default {
   name: 'images',
@@ -26,15 +41,26 @@ export default {
       layer: null,
       // cache images on the component so that we can check which property was altered in the images watcher
       imageCache: [],
+      scaleX: null,
+      scaleY: null,
+      rwuXtoPx: null,
+      rwuYtoPx: null,
+      debouncedRenderImages: null,
+      transformAtLastRender: null,
     };
   },
   mounted() {
-    ResizeEvents.$on('resize-resize', this.renderImages);
+    this.debouncedRenderImages = _.debounce(this.renderImages, 10);
+
+    ResizeEvents.$on('resize', this.renderImages);
+    ResizeEvents.$on('zoomStabilized', this.renderImages);
     window.addEventListener('resize', this.renderImages);
     this.renderImages();
   },
   beforeDestroy() {
-    ResizeEvents.$off('resize-resize', this.renderImages);
+    ResizeEvents.$off('resize', this.renderImages);
+    ResizeEvents.$off('zoomStabilized', this.renderImages);
+
     window.removeEventListener('resize', this.renderImages);
   },
   methods: {
@@ -51,6 +77,16 @@ export default {
         width: document.getElementById('canvas').clientWidth,
         height: document.getElementById('canvas').clientHeight,
       });
+
+      this.transformAtLastRender = { ...this.transform };
+
+      this.rwuXtoPx = d3.scaleLinear()
+        .domain([this.view.min_x, this.view.max_x])
+        .range([0, this.$refs.images.clientWidth]);
+      this.rwuYtoPx = d3.scaleLinear()
+        .domain([this.view.min_y, this.view.max_y])
+        .range([this.$refs.images.clientHeight, 0]);
+
       this.layer = new Konva.Layer();
       this.stage.add(this.layer);
 
@@ -62,23 +98,20 @@ export default {
     },
     renderImage(image) {
       // values in pixels
-      const y = -1 * this.scaleY.invert(image.y);
-      const x = this.scaleX.invert(image.x);
-      const w = this.scaleX.invert(image.width);
-      const h = this.scaleY.invert(image.height);
-
+      const w = image.width * this.pxPerRWU;
+      const h = image.height * this.pxPerRWU;
       // (x, y) is the image center position in pixels
       // konva places image by their upper left corner, so adjust by half the height and half the width
       const imageGroup = new Konva.Group({
         // image center position in pixels
-        x,
-        y,
+        x: this.rwuXtoPx(image.x),
+        y: this.rwuYtoPx(image.y),
         // offset from center point and rotation point
         offset: {
           x: (w / 2),
           y: (h / 2),
         },
-        draggable: true,
+        draggable: this.currentTool === 'Drag',
       });
       const imageObj = new Konva.Image({
         x: 0,
@@ -90,7 +123,7 @@ export default {
         // add a green border to the currentImage
         stroke: '#6AAC15',
         strokeWidth: 3,
-        strokeEnabled: (this.currentImage && this.currentImage.id === image.id),
+        strokeEnabled: (this.currentTool === 'Drag' && this.currentImage && this.currentImage.id === image.id),
       });
       const imageCenter = new Konva.Circle({
         x: (w / 2),
@@ -107,7 +140,7 @@ export default {
       imageGroup
         .add(imageObj)
         .add(imageCenter)
-        .setZIndex(image.z)
+        .setZIndex(image.id)
         .rotation(image.r);
 
       // load image
@@ -118,9 +151,11 @@ export default {
       };
       imageReader.src = image.src;
 
-      // initialize rotate and resize controls on the image group
-      this.initRotation(imageGroup);
-      this.initResize(imageGroup);
+      if (this.currentTool === 'Drag') {
+        // initialize rotate and resize controls on the image group
+        this.initRotation(imageGroup);
+        this.initResize(imageGroup);
+      }
 
       // events
       // set as currentImage when an image's group is clicked (or dragged)
@@ -135,15 +170,15 @@ export default {
         const updatedRotation = imageGroup.rotation();
         // get center relative to layer since group might be rotated
         const updatedCenterX = imageCenter.getAbsolutePosition(this.layer).x;
-        const updatedCenterY = -1 * imageCenter.getAbsolutePosition(this.layer).y;
+        const updatedCenterY = imageCenter.getAbsolutePosition(this.layer).y;
 
         this.$store.dispatch('models/updateImageWithData', {
           image,
-          x: this.scaleX(updatedCenterX),
-          y: this.scaleY(updatedCenterY),
+          x: this.rwuXtoPx.invert(updatedCenterX),
+          y: this.rwuYtoPx.invert(updatedCenterY),
           r: updatedRotation,
-          width: this.scaleX(updatedWidth),
-          height: this.scaleY(updatedHeight),
+          width: (updatedWidth / this.pxPerRWU),
+          height: (updatedHeight / this.pxPerRWU),
         });
       });
     },
@@ -367,23 +402,18 @@ export default {
     * Set the scale and position of the canvas based on the current viewbox
     */
     scaleAndPlaceStage() {
-      // original rwu/px resolution when scales were set
-      const originalResolution = (this.scaleX.range()[1] - this.scaleX.range()[0]) / (this.scaleX.domain()[1] - this.scaleX.domain()[0]);
+      const transform = transformDiff(this.transformAtLastRender, this.transform);
       // current rwu/px resolution based on current viewbox (after panning and zooming)
-      const currentResolution = (this.view.max_x - this.view.min_x) / this.$refs.images.clientWidth;
-      // scaling factor to render canvas images at current resolution
-      const scale = originalResolution / currentResolution;
-
       this.stage
         // scale will not be 1 if the user has zoomed in or out
         .scale({
-          x: scale,
-          y: scale,
+          x: transform.k,
+          y: transform.k,
         })
         // place the canvas at the pixel value corresponding to our RWU 0
         .position({
-          x: this.rwuToPx(0, 'x'),
-          y: this.rwuToPx(0, 'y'),
+          x: transform.x,
+          y: transform.y,
         })
         .draw();
     },
@@ -409,16 +439,20 @@ export default {
     }),
     ...mapState({
       currentTool: state => state.application.currentSelections.tool,
-      scaleX: state => state.application.scale.x,
-      scaleY: state => state.application.scale.y,
       view: state => state.project.view,
+      pixelWidth: state => state.application.scale.x.pixels,
+      pixelHeight: state => state.application.scale.y.pixels,
     }),
     images() { return this.currentStory.images; },
-
+    pxPerRWU() { return (this.rwuXtoPx(100) - this.rwuXtoPx(0)) / 100; },
     currentImage: {
       get() { return this.$store.getters['application/currentImage']; },
       set(item) { this.$store.dispatch('application/setCurrentSubSelectionId', { id: item.id }); },
     },
+    transform: {
+      get() { return this.$store.state.project.transform; },
+      set(t) { this.$store.dispatch('project/setTransform', t); },
+    }
   },
   watch: {
     /*
@@ -454,10 +488,18 @@ export default {
       this.renderImages();
     },
     // if the view boundaries change
-    view: {
-      handler() { this.scaleAndPlaceStage(); },
-      deep: true,
+    pixelWidth() {
+      this.debouncedRenderImages();
     },
+    pixelHeight() {
+      this.debouncedRenderImages();
+    },
+    transform() {
+      this.scaleAndPlaceStage();
+    },
+    currentTool() {
+      this.renderImages();
+    }
   },
 };
 </script>

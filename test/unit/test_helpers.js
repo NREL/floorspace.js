@@ -9,6 +9,12 @@ export function assert(condition, message) {
   }
 }
 
+export function assertEqual(a, b) {
+  assert(
+    _.isEqual(a, b),
+    `expected ${JSON.stringify(a)} to equal ${JSON.stringify(b)}`);
+}
+
 export function refute(condition, ...args) {
   return assert(!condition, ...args);
 }
@@ -18,7 +24,10 @@ export function nearlyEqual(a, b, epsilon = 0.000001) {
 }
 
 export function assertProperty(...args) {
-  let resp = check(property(...args));
+  // if last parameter is not a function, assume it's config for call to check()
+  const checkConfig = _.isFunction(args[args.length - 1]) ? {} : args.pop();
+
+  let resp = check(property(...args), checkConfig);
   if (resp.result instanceof Error) {
     resp = resp.shrunk || resp;
     console.error(`${resp.result}`);
@@ -84,17 +93,20 @@ export const genRectangle = gen.oneOf([
   .then(createIrregularPolygon),
 ]);
 
-export const genIrregularPolygon = gen.object({
+export const genIrregularPolygonPieces = gen.object({
   center: genPoint,
   radii: gen.array(gen.intWithin(5, 100), { minSize: 3, maxSize: 20 }),
-})
+});
+
+export const genIrregularPolygon = genIrregularPolygonPieces
 .then(createIrregularPolygon);
 
-export const genRegularPolygon = gen.object({
+export const genRegularPolygonPieces = gen.object({
   center: genPoint,
   radius: gen.intWithin(5, 100),
   numEdges: gen.intWithin(3, 20),
-})
+});
+export const genRegularPolygon = genRegularPolygonPieces
 .then(({ center, radius, numEdges }) => createIrregularPolygon({
   radii: _.range(numEdges).map(_.constant(radius)),
   center,

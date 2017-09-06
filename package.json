@@ -1,6 +1,6 @@
 {
   "name": "geometry-editor",
-  "version": "1.0.0",
+  "version": "0.4.0",
   "description": "a widget for creating 2d building energy models in svg",
   "author": "Katie Noland <katie@devetry.com>",
   "private": true,
@@ -10,7 +10,7 @@
     "openstudio-build": "npm run build; ruby build/build.rb",
     "unit": "karma start test/unit/karma.conf.js",
     "e2e": "node test/e2e/runner.js",
-    "test": "npm run unit #&& npm run e2e",
+    "test": "karma start test/unit/karma.conf.js --single-run && node test/e2e/runner.js",
     "lint": "eslint --ext .js,.vue src test/unit/specs test/e2e/specs"
   },
   "dependencies": {

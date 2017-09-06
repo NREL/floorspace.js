@@ -10,24 +10,19 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       :class="`tool_${tool.toLowerCase()}`">
         <toolbar :class="{ 'disabled-component': tool === 'Map' }"></toolbar>
 
-        <resize-group :vertical="true">
-            <resize-group :horizontal="true" id="layout-main">
-                <resize id="layout-navigation" :resize-right="true" :resize-right-min="200">
-                    <navigation :class="{ 'disabled-component': tool === 'Map' }"></navigation>
-                </resize>
-                <main>
-                  <div id="alert-text" v-show="error || success" :class="{ error, success }">
-                      <p>{{ error || success }}</p>
-                  </div>
-                    <canvas-view></canvas-view>
-                    <grid-view></grid-view>
-                </main>
-                <!-- <inspector-view></inspector-view> -->
-            </resize-group>
-            <resize id="layout-library" :resize-top="true" :resize-top-min="100">
-                <library :class="{ 'disabled-component': tool === 'Map' }"></library>
-            </resize>
-        </resize-group>
+        <div id="layout-main">
+            <navigation :class="{ 'disabled-component': tool === 'Map' }"></navigation>
+
+            <main>
+              <div id="alert-text" v-show="error || success" :class="{ error, success }">
+                  <p>{{ error || success }}</p>
+              </div>
+                <canvas-view></canvas-view>
+                <grid-view></grid-view>
+            </main>
+            <!-- <inspector-view></inspector-view> -->
+        </div>
+        <library :class="{ 'disabled-component': tool === 'Map' }"></library>
     </div>
 </template>
 
@@ -42,7 +37,7 @@ import Canvas from './components/Canvas/Canvas.vue';
 import Toolbar from './components/Toolbar.vue';
 import Inspector from './components/Inspector.vue';
 import Library from './components/Library.vue';
-import { Resize, ResizeGroup } from './components/Resize';
+import { Resize } from './components/Resize';
 
 
 export default {
@@ -70,6 +65,11 @@ export default {
       this.success = msg;
       setTimeout(() => { this.success = null; }, 5000);
     });
+    this.$on('reload-grid', () => {
+      // This is unfortunate. oh well.
+      document.getElementById('svg-grid')
+        .dispatchEvent(new Event('reloadGrid'));
+    });
 
     document.addEventListener('keydown', (e) => {
       if (!this.$store.timetravel){
@@ -92,9 +92,7 @@ export default {
     'inspector-view': Inspector,
     library: Library,
     navigation: Navigation,
-    toolbar: Toolbar,
-    resize: Resize,
-    'resize-group': ResizeGroup,
+    toolbar: Toolbar
   },
 };
 </script>
@@ -102,11 +100,10 @@ export default {
 <style src="./scss/main.scss" lang="scss"></style>
 <style lang="scss" scoped>
 @import "./scss/config";
-.tool_select polygon {
-  cursor: pointer;
-}
 .tool_rectangle, .tool_polygon, .tool_eraser {
-  cursor: crosshair;
+  #grid {
+    cursor: crosshair;
+  }
 }
 .tool_drag {
   cursor: move;

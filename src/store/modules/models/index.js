@@ -11,6 +11,7 @@ export default {
             name: null,
             geometry_id: null,
             below_floor_plenum_height: 0,
+            above_floor_plenum_height: 0,
             floor_to_ceiling_height: 0,
             multiplier: 0,
             spaces: [{

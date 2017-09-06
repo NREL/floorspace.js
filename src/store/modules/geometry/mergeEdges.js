@@ -36,8 +36,8 @@ export default {
     const
       { start, end } = right,
       avgEdgeLen = this.avgEdgeLength(left, right),
-      { dist: startDist, proj: startProj } = this.pointDistanceToSegment(start, left),
-      { dist: endDist, proj: endProj } = this.pointDistanceToSegment(end, left);
+      { dist: startDist, proj: startProj } = helpers.pointDistanceToSegment(start, left),
+      { dist: endDist, proj: endProj } = helpers.pointDistanceToSegment(end, left);
 
     if (!(Math.max(startDist, endDist) < 0.05 * avgEdgeLen)) {
       return false;
@@ -117,8 +117,8 @@ export default {
     const
       avgEdgeLength = this.avgEdgeLength(left, right),
       distCutoff = 0.05 * avgEdgeLength,
-      { dist: leftEndDist } = this.pointDistanceToSegment(left.end, right),
-      { dist: rightStartDist } = this.pointDistanceToSegment(right.start, left);
+      { dist: leftEndDist } = helpers.pointDistanceToSegment(left.end, right),
+      { dist: rightStartDist } = helpers.pointDistanceToSegment(right.start, left);
 
     return Math.min(leftEndDist, rightStartDist) < distCutoff;
   },
@@ -178,12 +178,5 @@ export default {
     // Now put the 'end' back at the end.
     finalPts.push(finalPts.splice(1, 1)[0]);
     return finalPts;
-  },
-  pointDistanceToSegment(pt, { start, end }) {
-    const proj = helpers.projectionOfPointToLine(pt, { p1: start, p2: end });
-    return {
-      dist: helpers.distanceBetweenPoints(pt, proj),
-      proj,
-    };
   },
 };

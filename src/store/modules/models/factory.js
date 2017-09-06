@@ -11,6 +11,7 @@ export default {
       geometry_id: null,
       below_floor_plenum_height: 0,
       floor_to_ceiling_height: 0,
+      above_floor_plenum_height: 0,
       multiplier: 0,
       spaces: [],
       daylighting_controls: [],
@@ -31,6 +32,7 @@ export default {
       thermal_zone_id: null,
       space_type_id: null,
       construction_set_id: null,
+      type: 'space',
     };
   },
   Shading(name) {

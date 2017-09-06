@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 export default {
   setCurrentStoryId(context, payload) {
     const { id } = payload;
@@ -33,6 +35,12 @@ export default {
       context.rootState.models.library.window_definitions.find(i => i.id === id)) {
       context.commit('setCurrentComponentDefinitionId', { id });
     }
+  },
+  setCurrentSnapMode(context, { snapMode }) {
+    if (!_.includes(['grid-strict', 'grid-verts-edges'], snapMode)) {
+      throw new Error(`Unknown grid mode ${snapMode}`);
+    }
+    context.commit('setCurrentSnapMode', { snapMode });
   },
 
   setCurrentTool(context, payload) {

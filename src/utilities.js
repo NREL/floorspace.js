@@ -58,3 +58,12 @@ export function dropConsecutiveDups(arr, key = JSON.stringify) {
     pos === 0 || key(item) !== key(arr[pos - 1])
   ));
 }
+
+// get all siblings for a node
+export function getSiblings(el) {
+  const siblings = [];
+  for (let sibling = el.parentNode.firstChild; sibling; sibling = sibling.nextSibling) {
+    if (sibling.nodeType === 1 && sibling !== el) { siblings.push(sibling); }
+  }
+  return siblings;
+}

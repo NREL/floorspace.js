@@ -13,7 +13,7 @@ main {
 }
 
 #toolbar {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     right: 0;
@@ -21,7 +21,7 @@ main {
 }
 
 #layout-main {
-    position: fixed;
+    position: absolute;
     top: 5rem;
     left: 0;
     right: 0;
@@ -45,7 +45,7 @@ main {
 }
 
 #layout-library {
-    position: fixed;
+    position: absolute;
     bottom: 0;
     left: 0;
     right: 0;

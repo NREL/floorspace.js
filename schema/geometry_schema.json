@@ -1,8 +1,12 @@
 {
 	"$schema": "http://json-schema.org/draft-04/schema#",
+	"version": "0.4.0",
 	"description": "Comment describing your JSON Schema",
 	"type": "object",
 	"properties": {
+		"version": {
+			"type": "string"
+		},
 		"application": {
 			"$ref": "#/definitions/Application"
 		},
@@ -52,6 +56,16 @@
 			}
 		}
 	},
+	"required": [
+		"project",
+		"stories",
+		"building_units",
+		"thermal_zones",
+		"space_types",
+		"construction_sets",
+		"windows",
+		"daylighting_controls"
+	],
 	"definitions": {
 		"Application": {
 			"type": "object"
@@ -83,10 +97,7 @@
 						"visible": {
 							"type": "boolean"
 						},
-						"x_spacing": {
-							"type": "number"
-						},
-						"y_spacing": {
+						"spacing": {
 							"type": "number"
 						}
 					}
@@ -125,8 +136,28 @@
 						},
 						"elevation": {
 							"type": "number"
+						},
+						"enabled": {
+							"type": "boolean"
+						},
+						"initialized": {
+							"type": "boolean"
+						},
+						"rotation": {
+							"type": "number"
 						}
 					}
+				},
+				"previous_story": {
+					"type": "object",
+					"properties": {
+						"visible": {
+							"type": "boolean"
+						}
+					}
+				},
+				"showImportExport": {
+					"type": "boolean"
 				}
 			}
 		},
@@ -328,7 +359,8 @@
 				}
 			},
 			"required": [
-				"id"
+				"id",
+				"name"
 			]
 		},
 		"Space": {
@@ -397,6 +429,7 @@
 			},
 			"required": [
 				"id",
+				"name",
 				"face_id"
 			]
 		},
@@ -418,6 +451,7 @@
 			},
 			"required": [
 				"id",
+				"name",
 				"face_id"
 			]
 		},
@@ -444,7 +478,8 @@
 				}
 			},
 			"required": [
-				"id"
+				"id",
+				"name"
 			]
 		},
 		"SpaceType": {
@@ -470,7 +505,8 @@
 				}
 			},
 			"required": [
-				"id"
+				"id",
+				"name"
 			]
 		},
 		"BuildingUnit": {
@@ -496,7 +532,8 @@
 				}
 			},
 			"required": [
-				"id"
+				"id",
+				"name"
 			]
 		},
 		"ConstructionSet": {
@@ -519,7 +556,8 @@
 				}
 			},
 			"required": [
-				"id"
+				"id",
+				"name"
 			]
 		},
 		"WindowDefinition": {
@@ -548,7 +586,8 @@
 				}
 			},
 			"required": [
-				"id"
+				"id",
+				"name"
 			]
 		},
 		"DaylightingControlDefinition": {
@@ -574,7 +613,8 @@
 				}
 			},
 			"required": [
-				"id"
+				"id",
+				"name"
 			]
 		}
 	}
