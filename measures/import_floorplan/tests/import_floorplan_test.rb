@@ -62,8 +62,6 @@ class ImportFloorplan_Test < MiniTest::Unit::TestCase
 
     # assert that it ran correctly
     assert_equal("Success", result.value.valueName)
-    assert(result.info.size == 0)
-    assert(result.warnings.size == 0)
 
     # save the model to test output directory
     output_file_path = OpenStudio::Path.new(File.dirname(__FILE__) + "/output/test_output.osm")

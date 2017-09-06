@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>import_floorplan</name>
   <uid>79d7fbb8-e001-4c65-9444-c7dcb975290f</uid>
-  <version_id>98112ebb-2a55-40db-ad17-f272e07cd0d2</version_id>
-  <version_modified>20170614T033256Z</version_modified>
+  <version_id>a806ff54-0e48-4bf7-9f9c-322d3966351c</version_id>
+  <version_modified>20170906T185753Z</version_modified>
   <xml_checksum>0AD1E2E2</xml_checksum>
   <class_name>ImportFloorplan</class_name>
   <display_name>Import Floorplan</display_name>
@@ -56,24 +56,24 @@
       <filename>import_floorplan_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>C7FECBCD</checksum>
+      <checksum>C7DD576A</checksum>
     </file>
     <file>
       <filename>floorplan.json</filename>
       <filetype>json</filetype>
       <usage_type>test</usage_type>
-      <checksum>ED09A869</checksum>
+      <checksum>B7E75658</checksum>
     </file>
     <file>
       <version>
         <software_program>OpenStudio</software_program>
-        <identifier>2.1.2</identifier>
-        <min_compatible>2.1.2</min_compatible>
+        <identifier>2.2.1</identifier>
+        <min_compatible>2.2.1</min_compatible>
       </version>
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>B2595976</checksum>
+      <checksum>C9D9B4FE</checksum>
     </file>
   </files>
 </measure>

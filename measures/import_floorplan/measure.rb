@@ -71,24 +71,48 @@ class ImportFloorplan < OpenStudio::Ruleset::ModelUserScript
 
     scene = floorplan.get.toThreeScene(true)
     
-    new_model = OpenStudio::Model::modelFromThreeJS(scene)
+    rt = OpenStudio::Model::ThreeJSReverseTranslator.new
+    new_model = rt.modelFromThreeJS(scene)
     
     if new_model.empty?
       runner.registerError("Cannot convert floorplan to model.")
       return false
     end
+    new_model = new_model.get
+
+    had_error = false
+    rt.errors.each do |error|
+      runner.registerError(error.logMessage)
+      had_error = true
+    end
+    
+    rt.warnings.each do |warnings|
+      runner.registerWarning(warnings.logMessage)
+    end
+    
+    if had_error
+      return false
+    end
     
     runner.registerInitialCondition("Initial model has #{model.getPlanarSurfaceGroups.size} planar surface groups")
     
-    # mega lame merge
-    model.getPlanarSurfaceGroups.each do |g|
-      g.remove
+    mm = OpenStudio::Model::ModelMerger.new
+    mm.mergeModels(model, new_model, rt.handleMapping)
+    
+    had_error = false
+    mm.errors.each do |error|
+      runner.registerError(error.logMessage)
+      had_error = true
     end
     
-    new_model.get.getPlanarSurfaceGroups.each do |g| 
-      g.clone(model)
+    mm.warnings.each do |warnings|
+      runner.registerWarning(warnings.logMessage)
     end
     
+    if had_error
+      return false
+    end
+
     runner.registerFinalCondition("Final model has #{model.getPlanarSurfaceGroups.size} planar surface groups")
 
     return true
