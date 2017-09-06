@@ -229,6 +229,7 @@ export default {
     },
   },
   watch: {
+    units() { this.updateMapView(); },
     latitude() { this.updateMapView(); },
     longitude() { this.updateMapView(); },
     rotation() { this.updateMapView(); },
