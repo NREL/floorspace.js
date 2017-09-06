@@ -341,13 +341,19 @@
 							"window_id": {
 								"type": "string"
 							},
-							"vertex_id": {
+							"edge_id": {
 								"type": "string"
+							},
+							"alpha": {
+								"description": "Distance along edge to center point of window, starting from first vertex of edge at a = 0 and ending at second vertex of edge at a =1.  v = v1 + a*(v2-v1)",
+								"type": "number",
+								"minimum": 0,
+								"maximum": 1
 							}
 						},
 						"required": [
 							"window_id",
-							"vertex_id"
+							"edge_id"
 						]
 					}
 				},
