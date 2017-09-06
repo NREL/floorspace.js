@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import { gen } from 'testcheck';
+import { ptsAreCollinear, haveSimilarAngles, distanceBetweenPoints } from '../../../../src/store/modules/geometry/helpers';
 import { gridSnapTargets, snapTargets, snapWindowToEdge } from '../../../../src/components/Grid/snapping';
-import { assertProperty, assertEqual, assert, genPoint } from '../../test_helpers';
+import { assertProperty, assertEqual, assert, genPoint, refute, nearlyEqual } from '../../test_helpers';
 
 describe('gridSnapTargets', () => {
   it('returns 4 unique points', () => {
@@ -87,35 +88,91 @@ describe('snapTargets', () => {
 
 describe('snapWindowToEdge', () => {
   // https://trello-attachments.s3.amazonaws.com/58d428743111af1d0a20cf28/59b06c1d7ae5ee5570e40141/e69e97620f7e686b0e2e1ddd4a0f8ad0/capture.png
-  const edges = [
-    { id: '8', v1: { id: '4', x: -30, y: 30 }, v2: { id: '5', x: 0, y: 30 } },
-    { id: '9', v1: { id: '5', x: 0, y: 30 }, v2: { id: '6', x: 0, y: 0 } },
-    { id: '10', v1: { id: '6', x: 0, y: 0 }, v2: { id: '7', x: -30, y: 0 } },
-    { id: '11', v1: { id: '7', x: -30, y: 0 }, v2: { id: '4', x: -30, y: 30 } },
-    { id: '38', v1: { id: '5', x: 0, y: 30 }, v2: { id: '33', x: -10, y: 40 } },
-    { id: '39', v1: { id: '33', x: -10, y: 40 }, v2: { id: '34', x: 10, y: 50 } },
-    { id: '40', v1: { id: '34', x: 10, y: 50 }, v2: { id: '35', x: 65, y: 35 } },
-    { id: '41', v1: { id: '35', x: 65, y: 35 }, v2: { id: '36', x: 55, y: -25 } },
-    { id: '42', v1: { id: '36', x: 55, y: -25 }, v2: { id: '37', x: 5, y: 0 } },
-    { id: '43', v1: { id: '37', x: 5, y: 0 }, v2: { id: '5', x: 0, y: 30 } },
-  ];
-  it('returns null on empty window list', () => {
+  const
+    edges = [
+      { id: '8', v1: { id: '4', x: -30, y: 30 }, v2: { id: '5', x: 0, y: 30 } },
+      { id: '9', v1: { id: '5', x: 0, y: 30 }, v2: { id: '6', x: 0, y: 0 } },
+      { id: '10', v1: { id: '6', x: 0, y: 0 }, v2: { id: '7', x: -30, y: 0 } },
+      { id: '11', v1: { id: '7', x: -30, y: 0 }, v2: { id: '4', x: -30, y: 30 } },
+      { id: '38', v1: { id: '5', x: 0, y: 30 }, v2: { id: '33', x: -10, y: 40 } },
+      { id: '39', v1: { id: '33', x: -10, y: 40 }, v2: { id: '34', x: 10, y: 50 } },
+      { id: '40', v1: { id: '34', x: 10, y: 50 }, v2: { id: '35', x: 65, y: 35 } },
+      { id: '41', v1: { id: '35', x: 65, y: 35 }, v2: { id: '36', x: 55, y: -25 } },
+      { id: '42', v1: { id: '36', x: 55, y: -25 }, v2: { id: '37', x: 5, y: 0 } },
+      { id: '43', v1: { id: '37', x: 5, y: 0 }, v2: { id: '5', x: 0, y: 30 } },
+    ],
+    genPointInNeighborhood = gen.object({
+      x: gen.numberWithin(-35, 70),
+      y: gen.numberWithin(-30, 50),
+    }),
+    inclusiveMaxSnapDist = 100,
+    narrowMaxSnapDist = 5;
 
+  it('returns null on empty window list', () => {
+    refute(snapWindowToEdge([], { x: 12, y: 12 }, 10, inclusiveMaxSnapDist));
   });
 
   it('returns null when no windows nearby', () => {
-
+    refute(snapWindowToEdge(edges, { x: 100, y: 70 }, 10, narrowMaxSnapDist));
+    refute(snapWindowToEdge(edges, { x: -50, y: -50 }, 10, narrowMaxSnapDist));
   });
 
-  it('always returns a segment centered on an edge (or null)', () => {
-
+  it('returns a segment centered on an edge', () => {
+    assertProperty(
+      genPointInNeighborhood,
+      (cursor) => {
+        const
+          windowLoc = snapWindowToEdge(edges, cursor, 10, inclusiveMaxSnapDist),
+          edge = _.find(edges, { id: windowLoc.edge_id }),
+          alpha = edge.v2.x === edge.v1.x ?
+            (windowLoc.center.y - edge.v1.y) / (edge.v2.y - edge.v1.y) :
+            (windowLoc.center.x - edge.v1.x) / (edge.v2.x - edge.v1.x);
+        assert(
+          ptsAreCollinear(edge.v1, windowLoc.center, edge.v2),
+          'expected pts to be collinear');
+        assert(
+          alpha >= 0 && alpha <= 1,
+          'expected center to be between endpoints of edge');
+      },
+    );
   });
 
-  it('always returns a segment with the same angle as an edge (or null)', () => {
-
+  it('returns a segment with the same angle as an edge', () => {
+    assertProperty(
+      genPointInNeighborhood,
+      (cursor) => {
+        const
+          windowLoc = snapWindowToEdge(edges, cursor, 10, inclusiveMaxSnapDist),
+          edge = _.find(edges, { id: windowLoc.edge_id });
+        assert(
+          haveSimilarAngles({ start: edge.v1, end: edge.v2 }, windowLoc),
+          `expected ${JSON.stringify(edge)} and ${JSON.stringify(windowLoc)} to be parallel`,
+        );
+      },
+    );
   });
 
   it('chooses the closest edge when several are within maxSnapDist', () => {
+    const windowLoc = snapWindowToEdge(
+      edges, { x: 4, y: 5 }, 10, inclusiveMaxSnapDist);
+    assertEqual(windowLoc.edge_id, '43');
+  });
 
+  it('edges returned always span windowWidth / 2 to either side', () => {
+    assertProperty(
+      genPointInNeighborhood,
+      gen.intWithin(1, 20),
+      (cursor, windowWidth) => {
+        const windowLoc = snapWindowToEdge(edges, cursor, windowWidth, inclusiveMaxSnapDist);
+        assert(
+          nearlyEqual(
+            distanceBetweenPoints(windowLoc.center, windowLoc.start),
+            windowWidth / 2));
+        assert(
+          nearlyEqual(
+            distanceBetweenPoints(windowLoc.center, windowLoc.end),
+            windowWidth / 2));
+      },
+    );
   });
 });

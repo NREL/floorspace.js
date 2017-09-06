@@ -17,6 +17,17 @@ export function edgeDirection({ start, end }) {
   return deltaX === 0 ? 0.5 * Math.PI : Math.atan(deltaY / deltaX);
 }
 
+export function haveSimilarAngles(edge1, edge2) {
+  const
+    angleDiff = edgeDirection(edge1) - edgeDirection(edge2),
+    correctedDiff = Math.min(
+      Math.abs(angleDiff),
+      Math.PI - angleDiff, // To catch angles that are very similar, but opposite directions
+    );
+  return correctedDiff < 0.05 * Math.PI;
+}
+
+
 /*
  * given a point and a line (object with two points p1 and p2)
  * return the coordinates of the projection of the point onto the line
@@ -51,6 +62,14 @@ export function pointDistanceToSegment(pt, { start, end }) {
     dist: distanceBetweenPoints(pt, proj),
     proj,
   };
+}
+
+export function ptsAreCollinear(p1, p2, p3) {
+  const
+    [a, b] = [p1.x, p1.y],
+    [m, n] = [p2.x, p2.y],
+    { x, y } = p3;
+  return Math.abs(((n - b) * (x - m)) - ((y - n) * (m - a))) < 0.00001;
 }
 
 
@@ -315,13 +334,7 @@ const helpers = {
       return !!ClipperLib.Clipper.PointInPolygon(testPoint, facePoints);
     },
 
-    ptsAreCollinear(p1, p2, p3) {
-      const [a, b] = [p1.x, p1.y],
-        [m, n] = [p2.x, p2.y],
-        {x, y} = p3;
-      return Math.abs((n - b) * (x - m) - (y - n) * (m - a)) < 0.00001;
-    },
-
+  ptsAreCollinear,
   syntheticRectangleSnaps(points, rectStart, cursorPt) {
     // create synthetic snapping points by considering
     // points that are near to the corners we're not drawing.
@@ -364,15 +377,7 @@ const helpers = {
     ];
   },
   edgeDirection,
-  haveSimilarAngles(edge1, edge2) {
-    const
-      angleDiff = this.edgeDirection(edge1) - this.edgeDirection(edge2),
-      correctedDiff = Math.min(
-        Math.abs(angleDiff),
-        Math.PI - angleDiff, // To catch angles that are very similar, but opposite directions
-      );
-    return correctedDiff < 0.05 * Math.PI;
-  },
+  haveSimilarAngles,
   pointDistanceToSegment,
 
   exceptFace(geometry, face_id) {

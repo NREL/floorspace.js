@@ -43,8 +43,8 @@ export function snapWindowToEdge(edges, cursor, windowWidth, maxSnapDist) {
   }
   const
     theta = edgeDirection({ start: closestWindow.v1, end: closestWindow.v2 }),
-    windowDeltaX = windowWidth * Math.cos(theta),
-    windowDeltaY = windowWidth * Math.sin(theta);
+    windowDeltaX = (windowWidth * Math.cos(theta)) / 2,
+    windowDeltaY = (windowWidth * Math.sin(theta)) / 2;
   return {
     edge_id: closestWindow.id,
     center: closestWindow.proj,
