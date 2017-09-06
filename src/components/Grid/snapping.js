@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { distanceBetweenPoints } from '../../store/modules/geometry/helpers';
+import { distanceBetweenPoints, pointDistanceToSegment, edgeDirection } from '../../store/modules/geometry/helpers';
 
 export function gridSnapTargets(gridSpacing, { x, y }) {
   return [
@@ -29,4 +29,32 @@ export function snapTargets(vertices, gridSpacing, cursor) {
     }));
 
   return _.orderBy(targets, ['dist', 'origin', 'type'], ['asc', 'asc', 'desc']);
+}
+
+export function snapWindowToEdge(edges, cursor, windowWidth, maxSnapDist) {
+  const
+    withDistance = edges.map(e => ({
+      ...e,
+      ...pointDistanceToSegment(cursor, { start: e.v1, end: e.v2 }),
+    })),
+    closestWindow = _.minBy(withDistance, 'dist');
+  if (!closestWindow || closestWindow.dist > maxSnapDist) {
+    return null;
+  }
+  const
+    theta = edgeDirection({ start: closestWindow.v1, end: closestWindow.v2 }),
+    windowDeltaX = windowWidth * Math.cos(theta),
+    windowDeltaY = windowWidth * Math.sin(theta);
+  return {
+    edge_id: closestWindow.id,
+    center: closestWindow.proj,
+    start: {
+      x: closestWindow.proj.x - windowDeltaX,
+      y: closestWindow.proj.y - windowDeltaY,
+    },
+    end: {
+      x: closestWindow.proj.x + windowDeltaX,
+      y: closestWindow.proj.y + windowDeltaY,
+    },
+  };
 }

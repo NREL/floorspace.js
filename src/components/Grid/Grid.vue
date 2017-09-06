@@ -79,6 +79,7 @@ export default {
     ...mapGetters({
       currentStory: 'application/currentStory',
       currentStoryGeometry: 'application/currentStoryGeometry',
+      denormalizedGeometry: 'application/currentStoryDenormalizedGeom',
       currentSpace: 'application/currentSpace',
       currentShading: 'application/currentShading',
       currentComponentDefinition: 'application/currentComponentDefinition',

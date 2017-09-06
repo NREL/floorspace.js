@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { gen } from 'testcheck';
-import { gridSnapTargets, snapTargets } from '../../../../src/components/Grid/snapping';
+import { gridSnapTargets, snapTargets, snapWindowToEdge } from '../../../../src/components/Grid/snapping';
 import { assertProperty, assertEqual, assert, genPoint } from '../../test_helpers';
 
 describe('gridSnapTargets', () => {
@@ -82,5 +82,40 @@ describe('snapTargets', () => {
 
     assert(_.isMatch(first, { type: 'vertex', x: 0, y: 0, origin: true }));
     assert(_.isMatch(second, { type: 'vertex', x: 0, y: 0 }));
+  });
+});
+
+describe('snapWindowToEdge', () => {
+  // https://trello-attachments.s3.amazonaws.com/58d428743111af1d0a20cf28/59b06c1d7ae5ee5570e40141/e69e97620f7e686b0e2e1ddd4a0f8ad0/capture.png
+  const edges = [
+    { id: '8', v1: { id: '4', x: -30, y: 30 }, v2: { id: '5', x: 0, y: 30 } },
+    { id: '9', v1: { id: '5', x: 0, y: 30 }, v2: { id: '6', x: 0, y: 0 } },
+    { id: '10', v1: { id: '6', x: 0, y: 0 }, v2: { id: '7', x: -30, y: 0 } },
+    { id: '11', v1: { id: '7', x: -30, y: 0 }, v2: { id: '4', x: -30, y: 30 } },
+    { id: '38', v1: { id: '5', x: 0, y: 30 }, v2: { id: '33', x: -10, y: 40 } },
+    { id: '39', v1: { id: '33', x: -10, y: 40 }, v2: { id: '34', x: 10, y: 50 } },
+    { id: '40', v1: { id: '34', x: 10, y: 50 }, v2: { id: '35', x: 65, y: 35 } },
+    { id: '41', v1: { id: '35', x: 65, y: 35 }, v2: { id: '36', x: 55, y: -25 } },
+    { id: '42', v1: { id: '36', x: 55, y: -25 }, v2: { id: '37', x: 5, y: 0 } },
+    { id: '43', v1: { id: '37', x: 5, y: 0 }, v2: { id: '5', x: 0, y: 30 } },
+  ];
+  it('returns null on empty window list', () => {
+
+  });
+
+  it('returns null when no windows nearby', () => {
+
+  });
+
+  it('always returns a segment centered on an edge (or null)', () => {
+
+  });
+
+  it('always returns a segment with the same angle as an edge (or null)', () => {
+
+  });
+
+  it('chooses the closest edge when several are within maxSnapDist', () => {
+
   });
 });

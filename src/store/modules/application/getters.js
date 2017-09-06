@@ -1,3 +1,5 @@
+import geometryHelpers from '../geometry/helpers';
+
 export default {
   // full story object for the currentSelections story_id
   currentStory(state, getters, rootState) { return rootState.models.stories.find(s => s.id === state.currentSelections.story_id); },
@@ -59,6 +61,9 @@ export default {
   // geometry for the story being edited
   currentStoryGeometry(state, getters, rootState) {
     return rootState.geometry.find(g => g.id === getters['currentStory'].geometry_id);
+  },
+  currentStoryDenormalizedGeom(state, getters) {
+    return geometryHelpers.denormalize(getters['currentStoryGeometry']);
   },
 
   // face for the shading or space being edited

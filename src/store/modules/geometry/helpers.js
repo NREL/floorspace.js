@@ -9,6 +9,50 @@ export function distanceBetweenPoints(p1, p2) {
   return Math.sqrt((dx * dx) + (dy * dy));
 }
 
+export function edgeDirection({ start, end }) {
+  // return the angle from east, in radians.
+  const
+    deltaX = end.x - start.x,
+    deltaY = end.y - start.y;
+  return deltaX === 0 ? 0.5 * Math.PI : Math.atan(deltaY / deltaX);
+}
+
+/*
+ * given a point and a line (object with two points p1 and p2)
+ * return the coordinates of the projection of the point onto the line
+ */
+export function projectionOfPointToLine(point, line) {
+  const { p1: { x: x1, y: y1 }, p2: { x: x2, y: y2 } } = line;
+  const
+    A = point.x - x1,
+    B = point.y - y1,
+    C = x2 - x1,
+    D = y2 - y1,
+    dot = (A * C) + (B * D),
+    lenSq = (C * C) + (D * D) || 2,
+    param = dot / lenSq;
+
+  // projection is an endpoint
+  if (param <= 0) {
+    return line.p1;
+  } else if (param > 1) {
+    return line.p2;
+  }
+
+  return {
+    x: x1 + (param * C),
+    y: y1 + (param * D),
+  };
+}
+
+export function pointDistanceToSegment(pt, { start, end }) {
+  const proj = projectionOfPointToLine(pt, { p1: start, p2: end });
+  return {
+    dist: distanceBetweenPoints(pt, proj),
+    proj,
+  };
+}
+
 
 const helpers = {
   // ************************************ CLIPPER ************************************ //
@@ -133,41 +177,7 @@ const helpers = {
         });
     },
 
-    /*
-     * given a point and a line (object with two points p1 and p2)
-     * return the coordinates of the projection of the point onto the line
-     */
-    projectionOfPointToLine(point, line) {
-        const {
-            p1: {
-                x: x1,
-                y: y1
-            },
-            p2: {
-                x: x2,
-                y: y2
-            }
-        } = line;
-        const A = point.x - x1,
-            B = point.y - y1,
-            C = x2 - x1,
-            D = y2 - y1,
-            dot = A * C + B * D,
-            lenSq = (C * C + D * D) || 2,
-            param = dot / lenSq;
-
-        // projection is an endpoint
-        if (param <= 0) {
-            return line.p1;
-        } else if (param > 1) {
-            return line.p2;
-        }
-
-        return {
-            x: x1 + param * C,
-            y: y1 + param * D
-        };
-    },
+    projectionOfPointToLine,
 
     /*
      * given two points return the distance between them
@@ -353,13 +363,7 @@ const helpers = {
         { x, y: y + (2 * (yMid - y)), synthetic: true, originalPt: { x, y } })),
     ];
   },
-  edgeDirection({ start, end }) {
-    // return the angle from east, in radians.
-    const
-      deltaX = end.x - start.x,
-      deltaY = end.y - start.y;
-    return deltaX === 0 ? 0.5 * Math.PI : Math.atan(deltaY / deltaX);
-  },
+  edgeDirection,
   haveSimilarAngles(edge1, edge2) {
     const
       angleDiff = this.edgeDirection(edge1) - this.edgeDirection(edge2),
@@ -369,13 +373,7 @@ const helpers = {
       );
     return correctedDiff < 0.05 * Math.PI;
   },
-  pointDistanceToSegment(pt, { start, end }) {
-    const proj = helpers.projectionOfPointToLine(pt, { p1: start, p2: end });
-    return {
-      dist: helpers.distanceBetweenPoints(pt, proj),
-      proj,
-    };
-  },
+  pointDistanceToSegment,
 
   exceptFace(geometry, face_id) {
     if (!face_id) { return geometry; }

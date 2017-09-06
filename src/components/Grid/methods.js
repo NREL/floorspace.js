@@ -121,8 +121,12 @@ export default {
     const gridCoords = d3.mouse(this.$refs.grid),
       gridPoint = { x: gridCoords[0], y: gridCoords[1] };
 
-    const options = { edge_component: (this.currentTool === 'Place Component' && this.currentComponentType === 'window_definitions') };
-    const snapTarget = this.findSnapTarget(gridPoint/*, options*/);
+    if (this.currentTool === 'Place Component' && this.currentComponentDefinition) {
+      this.highlightComponent(gridPoint);
+      return;
+    }
+
+    const snapTarget = this.findSnapTarget(gridPoint);
 
     // render a line and point showing which geometry would be created with a click at this location
     const guidePoint = snapTarget.type === 'edge' ? snapTarget.projection :
@@ -165,6 +169,21 @@ export default {
       .classed('highlight', true)
       .attr('vector-effect', 'non-scaling-stroke');
     }
+  },
+
+  highlightComponent(gridPoint) {
+    if (this.currentComponentType === 'window_definitions') {
+      this.highlightWindow(gridPoint);
+    } else {
+      this.highlightDaylightingControl(gridPoint);
+    }
+  },
+
+  highlightWindow(gridPoint) {
+    const loc = this.findWindowSnap(gridPoint);
+  },
+  highlightDaylightingControl(gridPoint) {
+
   },
 
   /*
