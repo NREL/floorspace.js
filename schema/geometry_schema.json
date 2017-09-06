@@ -422,13 +422,17 @@
 							"daylighting_control_id": {
 								"type": "string"
 							},
-							"vertex_id": {
-								"type": "string"
+							"x": {
+								"type": "number"
+							},
+							"y": {
+								"type": "number"
 							}
 						},
 						"required": [
 							"daylighting_control_id",
-							"vertex_id"
+							"x",
+							"y"
 						]
 					}
 				}
