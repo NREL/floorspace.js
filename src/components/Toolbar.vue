@@ -313,6 +313,7 @@ export default {
           &:last-child {
             margin-left: 1rem;
           }
+        }
       }
       > .snapping-options {
         margin-right: auto;

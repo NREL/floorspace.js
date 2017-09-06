@@ -569,11 +569,6 @@ export default {
       };
     }
 
-    // translate grid point to real world units to check for snapping targets
-    const rwuPoint = {
-      x: this.gridToRWU(gridPoint.x, 'x'),
-      y: this.gridToRWU(gridPoint.y, 'y'),
-    };
     // if snapping only to edges (placing edge components, return either the snapping edge or original point)
     if (snapOnlyToEdges) {
       const snappingEdge = this.snappingEdgeData(rwuPoint);

@@ -60,41 +60,41 @@ const map = {
   },
   window_definitions: {
     displayName: 'Window Definition',
-    keymap: {
-      id: {
+    columns: [
+      {
+        name: 'id',
         displayName: 'ID',
         readonly: true,
-        private: false,
+        private: true,
       },
-      name: {
+      {
+        name: 'name',
         displayName: 'Name',
-        readonly: false,
         input_type: 'text',
-        private: false,
         validator: validators.name,
       },
-      height: {
+      {
+        name: 'height',
         displayName: 'Height',
-        readonly: false,
-        input_type: 'number',
-        private: false,
+        input_type: 'text',
         validator: validators.number,
+        converter: converters.number,
       },
-      width: {
+      {
+        name: 'width',
         displayName: 'Width',
-        readonly: false,
-        input_type: 'number',
-        private: false,
+        input_type: 'text',
         validator: validators.number,
+        converter: converters.number,
       },
-      sill_height: {
+      {
+        name: 'sill_height',
         displayName: 'Sill Height',
-        readonly: false,
-        input_type: 'number',
-        private: false,
+        input_type: 'text',
         validator: validators.number,
+        converter: converters.number,
       },
-    },
+    ],
     init: factory.ThermalZone,
   },
   space_types: {
@@ -170,7 +170,7 @@ const map = {
         },
       },
     ],
-    init: factory.Window,
+    init: factory.WindowDefn,
   },
   daylighting_control_definitions: {
     displayName: 'Daylighting Control Definition',
@@ -187,8 +187,22 @@ const map = {
         input_type: 'text',
         validator: validators.name,
       },
+      {
+        name: 'height',
+        displayName: 'Height',
+        input_type: 'text',
+        validator: validators.number,
+        converter: converters.number,
+      },
+      {
+        name: 'illuminance_setpoint',
+        displayName: 'Illuminance Setpoint',
+        input_type: 'text',
+        validator: validators.number,
+        converter: converters.number,
+      },
     ],
-    init: factory.DaylightingControl,
+    init: factory.DaylightingControlDefn,
   },
   stories: {
     displayName: 'Story',
