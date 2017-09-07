@@ -37,24 +37,27 @@ export function snapWindowToEdge(edges, cursor, windowWidth, maxSnapDist) {
       ...e,
       ...pointDistanceToSegment(cursor, { start: e.v1, end: e.v2 }),
     })),
-    closestWindow = _.minBy(withDistance, 'dist');
-  if (!closestWindow || closestWindow.dist > maxSnapDist) {
+    closestEdge = _.minBy(withDistance, 'dist');
+  if (!closestEdge || closestEdge.dist > maxSnapDist) {
     return null;
   }
   const
-    theta = edgeDirection({ start: closestWindow.v1, end: closestWindow.v2 }),
+    theta = edgeDirection({ start: closestEdge.v1, end: closestEdge.v2 }),
     windowDeltaX = (windowWidth * Math.cos(theta)) / 2,
     windowDeltaY = (windowWidth * Math.sin(theta)) / 2;
   return {
-    edge_id: closestWindow.id,
-    center: closestWindow.proj,
+    edge_id: closestEdge.id,
+    center: closestEdge.proj,
+    alpha: closestEdge.v2.x === closestEdge.v1.x ?
+      (closestEdge.proj.y - closestEdge.v1.y) / (closestEdge.v2.y - closestEdge.v1.y) :
+      (closestEdge.proj.x - closestEdge.v1.x) / (closestEdge.v2.x - closestEdge.v1.x),
     start: {
-      x: closestWindow.proj.x - windowDeltaX,
-      y: closestWindow.proj.y - windowDeltaY,
+      x: closestEdge.proj.x - windowDeltaX,
+      y: closestEdge.proj.y - windowDeltaY,
     },
     end: {
-      x: closestWindow.proj.x + windowDeltaX,
-      y: closestWindow.proj.y + windowDeltaY,
+      x: closestEdge.proj.x + windowDeltaX,
+      y: closestEdge.proj.y + windowDeltaY,
     },
   };
 }

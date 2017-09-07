@@ -8,7 +8,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
   <div id="grid" :style="{ 'pointer-events': (currentTool === 'Drag' || currentTool === 'Map') ? 'none': 'auto' }">
-    <svg ref="grid" preserveAspectRatio="none" id="svg-grid"></svg>
+    <svg ref="grid" id="svg-grid">
+      <defs>
+        <marker id="perp-linecap" markerWidth="1" markerHeight="10" orient="auto" markerUnits="strokeWidth" refY="5" refX="0.5">
+          <rect x="0" y="1" width="1" height="8" shape-rendering="optimizeQuality"/>
+        </marker>
+      </defs>
+    </svg>
   </div>
 </template>
 
@@ -20,6 +26,7 @@ import geometryHelpers from './../../store/modules/geometry/helpers';
 import modelHelpers from './../../store/modules/models/helpers';
 import applicationHelpers from './../../store/modules/application/helpers';
 import { ResizeEvents } from '../../components/Resize';
+import { drawWindow } from './drawing';
 
 const d3 = require('d3');
 
@@ -37,6 +44,9 @@ export default {
         y: null,
       },
       handleMouseMove: null, // placeholder --> overwritten in mounted()
+      drawWindow: drawWindow()
+        .xScale(v => this.rwuToGrid(v, 'x'))
+        .yScale(v => this.rwuToGrid(v, 'y')),
     };
   },
   mounted() {

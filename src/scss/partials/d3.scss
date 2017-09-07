@@ -92,4 +92,13 @@
       shape-rendering: crispEdges;
       stroke: $gray-medium;
     }
+
+    .window {
+      stroke-width: 3;
+      stroke: black;
+    }
+    #perp-linecap rect {
+      fill: black;
+      stroke: none;
+    }
 }

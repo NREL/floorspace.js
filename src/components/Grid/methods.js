@@ -9,7 +9,7 @@
 const d3 = require('d3');
 const polylabel = require('polylabel');
 import _ from 'lodash';
-import { snapTargets } from './snapping';
+import { snapTargets, snapWindowToEdge } from './snapping';
 import geometryHelpers from './../../store/modules/geometry/helpers';
 import modelHelpers from './../../store/modules/models/helpers';
 import { ResizeEvents } from '../../components/Resize';
@@ -180,7 +180,20 @@ export default {
   },
 
   highlightWindow(gridPoint) {
-    const loc = this.findWindowSnap(gridPoint);
+    const that = this;
+    const
+      rwuPoint = this.gridPointToRWU(gridPoint),
+      loc = snapWindowToEdge(
+        this.denormalizedGeometry.edges, rwuPoint,
+        this.currentComponentDefinition.width, this.spacing * 2,
+      );
+
+    if(!loc) { return; }
+    const hl = d3.select('#grid svg')
+      .append('g')
+      .datum(loc)
+      .classed('highlight', true)
+      .call(this.drawWindow);
   },
   highlightDaylightingControl(gridPoint) {
 
@@ -1137,6 +1150,20 @@ export default {
     const result = scale.invert(gridValue);
     // prevent floating point inaccuracies in stored numbers
     return (Math.round(result * 100000000000))/100000000000;
+  },
+
+  gridPointToRWU(pt) {
+    return {
+      x: this.gridToRWU(pt.x, 'x'),
+      y: this.gridToRWU(pt.y, 'y'),
+    };
+  },
+
+  rwuPointToGrid(pt) {
+    return {
+      x: this.rwuToGrid(pt.x, 'x'),
+      y: this.rwuToGrid(pt.y, 'y'),
+    };
   },
 
   /*

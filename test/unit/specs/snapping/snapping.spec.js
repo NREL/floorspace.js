@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { gen } from 'testcheck';
 import { ptsAreCollinear, haveSimilarAngles, distanceBetweenPoints } from '../../../../src/store/modules/geometry/helpers';
 import { gridSnapTargets, snapTargets, snapWindowToEdge } from '../../../../src/components/Grid/snapping';
-import { assertProperty, assertEqual, assert, genPoint, refute, nearlyEqual } from '../../test_helpers';
+import { assertProperty, assertEqual, assert, genPoint, refute, nearlyEqual, isNearlyEqual } from '../../test_helpers';
 
 describe('gridSnapTargets', () => {
   it('returns 4 unique points', () => {
@@ -123,16 +123,32 @@ describe('snapWindowToEdge', () => {
       (cursor) => {
         const
           windowLoc = snapWindowToEdge(edges, cursor, 10, inclusiveMaxSnapDist),
-          edge = _.find(edges, { id: windowLoc.edge_id }),
-          alpha = edge.v2.x === edge.v1.x ?
-            (windowLoc.center.y - edge.v1.y) / (edge.v2.y - edge.v1.y) :
-            (windowLoc.center.x - edge.v1.x) / (edge.v2.x - edge.v1.x);
+          edge = _.find(edges, { id: windowLoc.edge_id });
         assert(
           ptsAreCollinear(edge.v1, windowLoc.center, edge.v2),
           'expected pts to be collinear');
         assert(
-          alpha >= 0 && alpha <= 1,
+          windowLoc.alpha >= 0 && windowLoc.alpha <= 1,
           'expected center to be between endpoints of edge');
+      },
+    );
+  });
+
+  it('alpha accurately describes the location of the center', () => {
+    assertProperty(
+      genPointInNeighborhood,
+      (cursor) => {
+        const
+          windowLoc = snapWindowToEdge(edges, cursor, 10, inclusiveMaxSnapDist),
+          edge = _.find(edges, { id: windowLoc.edge_id }),
+          alphaAlongEdge = {
+            x: edge.v1.x + (windowLoc.alpha * (edge.v2.x - edge.v1.x)),
+            y: edge.v1.y + (windowLoc.alpha * (edge.v2.y - edge.v1.y)),
+          };
+        assert(isNearlyEqual(
+          alphaAlongEdge,
+          _.pick(windowLoc.center, ['x', 'y']),
+        ));
       },
     );
   });
