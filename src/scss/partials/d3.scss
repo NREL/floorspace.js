@@ -101,4 +101,14 @@
       fill: black;
       stroke: none;
     }
+    #perp-linecap-highlight rect {
+      fill: #008500;
+      stroke: none;
+    }
+    .highlight {
+      .window {
+        stroke: #008500;
+        fill: black;
+      }
+    }
 }
