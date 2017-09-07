@@ -353,7 +353,8 @@
 						},
 						"required": [
 							"window_id",
-							"edge_id"
+							"edge_id",
+							"alpha"
 						]
 					}
 				},
