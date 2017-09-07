@@ -31,6 +31,29 @@ export function snapTargets(vertices, gridSpacing, cursor) {
   return _.orderBy(targets, ['dist', 'origin', 'type'], ['asc', 'asc', 'desc']);
 }
 
+export function expandWindowAlongEdge(edge, center, windowWidth) {
+  const
+    theta = edgeDirection({ start: edge.v1, end: edge.v2 }),
+    windowDeltaX = (windowWidth * Math.cos(theta)) / 2,
+    windowDeltaY = (windowWidth * Math.sin(theta)) / 2;
+  return {
+    edge_id: edge.id,
+    center,
+    alpha: edge.v2.x === edge.v1.x ?
+      (center.y - edge.v1.y) / (edge.v2.y - edge.v1.y) :
+      (center.x - edge.v1.x) / (edge.v2.x - edge.v1.x),
+    start: {
+      x: center.x - windowDeltaX,
+      y: center.y - windowDeltaY,
+    },
+    end: {
+      x: center.x + windowDeltaX,
+      y: center.y + windowDeltaY,
+    },
+  };
+}
+
+
 export function snapWindowToEdge(edges, cursor, windowWidth, maxSnapDist) {
   const
     withDistance = edges.map(e => ({
@@ -41,23 +64,5 @@ export function snapWindowToEdge(edges, cursor, windowWidth, maxSnapDist) {
   if (!closestEdge || closestEdge.dist > maxSnapDist) {
     return null;
   }
-  const
-    theta = edgeDirection({ start: closestEdge.v1, end: closestEdge.v2 }),
-    windowDeltaX = (windowWidth * Math.cos(theta)) / 2,
-    windowDeltaY = (windowWidth * Math.sin(theta)) / 2;
-  return {
-    edge_id: closestEdge.id,
-    center: closestEdge.proj,
-    alpha: closestEdge.v2.x === closestEdge.v1.x ?
-      (closestEdge.proj.y - closestEdge.v1.y) / (closestEdge.v2.y - closestEdge.v1.y) :
-      (closestEdge.proj.x - closestEdge.v1.x) / (closestEdge.v2.x - closestEdge.v1.x),
-    start: {
-      x: closestEdge.proj.x - windowDeltaX,
-      y: closestEdge.proj.y - windowDeltaY,
-    },
-    end: {
-      x: closestEdge.proj.x + windowDeltaX,
-      y: closestEdge.proj.y + windowDeltaY,
-    },
-  };
+  return expandWindowAlongEdge(closestEdge, closestEdge.proj, windowWidth);
 }

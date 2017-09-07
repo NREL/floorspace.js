@@ -122,8 +122,7 @@ export default {
     ((this.currentTool === 'Rectangle' || this.currentTool === 'Polygon') && (this.currentSpace || this.currentShading)))) { return; }
 
     // unhighlight expired snap targets
-    d3.selectAll('#grid .highlight, #grid .gridpoint').remove();
-
+    this.clearHighlights()
 
     // location of the mouse in grid units
     const gridCoords = d3.mouse(this.$refs.grid),
@@ -179,6 +178,11 @@ export default {
     }
   },
 
+  clearHighlights() {
+    d3.selectAll('#grid .highlight, #grid .gridpoint').remove();
+  },
+
+
   highlightComponent(gridPoint) {
     if (this.currentComponentType === 'window_definitions') {
       this.highlightWindow(gridPoint);
@@ -188,7 +192,6 @@ export default {
   },
 
   highlightWindow(gridPoint) {
-    const that = this;
     const
       rwuPoint = this.gridPointToRWU(gridPoint),
       loc = snapWindowToEdge(
@@ -200,7 +203,8 @@ export default {
     const hl = d3.select('#grid svg')
       .append('g')
       .classed('highlight', true)
-      .datum(loc)
+      .selectAll('.window')
+      .data([loc])
       .call(this.drawWindow);
   },
   highlightDaylightingControl(gridPoint) {
@@ -540,6 +544,7 @@ export default {
     const polyEnter = poly.enter().append('g').attr('class', 'poly');
     polyEnter.append('polygon');
     polyEnter.append('text').attr('class', 'polygon-text');
+    polyEnter.append('g').attr('class', 'windows');
 
     // draw polygons
     poly = polyEnter
@@ -572,6 +577,11 @@ export default {
       .attr('font-family', 'sans-serif')
       .attr('fill', 'red')
       .classed('polygon-text', true);
+
+    poly.select('.windows')
+      .selectAll('.window')
+      .data(d => d.windows)
+      .call(this.drawWindow);
 
     this.registerDrag();
 
@@ -1060,7 +1070,7 @@ export default {
 
        this.axis_generator.x.scale(newScaleX);
        this.axis_generator.y.scale(newScaleY);
-
+       this.clearHighlights();
        this.updateGrid();
 
        // axis padding

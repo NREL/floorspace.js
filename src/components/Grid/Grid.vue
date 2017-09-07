@@ -10,8 +10,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
   <div id="grid" :style="{ 'pointer-events': (currentTool === 'Drag' || currentTool === 'Map') ? 'none': 'auto' }">
     <svg ref="grid" id="svg-grid">
       <defs>
-        <marker id="perp-linecap" markerWidth="1" markerHeight="10" orient="auto" markerUnits="strokeWidth" refY="5" refX="0.5">
-          <rect x="0" y="1" width="1" height="8" shape-rendering="optimizeQuality"/>
+        <marker id="perp-linecap" markerWidth="1" markerHeight="10" orient="auto" markerUnits="strokeWidth" refY="4" refX="0.5">
+          <rect x="0" y="1" width="1" height="6" shape-rendering="optimizeQuality"/>
         </marker>
       </defs>
     </svg>
@@ -27,6 +27,7 @@ import modelHelpers from './../../store/modules/models/helpers';
 import applicationHelpers from './../../store/modules/application/helpers';
 import { ResizeEvents } from '../../components/Resize';
 import { drawWindow } from './drawing';
+import { expandWindowAlongEdge } from './snapping';
 
 const d3 = require('d3');
 
@@ -156,7 +157,6 @@ export default {
 
     currentMode() { this.drawPolygons(); },
     polygons() { this.drawPolygons(); },
-
     currentTool() {
       this.points = [];
       this.drawPolygons();
@@ -191,8 +191,20 @@ export default {
   },
   methods: {
     ...methods,
+    denormalizeWindow(edge, { edge_id, alpha, window_defn_id }) {
+      const
+        windowDefn = _.find(this.$store.state.models.library.window_definitions, { id: window_defn_id }),
+        center = {
+          x: edge.v1.x + (alpha * (edge.v2.x - edge.v1.x)),
+          y: edge.v1.y + (alpha * (edge.v2.y - edge.v1.y)),
+        };
+      return expandWindowAlongEdge(edge, center, windowDefn.width);
+    },
     polygonsFromGeometry(geometry, extraPolygonAttrs = {}) {
-      const geom = geometryHelpers.denormalize(geometry);
+      const
+        geom = geometryHelpers.denormalize(geometry),
+        windows = this.currentStory.geometry_id === geometry.id ?
+          this.currentStory.windows : [];
       const polygons = geom.faces.map((face) => {
         // look up the model (space or shading) associated with the face
         const
@@ -205,6 +217,10 @@ export default {
             color: model.color,
             points,
             labelPosition: this.polygonLabelPosition(points),
+            windows: _.flatMap(
+              face.edges,
+              e => _.filter(windows, { edge_id: e.id })
+                    .map(w => this.denormalizeWindow(e, w))),
             ...extraPolygonAttrs,
           };
         if (!points.length) {
