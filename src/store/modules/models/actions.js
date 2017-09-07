@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import libconfig from './libconfig';
 import factory from './factory';
 import helpers from './helpers';
@@ -203,4 +204,25 @@ export default {
     const story = payload.story;
     context.dispatch('application/setCurrentStoryId', { id: story.id }, { root: true });
   },
-}
+
+  createWindow(context, payload) {
+    const
+      { story_id, edge_id, window_defn_id, alpha } = payload,
+      story = _.find(context.state.stories, { id: story_id }),
+      windowDefn = _.find(context.state.library.window_definitions, { id: window_defn_id }),
+      geometry = story && _.find(context.rootState.geometry, { id: story.geometry_id }),
+      edge = geometry && _.find(geometry.edges, { id: edge_id });
+    if (!story) {
+      throw new Error('Story not found');
+    } else if (!windowDefn) {
+      throw new Error('Window Definition not found');
+    } else if (!geometry) {
+      throw new Error('Geometry not found');
+    } else if (!edge) {
+      throw new Error('Edge not found');
+    } else if (alpha < 0 || alpha > 1) {
+      throw new Error('Alpha must be between 0 and 1');
+    }
+    context.commit('createWindow', payload);
+  },
+};

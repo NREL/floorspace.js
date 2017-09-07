@@ -68,5 +68,13 @@ export default {
         const object = payload.object;
         Object.assign(object, payload);
         delete object.object;
-    }
+    },
+  createWindow(state, { story_id, edge_id, window_defn_id, alpha }) {
+    const story = _.find(state.stories, { id: story_id });
+    story.windows.push({
+      window_defn_id,
+      edge_id,
+      alpha,
+    });
+  },
 }

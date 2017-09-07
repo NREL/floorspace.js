@@ -42,16 +42,24 @@ export default {
   placeWindow() {
     const
       gridCoords = d3.mouse(this.$refs.grid),
-      gridPoint = { x: gridCoords[0], y: gridCoords[1] };
+      gridPoint = { x: gridCoords[0], y: gridCoords[1] },
+      rwuPoint = this.gridPointToRWU(gridPoint),
+      loc = snapWindowToEdge(
+        this.denormalizedGeometry.edges, rwuPoint,
+        this.currentComponentDefinition.width, this.spacing * 2,
+      );
 
-    // snap only to edges
-    const snapTarget = this.findSnapTarget(gridPoint/*, { edge_component: true }*/);
+    if (!loc) { return; }
 
-    if (snapTarget.type === 'edge') {
-      window.eventBus.$emit('success', `Window created at (${snapTarget.projection.x}, ${snapTarget.projection.y})`);
-    } else {
-      window.eventBus.$emit('error', 'Windows must be on edges.');
-    }
+    const payload = {
+      story_id: this.currentStory.id,
+      edge_id: loc.edge_id,
+      window_defn_id: this.currentComponentDefinition.id,
+      alpha: loc.alpha,
+    };
+    this.$store.dispatch('models/createWindow', payload);
+
+    window.eventBus.$emit('success', `Window created at (${loc.center.x}, ${loc.center.y})`);
   },
   placeDaylightingControl() {
     const
@@ -191,8 +199,8 @@ export default {
     if(!loc) { return; }
     const hl = d3.select('#grid svg')
       .append('g')
-      .datum(loc)
       .classed('highlight', true)
+      .datum(loc)
       .call(this.drawWindow);
   },
   highlightDaylightingControl(gridPoint) {
@@ -983,7 +991,6 @@ export default {
     const
       width = this.$refs.grid.clientWidth,
       height = this.$refs.grid.clientHeight;
-
     this.xScale = d3.scaleLinear()
       .domain([this.min_x, this.max_x])
       .range([0, width]);
