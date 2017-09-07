@@ -52,6 +52,12 @@ export default {
   mounted() {
     // throttle/debounce event handlers
     this.handleMouseMove = throttle(this.highlightSnapTarget, 100);
+
+    // render grid first time (not debounced, as this seems to fix an issue
+    // where the x bounds are set correctly, and then becomes incorrect when the
+    // debounced renderGrid runs)
+    this.renderGrid();
+
     this.renderGrid = debounce(this.renderGrid, 5);
 
     // add event listeners
@@ -61,9 +67,6 @@ export default {
     window.addEventListener('resize', this.reloadGridAndScales);
 
     ResizeEvents.$on('resize', this.reloadGridAndScales);
-
-    // render grid first time
-    this.renderGrid();
   },
   beforeDestroy() {
     this.$refs.grid.removeEventListener('reloadGrid', this.reloadGridAndScales);
