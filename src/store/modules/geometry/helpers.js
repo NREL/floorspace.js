@@ -153,7 +153,6 @@ const helpers = {
     // nextRing is either entirely within, or entirely without outerRing.
     return helpers.inRing(ptFromNextRing, outerRing);
   },
-
   // convenience functions for setOperation
   intersection(f1, f2) {
     return this.setOperation('intersection', f1, f2);
@@ -529,5 +528,10 @@ helpers.inRing = function (pt, ring, ignoreBoundary) {
   }
   return isInside;
 };
+
+export function vertInRing(vert, ring) {
+  const toLst = ({ x, y }) => [x, y];
+  return helpers.inRing(toLst(vert), ring.map(toLst));
+}
 
 export default helpers;

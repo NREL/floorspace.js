@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { distanceBetweenPoints, pointDistanceToSegment, edgeDirection } from '../../store/modules/geometry/helpers';
+import { distanceBetweenPoints, pointDistanceToSegment, edgeDirection, vertInRing } from '../../store/modules/geometry/helpers';
 
 export function gridSnapTargets(gridSpacing, { x, y }) {
   return [
@@ -65,4 +65,9 @@ export function snapWindowToEdge(edges, cursor, windowWidth, maxSnapDist) {
     return null;
   }
   return expandWindowAlongEdge(closestEdge, closestEdge.proj, windowWidth);
+}
+
+export function snapToVertexWithinFace(faces, cursor, gridSpacing) {
+  return snapTargets([], gridSpacing, cursor)
+    .filter(g => _.some(faces, f => vertInRing(g, f.vertices)))[0];
 }

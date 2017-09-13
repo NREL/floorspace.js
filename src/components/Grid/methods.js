@@ -9,7 +9,7 @@
 const d3 = require('d3');
 const polylabel = require('polylabel');
 import _ from 'lodash';
-import { snapTargets, snapWindowToEdge } from './snapping';
+import { snapTargets, snapWindowToEdge, snapToVertexWithinFace } from './snapping';
 import geometryHelpers from './../../store/modules/geometry/helpers';
 import modelHelpers from './../../store/modules/models/helpers';
 import { ResizeEvents } from '../../components/Resize';
@@ -200,7 +200,7 @@ export default {
       );
 
     if(!loc) { return; }
-    const hl = d3.select('#grid svg')
+    d3.select('#grid svg')
       .append('g')
       .classed('highlight', true)
       .selectAll('.window')
@@ -208,7 +208,19 @@ export default {
       .call(this.drawWindow.highlight(true));
   },
   highlightDaylightingControl(gridPoint) {
-
+    const
+      rwuPoint = this.gridPointToRWU(gridPoint),
+      loc = snapToVertexWithinFace(
+        this.denormalizedGeometry.faces, rwuPoint,
+        this.spacing,
+      );
+    if(!loc) { return; }
+    d3.select('#grid svg')
+      .append('circle')
+      .classed('highlight daylighting-control-highlight', true)
+      .attr('cx', this.rwuToGrid(loc.x, 'x'))
+      .attr('cy', this.rwuToGrid(loc.y, 'y'))
+      .attr('r', 3);
   },
 
   /*
