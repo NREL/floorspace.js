@@ -205,7 +205,7 @@ export default {
       .classed('highlight', true)
       .selectAll('.window')
       .data([loc])
-      .call(this.drawWindow.lineCaps('perp-linecap-highlight'));
+      .call(this.drawWindow.highlight(true));
   },
   highlightDaylightingControl(gridPoint) {
 
@@ -581,7 +581,7 @@ export default {
     poly.select('.windows')
       .selectAll('.window')
       .data(d => d.windows)
-      .call(this.drawWindow.lineCaps('perp-linecap'));
+      .call(this.drawWindow.highlight(false));
 
     this.registerDrag();
 

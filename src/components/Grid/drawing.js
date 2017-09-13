@@ -6,17 +6,24 @@ export function drawWindow() {
   let
     xScale = _.identity,
     yScale = _.identity,
-    lineCaps = 'perp-linecap';
+    highlight = false;
   function chart(selection) {
     selection.exit().remove();
-    selection
-      .merge(selection.enter().append('line').attr('class', 'window'))
+    const windowE = selection.enter().append('g').attr('class', 'window');
+    windowE.append('line');
+    windowE.append('circle');
+    const windw = selection.merge(windowE);
+    windw.select('line')
       .attr('x1', d => xScale(d.start.x))
       .attr('y1', d => yScale(d.start.y))
       .attr('x2', d => xScale(d.end.x))
       .attr('y2', d => yScale(d.end.y))
-      .attr('marker-end', `url(#${lineCaps})`)
-      .attr('marker-start', `url(#${lineCaps})`);
+      .attr('marker-end', `url(#perp-linecap${highlight ? '-highlight' : ''})`)
+      .attr('marker-start', `url(#perp-linecap${highlight ? '-highlight' : ''})`);
+    windw.select('circle')
+      .attr('cx', d => xScale(d.center.x))
+      .attr('cy', d => yScale(d.center.y))
+      .attr('r', '2');
   }
 
   chart.xScale = function (_) {
@@ -29,9 +36,9 @@ export function drawWindow() {
     yScale = _;
     return chart;
   };
-  chart.lineCaps = function(_) {
-    if (!arguments.length) return lineCaps;
-    lineCaps = _;
+  chart.highlight = function(_) {
+    if (!arguments.length) return highlight;
+    highlight = _;
     return chart;
   };
 
