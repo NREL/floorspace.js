@@ -54,6 +54,7 @@ export default {
     };
   },
   mounted() {
+    window.theGrid = this;
     // throttle/debounce event handlers
     this.handleMouseMove = throttle(this.highlightSnapTarget, 100);
 
@@ -92,6 +93,8 @@ export default {
       // pixels to real world units, these are initialized in calcGrid based on the grid pixel dimensions and then never changed
       scaleX: state => state.application.scale.x,
       scaleY: state => state.application.scale.y,
+      windowDefs: state => state.models.library.window_definitions,
+      windowWidths: state => _.sumBy(state.models.library.window_definitions, 'width'),
     }),
     ...mapGetters({
       currentStory: 'application/currentStory',
@@ -160,6 +163,10 @@ export default {
 
     currentMode() { this.drawPolygons(); },
     polygons() { this.drawPolygons(); },
+    windowDefs: {
+      handler() { console.log('windowDefs was updated'); this.drawPolygons(); },
+      deep: true,
+    },
     currentTool() {
       this.points = [];
       this.drawPolygons();
@@ -197,7 +204,7 @@ export default {
     ...methods,
     denormalizeWindow(edge, { edge_id, alpha, window_defn_id }) {
       const
-        windowDefn = _.find(this.$store.state.models.library.window_definitions, { id: window_defn_id }),
+        windowDefn = _.find(this.windowDefs, { id: window_defn_id }),
         center = windowLocation(edge, { alpha });
       return expandWindowAlongEdge(edge, center, windowDefn.width);
     },
