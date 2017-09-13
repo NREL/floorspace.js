@@ -167,11 +167,13 @@ export default {
     },
 
   replaceFacePoints(context, { geometry_id, face_id, vertices, edges }) {
+    // get all components
     context.commit('replaceFacePoints', {
       geometry_id,
       vertices,
       edges,
       face_id,
     });
+    // replay the components
   },
 }
