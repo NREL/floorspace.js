@@ -65,7 +65,7 @@ export default {
     }
 
     const movedGeom = validateFaceGeometry(movedPoints, currentStoryGeometry);
-    if (!movedGeom) {
+    if (!movedGeom.success) {
       window.eventBus.$emit('error', movedGeom.error);
       window.eventBus.$emit('reload-grid');
       return;
