@@ -27,7 +27,7 @@ import modelHelpers from './../../store/modules/models/helpers';
 import applicationHelpers from './../../store/modules/application/helpers';
 import { ResizeEvents } from '../../components/Resize';
 import { drawWindow, drawDaylightingControl } from './drawing';
-import { expandWindowAlongEdge } from './snapping';
+import { expandWindowAlongEdge, windowLocation } from './snapping';
 
 const d3 = require('d3');
 
