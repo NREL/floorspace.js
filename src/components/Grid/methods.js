@@ -200,7 +200,7 @@ export default {
         this.currentComponentDefinition.width, this.spacing * 2,
       );
 
-    if(!loc) { return; }
+    if (!loc) { return; }
     d3.select('#grid svg')
       .append('g')
       .classed('highlight', true)
@@ -215,13 +215,13 @@ export default {
         this.denormalizedGeometry.faces, rwuPoint,
         this.spacing,
       );
-    if(!loc) { return; }
+    if (!loc) { return; }
     d3.select('#grid svg')
-      .append('circle')
-      .classed('highlight daylighting-control-highlight', true)
-      .attr('cx', this.rwuToGrid(loc.x, 'x'))
-      .attr('cy', this.rwuToGrid(loc.y, 'y'))
-      .attr('r', 3);
+      .append('g')
+      .classed('highlight', true)
+      .selectAll('.daylighting-control')
+      .data([loc])
+      .call(this.drawDC);
   },
 
   /*
@@ -558,6 +558,7 @@ export default {
     polyEnter.append('polygon');
     polyEnter.append('text').attr('class', 'polygon-text');
     polyEnter.append('g').attr('class', 'windows');
+    polyEnter.append('g').attr('class', 'daylighting-controls');
 
     // draw polygons
     poly = polyEnter
@@ -595,6 +596,11 @@ export default {
       .selectAll('.window')
       .data(d => d.windows)
       .call(this.drawWindow.highlight(false));
+
+    poly.select('.daylighting-controls')
+      .selectAll('.daylighting-control')
+      .data(d => d.daylighting_controls)
+      .call(this.drawDC);
 
     this.registerDrag();
 

@@ -44,3 +44,37 @@ export function drawWindow() {
 
   return chart;
 }
+
+export function drawDaylightingControl() {
+  let
+    xScale = _.identity,
+    yScale = _.identity;
+
+  function chart(selection) {
+    selection.exit().remove();
+    const dcE = selection.enter().append('g').attr('class', 'daylighting-control');
+    dcE.append('circle').attr('class', 'sun');
+    dcE.append('circle').attr('class', 'rays');
+    const dc = selection.merge(dcE);
+    dc.select('circle.sun')
+      .attr('cx', d => xScale(d.x))
+      .attr('cy', d => yScale(d.y))
+      .attr('r', 5);
+    dc.select('circle.rays')
+      .attr('cx', d => xScale(d.x))
+      .attr('cy', d => yScale(d.y))
+      .attr('r', 8);
+  }
+
+  chart.xScale = function (_) {
+    if (!arguments.length) return xScale;
+    xScale = _;
+    return chart;
+  };
+  chart.yScale = function (_) {
+    if (!arguments.length) return yScale;
+    yScale = _;
+    return chart;
+  };
+  return chart;
+}

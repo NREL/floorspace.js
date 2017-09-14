@@ -105,10 +105,29 @@
       fill: #008500;
       stroke: none;
     }
+    .daylighting-control {
+      circle {
+        stroke: #000;
+      }
+      .sun {
+        fill: none;
+        stroke-width: 1.5px;
+      }
+      .rays {
+        fill: none;
+        stroke-width: 2px;
+        stroke-dasharray: 2,3;
+      }
+    }
     .highlight {
       .window {
         stroke: #008500;
         fill: black;
+      }
+      .daylighting-control {
+        circle {
+          stroke: #dfda48;
+        }
       }
     }
 }

@@ -26,7 +26,7 @@ import geometryHelpers from './../../store/modules/geometry/helpers';
 import modelHelpers from './../../store/modules/models/helpers';
 import applicationHelpers from './../../store/modules/application/helpers';
 import { ResizeEvents } from '../../components/Resize';
-import { drawWindow } from './drawing';
+import { drawWindow, drawDaylightingControl } from './drawing';
 import { expandWindowAlongEdge } from './snapping';
 
 const d3 = require('d3');
@@ -46,6 +46,9 @@ export default {
       },
       handleMouseMove: null, // placeholder --> overwritten in mounted()
       drawWindow: drawWindow()
+        .xScale(v => this.rwuToGrid(v, 'x'))
+        .yScale(v => this.rwuToGrid(v, 'y')),
+      drawDC: drawDaylightingControl()
         .xScale(v => this.rwuToGrid(v, 'x'))
         .yScale(v => this.rwuToGrid(v, 'y')),
     };
@@ -195,10 +198,7 @@ export default {
     denormalizeWindow(edge, { edge_id, alpha, window_defn_id }) {
       const
         windowDefn = _.find(this.$store.state.models.library.window_definitions, { id: window_defn_id }),
-        center = {
-          x: edge.v1.x + (alpha * (edge.v2.x - edge.v1.x)),
-          y: edge.v1.y + (alpha * (edge.v2.y - edge.v1.y)),
-        };
+        center = windowLocation(edge, { alpha });
       return expandWindowAlongEdge(edge, center, windowDefn.width);
     },
     polygonsFromGeometry(geometry, extraPolygonAttrs = {}) {
@@ -222,6 +222,8 @@ export default {
               face.edges,
               e => _.filter(windows, { edge_id: e.id })
                     .map(w => this.denormalizeWindow(e, w))),
+            daylighting_controls: model.daylighting_controls
+              .map(dc => geometryHelpers.vertexForId(dc.vertex_id, geometry)),
             ...extraPolygonAttrs,
           };
         if (!points.length) {

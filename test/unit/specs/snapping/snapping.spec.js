@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { gen } from 'testcheck';
 import { ptsAreCollinear, haveSimilarAngles, distanceBetweenPoints } from '../../../../src/store/modules/geometry/helpers';
-import { gridSnapTargets, snapTargets, snapWindowToEdge } from '../../../../src/components/Grid/snapping';
+import { gridSnapTargets, snapTargets, snapWindowToEdge, windowLocation } from '../../../../src/components/Grid/snapping';
 import { assertProperty, assertEqual, assert, genPoint, refute, nearlyEqual, isNearlyEqual } from '../../test_helpers';
 
 describe('gridSnapTargets', () => {
@@ -141,10 +141,7 @@ describe('snapWindowToEdge', () => {
         const
           windowLoc = snapWindowToEdge(edges, cursor, 10, inclusiveMaxSnapDist),
           edge = _.find(edges, { id: windowLoc.edge_id }),
-          alphaAlongEdge = {
-            x: edge.v1.x + (windowLoc.alpha * (edge.v2.x - edge.v1.x)),
-            y: edge.v1.y + (windowLoc.alpha * (edge.v2.y - edge.v1.y)),
-          };
+          alphaAlongEdge = windowLocation(edge, windowLoc);
         assert(isNearlyEqual(
           alphaAlongEdge,
           _.pick(windowLoc.center, ['x', 'y']),

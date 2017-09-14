@@ -2,19 +2,13 @@ import _ from 'lodash';
 import factory from './../factory.js'
 import geometryHelpers from './../helpers'
 import modelHelpers from './../../models/helpers'
-import { snapWindowToEdge, snapToVertexWithinFace } from '../../../../components/Grid/snapping';
+import { snapWindowToEdge, snapToVertexWithinFace, windowLocation } from '../../../../components/Grid/snapping';
 import createFaceFromPoints, { matchOrCreateEdges, eraseSelection, newGeometriesOfOverlappedFaces, validateFaceGeometry } from './createFaceFromPoints'
 
 export function getOrCreateVertex(geometry, coords) {
   return geometryHelpers.vertexForCoordinates(coords, geometry) || factory.Vertex(coords.x, coords.y);
 }
 
-function windowLocation(edge, windw) {
-  return {
-    x: edge.v1.x + (windw.alpha * (edge.v2.x - edge.v1.x)),
-    y: edge.v1.y + (windw.alpha * (edge.v2.y - edge.v1.y)),
-  };
-}
 
 function componentsOnFace(state, geometry_id, face_id) {
   const

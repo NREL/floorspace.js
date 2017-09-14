@@ -68,6 +68,20 @@ export function snapWindowToEdge(edges, cursor, windowWidth, maxSnapDist) {
 }
 
 export function snapToVertexWithinFace(faces, cursor, gridSpacing) {
-  return snapTargets([], gridSpacing, cursor)
-    .filter(g => _.some(faces, f => vertInRing(g, f.vertices)))[0];
+  return _.chain(snapTargets([], gridSpacing, cursor))
+    .map(g => ({
+      ...g,
+      face_id: _.find(faces, f => vertInRing(g, f.vertices)),
+    }))
+    .filter('face_id')
+    .map(g => ({ ...g, face_id: g.face_id.id }))
+    .first()
+    .value();
+}
+
+export function windowLocation(edge, windw) {
+  return {
+    x: edge.v1.x + (windw.alpha * (edge.v2.x - edge.v1.x)),
+    y: edge.v1.y + (windw.alpha * (edge.v2.y - edge.v1.y)),
+  };
 }
