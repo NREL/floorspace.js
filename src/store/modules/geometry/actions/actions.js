@@ -25,7 +25,7 @@ function componentsOnFace(state, geometry_id, face_id) {
 
   if (!face) {
     // brand new face, no components possible
-    return { story_id: story.id, windows: [], daylighting_controls: [] };
+    return { space_id: null, story_id: null, windows: [], daylighting_controls: [] };
   }
 
   const retval = {
@@ -42,15 +42,17 @@ function componentsOnFace(state, geometry_id, face_id) {
   return retval;
 }
 
-function replayComponents(
+function replaceComponents(
   context,
-  { windows, daylighting_controls, story_id },
+  { windows, daylighting_controls, story_id, space_id },
   { geometry_id, face_id, dx, dy },
 ) {
   const
     geometry = geometryHelpers.denormalize(_.find(context.rootState.geometry, { id: geometry_id })),
     face = _.find(geometry.faces, { id: face_id }),
     spacing = context.rootState.project.grid.spacing;
+
+  context.dispatch('models/destroyAllComponents', { face_id, space_id }, { root: true });
 
   windows.forEach((w) => {
     const
@@ -249,7 +251,7 @@ export default {
       face_id,
     });
     // replay the components
-    replayComponents(context, components, {
+    replaceComponents(context, components, {
       geometry_id, face_id, dx: (dx || 0), dy: (dy || 0),
     });
   },

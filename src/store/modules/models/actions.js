@@ -245,7 +245,15 @@ export default {
     } else if (!vertex.id) {
       throw new Error('Unable to find or create vertex');
     }
-    context.commit('geometry/ensureVertsExist', { geometry_id: geometry.id, vertices: [vertex] });
+    context.commit('geometry/ensureVertsExist', { geometry_id: geometry.id, vertices: [vertex] }, { root: true });
     context.commit('createDaylightingControl', { ...payload, vertex_id: vertex.id });
+  },
+
+  destroyAllComponents(context, { face_id, space_id, story_id }) {
+    if (!face_id || !space_id || !story_id) {
+      return;
+    }
+    context.commit('dropDaylightingControls', { face_id, story_id });
+    context.commit('dropWindows', { space_id });
   },
 };

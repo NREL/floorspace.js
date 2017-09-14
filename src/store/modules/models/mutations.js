@@ -77,6 +77,10 @@ export default {
       alpha,
     });
   },
+  dropWindows(state, { story_id }) {
+    const story = _.find(state.stories, { id: story_id });
+    story.windows = [];
+  },
   createDaylightingControl(state, { story_id, face_id, daylighting_control_defn_id, vertex_id }) {
     const
       story = _.find(state.stories, { id: story_id }),
@@ -86,5 +90,11 @@ export default {
       daylighting_control_defn_id,
       vertex_id,
     });
+  },
+  dropDaylightingControls(state, { face_id, story_id }) {
+    const
+      story = _.find(state.stories, { id: story_id }),
+      space = _.find(story.space, { face_id });
+    space.daylighting_controls = [];
   },
 }
