@@ -160,6 +160,7 @@ export default {
     currentTool() {
       this.points = [];
       this.drawPolygons();
+      this.clearHighlights();
     },
     currentSpace() {
       this.points = [];

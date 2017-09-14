@@ -123,7 +123,7 @@ export default {
     ((this.currentTool === 'Rectangle' || this.currentTool === 'Polygon') && (this.currentSpace || this.currentShading)))) { return; }
 
     // unhighlight expired snap targets
-    this.clearHighlights()
+    this.clearHighlights();
 
     // location of the mouse in grid units
     const gridCoords = d3.mouse(this.$refs.grid),
