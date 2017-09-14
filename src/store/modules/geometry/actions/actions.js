@@ -2,12 +2,83 @@ import _ from 'lodash';
 import factory from './../factory.js'
 import geometryHelpers from './../helpers'
 import modelHelpers from './../../models/helpers'
+import { snapWindowToEdge, snapToVertexWithinFace } from '../../../../components/Grid/snapping';
 import createFaceFromPoints, { matchOrCreateEdges, eraseSelection, newGeometriesOfOverlappedFaces, validateFaceGeometry } from './createFaceFromPoints'
 
 export function getOrCreateVertex(geometry, coords) {
   return geometryHelpers.vertexForCoordinates(coords, geometry) || factory.Vertex(coords.x, coords.y);
 }
 
+function windowLocation(edge, windw) {
+  return {
+    x: edge.v1.x + (windw.alpha * (edge.v2.x - edge.v1.x)),
+    y: edge.v1.y + (windw.alpha * (edge.v2.y - edge.v1.y)),
+  };
+}
+
+function componentsOnFace(state, geometry_id, face_id) {
+  const
+    geom = geometryHelpers.denormalize(_.find(state.geometry, { id: geometry_id })),
+    face = _.find(geom.faces, { id: face_id }),
+    story = _.find(state.models.stories, { geometry_id }),
+    space = _.find(story.spaces, { face_id });
+
+  if (!face) {
+    // brand new face, no components possible
+    return { story_id: story.id, windows: [], daylighting_controls: [] };
+  }
+
+  const retval = {
+    story_id: story.id,
+    windows: story.windows.filter(
+      w => _.includes(_.map(face.edges, 'edge_id'), w.edge_id),
+    ).map(w => ({
+      ...w,
+      originalLoc: windowLocation(_.find(face.edges, { edge_id: w.edge_id }), w),
+    })),
+    daylighting_controls: space.daylighting_controls
+    .map(d => ({ ...d, vertex: _.find(geom.vertices, { id: d.vertex_id }) })),
+  };
+  return retval;
+}
+
+function replayComponents(
+  context,
+  { windows, daylighting_controls, story_id },
+  { geometry_id, face_id, dx, dy },
+) {
+  const
+    geometry = geometryHelpers.denormalize(_.find(context.rootState.geometry, { id: geometry_id })),
+    face = _.find(geometry.faces, { id: face_id }),
+    spacing = context.rootState.project.grid.spacing;
+
+  windows.forEach((w) => {
+    const
+      newLoc = { x: w.originalLoc.x + dx, y: w.originalLoc.y + dy },
+      loc = snapWindowToEdge(face.edges, newLoc, 1, spacing);
+    if (!loc) { return; }
+
+    context.dispatch('models/createWindow', {
+      story_id,
+      edge_id: loc.edge_id,
+      alpha: loc.alpha,
+      window_defn_id: w.window_defn_id,
+    }, { root: true });
+  });
+
+  daylighting_controls.forEach((d) => {
+    const
+      newLoc = { x: d.vertex.x + dx, y: d.vertex.y + dy },
+      loc = snapToVertexWithinFace([face], newLoc, spacing);
+    if (!loc) { return; }
+
+    context.dispatch('models/createDaylightingControl', {
+      daylighting_control_defn_id: d.daylighting_control_defn_id,
+      x: loc.x,
+      y: loc.y,
+    }, { root: true });
+  });
+}
 
 export default {
     /*
@@ -78,6 +149,8 @@ export default {
       face_id,
       vertices: movedGeom.vertices,
       edges: movedGeom.edges,
+      dx,
+      dy,
     });
   },
   /*
@@ -166,8 +239,9 @@ export default {
       expVertices.forEach(vertex => context.commit('destroyGeometry', { id: vertex.id }));
     },
 
-  replaceFacePoints(context, { geometry_id, face_id, vertices, edges }) {
+  replaceFacePoints(context, { geometry_id, face_id, vertices, edges, dx, dy }) {
     // get all components
+    const components = componentsOnFace(context.rootState, geometry_id, face_id);
     context.commit('replaceFacePoints', {
       geometry_id,
       vertices,
@@ -175,5 +249,8 @@ export default {
       face_id,
     });
     // replay the components
+    replayComponents(context, components, {
+      geometry_id, face_id, dx: (dx || 0), dy: (dy || 0),
+    });
   },
 }

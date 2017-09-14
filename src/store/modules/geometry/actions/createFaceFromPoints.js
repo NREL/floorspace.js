@@ -146,7 +146,7 @@ function storeFace({ vertices, edges }, target, context, existingFace) {
 
   const face = existingFace || new factory.Face([]);
 
-  context.commit('replaceFacePoints', {
+  context.dispatch('replaceFacePoints', {
     face_id: face.id,
     geometry_id: currentStoryGeometry.id,
     vertices,

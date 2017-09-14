@@ -77,8 +77,10 @@ export default {
       }
       if (e.keyCode === 90 && (e.ctrlKey || e.metaKey)) {
         e.shiftKey ? this.$store.timetravel.redo() : this.$store.timetravel.undo();
+        e.preventDefault();
       } else if (e.keyCode == 89 && (e.ctrlKey || e.metaKey)){
         this.$store.timetravel.redo();
+        e.preventDefault();
       }
     });
   },
