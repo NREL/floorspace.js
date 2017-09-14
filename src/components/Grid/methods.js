@@ -68,19 +68,20 @@ export default {
       rwuPoint = {
         x: this.gridToRWU(gridPoint.x, 'x'),
         y: this.gridToRWU(gridPoint.y, 'y'),
-      };
+      },
+      loc = snapToVertexWithinFace(
+        this.denormalizedGeometry.faces, rwuPoint, this.spacing);
 
-    // check if control is being placed inside a space's face
-    let isInFace = false;
-    this.currentStoryGeometry.faces.forEach(({ id }) => {
-      if (geometryHelpers.pointInFace(rwuPoint, geometryHelpers.verticesForFaceId(id, this.currentStoryGeometry))) { isInFace = true; }
-    });
+    if (!loc) { return; }
 
-    if (isInFace) {
-      window.eventBus.$emit('success', `Daylighting control created at (${gridPoint.x}, ${gridPoint.y})`);
-    } else {
-      window.eventBus.$emit('error', 'Daylighting controls must be in spaces.');
-    }
+    const payload = {
+      story_id: this.currentStory.id,
+      face_id: loc.face_id,
+      daylighting_control_defn_id: this.currentComponentDefinition.id,
+      ...loc,
+    };
+    this.$store.dispatch('models/createDaylightingControl', payload);
+    window.eventBus.$emit('success', `Daylighting control created at (${loc.x}, ${loc.y})`);
   },
   /*
   * If the grid is clicked when a drawing tool or the eraser tool is active, add a point to the component

@@ -77,4 +77,12 @@ export default {
       alpha,
     });
   },
+  createDaylightingControl(state, { story_id, face_id, daylighting_control_defn_id, vertex_id }) {
+    const story = _.find(state.stories, { id: story_id });
+    story.daylighting_controls.push({
+      daylighting_control_defn_id,
+      vertex_id,
+      face_id,
+    });
+  },
 }
