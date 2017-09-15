@@ -58,6 +58,45 @@ const map = {
     ],
     init: factory.ThermalZone,
   },
+  window_definitions: {
+    displayName: 'Window Definition',
+    columns: [
+      {
+        name: 'id',
+        displayName: 'ID',
+        readonly: true,
+        private: true,
+      },
+      {
+        name: 'name',
+        displayName: 'Name',
+        input_type: 'text',
+        validator: validators.name,
+      },
+      {
+        name: 'height',
+        displayName: 'Height',
+        input_type: 'text',
+        validator: validators.number,
+        converter: converters.number,
+      },
+      {
+        name: 'width',
+        displayName: 'Width',
+        input_type: 'text',
+        validator: validators.number,
+        converter: converters.number,
+      },
+      {
+        name: 'sill_height',
+        displayName: 'Sill Height',
+        input_type: 'text',
+        validator: validators.number,
+        converter: converters.number,
+      },
+    ],
+    init: factory.WindowDefn,
+  },
   space_types: {
     displayName: 'Space Type',
     columns: [
@@ -100,8 +139,8 @@ const map = {
     ],
     init: factory.ConstructionSet,
   },
-  windows: {
-    displayName: 'Window',
+  daylighting_control_definitions: {
+    displayName: 'Daylighting Control Definition',
     columns: [
       {
         name: 'id',
@@ -116,35 +155,21 @@ const map = {
         validator: validators.name,
       },
       {
-        name: 'story',
-        displayName: 'Story',
-        readonly: true,
-        get(windowObj, state) {
-          // look up story with a reference to the window
-          const windowStory = state.models.stories.find(s => s.windows.map(w => w.id).indexOf(windowObj.id) !== -1);
-          return windowStory.name;
-        },
-      },
-    ],
-    init: factory.Window,
-  },
-  daylighting_controls: {
-    displayName: 'Daylighting Control',
-    columns: [
-      {
-        name: 'id',
-        displayName: 'ID',
-        readonly: true,
-        private: true,
-      },
-      {
-        name: 'name',
-        displayName: 'Name',
+        name: 'height',
+        displayName: 'Height',
         input_type: 'text',
-        validator: validators.name,
+        validator: validators.number,
+        converter: converters.number,
+      },
+      {
+        name: 'illuminance_setpoint',
+        displayName: 'Illuminance Setpoint',
+        input_type: 'text',
+        validator: validators.number,
+        converter: converters.number,
       },
     ],
-    init: factory.DaylightingControl,
+    init: factory.DaylightingControlDefn,
   },
   stories: {
     displayName: 'Story',
@@ -204,15 +229,6 @@ const map = {
         readonly: true,
         get(story, state) {
           return story.spaces.map(s => s.name).join(', ');
-        },
-      },
-      {
-        name: 'windows',
-        displayName: 'Windows',
-        readonly: true,
-        private: true,
-        get(story, state) {
-          return story.windows.map(w => w.name).join(', ');
         },
       },
       {

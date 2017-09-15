@@ -17,17 +17,17 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
           </div>
           <div class='input-select'>
               <label>Type</label>
-              <select v-model='type'>
+              <select v-model='type' id="library-type-select">
                   <option v-for='(objects, type) in extendedLibrary' :value="type">{{ displayTypeForType(type) }}</option>
               </select>
               <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
                   <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
               </svg>
           </div>
-          <button @click="createObject">New</button>
+          <button @click="createObject" id="library-new-object">New</button>
       </header>
 
-      <table class="table">
+      <table class="table library-table">
           <thead>
               <tr>
                   <th v-for="column in columns" @click="sortBy(column)">
@@ -53,7 +53,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
                 :style="{ 'background-color': (selectedObject && selectedObject.id === object.id) ? '#008500' : '' }"
                 :data-id="object.id"
               >
-                  <td v-for="column in columns">
+                  <td v-for="column in columns" :data-column="column">
                       <input v-if="!inputTypeForKey(column)" :value="valueForKey(object, column)" @change="setValueForKey(object, column, $event.target.value)" readonly>
                       <input v-if="inputTypeForKey(column) === 'text'" :value="valueForKey(object, column)" @change="setValueForKey(object, column, $event.target.value)">
 
@@ -445,7 +445,8 @@ export default {
         padding: 1rem 1.5rem;
 
         .input-select {
-            margin-right: 3rem;
+            margin-right: 1rem;
+            padding-right: 4rem;
             width: 10rem;
         }
         .input-text {

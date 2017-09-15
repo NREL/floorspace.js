@@ -9,7 +9,7 @@
 const d3 = require('d3');
 const polylabel = require('polylabel');
 import _ from 'lodash';
-import { snapTargets } from './snapping';
+import { snapTargets, snapWindowToEdge, snapToVertexWithinFace } from './snapping';
 import geometryHelpers from './../../store/modules/geometry/helpers';
 import modelHelpers from './../../store/modules/models/helpers';
 import { ResizeEvents } from '../../components/Resize';
@@ -31,8 +31,58 @@ export default {
     ((this.currentTool === 'Rectangle' || this.currentTool === 'Polygon') && (this.currentSpace || this.currentShading))) {
       this.addPoint();
     }
+    if (this.currentTool === 'Place Component') {
+      if (this.currentComponentType === 'window_definitions') {
+        this.placeWindow();
+      } else if (this.currentComponentType === 'daylighting_control_definitions') {
+        this.placeDaylightingControl();
+      }
+    }
   },
+  placeWindow() {
+    const
+      gridCoords = d3.mouse(this.$refs.grid),
+      gridPoint = { x: gridCoords[0], y: gridCoords[1] },
+      rwuPoint = this.gridPointToRWU(gridPoint),
+      loc = snapWindowToEdge(
+        this.denormalizedGeometry.edges, rwuPoint,
+        this.currentComponentDefinition.width, this.spacing * 2,
+      );
 
+    if (!loc) { return; }
+
+    const payload = {
+      story_id: this.currentStory.id,
+      edge_id: loc.edge_id,
+      window_defn_id: this.currentComponentDefinition.id,
+      alpha: loc.alpha,
+    };
+    this.$store.dispatch('models/createWindow', payload);
+
+    window.eventBus.$emit('success', `Window created at (${loc.center.x}, ${loc.center.y})`);
+  },
+  placeDaylightingControl() {
+    const
+      gridCoords = d3.mouse(this.$refs.grid),
+      gridPoint = { x: gridCoords[0], y: gridCoords[1] },
+      rwuPoint = {
+        x: this.gridToRWU(gridPoint.x, 'x'),
+        y: this.gridToRWU(gridPoint.y, 'y'),
+      },
+      loc = snapToVertexWithinFace(
+        this.denormalizedGeometry.faces, rwuPoint, this.spacing);
+
+    if (!loc) { return; }
+
+    const payload = {
+      story_id: this.currentStory.id,
+      face_id: loc.face_id,
+      daylighting_control_defn_id: this.currentComponentDefinition.id,
+      ...loc,
+    };
+    this.$store.dispatch('models/createDaylightingControl', payload);
+    window.eventBus.$emit('success', `Daylighting control created at (${loc.x}, ${loc.y})`);
+  },
   /*
   * If the grid is clicked when a drawing tool or the eraser tool is active, add a point to the component
   * if the new point completes a face being drawn, save the face
@@ -68,15 +118,21 @@ export default {
   */
   highlightSnapTarget(e) {
     // only highlight snap targets in drawing modes when a space or shading has been selected
-    if (this.currentTool !== 'Eraser' && ((this.currentTool !== 'Rectangle' && this.currentTool !== 'Polygon') || (!this.currentSpace && !this.currentShading))) { return; }
+    if (!(this.currentTool === 'Eraser' ||
+    (this.currentTool === 'Place Component' && this.currentComponentDefinition) ||
+    ((this.currentTool === 'Rectangle' || this.currentTool === 'Polygon') && (this.currentSpace || this.currentShading)))) { return; }
 
     // unhighlight expired snap targets
-    d3.selectAll('#grid .highlight, #grid .gridpoint').remove();
-
+    this.clearHighlights();
 
     // location of the mouse in grid units
     const gridCoords = d3.mouse(this.$refs.grid),
       gridPoint = { x: gridCoords[0], y: gridCoords[1] };
+
+    if (this.currentTool === 'Place Component' && this.currentComponentDefinition) {
+      this.highlightComponent(gridPoint);
+      return;
+    }
 
     const snapTarget = this.findSnapTarget(gridPoint);
 
@@ -121,6 +177,51 @@ export default {
       .classed('highlight', true)
       .attr('vector-effect', 'non-scaling-stroke');
     }
+  },
+
+  clearHighlights() {
+    d3.selectAll('#grid .highlight, #grid .gridpoint').remove();
+  },
+
+
+  highlightComponent(gridPoint) {
+    if (this.currentComponentType === 'window_definitions') {
+      this.highlightWindow(gridPoint);
+    } else {
+      this.highlightDaylightingControl(gridPoint);
+    }
+  },
+
+  highlightWindow(gridPoint) {
+    const
+      rwuPoint = this.gridPointToRWU(gridPoint),
+      loc = snapWindowToEdge(
+        this.denormalizedGeometry.edges, rwuPoint,
+        this.currentComponentDefinition.width, this.spacing * 2,
+      );
+
+    if (!loc) { return; }
+    d3.select('#grid svg')
+      .append('g')
+      .classed('highlight', true)
+      .selectAll('.window')
+      .data([loc])
+      .call(this.drawWindow.highlight(true));
+  },
+  highlightDaylightingControl(gridPoint) {
+    const
+      rwuPoint = this.gridPointToRWU(gridPoint),
+      loc = snapToVertexWithinFace(
+        this.denormalizedGeometry.faces, rwuPoint,
+        this.spacing,
+      );
+    if (!loc) { return; }
+    d3.select('#grid svg')
+      .append('g')
+      .classed('highlight', true)
+      .selectAll('.daylighting-control')
+      .data([loc])
+      .call(this.drawDC);
   },
 
   /*
@@ -349,7 +450,7 @@ export default {
   */
   drawPoints () {
     // remove expired points and guidelines
-    d3.selectAll('#grid ellipse, #grid path').remove();
+    d3.selectAll('#grid .point-path').remove();
 
     // draw points
     d3.select('#grid svg')
@@ -362,7 +463,7 @@ export default {
     .attr('vector-effect', 'non-scaling-stroke');
 
     // apply custom CSS for origin of polygons
-    d3.select('#grid svg').select('ellipse')
+    d3.select('#grid svg').select('ellipse').attr('class', 'point-path')
     .attr('rx', 7)
     .attr('ry', 7)
     .classed('origin', true)
@@ -370,7 +471,7 @@ export default {
     .attr('fill', 'none');
 
     // connect the points for the face being drawn with a line
-    d3.select('#grid svg').append('path')
+    d3.select('#grid svg').append('path').attr('class', 'point-path')
     .datum(this.points)
     .attr('fill', 'none')
     .attr('vector-effect', 'non-scaling-stroke')
@@ -456,6 +557,8 @@ export default {
     const polyEnter = poly.enter().append('g').attr('class', 'poly');
     polyEnter.append('polygon');
     polyEnter.append('text').attr('class', 'polygon-text');
+    polyEnter.append('g').attr('class', 'windows');
+    polyEnter.append('g').attr('class', 'daylighting-controls');
 
     // draw polygons
     poly = polyEnter
@@ -489,6 +592,16 @@ export default {
       .attr('fill', 'red')
       .classed('polygon-text', true);
 
+    poly.select('.windows')
+      .selectAll('.window')
+      .data(d => d.windows)
+      .call(this.drawWindow.highlight(false));
+
+    poly.select('.daylighting-controls')
+      .selectAll('.daylighting-control')
+      .data(d => d.daylighting_controls)
+      .call(this.drawDC);
+
     this.registerDrag();
 
     // render the selected model's face above the other polygons so that the border is not obscured
@@ -501,7 +614,8 @@ export default {
   * if the grid is active and no vertex or edge is within the snap tolerance, returns the closest grid point
   * if the grid is inactive, returns the or the location of the point
   */
-  findSnapTarget(gridPoint) {
+  findSnapTarget(gridPoint, options = {}) {
+    const { edge_component: snapOnlyToEdges } = options;
     // translate grid point to real world units to check for snapping targets
     const rwuPoint = {
       x: this.gridToRWU(gridPoint.x, 'x'),
@@ -524,6 +638,14 @@ export default {
       };
     }
 
+    // if snapping only to edges (placing edge components, return either the snapping edge or original point)
+    if (snapOnlyToEdges) {
+      const snappingEdge = this.snappingEdgeData(rwuPoint);
+      return snappingEdge || {
+        type: 'gridpoint',
+        ...gridPoint,
+      };
+    }
     // if a snappable vertex exists, don't check for edges
     const snappingVertex = this.snappingVertexData(rwuPoint);
     if (snappingVertex) { return snappingVertex; }
@@ -898,7 +1020,6 @@ export default {
     const
       width = this.$refs.grid.clientWidth,
       height = this.$refs.grid.clientHeight;
-
     this.xScale = d3.scaleLinear()
       .domain([this.min_x, this.max_x])
       .range([0, width]);
@@ -968,7 +1089,7 @@ export default {
 
        this.axis_generator.x.scale(newScaleX);
        this.axis_generator.y.scale(newScaleY);
-
+       this.clearHighlights();
        this.updateGrid();
 
        // axis padding
@@ -1067,6 +1188,20 @@ export default {
     return (Math.round(result * 100000000000))/100000000000;
   },
 
+  gridPointToRWU(pt) {
+    return {
+      x: this.gridToRWU(pt.x, 'x'),
+      y: this.gridToRWU(pt.y, 'y'),
+    };
+  },
+
+  rwuPointToGrid(pt) {
+    return {
+      x: this.rwuToGrid(pt.x, 'x'),
+      y: this.rwuToGrid(pt.y, 'y'),
+    };
+  },
+
   /*
   * determine label x,y for given polygon
   */
@@ -1107,4 +1242,4 @@ export default {
 
     this.axis.y.call(this.axis_generator.y.tickPadding(yPadding));
   }
-}
+};

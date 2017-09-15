@@ -14,6 +14,7 @@ export default {
       above_floor_plenum_height: 0,
       multiplier: 0,
       spaces: [],
+      daylighting_controls: [],
       windows: [],
       shading: [],
       images: [],
@@ -85,16 +86,21 @@ export default {
             name: opts.name
         };
     },
-    Window: function (opts = {}) {
-        return {
-            id: idFactory.generate(),
-            name: opts.name
-        };
-    },
-    DaylightingControl: function (opts = {}) {
-        return {
-            id: idFactory.generate(),
-            name: opts.name
-        };
-    }
-}
+  WindowDefn(opts = {}) {
+    return {
+      id: idFactory.generate(),
+      name: opts.name,
+      height: opts.height,
+      width: opts.width || 0,
+      sill_height: opts.sill_height,
+    };
+  },
+  DaylightingControlDefn(opts = {}) {
+    return {
+      id: idFactory.generate(),
+      name: opts.name,
+      height: opts.height,
+      illuminance_setpoint: opts.illuminance_setpoint,
+    };
+  },
+};

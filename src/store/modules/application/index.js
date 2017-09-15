@@ -13,6 +13,9 @@ export default {
       story_id: null,
       subselection_id: null, // space, shading, image
 
+      component_id: null,
+      component_definition_id: null,
+
       building_unit_id: null,
       thermal_zone_id: null,
       space_type_id: null,
@@ -23,7 +26,7 @@ export default {
       snapMode: 'grid-strict',
     },
     modes: ['spaces', 'shading', 'building_units', 'thermal_zones', 'space_types', 'images'],
-    tools: ['Pan', 'Drag', 'Rectangle', 'Polygon', 'Eraser', 'Select', 'Map', 'Fill'], // 'Place Component', 'Apply Property'
+    tools: ['Pan', 'Drag', 'Rectangle', 'Polygon', 'Eraser', 'Select', 'Map', 'Fill', 'Place Component'], // 'Apply Property'
     // d3 scale functions px -> rwu
     scale: {
       x: d3.scaleLinear().range([0, 0]).domain([0, 0]),

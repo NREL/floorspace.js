@@ -7,7 +7,7 @@ model = vt.loadModel(ARGV[0]).get
 library = {}
 
 project = {}
-config = {:units => 'ft', :language =>'en-us'} 
+config = {:units => 'ft', :language =>'en-us'}
 project[:config] = config
 library[:project] = project
 
@@ -44,20 +44,20 @@ model.getDefaultConstructionSets.each do |cs|
 end
 library[:construction_sets] = construction_sets
 
-windows = []
+window_definitions = []
 #DLM: these distances are in feet, what happens if user changes app to m?
-windows << {:id => "", :name => "Window A", :height => 4, :width => 2, :sill_height => 3}
-windows << {:id => "", :name => "Window B", :height => 4, :width => 3, :sill_height => 3}
-windows << {:id => "", :name => "Window C", :height => 4, :width => 4, :sill_height => 3}
-windows << {:id => "", :name => "Window D", :height => 3, :width => 2, :sill_height => 3}
-windows << {:id => "", :name => "Window E", :height => 3, :width => 3, :sill_height => 3}
-windows << {:id => "", :name => "Window F", :height => 3, :width => 4, :sill_height => 3}
-library[:windows] = windows
+window_definitions << {:id => "", :name => "Window A", :height => 4, :width => 2, :sill_height => 3}
+window_definitions << {:id => "", :name => "Window B", :height => 4, :width => 3, :sill_height => 3}
+window_definitions << {:id => "", :name => "Window C", :height => 4, :width => 4, :sill_height => 3}
+window_definitions << {:id => "", :name => "Window D", :height => 3, :width => 2, :sill_height => 3}
+window_definitions << {:id => "", :name => "Window E", :height => 3, :width => 3, :sill_height => 3}
+window_definitions << {:id => "", :name => "Window F", :height => 3, :width => 4, :sill_height => 3}
+library[:window_definitions] = window_definitions
 
-daylighting_controls = []
-daylighting_controls << {:id => "", :name => "Daylighting Control A", :illuminance_setpoint => 300, :height => 3}
-daylighting_controls << {:id => "", :name => "Daylighting Control B", :illuminance_setpoint => 500, :height => 3}
-library[:daylighting_controls] = daylighting_controls
+daylighting_control_definitions = []
+daylighting_control_definitions << {:id => "", :name => "Daylighting Control A", :illuminance_setpoint => 300, :height => 3}
+daylighting_control_definitions << {:id => "", :name => "Daylighting Control B", :illuminance_setpoint => 500, :height => 3}
+library[:daylighting_control_definitions] = daylighting_control_definitions
 
 File.open('library.json', 'w') do |file|
   file << JSON::pretty_generate(library)

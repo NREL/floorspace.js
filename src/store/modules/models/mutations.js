@@ -68,5 +68,33 @@ export default {
         const object = payload.object;
         Object.assign(object, payload);
         delete object.object;
-    }
+    },
+  createWindow(state, { story_id, edge_id, window_defn_id, alpha }) {
+    const story = _.find(state.stories, { id: story_id });
+    story.windows.push({
+      window_defn_id,
+      edge_id,
+      alpha,
+    });
+  },
+  dropWindows(state, { story_id }) {
+    const story = _.find(state.stories, { id: story_id });
+    story.windows = [];
+  },
+  createDaylightingControl(state, { story_id, face_id, daylighting_control_defn_id, vertex_id }) {
+    const
+      story = _.find(state.stories, { id: story_id }),
+      space = _.find(story.spaces, { face_id });
+
+    space.daylighting_controls.push({
+      daylighting_control_defn_id,
+      vertex_id,
+    });
+  },
+  dropDaylightingControls(state, { face_id, story_id }) {
+    const
+      story = _.find(state.stories, { id: story_id }),
+      space = _.find(story.spaces, { face_id });
+    space.daylighting_controls = [];
+  },
 }

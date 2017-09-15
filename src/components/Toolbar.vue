@@ -61,6 +61,20 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <button @click="snapMode = 'grid-strict'" :class="{ active: snapMode === 'grid-strict' }">Strict Grid</button>
         <button @click="snapMode = 'grid-verts-edges'" :class="{ active: snapMode === 'grid-verts-edges' }">Edges too</button>
       </div>
+      <div id="component-menus" v-if="tool === 'Place Component'">
+        <div class='input-select'>
+            <label>Component</label>
+            <select v-model='currentComponent'>
+                <optgroup v-for="ct in allComponents" :label="ct.name">
+                  <option v-for='definition in ct.defs' :value="{ definition, type: ct.type }">{{ definition.name }}</option>
+                </optgroup>
+            </select>
+            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
+                <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
+            </svg>
+        </div>
+      </div>
+
       <div>
         <button @click="tool = item" :class="{ active: tool === item }" v-for="item in availableTools" :data-tool="item">{{ item }}</button>
       </div>
@@ -85,6 +99,10 @@ export default {
   name: 'toolbar',
   data() {
     return {
+      componentTypes: {
+        daylighting_control_definitions: 'Daylighting Control Definitions',
+        window_definitions: 'Window Definitions',
+      },
       showSaveModal: false,
       thingWereSaving: '',
     };
@@ -137,6 +155,28 @@ export default {
     },
   },
   computed: {
+    latestCreatedCompId() {
+      return _.chain(this.allComponents)
+        .map('defs')
+        .flatten()
+        .map('id')
+        .map(Number)
+        .max()
+        .value() + '';
+    },
+    allComponents() {
+      return Object.keys(this.componentTypes).map((ct) => ({
+        defs: this.$store.state.models.library[ct],
+        name: this.componentTypes[ct],
+        type: ct,
+      }));
+    },
+    currentComponentType() {
+      return this.currentComponent.type;
+    },
+    currentComponentDefinition() {
+      return this.currentComponent.definition;
+    },
     ...mapState({
       currentMode: state => state.application.currentSelections.mode,
       mapEnabled: state => state.project.map.enabled,
@@ -187,6 +227,14 @@ export default {
       get() { return this.$store.state.project.grid.spacing; },
       set(spacing) { this.$store.dispatch('project/setSpacing', { spacing }); },
     },
+
+    currentComponent: {
+      get() { return this.$store.getters['application/currentComponent']; },
+      set(item) {
+        if (!item || !item.definition || !item.definition.id) { return; }
+        this.$store.dispatch('application/setCurrentComponentDefinitionId', { id: item.definition.id });
+      },
+    },
     rwUnits: {
       get() { return this.$store.state.project.config.units; },
       set(units) { this.$store.dispatch('project/setUnits', { units }); },
@@ -204,6 +252,9 @@ export default {
       if (this.availableTools.indexOf(val) === -1 && val !== 'Map') { this.tool = this.availableTools[0]; }
     },
     currentMode() { this.tool = this.availableTools[0]; },
+    latestCreatedCompId() {
+      this.$store.dispatch('application/setCurrentComponentDefinitionId', { id: this.latestCreatedCompId });
+    },
   },
   components: {
     'save-as-modal': SaveAsModal,
@@ -258,6 +309,15 @@ export default {
       > .undo-redo {
         margin-right: auto;
       }
+      #component-menus {
+        margin: 0 auto;
+        .input-select {
+          display: inline-block;
+          &:last-child {
+            margin-left: 1rem;
+          }
+        }
+      }
       > .snapping-options {
         margin-right: auto;
         :first-child {
@@ -272,8 +332,6 @@ export default {
         }
       }
     }
-
-
   }
 }
 </style>

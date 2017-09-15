@@ -8,7 +8,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
   <div id="grid" :style="{ 'pointer-events': (currentTool === 'Drag' || currentTool === 'Map') ? 'none': 'auto' }">
-    <svg ref="grid" preserveAspectRatio="none" id="svg-grid"></svg>
+    <svg ref="grid" id="svg-grid">
+      <defs>
+        <marker v-for="id in ['perp-linecap', 'perp-linecap-highlight']" :id="id" markerWidth="1" markerHeight="10" orient="auto" markerUnits="strokeWidth" refY="4" refX="0.5">
+          <rect x="0" y="1" width="1" height="6" shape-rendering="optimizeQuality"/>
+        </marker>
+      </defs>
+    </svg>
   </div>
 </template>
 
@@ -20,6 +26,8 @@ import geometryHelpers from './../../store/modules/geometry/helpers';
 import modelHelpers from './../../store/modules/models/helpers';
 import applicationHelpers from './../../store/modules/application/helpers';
 import { ResizeEvents } from '../../components/Resize';
+import { drawWindow, drawDaylightingControl } from './drawing';
+import { expandWindowAlongEdge, windowLocation } from './snapping';
 
 const d3 = require('d3');
 
@@ -37,6 +45,12 @@ export default {
         y: null,
       },
       handleMouseMove: null, // placeholder --> overwritten in mounted()
+      drawWindow: drawWindow()
+        .xScale(v => this.rwuToGrid(v, 'x'))
+        .yScale(v => this.rwuToGrid(v, 'y')),
+      drawDC: drawDaylightingControl()
+        .xScale(v => this.rwuToGrid(v, 'x'))
+        .yScale(v => this.rwuToGrid(v, 'y')),
     };
   },
   mounted() {
@@ -67,7 +81,6 @@ export default {
     ResizeEvents.$off('resize', this.reloadGridAndScales);
   },
   computed: {
-
     ...mapState({
       currentMode: state => state.application.currentSelections.mode,
       currentTool: state => state.application.currentSelections.tool,
@@ -79,13 +92,19 @@ export default {
       // pixels to real world units, these are initialized in calcGrid based on the grid pixel dimensions and then never changed
       scaleX: state => state.application.scale.x,
       scaleY: state => state.application.scale.y,
+      windowDefs: state => state.models.library.window_definitions,
+      windowWidths: state => _.sumBy(state.models.library.window_definitions, 'width'),
     }),
     ...mapGetters({
       currentStory: 'application/currentStory',
       currentStoryGeometry: 'application/currentStoryGeometry',
+      denormalizedGeometry: 'application/currentStoryDenormalizedGeom',
       currentSpace: 'application/currentSpace',
       currentShading: 'application/currentShading',
+      currentComponent: 'application/currentComponent',
     }),
+    currentComponentType() { return this.currentComponent.type; },
+    currentComponentDefinition() { return this.currentComponent.definition; },
     currentSubSelection: {
       get() { return this.$store.getters['application/currentSubSelection']; },
       set(item) { this.$store.dispatch('application/setCurrentSubSelectionId', { id: item.id }); },
@@ -144,10 +163,11 @@ export default {
 
     currentMode() { this.drawPolygons(); },
     polygons() { this.drawPolygons(); },
-
+    windowDefs() { this.drawPolygons(); },
     currentTool() {
       this.points = [];
       this.drawPolygons();
+      this.clearHighlights();
     },
     currentSpace() {
       this.points = [];
@@ -179,8 +199,17 @@ export default {
   },
   methods: {
     ...methods,
+    denormalizeWindow(edge, { edge_id, alpha, window_defn_id }) {
+      const
+        windowDefn = _.find(this.windowDefs, { id: window_defn_id }),
+        center = windowLocation(edge, { alpha });
+      return expandWindowAlongEdge(edge, center, windowDefn.width);
+    },
     polygonsFromGeometry(geometry, extraPolygonAttrs = {}) {
-      const geom = geometryHelpers.denormalize(geometry);
+      const
+        geom = geometryHelpers.denormalize(geometry),
+        windows = this.currentStory.geometry_id === geometry.id ?
+          this.currentStory.windows : [];
       const polygons = geom.faces.map((face) => {
         // look up the model (space or shading) associated with the face
         const
@@ -193,6 +222,12 @@ export default {
             color: model.color,
             points,
             labelPosition: this.polygonLabelPosition(points),
+            windows: _.flatMap(
+              face.edges,
+              e => _.filter(windows, { edge_id: e.id })
+                    .map(w => this.denormalizeWindow(e, w))),
+            daylighting_controls: model.daylighting_controls
+              .map(dc => geometryHelpers.vertexForId(dc.vertex_id, geometry)),
             ...extraPolygonAttrs,
           };
         if (!points.length) {
