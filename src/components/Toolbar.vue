@@ -98,7 +98,6 @@ import SaveAsModal from './Modals/SaveAsModal.vue';
 export default {
   name: 'toolbar',
   data() {
-    window.theToolbar = this;
     return {
       componentTypes: {
         daylighting_control_definitions: 'Daylighting Control Definitions',

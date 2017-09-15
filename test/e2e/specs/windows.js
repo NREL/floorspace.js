@@ -14,7 +14,6 @@ module.exports = {
       .click('#library-new-object')
       .setValue('.library-table [data-column="width"] input', '12')
       .click('.tools [data-tool="Place Component"]')
-      .click('#component-menus select option[value="window_definitions"]')
       .perform((client, done) => {
         client
         .moveToElement('#grid svg', client.xScale(-40), client.yScale(50))

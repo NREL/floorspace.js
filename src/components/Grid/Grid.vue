@@ -54,7 +54,6 @@ export default {
     };
   },
   mounted() {
-    window.theGrid = this;
     // throttle/debounce event handlers
     this.handleMouseMove = throttle(this.highlightSnapTarget, 100);
 
@@ -164,10 +163,7 @@ export default {
 
     currentMode() { this.drawPolygons(); },
     polygons() { this.drawPolygons(); },
-    windowDefs: {
-      handler() { console.log('windowDefs was updated'); this.drawPolygons(); },
-      deep: true,
-    },
+    windowDefs() { this.drawPolygons(); },
     currentTool() {
       this.points = [];
       this.drawPolygons();

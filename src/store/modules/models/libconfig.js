@@ -139,39 +139,6 @@ const map = {
     ],
     init: factory.ConstructionSet,
   },
-  windows: {
-    displayName: 'Window',
-    columns: [
-      {
-        name: 'id',
-        displayName: 'ID',
-        readonly: true,
-        private: true,
-      },
-      {
-        name: 'name',
-        displayName: 'Definition Name',
-        input_type: 'text',
-        validator: validators.name,
-        get(windowObj, state) {
-          // look up story with a reference to the window
-          const window = state.models.library.window_definitions.find(w => w.id).indexOf(windowObj.id);
-          return window.name;
-        },
-      },
-      {
-        name: 'story',
-        displayName: 'Story',
-        readonly: true,
-        get(windowObj, state) {
-          // look up story with a reference to the window
-          const windowStory = state.models.stories.find(s => s.windows.map(w => w.id).indexOf(windowObj.id) !== -1);
-          return windowStory.name;
-        },
-      },
-    ],
-    init: factory.WindowDefn,
-  },
   daylighting_control_definitions: {
     displayName: 'Daylighting Control Definition',
     columns: [
