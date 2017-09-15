@@ -95,7 +95,7 @@ const map = {
         converter: converters.number,
       },
     ],
-    init: factory.ThermalZone,
+    init: factory.WindowDefn,
   },
   space_types: {
     displayName: 'Space Type',

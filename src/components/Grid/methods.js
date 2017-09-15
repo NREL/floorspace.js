@@ -548,6 +548,7 @@ export default {
   * handle clicks to select faces
   */
   drawPolygons() {
+    console.log('top of drawPolygons');
     this.recalcScales();
     // remove expired polygons
     let poly = d3.select('#grid svg').selectAll('g.poly')
