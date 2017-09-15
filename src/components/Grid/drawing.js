@@ -53,17 +53,18 @@ export function drawDaylightingControl() {
   function chart(selection) {
     selection.exit().remove();
     const dcE = selection.enter().append('g').attr('class', 'daylighting-control');
-    dcE.append('circle').attr('class', 'sun');
-    dcE.append('circle').attr('class', 'rays');
+    dcE.append('circle').attr('class', 'bg');
+    dcE.append('path').attr('class', 'quadrants');
     const dc = selection.merge(dcE);
-    dc.select('circle.sun')
+    dc.select('circle.bg')
       .attr('cx', d => xScale(d.x))
       .attr('cy', d => yScale(d.y))
-      .attr('r', 5);
-    dc.select('circle.rays')
-      .attr('cx', d => xScale(d.x))
-      .attr('cy', d => yScale(d.y))
-      .attr('r', 8);
+      .attr('r', 10);
+    dc.select('path.quadrants')
+      .attr('d', (d) => {
+        const x = xScale(d.x), y = yScale(d.y), r = 10;
+        return `M${x} ${y} L${x + r} ${y} A ${r} ${r} 0 0 1 ${x} ${y + r} L ${x} ${y - r} A ${r} ${r} 0 0 0 ${x - r} ${y} Z`;
+      });
   }
 
   chart.xScale = function (_) {
