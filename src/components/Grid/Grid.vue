@@ -102,9 +102,10 @@ export default {
       denormalizedGeometry: 'application/currentStoryDenormalizedGeom',
       currentSpace: 'application/currentSpace',
       currentShading: 'application/currentShading',
-      currentComponentDefinition: 'application/currentComponentDefinition',
-      currentComponentType: 'application/currentComponentType',
+      currentComponent: 'application/currentComponent',
     }),
+    currentComponentType() { return this.currentComponent.type; },
+    currentComponentDefinition() { return this.currentComponent.definition; },
     currentSubSelection: {
       get() { return this.$store.getters['application/currentSubSelection']; },
       set(item) { this.$store.dispatch('application/setCurrentSubSelectionId', { id: item.id }); },

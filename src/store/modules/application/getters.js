@@ -31,27 +31,17 @@ export default {
   currentShading(state, getters) { return getters.currentSubSelectionType === 'shading' ? getters.currentSubSelection : null; },
   currentImage(state, getters) { return getters.currentSubSelectionType === 'images' ? getters.currentSubSelection : null; },
 
-  // the type of the component definition being instantiated
-  currentComponentType(state, getters, rootState) {
-    const componentDefinitionId = state.currentSelections.component_definition_id;
-    if (rootState.models.library.window_definitions.find(i => i.id === componentDefinitionId)) { return 'window_definitions'; }
-    if (rootState.models.library.daylighting_control_definitions.find(i => i.id === componentDefinitionId)) { return 'daylighting_control_definitions'; }
-    return null;
-  },
-
-  // full component (window or daylighting_control) instance for the component_id, this will be stored on the currentStory
-  currentComponent(state, getters) {
-    const currentStory = getters['currentStory'];
-    const componentId = state.currentSelections.component_id;
-    return currentStory.windows.find(i => i.id === componentId) ||
-      currentStory.daylighting_controls.find(i => i.id === componentId);
-  },
   // full component definition (window_definition or daylighting_control_definition) instance for the component_definition_id
   // this will be stored in the top level library
-  currentComponentDefinition(state, getters, rootState) {
+  currentComponent(state, getters, rootState) {
     const componentDefinitionId = state.currentSelections.component_definition_id;
-    return rootState.models.library.window_definitions.find(i => i.id === componentDefinitionId) ||
-      rootState.models.library.daylighting_control_definitions.find(i => i.id === componentDefinitionId);
+    let type, definition;
+    if ((definition = rootState.models.library.window_definitions.find(i => i.id === componentDefinitionId))) {
+      type = 'window_definitions';
+    } else if ((definition = rootState.models.library.daylighting_control_definitions.find(i => i.id === componentDefinitionId))) {
+      type = 'daylighting_control_definitions';
+    }
+    return { type, definition };
   },
 
   currentBuildingUnit(state, getters, rootState) { return rootState.models.library.building_units.find(i => i.id === state.currentSelections.building_unit_id); },

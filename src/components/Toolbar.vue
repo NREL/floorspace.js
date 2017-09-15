@@ -63,20 +63,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       </div>
       <div id="component-menus" v-if="tool === 'Place Component'">
         <div class='input-select'>
-            <label>Type</label>
-            <select v-model='componentType'>
-                <!-- <option selected>--</option> -->
-                <option v-for='(n, t) in componentTypes' :value="t">{{ n }}</option>
-            </select>
-            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
-                <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
-            </svg>
-        </div>
-        <div class='input-select'>
-            <label>Definition</label>
-            <select v-model='currentComponentDefinition'>
-                <!-- <option selected>--</option> -->
-                <option v-for='definition in componentDefinitions' :value="definition">{{ definition.name }}</option>
+            <label>Component</label>
+            <select v-model='currentComponent'>
+                <optgroup v-for="ct in allComponents" :label="ct.name">
+                  <option v-for='definition in ct.defs' :value="{ definition, type: ct.type }">{{ definition.name }}</option>
+                </optgroup>
             </select>
             <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
                 <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
@@ -107,9 +98,8 @@ import SaveAsModal from './Modals/SaveAsModal.vue';
 export default {
   name: 'toolbar',
   data() {
+    window.theToolbar = this;
     return {
-      componentType: '',
-      // componentDefinition: '',
       componentTypes: {
         daylighting_control_definitions: 'Daylighting Control Definitions',
         window_definitions: 'Window Definitions',
@@ -117,10 +107,6 @@ export default {
       showSaveModal: false,
       thingWereSaving: '',
     };
-  },
-  mounted() {
-    this.componentType = Object.keys(this.componentTypes)[0];
-    this.currentComponentDefinition = this.componentDefinitions[0];
   },
   methods: {
     exportData() {
@@ -170,7 +156,28 @@ export default {
     },
   },
   computed: {
-    componentDefinitions() { return this.$store.state.models.library[this.componentType]; },
+    latestCreatedCompId() {
+      return _.chain(this.allComponents)
+        .map('defs')
+        .flatten()
+        .map('id')
+        .map(Number)
+        .max()
+        .value() + '';
+    },
+    allComponents() {
+      return Object.keys(this.componentTypes).map((ct) => ({
+        defs: this.$store.state.models.library[ct],
+        name: this.componentTypes[ct],
+        type: ct,
+      }));
+    },
+    currentComponentType() {
+      return this.currentComponent.type;
+    },
+    currentComponentDefinition() {
+      return this.currentComponent.definition;
+    },
     ...mapState({
       currentMode: state => state.application.currentSelections.mode,
       mapEnabled: state => state.project.map.enabled,
@@ -222,18 +229,13 @@ export default {
       set(spacing) { this.$store.dispatch('project/setSpacing', { spacing }); },
     },
 
-    currentComponentDefinition: {
-      get() { return this.$store.getters['application/currentComponentDefinition']; },
+    currentComponent: {
+      get() { return this.$store.getters['application/currentComponent']; },
       set(item) {
-        if (!item) { return; }
-        this.$store.dispatch('application/setCurrentComponentDefinitionId', { id: item.id });
+        if (!item || !item.definition || !item.definition.id) { return; }
+        this.$store.dispatch('application/setCurrentComponentDefinitionId', { id: item.definition.id });
       },
     },
-
-    // currentComponent: {
-    //   get() { return this.$store.getters['application/currentComponent']; },
-    //   set(item) { this.$store.dispatch('application/currentComponentId', { id: item.id }); },
-    // },
     rwUnits: {
       get() { return this.$store.state.project.config.units; },
       set(units) { this.$store.dispatch('project/setUnits', { units }); },
@@ -251,9 +253,8 @@ export default {
       if (this.availableTools.indexOf(val) === -1 && val !== 'Map') { this.tool = this.availableTools[0]; }
     },
     currentMode() { this.tool = this.availableTools[0]; },
-    'componentDefinitions.length':function () { this.currentComponentDefinition = this.componentDefinitions[this.componentDefinitions.length - 1]; },
-    componentType() {
-      this.currentComponentDefinition = this.componentDefinitions[0];
+    latestCreatedCompId() {
+      this.$store.dispatch('application/setCurrentComponentDefinitionId', { id: this.latestCreatedCompId });
     },
   },
   components: {
