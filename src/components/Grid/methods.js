@@ -450,7 +450,7 @@ export default {
   */
   drawPoints () {
     // remove expired points and guidelines
-    d3.selectAll('#grid ellipse, #grid path').remove();
+    d3.selectAll('#grid .point-path').remove();
 
     // draw points
     d3.select('#grid svg')
@@ -463,7 +463,7 @@ export default {
     .attr('vector-effect', 'non-scaling-stroke');
 
     // apply custom CSS for origin of polygons
-    d3.select('#grid svg').select('ellipse')
+    d3.select('#grid svg').select('ellipse').attr('class', 'point-path')
     .attr('rx', 7)
     .attr('ry', 7)
     .classed('origin', true)
@@ -471,7 +471,7 @@ export default {
     .attr('fill', 'none');
 
     // connect the points for the face being drawn with a line
-    d3.select('#grid svg').append('path')
+    d3.select('#grid svg').append('path').attr('class', 'point-path')
     .datum(this.points)
     .attr('fill', 'none')
     .attr('vector-effect', 'non-scaling-stroke')
