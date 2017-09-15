@@ -353,7 +353,8 @@
 						},
 						"required": [
 							"window_defn_id",
-							"vertex_id"
+							"edge_id",
+							"alpha"
 						]
 					}
 				},
