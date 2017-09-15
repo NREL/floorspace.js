@@ -94,7 +94,7 @@ export default {
   dropDaylightingControls(state, { face_id, story_id }) {
     const
       story = _.find(state.stories, { id: story_id }),
-      space = _.find(story.space, { face_id });
+      space = _.find(story.spaces, { face_id });
     space.daylighting_controls = [];
   },
 }

@@ -19,7 +19,7 @@ function componentsOnFace(state, geometry_id, face_id) {
 
   if (!face) {
     // brand new face, no components possible
-    return { space_id: null, story_id: null, windows: [], daylighting_controls: [] };
+    return { story_id: null, windows: [], daylighting_controls: [] };
   }
 
   const retval = {
@@ -38,7 +38,7 @@ function componentsOnFace(state, geometry_id, face_id) {
 
 function replaceComponents(
   context,
-  { windows, daylighting_controls, story_id, space_id },
+  { windows, daylighting_controls, story_id },
   { geometry_id, face_id, dx, dy },
 ) {
   const
@@ -46,7 +46,7 @@ function replaceComponents(
     face = _.find(geometry.faces, { id: face_id }),
     spacing = context.rootState.project.grid.spacing;
 
-  context.dispatch('models/destroyAllComponents', { face_id, space_id }, { root: true });
+  context.dispatch('models/destroyAllComponents', { face_id, story_id }, { root: true });
 
   windows.forEach((w) => {
     const
@@ -72,6 +72,8 @@ function replaceComponents(
       daylighting_control_defn_id: d.daylighting_control_defn_id,
       x: loc.x,
       y: loc.y,
+      story_id,
+      face_id,
     }, { root: true });
   });
 }

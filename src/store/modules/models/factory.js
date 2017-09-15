@@ -91,7 +91,7 @@ export default {
       id: idFactory.generate(),
       name: opts.name,
       height: opts.height,
-      width: opts.width,
+      width: opts.width || 0,
       sill_height: opts.sill_height,
     };
   },

@@ -230,10 +230,11 @@ export default {
 
   createDaylightingControl(context, payload) {
     const
-      { story_id, daylighting_control_defn_id, x, y } = payload,
+      { story_id, face_id, daylighting_control_defn_id, x, y } = payload,
       story = _.find(context.state.stories, { id: story_id }),
       daylightingDefn = _.find(context.state.library.daylighting_control_definitions, { id: daylighting_control_defn_id }),
       geometry = story && _.find(context.rootState.geometry, { id: story.geometry_id }),
+      face = geometry && _.find(geometry.faces, { id: face_id }),
       vertex = geometry && (
         geometryHelpers.vertexForCoordinates({ x, y }, geometry) || geometryFactory.Vertex(x, y));
     if (!story) {
@@ -242,6 +243,8 @@ export default {
       throw new Error('Window Definition not found');
     } else if (!geometry) {
       throw new Error('Geometry not found');
+    } else if (!face) {
+      throw new Error('Face not found');
     } else if (!vertex.id) {
       throw new Error('Unable to find or create vertex');
     }
@@ -249,11 +252,11 @@ export default {
     context.commit('createDaylightingControl', { ...payload, vertex_id: vertex.id });
   },
 
-  destroyAllComponents(context, { face_id, space_id, story_id }) {
-    if (!face_id || !space_id || !story_id) {
+  destroyAllComponents(context, { face_id, story_id }) {
+    if (!face_id || !story_id) {
       return;
     }
     context.commit('dropDaylightingControls', { face_id, story_id });
-    context.commit('dropWindows', { space_id });
+    context.commit('dropWindows', { story_id });
   },
 };
