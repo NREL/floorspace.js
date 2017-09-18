@@ -65,5 +65,44 @@ module.exports = {
       .checkForErrors()
       .end();
   },
+  'windows on exterior edges that become interior should be removed': (browser) => {
+    browser
+      .click('.tools [data-tool="Rectangle"]')
+      .click('#selections .add-sub-selection')
+      .perform(drawSquare(-50, 50, 50, 20))
+      .assert.elementCount('.window', 0)
+      .checkForErrors()
+      .end();
+  },
+  'windows on interior edges that become exterior should be removed': (browser) => {
+    browser
+      .click('.tools [data-tool="Rectangle"]')
+      .click('#selections .add-sub-selection')
+      .perform(drawSquare(50, 0, 30, 50))
+      .assert.elementCount('.window', 1) // original window draw in setUp
+      .click('.tools [data-tool="Place Component"]')
+      .perform((client, done) => {
+        client
+        .moveToElement('#grid svg', client.xScale(0), client.yScale(30))
+        .mouseButtonClick();
 
+        done();
+      })
+      .assert.elementCount('.window', 2) // even though there are two polygons
+      // on this edge, assert that we only drew a single window.
+      .click('.tools [data-tool="Select"]')
+      .perform((client, done) => {
+        client
+        .moveToElement('#grid svg', client.xScale(15), client.yScale(25))
+        .pause(10)
+        .mouseButtonDown(0)
+        .moveToElement('#grid svg', client.xScale(30), client.yScale(25))
+        .mouseButtonUp(0);
+
+        done();
+      })
+      .assert.elementCount('.window', 1) // back to just the original one.
+      .checkForErrors()
+      .end();
+  },
 };
