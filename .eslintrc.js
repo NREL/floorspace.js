@@ -22,5 +22,6 @@ module.exports = {
     'one-var': 0,
     'one-var-declaration-per-line': 0,
     'no-nested-ternary': 0,
+    'camelcase': 0, // We have tons of camelcase identifiers, because the spec calls for it
   }
 };

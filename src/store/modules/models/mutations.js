@@ -77,9 +77,9 @@ export default {
       alpha,
     });
   },
-  dropWindows(state, { story_id }) {
+  dropWindows(state, { story_id, edge_ids }) {
     const story = _.find(state.stories, { id: story_id });
-    story.windows = [];
+    story.windows = _.reject(story.windows, w => _.includes(edge_ids, w.edge_id));
   },
   createDaylightingControl(state, { story_id, face_id, daylighting_control_defn_id, vertex_id }) {
     const
