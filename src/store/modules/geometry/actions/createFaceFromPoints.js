@@ -3,6 +3,7 @@ import factory from './../factory';
 import geometryHelpers from './../helpers';
 import modelHelpers from './../../models/helpers';
 import { uniq, dropConsecutiveDups, allPairs } from './../../../../utilities';
+import { componentsOnFace, replaceComponents } from './componentPreservationSociety';
 
 /*
  * create a face and associated edges and vertices from an array of points
@@ -412,11 +413,17 @@ export function edgesToSplit(geometry) {
  * destroy the original edge
  */
 function splitEdges(context) {
-  const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'];
-  const edgeChanges = edgesToSplit(currentStoryGeometry);
+  const
+    currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'],
+    edgeChanges = edgesToSplit(currentStoryGeometry),
+    affectedFaces = _.uniq(_.flatMap(edgeChanges, ec => _.map(ec.replaceEdgeRefs, 'face_id'))),
+    savedComponents = affectedFaces.map(face_id => componentsOnFace(context.rootState, currentStoryGeometry.id, face_id));
+
   edgeChanges.forEach(payload => context.commit({
     type: 'splitEdge',
     geometry_id: currentStoryGeometry.id,
     ...payload,
   }));
+
+  savedComponents.forEach(sc => replaceComponents(context, sc));
 }
