@@ -159,60 +159,6 @@ export default {
   */
   createFaceFromPoints,
 
-    // convert the splitting edge into two new edges
-    splitEdge (context, payload) {
-        const { edge, vertex } = payload;
-        const geometry = context.rootGetters['application/currentStoryGeometry'];
-
-        // splittingEdge.v1 -> midpoint
-        const edge1 = new factory.Edge();
-        edge1.v1 = edge.v1;
-        edge1.v2 = vertex.id;
-        context.commit('createEdge', {
-            geometry_id: geometry.id,
-            edge: edge1
-        });
-
-        // midpoint -> splittingEdge.v2
-        const edge2 = new factory.Edge();
-        edge2.v1 = vertex.id;
-        edge2.v2 = edge.v2;
-        context.commit('createEdge', {
-            geometry_id: geometry.id,
-            edge: edge2
-        });
-
-        // update faces referencing the edge being split
-        geometryHelpers.facesForEdgeId(edge.id, geometry).forEach((face) => {
-            context.commit('createEdgeRef', {
-                geometry_id: geometry.id,
-                face_id: face.id,
-                edgeRef: {
-                    edge_id: edge1.id,
-                    reverse: false
-                }
-            });
-            context.commit('createEdgeRef', {
-                geometry_id: geometry.id,
-                face_id: face.id,
-                edgeRef: {
-                    edge_id: edge2.id,
-                    reverse: false
-                }
-            });
-
-            // remove references to the edge being split
-            context.commit('destroyEdgeRef', {
-                geometry_id: geometry.id,
-                edge_id: edge.id,
-                face_id: face.id
-            });
-        });
-
-        // destroy edge that was split
-        context.commit('destroyGeometry', { id: edge.id });
-    },
-
 	/*
 	* given a face which may or may not be saved to the datastore
 	* look up and destroy all edges and vertices referenced only by that face
