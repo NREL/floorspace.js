@@ -22,9 +22,18 @@ module.exports = {
         done();
       });
   },
+  'modifying edge preserves windows': (browser) => {
+    browser
+      .click('.tools [data-tool="Rectangle"]')
+      .perform(drawSquare(-10, 50, 10, 10))
+      .assert.elementCount('.window', 1)
+      .checkForErrors()
+      .end();
+  },
   'splitting edge preserves windows': (browser) => {
     browser
       .click('.tools [data-tool="Rectangle"]')
+      .click('#selections .add-sub-selection')
       .perform(drawSquare(-10, 50, 10, 10))
       .assert.elementCount('.window', 1)
       .checkForErrors()
