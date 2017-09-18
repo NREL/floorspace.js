@@ -10,13 +10,12 @@ module.exports = {
       // unfortunately, it does so asyncronously, so we have to use .perform()
       // if we want to access them.
       .perform(draw50By50Square)
-      .click('#library-type-select option[value="window_definitions"]')
+      .click('#library-type-select option[value="daylighting_control_definitions"]')
       .click('#library-new-object')
-      .setValue('.library-table [data-column="width"] input', '12')
       .click('.tools [data-tool="Place Component"]')
       .perform((client, done) => {
         client
-        .moveToElement('#grid svg', client.xScale(-40), client.yScale(50))
+        .moveToElement('#grid svg', client.xScale(-40), client.yScale(40))
         .mouseButtonClick();
 
         done();
@@ -26,7 +25,7 @@ module.exports = {
     browser
       .click('.tools [data-tool="Rectangle"]')
       .perform(drawSquare(-10, 50, 10, 10))
-      .assert.elementCount('.window', 1)
+      .assert.elementCount('.daylighting-control', 1)
       .checkForErrors()
       .end();
   },
@@ -35,20 +34,20 @@ module.exports = {
       .click('.tools [data-tool="Rectangle"]')
       .click('#selections .add-sub-selection')
       .perform(drawSquare(-10, 50, 10, 10))
-      .assert.elementCount('.window', 1)
+      .assert.elementCount('.daylighting-control', 1)
       .checkForErrors()
       .end();
   },
-  'covering edge removes windows': (browser) => {
+  'covering daylighting control removes it': (browser) => {
     browser
       .click('.tools [data-tool="Rectangle"]')
       .click('#selections .add-sub-selection')
-      .perform(drawSquare(-45, 45, 10, 10))
-      .assert.elementCount('.window', 0)
+      .perform(drawSquare(-45, 35, 30, 30))
+      .assert.elementCount('.daylighting-control', 0)
       .checkForErrors()
       .end();
   },
-  'moving space preserves windows': (browser) => {
+  'moving space preserves daylighting controls': (browser) => {
     browser
       .click('.tools [data-tool="Select"]')
       .perform((client, done) => {
@@ -61,7 +60,7 @@ module.exports = {
 
         done();
       })
-      .assert.elementCount('.window', 1)
+      .assert.elementCount('.daylighting-control', 1)
       .checkForErrors()
       .end();
   },
