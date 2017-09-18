@@ -8,59 +8,81 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
   <nav id="toolbar">
-    <section class="settings">
+    <section id="top">
+      <div id="navigation-head">
+        <template v-if="showImportExport">
+          <input ref="importLibrary" @change="importDataAsFile($event, 'library')" type="file" />
+          <input ref="importInput" @change="importDataAsFile($event, 'floorplan')" type="file" />
 
-      <div class="input-checkbox">
-        <label>Story Below</label>
-        <input type="checkbox" v-model="previousStoryVisible">
+          <button @click="$refs.importInput.click()" id="import">Open</button>
+          <button @click="exportData" id="export">Save</button>
+          <button @click="$refs.importLibrary.click()">Import</button>
+        </template>
+
+        <div id="undo-redo">
+          <button @click="undo" :disabled="!timetravelInitialized">Undo</button>
+          <button @click="redo" :disabled="!timetravelInitialized">Redo</button>
+        </div>
+      </div>
+      <div id="mode-tabs">
+        <span @click="mode='floorplan'">
+          Floorplan
+          <svg class="icon" baseProfile="tiny" height="500" overflow="auto" viewBox="0 0 500 500" width="500" xmlns="http://www.w3.org/2000/svg"><path d="M359.688 31.938c-17.69-4.072-69.403 127.513-69.403 127.513s-8.165-2.553-35.384-2.553c-23.264 0-34.566 2.07-37.368 3.51-8.734-21.754-53.894-131.43-69.766-127.78-17.692 4.07-91.98 168.313-91.98 312.103 0 116.32 110.434 117.604 202.166 117.604 83.953 0 195.637-1.332 195.637-122.47-.002-143.788-76.212-303.856-93.902-307.926zM105.914 186.346c-.01-.004-.004-.02.014-.046 13.65-47.807 35.84-87.16 42.285-88.62 9.05-2.054 32.287 54.468 37.266 66.696-.517-.597-20.032.29-39.65 5.293-27.11 6.91-39.39 15.916-39.902 16.63l-.014.046zm145.67 144.063c-137.903 0-138.648-19.147-138.648-19.147l17.008-59.073s8.24 7.02 125.48 7.02c109.543 0 122.56-7.02 122.56-7.02l17.007 59.073s-2.953 19.146-143.406 19.146zM362.24 169.656c-19.624-5.01-39.145-5.9-39.66-5.302 4.98-12.247 28.226-68.857 37.278-66.8 6.444 1.463 28.645 40.877 42.298 88.757-.51-.712-12.795-9.732-39.916-16.655z"/></svg>
+        </span>
+
+        <span @click="mode='shading'">
+          Shading
+          <svg class="icon" baseProfile="tiny" height="500" overflow="auto" viewBox="0 0 500 500" width="500" xmlns="http://www.w3.org/2000/svg"><path d="M359.688 31.938c-17.69-4.072-69.403 127.513-69.403 127.513s-8.165-2.553-35.384-2.553c-23.264 0-34.566 2.07-37.368 3.51-8.734-21.754-53.894-131.43-69.766-127.78-17.692 4.07-91.98 168.313-91.98 312.103 0 116.32 110.434 117.604 202.166 117.604 83.953 0 195.637-1.332 195.637-122.47-.002-143.788-76.212-303.856-93.902-307.926zM105.914 186.346c-.01-.004-.004-.02.014-.046 13.65-47.807 35.84-87.16 42.285-88.62 9.05-2.054 32.287 54.468 37.266 66.696-.517-.597-20.032.29-39.65 5.293-27.11 6.91-39.39 15.916-39.902 16.63l-.014.046zm145.67 144.063c-137.903 0-138.648-19.147-138.648-19.147l17.008-59.073s8.24 7.02 125.48 7.02c109.543 0 122.56-7.02 122.56-7.02l17.007 59.073s-2.953 19.146-143.406 19.146zM362.24 169.656c-19.624-5.01-39.145-5.9-39.66-5.302 4.98-12.247 28.226-68.857 37.278-66.8 6.444 1.463 28.645 40.877 42.298 88.757-.51-.712-12.795-9.732-39.916-16.655z"/></svg>
+        </span>
+
+        <span @click="mode='components'">
+          Components
+          <svg class="icon" baseProfile="tiny" height="500" overflow="auto" viewBox="0 0 500 500" width="500" xmlns="http://www.w3.org/2000/svg"><path d="M359.688 31.938c-17.69-4.072-69.403 127.513-69.403 127.513s-8.165-2.553-35.384-2.553c-23.264 0-34.566 2.07-37.368 3.51-8.734-21.754-53.894-131.43-69.766-127.78-17.692 4.07-91.98 168.313-91.98 312.103 0 116.32 110.434 117.604 202.166 117.604 83.953 0 195.637-1.332 195.637-122.47-.002-143.788-76.212-303.856-93.902-307.926zM105.914 186.346c-.01-.004-.004-.02.014-.046 13.65-47.807 35.84-87.16 42.285-88.62 9.05-2.054 32.287 54.468 37.266 66.696-.517-.597-20.032.29-39.65 5.293-27.11 6.91-39.39 15.916-39.902 16.63l-.014.046zm145.67 144.063c-137.903 0-138.648-19.147-138.648-19.147l17.008-59.073s8.24 7.02 125.48 7.02c109.543 0 122.56-7.02 122.56-7.02l17.007 59.073s-2.953 19.146-143.406 19.146zM362.24 169.656c-19.624-5.01-39.145-5.9-39.66-5.302 4.98-12.247 28.226-68.857 37.278-66.8 6.444 1.463 28.645 40.877 42.298 88.757-.51-.712-12.795-9.732-39.916-16.655z"/></svg>
+        </span>
+
+        <span @click="mode='assign'">
+          Assign
+          <svg class="icon" baseProfile="tiny" height="500" overflow="auto" viewBox="0 0 500 500" width="500" xmlns="http://www.w3.org/2000/svg"><path d="M359.688 31.938c-17.69-4.072-69.403 127.513-69.403 127.513s-8.165-2.553-35.384-2.553c-23.264 0-34.566 2.07-37.368 3.51-8.734-21.754-53.894-131.43-69.766-127.78-17.692 4.07-91.98 168.313-91.98 312.103 0 116.32 110.434 117.604 202.166 117.604 83.953 0 195.637-1.332 195.637-122.47-.002-143.788-76.212-303.856-93.902-307.926zM105.914 186.346c-.01-.004-.004-.02.014-.046 13.65-47.807 35.84-87.16 42.285-88.62 9.05-2.054 32.287 54.468 37.266 66.696-.517-.597-20.032.29-39.65 5.293-27.11 6.91-39.39 15.916-39.902 16.63l-.014.046zm145.67 144.063c-137.903 0-138.648-19.147-138.648-19.147l17.008-59.073s8.24 7.02 125.48 7.02c109.543 0 122.56-7.02 122.56-7.02l17.007 59.073s-2.953 19.146-143.406 19.146zM362.24 169.656c-19.624-5.01-39.145-5.9-39.66-5.302 4.98-12.247 28.226-68.857 37.278-66.8 6.444 1.463 28.645 40.877 42.298 88.757-.51-.712-12.795-9.732-39.916-16.655z"/></svg>
+        </span>
       </div>
 
-      <div v-if="mapEnabled" class="input-checkbox">
-        <label>map</label>
-        <input type="checkbox" v-model="mapVisible">
-      </div>
+      <div id="grid-settings">
+        <div class="input-checkbox">
+          <label>Story Below</label>
+          <input type="checkbox" v-model="previousStoryVisible">
+        </div>
 
-      <div class="input-checkbox">
-        <label>grid</label>
-        <input type="checkbox" v-model="gridVisible">
-      </div>
+        <div v-if="mapEnabled" class="input-checkbox">
+          <label>map</label>
+          <input type="checkbox" v-model="mapVisible">
+        </div>
 
-      <div class="input-number input-select">
-        <label>spacing</label>
-        <input v-model.number.lazy="spacing">
-        <select ref="unitSelect" @change="updateUnits">
-          <option value="ft">ft</option>
-          <option value="m">m</option>
-        </select>
-        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
-            <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
-        </svg>
-      </div>
+        <div class="input-checkbox">
+          <label>grid</label>
+          <input type="checkbox" v-model="gridVisible">
+        </div>
 
-      <div class="input-number">
-        <label>north axis</label>
-        <input v-model.number.lazy="northAxis" :disabled="mapEnabled">
-      </div>
+        <div class="input-number input-select">
+          <label>spacing</label>
+          <input v-model.number.lazy="spacing">
+          <select ref="unitSelect" @change="updateUnits">
+            <option value="ft">ft</option>
+            <option value="m">m</option>
+          </select>
+          <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
+              <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
+          </svg>
+        </div>
 
-      <div id="import-export" v-if="showImportExport">
-        <input ref="importLibrary" @change="importDataAsFile($event, 'library')" type="file" />
-        <button @click="$refs.importLibrary.click()">Import Library</button>
-        <input ref="importInput" @change="importDataAsFile($event, 'floorplan')" type="file" />
-        <button @click="$refs.importInput.click()" id="import">Open Floorplan</button>
-        <button @click="exportData" id="export">Save Floorplan</button>
+        <div class="input-number">
+          <label>north axis</label>
+          <input v-model.number.lazy="northAxis" :disabled="mapEnabled">
+        </div>
       </div>
-
     </section>
 
-    <section class="tools">
-      <div class="undo-redo">
-        <button @click="undo" :disabled="!timetravelInitialized">Undo</button>
-        <button @click="redo" :disabled="!timetravelInitialized">Redo</button>
-      </div>
-      <div class="snapping-options">
-        <button @click="snapMode = 'grid-strict'" :class="{ active: snapMode === 'grid-strict' }">Strict Grid</button>
-        <button @click="snapMode = 'grid-verts-edges'" :class="{ active: snapMode === 'grid-verts-edges' }">Edges too</button>
-      </div>
+    <section id="bottom">
+
       <div id="component-menus" v-if="tool === 'Place Component'">
         <div class='input-select'>
             <label>Component</label>
@@ -77,6 +99,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
       <div>
         <button @click="tool = item" :class="{ active: tool === item }" v-for="item in availableTools" :data-tool="item">{{ item }}</button>
+      </div>
+
+
+      <div id="snapping-options">
+        <button @click="snapMode = 'grid-strict'" :class="{ active: snapMode === 'grid-strict' }">Strict Grid</button>
+        <button @click="snapMode = 'grid-verts-edges'" :class="{ active: snapMode === 'grid-verts-edges' }">Edges too</button>
       </div>
     </section>
 
@@ -267,71 +295,55 @@ export default {
 
 #toolbar {
   z-index: 3;
-
-  section {
-    align-items: center;
+  #top {
     display: flex;
-    height: 2.5rem;
-    padding: 0 2.5rem;
-    &.settings {
-      background-color: $gray-medium-dark;
-      text-align: right;
-      .input-number, .input-checkbox {
-        margin-right: 1.5rem;
+    justify-content: space-between;
+    #navigation-head {
+      background-color: $gray-darkest;
+        display: inline-block;
+      #undo-redo {
+        display: inline-block;
+        float: right;
       }
-      // buttons to trigger file inputs
-      #import-export {
-        position: absolute;
-        right: 2.5rem;
-        button {
-          margin-left: 1rem;
-        }
-      }
-      // hidden file inputs
-      input[type="file"],
-      input[type="text"] {
-        position: absolute;
-        visibility: hidden;
+      input {
+        display: none;
       }
     }
-    &.tools {
-      background-color: $gray-medium-light;
-      justify-content: flex-end;
-      button {
-        &:last-child {
-          margin: 0;
-        }
-        margin: 0 1rem 0 0;
-      }
-      .active {
-        border: 2px solid $primary;
-      }
-      > .undo-redo {
-        margin-right: auto;
-      }
-      #component-menus {
-        margin: 0 auto;
-        .input-select {
-          display: inline-block;
-          &:last-child {
-            margin-left: 1rem;
+    #mode-tabs {
+       display: inline-block;
+       > {
+         display: inline-block;
+       }
+        > span {
+          font-size: .8rem;
+          width: 6rem;
+          &.active {
+            background-color: $gray-lightest;
+          }
+          svg.icon {
+            height: 1rem;
+            width: 1rem;
           }
         }
-      }
-      > .snapping-options {
-        margin-right: auto;
-        :first-child {
-          margin-right: -2px;
-          border-bottom-right-radius: 0;
-          border-top-right-radius: 0;
-        }
-        :last-child {
-          margin-left: -2px;
-          border-bottom-left-radius: 0;
-          border-top-left-radius: 0;
-        }
+    }
+    #grid-settings {
+      display: inline-block;
+      float: right;
+      > div {
+        display: inline-block;
       }
     }
   }
+  #bottom {
+    margin-left: 17.5rem;
+    > {
+      display: inline-block;
+    }
+    #snapping-options {
+      float: right;
+    }
+  }
+
+
 }
 </style>
