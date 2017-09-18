@@ -104,6 +104,7 @@ export default {
       if (!eraseResult) {
         window.eventBus.$emit('error', 'Operation cancelled - no split faces');
       }
+      context.dispatch('trimGeometry', { geometry_id: context.rootGetters['application/currentStoryGeometry'].id });
   	},
 
   /*
@@ -150,6 +151,7 @@ export default {
       dx,
       dy,
     });
+    context.dispatch('trimGeometry', { geometry_id: currentStoryGeometry.id });
   },
   /*
   * create a face and associated edges and vertices from an array of points
@@ -250,5 +252,13 @@ export default {
     replaceComponents(context, components, {
       geometry_id, face_id, dx: (dx || 0), dy: (dy || 0),
     });
+  },
+
+  trimGeometry({ rootState, commit }, { geometry_id }) {
+    const
+      story = _.find(rootState.models.stories, { geometry_id }),
+      vertsReferencedByDCs = _.flatMap(story.spaces, s => _.map(s.daylighting_controls, 'vertex_id'));
+
+    commit('trimGeometry', { geometry_id, vertsReferencedElsewhere: vertsReferencedByDCs });
   },
 }

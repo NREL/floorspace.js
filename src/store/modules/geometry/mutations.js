@@ -3,21 +3,25 @@ import _ from 'lodash';
     * create a new geometry set, face, edge, or vertex in the data store
     */
 
-export function trimGeometry(state, { geometry_id }) {
+export function trimGeometry(state, { geometry_id, vertsReferencedElsewhere }) {
   const
     geometry = _.find(state, { id: geometry_id }),
     edgesInUse = new Set(_.flatMap(geometry.faces, f => _.map(f.edgeRefs, 'edge_id'))),
-    verticesInUse = new Set(_.flatMap(
+    vertsOnEdges = _.flatMap(
       geometry.edges.filter(e => edgesInUse.has(e.id)),
-      e => [e.v1, e.v2]));
-
+      e => [e.v1, e.v2]),
+    verticesInUse = new Set([
+      ...(vertsReferencedElsewhere || []),
+      ...vertsOnEdges,
+    ]);
   geometry.edges = geometry.edges.filter(e => edgesInUse.has(e.id));
   geometry.vertices = geometry.vertices.filter(v => verticesInUse.has(v.id));
-
-  if (geometry.edges.length !== edgesInUse.size) {
+  const missingEdges = _.difference([...edgesInUse], _.map(geometry.edges, 'id'));
+  if (missingEdges.length) {
     console.error('An edge is referenced by a face, but does not exist!', JSON.stringify(geometry));
   }
-  if (geometry.vertices.length !== verticesInUse.size) {
+  const missingVerts = _.difference(vertsOnEdges, _.map(geometry.vertices, 'id'));
+  if (missingVerts.length) {
     console.error('A vertex is referenced by a face, but does not exist!', JSON.stringify(geometry));
   }
 }
@@ -146,5 +150,4 @@ export function replaceFacePoints(state, { geometry_id, vertices, edges, face_id
     edge_id: e.id,
     reverse: !!e.reverse,
   }));
-  trimGeometry(state, { geometry_id });
 }

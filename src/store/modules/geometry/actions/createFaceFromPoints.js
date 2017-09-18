@@ -159,6 +159,7 @@ function storeFace({ vertices, edges }, target, context, existingFace) {
   }, {
     root: true,
   });
+  context.dispatch('trimGeometry', { geometry_id: currentStoryGeometry.id });
 }
 
 export function findExistingEdge(v1, v2, edges) {
