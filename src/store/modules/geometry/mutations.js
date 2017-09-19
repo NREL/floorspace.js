@@ -34,10 +34,6 @@ export function createVertex(state, payload) {
       const { geometry_id, vertex } = payload;
       state.find(g => g.id === geometry_id).vertices.push(vertex);
 }
-export function createEdge(state, payload) {
-      const { geometry_id, edge } = payload;
-      state.find(g => g.id === geometry_id).edges.push(edge);
-}
 export function createFace(state, payload) {
       const { geometry_id, face } = payload;
       state.find(g => g.id === geometry_id).faces.push(face);
@@ -115,11 +111,6 @@ export function replaceEdgeRef(state, payload) {
   );
 }
 
-export function splitEdge(state, { geometry_id, edgeToDelete, newEdges, replaceEdgeRefs }) {
-  newEdges.forEach(edge => createEdge(state, { edge, geometry_id }));
-  replaceEdgeRefs.forEach(replacement => replaceEdgeRef(state, replacement));
-  destroyGeometry(state, { id: edgeToDelete });
-}
 
 export function ensureVertsExist(state, { geometry_id, vertices }) {
   const geometry = _.find(state, { id: geometry_id });
@@ -134,6 +125,13 @@ export function ensureEdgesExist(state, { geometry_id, edges }) {
     _.find(geometry.edges, { id: e.id }) || geometry.edges.push(e)
   );
 }
+
+export function splitEdge(state, { geometry_id, edgeToDelete, newEdges, replaceEdgeRefs }) {
+  ensureEdgesExist(state, { geometry_id, edges: newEdges });
+  replaceEdgeRefs.forEach(replacement => replaceEdgeRef(state, replacement));
+  destroyGeometry(state, { id: edgeToDelete });
+}
+
 
 export function replaceFacePoints(state, { geometry_id, vertices, edges, face_id }) {
   const geometry = _.find(state, { id: geometry_id });
