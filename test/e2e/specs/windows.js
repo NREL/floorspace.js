@@ -44,7 +44,7 @@ module.exports = {
     browser
       .click('.tools [data-tool="Rectangle"]')
       .click('#selections .add-sub-selection')
-      .perform(drawSquare(-45, 45, 10, 10))
+      .perform(drawSquare(-55, 40, 30, 20))
       .assert.elementCount('.window', 0)
       .checkForErrors()
       .end();
