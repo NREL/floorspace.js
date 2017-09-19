@@ -76,23 +76,15 @@ module.exports = {
       .end();
   },
   'windows on interior edges that become exterior should be removed': (browser) => {
-    browser
-      .click('.tools [data-tool="Rectangle"]')
-      .click('#selections .add-sub-selection')
-      .perform(drawSquare(0, 0, 30, 50))
-      .assert.elementCount('.window', 1) // original window draw in setUp
-      .click('.tools [data-tool="Place Component"]')
-      .perform((client, done) => {
+
+    const rightSideWindow = (client, done) => {
         client
         .moveToElement('#grid svg', client.xScale(0), client.yScale(30))
         .mouseButtonClick();
 
         done();
-      })
-      .click('.tools [data-tool="Select"]')
-      .assert.elementCount('.window', 3) // Two for the new one (two faces),
-      // one for the existing one.
-      .perform((client, done) => {
+      },
+      move15ToRight = (client, done) => {
         client
         .moveToElement('#grid svg', client.xScale(15), client.yScale(25))
         .pause(10)
@@ -101,8 +93,27 @@ module.exports = {
         .mouseButtonUp(0);
 
         done();
-      })
+      };
+
+    browser
+      .click('.tools [data-tool="Rectangle"]')
+      .click('#selections .add-sub-selection')
+      .perform(drawSquare(0, 0, 30, 50))
+      .assert.elementCount('.window', 1) // original window draw in setUp
+      .click('.tools [data-tool="Place Component"]')
+      .perform(rightSideWindow)
+      .click('.tools [data-tool="Select"]')
+      .assert.elementCount('.window', 3) // Two for the new one (two faces),
+      // one for the existing one.
+      .perform(move15ToRight)
       .assert.elementCount('.window', 1) // back to just the original one.
+      .click('.tools [data-tool="Rectangle"]')
+      .perform(drawSquare(0, 10, 20, 40))
+      .click('.tools [data-tool="Place Component"]')
+      .perform(rightSideWindow)
+      .click('.tools [data-tool="Select"]')
+      .perform(move15ToRight)
+      .assert.elementCount('.window', 1)
       .checkForErrors()
       .end();
   },
