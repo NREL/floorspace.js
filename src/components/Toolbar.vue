@@ -25,22 +25,22 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </div>
       </div>
       <div id="mode-tabs">
-        <span @click="mode='floorplan'">
+        <span @click="mode='floorplan'" :class="{ active: mode === 'floorplan' }">
           Floorplan
           <svg class="icon" baseProfile="tiny" height="500" overflow="auto" viewBox="0 0 500 500" width="500" xmlns="http://www.w3.org/2000/svg"><path d="M359.688 31.938c-17.69-4.072-69.403 127.513-69.403 127.513s-8.165-2.553-35.384-2.553c-23.264 0-34.566 2.07-37.368 3.51-8.734-21.754-53.894-131.43-69.766-127.78-17.692 4.07-91.98 168.313-91.98 312.103 0 116.32 110.434 117.604 202.166 117.604 83.953 0 195.637-1.332 195.637-122.47-.002-143.788-76.212-303.856-93.902-307.926zM105.914 186.346c-.01-.004-.004-.02.014-.046 13.65-47.807 35.84-87.16 42.285-88.62 9.05-2.054 32.287 54.468 37.266 66.696-.517-.597-20.032.29-39.65 5.293-27.11 6.91-39.39 15.916-39.902 16.63l-.014.046zm145.67 144.063c-137.903 0-138.648-19.147-138.648-19.147l17.008-59.073s8.24 7.02 125.48 7.02c109.543 0 122.56-7.02 122.56-7.02l17.007 59.073s-2.953 19.146-143.406 19.146zM362.24 169.656c-19.624-5.01-39.145-5.9-39.66-5.302 4.98-12.247 28.226-68.857 37.278-66.8 6.444 1.463 28.645 40.877 42.298 88.757-.51-.712-12.795-9.732-39.916-16.655z"/></svg>
         </span>
 
-        <span @click="mode='shading'">
-          Shading
+        <span @click="mode='images'" :class="{ active: mode === 'images' }">
+          Images
           <svg class="icon" baseProfile="tiny" height="500" overflow="auto" viewBox="0 0 500 500" width="500" xmlns="http://www.w3.org/2000/svg"><path d="M359.688 31.938c-17.69-4.072-69.403 127.513-69.403 127.513s-8.165-2.553-35.384-2.553c-23.264 0-34.566 2.07-37.368 3.51-8.734-21.754-53.894-131.43-69.766-127.78-17.692 4.07-91.98 168.313-91.98 312.103 0 116.32 110.434 117.604 202.166 117.604 83.953 0 195.637-1.332 195.637-122.47-.002-143.788-76.212-303.856-93.902-307.926zM105.914 186.346c-.01-.004-.004-.02.014-.046 13.65-47.807 35.84-87.16 42.285-88.62 9.05-2.054 32.287 54.468 37.266 66.696-.517-.597-20.032.29-39.65 5.293-27.11 6.91-39.39 15.916-39.902 16.63l-.014.046zm145.67 144.063c-137.903 0-138.648-19.147-138.648-19.147l17.008-59.073s8.24 7.02 125.48 7.02c109.543 0 122.56-7.02 122.56-7.02l17.007 59.073s-2.953 19.146-143.406 19.146zM362.24 169.656c-19.624-5.01-39.145-5.9-39.66-5.302 4.98-12.247 28.226-68.857 37.278-66.8 6.444 1.463 28.645 40.877 42.298 88.757-.51-.712-12.795-9.732-39.916-16.655z"/></svg>
         </span>
 
-        <span @click="mode='components'">
+        <span @click="mode='components'" :class="{ active: mode === 'components' }">
           Components
           <svg class="icon" baseProfile="tiny" height="500" overflow="auto" viewBox="0 0 500 500" width="500" xmlns="http://www.w3.org/2000/svg"><path d="M359.688 31.938c-17.69-4.072-69.403 127.513-69.403 127.513s-8.165-2.553-35.384-2.553c-23.264 0-34.566 2.07-37.368 3.51-8.734-21.754-53.894-131.43-69.766-127.78-17.692 4.07-91.98 168.313-91.98 312.103 0 116.32 110.434 117.604 202.166 117.604 83.953 0 195.637-1.332 195.637-122.47-.002-143.788-76.212-303.856-93.902-307.926zM105.914 186.346c-.01-.004-.004-.02.014-.046 13.65-47.807 35.84-87.16 42.285-88.62 9.05-2.054 32.287 54.468 37.266 66.696-.517-.597-20.032.29-39.65 5.293-27.11 6.91-39.39 15.916-39.902 16.63l-.014.046zm145.67 144.063c-137.903 0-138.648-19.147-138.648-19.147l17.008-59.073s8.24 7.02 125.48 7.02c109.543 0 122.56-7.02 122.56-7.02l17.007 59.073s-2.953 19.146-143.406 19.146zM362.24 169.656c-19.624-5.01-39.145-5.9-39.66-5.302 4.98-12.247 28.226-68.857 37.278-66.8 6.444 1.463 28.645 40.877 42.298 88.757-.51-.712-12.795-9.732-39.916-16.655z"/></svg>
         </span>
 
-        <span @click="mode='assign'">
+        <span @click="mode='assign'" :class="{ active: mode === 'assign' }">
           Assign
           <svg class="icon" baseProfile="tiny" height="500" overflow="auto" viewBox="0 0 500 500" width="500" xmlns="http://www.w3.org/2000/svg"><path d="M359.688 31.938c-17.69-4.072-69.403 127.513-69.403 127.513s-8.165-2.553-35.384-2.553c-23.264 0-34.566 2.07-37.368 3.51-8.734-21.754-53.894-131.43-69.766-127.78-17.692 4.07-91.98 168.313-91.98 312.103 0 116.32 110.434 117.604 202.166 117.604 83.953 0 195.637-1.332 195.637-122.47-.002-143.788-76.212-303.856-93.902-307.926zM105.914 186.346c-.01-.004-.004-.02.014-.046 13.65-47.807 35.84-87.16 42.285-88.62 9.05-2.054 32.287 54.468 37.266 66.696-.517-.597-20.032.29-39.65 5.293-27.11 6.91-39.39 15.916-39.902 16.63l-.014.046zm145.67 144.063c-137.903 0-138.648-19.147-138.648-19.147l17.008-59.073s8.24 7.02 125.48 7.02c109.543 0 122.56-7.02 122.56-7.02l17.007 59.073s-2.953 19.146-143.406 19.146zM362.24 169.656c-19.624-5.01-39.145-5.9-39.66-5.302 4.98-12.247 28.226-68.857 37.278-66.8 6.444 1.463 28.645 40.877 42.298 88.757-.51-.712-12.795-9.732-39.916-16.655z"/></svg>
         </span>
@@ -101,7 +101,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <button @click="tool = item" :class="{ active: tool === item }" v-for="item in availableTools" :data-tool="item">{{ item }}</button>
       </div>
 
-
+      <div class='input-select'>
+          <label>View By</label>
+          <select v-model='currentMode'>
+              <option v-for="mode in ['building_units', 'thermal_zones', 'space_types']" :value="mode">{{ displayNameForMode(mode) }}</option>
+          </select>
+          <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
+              <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
+          </svg>
+      </div>
       <div id="snapping-options">
         <button @click="snapMode = 'grid-strict'" :class="{ active: snapMode === 'grid-strict' }">Strict Grid</button>
         <button @click="snapMode = 'grid-verts-edges'" :class="{ active: snapMode === 'grid-verts-edges' }">Edges too</button>
@@ -121,12 +129,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <script>
 import { mapState } from 'vuex';
 import SaveAsModal from './Modals/SaveAsModal.vue';
-
+import applicationHelpers from './../store/modules/application/helpers';
 
 export default {
   name: 'toolbar',
   data() {
     return {
+      mode: 'floorplan',
       componentTypes: {
         daylighting_control_definitions: 'Daylighting Control Definitions',
         window_definitions: 'Window Definitions',
@@ -181,6 +190,7 @@ export default {
         this.$refs.unitSelect.value = this.rwUnits;
       }
     },
+    displayNameForMode(mode) { return applicationHelpers.displayNameForMode(mode); },
   },
   computed: {
     latestCreatedCompId() {
@@ -213,22 +223,34 @@ export default {
       allowSettingUnits: state => state.geometry.length === 1 && state.geometry[0].vertices.length === 0,
     }),
     availableTools() {
-      return this.$store.state.application.tools
-      .filter((t) => {
-        if (t === 'Rectangle' || t === 'Polygon' || t === 'Eraser' || t === 'Select') {
-          // only allow drawing tools in space and shade mode
-          return (this.currentMode === 'spaces' || this.currentMode === 'shading');
-        } else if (t === 'Drag' || t === 'Pan') {
-          // only allow dragging in image mode
-          return (this.currentMode === 'images');
-        } else if (t === 'Fill') {
-          // only allow cloning in space and shade mode if previousStoryVisible
-          return this.previousStoryVisible && (this.currentMode === 'spaces' || this.currentMode === 'shading');
-        }
-        return true;
-      })
-      // never display the map tool, it is only used when the map is initialized
-      .filter(t => t !== 'Map');
+      let tools = [];
+      switch (this.mode) {
+        case 'floorplan':
+          tools = ['Rectangle', 'Polygon', 'Eraser', 'Select'];
+          break;
+        // case 'shading':
+        //   tools = ['Rectangle', 'Polygon', 'Eraser', 'Select'];
+        //   break;
+        case 'images':
+          tools = ['Pan', 'Drag'];
+          break;
+        case 'components':
+          tools = ['Place Component'];
+          break;
+        case 'assign':
+          tools = [];
+          break;
+        default:
+          break;
+      }
+      if (this.previousStoryVisible && (this.mode === 'floorplan' || this.currentMode === 'shading')) {
+        tools.push('Fill');
+      }
+      return tools;
+    },
+    currentMode: {
+      get() { return `${this.$store.state.application.currentSelections.mode}`; },
+      set(mode) { this.$store.dispatch('application/setCurrentMode', { mode }); },
     },
     northAxis: {
       get() { return `${this.$store.state.project.config.north_axis}°`; },
@@ -296,11 +318,9 @@ export default {
 #toolbar {
   z-index: 3;
   #top {
-    display: flex;
-    justify-content: space-between;
     #navigation-head {
       background-color: $gray-darkest;
-        display: inline-block;
+      display: inline-block;
       #undo-redo {
         display: inline-block;
         float: right;
@@ -318,7 +338,7 @@ export default {
           font-size: .8rem;
           width: 6rem;
           &.active {
-            background-color: $gray-lightest;
+            background-color: $gray-medium-light;
           }
           svg.icon {
             height: 1rem;
@@ -335,12 +355,10 @@ export default {
     }
   }
   #bottom {
+    background-color: $gray-medium-light;
     margin-left: 17.5rem;
     > {
       display: inline-block;
-    }
-    #snapping-options {
-      float: right;
     }
   }
 
