@@ -9,10 +9,7 @@ export function componentsOnStory(state, geometry_id) {
 
   const perFaceComponents = story.spaces.map(space => ({
     daylighting_controls: space.daylighting_controls
-      .map(d => {
-        debugger;
-        return ({ ...d, vertex: _.find(geom.vertices, { id: d.vertex_id }) });
-      }),
+      .map(d => ({ ...d, vertex: _.find(geom.vertices, { id: d.vertex_id }) })),
     space_id: space.id,
     face_id: space.face_id,
   }));
@@ -20,10 +17,21 @@ export function componentsOnStory(state, geometry_id) {
     geometry_id,
     story_id: story.id,
     windows: story.windows
-      .map(w => ({
-        ...w,
-        originalLoc: windowLocation(_.find(geom.edges, { edge_id: w.edge_id }), w),
-      })),
+      .map((w) => {
+        const
+          edge = _.find(geom.edges, { id: w.edge_id }),
+          faces = _.filter(
+            geom.faces,
+            f => _.chain(f.edges)
+              .map('id')
+              .includes(w.edge_id)
+              .value());
+        return {
+          ...w,
+          originalLoc: windowLocation(edge, w),
+          originalFaceIds: _.map(faces, 'id'),
+        };
+      }),
     perFaceComponents,
   };
 }
@@ -42,7 +50,8 @@ export function replaceComponents(
 
   windows.forEach((w) => {
     const
-      newLoc = { x: w.originalLoc.x, y: w.originalLoc.y },
+      { dx, dy } = movementsByFaceId[w.originalFaceIds[0]] || { dx: 0, dy: 0 },
+      newLoc = { x: w.originalLoc.x + dx, y: w.originalLoc.y + dy },
       loc = snapWindowToEdge(geometry.edges, newLoc, 1, spacing);
     if (!loc) { return; }
 
@@ -59,7 +68,8 @@ export function replaceComponents(
 
     daylighting_controls.forEach((d) => {
       const
-        newLoc = { x: d.vertex.x, y: d.vertex.y },
+        { dx, dy } = movementsByFaceId[face_id] || { dx: 0, dy: 0 },
+        newLoc = { x: d.vertex.x + dx, y: d.vertex.y + dy },
         loc = snapToVertexWithinFace([face], newLoc, spacing);
       if (!loc) { return; }
 

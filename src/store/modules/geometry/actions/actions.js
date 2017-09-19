@@ -96,7 +96,7 @@ export default {
     });
 
     // replay the components
-    replaceComponents(context, components, { face_id: { dx, dy } });
+    replaceComponents(context, components, { [face_id]: { dx, dy } });
 
     context.dispatch('trimGeometry', { geometry_id: currentStoryGeometry.id });
   },
