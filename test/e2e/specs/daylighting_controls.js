@@ -21,7 +21,7 @@ module.exports = {
         done();
       });
   },
-  'modifying edge preserves windows': (browser) => {
+  'modifying edge preserves daylighting controls': (browser) => {
     browser
       .click('.tools [data-tool="Rectangle"]')
       .perform(drawSquare(-10, 50, 10, 10))
@@ -29,7 +29,7 @@ module.exports = {
       .checkForErrors()
       .end();
   },
-  'splitting edge preserves windows': (browser) => {
+  'splitting edge preserves daylighting controls': (browser) => {
     browser
       .click('.tools [data-tool="Rectangle"]')
       .click('#selections .add-sub-selection')
