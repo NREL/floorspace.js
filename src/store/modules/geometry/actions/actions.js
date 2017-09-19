@@ -2,7 +2,7 @@ import _ from 'lodash';
 import factory from './../factory';
 import geometryHelpers from './../helpers';
 import createFaceFromPoints, { eraseSelection, newGeometriesOfOverlappedFaces, validateFaceGeometry } from './createFaceFromPoints';
-import { componentsOnFace, replaceComponents } from './componentPreservationSociety';
+import { componentsOnStory, replaceComponents, withPreservedComponents } from './componentPreservationSociety';
 
 export function getOrCreateVertex(geometry, coords) {
   return geometryHelpers.vertexForCoordinates(coords, geometry) || factory.Vertex(coords.x, coords.y);
@@ -24,18 +24,28 @@ export default {
       }, { root: true });
     },
 
-    /*
-    * Erase the selection defined by a set of points on all faces on the current story
-    * Dispatched by the eraser tool
-    */
-    eraseSelection (context, payload) {
-  		const { points } = payload;
-  		const eraseResult = eraseSelection(points, context);
-      if (!eraseResult) {
-        window.eventBus.$emit('error', 'Operation cancelled - no split faces');
-      }
-      context.dispatch('trimGeometry', { geometry_id: context.rootGetters['application/currentStoryGeometry'].id });
-  	},
+  /*
+  * Erase the selection defined by a set of points on all faces on the current story
+  * Dispatched by the eraser tool
+  */
+  eraseSelection(context, payload) {
+    const
+      { points } = payload,
+      geometry_id = context.rootGetters['application/currentStoryGeometry'].id;
+
+    // get all components
+    const components = componentsOnStory(context.rootState, geometry_id);
+
+    const eraseResult = eraseSelection(points, context);
+    if (!eraseResult) {
+      window.eventBus.$emit('error', 'Operation cancelled - no split faces');
+    }
+
+    // replay the components
+    replaceComponents(context, components);
+
+    context.dispatch('trimGeometry', { geometry_id });
+  },
 
   /*
   * Given a dx, dy, and face
@@ -71,6 +81,9 @@ export default {
       return;
     }
 
+    // get all components
+    const components = componentsOnStory(context.rootState, currentStoryGeometry.id);
+
     newGeoms.forEach(newGeom => context.dispatch('replaceFacePoints', newGeom));
 
     context.dispatch('replaceFacePoints', {
@@ -81,6 +94,10 @@ export default {
       dx,
       dy,
     });
+
+    // replay the components
+    replaceComponents(context, components, { face_id: { dx, dy } });
+
     context.dispatch('trimGeometry', { geometry_id: currentStoryGeometry.id });
   },
   /*
@@ -115,18 +132,12 @@ export default {
       expVertices.forEach(vertex => context.commit('destroyGeometry', { id: vertex.id }));
     },
 
-  replaceFacePoints(context, { geometry_id, face_id, vertices, edges, dx, dy }) {
-    // get all components
-    const components = componentsOnFace(context.rootState, geometry_id, face_id);
+  replaceFacePoints(context, { geometry_id, face_id, vertices, edges }) {
     context.commit('replaceFacePoints', {
       geometry_id,
       vertices,
       edges,
       face_id,
-    });
-    // replay the components
-    replaceComponents(context, components, {
-      dx: (dx || 0), dy: (dy || 0),
     });
   },
 

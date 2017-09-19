@@ -252,16 +252,8 @@ export default {
     context.commit('createDaylightingControl', { ...payload, vertex_id: vertex.id });
   },
 
-  destroyAllComponents({ state, rootState, commit }, { face_id, story_id }) {
-    if (!face_id || !story_id) {
-      return;
-    }
-    const
-      story = _.find(state.stories, { id: story_id }),
-      geometry = _.find(rootState.geometry, { id: story.geometry_id }),
-      face = _.find(geometry.faces, { id: face_id }),
-      edge_ids = _.map(face.edgeRefs, 'edge_id');
-    commit('dropDaylightingControls', { face_id, story_id });
-    commit('dropWindows', { story_id, edge_ids });
+  destroyAllComponents({ state, rootState, commit }, { story_id }) {
+    commit('dropDaylightingControls', { story_id });
+    commit('dropWindows', { story_id });
   },
 };

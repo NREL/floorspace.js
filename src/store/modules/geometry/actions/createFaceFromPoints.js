@@ -3,7 +3,7 @@ import factory from './../factory';
 import geometryHelpers from './../helpers';
 import modelHelpers from './../../models/helpers';
 import { uniq, dropConsecutiveDups, allPairs } from './../../../../utilities';
-import { componentsOnFace, replaceComponents } from './componentPreservationSociety';
+import { componentsOnStory, replaceComponents } from './componentPreservationSociety';
 
 /*
  * create a face and associated edges and vertices from an array of points
@@ -55,6 +55,9 @@ export default function createFaceFromPoints(context, payload) {
     return;
   }
 
+  // get all components
+  const components = componentsOnStory(context.rootState, currentStoryGeometry.id);
+
   newGeoms.forEach(newGeom => context.dispatch('replaceFacePoints', newGeom));
 
   // save the face and its descendent geometry
@@ -62,6 +65,11 @@ export default function createFaceFromPoints(context, payload) {
 
   // split edges where vertices touch them
   splitEdges(context);
+
+  // replay the components
+  replaceComponents(context, components);
+
+  context.dispatch('trimGeometry', { geometry_id: currentStoryGeometry.id });
 }
 
 // ////////////////////// HELPERS //////////////////////////// //
@@ -160,7 +168,6 @@ function storeFace({ vertices, edges }, target, context, existingFace) {
   }, {
     root: true,
   });
-  context.dispatch('trimGeometry', { geometry_id: currentStoryGeometry.id });
 }
 
 export function findExistingEdge(v1, v2, edges) {
@@ -415,15 +422,11 @@ export function edgesToSplit(geometry) {
 function splitEdges(context) {
   const
     currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'],
-    edgeChanges = edgesToSplit(currentStoryGeometry),
-    affectedFaces = _.uniq(_.flatMap(edgeChanges, ec => _.map(ec.replaceEdgeRefs, 'face_id'))),
-    savedComponents = affectedFaces.map(face_id => componentsOnFace(context.rootState, currentStoryGeometry.id, face_id));
+    edgeChanges = edgesToSplit(currentStoryGeometry);
 
   edgeChanges.forEach(payload => context.commit({
     type: 'splitEdge',
     geometry_id: currentStoryGeometry.id,
     ...payload,
   }));
-
-  savedComponents.forEach(sc => replaceComponents(context, sc));
 }

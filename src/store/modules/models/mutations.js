@@ -77,9 +77,9 @@ export default {
       alpha,
     });
   },
-  dropWindows(state, { story_id, edge_ids }) {
+  dropWindows(state, { story_id }) {
     const story = _.find(state.stories, { id: story_id });
-    story.windows = _.reject(story.windows, w => _.includes(edge_ids, w.edge_id));
+    story.windows = [];
   },
   createDaylightingControl(state, { story_id, face_id, daylighting_control_defn_id, vertex_id }) {
     const
@@ -91,10 +91,10 @@ export default {
       vertex_id,
     });
   },
-  dropDaylightingControls(state, { face_id, story_id }) {
-    const
-      story = _.find(state.stories, { id: story_id }),
-      space = _.find(story.spaces, { face_id });
-    space.daylighting_controls = [];
+  dropDaylightingControls(state, { story_id }) {
+    const story = _.find(state.stories, { id: story_id });
+    story.spaces.forEach((space) => {
+      space.daylighting_controls = [];
+    });
   },
 }
