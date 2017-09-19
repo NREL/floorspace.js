@@ -48,11 +48,12 @@ export function replaceComponents(
 
   context.dispatch('models/destroyAllComponents', { story_id }, { root: true });
 
+  const edgesPresentOnFaces = _.flatMap(geometry.faces, 'edges');
   windows.forEach((w) => {
     const
       { dx, dy } = movementsByFaceId[w.originalFaceIds[0]] || { dx: 0, dy: 0 },
       newLoc = { x: w.originalLoc.x + dx, y: w.originalLoc.y + dy },
-      loc = snapWindowToEdge(geometry.edges, newLoc, 1, spacing);
+      loc = snapWindowToEdge(edgesPresentOnFaces, newLoc, 1, spacing);
     if (!loc) { return; }
 
     context.dispatch('models/createWindow', {
