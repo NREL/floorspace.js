@@ -2,6 +2,15 @@ import _ from 'lodash';
 import geometryHelpers from './../helpers';
 import { snapWindowToEdge, snapToVertexWithinFace, windowLocation } from '../../../../components/Grid/snapping';
 
+function facesContainingEdge(faces, edge_id) {
+  return _.filter(
+    faces,
+    f => _.chain(f.edges)
+      .map('id')
+      .includes(edge_id)
+      .value());
+}
+
 export function componentsOnStory(state, geometry_id) {
   const
     geom = geometryHelpers.denormalize(_.find(state.geometry, { id: geometry_id })),
@@ -20,12 +29,7 @@ export function componentsOnStory(state, geometry_id) {
       .map((w) => {
         const
           edge = _.find(geom.edges, { id: w.edge_id }),
-          faces = _.filter(
-            geom.faces,
-            f => _.chain(f.edges)
-              .map('id')
-              .includes(w.edge_id)
-              .value());
+          faces = facesContainingEdge(geom.faces, w.edge_id);
         return {
           ...w,
           originalLoc: windowLocation(edge, w),
@@ -53,8 +57,20 @@ export function replaceComponents(
     const
       { dx, dy } = movementsByFaceId[w.originalFaceIds[0]] || { dx: 0, dy: 0 },
       newLoc = { x: w.originalLoc.x + dx, y: w.originalLoc.y + dy },
-      loc = snapWindowToEdge(edgesPresentOnFaces, newLoc, 1, spacing);
+      loc = snapWindowToEdge(edgesPresentOnFaces, newLoc, 1, spacing),
+      facesWithEdge = _.map(facesContainingEdge(geometry.faces, w.edge_id), 'id');
     if (!loc) { return; }
+    if (_.intersection(facesWithEdge, w.originalFaceIds).length !== facesWithEdge.length) {
+      // Suppose we add some windows to an edge that's shared between two spaces.
+      // What happens when we move one of the spaces?
+      // Should we just duplicate the windows?
+
+      // dan's response:
+      // Remove that window.
+      // also, if you have a window on an exterior wall, then draw another space
+      // so it becomes interior, id delete the window too.
+      return;
+    }
 
     context.dispatch('models/createWindow', {
       story_id,

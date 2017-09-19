@@ -70,7 +70,7 @@ module.exports = {
     browser
       .click('.tools [data-tool="Rectangle"]')
       .click('#selections .add-sub-selection')
-      .perform(drawSquare(-50, 50, 50, 20))
+      .perform(drawSquare(-50, 50, 50, 10))
       .assert.elementCount('.window', 0)
       .checkForErrors()
       .end();
@@ -79,7 +79,7 @@ module.exports = {
     browser
       .click('.tools [data-tool="Rectangle"]')
       .click('#selections .add-sub-selection')
-      .perform(drawSquare(50, 0, 30, 50))
+      .perform(drawSquare(0, 0, 30, 50))
       .assert.elementCount('.window', 1) // original window draw in setUp
       .click('.tools [data-tool="Place Component"]')
       .perform((client, done) => {
@@ -89,9 +89,9 @@ module.exports = {
 
         done();
       })
-      .assert.elementCount('.window', 2) // even though there are two polygons
-      // on this edge, assert that we only drew a single window.
       .click('.tools [data-tool="Select"]')
+      .assert.elementCount('.window', 3) // Two for the new one (two faces),
+      // one for the existing one.
       .perform((client, done) => {
         client
         .moveToElement('#grid svg', client.xScale(15), client.yScale(25))
