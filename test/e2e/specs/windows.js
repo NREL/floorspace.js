@@ -1,6 +1,7 @@
 const { failOnError, withScales, draw50By50Square, drawSquare } = require('../helpers');
 
 module.exports = {
+  tags: ['components', 'windows'],
   setUp: (browser) => {
     withScales(failOnError(browser))
       .waitForElementVisible('.modal .new-floorplan', 5000)
