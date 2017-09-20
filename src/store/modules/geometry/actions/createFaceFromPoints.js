@@ -3,7 +3,7 @@ import factory from './../factory';
 import geometryHelpers, { distanceBetweenPoints } from './../helpers';
 import modelHelpers from './../../models/helpers';
 import { uniq, dropConsecutiveDups, allPairs } from './../../../../utilities';
-import { componentsOnStory, replaceComponents } from './componentPreservationSociety';
+import { withPreservedComponents } from './componentPreservationSociety';
 
 /*
  * create a face and associated edges and vertices from an array of points
@@ -55,19 +55,15 @@ export default function createFaceFromPoints(context, payload) {
     return;
   }
 
-  // get all components
-  const components = componentsOnStory(context.rootState, currentStoryGeometry.id);
+  withPreservedComponents(context, currentStoryGeometry.id, () => {
+    newGeoms.forEach(newGeom => context.dispatch('replaceFacePoints', newGeom));
 
-  newGeoms.forEach(newGeom => context.dispatch('replaceFacePoints', newGeom));
+    // save the face and its descendent geometry
+    storeFace(faceGeometry, target, context, existingFace);
 
-  // save the face and its descendent geometry
-  storeFace(faceGeometry, target, context, existingFace);
-
-  // split edges where vertices touch them
-  splitEdges(context);
-
-  // replay the components
-  replaceComponents(context, components);
+    // split edges where vertices touch them
+    splitEdges(context);
+  });
 
   context.dispatch('trimGeometry', { geometry_id: currentStoryGeometry.id });
 }

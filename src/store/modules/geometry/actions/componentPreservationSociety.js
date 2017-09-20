@@ -11,7 +11,7 @@ function facesContainingEdge(faces, edge_id) {
       .value());
 }
 
-export function componentsOnStory(state, geometry_id) {
+function componentsOnStory(state, geometry_id) {
   const
     geom = geometryHelpers.denormalize(_.find(state.geometry, { id: geometry_id })),
     story = _.find(state.models.stories, { geometry_id });
@@ -40,7 +40,7 @@ export function componentsOnStory(state, geometry_id) {
   };
 }
 
-export function replaceComponents(
+function replaceComponents(
   context,
   components,
   movementsByFaceId = {},
