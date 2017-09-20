@@ -45,8 +45,9 @@ export default {
       gridPoint = { x: gridCoords[0], y: gridCoords[1] },
       rwuPoint = this.gridPointToRWU(gridPoint),
       loc = snapWindowToEdge(
+        this.snapMode,
         this.denormalizedGeometry.edges, rwuPoint,
-        this.currentComponentDefinition.width, this.spacing * 2,
+        this.currentComponentDefinition.width, this.spacing * 2, this.spacing,
       );
 
     if (!loc) { return; }
@@ -193,8 +194,9 @@ export default {
     const
       rwuPoint = this.gridPointToRWU(gridPoint),
       loc = snapWindowToEdge(
+        this.snapMode,
         this.denormalizedGeometry.edges, rwuPoint,
-        this.currentComponentDefinition.width, this.spacing * 2,
+        this.currentComponentDefinition.width, this.spacing * 2, this.spacing,
       );
 
     if (!loc) { return; }

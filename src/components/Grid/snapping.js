@@ -42,7 +42,7 @@ export function expandWindowAlongEdge(edge, center, windowWidth) {
   return {
     edge_id: edge.id,
     center,
-    edge_start: alpha < 0.5 ? edge.v1 : edge.v2,
+    edge_start: edge.v1,
     alpha,
     start: {
       x: center.x - windowDeltaX,
@@ -55,18 +55,49 @@ export function expandWindowAlongEdge(edge, center, windowWidth) {
   };
 }
 
-
-export function snapWindowToEdge(edges, cursor, windowWidth, maxSnapDist) {
+function findClosestEdge(edges, cursor) {
   const
     withDistance = edges.map(e => ({
       ...e,
       ...pointDistanceToSegment(cursor, { start: e.v1, end: e.v2 }),
     })),
     closestEdge = _.minBy(withDistance, 'dist');
+  return closestEdge;
+}
+
+function snapWindowToEdgeAnywhere(edges, cursor, windowWidth, maxSnapDist) {
+  const closestEdge = findClosestEdge(edges, cursor);
   if (!closestEdge || closestEdge.dist > maxSnapDist) {
     return null;
   }
   return expandWindowAlongEdge(closestEdge, closestEdge.proj, windowWidth);
+}
+
+function snapWindowToEdgeAtGridIntervals(edges, cursor, windowWidth, maxSnapDist, gridSpacing) {
+  const closestEdge = findClosestEdge(edges, cursor);
+  if (!closestEdge || closestEdge.dist > maxSnapDist) {
+    return null;
+  }
+
+  const
+    dist = distanceBetweenPoints(closestEdge.v1, closestEdge.proj),
+    roundedDist = Math.round(dist / gridSpacing) * gridSpacing,
+    dx = (closestEdge.v2.x - closestEdge.v1.x),
+    dy = (closestEdge.v2.y - closestEdge.v1.y),
+    norm = Math.sqrt((dx * dx) + (dy * dy)),
+    snapLoc = {
+      x: closestEdge.v1.x + (roundedDist * (dx / norm)),
+      y: closestEdge.v1.y + (roundedDist * (dy / norm)),
+    };
+
+  return expandWindowAlongEdge(closestEdge, snapLoc, windowWidth);
+}
+
+export function snapWindowToEdge(snapMode, ...args) {
+  if (snapMode === 'grid-strict') {
+    return snapWindowToEdgeAtGridIntervals(...args);
+  }
+  return snapWindowToEdgeAnywhere(...args);
 }
 
 export function snapToVertexWithinFace(faces, cursor, gridSpacing) {
