@@ -1,6 +1,6 @@
 import _ from 'lodash';
-
-const d3 = require('d3');
+import 'd3-selection-multi';
+import { distanceBetweenPoints, unitPerpVector } from './../../store/modules/geometry/helpers';
 
 export function drawWindow() {
   let
@@ -45,6 +45,57 @@ export function drawWindow() {
   return chart;
 }
 
+export function drawWindowGuideline() {
+  let
+    xScale = _.identity,
+    yScale = _.identity;
+  function chart(selection) {
+    selection.exit().remove();
+    const labelE = selection.enter().append('g')
+        .attr('class', 'window-guideline')
+        .attr('transform', (d) => {
+          const { dx, dy } = unitPerpVector(d.edge_start, d.center),
+            offset = 20,
+            offX = offset * dx,
+            offY = offset * dy;
+          return `translate(${offX}, ${offY})`;
+        });
+    labelE.append('line');
+    labelE.append('text');
+    const label = selection.merge(labelE);
+    label.select('text')
+      .attr('x', d => xScale(d.center.x))
+      .attr('y', d => yScale(d.center.y))
+      .attr('fill', 'red')
+      .text((d) => {
+        const
+          distance = distanceBetweenPoints(d.edge_start, d.center),
+          roundDistance = Math.round(distance * 100) / 100;
+        return `${roundDistance}`;
+      });
+    label.select('line')
+      .attr('x1', d => xScale(d.edge_start.x))
+      .attr('y1', d => yScale(d.edge_start.y))
+      .attr('x2', d => xScale(d.center.x))
+      .attr('y2', d => yScale(d.center.y))
+      .attr('stroke-width', 2)
+      .attr('stroke', 'red');
+  }
+
+  chart.xScale = function (_) {
+    if (!arguments.length) return xScale;
+    xScale = _;
+    return chart;
+  };
+  chart.yScale = function (_) {
+    if (!arguments.length) return yScale;
+    yScale = _;
+    return chart;
+  };
+  return chart;
+}
+
+
 export function drawDaylightingControl() {
   let
     xScale = _.identity,
@@ -65,6 +116,32 @@ export function drawDaylightingControl() {
         const x = xScale(d.x), y = yScale(d.y), r = 10;
         return `M${x} ${y} L${x + r} ${y} A ${r} ${r} 0 0 1 ${x} ${y + r} L ${x} ${y - r} A ${r} ${r} 0 0 0 ${x - r} ${y} Z`;
       });
+  }
+
+  chart.xScale = function (_) {
+    if (!arguments.length) return xScale;
+    xScale = _;
+    return chart;
+  };
+  chart.yScale = function (_) {
+    if (!arguments.length) return yScale;
+    yScale = _;
+    return chart;
+  };
+  return chart;
+}
+
+export function drawDaylightingControlGuideline() {
+  let
+    xScale = _.identity,
+    yScale = _.identity;
+  function chart(selection) {
+    selection.exit().remove();
+    selection
+      .merge(selection.enter().append('text').attr('class', 'daylighting-control-guideline'))
+      .attr('x', d => xScale(d.start.x))
+      .attr('y', d => yScale(d.start.y))
+      .text('gonna put a daylighting control here');
   }
 
   chart.xScale = function (_) {

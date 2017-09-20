@@ -26,7 +26,7 @@ import geometryHelpers from './../../store/modules/geometry/helpers';
 import modelHelpers from './../../store/modules/models/helpers';
 import applicationHelpers from './../../store/modules/application/helpers';
 import { ResizeEvents } from '../../components/Resize';
-import { drawWindow, drawDaylightingControl } from './drawing';
+import { drawWindow, drawDaylightingControl, drawWindowGuideline, drawDaylightingControlGuideline } from './drawing';
 import { expandWindowAlongEdge, windowLocation } from './snapping';
 
 const d3 = require('d3');
@@ -34,6 +34,10 @@ const d3 = require('d3');
 export default {
   name: 'grid',
   data() {
+    const
+      xScale = v => this.rwuToGrid(v, 'x'),
+      yScale = v => this.rwuToGrid(v, 'y');
+
     return {
       points: [], // points for the face currently being drawn
       axis: {
@@ -46,11 +50,17 @@ export default {
       },
       handleMouseMove: null, // placeholder --> overwritten in mounted()
       drawWindow: drawWindow()
-        .xScale(v => this.rwuToGrid(v, 'x'))
-        .yScale(v => this.rwuToGrid(v, 'y')),
+        .xScale(xScale)
+        .yScale(yScale),
+      drawWindowGuideline: drawWindowGuideline()
+        .xScale(xScale)
+        .yScale(yScale),
       drawDC: drawDaylightingControl()
-        .xScale(v => this.rwuToGrid(v, 'x'))
-        .yScale(v => this.rwuToGrid(v, 'y')),
+        .xScale(xScale)
+        .yScale(yScale),
+      drawDCGuideline: drawDaylightingControlGuideline()
+        .xScale(xScale)
+        .yScale(yScale),
     };
   },
   mounted() {

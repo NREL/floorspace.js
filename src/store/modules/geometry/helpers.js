@@ -27,6 +27,22 @@ export function haveSimilarAngles(edge1, edge2) {
   return correctedDiff < 0.05 * Math.PI;
 }
 
+export function unitPerpVector(p1, p2) {
+  let dx, dy;
+  if (p1.y === p2.y) {
+    dy = 1;
+    dx = ((p1.y - p2.y)) / (p1.x - p2.x);
+  } else {
+    dx = 1;
+    dy = ((p1.x - p2.x)) / (p1.y - p2.y);
+  }
+  const normalization = Math.sqrt((dx * dx) + (dy * dy));
+  return {
+    dx: dx / normalization,
+    dy: dy / normalization,
+  };
+}
+
 
 /*
  * given a point and a line (object with two points p1 and p2)

@@ -177,7 +177,7 @@ export default {
   },
 
   clearHighlights() {
-    d3.selectAll('#grid .highlight, #grid .gridpoint').remove();
+    d3.selectAll('#grid .highlight, #grid .gridpoint, #grid .guideline').remove();
   },
 
 
@@ -204,6 +204,13 @@ export default {
       .selectAll('.window')
       .data([loc])
       .call(this.drawWindow.highlight(true));
+
+    d3.select('#grid svg')
+      .append('g')
+      .classed('guideline', true)
+      .selectAll('.window-guideline')
+      .data([loc])
+      .call(this.drawWindowGuideline);
   },
   highlightDaylightingControl(gridPoint) {
     const
@@ -219,6 +226,13 @@ export default {
       .selectAll('.daylighting-control')
       .data([loc])
       .call(this.drawDC);
+
+    d3.select('#grid svg')
+      .append('g')
+      .classed('guideline', true)
+      .selectAll('.daylighting-control-guideline')
+      .data([loc])
+      .call(this.drawDCGuideline);
   },
 
   /*

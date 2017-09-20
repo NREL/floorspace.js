@@ -35,13 +35,15 @@ export function expandWindowAlongEdge(edge, center, windowWidth) {
   const
     theta = edgeDirection({ start: edge.v1, end: edge.v2 }),
     windowDeltaX = (windowWidth * Math.cos(theta)) / 2,
-    windowDeltaY = (windowWidth * Math.sin(theta)) / 2;
+    windowDeltaY = (windowWidth * Math.sin(theta)) / 2,
+    alpha = edge.v2.x === edge.v1.x ?
+      (center.y - edge.v1.y) / (edge.v2.y - edge.v1.y) :
+      (center.x - edge.v1.x) / (edge.v2.x - edge.v1.x);
   return {
     edge_id: edge.id,
     center,
-    alpha: edge.v2.x === edge.v1.x ?
-      (center.y - edge.v1.y) / (edge.v2.y - edge.v1.y) :
-      (center.x - edge.v1.x) / (edge.v2.x - edge.v1.x),
+    edge_start: alpha < 0.5 ? edge.v1 : edge.v2,
+    alpha,
     start: {
       x: center.x - windowDeltaX,
       y: center.y - windowDeltaY,
