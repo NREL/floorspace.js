@@ -58,8 +58,6 @@ export default {
       alpha: loc.alpha,
     };
     this.$store.dispatch('models/createWindow', payload);
-
-    window.eventBus.$emit('success', `Window created at (${loc.center.x}, ${loc.center.y})`);
   },
   placeDaylightingControl() {
     const
@@ -81,7 +79,6 @@ export default {
       ...loc,
     };
     this.$store.dispatch('models/createDaylightingControl', payload);
-    window.eventBus.$emit('success', `Daylighting control created at (${loc.x}, ${loc.y})`);
   },
   /*
   * If the grid is clicked when a drawing tool or the eraser tool is active, add a point to the component
