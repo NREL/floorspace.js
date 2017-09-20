@@ -100,8 +100,11 @@ export function snapWindowToEdge(snapMode, ...args) {
   return snapWindowToEdgeAnywhere(...args);
 }
 
-export function snapToVertexWithinFace(faces, cursor, gridSpacing) {
-  return _.chain(snapTargets([], gridSpacing, cursor))
+export function snapToVertexWithinFace(snapMode, faces, cursor, gridSpacing) {
+  const existingVerts = snapMode === 'grid-strict' ? [] : [cursor];
+  // We'll pretend `cursor` is an existing vert when we're not in strict snapping mode.
+  // That way, we will suggest the exact location of the cursor.
+  return _.chain(snapTargets(existingVerts, gridSpacing, cursor))
     .map(g => ({
       ...g,
       face_id: _.find(faces, f => vertInRing(g, f.vertices)),

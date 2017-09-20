@@ -69,6 +69,7 @@ export default {
         y: this.gridToRWU(gridPoint.y, 'y'),
       },
       loc = snapToVertexWithinFace(
+        this.snapMode,
         this.denormalizedGeometry.faces, rwuPoint, this.spacing);
 
     if (!loc) { return; }
@@ -218,6 +219,7 @@ export default {
     const
       rwuPoint = this.gridPointToRWU(gridPoint),
       loc = snapToVertexWithinFace(
+        this.snapMode,
         this.denormalizedGeometry.faces, rwuPoint,
         this.spacing,
       );
