@@ -23,5 +23,6 @@ module.exports = {
     'one-var-declaration-per-line': 0,
     'no-nested-ternary': 0,
     'camelcase': 0, // We have tons of camelcase identifiers, because the spec calls for it
+    'func-names': 0, // not every anonymous function should be an arrow func.
   }
 };

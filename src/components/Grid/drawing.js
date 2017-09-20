@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import 'd3-selection-multi';
 import { distanceBetweenPoints, unitPerpVector } from './../../store/modules/geometry/helpers';
 
 export function drawWindow() {
@@ -78,8 +77,23 @@ export function drawWindowGuideline() {
       .attr('y1', d => yScale(d.edge_start.y))
       .attr('x2', d => xScale(d.center.x))
       .attr('y2', d => yScale(d.center.y))
+      .attr('marker-start', 'url(#red-arrowhead-left)')
+      .attr('marker-end', 'url(#red-arrowhead-right)')
       .attr('stroke-width', 2)
-      .attr('stroke', 'red');
+      .attr('stroke', '#ff0000')
+      .attr('stroke-dasharray', (d) => {
+        const
+          pxStart = {
+            x: xScale(d.edge_start.x),
+            y: yScale(d.edge_start.y),
+          },
+          pxCenter = {
+            x: xScale(d.center.x),
+            y: yScale(d.center.y),
+          },
+          pxDist = distanceBetweenPoints(pxStart, pxCenter);
+        return `0, 11.5, ${pxDist - 23}, 11.5`;
+      });
   }
 
   chart.xScale = function (_) {
