@@ -1,3 +1,4 @@
+import 'd3-selection-multi';
 import _ from 'lodash';
 import { distanceBetweenPoints, unitPerpVector } from './../../store/modules/geometry/helpers';
 
@@ -66,6 +67,16 @@ export function drawWindowGuideline() {
       .attr('x', d => xScale(d.center.x))
       .attr('y', d => yScale(d.center.y))
       .attr('fill', 'red')
+      .attr('dominant-baseline', 'text-before-edge')
+      .attrs((d) => {
+        const
+          { dx, dy } = unitPerpVector(d.edge_start, d.center),
+          offset = 4;
+        return {
+          dx: dx * offset,
+          dy: dy * offset,
+        };
+      })
       .text((d) => {
         const
           distance = distanceBetweenPoints(d.edge_start, d.center),
