@@ -104,9 +104,14 @@ function distanceMeasure() {
     const
       arrowHead = 'M -6,-2 V 2 L0,0 Z',
       rotate = (d) => {
-        const { dx, dy } = unitVector(d.start, d.end);
-        return (Math.atan(dy / dx) * 180) / Math.PI;
-        // edgeDirection(d) * 180) / Math.PI
+        // did ya ever... did ya ever program by guess and check?
+        const
+          angle = (edgeDirection(d) * 180) / Math.PI,
+          adjust = d.start.x === d.end.x ?
+                    (d.start.y > d.end.y ? 0 : 180) :
+                    (d.start.x > d.end.x ? 0 : 180);
+
+        return adjust - angle;
       };
 
     measure.select('path.start')
