@@ -150,4 +150,20 @@
         }
       }
     }
+    .daylighting-control-guideline {
+      .distance-measure {
+        stroke-opacity: 1;
+        fill-opacity: 1;
+        fill: none;
+        stroke: blue;
+        line {
+          stroke-width: 2;
+          stroke-dasharray: 1 2;
+        }
+        path.start, path.end {
+          stroke: inherit;
+          stroke-width: 0.5;
+        }
+      }
+    }
 }

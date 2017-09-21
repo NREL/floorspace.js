@@ -48,16 +48,16 @@ export function drawWindow() {
 function distanceMeasure() {
   let
     xScale = _.identity,
-    yScale = _.identity;
+    yScale = _.identity,
+    lineOffset = 20;
   function chart(selection) {
     selection.exit().remove();
     const measureE = selection.enter().append('g')
       .attr('class', 'distance-measure')
       .attr('transform', (d) => {
         const { dx, dy } = unitPerpVector(d.start, d.end),
-          offset = 20,
-          offX = offset * dx,
-          offY = offset * dy;
+          offX = lineOffset * dx,
+          offY = lineOffset * dy;
         return `translate(${offX}, ${offY})`;
       });
     measureE.append('line');
@@ -132,6 +132,11 @@ function distanceMeasure() {
   chart.yScale = function (_) {
     if (!arguments.length) return yScale;
     yScale = _;
+    return chart;
+  };
+  chart.lineOffset = function(_) {
+    if (!arguments.length) return lineOffset;
+    lineOffset = _;
     return chart;
   };
 
@@ -210,7 +215,8 @@ export function drawDaylightingControlGuideline() {
   let
     xScale = _.identity,
     yScale = _.identity;
-  const drawMeasure = distanceMeasure();
+  const drawMeasure = distanceMeasure()
+    .lineOffset(0);
   function chart(selection) {
     drawMeasure.xScale(xScale).yScale(yScale);
     selection.exit().remove();
