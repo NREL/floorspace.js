@@ -194,62 +194,24 @@ export function drawDaylightingControlGuideline() {
   let
     xScale = _.identity,
     yScale = _.identity;
+  const drawMeasure = distanceMeasure();
   function chart(selection) {
+    drawMeasure.xScale(xScale).yScale(yScale);
     selection.exit().remove();
-    const labelE = selection.enter().append('g')
-        .attr('class', 'daylighting-control-guideline')
-        .attr('transform', (d) => {
-          const { dx, dy } = unitPerpVector(d.edge_start, d.center),
-            offset = 20,
-            offX = offset * dx,
-            offY = offset * dy;
-          return `translate(${offX}, ${offY})`;
-        });
-    labelE.append('line');
-    labelE.append('text');
-    const label = selection.merge(labelE);
-    label.select('text')
-      .attr('x', d => xScale(d.center.x))
-      .attr('y', d => yScale(d.center.y))
-      .attr('fill', 'red')
-      .attr('dominant-baseline', 'text-before-edge')
-      .attrs((d) => {
-        const
-          { dx, dy } = unitPerpVector(d.edge_start, d.center),
-          offset = 4;
-        return {
-          dx: dx * offset,
-          dy: dy * offset,
-        };
-      })
-      .text((d) => {
-        const
-          distance = distanceBetweenPoints(d.edge_start, d.center),
-          roundDistance = Math.round(distance * 100) / 100;
-        return `${roundDistance}`;
-      });
-    label.select('line')
-      .attr('x1', d => xScale(d.edge_start.x))
-      .attr('y1', d => yScale(d.edge_start.y))
-      .attr('x2', d => xScale(d.center.x))
-      .attr('y2', d => yScale(d.center.y))
-      .attr('marker-start', 'url(#red-arrowhead-left)')
-      .attr('marker-end', 'url(#red-arrowhead-right)')
-      .attr('stroke-width', 2)
-      .attr('stroke', '#ff0000')
-      .attr('stroke-dasharray', (d) => {
-        const
-          pxStart = {
-            x: xScale(d.edge_start.x),
-            y: yScale(d.edge_start.y),
-          },
-          pxCenter = {
-            x: xScale(d.center.x),
-            y: yScale(d.center.y),
-          },
-          pxDist = distanceBetweenPoints(pxStart, pxCenter);
-        return `0, 11.5, ${pxDist - 23}, 11.5`;
-      });
+    const guideE = selection.enter().append('g')
+      .classed('daylighting-control-guideline', true);
+
+    const data = _.flatMap(
+      selection.merge(selection.enter()).data(),
+      d => (
+        [
+          { start: d.loc, end: d.nearestEdge.proj },
+        ]));
+    const guide = selection.merge(guideE);
+    guide
+      .selectAll('.distance-measure')
+      .data(data)
+      .call(drawMeasure);
   }
 
   chart.xScale = function (_) {
