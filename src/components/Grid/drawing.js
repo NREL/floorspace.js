@@ -1,6 +1,6 @@
 import 'd3-selection-multi';
 import _ from 'lodash';
-import { distanceBetweenPoints, unitPerpVector } from './../../store/modules/geometry/helpers';
+import { distanceBetweenPoints, unitPerpVector, unitVector, edgeDirection } from './../../store/modules/geometry/helpers';
 
 export function drawWindow() {
   let
@@ -62,6 +62,8 @@ function distanceMeasure() {
       });
     measureE.append('line');
     measureE.append('text');
+    measureE.append('path').attr('class', 'start');
+    measureE.append('path').attr('class', 'end');
 
     const measure = selection.merge(measureE);
 
@@ -86,27 +88,36 @@ function distanceMeasure() {
         return `${roundDistance}`;
       });
     measure.select('line')
-      .attr('x1', d => xScale(d.start.x))
-      .attr('y1', d => yScale(d.start.y))
-      .attr('x2', d => xScale(d.end.x))
-      .attr('y2', d => yScale(d.end.y))
-      .attr('marker-start', 'url(#red-arrowhead-left)')
-      .attr('marker-end', 'url(#red-arrowhead-right)')
-      .attr('stroke-width', 2)
-      .attr('stroke', '#ff0000')
-      .attr('stroke-dasharray', (d) => {
-        const
-          pxStart = {
-            x: xScale(d.start.x),
-            y: yScale(d.start.y),
-          },
-          pxCenter = {
-            x: xScale(d.end.x),
-            y: yScale(d.end.y),
-          },
-          pxDist = distanceBetweenPoints(pxStart, pxCenter);
-        return `0, 11.5, ${pxDist - 23}, 11.5`;
+      .attrs((d) => {
+        const { dx, dy } = unitVector(d.start, d.end),
+          offset = 11.5,
+          offX = dx * offset,
+          offY = dy * offset;
+
+        return {
+          x1: xScale(d.start.x) + offX,
+          y1: yScale(d.start.y) - offY,
+          x2: xScale(d.end.x) - offX,
+          y2: yScale(d.end.y) + offY,
+        };
       });
+    const
+      arrowHead = 'M -6,-2 V 2 L0,0 Z',
+      rotate = (d) => {
+        const { dx, dy } = unitVector(d.start, d.end);
+        return (Math.atan(dy / dx) * 180) / Math.PI;
+        // edgeDirection(d) * 180) / Math.PI
+      };
+
+    measure.select('path.start')
+      .attr('transform',
+        d => `translate(${xScale(d.start.x)}, ${yScale(d.start.y)}) scale(2) rotate(${rotate(d)})`)
+      .attr('d', arrowHead);
+
+    measure.select('path.end')
+      .attr('transform',
+        d => `translate(${xScale(d.end.x)}, ${yScale(d.end.y)}) scale(2) rotate(${180 + rotate(d)})`)
+      .attr('d', arrowHead);
   }
   chart.xScale = function (_) {
     if (!arguments.length) return xScale;

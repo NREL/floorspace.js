@@ -136,4 +136,18 @@
         }
       }
     }
+    .window-guideline {
+      .distance-measure {
+        stroke-opacity: 1;
+        fill-opacity: 1;
+        stroke: red;
+        fill: red;
+        line {
+          stroke-width: 2;
+        }
+        path {
+          stroke-width: 0;
+        }
+      }
+    }
 }

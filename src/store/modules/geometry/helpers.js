@@ -26,7 +26,13 @@ export function haveSimilarAngles(edge1, edge2) {
     );
   return correctedDiff < 0.05 * Math.PI;
 }
-
+function normalize({ dx, dy }) {
+  const normalization = Math.sqrt((dx * dx) + (dy * dy));
+  return {
+    dx: dx / normalization,
+    dy: dy / normalization,
+  };
+}
 export function unitPerpVector(p1, p2) {
   let dx, dy;
   if (p1.x !== p2.x) {
@@ -38,11 +44,14 @@ export function unitPerpVector(p1, p2) {
   } else {
     dx = dy = 1;
   }
-  const normalization = Math.sqrt((dx * dx) + (dy * dy));
-  return {
-    dx: dx / normalization,
-    dy: dy / normalization,
-  };
+  return normalize({ dx, dy });
+}
+
+export function unitVector(p1, p2) {
+  const
+    dx = p2.x - p1.x,
+    dy = p2.y - p1.y;
+  return normalize({ dx, dy });
 }
 
 
