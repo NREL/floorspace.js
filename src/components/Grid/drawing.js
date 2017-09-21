@@ -225,10 +225,25 @@ export function drawDaylightingControlGuideline() {
 
     const data = _.flatMap(
       selection.merge(selection.enter()).data(),
-      d => (
-        [
-          { start: d.loc, end: d.nearestEdge.proj },
-        ]));
+      (d) => {
+        const
+          dir = unitVector(d.nearestEdge.v1, d.nearestEdge.v2),
+          v = { start: d.loc, end: d.nearestEdge.proj },
+          parallel = {
+            start: v.end,
+            end: {
+              x: v.start.x + ((v.end.x - v.start.x) * dir.dx),
+              y: v.start.y + ((v.end.y - v.start.y) * dir.dy),
+            },
+          },
+          perp = {
+            start: v.start,
+            end: parallel.end,
+          };
+
+        const retval = [v, parallel, perp];
+        return retval;
+      });
     const guide = selection.merge(guideE);
     guide
       .selectAll('.distance-measure')
