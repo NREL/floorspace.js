@@ -1,5 +1,9 @@
+import _ from 'lodash';
+import libconfig from './libconfig';
 import factory from './factory';
+import geometryFactory from '../geometry/factory';
 import helpers from './helpers';
+import geometryHelpers from '../geometry/helpers';
 
 export default {
   initStory(context) {
@@ -12,7 +16,7 @@ export default {
       context.dispatch('geometry/initGeometry', { story_id: story.id }, { root: true });
       // create space and select
       context.dispatch('initSpace', { story });
-      context.dispatch('selectStoryAndSpace', { story });
+      context.dispatch('selectStory', { story });
     },
 
     initSpace (context, payload) {
@@ -41,7 +45,7 @@ export default {
       if (stories.length === 0) {
         context.dispatch('initStory');
       } else {
-        context.dispatch('selectStoryAndSpace', { story: stories[storyIndex - 1] });
+        context.dispatch('selectStory', { story: stories[storyIndex - 1] });
       }
     },
 
@@ -101,7 +105,7 @@ export default {
 
     updateStoryWithData (context, payload) {
         const story = context.state.stories.find(s => s.id === payload.story.id),
-            validProperties = Object.keys(story),
+            validProperties = Object.keys(libconfig.stories.keymap),
             cleanedPayload = {};
 
         // remove extra properties from the payload
@@ -177,22 +181,17 @@ export default {
   createImageForStory(context, payload) {
     const story = context.state.stories.find(s => s.id === payload.story_id);
     const name = helpers.generateName(context.state, 'images', story);
-    const img = new Image();
+    const image = new factory.Image(name, payload.src);
 
-    img.onload = () => {
-      const image = new factory.Image(name, payload.src);
+    image.height = payload.height;
+    image.width = payload.width;
+    image.x = payload.x;
+    image.y = payload.y;
 
-      image.height = payload.height;
-      image.width = payload.width;
-      image.x = payload.x;
-      image.y = payload.y;
-
-      context.commit('createImageForStory', {
-        story_id: story.id,
-        image,
-      });
-    };
-    img.src = payload.src;
+    context.commit('createImageForStory', {
+      story_id: story.id,
+      image,
+    });
   },
 
     createObjectWithType (context, payload) {
@@ -203,15 +202,61 @@ export default {
         context.commit('initObject', { type, object });
     },
 
-    selectStoryAndSpace (context, payload) {
-        const story = payload.story,
-            // select last space
-            space = story.spaces[story.spaces.length - 1];
+  selectStory(context, payload) {
+    const story = payload.story;
+    context.dispatch('application/setCurrentStoryId', { id: story.id }, { root: true });
+  },
 
-
-        context.dispatch('application/setCurrentStoryId', { id: story.id }, { root: true });
-
-        context.dispatch('application/setCurrentSubSelectionId', { id: space.id }, { root: true });
-        context.dispatch('application/setCurrentMode', { mode: 'spaces' }, { root: true });
+  createWindow(context, payload) {
+    const
+      { story_id, edge_id, window_defn_id, alpha } = payload,
+      story = _.find(context.state.stories, { id: story_id }),
+      windowDefn = _.find(context.state.library.window_definitions, { id: window_defn_id }),
+      geometry = story && _.find(context.rootState.geometry, { id: story.geometry_id }),
+      edge = geometry && _.find(geometry.edges, { id: edge_id });
+    if (!story) {
+      throw new Error('Story not found');
+    } else if (!windowDefn) {
+      throw new Error('Window Definition not found');
+    } else if (!geometry) {
+      throw new Error('Geometry not found');
+    } else if (!edge) {
+      throw new Error('Edge not found');
+    } else if (alpha < 0 || alpha > 1) {
+      throw new Error('Alpha must be between 0 and 1');
     }
-}
+    context.commit('createWindow', payload);
+  },
+
+  createDaylightingControl(context, payload) {
+    const
+      { story_id, face_id, daylighting_control_defn_id, x, y } = payload,
+      story = _.find(context.state.stories, { id: story_id }),
+      daylightingDefn = _.find(context.state.library.daylighting_control_definitions, { id: daylighting_control_defn_id }),
+      geometry = story && _.find(context.rootState.geometry, { id: story.geometry_id }),
+      face = geometry && _.find(geometry.faces, { id: face_id }),
+      vertex = geometry && (
+        geometryHelpers.vertexForCoordinates({ x, y }, geometry) || geometryFactory.Vertex(x, y));
+    if (!story) {
+      throw new Error('Story not found');
+    } else if (!daylightingDefn) {
+      throw new Error('Window Definition not found');
+    } else if (!geometry) {
+      throw new Error('Geometry not found');
+    } else if (!face) {
+      throw new Error('Face not found');
+    } else if (!vertex.id) {
+      throw new Error('Unable to find or create vertex');
+    }
+    context.commit('geometry/ensureVertsExist', { geometry_id: geometry.id, vertices: [vertex] }, { root: true });
+    context.commit('createDaylightingControl', { ...payload, vertex_id: vertex.id });
+  },
+
+  destroyAllComponents(context, { face_id, story_id }) {
+    if (!face_id || !story_id) {
+      return;
+    }
+    context.commit('dropDaylightingControls', { face_id, story_id });
+    context.commit('dropWindows', { story_id });
+  },
+};

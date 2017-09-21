@@ -1,70 +1,168 @@
-import ClipperLib from 'js-clipper'
+import _ from 'lodash';
+import ClipperLib from 'js-clipper';
+import { dropConsecutiveDups } from '../../../utilities';
+
+export function distanceBetweenPoints(p1, p2) {
+  const
+    dx = Math.abs(p1.x - p2.x),
+    dy = Math.abs(p1.y - p2.y);
+  return Math.sqrt((dx * dx) + (dy * dy));
+}
+
+export function edgeDirection({ start, end }) {
+  // return the angle from east, in radians.
+  const
+    deltaX = end.x - start.x,
+    deltaY = end.y - start.y;
+  return deltaX === 0 ? 0.5 * Math.PI : Math.atan(deltaY / deltaX);
+}
+
+export function haveSimilarAngles(edge1, edge2) {
+  const
+    angleDiff = edgeDirection(edge1) - edgeDirection(edge2),
+    correctedDiff = Math.min(
+      Math.abs(angleDiff),
+      Math.PI - angleDiff, // To catch angles that are very similar, but opposite directions
+    );
+  return correctedDiff < 0.05 * Math.PI;
+}
+
+
+/*
+ * given a point and a line (object with two points p1 and p2)
+ * return the coordinates of the projection of the point onto the line
+ */
+export function projectionOfPointToLine(point, line) {
+  const { p1: { x: x1, y: y1 }, p2: { x: x2, y: y2 } } = line;
+  const
+    A = point.x - x1,
+    B = point.y - y1,
+    C = x2 - x1,
+    D = y2 - y1,
+    dot = (A * C) + (B * D),
+    lenSq = (C * C) + (D * D) || 2,
+    param = dot / lenSq;
+
+  // projection is an endpoint
+  if (param <= 0) {
+    return line.p1;
+  } else if (param > 1) {
+    return line.p2;
+  }
+
+  return {
+    x: x1 + (param * C),
+    y: y1 + (param * D),
+  };
+}
+
+export function pointDistanceToSegment(pt, { start, end }) {
+  const proj = projectionOfPointToLine(pt, { p1: start, p2: end });
+  return {
+    dist: distanceBetweenPoints(pt, proj),
+    proj,
+  };
+}
+
+export function ptsAreCollinear(p1, p2, p3) {
+  const
+    [a, b] = [p1.x, p1.y],
+    [m, n] = [p2.x, p2.y],
+    { x, y } = p3;
+  return Math.abs(((n - b) * (x - m)) - ((y - n) * (m - a))) < 0.00001;
+}
+
 
 const helpers = {
-    // ************************************ CLIPPER ************************************ //
-	// scaling - see https://sourceforge.net/p/jsclipper/wiki/documentation/#clipperlibclipperoffsetexecute
-    clipScale: 100,
-	// prevent floating point inaccuracies by expanding faces by the offset before performing a clip operation, and then scaling the result back down
-	// https://sourceforge.net/p/jsclipper/wiki/documentation/#clipperoffset
-	offset: 0.01,
+  // ************************************ CLIPPER ************************************ //
+  // scaling - see https://sourceforge.net/p/jsclipper/wiki/documentation/#clipperlibclipperoffsetexecute
+  clipScale: 100,
+  // prevent floating point inaccuracies by expanding faces by the offset before performing a clip operation, and then scaling the result back down
+  // https://sourceforge.net/p/jsclipper/wiki/documentation/#clipperoffset
+  offset: 0.01,
 
-	/*
-	* given two sets of points defining two faces
-	* perform the specified operation (intersection, difference, union), return the resulting set of points
-	* return false if the result contains multiple faces (a face was divided in two during the operation)
-	*/
-	setOperation (type, f1Points, f2Points) {
-		// translate points for each face into a clipper path
-		const f1Path = f1Points.map(p => ({ X: p.x, Y: p.y })),
-        	f2Path = f2Points.map(p => ({ X: p.x, Y: p.y }));
+  /*
+  * given two sets of points defining two faces
+  * perform the specified operation (intersection, difference, union), return the resulting set of points
+  * return false if the result contains multiple faces (a face was divided in two during the operation)
+  */
+  setOperation(type, f1Points, f2Points) {
+    // translate points for each face into a clipper path
+    const
+      f1Path = f1Points.map(p => ({ X: p.x, Y: p.y })),
+      f2Path = f2Points.map(p => ({ X: p.x, Y: p.y }));
 
-		// offset both paths prior to executing clipper operation to acount for tiny floating point inaccuracies
-		const offset = new ClipperLib.ClipperOffset(),
-			f1PathsOffsetted = new ClipperLib.Paths(),
-			f2PathsOffsetted = new ClipperLib.Paths();
+    // offset both paths prior to executing clipper operation to acount for tiny floating point inaccuracies
+    const offset = new ClipperLib.ClipperOffset(),
+      f1PathsOffsetted = new ClipperLib.Paths(),
+      f2PathsOffsetted = new ClipperLib.Paths();
 
-		offset.AddPaths([f1Path], ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
-		offset.Execute(f1PathsOffsetted, this.offset);
-		offset.Clear();
-		offset.AddPaths([f2Path], ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
-		offset.Execute(f2PathsOffsetted, this.offset);
-		offset.Clear();
+    offset.AddPaths([f1Path], ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
+    offset.Execute(f1PathsOffsetted, this.offset);
+    offset.Clear();
+    offset.AddPaths([f2Path], ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
+    offset.Execute(f2PathsOffsetted, this.offset);
+    offset.Clear();
 
-		// scale paths up before performing operation
-		ClipperLib.JS.ScaleUpPaths(f1PathsOffsetted, this.clipScale);
-		ClipperLib.JS.ScaleUpPaths(f2PathsOffsetted, this.clipScale);
+    // scale paths up before performing operation
+    ClipperLib.JS.ScaleUpPaths(f1PathsOffsetted, this.clipScale);
+    ClipperLib.JS.ScaleUpPaths(f2PathsOffsetted, this.clipScale);
 
-		const cpr = new ClipperLib.Clipper(),
-			resultPathsOffsetted = new ClipperLib.Paths();
+    const
+      cpr = new ClipperLib.Clipper(),
+      resultPathsOffsetted = new ClipperLib.Paths();
 
-        cpr.AddPaths(f1PathsOffsetted, ClipperLib.PolyType.ptSubject, true);
-        cpr.AddPaths(f2PathsOffsetted, ClipperLib.PolyType.ptClip, true);
+    cpr.AddPaths(f1PathsOffsetted, ClipperLib.PolyType.ptSubject, true);
+    cpr.AddPaths(f2PathsOffsetted, ClipperLib.PolyType.ptClip, true);
 
-		var operation;
-		if (type === 'union') { operation = ClipperLib.ClipType.ctUnion; }
-		else if (type === 'intersection') { operation = ClipperLib.ClipType.ctIntersection; }
-		else if (type === 'difference') { operation = ClipperLib.ClipType.ctDifference; }
+    const operation =
+      type === 'union' ? ClipperLib.ClipType.ctUnion :
+      type === 'intersection' ? ClipperLib.ClipType.ctIntersection :
+      type === 'difference' ? ClipperLib.ClipType.ctDifference :
+      null;
+    if (operation === null) {
+      throw new Error(`invalid operation "${type}". expected union, intersection, or difference`);
+    }
 
-        cpr.Execute(operation, resultPathsOffsetted, ClipperLib.PolyFillType.pftEvenOdd, ClipperLib.PolyFillType.pftEvenOdd);
+    cpr.Execute(operation, resultPathsOffsetted, ClipperLib.PolyFillType.pftEvenOdd, ClipperLib.PolyFillType.pftEvenOdd);
 
-		// scale down path
-		ClipperLib.JS.ScaleDownPaths(resultPathsOffsetted, this.clipScale);
+    // scale down path
+    ClipperLib.JS.ScaleDownPaths(resultPathsOffsetted, this.clipScale);
 
-		// undo offset on resulting path
-		const resultPaths = new ClipperLib.Paths();
-		offset.AddPaths(resultPathsOffsetted, ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
-		offset.Execute(resultPaths, -this.offset);
+    // undo offset on resulting path
+    const resultPaths = new ClipperLib.Paths();
+    offset.AddPaths(resultPathsOffsetted, ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
+    offset.Execute(resultPaths, -this.offset);
 
-		// if multiple paths were created, a face has been split and the operation should fail
-        if (resultPaths.length === 1) {
-			// translate into points
-			return resultPaths[0].map(p => ({ x: p.X, y: p.Y }));
-        } else if (resultPaths.length === 0) {
-        	return [];
-        } else if (resultPaths.length > 1) {
-			return false;
-        }
-	},
+    // if multiple paths were created, a face has been split and the operation should fail
+    if (resultPaths.length === 1) {
+      // translate into points
+      return resultPaths[0].map(p => ({ x: p.X, y: p.Y }));
+    } else if (resultPaths.length === 0) {
+      return [];
+    }
+    return {
+      error: helpers.clipperPolygonHasHoles(resultPaths) ? 'no holes' : 'no split faces',
+    };
+  },
+
+  clipperPolygonHasHoles(poly) {
+    const
+      outerRing = poly[0].map(r => [r.X, r.Y]),
+      ptFromNextRing = [poly[1][0].X, poly[1][0].Y];
+    // nextRing is either entirely within, or entirely without outerRing.
+    return helpers.inRing(ptFromNextRing, outerRing);
+  },
+  // convenience functions for setOperation
+  intersection(f1, f2) {
+    return this.setOperation('intersection', f1, f2);
+  },
+  union(f1, f2) {
+    return this.setOperation('union', f1, f2);
+  },
+  difference(f1, f2) {
+    return this.setOperation('difference', f1, f2);
+  },
 
     // given an array of points return the area of the space they enclose
     areaOfSelection(points) {
@@ -97,51 +195,12 @@ const helpers = {
         });
     },
 
-    /*
-     * given a point and a line (object with two points p1 and p2)
-     * return the coordinates of the projection of the point onto the line
-     */
-    projectionOfPointToLine(point, line) {
-        const {
-            p1: {
-                x: x1,
-                y: y1
-            },
-            p2: {
-                x: x2,
-                y: y2
-            }
-        } = line;
-
-        const A = point.x - x1,
-            B = point.y - y1,
-            C = x2 - x1,
-            D = y2 - y1,
-            dot = A * C + B * D,
-            lenSq = (C * C + D * D) || 2,
-            param = dot / lenSq;
-
-        // projection is an endpoint
-        if (param <= 0) {
-            return line.p1;
-        } else if (param > 1) {
-            return line.p2;
-        }
-
-        return {
-            x: x1 + param * C,
-            y: y1 + param * D
-        };
-    },
+    projectionOfPointToLine,
 
     /*
      * given two points return the distance between them
      */
-    distanceBetweenPoints(p1, p2) {
-        const dx = Math.abs(p1.x - p2.x),
-            dy = Math.abs(p1.y - p2.y);
-        return Math.sqrt((dx * dx) + (dy * dy));
-    },
+  distanceBetweenPoints,
 
 	intersectionOfLines(p1, p2, p3, p4) {
 	    var eps = 0.0000001;
@@ -215,11 +274,8 @@ const helpers = {
     },
 
     // given a set of coordinates, find the vertex on the geometry set within their tolerance zone
-  vertexForCoordinates(coordinates, snapTolerance, geometry) {
-    // const { x, y } = coordinates;
-    // return geometry.vertices.find(v => v.x === x && v.y === y);
-    // TODO once PR#118 is merged, put this back
-    return geometry.vertices.find(v => this.distanceBetweenPoints(v, coordinates) < snapTolerance)
+  vertexForCoordinates(coordinates, geometry) {
+    return geometry.vertices.find(v => this.distanceBetweenPoints(v, coordinates) < 0.00001)
   },
 
     // given a face id, returns the populated vertex objects reference by edges on that face
@@ -271,13 +327,13 @@ const helpers = {
         return geometry.faces.filter(face => face.edgeRefs.find(eR => eR.edge_id === edge_id));
     },
 
-    ptsAreCollinear(p1, p2, p3) {
-      const [a, b] = [p1.x, p1.y],
-        [m, n] = [p2.x, p2.y],
-        {x, y} = p3;
-      return Math.abs((n - b) * (x - m) - (y - n) * (m - a)) < 0.00001;
+    pointInFace(point, faceVertices) {
+      const facePoints = faceVertices.map(p => ({ X: p.x, Y: p.y }));
+      const testPoint = { X: point.x, Y: point.y };
+      return !!ClipperLib.Clipper.PointInPolygon(testPoint, facePoints);
     },
 
+  ptsAreCollinear,
   syntheticRectangleSnaps(points, rectStart, cursorPt) {
     // create synthetic snapping points by considering
     // points that are near to the corners we're not drawing.
@@ -316,9 +372,166 @@ const helpers = {
       ...points.map(({ x, y }) => (
         { y, x: x + (2 * (xMid - x)), synthetic: true, originalPt: { x, y } })),
       ...points.map(({ x, y }) => (
-        { x, y: y + (2 * (yMid - y)), synthetic: true, originalPt: { x, y } }))
+        { x, y: y + (2 * (yMid - y)), synthetic: true, originalPt: { x, y } })),
     ];
-  }
+  },
+  edgeDirection,
+  haveSimilarAngles,
+  pointDistanceToSegment,
+
+  exceptFace(geometry, face_id) {
+    if (!face_id) { return geometry; }
+    return {
+      ...geometry,
+      faces: _.reject(geometry.faces, { id: face_id }),
+    };
+  },
+
+  denormalize(geometry) {
+    const
+      edges = geometry.edges.map(edge => ({
+        ...edge,
+        v1: this.vertexForId(edge.v1, geometry),
+        v2: this.vertexForId(edge.v2, geometry),
+      })),
+      edgesById = _.zipObject(
+        _.map(edges, 'id'),
+        edges),
+      faces = geometry.faces.map(face => ({
+        id: face.id,
+        edges: face.edgeRefs.map(({ edge_id, reverse }) => ({
+          ...edgesById[edge_id],
+          edge_id,
+          reverse,
+        })),
+        get vertices() {
+          return dropConsecutiveDups(
+            _.flatMap(this.edges, e => (e.reverse ? [e.v2, e.v1] : [e.v1, e.v2])),
+            v => v.id);
+        },
+      }));
+    return {
+      ...geometry,
+      edges,
+      faces,
+    };
+  },
+
+  // probably best to use this only for testing
+  normalize(geometry) {
+    const
+      edges = _.uniqBy(
+        [
+          ...geometry.edges,
+          ..._.flatMap(geometry.faces, f => f.edges),
+        ], 'id'),
+      vertices = _.uniqBy(
+        [
+          ...geometry.vertices,
+          ..._.flatMap(edges, e => [e.v1, e.v2]),
+        ], 'id');
+    return {
+      id: geometry.id,
+      vertices: vertices.map(v => _.pick(v, ['id', 'x', 'y'])),
+      edges: edges.map(e => ({
+        id: e.id,
+        v1: e.v1.id,
+        v2: e.v2.id,
+      })),
+      faces: geometry.faces.map(f => ({
+        id: f.id,
+        edgeRefs: f.edges.map(er => ({ edge_id: er.id, reverse: er.reverse })),
+      })),
+    };
+  },
 };
+
+function isPointCoord(coord) {
+  return coord.length === 2 && _.isNumber(coord[0]) && _.isNumber(coord[1]);
+}
+
+function isRingCoords(coords) {
+  return coords.length >= 1 && _.every(coords, isPointCoord);
+}
+
+function isPolygonCoords(coords) {
+  return coords.length >= 1 && _.every(coords, isRingCoords);
+}
+
+// Many of the below geometry functions are copyright 2017 TurfJS, MIT License.
+
+// http://en.wikipedia.org/wiki/Even%E2%80%93odd_rule
+// modified from: https://github.com/Turfjs/turf/blob/master/packages/turf-inside/index.js
+// which was modified from https://github.com/substack/point-in-polygon/blob/master/index.js
+// which was modified from http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
+helpers.inside = function (pt, poly, ignoreBoundary = false) {
+  // validation
+  if (!isPointCoord(pt)) throw new Error(`point does not have correct coords: ${pt}`);
+  if (!isPolygonCoords(poly)) throw new Error(`polygon does not have correct coords: ${poly}`);
+
+  const bbox = helpers.bboxOfRing(poly[0]);
+
+  // Quick elimination if point is not inside bbox
+  if (bbox && helpers.inBBox(pt, bbox) === false) return false;
+
+  let insidePoly = false;
+  for (let i = 0; i < poly.length && !insidePoly; i++) {
+    // check if it is in the outer ring first
+    if (helpers.inRing(pt, poly[0], ignoreBoundary)) {
+      let inHole = false;
+      let k = 1;
+      // check for the point in any of the holes
+      while (k < poly.length && !inHole) {
+        if (helpers.inRing(pt, poly[k], !ignoreBoundary)) {
+          inHole = true;
+        }
+        k++;
+      }
+      if (!inHole) insidePoly = true;
+    }
+  }
+  return insidePoly;
+};
+
+helpers.bboxOfRing = function (ring) {
+  // a bbox is [west, south, east, north]
+  return [
+    _.min(_.map(ring, 0)),
+    _.min(_.map(ring, 1)),
+    _.max(_.map(ring, 0)),
+    _.max(_.map(ring, 1)),
+  ];
+};
+
+/**
+ * inRing
+ *
+ * @private
+ * @param {[number, number]} pt [x,y]
+ * @param {Array<[number, number]>} ring [[x,y], [x,y],..]
+ * @param {boolean} ignoreBoundary ignoreBoundary
+ * @returns {boolean} inRing
+ */
+helpers.inRing = function (pt, ring, ignoreBoundary) {
+  let isInside = false;
+  if (ring[0][0] === ring[ring.length - 1][0] && ring[0][1] === ring[ring.length - 1][1]) ring = ring.slice(0, ring.length - 1);
+
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i][0], yi = ring[i][1];
+    const xj = ring[j][0], yj = ring[j][1];
+    const onBoundary = (pt[1] * (xi - xj) + yi * (xj - pt[0]) + yj * (pt[0] - xi) === 0) &&
+      ((xi - pt[0]) * (xj - pt[0]) <= 0) && ((yi - pt[1]) * (yj - pt[1]) <= 0);
+    if (onBoundary) return !ignoreBoundary;
+    const intersect = ((yi > pt[1]) !== (yj > pt[1])) &&
+      (pt[0] < (xj - xi) * (pt[1] - yi) / (yj - yi) + xi);
+    if (intersect) isInside = !isInside;
+  }
+  return isInside;
+};
+
+export function vertInRing(vert, ring) {
+  const toLst = ({ x, y }) => [x, y];
+  return helpers.inRing(toLst(vert), ring.map(toLst));
+}
 
 export default helpers;

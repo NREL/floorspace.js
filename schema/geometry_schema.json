@@ -1,8 +1,12 @@
 {
 	"$schema": "http://json-schema.org/draft-04/schema#",
+	"version": "0.4.0",
 	"description": "Comment describing your JSON Schema",
 	"type": "object",
 	"properties": {
+		"version": {
+			"type": "string"
+		},
 		"application": {
 			"$ref": "#/definitions/Application"
 		},
@@ -39,16 +43,16 @@
 				"$ref": "#/definitions/ConstructionSet"
 			}
 		},
-		"windows": {
+		"window_definitions": {
 			"type": "array",
 			"items": {
-				"$ref": "#/definitions/Window"
+				"$ref": "#/definitions/WindowDefinition"
 			}
 		},
-		"daylighting_controls": {
+		"daylighting_control_definitions": {
 			"type": "array",
 			"items": {
-				"$ref": "#/definitions/DaylightingControl"
+				"$ref": "#/definitions/DaylightingControlDefinition"
 			}
 		},
 		"pitched_roofs": {
@@ -58,6 +62,16 @@
 			}
 		}
 	},
+	"required": [
+		"project",
+		"stories",
+		"building_units",
+		"thermal_zones",
+		"space_types",
+		"construction_sets",
+		"window_definitions",
+		"daylighting_control_definitions"
+	],
 	"definitions": {
 		"Application": {
 			"type": "object"
@@ -89,10 +103,7 @@
 						"visible": {
 							"type": "boolean"
 						},
-						"x_spacing": {
-							"type": "number"
-						},
-						"y_spacing": {
+						"spacing": {
 							"type": "number"
 						}
 					}
@@ -131,8 +142,28 @@
 						},
 						"elevation": {
 							"type": "number"
+						},
+						"enabled": {
+							"type": "boolean"
+						},
+						"initialized": {
+							"type": "boolean"
+						},
+						"rotation": {
+							"type": "number"
 						}
 					}
+				},
+				"previous_story": {
+					"type": "object",
+					"properties": {
+						"visible": {
+							"type": "boolean"
+						}
+					}
+				},
+				"showImportExport": {
+					"type": "boolean"
 				}
 			}
 		},
@@ -313,16 +344,23 @@
 					"items": {
 						"type": "object",
 						"properties": {
-							"window_id": {
+							"window_defn_id": {
 								"type": "string"
 							},
-							"vertex_id": {
+							"edge_id": {
 								"type": "string"
+							},
+							"alpha": {
+								"description": "Distance along edge to center point of window, starting from first vertex of edge at a = 0 and ending at second vertex of edge at a =1.  v = v1 + a*(v2-v1)",
+								"type": "number",
+								"minimum": 0,
+								"maximum": 1
 							}
 						},
 						"required": [
-							"window_id",
-							"vertex_id"
+							"window_defn_id",
+							"edge_id",
+							"alpha"
 						]
 					}
 				},
@@ -334,7 +372,8 @@
 				}
 			},
 			"required": [
-				"id"
+				"id",
+				"name"
 			]
 		},
 		"Space": {
@@ -393,7 +432,7 @@
 					"items": {
 						"type": "object",
 						"properties": {
-							"daylighting_control_id": {
+							"daylighting_control_defn_id": {
 								"type": "string"
 							},
 							"vertex_id": {
@@ -401,7 +440,7 @@
 							}
 						},
 						"required": [
-							"daylighting_control_id",
+							"daylighting_control_defn_id",
 							"vertex_id"
 						]
 					}
@@ -409,6 +448,7 @@
 			},
 			"required": [
 				"id",
+				"name",
 				"face_id"
 			]
 		},
@@ -430,6 +470,7 @@
 			},
 			"required": [
 				"id",
+				"name",
 				"face_id"
 			]
 		},
@@ -456,7 +497,8 @@
 				}
 			},
 			"required": [
-				"id"
+				"id",
+				"name"
 			]
 		},
 		"SpaceType": {
@@ -482,7 +524,8 @@
 				}
 			},
 			"required": [
-				"id"
+				"id",
+				"name"
 			]
 		},
 		"BuildingUnit": {
@@ -508,7 +551,8 @@
 				}
 			},
 			"required": [
-				"id"
+				"id",
+				"name"
 			]
 		},
 		"ConstructionSet": {
@@ -531,10 +575,11 @@
 				}
 			},
 			"required": [
-				"id"
+				"id",
+				"name"
 			]
 		},
-		"Window": {
+		"WindowDefinition": {
 			"type": "object",
 			"properties": {
 				"id": {
@@ -560,10 +605,11 @@
 				}
 			},
 			"required": [
-				"id"
+				"id",
+				"name"
 			]
 		},
-		"DaylightingControl": {
+		"DaylightingControlDefinition": {
 			"type": "object",
 			"properties": {
 				"id": {
@@ -586,7 +632,8 @@
 				}
 			},
 			"required": [
-				"id"
+				"id",
+				"name"
 			]
 		},
 		"PitchedRoof": {

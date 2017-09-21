@@ -1,3 +1,5 @@
+import geometryHelpers from '../geometry/helpers';
+
 export default {
   // full story object for the currentSelections story_id
   currentStory(state, getters, rootState) { return rootState.models.stories.find(s => s.id === state.currentSelections.story_id); },
@@ -29,6 +31,18 @@ export default {
   currentShading(state, getters) { return getters.currentSubSelectionType === 'shading' ? getters.currentSubSelection : null; },
   currentImage(state, getters) { return getters.currentSubSelectionType === 'images' ? getters.currentSubSelection : null; },
 
+  // full component definition (window_definition or daylighting_control_definition) instance for the component_definition_id
+  // this will be stored in the top level library
+  currentComponent(state, getters, rootState) {
+    const componentDefinitionId = state.currentSelections.component_definition_id;
+    let type, definition;
+    if ((definition = rootState.models.library.window_definitions.find(i => i.id === componentDefinitionId))) {
+      type = 'window_definitions';
+    } else if ((definition = rootState.models.library.daylighting_control_definitions.find(i => i.id === componentDefinitionId))) {
+      type = 'daylighting_control_definitions';
+    }
+    return { type, definition };
+  },
 
   currentBuildingUnit(state, getters, rootState) { return rootState.models.library.building_units.find(i => i.id === state.currentSelections.building_unit_id); },
   currentThermalZone(state, getters, rootState) { return rootState.models.library.thermal_zones.find(i => i.id === state.currentSelections.thermal_zone_id); },
@@ -37,6 +51,9 @@ export default {
   // geometry for the story being edited
   currentStoryGeometry(state, getters, rootState) {
     return rootState.geometry.find(g => g.id === getters['currentStory'].geometry_id);
+  },
+  currentStoryDenormalizedGeom(state, getters) {
+    return geometryHelpers.denormalize(getters['currentStoryGeometry']);
   },
 
   // face for the shading or space being edited

@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import helpers from './helpers.js'
 
 export default {
@@ -29,16 +30,13 @@ export default {
             return s.id === payload.story.id;
         }), 1);
     },
-    destroyObject (state, payload) {
-        // search the library
-        for (var type in state.library) {
-            if (state.library.hasOwnProperty(type)) {
-                state.library[type].splice(state.library[type].findIndex((i) => {
-                    return i.id === payload.object.id;
-                }), 1)
-            }
-        }
-    },
+  destroyObject(state, { object: { id } }) {
+    // search the library
+    state.library = _.mapValues(
+      state.library,
+      lst => _.reject(lst, { id }),
+    );
+  },
 
     updateStoryWithData (state, payload) {
         const story = payload.story;
@@ -70,5 +68,33 @@ export default {
         const object = payload.object;
         Object.assign(object, payload);
         delete object.object;
-    }
+    },
+  createWindow(state, { story_id, edge_id, window_defn_id, alpha }) {
+    const story = _.find(state.stories, { id: story_id });
+    story.windows.push({
+      window_defn_id,
+      edge_id,
+      alpha,
+    });
+  },
+  dropWindows(state, { story_id }) {
+    const story = _.find(state.stories, { id: story_id });
+    story.windows = [];
+  },
+  createDaylightingControl(state, { story_id, face_id, daylighting_control_defn_id, vertex_id }) {
+    const
+      story = _.find(state.stories, { id: story_id }),
+      space = _.find(story.spaces, { face_id });
+
+    space.daylighting_controls.push({
+      daylighting_control_defn_id,
+      vertex_id,
+    });
+  },
+  dropDaylightingControls(state, { face_id, story_id }) {
+    const
+      story = _.find(state.stories, { id: story_id }),
+      space = _.find(story.spaces, { face_id });
+    space.daylighting_controls = [];
+  },
 }

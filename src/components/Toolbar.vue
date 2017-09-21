@@ -25,9 +25,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <input type="checkbox" v-model="gridVisible">
       </div>
 
-      <div class="input-number">
+      <div class="input-number input-select">
         <label>spacing</label>
         <input v-model.number.lazy="spacing">
+        <select ref="unitSelect" @change="updateUnits">
+          <option value="ft">ft</option>
+          <option value="m">m</option>
+        </select>
+        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
+            <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
+        </svg>
       </div>
 
       <div class="input-number">
@@ -35,7 +42,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <input v-model.number.lazy="northAxis" :disabled="mapEnabled">
       </div>
 
-      <div id="import-export">
+      <div id="import-export" v-if="showImportExport">
         <input ref="importLibrary" @change="importDataAsFile($event, 'library')" type="file" />
         <button @click="$refs.importLibrary.click()">Import Library</button>
         <input ref="importInput" @change="importDataAsFile($event, 'floorplan')" type="file" />
@@ -46,32 +53,65 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     </section>
 
     <section class="tools">
-      <div class="undo-redo" v-if="timetravelInitialized">
-        <button @click="undo">Undo</button>
-        <button @click="redo">Redo</button>
+      <div class="undo-redo">
+        <button @click="undo" :disabled="!timetravelInitialized">Undo</button>
+        <button @click="redo" :disabled="!timetravelInitialized">Redo</button>
       </div>
+      <div class="snapping-options">
+        <button @click="snapMode = 'grid-strict'" :class="{ active: snapMode === 'grid-strict' }">Strict Grid</button>
+        <button @click="snapMode = 'grid-verts-edges'" :class="{ active: snapMode === 'grid-verts-edges' }">Edges too</button>
+      </div>
+      <div id="component-menus" v-if="tool === 'Place Component'">
+        <div class='input-select'>
+            <label>Component</label>
+            <select v-model='currentComponent'>
+                <optgroup v-for="ct in allComponents" :label="ct.name">
+                  <option v-for='definition in ct.defs' :value="{ definition, type: ct.type }">{{ definition.name }}</option>
+                </optgroup>
+            </select>
+            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
+                <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
+            </svg>
+        </div>
+      </div>
+
       <div>
-        <button @click="tool = item" :class="{ active: tool === item }" v-for="item in availableTools">{{ item }}</button>
+        <button @click="tool = item" :class="{ active: tool === item }" v-for="item in availableTools" :data-tool="item">{{ item }}</button>
       </div>
     </section>
 
+    <section class="modals" v-if="showSaveModal">
+      <save-as-modal
+        :saveWhat="thingWereSaving"
+        :dataToDownload="dataToDownload"
+        :onClose="() => {showSaveModal = false; thingWereSaving = '';}"
+      />
+    </section>
   </nav>
 </template>
 
 <script>
 import { mapState } from 'vuex';
+import SaveAsModal from './Modals/SaveAsModal.vue';
+
 
 export default {
   name: 'toolbar',
+  data() {
+    return {
+      componentTypes: {
+        daylighting_control_definitions: 'Daylighting Control Definitions',
+        window_definitions: 'Window Definitions',
+      },
+      showSaveModal: false,
+      thingWereSaving: '',
+    };
+  },
   methods: {
     exportData() {
+      this.thingWereSaving = 'Floorplan';
+      this.showSaveModal = true;
       const data = this.$store.getters['exportData'];
-      const a = document.createElement('a');
-      a.setAttribute('href', `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(data))}`);
-      a.setAttribute('download', 'floorplan.json');
-      a.click();
-
-      console.log(`exporting:\n${JSON.stringify(data)}`); // eslint-disable-line
       return data;
     },
     importDataAsFile(event, type) {
@@ -89,7 +129,7 @@ export default {
         if (type === 'library') {
           this.$store.dispatch('importLibrary', { data });
         } else if (type === 'floorplan') {
-          this.$store.dispatch('importModel', {
+          this.$store.dispatch('importFloorplan', {
             clientWidth: document.getElementById('svg-grid').clientWidth,
             clientHeight: document.getElementById('svg-grid').clientHeight,
             data,
@@ -105,12 +145,44 @@ export default {
     redo() {
       this.$store.timetravel.redo();
     },
+    updateUnits() {
+      if (this.allowSettingUnits) {
+        this.rwUnits = this.$refs.unitSelect.value;
+      } else {
+        window.eventBus.$emit('error', 'Units must be set before any geometry is drawn.');
+        this.$refs.unitSelect.value = this.rwUnits;
+      }
+    },
   },
   computed: {
+    latestCreatedCompId() {
+      return _.chain(this.allComponents)
+        .map('defs')
+        .flatten()
+        .map('id')
+        .map(Number)
+        .max()
+        .value() + '';
+    },
+    allComponents() {
+      return Object.keys(this.componentTypes).map((ct) => ({
+        defs: this.$store.state.models.library[ct],
+        name: this.componentTypes[ct],
+        type: ct,
+      }));
+    },
+    currentComponentType() {
+      return this.currentComponent.type;
+    },
+    currentComponentDefinition() {
+      return this.currentComponent.definition;
+    },
     ...mapState({
       currentMode: state => state.application.currentSelections.mode,
       mapEnabled: state => state.project.map.enabled,
       timetravelInitialized: state => state.timetravelInitialized,
+      showImportExport: state => state.project.showImportExport,
+      allowSettingUnits: state => state.geometry.length === 1 && state.geometry[0].vertices.length === 0,
     }),
     availableTools() {
       return this.$store.state.application.tools
@@ -152,8 +224,27 @@ export default {
     },
     // spacing between gridlines, measured in RWU
     spacing: {
-      get() { return `${this.$store.state.project.grid.spacing} ${this.$store.state.project.config.units}`; },
+      get() { return this.$store.state.project.grid.spacing; },
       set(spacing) { this.$store.dispatch('project/setSpacing', { spacing }); },
+    },
+
+    currentComponent: {
+      get() { return this.$store.getters['application/currentComponent']; },
+      set(item) {
+        if (!item || !item.definition || !item.definition.id) { return; }
+        this.$store.dispatch('application/setCurrentComponentDefinitionId', { id: item.definition.id });
+      },
+    },
+    rwUnits: {
+      get() { return this.$store.state.project.config.units; },
+      set(units) { this.$store.dispatch('project/setUnits', { units }); },
+    },
+    snapMode: {
+      get() { return this.$store.state.application.currentSelections.snapMode; },
+      set(snapMode) { this.$store.dispatch('application/setCurrentSnapMode', { snapMode }); },
+    },
+    dataToDownload() {
+      return this.$store.getters['exportData'];
     },
   },
   watch: {
@@ -161,6 +252,12 @@ export default {
       if (this.availableTools.indexOf(val) === -1 && val !== 'Map') { this.tool = this.availableTools[0]; }
     },
     currentMode() { this.tool = this.availableTools[0]; },
+    latestCreatedCompId() {
+      this.$store.dispatch('application/setCurrentComponentDefinitionId', { id: this.latestCreatedCompId });
+    },
+  },
+  components: {
+    'save-as-modal': SaveAsModal,
   },
 };
 </script>
@@ -169,6 +266,8 @@ export default {
 @import "./../scss/config";
 
 #toolbar {
+  z-index: 3;
+
   section {
     align-items: center;
     display: flex;
@@ -184,12 +283,8 @@ export default {
       #import-export {
         position: absolute;
         right: 2.5rem;
-        #import {
-          border: 1px solid $secondary;
-        }
-        #export {
+        button {
           margin-left: 1rem;
-          border: 1px solid $primary;
         }
       }
       // hidden file inputs
@@ -209,14 +304,34 @@ export default {
         margin: 0 1rem 0 0;
       }
       .active {
-        border: 1px solid $primary;
+        border: 2px solid $primary;
       }
       > .undo-redo {
         margin-right: auto;
       }
+      #component-menus {
+        margin: 0 auto;
+        .input-select {
+          display: inline-block;
+          &:last-child {
+            margin-left: 1rem;
+          }
+        }
+      }
+      > .snapping-options {
+        margin-right: auto;
+        :first-child {
+          margin-right: -2px;
+          border-bottom-right-radius: 0;
+          border-top-right-radius: 0;
+        }
+        :last-child {
+          margin-left: -2px;
+          border-bottom-left-radius: 0;
+          border-top-left-radius: 0;
+        }
+      }
     }
-
-
   }
 }
 </style>

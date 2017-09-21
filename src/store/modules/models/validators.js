@@ -22,8 +22,8 @@ export default {
     let error = '';
     if (objs.filter(s => (s.name === value) && (s.id !== object.id)).length) {
       error = 'Names must be unique.';
-    } else if (value.length < 5) {
-      error = 'Names must be at least 5 characters long.';
+    } else if (value === '') {
+      error = 'Names must be at least 1 characters long.';
     }
 
     return error ? { success: false, error } : { success: true };

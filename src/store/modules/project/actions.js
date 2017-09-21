@@ -2,11 +2,11 @@ import Validator from './../../utilities/validator.js'
 
 export default {
     // CONFIG
-    setUnits (context, payload) {
-        if (payload.units === 'm' || payload.units === 'ft') {
-            context.commit('setUnits', payload);
-        }
-    },
+  setUnits(context, payload) {
+    if (payload.units === 'm' || payload.units === 'ft') {
+      context.commit('setUnits', payload);
+    }
+  },
     setLanguage (context, payload) {
         if (payload.language === 'EN-US') {
             context.commit('setLanguage', payload);
@@ -16,6 +16,7 @@ export default {
       const { north_axis } = payload;
       if (north_axis > 360 || north_axis < 0) { return; }
       context.commit('setConfigNorthAxis', { north_axis });
+      context.commit('setMapRotation', { rotation: (north_axis * Math.PI) / 180 });
     },
     setMapVisible (context, payload) {
         if (typeof payload.visible === 'boolean') {
@@ -98,7 +99,7 @@ export default {
 
 
     setMapRotation (context, payload) {
-        context.dispatch('setNorthAxis', { north_axis: (payload.rotation/(2*Math.PI)) * 360 });
+        context.commit('setConfigNorthAxis', { north_axis: (payload.rotation/(2*Math.PI)) * 360 });
         context.commit('setMapRotation', { rotation: payload.rotation });
     },
 
@@ -106,5 +107,13 @@ export default {
     setPreviousStoryVisible (context, payload) {
         context.commit('setPreviousStoryVisible', { visible: payload.visible });
 
-    }
+    },
+
+    setShowImportExport(context, payload) {
+      context.commit('setShowImportExport', payload);
+    },
+
+    setTransform(context, payload) {
+      context.commit('setTransform', payload);
+    },
 }

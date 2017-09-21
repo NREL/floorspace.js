@@ -8,7 +8,7 @@ import geometry from './modules/geometry/index';
 import models from './modules/models/index';
 
 import exportData from './utilities/export';
-import importModel from './utilities/importModel';
+import importFloorplan from './utilities/importFloorplan';
 import importLibrary from './utilities/importLibrary';
 import mutations from './mutations';
 
@@ -26,7 +26,7 @@ const store = new Vuex.Store({
     exportData,
   },
   actions: {
-    importModel,
+    importFloorplan,
     importLibrary,
   },
   mutations,

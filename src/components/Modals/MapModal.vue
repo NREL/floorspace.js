@@ -8,7 +8,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
 <aside>
-    <div @click="$emit('close')" class="overlay"></div>
+    <div class="overlay"></div>
     <div class="modal">
         <header>
             <h2>Quick Start</h2>
@@ -17,10 +17,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <div class="content">
             <p>Choose to either open an existing floorplan, start a new floorplan without a map, or start a new floorplan with a geolocated map.</p>
 
-            <button @click="$refs.importInput.click()" id="import">Open Floorplan</button>
-            <button @click="mapEnabled = false; mapVisible = false; $emit('close')">New Floorplan</button>
-            <button @click="mapEnabled = true; tool='Map'; $emit('close')">New Floorplan w/ Map</button>
-            <input ref="importInput" @change="importModelAsFile" type="file"/>
+            <button @click="$refs.importInput.click()" id="import" class="open-floorplan">Open Floorplan</button>
+            <button @click="mapEnabled = false; mapVisible = false; $emit('close')" class="new-floorplan">New Floorplan</button>
+            <button @click="mapEnabled = true; tool='Map'; $emit('close')" :disabled="!online">New Floorplan w/ Map</button>
+            <input id="importInput" ref="importInput" @change="importFloorplanAsFile" type="file"/>
         </div>
     </div>
 </aside>
@@ -36,12 +36,11 @@ export default {
     };
   },
   computed: {
+    online () { return window.api && window.api.config ? window.api.config.online : true; },
     mapEnabled: {
       get() { return this.$store.state.project.map.enabled; },
       set(enabled) {
         this.$store.dispatch('project/setMapEnabled', { enabled });
-        // enable timetravel if map is disabled
-        if (!enabled) { window.eventBus.$emit('initTimetravel'); }
       },
     },
     tool: {
@@ -50,17 +49,17 @@ export default {
     },
   },
   methods: {
-    importModelAsFile(event) {
+    importFloorplanAsFile(event) {
       const file = event.target.files[0];
       const reader = new FileReader();
       reader.addEventListener('load', () => {
-        this.importModel(reader.result);
+        this.importFloorplan(reader.result);
       }, false);
 
       if (file) { reader.readAsText(file); }
     },
-    importModel(data) {
-      this.$store.dispatch('importModel', {
+    importFloorplan(data) {
+      this.$store.dispatch('importFloorplan', {
         clientWidth: document.getElementById('svg-grid').clientWidth,
         clientHeight: document.getElementById('svg-grid').clientHeight,
         data: JSON.parse(data),

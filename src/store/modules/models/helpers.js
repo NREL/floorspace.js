@@ -53,7 +53,9 @@ const helpers = {
               return result;
           }
       }
-
+      if (this.map[type].keymap[key] && this.map[type].keymap[key].converter) {
+        value = this.map[type].keymap[key].converter(value);
+      }
       // dispatch the correct action to update the specified type
       if (type === 'stories') {
           store.dispatch('models/updateStoryWithData', {
@@ -83,25 +85,6 @@ const helpers = {
       }
 
       return result;
-  },
-    /*
-    * return all keys in the keymap for a type
-    * this is needed so that computed keys are still displayed despite not being stored directly on objects of the type
-    * for example, story is not a property directly on objects of type space, so we load that key here to display it
-    */
-  defaultKeysForType(type) {
-      if (this.map[type]) {
-          return Object.keys(this.map[type].keymap);
-      } else {
-          return [];
-      }
-  },
-
-  keyIsPrivate(type, key) {
-      return this.map[type].keymap[key] ? this.map[type].keymap[key].private : false;
-  },
-  keyIsReadonly(type, key) {
-      return this.map[type].keymap[key] ? this.map[type].keymap[key].readonly : false;
   },
 
   inputTypeForKey(type, key) {
@@ -204,7 +187,7 @@ const helpers = {
       case 'spaces':
       case 'images':
         return state.stories.reduce((accum, s) => accum.concat(s[type]), []);
-      // 'building_units', 'thermal_zones', 'space_types', 'construction_sets', 'windows', 'daylighting_controls':
+      // 'building_units', 'thermal_zones', 'space_types', 'construction_sets', 'window_definitions', 'daylighting_control_definitions':
       default:
         return state.library[type];
     }

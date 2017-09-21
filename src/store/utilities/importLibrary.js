@@ -1,10 +1,10 @@
-import idFactory from './generateId'
+import idFactory from './generateId';
 
 export default function importLibrary(context, payload) {
   let count = 0;
   const types = Object.keys(payload.data);
   types.forEach((type) => {
-    if (type === 'project') { return; }
+    if (type === 'project' || !context.state.models.library[type]) { return; }
     const existingNames = context.state.models.library[type].map((o) => {
       // /_\d+[\w\s]?$/
       // if object name contains duplicate suffix, remove suffix
@@ -32,7 +32,7 @@ export default function importLibrary(context, payload) {
     thermal_zones: context.state.models.library.thermal_zones.concat(payload.data.thermal_zones || []),
     space_types: context.state.models.library.space_types.concat(payload.data.space_types || []),
     construction_sets: context.state.models.library.construction_sets.concat(payload.data.construction_sets || []),
-    windows: context.state.models.library.windows.concat(payload.data.windows || []),
-    daylighting_controls: context.state.models.library.daylighting_controls.concat(payload.data.daylighting_controls || []),
+    window_definitions: context.state.models.library.window_definitions.concat(payload.data.window_definitions || []),
+    daylighting_control_definitions: context.state.models.library.daylighting_control_definitions.concat(payload.data.daylighting_control_definitions || []),
   });
 }

@@ -12,6 +12,10 @@
   cursor: pointer;
 }
 
+.tool_fill polygon {
+  cursor: pointer;
+}
+
 .tool_drag #svg-grid {
   polygon, rect, path {
       pointer-events: none;
@@ -54,20 +58,32 @@
         z-index: 3;
         pointer-events: all;
         stroke: $gray-light;
-        &.current {
-            stroke: $secondary;
-            stroke-width: 2px;
-        }
-        &.previousStory, &.guideLine {
-            fill-opacity: 0.3;
-            z-index: -1;
-        }
-		&.previousStory {
-			stroke-dasharray: 10;
-			stroke: $black;
-			stroke-width: 2;
+        &.domain {
+          stroke: #fff;
         }
     }
+
+    .current {
+      polygon, rect, path {
+        stroke: $secondary;
+        stroke-width: 2px;
+      }
+    }
+
+    .previousStory {
+      polygon, rect, path {
+        stroke-dasharray: 10;
+        stroke: $black;
+        stroke-width: 2;
+      }
+    }
+    .previousStory, .guideLine {
+      polygon, rect, path {
+        fill-opacity: 0.3;
+        z-index: -1;
+      }
+    }
+
     rect.view {
       fill-opacity: 0;
     }
@@ -75,5 +91,46 @@
       stroke-opacity: 0.3;
       shape-rendering: crispEdges;
       stroke: $gray-medium;
+    }
+
+    .window {
+      stroke-width: 3;
+      stroke: black;
+    }
+    #perp-linecap rect {
+      fill: black;
+      stroke: none;
+    }
+    #perp-linecap-highlight rect {
+      fill: #008500;
+      stroke: none;
+    }
+    .daylighting-control {
+      circle {
+        stroke: #222;
+      }
+      .bg {
+        fill: #222;
+        fill-opacity: 0.2;
+        stroke-width: 1.5px;
+      }
+      .quadrants {
+        fill: #ff7979;
+        stroke-width: 0;
+      }
+    }
+    .highlight {
+      .window {
+        stroke: #008500;
+        fill: black;
+      }
+      .daylighting-control {
+        circle {
+          stroke: #dfda48;
+        }
+        path {
+          fill: #dfda48;
+        }
+      }
     }
 }
