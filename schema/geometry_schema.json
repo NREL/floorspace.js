@@ -50,6 +50,12 @@
 			"items": {
 				"$ref": "#/definitions/DaylightingControl"
 			}
+		},
+		"pitched_roofs": {
+			"type": "array",
+			"items": {
+				"$ref": "#/definitions/PitchedRoof"
+			}
 		}
 	},
 	"definitions": {
@@ -399,27 +405,6 @@
 							"vertex_id"
 						]
 					}
-				},
-				"below_floor_plenum_height": {
-					"description": "Overrides story value if provided. Excludes height under a pitched roof.",
-					"type": [
-						"number",
-						"null"
-					]
-				},
-				"floor_to_ceiling_height": {
-					"description": "Overrides story value if provided. Excludes height under a pitched roof.",
-					"type": [
-						"number",
-						"null"
-					]
-				},
-				"above_ceiling_plenum_height": {
-					"description": "Overrides story value if provided. Excludes height under a pitched roof.",
-					"type": [
-						"number",
-						"null"
-					]
 				}
 			},
 			"required": [
@@ -624,13 +609,13 @@
 					]
 				},
 				"pitch": {
-					"description": "Pitch of roof in ?/12",
+					"description": "Pitch of roof. A value of 6, for example, implies a 6 in 12 pitch (or 26.57 degrees).",
 					"type": "number",
 					"minimum": 0,
 					"exclusiveMinimum": true
 				},
 				"shed_direction": {
-					"description": "Direction of shed roof, from low point to high point, in degrees.",
+					"description": "Direction of shed roof, from low edge to high edge, in clockwise degrees from the y-axis when viewed from above.",
 					"type": "number"
 				}
 			},
