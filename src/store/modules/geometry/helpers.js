@@ -27,6 +27,9 @@ export function haveSimilarAngles(edge1, edge2) {
   return correctedDiff < 0.05 * Math.PI;
 }
 function normalize({ dx, dy }) {
+  if (dx === 0 && dy === 0) {
+    return { dx: 0, dy: 0 };
+  }
   const normalization = Math.sqrt((dx * dx) + (dy * dy));
   return {
     dx: dx / normalization,
