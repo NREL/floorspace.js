@@ -7,9 +7,10 @@
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 const d3 = require('d3');
+window.d3 = d3;
 const polylabel = require('polylabel');
 import _ from 'lodash';
-import { snapTargets, snapWindowToEdge, snapToVertexWithinFace } from './snapping';
+import { snapTargets, snapWindowToEdge, snapToVertexWithinFace, findClosestEdge, findClosestWindow } from './snapping';
 import geometryHelpers from './../../store/modules/geometry/helpers';
 import modelHelpers from './../../store/modules/models/helpers';
 import { ResizeEvents } from '../../components/Resize';
@@ -231,11 +232,15 @@ export default {
       .data([loc])
       .call(this.drawDC);
 
+    const
+      face = _.find(this.denormalizedGeometry.faces, { id: loc.face_id }),
+      windows = this.windowsOnFace(face),
+      nearestEdge = findClosestWindow(windows, loc) || findClosestEdge(face.edges, loc);
     d3.select('#grid svg')
       .append('g')
       .classed('guideline', true)
       .selectAll('.daylighting-control-guideline')
-      .data([loc])
+      .data([{ loc, nearestEdge }])
       .call(this.drawDCGuideline);
   },
 

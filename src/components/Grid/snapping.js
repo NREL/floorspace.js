@@ -55,7 +55,7 @@ export function expandWindowAlongEdge(edge, center, windowWidth) {
   };
 }
 
-function findClosestEdge(edges, cursor) {
+export function findClosestEdge(edges, cursor) {
   const
     withDistance = edges.map(e => ({
       ...e,
@@ -63,6 +63,20 @@ function findClosestEdge(edges, cursor) {
     })),
     closestEdge = _.minBy(withDistance, 'dist');
   return closestEdge;
+}
+
+export function findClosestWindow(windows, cursor) {
+  const withDistance = windows.map(w => ({
+    ...w,
+    dist: distanceBetweenPoints(cursor, w.center),
+    proj: w.center,
+    // alias start, end to v1, v2 so we can make this thing look like an edge.
+    // Then we can use the same code to display the distance markers from
+    // daylighting control to either closest window or closest edge.
+    v1: w.start,
+    v2: w.end,
+  }));
+  return _.minBy(withDistance, 'dist');
 }
 
 function snapWindowToEdgeAnywhere(edges, cursor, windowWidth, maxSnapDist) {

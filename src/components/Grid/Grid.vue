@@ -223,11 +223,15 @@ export default {
         center = windowLocation(edge, { alpha });
       return expandWindowAlongEdge(edge, center, windowDefn.width);
     },
+    windowsOnFace(face) {
+      return _.flatMap(
+        face.edges,
+        e => _.filter(this.currentStory.windows , { edge_id: e.id })
+              .map(w => this.denormalizeWindow(e, w)));
+    },
     polygonsFromGeometry(geometry, extraPolygonAttrs = {}) {
       const
-        geom = geometryHelpers.denormalize(geometry),
-        windows = this.currentStory.geometry_id === geometry.id ?
-          this.currentStory.windows : [];
+        geom = geometryHelpers.denormalize(geometry)
       const polygons = geom.faces.map((face) => {
         // look up the model (space or shading) associated with the face
         const
@@ -240,10 +244,7 @@ export default {
             color: model.color,
             points,
             labelPosition: this.polygonLabelPosition(points),
-            windows: _.flatMap(
-              face.edges,
-              e => _.filter(windows, { edge_id: e.id })
-                    .map(w => this.denormalizeWindow(e, w))),
+            windows: this.windowsOnFace(face),
             daylighting_controls: model.daylighting_controls
               .map(dc => geometryHelpers.vertexForId(dc.vertex_id, geometry)),
             ...extraPolygonAttrs,
