@@ -75,8 +75,16 @@ module.exports = {
       .checkForErrors()
       .end();
   },
+  'windows on exterior edges that become interior should be removed (partial overlap)': (browser) => {
+    browser
+      .click('.tools [data-tool="Rectangle"]')
+      .click('#selections .add-sub-selection')
+      .perform(drawSquare(-50, 50, 40, 10))
+      .assert.elementCount('.window', 0)
+      .checkForErrors()
+      .end();
+  },
   'windows on interior edges that become exterior should be removed': (browser) => {
-
     const rightSideWindow = (client, done) => {
         client
         .moveToElement('#grid svg', client.xScale(0), client.yScale(30))
