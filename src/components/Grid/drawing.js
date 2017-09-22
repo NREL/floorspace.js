@@ -49,7 +49,8 @@ function distanceMeasure() {
   let
     xScale = _.identity,
     yScale = _.identity,
-    lineOffset = 20;
+    lineOffset = 20,
+    labelPosition = 1;
   function chart(selection) {
     selection.exit().remove();
     const measureE = selection.enter().append('g')
@@ -68,9 +69,8 @@ function distanceMeasure() {
     const measure = selection.merge(measureE);
 
     measure.select('text')
-      .attr('x', d => xScale(d.end.x))
-      .attr('y', d => yScale(d.end.y))
-      .attr('fill', 'red')
+      .attr('x', d => (1 - labelPosition) * xScale(d.start.x) + labelPosition * xScale(d.end.x))
+      .attr('y', d => (1 - labelPosition) * yScale(d.start.y) + labelPosition * yScale(d.end.y))
       .attr('dominant-baseline', 'text-before-edge')
       .attrs((d) => {
         const
@@ -137,6 +137,14 @@ function distanceMeasure() {
   chart.lineOffset = function(_) {
     if (!arguments.length) return lineOffset;
     lineOffset = _;
+    return chart;
+  };
+  chart.labelPosition = function(_) {
+    if (!arguments.length) return labelPosition;
+    if (_ < 0 || _ > 1) {
+      console.warn(`Expected labelPosition to be in [0, 1] (got ${_})`);
+    }
+    labelPosition = _;
     return chart;
   };
 
@@ -216,7 +224,8 @@ export function drawDaylightingControlGuideline() {
     xScale = _.identity,
     yScale = _.identity;
   const drawMeasure = distanceMeasure()
-    .lineOffset(0);
+    .lineOffset(0)
+    .labelPosition(0.5);
   function chart(selection) {
     drawMeasure.xScale(xScale).yScale(yScale);
     selection.exit().remove();
@@ -229,20 +238,21 @@ export function drawDaylightingControlGuideline() {
         const
           dir = unitVector(d.nearestEdge.v1, d.nearestEdge.v2),
           v = { start: d.loc, end: d.nearestEdge.proj },
+          dotProduct = ((v.end.x - v.start.x) * dir.dx) + ((v.end.y - v.start.y) * dir.dy),
           parallel = {
-            start: v.end,
+            start: v.start,
             end: {
-              x: v.start.x + ((v.end.x - v.start.x) * dir.dx),
-              y: v.start.y + ((v.end.y - v.start.y) * dir.dy),
+              x: v.start.x + dotProduct * dir.dx,
+              y: v.start.y + dotProduct * dir.dy,
             },
           },
           perp = {
-            start: v.start,
-            end: parallel.end,
+            start: parallel.end,
+            end: v.end,
           };
-
-        const retval = [v, parallel, perp];
-        return retval;
+        return [v, perp, parallel].filter(
+          ({ start, end }) => distanceBetweenPoints(start, end) > 0.01,
+        );
       });
     const guide = selection.merge(guideE);
     guide
