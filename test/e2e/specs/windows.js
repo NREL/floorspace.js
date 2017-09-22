@@ -57,6 +57,19 @@ module.exports = {
       .checkForErrors()
       .end();
   },
+  'split then cover edge has weird slanty thing': (browser) => {
+    browser
+      .click('.tools [data-tool="Rectangle"]')
+      .click('#selections .add-sub-selection')
+      .perform(drawSquare(-10, 50, 10, 10))
+      .assert.elementCount('.window', 1)
+      .click('#selections .add-sub-selection')
+      .perform(drawSquare(-55, 40, 30, 20))
+      .assert.ok(false) // can't think of a thing to test for, but things look wonky here.
+      // I'll reconsider this case on Monday.
+      .checkForErrors()
+      .end();
+  },
   'moving space preserves windows': (browser) => {
     browser
       .click('.tools [data-tool="Select"]')
