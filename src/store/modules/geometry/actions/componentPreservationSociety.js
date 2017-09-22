@@ -57,7 +57,7 @@ function replaceComponents(
     const
       { dx, dy } = movementsByFaceId[w.originalFaceIds[0]] || { dx: 0, dy: 0 },
       newLoc = { x: w.originalLoc.x + dx, y: w.originalLoc.y + dy },
-      loc = snapWindowToEdge(edgesPresentOnFaces, newLoc, 1, spacing),
+      loc = snapWindowToEdge(/* snapMode */ 'nonstrict', edgesPresentOnFaces, newLoc, 1, spacing),
       facesWithEdge = _.map(facesContainingEdge(geometry.faces, w.edge_id), 'id');
     if (!loc) { return; }
     if (_.intersection(facesWithEdge, w.originalFaceIds).length !== facesWithEdge.length ||
@@ -88,7 +88,7 @@ function replaceComponents(
       const
         { dx, dy } = movementsByFaceId[face_id] || { dx: 0, dy: 0 },
         newLoc = { x: d.vertex.x + dx, y: d.vertex.y + dy },
-        loc = snapToVertexWithinFace([face], newLoc, spacing);
+        loc = snapToVertexWithinFace(/* snapMode */ 'nonstrict', [face], newLoc, spacing);
       if (!loc) { return; }
 
       context.dispatch('models/createDaylightingControl', {
