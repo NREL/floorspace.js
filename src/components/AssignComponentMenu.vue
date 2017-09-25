@@ -8,16 +8,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
   <div>type{{type}}
-    <icon></icon>
+    <icon class="button"></icon>
   </div>
 
 </template>
 
 <script>
-import icon from './../assets/geometry-editor-icons/icon_add_image-01.svg'
+import icon from './../assets/geometry-editor-icons/icon_add_image.svg'
 
-// var logoTwo = require('./../assets/geometry-editor-icons/icon_add_image-01.svg');
-console.log("icon", icon)
 export default {
   name: 'AssignComponentMenu',
   props: ['type'],
@@ -27,7 +25,6 @@ export default {
         daylighting_control_definitions: 'Daylighting Control Definitions',
         window_definitions: 'Window Definitions',
       },
-
     };
   },
   methods: {
@@ -65,7 +62,7 @@ export default {
     },
   },
   components: {
-    icon: icon
+    icon
   },
 };
 </script>

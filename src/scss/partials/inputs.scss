@@ -72,7 +72,7 @@ svg.button {
     width: 2rem;
     outline: none;
     // padding: 0 .75rem;
-    &[disabled] {
+    &.disabled {
       cursor: not-allowed;
       // background-color: $gray-medium-dark;
     }

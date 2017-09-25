@@ -15,14 +15,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           <input ref="importLibrary" @change="importDataAsFile($event, 'library')" type="file" />
           <input ref="importInput" @change="importDataAsFile($event, 'floorplan')" type="file" />
 
-          <button @click="$refs.importInput.click()" id="import">Open</button>
-          <button @click="exportData" id="export">Save</button>
-          <button @click="$refs.importLibrary.click()">Import</button>
+          <open-floorplan-svg @click.native="$refs.importInput.click()" id="import" class="button"></open-floorplan-svg>
+          <save-floorplan-svg @click.native="exportData" id="export" class="button"></save-floorplan-svg>
+          <import-library-svg @click.native="$refs.importLibrary.click()" class="button"></import-library-svg>
         </template>
 
         <div id="undo-redo">
-          <button @click="undo" :disabled="!timetravelInitialized">Undo</button>
-          <button @click="redo" :disabled="!timetravelInitialized">Redo</button>
+          <undo-svg @click.native="undo" class="button" :class="{ 'disabled' : !timetravelInitialized }"></undo-svg>
+          <redo-svg @click.native="redo" class="button" :disabled="!timetravelInitialized" :class="{ 'disabled' : !timetravelInitialized }"></redo-svg>
         </div>
       </div>
 
@@ -112,7 +112,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
               <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
           </svg>
         </span>
-        
+
         <assign-component-menu v-show="visibleComponentType" :type="visibleComponentType"></assign-component-menu>
       </div>
 
@@ -158,6 +158,13 @@ import { mapState } from 'vuex';
 import SaveAsModal from './Modals/SaveAsModal.vue';
 import AssignComponentMenu from './AssignComponentMenu.vue'
 import applicationHelpers from './../store/modules/application/helpers';
+
+// svgs
+import openFloorplanSvg from './../assets/geometry-editor-icons/icon_open_floorplan.svg'
+import saveFloorplanSvg from './../assets/geometry-editor-icons/icon_save_floorplan.svg'
+import importLibrarySvg from './../assets/geometry-editor-icons/icon_import_library.svg'
+import undoSvg from './../assets/geometry-editor-icons/icon_undo.svg'
+import redoSvg from './../assets/geometry-editor-icons/icon_redo.svg'
 
 export default {
   name: 'toolbar',
@@ -333,6 +340,11 @@ export default {
   components: {
     'save-as-modal': SaveAsModal,
     'assign-component-menu': AssignComponentMenu,
+    'open-floorplan-svg': openFloorplanSvg,
+    'save-floorplan-svg': saveFloorplanSvg,
+    'import-library-svg': importLibrarySvg,
+    'undo-svg': undoSvg,
+    'redo-svg': redoSvg
   },
 };
 </script>
