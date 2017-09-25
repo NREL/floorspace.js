@@ -7,14 +7,26 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 
 <template>
-  <div>BRIAN'S COMPONENT</div>
+  <div>type{{type}}
+    <icon></icon>
+  </div>
+
 </template>
 
 <script>
+import icon from './../assets/geometry-editor-icons/icon_add_image-01.svg'
+
+// var logoTwo = require('./../assets/geometry-editor-icons/icon_add_image-01.svg');
+console.log("icon", icon)
 export default {
   name: 'AssignComponentMenu',
+  props: ['type'],
   data() {
     return {
+      componentTypes: {
+        daylighting_control_definitions: 'Daylighting Control Definitions',
+        window_definitions: 'Window Definitions',
+      },
 
     };
   },
@@ -30,9 +42,9 @@ export default {
         .max()
         .value() + '';
     },
-    allComponents() {
+    components() {
       return Object.keys(this.componentTypes).map(ct => ({
-        defs: this.$store.state.models.library[ct],
+        defs: this.$store.state.models.library[this.type],
         name: this.componentTypes[ct],
         type: ct,
       }));
@@ -43,9 +55,18 @@ export default {
     currentComponentDefinition() {
       return this.currentComponent.definition;
     },
+
+    currentComponent: {
+      get() { return this.$store.getters['application/currentComponent']; },
+      set(item) {
+        if (!item || !item.definition || !item.definition.id) { return; }
+        this.$store.dispatch('application/setCurrentComponentDefinitionId', { id: item.definition.id });
+      },
+    },
   },
-  watch: {
-  }
+  components: {
+    icon: icon
+  },
 };
 </script>
 

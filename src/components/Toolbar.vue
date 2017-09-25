@@ -8,6 +8,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
   <nav id="toolbar">
+
     <section id="top">
       <div id="navigation-head">
         <template v-if="showImportExport">
@@ -24,6 +25,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           <button @click="redo" :disabled="!timetravelInitialized">Redo</button>
         </div>
       </div>
+
       <div id="mode-tabs">
         <span @click="mode='floorplan'" :class="{ active: mode === 'floorplan' }">
           Floorplan
@@ -31,7 +33,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </span>
 
         <span @click="mode='shading'" :class="{ active: mode === 'shading' }">
-          Images
+          Shading
           <svg class="icon" baseProfile="tiny" height="500" overflow="auto" viewBox="0 0 500 500" width="500" xmlns="http://www.w3.org/2000/svg"><path d="M359.688 31.938c-17.69-4.072-69.403 127.513-69.403 127.513s-8.165-2.553-35.384-2.553c-23.264 0-34.566 2.07-37.368 3.51-8.734-21.754-53.894-131.43-69.766-127.78-17.692 4.07-91.98 168.313-91.98 312.103 0 116.32 110.434 117.604 202.166 117.604 83.953 0 195.637-1.332 195.637-122.47-.002-143.788-76.212-303.856-93.902-307.926zM105.914 186.346c-.01-.004-.004-.02.014-.046 13.65-47.807 35.84-87.16 42.285-88.62 9.05-2.054 32.287 54.468 37.266 66.696-.517-.597-20.032.29-39.65 5.293-27.11 6.91-39.39 15.916-39.902 16.63l-.014.046zm145.67 144.063c-137.903 0-138.648-19.147-138.648-19.147l17.008-59.073s8.24 7.02 125.48 7.02c109.543 0 122.56-7.02 122.56-7.02l17.007 59.073s-2.953 19.146-143.406 19.146zM362.24 169.656c-19.624-5.01-39.145-5.9-39.66-5.302 4.98-12.247 28.226-68.857 37.278-66.8 6.444 1.463 28.645 40.877 42.298 88.757-.51-.712-12.795-9.732-39.916-16.655z"/></svg>
         </span>
 
@@ -67,9 +69,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           <input type="checkbox" v-model="gridVisible">
         </div>
 
-        <div class="input-number input-select">
+        <div class="input-number">
           <label>spacing</label>
           <input v-model.number.lazy="spacing">
+        </div>
+
+        <div class="input-select">
           <select ref="unitSelect" @change="updateUnits">
             <option value="ft">ft</option>
             <option value="m">m</option>
@@ -101,22 +106,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
       <div id="components-menu" v-if="mode==='components'">
 
-        <span v-for="type in ['window_definitions', 'daylighting_control_definitions']"  :class="{ active: currentComponentType === type }">
+        <span v-for="type in ['window_definitions', 'daylighting_control_definitions']"  @click="visibleComponentType = visibleComponentType === type ? null : type " :class="{ active: currentComponentType === type }">
           {{ type }}
-          <svg class="button" baseProfile="tiny" height="500" overflow="auto" viewBox="0 0 500 500" width="500" xmlns="http://www.w3.org/2000/svg"><path d="M359.688 31.938c-17.69-4.072-69.403 127.513-69.403 127.513s-8.165-2.553-35.384-2.553c-23.264 0-34.566 2.07-37.368 3.51-8.734-21.754-53.894-131.43-69.766-127.78-17.692 4.07-91.98 168.313-91.98 312.103 0 116.32 110.434 117.604 202.166 117.604 83.953 0 195.637-1.332 195.637-122.47-.002-143.788-76.212-303.856-93.902-307.926zM105.914 186.346c-.01-.004-.004-.02.014-.046 13.65-47.807 35.84-87.16 42.285-88.62 9.05-2.054 32.287 54.468 37.266 66.696-.517-.597-20.032.29-39.65 5.293-27.11 6.91-39.39 15.916-39.902 16.63l-.014.046zm145.67 144.063c-137.903 0-138.648-19.147-138.648-19.147l17.008-59.073s8.24 7.02 125.48 7.02c109.543 0 122.56-7.02 122.56-7.02l17.007 59.073s-2.953 19.146-143.406 19.146zM362.24 169.656c-19.624-5.01-39.145-5.9-39.66-5.302 4.98-12.247 28.226-68.857 37.278-66.8 6.444 1.463 28.645 40.877 42.298 88.757-.51-.712-12.795-9.732-39.916-16.655z"/></svg>
+          <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
+              <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
+          </svg>
         </span>
-        <div class='input-select'>
-            <label>Component</label>
-            <select v-model='currentComponent'>
-                <optgroup v-for="ct in allComponents" :label="ct.name">
-                  <option v-for='definition in ct.defs' :value="{ definition, type: ct.type }">{{ definition.name }}</option>
-                </optgroup>
-            </select>
-            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
-                <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
-            </svg>
-        </div>
-        <assign-component-menu></assign-component-menu>
+        
+        <assign-component-menu v-show="visibleComponentType" :type="visibleComponentType"></assign-component-menu>
       </div>
 
       <template v-if="mode==='assign'">
@@ -131,11 +128,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </div>
       </template>
 
+
+
+
+
       <div id="snapping-options">
         <button @click="snapMode = 'grid-strict'" :class="{ active: snapMode === 'grid-strict' }">Strict Grid</button>
         <button @click="snapMode = 'grid-verts-edges'" :class="{ active: snapMode === 'grid-verts-edges' }">Edges too</button>
       </div>
-
 
       <div id="grid-tools">
         <button @click="tool = item" :class="{ active: tool === item }" v-for="item in availableTools" :data-tool="item">{{ item }}</button>
@@ -156,7 +156,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <script>
 import { mapState } from 'vuex';
 import SaveAsModal from './Modals/SaveAsModal.vue';
-import AssignComponentMenu from './AssignComponentMenu.vue';
+import AssignComponentMenu from './AssignComponentMenu.vue'
 import applicationHelpers from './../store/modules/application/helpers';
 
 export default {
@@ -170,6 +170,7 @@ export default {
       },
       showSaveModal: false,
       thingWereSaving: '',
+      visibleComponentType: null
     };
   },
   methods: {
