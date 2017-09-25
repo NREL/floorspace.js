@@ -57,9 +57,10 @@ function replaceComponents(
     const
       { dx, dy } = movementsByFaceId[w.originalFaceIds[0]] || { dx: 0, dy: 0 },
       newLoc = { x: w.originalLoc.x + dx, y: w.originalLoc.y + dy },
-      loc = snapWindowToEdge(/* snapMode */ 'nonstrict', edgesPresentOnFaces, newLoc, 1, spacing),
-      facesWithEdge = _.map(facesContainingEdge(geometry.faces, w.edge_id), 'id');
+      loc = snapWindowToEdge(/* snapMode */ 'nonstrict', edgesPresentOnFaces, newLoc, 1, spacing);
     if (!loc) { return; }
+
+    const facesWithEdge = _.map(facesContainingEdge(geometry.faces, loc.edge_id), 'id');
     if (_.intersection(facesWithEdge, w.originalFaceIds).length !== facesWithEdge.length ||
         (w.originalFaceIds.length > 1 && _.intersection(Object.keys(movementsByFaceId), w.originalFaceIds))) {
       // Suppose we add some windows to an edge that's shared between two spaces.
