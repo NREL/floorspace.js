@@ -104,9 +104,9 @@ export function replaceEdgeRef(state, payload) {
   face.edgeRefs.splice(
     edgeRefIx, 1, // remove existing edge
     // replacing it with these ones, in the same direction.
-    ...newEdges.map(newEdgeId => ({
+    ...newEdges.map(({ id: newEdgeId, reverse: edgeReverse }) => ({
       edge_id: newEdgeId,
-      reverse: edgeRef.reverse,
+      reverse: edgeRef.reverse ^ edgeReverse,
     })),
   );
 }

@@ -99,7 +99,6 @@ module.exports = {
       .perform(drawSquare(-10, 50, 10, 10))
       .click('#selections .add-sub-selection')
       .perform(drawSquare(-55, 40, 30, 20))
-      .pause(2000)
       .execute(() => window.application.$store.state.geometry[0], [], ({ value }) => {
         const { faces, edges } = value,
           edgesConnect = (face) => {

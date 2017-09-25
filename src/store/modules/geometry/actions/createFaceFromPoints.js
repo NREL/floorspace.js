@@ -377,7 +377,7 @@ function replacementEdgeRefs(geometry, dyingEdgeId, newEdges) {
     geometry_id: geometry.id,
     edge_id: dyingEdgeId,
     face_id: affectedFace.id,
-    newEdges: _.map(newEdges, 'id'),
+    newEdges: _.map(newEdges, _.partialRight(_.pick, ['id', 'reverse'])),
   }));
 
   return replaceEdgeRefs;
