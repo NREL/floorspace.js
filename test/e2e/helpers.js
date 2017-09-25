@@ -2,7 +2,6 @@ const d3 = require('d3');
 const _ = require('lodash');
 
 function failOnError(browser) {
-  let errorOccurred;
   browser.setFlagOnError = () => {
     browser.execute(
       'window.errorOccurred = false; window.addEventListener("error", () => { window.errorOccurred = true; })',
@@ -11,12 +10,32 @@ function failOnError(browser) {
   };
   browser.checkForErrors = () => {
     browser.execute('return window.errorOccurred', [], ({ value }) => {
-      errorOccurred = value;
+      browser.assert.ok(!value);
     })
-    .perform((client, done) => {
-      client.assert.ok(!errorOccurred);
-      done();
+    .getLog('browser', (logs) => {
+      const errors = _(logs)
+        .filter({ level: 'SEVERE' })
+        .reject(log => /favicon.ico - Failed to load resource:/.test(log.message))
+        .map('message')
+        .value();
+      if (errors.length) {
+        console.error('errors found');
+        errors.forEach(e => console.error(e));
+      }
+      browser.assert.equal(errors.length, 0);
     });
+    return browser;
+  };
+  browser.assertErrorOccurred = () => {
+    browser
+      .getLog('browser', (logs) => {
+        const errors = _(logs)
+          .filter({ level: 'SEVERE' })
+          .reject(log => /favicon.ico - Failed to load resource:/.test(log.message))
+          .map('message')
+          .value();
+        browser.assert.ok(errors.length > 0);
+      });
     return browser;
   };
   return browser;

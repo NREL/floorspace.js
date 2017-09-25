@@ -5,6 +5,18 @@ const { failOnError, withScales, draw50By50Square, drawSquare } = require('../he
 
 module.exports = {
   tags: ['spaces'],
+  'failOnError causes failure': (browser) => {
+    failOnError(browser)
+      .url(browser.globals.devServerURL)
+      .resizeWindow(1000, 800)
+      .waitForElementVisible('.modal .new-floorplan', 5000)
+      .setFlagOnError()
+      .execute(() => {
+        window.application.$store.state.geometry[0].vertices.splice(1);
+      })
+      .assertErrorOccurred()
+      .end();
+  },
   'make space and new story': (browser) => {
     withScales(failOnError(browser))
       .waitForElementVisible('.modal .new-floorplan', 5000)
