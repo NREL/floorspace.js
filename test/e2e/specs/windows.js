@@ -26,9 +26,7 @@ module.exports = {
   "can't delete definition when instances exist": (browser) => {
     browser
       .click('.library-table .destroy')
-      .checkForErrors() // this should be throwing, but since it's not, we'll
-      // assert on the elment count.
-      .assert.elementCount('.library-table tr', 2)
+      .checkForErrors()
       .end();
   },
   'modifying edge preserves windows': (browser) => {
