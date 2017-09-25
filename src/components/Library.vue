@@ -376,6 +376,12 @@ export default {
             story: this.$store.state.models.stories.find(story => story[this.type].find(o => o.id === object.id)),
           });
           break;
+        case 'window_definitions':
+          this.$store.dispatch('models/destroyWindowDef', { object });
+          break;
+        case 'daylighting_control_definitions':
+          this.$store.dispatch('models/destroyDaylightingControlDef', { object });
+          break;
         default:
           this.$store.dispatch('models/destroyObject', { object });
           break;

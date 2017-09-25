@@ -97,4 +97,16 @@ export default {
       space.daylighting_controls = [];
     });
   },
+  destroyWindowsByDefinition(state, { id }) {
+    state.stories.forEach((story) => {
+      story.windows = _.reject(story.windows, { window_defn_id: id });
+    });
+  },
+  destroyDaylightingControlsByDefinition(state, { id }) {
+    state.stories.forEach((story) => {
+      story.spaces.forEach((space) => {
+        space.daylighting_controls = _.reject(space.daylighting_controls, { daylighting_control_defn_id: id });
+      });
+    });
+  },
 }

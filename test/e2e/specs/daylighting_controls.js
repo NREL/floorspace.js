@@ -22,6 +22,15 @@ module.exports = {
         done();
       });
   },
+  'deleting defn deletes all instances': (browser) => {
+    browser
+      .click('.library-table .destroy')
+      // switching tools clears the .highlight
+      .click('.tools [data-tool="Select"]')
+      .assert.elementCount('.daylighting-control', 0)
+      .checkForErrors()
+      .end();
+  },
   'modifying edge preserves daylighting controls': (browser) => {
     browser
       .click('.tools [data-tool="Rectangle"]')

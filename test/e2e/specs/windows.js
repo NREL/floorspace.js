@@ -23,9 +23,12 @@ module.exports = {
         done();
       });
   },
-  "can't delete definition when instances exist": (browser) => {
+  'deleting defn deletes all instances': (browser) => {
     browser
       .click('.library-table .destroy')
+      // switching tools clears the .highlight
+      .click('.tools [data-tool="Select"]')
+      .assert.elementCount('.window', 0)
       .checkForErrors()
       .end();
   },

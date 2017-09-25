@@ -96,6 +96,16 @@ export default {
         });
     },
 
+  destroyWindowDef(context, payload) {
+    context.commit('destroyWindowsByDefinition', payload.object);
+    context.commit('destroyObject', payload);
+  },
+
+  destroyDaylightingControlDef(context, payload) {
+    context.commit('destroyDaylightingControlsByDefinition', payload.object);
+    context.commit('destroyObject', payload);
+  },
+
     // this is ONLY for library objects and does not include shading, spaces, or stories
     destroyObject (context, payload) {
         context.commit('destroyObject', {
