@@ -15,8 +15,10 @@ import store from './store/index';
 import timetravel from './store/timetravel';
 import App from './App.vue';
 import PrettySelect from './components/PrettySelect.vue';
+import ValidatedInput from './components/ValidatedInput.vue';
 
 Vue.component('pretty-select', PrettySelect);
+Vue.component('validated-input', ValidatedInput);
 
 // mount the root vue instance
 window.application = new Vue({

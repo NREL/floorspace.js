@@ -7,86 +7,31 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 
 <template>
-  <div class="editable-select">
-    <table class="table">
-      <thead>
-        <tr>
-          <th v-for="col in visibleColumns">
-            {{col.displayName}}
-          </th>
-          <th><!-- placeholder for delete column --></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="row in rows">
-          <td v-for="col in visibleColumns" :data-column="col.name">
-            <validated-input
-              :col="col"
-              :row="row"
-              :onChange="updateRow"
-            />
-          </td>
-          <td class="destroy" @click="deleteRow(row.id)">
-            <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
-            </svg>
-          </td>
-        </tr>
-      </tbody>
-      <tfoot>
-        <tr>
-          <button @click="newRow">+</button>
-        </tr>
-      </tfoot>
-    </table>
+  <input v-if="col.readonly || !col.input_type" :value="row[col.name]" readonly />
+
+  <input v-else-if="col.input_type === 'text'" :value="row[col.name]" @change="onChange(row.id, col.name, $event.target.value)"/>
+
+  <div v-else-if="col.input_type === 'color'" class="input-color">
+    <input :object-id="row.id" :value="row[col.name]" @change="onChange(row.id, col.name, $event.target.value)"/>
   </div>
+
+  <pretty-select v-else-if="col.input_type === 'select'"
+    :onChange="onChange.bind(null, row.id, col.name)"
+    :options="_.toPairs(col.select_data(row, rootState)).map(([k, v]) => ({ val: v, display: k }))"
+    :value="row[col.name]"
+  />
 </template>
 
 <script>
 import _ from 'lodash';
-import { mapState, mapGetters } from 'vuex';
 
 export default {
-  name: 'EditableSelectTable',
-  props: ['columns', 'rows', 'newRow', 'deleteRow', 'updateRow'],
-  data() {
-    return {
-      editableRow: null,
-    };
-  },
-  computed: {
-    ...mapState({
-      rootState: state => state,
-    }),
-    visibleColumns() {
-      return _.reject(this.columns, 'private');
-    },
-  },
-};
+  name: 'ValidatedInput',
+  props: ['col', 'row', 'onChange'],
+}
+
 </script>
 
 <style lang="scss" scoped>
 @import "./../scss/config";
-  .editable-select {
-    background-color: #24292c;
-  }
-  input {
-      background-color: rgba(0,0,0,0);
-      border: none;
-      color: $gray-lightest;
-      font-size: 1rem;
-  }
-
-  td.destroy {
-      width: 2rem;
-      svg {
-          cursor: pointer;
-          height: 1.25rem;
-          fill: $gray-lightest;
-          &:hover {
-              fill: $secondary;
-          }
-      }
-  }
-
 </style>
