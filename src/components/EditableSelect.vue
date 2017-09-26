@@ -8,79 +8,51 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
   <div>
-    <div>type {{type}}
-      <icon class="button"></icon>
-    </div>
-    <editable-select :columns="currentComponentColumns" :rows="currentComponentDefinitions"/>
+    <table class="table">
+      <thead>
+        <tr>
+          <th v-for="col in visibleColumns">
+            {{col.displayName}}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="row in rows">
+          <th v-for="col in visibleColumns">
+            {{row[col.name]}}
+          </th>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </template>
 
 <script>
-import icon from './../assets/geometry-editor-icons/icon_add_image.svg'
-import EditableSelect from './EditableSelect';
-import libconfig from '../store/modules/models/libconfig';
+import _ from 'lodash';
 
 export default {
-  name: 'AssignComponentMenu',
-  props: ['type'],
+  name: 'EditableSelect',
+  props: ['columns', 'rows'],
   data() {
-    return {
-      componentTypes: {
-        daylighting_control_definitions: 'Daylighting Control Definitions',
-        window_definitions: 'Window Definitions',
-      },
-    };
+    return {};
   },
-  methods: {
+  mounted() {
   },
+  methods: {},
   computed: {
-    latestCreatedCompId() {
-      return _.chain(this.components)
-        .map('defs')
-        .flatten()
-        .map('id')
-        .map(Number)
-        .max()
-        .value() + '';
-    },
-    components() {
-      return Object.keys(this.componentTypes).map(ct => ({
-        defs: this.$store.state.models.library[ct],
-        name: this.componentTypes[ct],
-        type: ct,
-      }));
-    },
-    currentComponentType() {
-      return this.currentComponent.type;
-    },
-    currentComponentColumns() {
-      return this.type ? libconfig[this.type].columns : [];
-    },
-    currentComponentDefinition() {
-      return this.currentComponent.definition;
-    },
-    currentComponentDefinitions() {
-      return this.type ? this.$store.state.models.library[this.type] : [];
-    },
-
-    currentComponent: {
-      get() { return this.$store.getters['application/currentComponent']; },
-      set(item) {
-        if (!item || !item.definition || !item.definition.id) { return; }
-        this.$store.dispatch('application/setCurrentComponentDefinitionId', { id: item.definition.id });
-      },
+    visibleColumns() {
+      return _.reject(this.columns, 'private');
     },
   },
-  components: {
-    icon,
-    'editable-select': EditableSelect,
-  },
+  components: {},
 };
 </script>
 
 <style lang="scss" scoped>
 @import "./../scss/config";
   div {
-    background-color: red;
+    background-color: blue;
+    width: 400px;
+    height: 300px;
   }
 </style>
