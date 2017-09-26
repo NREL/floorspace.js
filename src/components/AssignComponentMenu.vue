@@ -11,13 +11,17 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     <div>type {{type}}
       <icon class="button"></icon>
     </div>
-    <editable-select :columns="currentComponentColumns" :rows="currentComponentDefinitions"/>
+    <editable-select-table
+      :columns="currentComponentColumns"
+      :rows="currentComponentDefinitions"
+      :newRow="createComponentDefinition"
+    />
   </div>
 </template>
 
 <script>
 import icon from './../assets/geometry-editor-icons/icon_add_image.svg'
-import EditableSelect from './EditableSelect';
+import EditableSelectTable from './EditableSelectTable';
 import libconfig from '../store/modules/models/libconfig';
 
 export default {
@@ -32,6 +36,9 @@ export default {
     };
   },
   methods: {
+    createComponentDefinition() {
+      this.$store.dispatch('models/createObjectWithType', { type: this.type })
+    },
   },
   computed: {
     latestCreatedCompId() {
@@ -73,7 +80,7 @@ export default {
   },
   components: {
     icon,
-    'editable-select': EditableSelect,
+    'editable-select-table': EditableSelectTable,
   },
 };
 </script>

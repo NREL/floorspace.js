@@ -14,37 +14,66 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           <th v-for="col in visibleColumns">
             {{col.displayName}}
           </th>
+          <th><!-- placeholder for delete column --></th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="row in rows">
-          <th v-for="col in visibleColumns">
-            {{row[col.name]}}
-          </th>
+          <td v-for="col in visibleColumns" :data-column="col.name">
+            <input v-if="col.readonly || !col.input_type" :value="row[col.name]" readonly />
+
+            <input v-if="col.input_type === 'text'" :value="row[col.name]" @change="updateRow(row.id, col.name, $event.target.value)"/>
+
+            <div v-if="col.input_type === 'color'" class="input-color">
+              <input :object-id="row.id" :value="row[col.name]" @change="updateRow(row.id, col.name, $event.target.value)"/>
+            </div>
+
+            <div v-if="col.input_type === 'select'" class='input-select'>
+                <select @change="updateRow(row.id, col.name, $event.target.value)">
+                    <option :selected="!row[col.name]" value="null">None</option>
+                    <option v-for='(val, display) in col.select_data(row, rootState)' :value="val" :selected="row[col.name] === val">{{ display }}</option>
+                </select>
+                <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
+                    <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
+                </svg>
+            </div>
+          </td>
+          <td class="destroy" @click="deleteRow(row.id)">
+            <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
+            </svg>
+          </td>
         </tr>
       </tbody>
+      <tfoot>
+        <tr>
+          <button @click="newRow">+</button>
+        </tr>
+      </tfoot>
     </table>
   </div>
 </template>
 
 <script>
 import _ from 'lodash';
+import { mapState, mapGetters } from 'vuex';
 
 export default {
-  name: 'EditableSelect',
-  props: ['columns', 'rows'],
+  name: 'EditableSelectTable',
+  props: ['columns', 'rows', 'newRow', 'deleteRow', 'updateRow'],
   data() {
-    return {};
+    return {
+      editableRow: null,
+    };
   },
-  mounted() {
-  },
-  methods: {},
   computed: {
+    ...mapState({
+      rootState: state => state,
+    }),
     visibleColumns() {
       return _.reject(this.columns, 'private');
     },
   },
-  components: {},
 };
 </script>
 
@@ -52,7 +81,6 @@ export default {
 @import "./../scss/config";
   div {
     background-color: blue;
-    width: 400px;
     height: 300px;
   }
 </style>
