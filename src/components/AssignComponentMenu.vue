@@ -16,6 +16,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       :rows="currentComponentDefinitions"
       :newRow="createComponentDefinition"
       :deleteRow="deleteComponentDef"
+      :updateRow="updateComponentDef"
     />
   </div>
 </template>
@@ -24,6 +25,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 import icon from './../assets/geometry-editor-icons/icon_add_image.svg'
 import EditableSelectTable from './EditableSelectTable';
 import libconfig from '../store/modules/models/libconfig';
+import helpers from './../store/modules/models/helpers';
 
 export default {
   name: 'AssignComponentMenu',
@@ -51,6 +53,14 @@ export default {
         default:
           this.$store.dispatch('models/destroyObject', { object: { id: componentId } });
           break;
+      }
+    },
+    updateComponentDef(componentId, key, value) {
+      const result = helpers.setValueForKey(
+        _.find(this.currentComponentDefinitions, { id: componentId }),
+        this.$store, this.type, key, value);
+      if (!result.success) {
+        window.eventBus.$emit('error', result.error);
       }
     },
   },
