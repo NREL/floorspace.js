@@ -8,13 +8,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
   <div>type{{type}}
-    <icon class="button"></icon>
   </div>
 
 </template>
 
 <script>
-import icon from './../assets/geometry-editor-icons/icon_add_image.svg'
 
 export default {
   name: 'AssignComponentMenu',
@@ -62,7 +60,6 @@ export default {
     },
   },
   components: {
-    icon
   },
 };
 </script>

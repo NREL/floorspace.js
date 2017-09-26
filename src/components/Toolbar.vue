@@ -27,30 +27,30 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       </div>
 
       <div id="mode-tabs">
-        <span @click="mode='floorplan'" :class="{ active: mode === 'floorplan' }">
-          Floorplan
-          <svg class="icon" baseProfile="tiny" height="500" overflow="auto" viewBox="0 0 500 500" width="500" xmlns="http://www.w3.org/2000/svg"><path d="M359.688 31.938c-17.69-4.072-69.403 127.513-69.403 127.513s-8.165-2.553-35.384-2.553c-23.264 0-34.566 2.07-37.368 3.51-8.734-21.754-53.894-131.43-69.766-127.78-17.692 4.07-91.98 168.313-91.98 312.103 0 116.32 110.434 117.604 202.166 117.604 83.953 0 195.637-1.332 195.637-122.47-.002-143.788-76.212-303.856-93.902-307.926zM105.914 186.346c-.01-.004-.004-.02.014-.046 13.65-47.807 35.84-87.16 42.285-88.62 9.05-2.054 32.287 54.468 37.266 66.696-.517-.597-20.032.29-39.65 5.293-27.11 6.91-39.39 15.916-39.902 16.63l-.014.046zm145.67 144.063c-137.903 0-138.648-19.147-138.648-19.147l17.008-59.073s8.24 7.02 125.48 7.02c109.543 0 122.56-7.02 122.56-7.02l17.007 59.073s-2.953 19.146-143.406 19.146zM362.24 169.656c-19.624-5.01-39.145-5.9-39.66-5.302 4.98-12.247 28.226-68.857 37.278-66.8 6.444 1.463 28.645 40.877 42.298 88.757-.51-.712-12.795-9.732-39.916-16.655z"/></svg>
-        </span>
+        <div click="mode='floorplan'" :class="{ active: mode === 'floorplan' }">
+          <span>Floorplan</span>
+          <tab-floorplan-svg class="icon"></tab-floorplan-svg>
+        </div>
 
-        <span @click="mode='shading'" :class="{ active: mode === 'shading' }">
-          Shading
-          <svg class="icon" baseProfile="tiny" height="500" overflow="auto" viewBox="0 0 500 500" width="500" xmlns="http://www.w3.org/2000/svg"><path d="M359.688 31.938c-17.69-4.072-69.403 127.513-69.403 127.513s-8.165-2.553-35.384-2.553c-23.264 0-34.566 2.07-37.368 3.51-8.734-21.754-53.894-131.43-69.766-127.78-17.692 4.07-91.98 168.313-91.98 312.103 0 116.32 110.434 117.604 202.166 117.604 83.953 0 195.637-1.332 195.637-122.47-.002-143.788-76.212-303.856-93.902-307.926zM105.914 186.346c-.01-.004-.004-.02.014-.046 13.65-47.807 35.84-87.16 42.285-88.62 9.05-2.054 32.287 54.468 37.266 66.696-.517-.597-20.032.29-39.65 5.293-27.11 6.91-39.39 15.916-39.902 16.63l-.014.046zm145.67 144.063c-137.903 0-138.648-19.147-138.648-19.147l17.008-59.073s8.24 7.02 125.48 7.02c109.543 0 122.56-7.02 122.56-7.02l17.007 59.073s-2.953 19.146-143.406 19.146zM362.24 169.656c-19.624-5.01-39.145-5.9-39.66-5.302 4.98-12.247 28.226-68.857 37.278-66.8 6.444 1.463 28.645 40.877 42.298 88.757-.51-.712-12.795-9.732-39.916-16.655z"/></svg>
-        </span>
+        <div @click="mode='shading'" :class="{ active: mode === 'shading' }">
+          <span>Shading</span>
+          <tab-shading-svg class="icon"></tab-shading-svg>
+        </div>
 
-        <span @click="mode='images'" :class="{ active: mode === 'images' }">
-          Images
-          <svg class="icon" baseProfile="tiny" height="500" overflow="auto" viewBox="0 0 500 500" width="500" xmlns="http://www.w3.org/2000/svg"><path d="M359.688 31.938c-17.69-4.072-69.403 127.513-69.403 127.513s-8.165-2.553-35.384-2.553c-23.264 0-34.566 2.07-37.368 3.51-8.734-21.754-53.894-131.43-69.766-127.78-17.692 4.07-91.98 168.313-91.98 312.103 0 116.32 110.434 117.604 202.166 117.604 83.953 0 195.637-1.332 195.637-122.47-.002-143.788-76.212-303.856-93.902-307.926zM105.914 186.346c-.01-.004-.004-.02.014-.046 13.65-47.807 35.84-87.16 42.285-88.62 9.05-2.054 32.287 54.468 37.266 66.696-.517-.597-20.032.29-39.65 5.293-27.11 6.91-39.39 15.916-39.902 16.63l-.014.046zm145.67 144.063c-137.903 0-138.648-19.147-138.648-19.147l17.008-59.073s8.24 7.02 125.48 7.02c109.543 0 122.56-7.02 122.56-7.02l17.007 59.073s-2.953 19.146-143.406 19.146zM362.24 169.656c-19.624-5.01-39.145-5.9-39.66-5.302 4.98-12.247 28.226-68.857 37.278-66.8 6.444 1.463 28.645 40.877 42.298 88.757-.51-.712-12.795-9.732-39.916-16.655z"/></svg>
-        </span>
+        <div @click="mode='images'" :class="{ active: mode === 'images' }">
+          <span>Images</span>
+          <tab-floorplan-svg  class="icon"></tab-floorplan-svg>
+        </div>
 
-        <span @click="mode='components'" :class="{ active: mode === 'components' }">
-          Components
-          <svg class="icon" baseProfile="tiny" height="500" overflow="auto" viewBox="0 0 500 500" width="500" xmlns="http://www.w3.org/2000/svg"><path d="M359.688 31.938c-17.69-4.072-69.403 127.513-69.403 127.513s-8.165-2.553-35.384-2.553c-23.264 0-34.566 2.07-37.368 3.51-8.734-21.754-53.894-131.43-69.766-127.78-17.692 4.07-91.98 168.313-91.98 312.103 0 116.32 110.434 117.604 202.166 117.604 83.953 0 195.637-1.332 195.637-122.47-.002-143.788-76.212-303.856-93.902-307.926zM105.914 186.346c-.01-.004-.004-.02.014-.046 13.65-47.807 35.84-87.16 42.285-88.62 9.05-2.054 32.287 54.468 37.266 66.696-.517-.597-20.032.29-39.65 5.293-27.11 6.91-39.39 15.916-39.902 16.63l-.014.046zm145.67 144.063c-137.903 0-138.648-19.147-138.648-19.147l17.008-59.073s8.24 7.02 125.48 7.02c109.543 0 122.56-7.02 122.56-7.02l17.007 59.073s-2.953 19.146-143.406 19.146zM362.24 169.656c-19.624-5.01-39.145-5.9-39.66-5.302 4.98-12.247 28.226-68.857 37.278-66.8 6.444 1.463 28.645 40.877 42.298 88.757-.51-.712-12.795-9.732-39.916-16.655z"/></svg>
-        </span>
+        <div @click="mode='components'" :class="{ active: mode === 'components' }">
+          <span>Components</span>
+          <tab-components-svg  class="icon"></tab-components-svg>
+        </div>
 
-        <span @click="mode='assign'" :class="{ active: mode === 'assign' }">
-          Assign
-          <svg class="icon" baseProfile="tiny" height="500" overflow="auto" viewBox="0 0 500 500" width="500" xmlns="http://www.w3.org/2000/svg"><path d="M359.688 31.938c-17.69-4.072-69.403 127.513-69.403 127.513s-8.165-2.553-35.384-2.553c-23.264 0-34.566 2.07-37.368 3.51-8.734-21.754-53.894-131.43-69.766-127.78-17.692 4.07-91.98 168.313-91.98 312.103 0 116.32 110.434 117.604 202.166 117.604 83.953 0 195.637-1.332 195.637-122.47-.002-143.788-76.212-303.856-93.902-307.926zM105.914 186.346c-.01-.004-.004-.02.014-.046 13.65-47.807 35.84-87.16 42.285-88.62 9.05-2.054 32.287 54.468 37.266 66.696-.517-.597-20.032.29-39.65 5.293-27.11 6.91-39.39 15.916-39.902 16.63l-.014.046zm145.67 144.063c-137.903 0-138.648-19.147-138.648-19.147l17.008-59.073s8.24 7.02 125.48 7.02c109.543 0 122.56-7.02 122.56-7.02l17.007 59.073s-2.953 19.146-143.406 19.146zM362.24 169.656c-19.624-5.01-39.145-5.9-39.66-5.302 4.98-12.247 28.226-68.857 37.278-66.8 6.444 1.463 28.645 40.877 42.298 88.757-.51-.712-12.795-9.732-39.916-16.655z"/></svg>
-        </span>
+        <div @click="mode='assign'" :class="{ active: mode === 'assign' }">
+          <span>Assign</span>
+          <tab-assign-svg  class="icon"></tab-assign-svg>
+        </div>
       </div>
 
       <div id="grid-settings">
@@ -92,7 +92,24 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     </section>
 
     <section id="bottom">
-      <template v-if="mode==='floorplan'">
+      <template  v-if="mode==='floorplan'">
+        <div id="instructions">Draw a floorplan and import images</div>
+
+        <div id="drawing-tools" class="tools-list">
+          <div @click="tool = 'Rectangle'" :class="{ active: tool === 'Rectangle' }">
+            <tool-draw-rectangle-svg class="button"></tool-draw-rectangle-svg>
+          </div>
+          <div @click="tool = 'Polygon'" :class="{ active: tool === 'Polygon' }">
+            <tool-draw-rectangle-svg class="button"></tool-draw-rectangle-svg>
+          </div>
+          <div @click="tool = 'Eraser'" :class="{ active: tool === 'Eraser' }">
+            <tool-erase-svg class="button"></tool-erase-svg>
+          </div>
+          <div @click="tool = ''" :class="{ active: tool === '' }">
+            <tool-move-size-svg class="button"></tool-move-size-svg>
+          </div>
+        </div>
+
         <div class='input-select'>
             <label>View By</label>
             <select v-model='currentMode'>
@@ -104,7 +121,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </div>
       </template>
 
-      <div id="components-menu" v-if="mode==='components'">
+      <div id="components-mode-menu"  class="mode-menu" v-if="mode==='components'">
 
         <span v-for="type in ['window_definitions', 'daylighting_control_definitions']"  @click="visibleComponentType = visibleComponentType === type ? null : type " :class="{ active: currentComponentType === type }">
           {{ type }}
@@ -132,13 +149,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 
 
-      <div id="snapping-options">
+      <!-- <div id="snapping-options">
         <button @click="snapMode = 'grid-strict'" :class="{ active: snapMode === 'grid-strict' }">Strict Grid</button>
         <button @click="snapMode = 'grid-verts-edges'" :class="{ active: snapMode === 'grid-verts-edges' }">Edges too</button>
-      </div>
+      </div> -->
 
       <div id="grid-tools">
-        <button @click="tool = item" :class="{ active: tool === item }" v-for="item in availableTools" :data-tool="item">{{ item }}</button>
+        <zoom-in-svg class="button"></zoom-in-svg>
+        <zoom-out-svg class="button"></zoom-out-svg>
+        <pan-svg class="button"></pan-svg>
       </div>
 
     </section>
@@ -156,15 +175,31 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <script>
 import { mapState } from 'vuex';
 import SaveAsModal from './Modals/SaveAsModal.vue';
-import AssignComponentMenu from './AssignComponentMenu.vue'
+import AssignComponentMenu from './AssignComponentMenu.vue';
 import applicationHelpers from './../store/modules/application/helpers';
 
 // svgs
-import openFloorplanSvg from './../assets/geometry-editor-icons/icon_open_floorplan.svg'
-import saveFloorplanSvg from './../assets/geometry-editor-icons/icon_save_floorplan.svg'
-import importLibrarySvg from './../assets/geometry-editor-icons/icon_import_library.svg'
-import undoSvg from './../assets/geometry-editor-icons/icon_undo.svg'
-import redoSvg from './../assets/geometry-editor-icons/icon_redo.svg'
+import openFloorplanSvg from './../assets/svg-icons/open_floorplan.svg'
+import saveFloorplanSvg from './../assets/svg-icons/save_floorplan.svg'
+import importLibrarySvg from './../assets/svg-icons/import_library.svg'
+
+import undoSvg from './../assets/svg-icons/undo.svg'
+import redoSvg from './../assets/svg-icons/redo.svg'
+
+import floorplanTabSvg from './../assets/svg-icons/tab_floorplan.svg'
+import shadingTabSvg from './../assets/svg-icons/tab_shading.svg'
+import assignTabSvg from './../assets/svg-icons/tab_assign.svg'
+import componentsTabSvg from './../assets/svg-icons/tab_components.svg'
+
+import toolDrawRectangleSvg from './../assets/svg-icons/tool_draw_rectangle.svg'
+import toolDrawPolygonSvg from './../assets/svg-icons/tool_draw_polygon.svg'
+import toolEraseSvg from './../assets/svg-icons/tool_erase.svg'
+import toolMoveSizeSvg from './../assets/svg-icons/tool_move_size.svg'
+import toolColorSvg from './../assets/svg-icons/tool_color.svg'
+
+import zoomInSvg from './../assets/svg-icons/zoom_in.svg'
+import zoomOutSvg from './../assets/svg-icons/zoom_out.svg'
+import panSvg from './../assets/svg-icons/pan.svg'
 
 export default {
   name: 'toolbar',
@@ -344,23 +379,41 @@ export default {
     'save-floorplan-svg': saveFloorplanSvg,
     'import-library-svg': importLibrarySvg,
     'undo-svg': undoSvg,
-    'redo-svg': redoSvg
+    'redo-svg': redoSvg,
+    'tab-floorplan-svg': floorplanTabSvg,
+    'tab-shading-svg': shadingTabSvg,
+    'tab-assign-svg': assignTabSvg,
+    'tab-components-svg': componentsTabSvg,
+
+    'tool-color-svg': toolColorSvg,
+    'tool-draw-rectangle-svg': toolDrawRectangleSvg,
+    'tool-draw-polygon-svg': toolDrawPolygonSvg,
+    'tool-erase-svg': toolEraseSvg,
+    'tool-move-size-svg': toolMoveSizeSvg,
+
+    'zoom-in-svg': zoomInSvg,
+    'zoom-out-svg': zoomOutSvg,
+    'pan-svg': panSvg,
   },
 };
 </script>
 
 <style lang="scss" scoped>
-@import "./../scss/config";
+// @import "./../scss/config";
+
+$gray-dark: #333333;
+$black: #000000;
+$gray-medium-light: #5b5b5b;
 
 #toolbar {
+  background-color: $black;
   z-index: 3;
+
   #top {
-    height: 2rem;
+    height: 3rem;
+    display: flex;
     #navigation-head {
-      background-color: $gray-darkest;
-      display: inline-block;
       #undo-redo {
-        display: inline-block;
         float: right;
       }
       input {
@@ -369,44 +422,48 @@ export default {
     }
 
     #mode-tabs {
-       display: inline-block;
-       > {
-         display: inline-block;
-       }
-        > span {
-          font-size: .8rem;
-          width: 6rem;
-          &.active {
-            background-color: $gray-medium-light;
-          }
-          svg.icon {
-            height: 1rem;
-            width: 1rem;
-          }
+      cursor: pointer;
+      display: flex;
+        >* {
+          padding-left: .5rem;
+        }
+        .active {
+          background-color: $gray-medium-light;
+        }
+        svg {
+          vertical-align: middle;
+          height: 2rem;
+          width: 2rem;
         }
     }
     #grid-settings {
-      display: inline-block;
-      float: right;
-      > div {
-        display: inline-block;
+      display: flex;
+      margin-left: auto;
+      >* {
+        margin-right: 1rem;
       }
     }
   }
   #bottom {
     background-color: $gray-medium-light;
-    height: 3rem;
-    margin-left: 17.5rem;
-    > {
-      display: inline-block;
-    }
+    display: flex;
+    height: 2rem;
 
+    .tools-list {
+      display: flex;
+      margin-right: 3rem;
+
+    }
+    #instructions {
+      margin-right: auto;
+    }
     #components-menu {
       span.active {
         background-color: $gray-dark;
       }
     }
     #grid-tools {
+      display: flex;
       float: right;
     }
   }
