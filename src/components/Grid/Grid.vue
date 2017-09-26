@@ -72,7 +72,6 @@ export default {
     };
   },
   mounted() {
-    window.theGrid = this;
     // throttle/debounce event handlers
     this.handleMouseMove = throttle(this.highlightSnapTarget, 100);
 

@@ -114,7 +114,6 @@ module.exports = {
       .execute(() => window.application.$store.state.geometry[0], [], ({ value }) => {
         const { faces, edges } = value,
           edgesConnect = (face) => {
-            console.log(`checking if edges connect for ${face.id}`);
             face.edges = face.edgeRefs.map(e => ({ ...e, ..._.find(edges, { id: e.edge_id }) }));
             _.zip(face.edges.slice(0, -1), face.edges.slice(1))
               .forEach(([e1, e2]) => {
