@@ -7,27 +7,86 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 
 <template>
-  <input v-if="col.readonly || !col.input_type" :value="row[col.name]" readonly />
-
-  <input v-else-if="col.input_type === 'text'" :value="row[col.name]" @change="onChange(row.id, col.name, $event.target.value)"/>
-
-  <div v-else-if="col.input_type === 'color'" class="input-color">
-    <input :object-id="row.id" :value="row[col.name]" @change="onChange(row.id, col.name, $event.target.value)"/>
+  <input v-if="!col.input_type || col.input_type === 'text'"
+    @focus="maybeFocus"
+    @dblclick="actuallyFocus"
+    @blur="ignoreFocus = true"
+    @keydown="blurOnEnter"
+    :value="row[col.name]"
+    :readonly="!col.input_type || col.readonly"
+  />
+  <!-- <div>
+    <input v-else-if="col.input_type === 'color'"
+       class="input-color"
+       :object-id="row.id"
+       :value="row[col.name]"
+    />
   </div>
 
   <pretty-select v-else-if="col.input_type === 'select'"
     :onChange="onChange.bind(null, row.id, col.name)"
     :options="_.toPairs(col.select_data(row, rootState)).map(([k, v]) => ({ val: v, display: k }))"
     :value="row[col.name]"
-  />
+  /> -->
 </template>
 
 <script>
 import _ from 'lodash';
 
 export default {
-  name: 'ValidatedInput',
+  name: 'GenericInput',
   props: ['col', 'row', 'onChange'],
+  data() {
+    return {
+      ignoreFocus: true,
+    };
+  },
+  methods: {
+    maybeFocus(evt) {
+      // blur unless ignoreFocus is false
+      this.ignoreFocus && this.$el.blur();
+      // but re-focus if the tab key was pressed.
+      const tabUp = (evt) => {
+        console.log('tabup?', evt);
+        if (evt.which === 9){
+          this.actuallyFocus();
+        }
+      };
+      console.log('adding event listener');
+      document.addEventListener('keyup', tabUp);
+      setTimeout(() => console.log('removing event listener') || document.removeEventListener('keyup', tabUp), 400);
+    },
+    actuallyFocus() {
+      this.ignoreFocus = false;
+      this.$el.focus();
+    },
+    blurOnEnter(evt) {
+      if (evt.which === 13) {
+        this.$el.blur();
+      }
+      return;
+    }
+  },
+  // mounted() {
+  //   this.configurePickers();
+  // },
+  // configurePickers() {
+  //   const inputs = this.$el.querySelectorAll('.input-color');
+  //   for (let i = 0; i < inputs.length; i++) {
+  //     // TODO use a forEach instead so that this doesn't fail because it's not
+  //     // closing over i;
+  //     const
+  //       objectId = inputs[i].getAttribute('data-object-id'),
+  //       colName = inputs[i].getAttribute('data-column');
+  //
+  //
+  //     this.huebs[objectId] = new Huebee(inputs[i], { saturations: 1 });
+  //     this.huebs[objectId].handler = (color) => {
+  //       this.onChange(objectId, colName, color);
+  //     };
+  //     this.huebs[objectId].on('change', this.huebs[objectId].handler);
+  //   }
+  // },
 }
 
 </script>

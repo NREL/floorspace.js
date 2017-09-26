@@ -20,7 +20,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       <tbody>
         <tr v-for="row in rows">
           <td v-for="col in visibleColumns" :data-column="col.name">
-            <validated-input
+            <generic-input
               :col="col"
               :row="row"
               :onChange="updateRow"
