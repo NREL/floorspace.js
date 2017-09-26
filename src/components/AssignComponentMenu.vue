@@ -15,6 +15,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       :columns="currentComponentColumns"
       :rows="currentComponentDefinitions"
       :newRow="createComponentDefinition"
+      :deleteRow="deleteComponentDef"
     />
   </div>
 </template>
@@ -38,6 +39,19 @@ export default {
   methods: {
     createComponentDefinition() {
       this.$store.dispatch('models/createObjectWithType', { type: this.type })
+    },
+    deleteComponentDef(componentId) {
+      switch (this.type) {
+        case 'window_definitions':
+          this.$store.dispatch('models/destroyWindowDef', { object: { id: componentId } });
+          break;
+        case 'daylighting_control_definitions':
+          this.$store.dispatch('models/destroyDaylightingControlDef', { object: { id: componentId } });
+          break;
+        default:
+          this.$store.dispatch('models/destroyObject', { object: { id: componentId } });
+          break;
+      }
     },
   },
   computed: {
@@ -69,7 +83,6 @@ export default {
     currentComponentDefinitions() {
       return this.type ? this.$store.state.models.library[this.type] : [];
     },
-
     currentComponent: {
       get() { return this.$store.getters['application/currentComponent']; },
       set(item) {

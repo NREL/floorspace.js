@@ -83,4 +83,16 @@ export default {
     background-color: blue;
     height: 300px;
   }
+  td.destroy {
+      width: 2rem;
+      svg {
+          cursor: pointer;
+          height: 1.25rem;
+          fill: $gray-lightest;
+          &:hover {
+              fill: $secondary;
+          }
+      }
+  }
+
 </style>
