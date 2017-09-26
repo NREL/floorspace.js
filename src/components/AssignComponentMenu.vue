@@ -8,9 +8,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
   <div>
-    <div>type {{type}}
-      <icon class="button"></icon>
-    </div>
     <editable-select-table
       :columns="currentComponentColumns"
       :rows="currentComponentDefinitions"
