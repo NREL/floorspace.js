@@ -8,12 +8,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
   <input v-if="!col.input_type || col.input_type === 'text'"
-    @focus="maybeFocus"
     @dblclick="actuallyFocus"
     @blur="ignoreFocus = true"
     @keydown="blurOnEnter"
     :value="row[col.name]"
-    :readonly="!col.input_type || col.readonly"
+    :readonly="!col.input_type || col.readonly || ignoreFocus"
   />
   <!-- <div>
     <input v-else-if="col.input_type === 'color'"
@@ -42,21 +41,8 @@ export default {
     };
   },
   methods: {
-    maybeFocus(evt) {
-      // blur unless ignoreFocus is false
-      this.ignoreFocus && this.$el.blur();
-      // but re-focus if the tab key was pressed.
-      const tabUp = (evt) => {
-        console.log('tabup?', evt);
-        if (evt.which === 9){
-          this.actuallyFocus();
-        }
-      };
-      console.log('adding event listener');
-      document.addEventListener('keyup', tabUp);
-      setTimeout(() => console.log('removing event listener') || document.removeEventListener('keyup', tabUp), 400);
-    },
     actuallyFocus() {
+      if (!this.col.input_type || this.col.readonly) { return; }
       this.ignoreFocus = false;
       this.$el.focus();
     },
