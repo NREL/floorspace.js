@@ -14,6 +14,9 @@ import store from './store/index';
 
 import timetravel from './store/timetravel';
 import App from './App.vue';
+import PrettySelect from './components/PrettySelect.vue';
+
+Vue.component('pretty-select', PrettySelect);
 
 // mount the root vue instance
 window.application = new Vue({

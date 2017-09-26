@@ -28,15 +28,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
               <input :object-id="row.id" :value="row[col.name]" @change="updateRow(row.id, col.name, $event.target.value)"/>
             </div>
 
-            <div v-if="col.input_type === 'select'" class='input-select'>
-                <select @change="updateRow(row.id, col.name, $event.target.value)">
-                    <option :selected="!row[col.name]" value="null">None</option>
-                    <option v-for='(val, display) in col.select_data(row, rootState)' :value="val" :selected="row[col.name] === val">{{ display }}</option>
-                </select>
-                <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
-                    <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
-                </svg>
-            </div>
+            <pretty-select v-if="col.input_type === 'select'"
+              :onChange="updateRow.bind(null, row.id, col.name)"
+              :options="_.toPairs(col.select_data(row, rootState)).map(([k, v]) => ({ val: v, display: k }))"
+              :value="row[col.name]"
+            />
           </td>
           <td class="destroy" @click="deleteRow(row.id)">
             <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
