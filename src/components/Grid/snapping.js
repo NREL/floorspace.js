@@ -35,13 +35,15 @@ export function expandWindowAlongEdge(edge, center, windowWidth) {
   const
     theta = edgeDirection({ start: edge.v1, end: edge.v2 }),
     windowDeltaX = (windowWidth * Math.cos(theta)) / 2,
-    windowDeltaY = (windowWidth * Math.sin(theta)) / 2;
+    windowDeltaY = (windowWidth * Math.sin(theta)) / 2,
+    alpha = edge.v2.x === edge.v1.x ?
+      (center.y - edge.v1.y) / (edge.v2.y - edge.v1.y) :
+      (center.x - edge.v1.x) / (edge.v2.x - edge.v1.x);
   return {
     edge_id: edge.id,
     center,
-    alpha: edge.v2.x === edge.v1.x ?
-      (center.y - edge.v1.y) / (edge.v2.y - edge.v1.y) :
-      (center.x - edge.v1.x) / (edge.v2.x - edge.v1.x),
+    edge_start: edge.v1,
+    alpha,
     start: {
       x: center.x - windowDeltaX,
       y: center.y - windowDeltaY,
@@ -53,22 +55,70 @@ export function expandWindowAlongEdge(edge, center, windowWidth) {
   };
 }
 
-
-export function snapWindowToEdge(edges, cursor, windowWidth, maxSnapDist) {
+export function findClosestEdge(edges, cursor) {
   const
     withDistance = edges.map(e => ({
       ...e,
       ...pointDistanceToSegment(cursor, { start: e.v1, end: e.v2 }),
     })),
     closestEdge = _.minBy(withDistance, 'dist');
+  return closestEdge;
+}
+
+export function findClosestWindow(windows, cursor) {
+  const withDistance = windows.map(w => ({
+    ...w,
+    dist: distanceBetweenPoints(cursor, w.center),
+    proj: w.center,
+    // alias start, end to v1, v2 so we can make this thing look like an edge.
+    // Then we can use the same code to display the distance markers from
+    // daylighting control to either closest window or closest edge.
+    v1: w.start,
+    v2: w.end,
+  }));
+  return _.minBy(withDistance, 'dist');
+}
+
+function snapWindowToEdgeAnywhere(edges, cursor, windowWidth, maxSnapDist) {
+  const closestEdge = findClosestEdge(edges, cursor);
   if (!closestEdge || closestEdge.dist > maxSnapDist) {
     return null;
   }
   return expandWindowAlongEdge(closestEdge, closestEdge.proj, windowWidth);
 }
 
-export function snapToVertexWithinFace(faces, cursor, gridSpacing) {
-  return _.chain(snapTargets([], gridSpacing, cursor))
+function snapWindowToEdgeAtGridIntervals(edges, cursor, windowWidth, maxSnapDist, gridSpacing) {
+  const closestEdge = findClosestEdge(edges, cursor);
+  if (!closestEdge || closestEdge.dist > maxSnapDist) {
+    return null;
+  }
+
+  const
+    dist = distanceBetweenPoints(closestEdge.v1, closestEdge.proj),
+    roundedDist = Math.round(dist / gridSpacing) * gridSpacing,
+    dx = (closestEdge.v2.x - closestEdge.v1.x),
+    dy = (closestEdge.v2.y - closestEdge.v1.y),
+    norm = Math.sqrt((dx * dx) + (dy * dy)),
+    snapLoc = {
+      x: closestEdge.v1.x + (roundedDist * (dx / norm)),
+      y: closestEdge.v1.y + (roundedDist * (dy / norm)),
+    };
+
+  return expandWindowAlongEdge(closestEdge, snapLoc, windowWidth);
+}
+
+export function snapWindowToEdge(snapMode, ...args) {
+  if (snapMode === 'grid-strict') {
+    return snapWindowToEdgeAtGridIntervals(...args);
+  }
+  return snapWindowToEdgeAnywhere(...args);
+}
+
+export function snapToVertexWithinFace(snapMode, faces, cursor, gridSpacing) {
+  const existingVerts = snapMode === 'grid-strict' ? [] : [cursor];
+  // We'll pretend `cursor` is an existing vert when we're not in strict snapping mode.
+  // That way, we will suggest the exact location of the cursor.
+  return _.chain(snapTargets(existingVerts, gridSpacing, cursor))
     .map(g => ({
       ...g,
       face_id: _.find(faces, f => vertInRing(g, f.vertices)),

@@ -3,21 +3,25 @@ import _ from 'lodash';
     * create a new geometry set, face, edge, or vertex in the data store
     */
 
-export function trimGeometry(state, { geometry_id }) {
+export function trimGeometry(state, { geometry_id, vertsReferencedElsewhere }) {
   const
     geometry = _.find(state, { id: geometry_id }),
     edgesInUse = new Set(_.flatMap(geometry.faces, f => _.map(f.edgeRefs, 'edge_id'))),
-    verticesInUse = new Set(_.flatMap(
+    vertsOnEdges = _.flatMap(
       geometry.edges.filter(e => edgesInUse.has(e.id)),
-      e => [e.v1, e.v2]));
-
+      e => [e.v1, e.v2]),
+    verticesInUse = new Set([
+      ...(vertsReferencedElsewhere || []),
+      ...vertsOnEdges,
+    ]);
   geometry.edges = geometry.edges.filter(e => edgesInUse.has(e.id));
   geometry.vertices = geometry.vertices.filter(v => verticesInUse.has(v.id));
-
-  if (geometry.edges.length !== edgesInUse.size) {
+  const missingEdges = _.difference([...edgesInUse], _.map(geometry.edges, 'id'));
+  if (missingEdges.length) {
     console.error('An edge is referenced by a face, but does not exist!', JSON.stringify(geometry));
   }
-  if (geometry.vertices.length !== verticesInUse.size) {
+  const missingVerts = _.difference(vertsOnEdges, _.map(geometry.vertices, 'id'));
+  if (missingVerts.length) {
     console.error('A vertex is referenced by a face, but does not exist!', JSON.stringify(geometry));
   }
 }
@@ -29,10 +33,6 @@ export function initGeometry(state, payload) {
 export function createVertex(state, payload) {
       const { geometry_id, vertex } = payload;
       state.find(g => g.id === geometry_id).vertices.push(vertex);
-}
-export function createEdge(state, payload) {
-      const { geometry_id, edge } = payload;
-      state.find(g => g.id === geometry_id).edges.push(edge);
 }
 export function createFace(state, payload) {
       const { geometry_id, face } = payload;
@@ -104,18 +104,13 @@ export function replaceEdgeRef(state, payload) {
   face.edgeRefs.splice(
     edgeRefIx, 1, // remove existing edge
     // replacing it with these ones, in the same direction.
-    ...newEdges.map(newEdgeId => ({
+    ...newEdges.map(({ id: newEdgeId, reverse: edgeReverse }) => ({
       edge_id: newEdgeId,
-      reverse: edgeRef.reverse,
+      reverse: edgeRef.reverse ^ edgeReverse,
     })),
   );
 }
 
-export function splitEdge(state, { geometry_id, edgeToDelete, newEdges, replaceEdgeRefs }) {
-  newEdges.forEach(edge => createEdge(state, { edge, geometry_id }));
-  replaceEdgeRefs.forEach(replacement => replaceEdgeRef(state, replacement));
-  destroyGeometry(state, { id: edgeToDelete });
-}
 
 export function ensureVertsExist(state, { geometry_id, vertices }) {
   const geometry = _.find(state, { id: geometry_id });
@@ -130,6 +125,13 @@ export function ensureEdgesExist(state, { geometry_id, edges }) {
     _.find(geometry.edges, { id: e.id }) || geometry.edges.push(e)
   );
 }
+
+export function splitEdge(state, { geometry_id, edgeToDelete, newEdges, replaceEdgeRefs }) {
+  ensureEdgesExist(state, { geometry_id, edges: newEdges });
+  replaceEdgeRefs.forEach(replacement => replaceEdgeRef(state, replacement));
+  destroyGeometry(state, { id: edgeToDelete });
+}
+
 
 export function replaceFacePoints(state, { geometry_id, vertices, edges, face_id }) {
   const geometry = _.find(state, { id: geometry_id });
@@ -146,5 +148,4 @@ export function replaceFacePoints(state, { geometry_id, vertices, edges, face_id
     edge_id: e.id,
     reverse: !!e.reverse,
   }));
-  trimGeometry(state, { geometry_id });
 }

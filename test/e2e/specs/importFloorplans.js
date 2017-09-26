@@ -2,6 +2,7 @@ const path = require('path');
 const failOnError = require('../helpers').failOnError;
 
 module.exports = {
+  tags: ['import-floorplan'],
   'try importing floorplans': (browser) => {
     const devServer = browser.globals.devServerURL;
 

@@ -1,8 +1,9 @@
 import _ from 'lodash';
 import factory from './../factory';
-import geometryHelpers from './../helpers';
+import geometryHelpers, { distanceBetweenPoints } from './../helpers';
 import modelHelpers from './../../models/helpers';
 import { uniq, dropConsecutiveDups, allPairs } from './../../../../utilities';
+import { withPreservedComponents } from './componentPreservationSociety';
 
 /*
  * create a face and associated edges and vertices from an array of points
@@ -54,13 +55,17 @@ export default function createFaceFromPoints(context, payload) {
     return;
   }
 
-  newGeoms.forEach(newGeom => context.dispatch('replaceFacePoints', newGeom));
+  withPreservedComponents(context, currentStoryGeometry.id, () => {
+    newGeoms.forEach(newGeom => context.dispatch('replaceFacePoints', newGeom));
 
-  // save the face and its descendent geometry
-  storeFace(faceGeometry, target, context, existingFace);
+    // save the face and its descendent geometry
+    storeFace(faceGeometry, target, context, existingFace);
 
-  // split edges where vertices touch them
-  splitEdges(context);
+    // split edges where vertices touch them
+    splitEdges(context);
+  });
+
+  context.dispatch('trimGeometry', { geometry_id: currentStoryGeometry.id });
 }
 
 // ////////////////////// HELPERS //////////////////////////// //
@@ -174,6 +179,10 @@ export function findExistingEdge(v1, v2, edges) {
   };
 }
 
+function matchOrCreateEdge(existingEdges) {
+  return ([v1, v2]) => (findExistingEdge(v1, v2, existingEdges) || new factory.Edge(v1.id, v2.id));
+}
+
 export function matchOrCreateEdges(vertices, existingEdges) {
    // pair each vertex with the next (wrapping back to start at the end)
   if (!vertices.length) {
@@ -181,7 +190,7 @@ export function matchOrCreateEdges(vertices, existingEdges) {
   }
   return _.zip(vertices, [...vertices.slice(1), vertices[0]])
   // try and find a shared edge, but fall back to creating a new one
-    .map(([v1, v2]) => (findExistingEdge(v1, v2, existingEdges) || new factory.Edge(v1.id, v2.id)));
+    .map(matchOrCreateEdge(existingEdges));
 }
 
 function InvalidFaceGeometry(message) {
@@ -353,9 +362,9 @@ export function validateFaceGeometry(points, currentStoryGeometry) {
   };
 }
 
-function edgesFromVerts(verts) {
+function edgesFromVerts(verts, existingEdges) {
   return _.zip(verts.slice(0, -1), verts.slice(1))
-    .map(([v1, v2]) => factory.Edge(v1.id, v2.id));
+    .map(matchOrCreateEdge(existingEdges));
 }
 
 function replacementEdgeRefs(geometry, dyingEdgeId, newEdges) {
@@ -368,7 +377,7 @@ function replacementEdgeRefs(geometry, dyingEdgeId, newEdges) {
     geometry_id: geometry.id,
     edge_id: dyingEdgeId,
     face_id: affectedFace.id,
-    newEdges: _.map(newEdges, 'id'),
+    newEdges: _.map(newEdges, _.partialRight(_.pick, ['id', 'reverse'])),
   }));
 
   return replaceEdgeRefs;
@@ -385,7 +394,7 @@ export function edgesToSplit(geometry) {
       endpoint = geometryHelpers.vertexForId(edge.v2, geometry);
 
     // sort splittingVertices by location on original edge
-    _.sortBy(splittingVertices, v => geometryHelpers.distanceBetweenPoints(v, startpoint));
+    _.sortBy(splittingVertices, v => distanceBetweenPoints(v, startpoint));
 
     // add startpoint and endpoint of original edge to splittingVertices array from which new edges will be created
     splittingVertices = [startpoint, ...splittingVertices, endpoint];
@@ -393,7 +402,7 @@ export function edgesToSplit(geometry) {
     // create new edges by connecting the original edge startpoint, ordered splitting vertices, and original edge endpoint
     // eg: startpoint -> SV1, SV1 -> SV2, SV2 -> SV3, SV3 -> endpoint
     const
-      newEdges = edgesFromVerts(splittingVertices),
+      newEdges = edgesFromVerts(splittingVertices, geometry.edges),
       replaceEdgeRefs = replacementEdgeRefs(geometry, edge.id, newEdges);
     return {
       edgeToDelete: edge.id,
@@ -411,8 +420,10 @@ export function edgesToSplit(geometry) {
  * destroy the original edge
  */
 function splitEdges(context) {
-  const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'];
-  const edgeChanges = edgesToSplit(currentStoryGeometry);
+  const
+    currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'],
+    edgeChanges = edgesToSplit(currentStoryGeometry);
+
   edgeChanges.forEach(payload => context.commit({
     type: 'splitEdge',
     geometry_id: currentStoryGeometry.id,

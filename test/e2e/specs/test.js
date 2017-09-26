@@ -1,8 +1,22 @@
 // For authoring Nightwatch tests, see
 // http://nightwatchjs.org/guide#usage
-const { failOnError, withScales, draw50By50Square } = require('../helpers');
+const _ = require('lodash');
+const { failOnError, withScales, draw50By50Square, drawSquare } = require('../helpers');
 
 module.exports = {
+  tags: ['spaces'],
+  'failOnError causes failure': (browser) => {
+    failOnError(browser)
+      .url(browser.globals.devServerURL)
+      .resizeWindow(1000, 800)
+      .waitForElementVisible('.modal .new-floorplan', 5000)
+      .setFlagOnError()
+      .execute(() => {
+        window.application.$store.state.geometry[0].vertices.splice(1);
+      })
+      .assertErrorOccurred()
+      .end();
+  },
   'make space and new story': (browser) => {
     withScales(failOnError(browser))
       .waitForElementVisible('.modal .new-floorplan', 5000)
@@ -82,6 +96,35 @@ module.exports = {
       .click('#navigation #selections select option[value="images"]')
       .click('.create-story')
       .assert.value('#navigation #selections select', 'images')
+      .checkForErrors()
+      .end();
+  },
+  'split then cover edge has weird slanty thing': (browser) => {
+    withScales(failOnError(browser))
+      .waitForElementVisible('.modal .new-floorplan', 5000)
+      .setFlagOnError()
+      .click('.modal .new-floorplan')
+      .getScales()
+      .perform(draw50By50Square)
+      .click('.tools [data-tool="Rectangle"]')
+      .click('#selections .add-sub-selection')
+      .perform(drawSquare(-10, 50, 10, 10))
+      .click('#selections .add-sub-selection')
+      .perform(drawSquare(-55, 40, 30, 20))
+      .execute(() => window.application.$store.state.geometry[0], [], ({ value }) => {
+        const { faces, edges } = value,
+          edgesConnect = (face) => {
+            face.edges = face.edgeRefs.map(e => ({ ...e, ..._.find(edges, { id: e.edge_id }) }));
+            _.zip(face.edges.slice(0, -1), face.edges.slice(1))
+              .forEach(([e1, e2]) => {
+                const
+                  e1End = e1.reverse ? e1.v1 : e1.v2,
+                  e2Start = e2.reverse ? e2.v2 : e2.v1;
+                browser.assert.equal(e1End, e2Start);
+              });
+          };
+        faces.forEach(edgesConnect);
+      })
       .checkForErrors()
       .end();
   },
