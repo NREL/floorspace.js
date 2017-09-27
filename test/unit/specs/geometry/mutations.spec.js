@@ -84,4 +84,12 @@ describe('trimGeometry', () => {
     trimGeometry([geometry], { geometry_id: geometry.id });
     assertEqual(geometry, emptyGeometry);
   });
+
+  it('respects vertsReferencedElsewhere and maintains those verts', () => {
+    const geometry = _.cloneDeep(simpleGeometry);
+    geometry.vertices.push({ id: 'used by daylighting control', x: 12, y: 18 });
+
+    trimGeometry([geometry], { geometry_id: geometry.id, vertsReferencedElsewhere: ['used by daylighting control'] });
+    assert(_.find(geometry.vertices, { id: 'used by daylighting control' }));
+  });
 });

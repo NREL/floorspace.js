@@ -125,11 +125,44 @@
         fill: black;
       }
       .daylighting-control {
+        circle, path {
+          pointer-events: none;
+        }
         circle {
           stroke: #dfda48;
         }
         path {
           fill: #dfda48;
+        }
+      }
+    }
+    .window-guideline {
+      .distance-measure {
+        stroke-opacity: 1;
+        fill-opacity: 1;
+        stroke: red;
+        fill: red;
+        line {
+          stroke-width: 2;
+        }
+        path {
+          stroke-width: 0;
+        }
+      }
+    }
+    .daylighting-control-guideline {
+      .distance-measure {
+        stroke-opacity: 1;
+        fill-opacity: 1;
+        fill: none;
+        stroke: blue;
+        line {
+          stroke-width: 2;
+          stroke-dasharray: 1 2;
+        }
+        path.start, path.end {
+          stroke: inherit;
+          stroke-width: 0.5;
         }
       }
     }

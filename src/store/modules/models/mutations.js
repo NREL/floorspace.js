@@ -91,10 +91,22 @@ export default {
       vertex_id,
     });
   },
-  dropDaylightingControls(state, { face_id, story_id }) {
-    const
-      story = _.find(state.stories, { id: story_id }),
-      space = _.find(story.spaces, { face_id });
-    space.daylighting_controls = [];
+  dropDaylightingControls(state, { story_id }) {
+    const story = _.find(state.stories, { id: story_id });
+    story.spaces.forEach((space) => {
+      space.daylighting_controls = [];
+    });
+  },
+  destroyWindowsByDefinition(state, { id }) {
+    state.stories.forEach((story) => {
+      story.windows = _.reject(story.windows, { window_defn_id: id });
+    });
+  },
+  destroyDaylightingControlsByDefinition(state, { id }) {
+    state.stories.forEach((story) => {
+      story.spaces.forEach((space) => {
+        space.daylighting_controls = _.reject(space.daylighting_controls, { daylighting_control_defn_id: id });
+      });
+    });
   },
 }
