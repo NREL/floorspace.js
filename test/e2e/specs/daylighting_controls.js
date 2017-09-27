@@ -31,6 +31,15 @@ module.exports = {
       .checkForErrors()
       .end();
   },
+  'replacing section of space moves daylighting control to new space': (browser) => {
+    browser
+      .click('.tools [data-tool="Rectangle"]')
+      .click('#selections .add-sub-selection')
+      .perform(drawSquare(-50, 0, 30, 50))
+      .assert.elementCount('.daylighting-control', 1)
+      .checkForErrors()
+      .end();
+  },
   'modifying edge preserves daylighting controls': (browser) => {
     browser
       .click('.tools [data-tool="Rectangle"]')
