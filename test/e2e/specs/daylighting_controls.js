@@ -40,6 +40,16 @@ module.exports = {
       .checkForErrors()
       .end();
   },
+  'daylighting control wont "jump" to stay in space': (browser) => {
+    browser
+      .click('.tools [data-tool="Eraser"]')
+      .click('#selections .add-sub-selection')
+      .perform(drawSquare(-50, 25, 30, 20))
+      .pause()
+      .assert.elementCount('.daylighting-control', 0)
+      .checkForErrors()
+      .end();
+  },
   'modifying edge preserves daylighting controls': (browser) => {
     browser
       .click('.tools [data-tool="Rectangle"]')
