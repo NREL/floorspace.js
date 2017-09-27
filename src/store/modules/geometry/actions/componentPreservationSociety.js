@@ -61,7 +61,7 @@ function replaceComponents(
     if (!loc) { return; }
 
     const facesWithEdge = _.map(facesContainingEdge(geometry.faces, loc.edge_id), 'id');
-    if (_.intersection(facesWithEdge, w.originalFaceIds).length !== facesWithEdge.length ||
+    if (w.originalFaceIds.length !== facesWithEdge.length ||
         (w.originalFaceIds.length > 1 && _.intersection(Object.keys(movementsByFaceId), w.originalFaceIds))) {
       // Suppose we add some windows to an edge that's shared between two spaces.
       // What happens when we move one of the spaces?
