@@ -55,10 +55,10 @@
 				"$ref": "#/definitions/DaylightingControlDefinition"
 			}
 		},
-		"pitched_roofs": {
+		"pitched_roof_types": {
 			"type": "array",
 			"items": {
-				"$ref": "#/definitions/PitchedRoof"
+				"$ref": "#/definitions/PitchedRoofType"
 			}
 		}
 	},
@@ -421,7 +421,7 @@
 						"null"
 					]
 				},
-				"pitched_roof_id": {
+				"pitched_roof_type_id": {
 					"type": [
 						"string",
 						"null"
@@ -636,7 +636,7 @@
 				"name"
 			]
 		},
-		"PitchedRoof": {
+		"PitchedRoofType": {
 			"properties": {
 				"id": {
 					"type": "string"
@@ -664,6 +664,9 @@
 				"shed_direction": {
 					"description": "Direction of shed roof, from low edge to high edge, in clockwise degrees from the y-axis when viewed from above.",
 					"type": "number"
+				},
+				"color": {
+					"type": "string"
 				}
 			},
 			"required": [
