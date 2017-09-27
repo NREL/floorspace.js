@@ -1,4 +1,5 @@
 const { failOnError, withScales, draw50By50Square, drawSquare } = require('../helpers');
+// test these things https://trello-attachments.s3.amazonaws.com/58d428743111af1d0a20cf28/59cbced9f6d415088a8aea95/f55303e067fe0e6b8c38231f62d0cd45/capture.png
 
 module.exports = {
   tags: ['components', 'windows'],
@@ -36,6 +37,15 @@ module.exports = {
     browser
       .click('.tools [data-tool="Rectangle"]')
       .perform(drawSquare(-10, 50, 10, 10))
+      .assert.elementCount('.window', 1)
+      .checkForErrors()
+      .end();
+  },
+  'replacing section of space moves window to new space': (browser) => {
+    browser
+      .click('.tools [data-tool="Rectangle"]')
+      .click('#selections .add-sub-selection')
+      .perform(drawSquare(-50, 0, 30, 50))
       .assert.elementCount('.window', 1)
       .checkForErrors()
       .end();
