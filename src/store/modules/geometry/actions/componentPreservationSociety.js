@@ -57,7 +57,7 @@ function replaceComponents(
     const
       { dx, dy } = movementsByFaceId[w.originalFaceIds[0]] || { dx: 0, dy: 0 },
       newLoc = { x: w.originalLoc.x + dx, y: w.originalLoc.y + dy },
-      loc = snapWindowToEdge(/* snapMode */ 'nonstrict', edgesPresentOnFaces, newLoc, 1, spacing);
+      loc = snapWindowToEdge(/* snapMode */ 'nonstrict', edgesPresentOnFaces, newLoc, 1, spacing / 4);
     if (!loc) { return; }
 
     const facesWithEdge = _.map(facesContainingEdge(geometry.faces, loc.edge_id), 'id');
@@ -83,13 +83,11 @@ function replaceComponents(
   });
 
   perFaceComponents.forEach(({ face_id, daylighting_controls }) => {
-    const face = _.find(geometry.faces, { id: face_id });
-
     daylighting_controls.forEach((d) => {
       const
         { dx, dy } = movementsByFaceId[face_id] || { dx: 0, dy: 0 },
         newLoc = { x: d.vertex.x + dx, y: d.vertex.y + dy },
-        loc = snapToVertexWithinFace(/* snapMode */ 'nonstrict', [face], newLoc, spacing);
+        loc = snapToVertexWithinFace(/* snapMode */ 'nonstrict', geometry.faces, newLoc, spacing / 4);
       if (!loc) { return; }
 
       context.dispatch('models/createDaylightingControl', {
