@@ -40,6 +40,15 @@ module.exports = {
       .checkForErrors()
       .end();
   },
+  'replacing section of space moves window to new space': (browser) => {
+    browser
+      .click('.tools [data-tool="Rectangle"]')
+      .click('#selections .add-sub-selection')
+      .perform(drawSquare(-50, 0, 30, 50))
+      .assert.elementCount('.window', 1)
+      .checkForErrors()
+      .end();
+  },
   'splitting edge preserves windows': (browser) => {
     browser
       .click('.tools [data-tool="Rectangle"]')
