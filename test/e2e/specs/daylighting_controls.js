@@ -1,4 +1,5 @@
 const { failOnError, withScales, draw50By50Square, drawSquare } = require('../helpers');
+// https://trello-attachments.s3.amazonaws.com/58d428743111af1d0a20cf28/59cbcee5c364c5692f59960a/acab1e2db0df2c56c0d3e261133e733b/capture.png
 
 module.exports = {
   tags: ['components', 'daylighting-controls'],
@@ -31,6 +32,24 @@ module.exports = {
       .checkForErrors()
       .end();
   },
+  'replacing section of space moves daylighting control to new space': (browser) => {
+    browser
+      .click('.tools [data-tool="Rectangle"]')
+      .click('#selections .add-sub-selection')
+      .perform(drawSquare(-50, 0, 30, 50))
+      .assert.elementCount('.daylighting-control', 1)
+      .checkForErrors()
+      .end();
+  },
+  'daylighting control wont "jump" to stay in space': (browser) => {
+    browser
+      .click('.tools [data-tool="Eraser"]')
+      .click('#selections .add-sub-selection')
+      .perform(drawSquare(-50, 25, 30, 20))
+      .assert.elementCount('.daylighting-control', 0)
+      .checkForErrors()
+      .end();
+  },
   'modifying edge preserves daylighting controls': (browser) => {
     browser
       .click('.tools [data-tool="Rectangle"]')
@@ -48,12 +67,12 @@ module.exports = {
       .checkForErrors()
       .end();
   },
-  'covering daylighting control removes it': (browser) => {
+  'covering daylighting control should not remove it': (browser) => {
     browser
       .click('.tools [data-tool="Rectangle"]')
       .click('#selections .add-sub-selection')
       .perform(drawSquare(-45, 35, 30, 30))
-      .assert.elementCount('.daylighting-control', 0)
+      .assert.elementCount('.daylighting-control', 1)
       .checkForErrors()
       .end();
   },
