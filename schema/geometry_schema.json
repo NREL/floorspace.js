@@ -662,7 +662,7 @@
 					"exclusiveMinimum": true
 				},
 				"shed_direction": {
-					"description": "Direction of shed roof, from low edge to high edge, in clockwise degrees from the y-axis when viewed from above.",
+					"description": "Direction of shed roof, from low edge to high edge, in clockwise degrees from the positive y-axis when viewed from above.",
 					"type": "number"
 				},
 				"color": {
