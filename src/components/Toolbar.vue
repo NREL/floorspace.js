@@ -92,7 +92,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     </section>
 
     <section id="bottom">
-      <template  v-if="mode ==='floorplan' || mode === 'shading'">
+      <template  v-if="mode ==='floorplan'">
         <div id="instructions">Draw a floorplan and import images</div>
 
         <div id="drawing-tools" class="tools-list">
@@ -113,9 +113,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           </div>
         </div>
 
-        <div v-if="mode=='floorplan'" class='input-select'>
+        <div class='input-select'>
             <label>View By</label>
             <select v-model='currentMode'>
+                <option selected>--</option>
                 <option v-for="mode in ['building_units', 'thermal_zones', 'space_types']" :value="mode">{{ displayNameForMode(mode) }}</option>
             </select>
             <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'>
@@ -124,17 +125,50 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </div>
       </template>
 
-      <div id="components-mode-menu"  class="mode-menu" v-if="mode==='components'">
+      <template  v-if="mode === 'shading'">
+        <div id="instructions">Draw shading objects</div>
 
-        <span v-for="type in ['window_definitions', 'daylighting_control_definitions']"  @click="visibleComponentType = visibleComponentType === type ? null : type " :class="{ active: currentComponentType === type }">
+        <div id="drawing-tools" class="tools-list">
+          <div @click="tool = 'Rectangle'" :class="{ active: tool === 'Rectangle' }">
+            <tool-draw-rectangle-svg class="button"></tool-draw-rectangle-svg>
+          </div>
+          <div @click="tool = 'Polygon'" :class="{ active: tool === 'Polygon' }">
+            <tool-draw-polygon-svg class="button"></tool-draw-polygon-svg>
+          </div>
+          <div @click="tool = 'Eraser'" :class="{ active: tool === 'Eraser' }">
+            <tool-erase-svg class="button"></tool-erase-svg>
+          </div>
+          <div @click="tool = 'Select'" :class="{ active: tool === 'Select' }">
+            <tool-move-size-svg class="button"></tool-move-size-svg>
+          </div>
+          <div @click="tool = ''" :class="{ active: tool === '' }">
+            <tool-color-svg class="button"></tool-color-svg>
+          </div>
+        </div>
+      </template>
+
+      <template v-if="mode === 'components'">
+        <div id="instructions">Add fenestration, daylighting, and PV</div>
+        <div id="component-icons" class="components-list">
+
+          <div @click="visibleComponentType = visibleComponentType === 'window_definitions' ? null : 'window_definitions' " :class="{ active: visibleComponentType === 'window_definitions' }">
+            <tool-move-size-svg class="button"></tool-move-size-svg>
+          </div>
+          <div @click="visibleComponentType = visibleComponentType === 'daylighting_control_definitions' ? null : 'daylighting_control_definitions' " :class="{ active: visibleComponentType === 'daylighting_control_definitions' }">
+
+            <tool-color-svg class="button"></tool-color-svg>
+          </div>
+        </div>
+
+        <!-- <span v-for="type in ['window_definitions', 'daylighting_control_definitions']"  >
           {{ type }}
           <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'>
               <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
           </svg>
-        </span>
+        </span> -->
 
         <assign-component-menu v-show="visibleComponentType" :type="visibleComponentType"></assign-component-menu>
-      </div>
+      </template>
 
       <template v-if="mode==='assign'">
         <div class='input-select'>
@@ -472,43 +506,47 @@ svg.icon, svg.button {
           position: absolute;
           left: 0;
         }
-
-
-
     }
     #grid-settings {
       display: flex;
       margin-left: auto;
-      >* {
-        margin-right: 1rem;
+      >div {
+        margin-right: .5rem;
       }
     }
   }
   #bottom {
     background-color: $gray-medium-light;
     display: flex;
-    height: 2rem;
+    height: 2.5rem;
 
     .tools-list {
       display: flex;
       margin-right: 3rem;
+      margin-left: auto;
       .active {
         background-color: $gray-dark;
       }
-
     }
-    #instructions {
+    #component-icons {
+      display: flex;
       margin-right: auto;
-      line-height: 2rem;
-    }
-    #components-menu {
-      span.active {
-        background-color: $gray-dark;
+      .active {
+        background-color: $gray-medium-light;
       }
     }
+
+    #instructions {
+      margin-right: auto;
+      line-height: 2.5rem;
+    }
+
     #grid-tools {
       display: flex;
       float: right;
+      div {
+        padding: 0 1rem;
+      }
     }
   }
 }
