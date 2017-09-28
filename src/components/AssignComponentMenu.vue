@@ -21,7 +21,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 </template>
 
 <script>
-import icon from './../assets/geometry-editor-icons/icon_add_image.svg'
+import icon from './../assets/svg-icons/add_image.svg'
 import EditableSelectTable from './EditableSelectTable';
 import libconfig from '../store/modules/models/libconfig';
 import helpers from './../store/modules/models/helpers';
