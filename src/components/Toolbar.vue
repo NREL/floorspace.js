@@ -437,17 +437,21 @@ svg.icon, svg.button {
         .tab {
           background-color: $gray-dark;
           margin-right: 1.5rem;
-          padding: 0 .5rem;
+          padding: 0 0 0 1.5rem;
           position: relative;
-
-
+          width: max-content;
+          &.active {
+            background-color: $gray-medium-light;
+            &::after {
+              color: $gray-medium-light;
+            }
+            &::before {
+                background-color: $gray-medium-light;
+            }
+          }
         }
         .tab:after {
           background-color: $black;
-
-          // .tab.active:after {
-          //   color: $gray-medium-light;
-          // }
           color: $gray-dark;
           border-left: 1.25rem solid;
           border-top: 1.25rem solid transparent;
@@ -458,27 +462,18 @@ svg.icon, svg.button {
           right: -1.25rem;
         }
         .tab:before {
-          background-color: red;
-
-          // .tab.active:after {
-          //   color: $gray-medium-light;
-          // }
-          color: $gray-dark;
-          border-left: 0.25rem solid;
-          border-top: 0.25rem solid transparent;
-          border-bottom: 0.25rem solid transparent;
+          background-color: $gray-dark;
+          color: $black;
+          border-left: 1.25rem solid;
+          border-top: 1.25rem solid transparent;
+          border-bottom: 1.25rem solid transparent;
           display: inline-block;
           content: '';
           position: absolute;
-          left: -1.25rem;
+          left: 0;
         }
 
-        .tab.active {
-          background-color: $gray-medium-light;
-          &::after {
-            color: $gray-medium-light;
-          }
-        }
+
 
     }
     #grid-settings {
