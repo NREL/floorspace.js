@@ -28,7 +28,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { throttle, debounce } from '../../utilities';
+import { debounce } from '../../utilities';
+import d3AwareThrottle from '../../utilities/d3-aware-throttle';
 import methods from './methods';
 import geometryHelpers from './../../store/modules/geometry/helpers';
 import modelHelpers from './../../store/modules/models/helpers';
@@ -73,7 +74,7 @@ export default {
   },
   mounted() {
     // throttle/debounce event handlers
-    this.handleMouseMove = throttle(this.highlightSnapTarget, 100);
+    this.handleMouseMove = d3AwareThrottle(this.highlightSnapTarget, 100);
 
     // render grid first time (not debounced, as this seems to fix an issue
     // where the x bounds are set correctly, and then becomes incorrect when the
