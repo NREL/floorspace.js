@@ -14,6 +14,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       :newRow="createComponentDefinition"
       :deleteRow="deleteComponentDef"
       :updateRow="updateComponentDef"
+      :selectedId="currentComponentDefinition && currentComponentDefinition.id"
+      :selectRow="setComponentById"
     />
   </div>
 </template>
@@ -59,6 +61,9 @@ export default {
       if (!result.success) {
         window.eventBus.$emit('error', result.error);
       }
+    },
+    setComponentById(componentId) {
+      this.currentComponent = { definition: { id: componentId } };
     },
   },
   computed: {

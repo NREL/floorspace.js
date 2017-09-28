@@ -18,15 +18,25 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </tr>
       </thead>
       <tbody>
-        <tr v-for="row in rows">
-          <td v-for="col in visibleColumns" :data-column="col.name">
+        <tr
+            v-for="row in processedRows"
+            :class="{ 'selected-row': row.selected }"
+            @click="selectRow(row.id)"
+        >
+          <td
+              v-for="col in visibleColumns"
+              :data-column="col.name"
+              @dblclick="setEditableRow(row, col)">
             <generic-input
               :col="col"
               :row="row"
-              :onChange="updateRow"
+              :onChange="updateRow.bind(null, row.id, col.name)"
+              :editable="row.editable"
+              :focus="row.editable && initialCol === col.name"
+              v-on:finishedEditing="editableId = null"
             />
           </td>
-          <td class="destroy" @click="deleteRow(row.id)">
+          <td class="destroy" @click.stop="deleteRow(row.id)">
             <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
                 <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
             </svg>
@@ -48,11 +58,22 @@ import { mapState, mapGetters } from 'vuex';
 
 export default {
   name: 'EditableSelectTable',
-  props: ['columns', 'rows', 'newRow', 'deleteRow', 'updateRow'],
+  props: [
+    'columns', 'rows', 'newRow', 'deleteRow', 'updateRow', 'selectedId',
+    'selectRow',
+  ],
   data() {
     return {
-      editableRow: null,
+      editableId: null,
+      initialCol: null,
     };
+  },
+  methods: {
+    setEditableRow(row, col) {
+      console.log('setting editable row');
+      this.editableId = row.id;
+      this.initialCol = col.name;
+    },
   },
   computed: {
     ...mapState({
@@ -60,6 +81,13 @@ export default {
     }),
     visibleColumns() {
       return _.reject(this.columns, 'private');
+    },
+    processedRows() {
+      return this.rows.map(r => ({
+        ...r,
+        selected: r.id === this.selectedId,
+        editable: r.id === this.editableId,
+      }));
     },
   },
 };
@@ -75,6 +103,12 @@ export default {
       border: none;
       color: $gray-lightest;
       font-size: 1rem;
+  }
+  tr.selected-row {
+    background-color: $gray-light;
+  }
+  td {
+    width: 10em;
   }
 
   td.destroy {

@@ -7,13 +7,13 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 
 <template>
-  <input v-if="!col.input_type || col.input_type === 'text'"
-    @dblclick="actuallyFocus"
-    @blur="ignoreFocus = true"
+  <input v-if="editable"
     @keydown="blurOnEnter"
+    @blur="onChange($event.target.value)"
     :value="row[col.name]"
-    :readonly="!col.input_type || col.readonly || ignoreFocus"
+    v-focus-pls="focus"
   />
+  <span v-else>{{row[col.name]}}</span>
   <!-- <div>
     <input v-else-if="col.input_type === 'color'"
        class="input-color"
@@ -34,24 +34,22 @@ import _ from 'lodash';
 
 export default {
   name: 'GenericInput',
-  props: ['col', 'row', 'onChange'],
-  data() {
-    return {
-      ignoreFocus: true,
-    };
-  },
+  props: ['col', 'row', 'onChange', 'editable', 'focus'],
   methods: {
-    actuallyFocus() {
-      if (!this.col.input_type || this.col.readonly) { return; }
-      this.ignoreFocus = false;
-      this.$el.focus();
-    },
     blurOnEnter(evt) {
-      if (evt.which === 13) {
+      if (evt.keyCode === 13) {
+        //blur on enter
         this.$el.blur();
+        this.$emit('finishedEditing');
+      }
+      if (evt.keyCode == 27) {
+        // reset then blur on esc
+        this.$el.value = row[col.name];
+        this.$el.blur();
+        this.$emit('finishedEditing');
       }
       return;
-    }
+    },
   },
   // mounted() {
   //   this.configurePickers();
@@ -73,6 +71,15 @@ export default {
   //     this.huebs[objectId].on('change', this.huebs[objectId].handler);
   //   }
   // },
+  directives: {
+    'focus-pls': {
+      inserted: function(el, binding) {
+        if (binding.value) {
+          el.focus();
+        }
+      },
+    },
+  },
 }
 
 </script>
