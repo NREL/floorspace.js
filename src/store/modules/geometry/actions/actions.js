@@ -1,81 +1,11 @@
 import _ from 'lodash';
-import factory from './../factory.js'
-import geometryHelpers from './../helpers'
-import modelHelpers from './../../models/helpers'
-import { snapWindowToEdge, snapToVertexWithinFace, windowLocation } from '../../../../components/Grid/snapping';
-import createFaceFromPoints, { matchOrCreateEdges, eraseSelection, newGeometriesOfOverlappedFaces, validateFaceGeometry } from './createFaceFromPoints'
+import factory from './../factory';
+import geometryHelpers from './../helpers';
+import createFaceFromPoints, { eraseSelection, newGeometriesOfOverlappedFaces, validateFaceGeometry } from './createFaceFromPoints';
+import { withPreservedComponents } from './componentPreservationSociety';
 
 export function getOrCreateVertex(geometry, coords) {
   return geometryHelpers.vertexForCoordinates(coords, geometry) || factory.Vertex(coords.x, coords.y);
-}
-
-
-function componentsOnFace(state, geometry_id, face_id) {
-  const
-    geom = geometryHelpers.denormalize(_.find(state.geometry, { id: geometry_id })),
-    face = _.find(geom.faces, { id: face_id }),
-    story = _.find(state.models.stories, { geometry_id }),
-    space = _.find(story.spaces, { face_id });
-
-  if (!face) {
-    // brand new face, no components possible
-    return { story_id: null, windows: [], daylighting_controls: [] };
-  }
-
-  const retval = {
-    story_id: story.id,
-    windows: story.windows.filter(
-      w => _.includes(_.map(face.edges, 'edge_id'), w.edge_id),
-    ).map(w => ({
-      ...w,
-      originalLoc: windowLocation(_.find(face.edges, { edge_id: w.edge_id }), w),
-    })),
-    daylighting_controls: space.daylighting_controls
-    .map(d => ({ ...d, vertex: _.find(geom.vertices, { id: d.vertex_id }) })),
-  };
-  return retval;
-}
-
-function replaceComponents(
-  context,
-  { windows, daylighting_controls, story_id },
-  { geometry_id, face_id, dx, dy },
-) {
-  const
-    geometry = geometryHelpers.denormalize(_.find(context.rootState.geometry, { id: geometry_id })),
-    face = _.find(geometry.faces, { id: face_id }),
-    spacing = context.rootState.project.grid.spacing;
-
-  context.dispatch('models/destroyAllComponents', { face_id, story_id }, { root: true });
-
-  windows.forEach((w) => {
-    const
-      newLoc = { x: w.originalLoc.x + dx, y: w.originalLoc.y + dy },
-      loc = snapWindowToEdge(face.edges, newLoc, 1, spacing);
-    if (!loc) { return; }
-
-    context.dispatch('models/createWindow', {
-      story_id,
-      edge_id: loc.edge_id,
-      alpha: loc.alpha,
-      window_defn_id: w.window_defn_id,
-    }, { root: true });
-  });
-
-  daylighting_controls.forEach((d) => {
-    const
-      newLoc = { x: d.vertex.x + dx, y: d.vertex.y + dy },
-      loc = snapToVertexWithinFace([face], newLoc, spacing);
-    if (!loc) { return; }
-
-    context.dispatch('models/createDaylightingControl', {
-      daylighting_control_defn_id: d.daylighting_control_defn_id,
-      x: loc.x,
-      y: loc.y,
-      story_id,
-      face_id,
-    }, { root: true });
-  });
 }
 
 export default {
@@ -94,17 +24,25 @@ export default {
       }, { root: true });
     },
 
-    /*
-    * Erase the selection defined by a set of points on all faces on the current story
-    * Dispatched by the eraser tool
-    */
-    eraseSelection (context, payload) {
-  		const { points } = payload;
-  		const eraseResult = eraseSelection(points, context);
+  /*
+  * Erase the selection defined by a set of points on all faces on the current story
+  * Dispatched by the eraser tool
+  */
+  eraseSelection(context, payload) {
+    const
+      { points } = payload,
+      geometry_id = context.rootGetters['application/currentStoryGeometry'].id;
+
+    withPreservedComponents(context, geometry_id, () => {
+      const eraseResult = eraseSelection(points, context);
+
       if (!eraseResult) {
         window.eventBus.$emit('error', 'Operation cancelled - no split faces');
       }
-  	},
+    });
+
+    context.dispatch('trimGeometry', { geometry_id });
+  },
 
   /*
   * Given a dx, dy, and face
@@ -140,76 +78,28 @@ export default {
       return;
     }
 
-    newGeoms.forEach(newGeom => context.dispatch('replaceFacePoints', newGeom));
+    const movementsByFaceId = { [face_id]: { dx, dy } };
 
-    context.dispatch('replaceFacePoints', {
-      geometry_id: currentStoryGeometry.id,
-      face_id,
-      vertices: movedGeom.vertices,
-      edges: movedGeom.edges,
-      dx,
-      dy,
+    withPreservedComponents(context, currentStoryGeometry.id, movementsByFaceId, () => {
+      newGeoms.forEach(newGeom => context.dispatch('replaceFacePoints', newGeom));
+
+      context.dispatch('replaceFacePoints', {
+        geometry_id: currentStoryGeometry.id,
+        face_id,
+        vertices: movedGeom.vertices,
+        edges: movedGeom.edges,
+        dx,
+        dy,
+      });
     });
+
+    context.dispatch('trimGeometry', { geometry_id: currentStoryGeometry.id });
   },
   /*
   * create a face and associated edges and vertices from an array of points
   * associate the face with the space or shading included in the payload
   */
   createFaceFromPoints,
-
-    // convert the splitting edge into two new edges
-    splitEdge (context, payload) {
-        const { edge, vertex } = payload;
-        const geometry = context.rootGetters['application/currentStoryGeometry'];
-
-        // splittingEdge.v1 -> midpoint
-        const edge1 = new factory.Edge();
-        edge1.v1 = edge.v1;
-        edge1.v2 = vertex.id;
-        context.commit('createEdge', {
-            geometry_id: geometry.id,
-            edge: edge1
-        });
-
-        // midpoint -> splittingEdge.v2
-        const edge2 = new factory.Edge();
-        edge2.v1 = vertex.id;
-        edge2.v2 = edge.v2;
-        context.commit('createEdge', {
-            geometry_id: geometry.id,
-            edge: edge2
-        });
-
-        // update faces referencing the edge being split
-        geometryHelpers.facesForEdgeId(edge.id, geometry).forEach((face) => {
-            context.commit('createEdgeRef', {
-                geometry_id: geometry.id,
-                face_id: face.id,
-                edgeRef: {
-                    edge_id: edge1.id,
-                    reverse: false
-                }
-            });
-            context.commit('createEdgeRef', {
-                geometry_id: geometry.id,
-                face_id: face.id,
-                edgeRef: {
-                    edge_id: edge2.id,
-                    reverse: false
-                }
-            });
-
-            // remove references to the edge being split
-            context.commit('destroyEdgeRef', {
-                geometry_id: geometry.id,
-                edge_id: edge.id,
-                face_id: face.id
-            });
-        });
-
-        // destroy edge that was split
-        context.commit('destroyGeometry', { id: edge.id });
-    },
 
 	/*
 	* given a face which may or may not be saved to the datastore
@@ -237,18 +127,20 @@ export default {
       expVertices.forEach(vertex => context.commit('destroyGeometry', { id: vertex.id }));
     },
 
-  replaceFacePoints(context, { geometry_id, face_id, vertices, edges, dx, dy }) {
-    // get all components
-    const components = componentsOnFace(context.rootState, geometry_id, face_id);
+  replaceFacePoints(context, { geometry_id, face_id, vertices, edges }) {
     context.commit('replaceFacePoints', {
       geometry_id,
       vertices,
       edges,
       face_id,
     });
-    // replay the components
-    replaceComponents(context, components, {
-      geometry_id, face_id, dx: (dx || 0), dy: (dy || 0),
-    });
+  },
+
+  trimGeometry({ rootState, commit }, { geometry_id }) {
+    const
+      story = _.find(rootState.models.stories, { geometry_id }),
+      vertsReferencedByDCs = _.flatMap(story.spaces, s => _.map(s.daylighting_controls, 'vertex_id'));
+
+    commit('trimGeometry', { geometry_id, vertsReferencedElsewhere: vertsReferencedByDCs });
   },
 }

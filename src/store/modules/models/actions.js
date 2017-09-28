@@ -96,6 +96,16 @@ export default {
         });
     },
 
+  destroyWindowDef(context, payload) {
+    context.commit('destroyWindowsByDefinition', payload.object);
+    context.commit('destroyObject', payload);
+  },
+
+  destroyDaylightingControlDef(context, payload) {
+    context.commit('destroyDaylightingControlsByDefinition', payload.object);
+    context.commit('destroyObject', payload);
+  },
+
     // this is ONLY for library objects and does not include shading, spaces, or stories
     destroyObject (context, payload) {
         context.commit('destroyObject', {
@@ -252,11 +262,8 @@ export default {
     context.commit('createDaylightingControl', { ...payload, vertex_id: vertex.id });
   },
 
-  destroyAllComponents(context, { face_id, story_id }) {
-    if (!face_id || !story_id) {
-      return;
-    }
-    context.commit('dropDaylightingControls', { face_id, story_id });
-    context.commit('dropWindows', { story_id });
+  destroyAllComponents({ state, rootState, commit }, { story_id }) {
+    commit('dropDaylightingControls', { story_id });
+    commit('dropWindows', { story_id });
   },
 };

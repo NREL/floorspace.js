@@ -13,6 +13,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <marker v-for="id in ['perp-linecap', 'perp-linecap-highlight']" :id="id" markerWidth="1" markerHeight="10" orient="auto" markerUnits="strokeWidth" refY="4" refX="0.5">
           <rect x="0" y="1" width="1" height="6" shape-rendering="optimizeQuality"/>
         </marker>
+        <marker id="red-arrowhead-right" markerWidth="6" markerHeight="4" refX="6" refY="2"
+             orient="auto">
+          <path d="M 0,0 V 4 L6,2 Z" style="fill: red; stroke: none" />
+        </marker>
+        <marker id="red-arrowhead-left" markerWidth="6" markerHeight="4" refX="0" refY="2"
+             orient="auto">
+          <path d="M 6,0 V 4 L0,2 Z" style="fill: red; stroke: none" />
+        </marker>
       </defs>
     </svg>
   </div>
@@ -20,13 +28,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { throttle, debounce } from '../../utilities';
+import { debounce } from '../../utilities';
+import d3AwareThrottle from '../../utilities/d3-aware-throttle';
 import methods from './methods';
 import geometryHelpers from './../../store/modules/geometry/helpers';
 import modelHelpers from './../../store/modules/models/helpers';
 import applicationHelpers from './../../store/modules/application/helpers';
 import { ResizeEvents } from '../../components/Resize';
-import { drawWindow, drawDaylightingControl } from './drawing';
+import { drawWindow, drawDaylightingControl, drawWindowGuideline, drawDaylightingControlGuideline } from './drawing';
 import { expandWindowAlongEdge, windowLocation } from './snapping';
 
 const d3 = require('d3');
@@ -34,6 +43,10 @@ const d3 = require('d3');
 export default {
   name: 'grid',
   data() {
+    const
+      xScale = v => this.rwuToGrid(v, 'x'),
+      yScale = v => this.rwuToGrid(v, 'y');
+
     return {
       points: [], // points for the face currently being drawn
       axis: {
@@ -46,16 +59,22 @@ export default {
       },
       handleMouseMove: null, // placeholder --> overwritten in mounted()
       drawWindow: drawWindow()
-        .xScale(v => this.rwuToGrid(v, 'x'))
-        .yScale(v => this.rwuToGrid(v, 'y')),
+        .xScale(xScale)
+        .yScale(yScale),
+      drawWindowGuideline: drawWindowGuideline()
+        .xScale(xScale)
+        .yScale(yScale),
       drawDC: drawDaylightingControl()
-        .xScale(v => this.rwuToGrid(v, 'x'))
-        .yScale(v => this.rwuToGrid(v, 'y')),
+        .xScale(xScale)
+        .yScale(yScale),
+      drawDCGuideline: drawDaylightingControlGuideline()
+        .xScale(xScale)
+        .yScale(yScale),
     };
   },
   mounted() {
     // throttle/debounce event handlers
-    this.handleMouseMove = throttle(this.highlightSnapTarget, 100);
+    this.handleMouseMove = d3AwareThrottle(this.highlightSnapTarget, 100);
 
     // render grid first time (not debounced, as this seems to fix an issue
     // where the x bounds are set correctly, and then becomes incorrect when the
@@ -205,11 +224,15 @@ export default {
         center = windowLocation(edge, { alpha });
       return expandWindowAlongEdge(edge, center, windowDefn.width);
     },
+    windowsOnFace(face) {
+      return _.flatMap(
+        face.edges,
+        e => _.filter(this.currentStory.windows , { edge_id: e.id })
+              .map(w => this.denormalizeWindow(e, w)));
+    },
     polygonsFromGeometry(geometry, extraPolygonAttrs = {}) {
       const
-        geom = geometryHelpers.denormalize(geometry),
-        windows = this.currentStory.geometry_id === geometry.id ?
-          this.currentStory.windows : [];
+        geom = geometryHelpers.denormalize(geometry)
       const polygons = geom.faces.map((face) => {
         // look up the model (space or shading) associated with the face
         const
@@ -222,10 +245,7 @@ export default {
             color: model.color,
             points,
             labelPosition: this.polygonLabelPosition(points),
-            windows: _.flatMap(
-              face.edges,
-              e => _.filter(windows, { edge_id: e.id })
-                    .map(w => this.denormalizeWindow(e, w))),
+            windows: this.windowsOnFace(face),
             daylighting_controls: model.daylighting_controls
               .map(dc => geometryHelpers.vertexForId(dc.vertex_id, geometry)),
             ...extraPolygonAttrs,
