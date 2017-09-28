@@ -7,12 +7,24 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 
 <template>
-  <div>type{{type}}
+  <div>
+    <editable-select-table
+      :columns="currentComponentColumns"
+      :rows="currentComponentDefinitions"
+      :newRow="createComponentDefinition"
+      :deleteRow="deleteComponentDef"
+      :updateRow="updateComponentDef"
+      :selectedId="currentComponent && currentComponent.definition && currentComponent.definition.id"
+      :selectRow="setComponentById"
+    />
   </div>
-
 </template>
 
 <script>
+import icon from './../assets/svg-icons/add_image.svg'
+import EditableSelectTable from './EditableSelectTable';
+import libconfig from '../store/modules/models/libconfig';
+import helpers from './../store/modules/models/helpers';
 
 export default {
   name: 'AssignComponentMenu',
@@ -26,31 +38,47 @@ export default {
     };
   },
   methods: {
+    createComponentDefinition() {
+      this.$store.dispatch('models/createObjectWithType', { type: this.type })
+    },
+    deleteComponentDef(componentId) {
+      switch (this.type) {
+        case 'window_definitions':
+          this.$store.dispatch('models/destroyWindowDef', { object: { id: componentId } });
+          break;
+        case 'daylighting_control_definitions':
+          this.$store.dispatch('models/destroyDaylightingControlDef', { object: { id: componentId } });
+          break;
+        default:
+          throw new Error(`unknown component type '${this.type}'`);
+      }
+    },
+    updateComponentDef(componentId, key, value) {
+      const result = helpers.setValueForKey(
+        _.find(this.currentComponentDefinitions, { id: componentId }),
+        this.$store, this.type, key, value);
+      if (!result.success) {
+        window.eventBus.$emit('error', result.error);
+      }
+    },
+    setComponentById(componentId) {
+      this.currentComponent = { definition: { id: componentId } };
+    },
   },
   computed: {
-    latestCreatedCompId() {
-      return _.chain(this.allComponents)
-        .map('defs')
-        .flatten()
-        .map('id')
-        .map(Number)
-        .max()
-        .value() + '';
-    },
     components() {
       return Object.keys(this.componentTypes).map(ct => ({
-        defs: this.$store.state.models.library[this.type],
+        defs: this.$store.state.models.library[ct],
         name: this.componentTypes[ct],
         type: ct,
       }));
     },
-    currentComponentType() {
-      return this.currentComponent.type;
+    currentComponentColumns() {
+      return this.type ? libconfig[this.type].columns : [];
     },
-    currentComponentDefinition() {
-      return this.currentComponent.definition;
+    currentComponentDefinitions() {
+      return this.type ? this.$store.state.models.library[this.type] : [];
     },
-
     currentComponent: {
       get() { return this.$store.getters['application/currentComponent']; },
       set(item) {
@@ -60,6 +88,8 @@ export default {
     },
   },
   components: {
+    icon,
+    'editable-select-table': EditableSelectTable,
   },
 };
 </script>
