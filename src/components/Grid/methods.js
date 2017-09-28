@@ -9,7 +9,7 @@
 const d3 = require('d3');
 const polylabel = require('polylabel');
 import _ from 'lodash';
-import { snapTargets, snapWindowToEdge, snapToVertexWithinFace } from './snapping';
+import { snapTargets, snapWindowToEdge, snapToVertexWithinFace, findClosestEdge, findClosestWindow } from './snapping';
 import geometryHelpers from './../../store/modules/geometry/helpers';
 import modelHelpers from './../../store/modules/models/helpers';
 import { ResizeEvents } from '../../components/Resize';
@@ -45,8 +45,9 @@ export default {
       gridPoint = { x: gridCoords[0], y: gridCoords[1] },
       rwuPoint = this.gridPointToRWU(gridPoint),
       loc = snapWindowToEdge(
+        this.snapMode,
         this.denormalizedGeometry.edges, rwuPoint,
-        this.currentComponentDefinition.width, this.spacing * 2,
+        this.currentComponentDefinition.width, this.spacing * 2, this.spacing,
       );
 
     if (!loc) { return; }
@@ -58,8 +59,6 @@ export default {
       alpha: loc.alpha,
     };
     this.$store.dispatch('models/createWindow', payload);
-
-    window.eventBus.$emit('success', `Window created at (${loc.center.x}, ${loc.center.y})`);
   },
   placeDaylightingControl() {
     const
@@ -70,6 +69,7 @@ export default {
         y: this.gridToRWU(gridPoint.y, 'y'),
       },
       loc = snapToVertexWithinFace(
+        this.snapMode,
         this.denormalizedGeometry.faces, rwuPoint, this.spacing);
 
     if (!loc) { return; }
@@ -81,7 +81,6 @@ export default {
       ...loc,
     };
     this.$store.dispatch('models/createDaylightingControl', payload);
-    window.eventBus.$emit('success', `Daylighting control created at (${loc.x}, ${loc.y})`);
   },
   /*
   * If the grid is clicked when a drawing tool or the eraser tool is active, add a point to the component
@@ -180,7 +179,7 @@ export default {
   },
 
   clearHighlights() {
-    d3.selectAll('#grid .highlight, #grid .gridpoint').remove();
+    d3.selectAll('#grid .highlight, #grid .gridpoint, #grid .guideline').remove();
   },
 
 
@@ -196,8 +195,9 @@ export default {
     const
       rwuPoint = this.gridPointToRWU(gridPoint),
       loc = snapWindowToEdge(
+        this.snapMode,
         this.denormalizedGeometry.edges, rwuPoint,
-        this.currentComponentDefinition.width, this.spacing * 2,
+        this.currentComponentDefinition.width, this.spacing * 2, this.spacing,
       );
 
     if (!loc) { return; }
@@ -207,11 +207,19 @@ export default {
       .selectAll('.window')
       .data([loc])
       .call(this.drawWindow.highlight(true));
+
+    d3.select('#grid svg')
+      .append('g')
+      .classed('guideline', true)
+      .selectAll('.window-guideline')
+      .data([loc])
+      .call(this.drawWindowGuideline);
   },
   highlightDaylightingControl(gridPoint) {
     const
       rwuPoint = this.gridPointToRWU(gridPoint),
       loc = snapToVertexWithinFace(
+        this.snapMode,
         this.denormalizedGeometry.faces, rwuPoint,
         this.spacing,
       );
@@ -222,6 +230,17 @@ export default {
       .selectAll('.daylighting-control')
       .data([loc])
       .call(this.drawDC);
+
+    const
+      face = _.find(this.denormalizedGeometry.faces, { id: loc.face_id }),
+      windows = this.windowsOnFace(face),
+      nearestEdge = findClosestWindow(windows, loc) || findClosestEdge(face.edges, loc);
+    d3.select('#grid svg')
+      .append('g')
+      .classed('guideline', true)
+      .selectAll('.daylighting-control-guideline')
+      .data([{ loc, nearestEdge }])
+      .call(this.drawDCGuideline);
   },
 
   /*

@@ -207,10 +207,10 @@ describe('edgesToSplit:simpleGeometry', () => {
   );
 
   it('splits an edge in a simple case', () => {
-    assert(edges.length === 1);
+    assert(edges.length === 1, 'only one edge should be split');
 
     const [{ edgeToDelete, newEdges, replaceEdgeRefs }] = edges;
-    assert(edgeToDelete === 'ce');
+    assert(edgeToDelete === 'ce', 'that edge should be "ce"');
 
     const replaceCE = _.find(replaceEdgeRefs, { face_id: 'bottom', edge_id: 'ce' });
     assert(replaceCE);
@@ -219,7 +219,7 @@ describe('edgesToSplit:simpleGeometry', () => {
       _.find(newEdges, { v1: 'd', v2: 'e' }) ||
       _.find(newEdges, { v1: 'e', v2: 'd' }));
 
-    assert(_.includes(replaceCE.newEdges, edgeDE.id));
+    assert(_.includes(_.map(replaceCE.newEdges, 'id'), edgeDE.id));
   });
 
   it('maintains order of existing vertices', () => {
