@@ -27,27 +27,27 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       </div>
 
       <div id="mode-tabs">
-        <div click="mode='floorplan'" :class="{ active: mode === 'floorplan' }">
+        <div @click="mode='floorplan'" class="tab" :class="{ active: mode === 'floorplan' }">
           <span>Floorplan</span>
           <tab-floorplan-svg class="icon"></tab-floorplan-svg>
         </div>
 
-        <div @click="mode='shading'" :class="{ active: mode === 'shading' }">
+        <div @click="mode='shading'" class="tab" :class="{ active: mode === 'shading' }">
           <span>Shading</span>
           <tab-shading-svg class="icon"></tab-shading-svg>
         </div>
 
-        <div @click="mode='images'" :class="{ active: mode === 'images' }">
+        <div @click="mode='images'" class="tab" :class="{ active: mode === 'images' }">
           <span>Images</span>
           <tab-floorplan-svg  class="icon"></tab-floorplan-svg>
         </div>
 
-        <div @click="mode='components'" :class="{ active: mode === 'components' }">
+        <div @click="mode='components'" class="tab" :class="{ active: mode === 'components' }">
           <span>Components</span>
           <tab-components-svg  class="icon"></tab-components-svg>
         </div>
 
-        <div @click="mode='assign'" :class="{ active: mode === 'assign' }">
+        <div @click="mode='assign'" class="tab" :class="{ active: mode === 'assign' }">
           <span>Assign</span>
           <tab-assign-svg  class="icon"></tab-assign-svg>
         </div>
@@ -79,7 +79,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <option value="ft">ft</option>
             <option value="m">m</option>
           </select>
-          <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
+          <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'>
               <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
           </svg>
         </div>
@@ -92,7 +92,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     </section>
 
     <section id="bottom">
-      <template  v-if="mode==='floorplan'">
+      <template  v-if="mode ==='floorplan' || mode === 'shading'">
         <div id="instructions">Draw a floorplan and import images</div>
 
         <div id="drawing-tools" class="tools-list">
@@ -100,22 +100,25 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <tool-draw-rectangle-svg class="button"></tool-draw-rectangle-svg>
           </div>
           <div @click="tool = 'Polygon'" :class="{ active: tool === 'Polygon' }">
-            <tool-draw-rectangle-svg class="button"></tool-draw-rectangle-svg>
+            <tool-draw-polygon-svg class="button"></tool-draw-polygon-svg>
           </div>
           <div @click="tool = 'Eraser'" :class="{ active: tool === 'Eraser' }">
             <tool-erase-svg class="button"></tool-erase-svg>
           </div>
-          <div @click="tool = ''" :class="{ active: tool === '' }">
+          <div @click="tool = 'Select'" :class="{ active: tool === 'Select' }">
             <tool-move-size-svg class="button"></tool-move-size-svg>
+          </div>
+          <div @click="tool = ''" :class="{ active: tool === '' }">
+            <tool-color-svg class="button"></tool-color-svg>
           </div>
         </div>
 
-        <div class='input-select'>
+        <div v-if="mode=='floorplan'" class='input-select'>
             <label>View By</label>
             <select v-model='currentMode'>
                 <option v-for="mode in ['building_units', 'thermal_zones', 'space_types']" :value="mode">{{ displayNameForMode(mode) }}</option>
             </select>
-            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
+            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'>
                 <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
             </svg>
         </div>
@@ -125,7 +128,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
         <span v-for="type in ['window_definitions', 'daylighting_control_definitions']"  @click="visibleComponentType = visibleComponentType === type ? null : type " :class="{ active: currentComponentType === type }">
           {{ type }}
-          <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
+          <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'>
               <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
           </svg>
         </span>
@@ -139,7 +142,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <select v-model='currentMode'>
                 <option v-for="mode in ['building_units', 'thermal_zones', 'space_types']" :value="mode">{{ displayNameForMode(mode) }}</option>
             </select>
-            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
+            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'>
                 <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
             </svg>
         </div>
@@ -157,7 +160,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       <div id="grid-tools">
         <zoom-in-svg class="button"></zoom-in-svg>
         <zoom-out-svg class="button"></zoom-out-svg>
-        <pan-svg class="button"></pan-svg>
+        <pan-svg @click="tool = 'Pan'" :class="{ active: tool === 'Pan' }" class="button"></pan-svg>
       </div>
 
     </section>
@@ -405,12 +408,19 @@ $gray-dark: #333333;
 $black: #000000;
 $gray-medium-light: #5b5b5b;
 
+svg.icon, svg.button {
+  margin-top: .5rem;
+  vertical-align: middle;
+  height: 2rem;
+  width: 2rem;
+}
+
 #toolbar {
   background-color: $black;
   z-index: 3;
 
   #top {
-    height: 3rem;
+    height: 2.5rem;
     display: flex;
     #navigation-head {
       #undo-redo {
@@ -424,17 +434,52 @@ $gray-medium-light: #5b5b5b;
     #mode-tabs {
       cursor: pointer;
       display: flex;
-        >* {
-          padding-left: .5rem;
+        .tab {
+          background-color: $gray-dark;
+          margin-right: 1.5rem;
+          padding: 0 .5rem;
+          position: relative;
+
+
         }
-        .active {
+        .tab:after {
+          background-color: $black;
+
+          // .tab.active:after {
+          //   color: $gray-medium-light;
+          // }
+          color: $gray-dark;
+          border-left: 1.25rem solid;
+          border-top: 1.25rem solid transparent;
+          border-bottom: 1.25rem solid transparent;
+          display: inline-block;
+          content: '';
+          position: absolute;
+          right: -1.25rem;
+        }
+        .tab:before {
+          background-color: red;
+
+          // .tab.active:after {
+          //   color: $gray-medium-light;
+          // }
+          color: $gray-dark;
+          border-left: 0.25rem solid;
+          border-top: 0.25rem solid transparent;
+          border-bottom: 0.25rem solid transparent;
+          display: inline-block;
+          content: '';
+          position: absolute;
+          left: -1.25rem;
+        }
+
+        .tab.active {
           background-color: $gray-medium-light;
+          &::after {
+            color: $gray-medium-light;
+          }
         }
-        svg {
-          vertical-align: middle;
-          height: 2rem;
-          width: 2rem;
-        }
+
     }
     #grid-settings {
       display: flex;
@@ -452,10 +497,14 @@ $gray-medium-light: #5b5b5b;
     .tools-list {
       display: flex;
       margin-right: 3rem;
+      .active {
+        background-color: $gray-dark;
+      }
 
     }
     #instructions {
       margin-right: auto;
+      line-height: 2rem;
     }
     #components-menu {
       span.active {

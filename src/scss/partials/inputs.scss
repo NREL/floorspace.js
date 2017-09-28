@@ -49,12 +49,14 @@
     }
 
     svg {
-        pointer-events: none;
-        position: absolute;
-        right: .5rem;
-        top: calc(50% - 3px);
+      height: .5rem;
+      pointer-events: none;
+      position: absolute;
+      right: .25rem;
+      fill: white;
+      top: calc(50% - 0.25rem);
         path {
-            fill: $gray-medium-light;
+            fill: $white;
         }
     }
 }

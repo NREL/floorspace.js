@@ -20,7 +20,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
               <select v-model='type' id="library-type-select">
                   <option v-for='(objects, type) in extendedLibrary' :value="type">{{ displayTypeForType(type) }}</option>
               </select>
-              <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
+              <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'>
                   <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
               </svg>
           </div>
@@ -66,7 +66,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
                               <option :selected="!valueForKey(object, column)" value="null">None</option>
                               <option v-for='(id, name) in selectOptionsForObjectAndKey(object, column)' :value="id" :selected="valueForKey(object, column)===name">{{ name }}</option>
                           </select>
-                          <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
+                          <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'>
                               <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
                           </svg>
                       </div>

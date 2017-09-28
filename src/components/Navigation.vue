@@ -15,7 +15,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 <select v-model='mode'>
                     <option v-for='mode in modes' :value="mode">{{displayNameForMode(mode)}}</option>
                 </select>
-                <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
+                <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'>
                     <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
                 </svg>
             </div>
