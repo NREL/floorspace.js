@@ -32,7 +32,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
               :row="row"
               :onChange="updateRow.bind(null, row.id, col.name)"
               :editable="row.editable"
-              :focus="row.editable && initialCol === col.name"
+              :focus="row.editable && col.name === initialCol"
               v-on:finishedEditing="editableId = null"
             />
           </td>
@@ -70,15 +70,11 @@ export default {
   },
   methods: {
     setEditableRow(row, col) {
-      console.log('setting editable row');
       this.editableId = row.id;
       this.initialCol = col.name;
     },
   },
   computed: {
-    ...mapState({
-      rootState: state => state,
-    }),
     visibleColumns() {
       return _.reject(this.columns, 'private');
     },

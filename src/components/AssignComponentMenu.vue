@@ -14,7 +14,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       :newRow="createComponentDefinition"
       :deleteRow="deleteComponentDef"
       :updateRow="updateComponentDef"
-      :selectedId="currentComponentDefinition && currentComponentDefinition.id"
+      :selectedId="currentComponent && currentComponent.definition && currentComponent.definition.id"
       :selectRow="setComponentById"
     />
   </div>
@@ -50,8 +50,7 @@ export default {
           this.$store.dispatch('models/destroyDaylightingControlDef', { object: { id: componentId } });
           break;
         default:
-          this.$store.dispatch('models/destroyObject', { object: { id: componentId } });
-          break;
+          throw new Error(`unknown component type '${this.type}'`);
       }
     },
     updateComponentDef(componentId, key, value) {
@@ -67,15 +66,6 @@ export default {
     },
   },
   computed: {
-    latestCreatedCompId() {
-      return _.chain(this.components)
-        .map('defs')
-        .flatten()
-        .map('id')
-        .map(Number)
-        .max()
-        .value() + '';
-    },
     components() {
       return Object.keys(this.componentTypes).map(ct => ({
         defs: this.$store.state.models.library[ct],
@@ -83,14 +73,8 @@ export default {
         type: ct,
       }));
     },
-    currentComponentType() {
-      return this.currentComponent.type;
-    },
     currentComponentColumns() {
       return this.type ? libconfig[this.type].columns : [];
-    },
-    currentComponentDefinition() {
-      return this.currentComponent.definition;
     },
     currentComponentDefinitions() {
       return this.type ? this.$store.state.models.library[this.type] : [];
