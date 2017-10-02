@@ -49,7 +49,7 @@ svg#north_axis {
   top: 1rem;
   left: 1rem;
   width: 3rem;
-  z-index: 90;
+  z-index: 1;
 }
 #canvas {
     background: white;

@@ -98,13 +98,18 @@ export default {
       background-color: rgba(0,0,0,0);
       border: none;
       color: $gray-lightest;
-      font-size: 1rem;
   }
   tr.selected-row {
-    background-color: $gray-light;
+    background-color: $gray-medium;
   }
   td {
-    width: 10em;
+    width: 11em;
+    span, input {
+      padding-top: 10px;
+      padding-bottom: 10px;
+      font-size: 1rem;
+      height: 18px;
+    }
   }
 
   td.destroy {
