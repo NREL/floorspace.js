@@ -88,7 +88,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { getSiblings } from './../utilities';
 import helpers from './../store/modules/models/helpers';
 import ResizeEvents from './Resize/ResizeEvents';
 import libconfig from '../store/modules/models/libconfig';
@@ -256,9 +255,7 @@ export default {
       const doResize = (e) => {
         const newHeight = e.clientY + collapsedHeight > window.innerHeight ? window.innerHeight - collapsedHeight : e.clientY;
         document.getElementById('layout-library').style.top = `${newHeight}px`;
-        getSiblings(document.getElementById('layout-library')).forEach((el) => {
-          el.style.bottom = `${window.innerHeight - newHeight}px`;
-        });
+        document.getElementById('layout-main').style.bottom = `${window.innerHeight - newHeight}px`;
 
         ResizeEvents.$emit('resize');
       };
@@ -272,17 +269,13 @@ export default {
     showHide() {
       const newHeight = document.getElementById('layout-library').offsetTop === (window.innerHeight - collapsedHeight) ? fullHeight : (window.innerHeight - collapsedHeight);
       document.getElementById('layout-library').style.top = `${newHeight}px`;
-      getSiblings(document.getElementById('layout-library')).forEach((el) => {
-        el.style.bottom = `${window.innerHeight - newHeight}px`;
-      });
+      document.getElementById('layout-main').style.bottom = `${window.innerHeight - newHeight}px`;
       ResizeEvents.$emit('resize');
     },
     // reset the library size when the window is resized
     resetSize() {
       document.getElementById('layout-library').style.top = "";
-      getSiblings(document.getElementById('layout-library')).forEach((el) => {
-        el.style.bottom = "";
-      });
+      document.getElementById('layout-main').style.bottom = '';
       fullHeight = document.getElementById('layout-library').offsetTop;
     },
     // configure Huebee color pickers for each color picker input
