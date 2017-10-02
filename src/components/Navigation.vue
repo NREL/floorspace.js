@@ -38,7 +38,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 </div>
             </section>
             <section id="story-library-section" v-if="libraryExpanded === 'story'">
-              <div class="library-goes-here" />
+              <library :class="{ 'disabled-component': tool === 'Map' }"></library>
             </section>
 
             <section id="subselection-list">
@@ -82,7 +82,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 </div>
             </section>
             <section id="sublibrary-section" v-if="libraryExpanded === 'subselect'">
-              <div class="library-goes-here" />
+              <library :class="{ 'disabled-component': tool === 'Map' }"></library>
             </section>
 
         </div>
@@ -97,6 +97,7 @@ import { getSiblings } from './../utilities';
 import applicationHelpers from './../store/modules/application/helpers';
 import modelHelpers from './../store/modules/models/helpers';
 import ResizeEvents from './Resize/ResizeEvents';
+import Library from './Library.vue';
 
 let fullWidth;
 const collapsedWidth = 8;
@@ -117,6 +118,8 @@ export default {
     ...mapState({
       // available model types
       modes: state => state.application.modes,
+
+      tool: state => state.application.currentSelections.tool,
 
       // top level models
       stories: state => state.models.stories,
@@ -423,6 +426,9 @@ export default {
       }
     },
   },
+  components: {
+    library: Library,
+  }
 };
 </script>
 

@@ -28,7 +28,7 @@ main {
     top: 5rem;
     left: 0;
     right: 0;
-    bottom: 30%;
+    bottom: 0;
 
     > * {
         position: absolute;
@@ -47,11 +47,6 @@ main {
         right: 0;
     }
 }
-
 #layout-library {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    top: 70%;
+  height: 100%;
 }

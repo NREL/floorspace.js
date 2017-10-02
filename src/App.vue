@@ -22,7 +22,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             </main>
             <!-- <inspector-view></inspector-view> -->
         </div>
-        <library :class="{ 'disabled-component': tool === 'Map' }"></library>
     </div>
 </template>
 
@@ -36,7 +35,6 @@ import Grid from './components/Grid/Grid.vue';
 import Canvas from './components/Canvas/Canvas.vue';
 import Toolbar from './components/Toolbar.vue';
 import Inspector from './components/Inspector.vue';
-import Library from './components/Library.vue';
 import { Resize } from './components/Resize';
 
 
@@ -92,7 +90,6 @@ export default {
     'grid-view': Grid,
     'canvas-view': Canvas,
     'inspector-view': Inspector,
-    library: Library,
     navigation: Navigation,
     toolbar: Toolbar
   },
