@@ -171,11 +171,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <div id="component-icons" class="components-list">
 
           <div @click="visibleComponentType = visibleComponentType === 'window_definitions' ? null : 'window_definitions' " :class="{ active: visibleComponentType === 'window_definitions' }">
-            <tool-move-size-svg class="button"></tool-move-size-svg>
+            <components-window class="button" />
           </div>
           <div @click="visibleComponentType = visibleComponentType === 'daylighting_control_definitions' ? null : 'daylighting_control_definitions' " :class="{ active: visibleComponentType === 'daylighting_control_definitions' }">
 
-            <tool-color-svg class="button"></tool-color-svg>
+            <components-daylighting class="button" />
           </div>
         </div>
 
