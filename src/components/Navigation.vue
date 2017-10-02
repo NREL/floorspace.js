@@ -54,12 +54,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                   </div>
 
                   <input id="upload-image-input" ref="fileInput" @change="uploadImage" type="file"/>
-                  <button v-show="mode==='images'" @click="$refs.fileInput.click()">
-                      <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M208 122h-74V48c0-3.534-2.466-6.4-6-6.4s-6 2.866-6 6.4v74H48c-3.534 0-6.4 2.466-6.4 6s2.866 6 6.4 6h74v74c0 3.534 2.466 6.4 6 6.4s6-2.866 6-6.4v-74h74c3.534 0 6.4-2.466 6.4-6s-2.866-6-6.4-6z"/>
-                      </svg>
-                      {{displayNameForMode(mode)}}
-                  </button>
+                  <button v-show="mode==='images'" @click="$refs.fileInput.click()">+</button>
                   <button v-if="mode!=='images'" @click="createItem()" class="add-sub-selection">+</button>
                 </div>
                 <button @click="expandLibrary(libraryExpanded === 'subselect'? false : 'subselect')">

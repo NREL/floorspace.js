@@ -16,7 +16,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
           </div>
           <div class='input-select'>
               <label>Type</label>
-              <select v-model='type' id="library-type-select">
+              <select v-model='mode' id="library-type-select">
                   <option v-for='(objects, type) in extendedLibrary' :value="type">{{ displayTypeForType(type) }}</option>
               </select>
               <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'>
@@ -25,60 +25,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
           </div>
           <button @click="createObject" id="library-new-object">New</button>
       </header>
-
-      <table class="table library-table">
-          <thead>
-              <tr>
-                  <th v-for="column in columns" @click="sortBy(column)">
-                      <span>
-                          <span>{{ displayNameForKey(column) }}</span>
-                          <svg v-show="column === sortKey && sortDescending" viewBox="0 0 10 3" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M0 .5l5 5 5-5H0z"/>
-                          </svg>
-                          <svg v-show="column === sortKey && !sortDescending" viewBox="0 0 10 3" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M0 5.5l5-5 5 5H0z"/>
-                          </svg>
-                      </span>
-                  </th>
-                  <th ></th>
-              </tr>
-          </thead>
-
-          <tbody>
-              <tr
-                v-for='object in displayObjects'
-                :key="object.id"
-                @click="selectedObject = object"
-                :style="{ 'background-color': (selectedObject && selectedObject.id === object.id) ? '#008500' : '' }"
-                :data-id="object.id"
-              >
-                  <td v-for="column in columns" :data-column="column">
-                      <input v-if="!inputTypeForKey(column)" :value="valueForKey(object, column)" @change="setValueForKey(object, column, $event.target.value)" readonly>
-                      <input v-if="inputTypeForKey(column) === 'text'" :value="valueForKey(object, column)" @change="setValueForKey(object, column, $event.target.value)">
-
-                      <div v-if="inputTypeForKey(column) === 'color'" class='input-color'>
-                          <input v-if="inputTypeForKey(column) === 'color'" :object-id="object.id" :value="valueForKey(object, column)" @change="setValueForKey(object, column, $event.target.value)">
-                      </div>
-
-                      <div v-if="inputTypeForKey(column) === 'select'" class='input-select'>
-                          <select @change="setValueForKey(object, column, $event.target.value)" >
-                              <option :selected="!valueForKey(object, column)" value="null">None</option>
-                              <option v-for='(id, name) in selectOptionsForObjectAndKey(object, column)' :value="id" :selected="valueForKey(object, column)===name">{{ name }}</option>
-                          </select>
-                          <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'>
-                              <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
-                          </svg>
-                      </div>
-                  </td>
-                  <td class="destroy" @click.stop="destroyObject(object)">
-                      <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
-                      </svg>
-                  </td>
-              </tr>
-          </tbody>
-      </table>
-
+      <library-rows
+        :rows="displayObjects"
+        :selectedItemId="null"
+        :compact="compact"
+      />
   </section>
 
   </div>
@@ -89,6 +40,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
 import { mapState, mapGetters } from 'vuex';
 import helpers from './../store/modules/models/helpers';
 import libconfig from '../store/modules/models/libconfig';
+import LibraryRows from './LibraryRows';
 
 const Huebee = require('huebee');
 
@@ -101,18 +53,16 @@ export default {
       search: '',
       sortKey: 'id',
       sortDescending: true,
-      type: null, // object type being viewed
       huebs: {},
+      compact: true,
     };
   },
   mounted() {
     // initialize the library to view objects of the same type being viewed in the navigation
-    this.type = this.mode;
     this.configurePickers();
   },
   computed: {
     ...mapState({
-      mode: state => state.application.currentSelections.mode,
       stories: state => state.models.stories,
     }),
     ...mapGetters({
@@ -120,6 +70,11 @@ export default {
       currentShading: 'application/currentShading',
       currentImage: 'application/currentImage',
     }),
+
+    mode: {
+      get() { return this.$store.state.application.currentSelections.mode; },
+      set(mode) { this.$store.dispatch('application/setCurrentMode', { mode }); },
+    },
 
     // current selection getters and setters - these dispatch actions to update the data store when a new item is selected
     currentStory: {
@@ -151,7 +106,7 @@ export default {
     */
     selectedObject: {
       get() {
-        switch (this.type) {
+        switch (this.mode) {
           case 'stories':
             return this.currentStory;
           case 'building_units':
@@ -165,7 +120,7 @@ export default {
         }
       },
       set(item) {
-        switch (this.type) {
+        switch (this.mode) {
           case 'stories':
             this.currentStory = item;
             break;
@@ -215,7 +170,7 @@ export default {
     * objects are deep copies to avoid mutating the store
     */
     displayObjects() {
-      return (this.extendedLibrary[this.type] || [])
+      return (this.extendedLibrary[this.mode] || [])
         .filter(object =>
           // check if the value for any key on the object contains the search term
           Object.keys(object).some((key) => {
@@ -236,9 +191,9 @@ export default {
     * return all unique non private keys for the set of displayObjects
     */
     columns() {
-      if (!this.type || !libconfig[this.type]) return;
+      if (!this.mode || !libconfig[this.mode]) return;
       return _.map(
-        _.reject(libconfig[this.type].columns, 'private'),
+        _.reject(libconfig[this.mode].columns, 'private'),
         'name');
     },
   },
@@ -263,31 +218,31 @@ export default {
     */
     // call the property getter if it exists, otherwise return the string value at obj[key]
     valueForKey(object, key) {
-      // return this.errorForObjectAndKey(object, key) ? this.errorForObjectAndKey(object, key).value : helpers.valueForKey(object, this.$store.state, this.type, key);
-      return helpers.valueForKey(object, this.$store.state, this.type, key);
+      // return this.errorForObjectAndKey(object, key) ? this.errorForObjectAndKey(object, key).value : helpers.valueForKey(object, this.$store.state, this.mode, key);
+      return helpers.valueForKey(object, this.$store.state, this.mode, key);
     },
 
     // update a property on an object in the datastore
     // TODO: validation
     setValueForKey(object, key, value) {
-      const result = helpers.setValueForKey(object, this.$store, this.type, key, value);
+      const result = helpers.setValueForKey(object, this.$store, this.mode, key, value);
       if (!result.success) {
         window.eventBus.$emit('error', result.error);
       }
     },
 
-    // input type to display in the column for a given key
-    inputTypeForKey(key) { return helpers.inputTypeForKey(this.type, key); },
+    // input mode to display in the column for a given key
+    inputTypeForKey(key) { return helpers.inputTypeForKey(this.mode, key); },
     // options to display in select dropdown
     // this is only called from the template if the input type for the key is select
-    selectOptionsForObjectAndKey(object, key) { return helpers.selectOptionsForKey(object, this.$store.state, this.type, key); },
+    selectOptionsForObjectAndKey(object, key) { return helpers.selectOptionsForKey(object, this.$store.state, this.mode, key); },
 
     /*
     * CREATE OBJECT
     * initializes an empty object
     */
     createObject() {
-      switch (this.type) {
+      switch (this.mode) {
         case 'stories':
           this.$store.dispatch('models/initStory');
           return;
@@ -301,7 +256,7 @@ export default {
           window.eventBus.$emit('uploadImage');
           break;
         default:
-          this.$store.dispatch('models/createObjectWithType', { type: this.type });
+          this.$store.dispatch('models/createObjectWithType', { type: this.mode });
           break;
       }
       // select the newly created object
@@ -312,26 +267,26 @@ export default {
     * DESTROY OBJECT
     */
     destroyObject(object) {
-      switch (this.type) {
+      switch (this.mode) {
         case 'stories':
           this.$store.dispatch('models/destroyStory', { story: object });
           return;
         case 'spaces':
           this.$store.dispatch('models/destroySpace', {
             space: object,
-            story: this.$store.state.models.stories.find(story => story[this.type].find(o => o.id === object.id)),
+            story: this.$store.state.models.stories.find(story => story[this.mode].find(o => o.id === object.id)),
           });
           break;
         case 'shading':
           this.$store.dispatch('models/destroyShading', {
             shading: object,
-            story: this.$store.state.models.stories.find(story => story[this.type].find(o => o.id === object.id)),
+            story: this.$store.state.models.stories.find(story => story[this.mode].find(o => o.id === object.id)),
           });
           break;
         case 'images':
           this.$store.dispatch('models/destroyImage', {
             image: object,
-            story: this.$store.state.models.stories.find(story => story[this.type].find(o => o.id === object.id)),
+            story: this.$store.state.models.stories.find(story => story[this.mode].find(o => o.id === object.id)),
           });
           break;
         case 'window_definitions':
@@ -354,7 +309,7 @@ export default {
 
     // used in column headers to get the display name for each object property
     // private properties will return null
-    displayNameForKey(key) { return helpers.displayNameForKey(this.type, key); },
+    displayNameForKey(key) { return helpers.displayNameForKey(this.mode, key); },
 
     // when a sort arrow is clicked, set sort order and key
     // this will trigger a recalculation of displayObjects
@@ -367,7 +322,7 @@ export default {
   },
   watch: {
     displayObjects() { this.$nextTick(this.configurePickers); },
-    type() {
+    mode() {
       this.search = '';
       this.sortKey = 'id';
       this.sortDescending = true;
@@ -379,6 +334,9 @@ export default {
         row.scrollIntoView();
       }
     },
+  },
+  components: {
+    'library-rows': LibraryRows,
   },
 };
 </script>
