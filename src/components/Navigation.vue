@@ -11,6 +11,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     <nav id="navigation">
       <div id="right-bar" @mousedown="resizeBarClicked" v-on:dblclick="showHide" ref="resizebar" class="resize-bar"></div>
         <section id="selections">
+          <span>
+            {{displayNameForMode('stories')}}
+            <button @click="createItem('stories')" class="create-story">+</button>
+          </span>
+          <span>
             <div class='input-select'>
                 <select v-model='mode'>
                     <option v-for='mode in modes' :value="mode">{{displayNameForMode(mode)}}</option>
@@ -27,30 +32,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 </svg>
                 {{displayNameForMode(mode)}}
             </button>
-
-            <button v-if="mode!=='images'" @click="createItem()" class="add-sub-selection">
-                <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M208 122h-74V48c0-3.534-2.466-6.4-6-6.4s-6 2.866-6 6.4v74H48c-3.534 0-6.4 2.466-6.4 6s2.866 6 6.4 6h74v74c0 3.534 2.466 6.4 6 6.4s6-2.866 6-6.4v-74h74c3.534 0 6.4-2.466 6.4-6s-2.866-6-6.4-6z"/>
-                </svg>
-                {{displayNameForMode(mode)}}
-            </button>
-        </section>
-
-        <section id="breadcrumbs">
-            <button @click="createItem('stories')" class="create-story">
-                <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M208 122h-74V48c0-3.534-2.466-6.4-6-6.4s-6 2.866-6 6.4v74H48c-3.534 0-6.4 2.466-6.4 6s2.866 6 6.4 6h74v74c0 3.534 2.466 6.4 6 6.4s6-2.866 6-6.4v-74h74c3.534 0 6.4-2.466 6.4-6s-2.866-6-6.4-6z"/>
-                </svg>
-                {{displayNameForMode('stories')}}
-            </button>
-            <span>
-                {{ currentStory.name }}
-                <template v-if="selectedObject">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path d="M.5 0v14l11-7-11-7z"/></svg>
-                    {{ selectedObject.name }}
-                </template>
-            </span>
-
+            <button v-if="mode!=='images'" @click="createItem()" class="add-sub-selection">+</button>
+         </span>
         </section>
 
         <div id="list">
@@ -429,6 +412,9 @@ export default {
     font-size: 0.75rem;
     height: 100%;
     #selections {
+        > span {
+          display: inherit;
+        }
         display: flex;
         padding: .25rem;
         justify-content: space-between;
