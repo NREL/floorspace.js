@@ -9,7 +9,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
 <template>
   <div id="layout-library">
     <section id='library'>
-    <div @mousedown="resizeBarClicked" v-on:dblclick="showHide" id="top-bar" ref="resizebar" class="resize-bar"></div>
       <header>
           <div class="input-text">
               <label>Search</label>
@@ -89,7 +88,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
 <script>
 import { mapState, mapGetters } from 'vuex';
 import helpers from './../store/modules/models/helpers';
-import ResizeEvents from './Resize/ResizeEvents';
 import libconfig from '../store/modules/models/libconfig';
 
 const Huebee = require('huebee');
@@ -110,11 +108,8 @@ export default {
   mounted() {
     // initialize the library to view objects of the same type being viewed in the navigation
     this.type = this.mode;
-    fullHeight = document.getElementById('layout-library').offsetTop;
     this.configurePickers();
-    window.addEventListener('resize', this.resetSize);
   },
-  beforeDestroy() { window.removeEventListener('resize', this.resetSize); },
   computed: {
     ...mapState({
       mode: state => state.application.currentSelections.mode,
@@ -248,36 +243,6 @@ export default {
     },
   },
   methods: {
-    /*
-    * Resize the library and adjust the positions of sibling elements
-    */
-    resizeBarClicked() {
-      const doResize = (e) => {
-        const newHeight = e.clientY + collapsedHeight > window.innerHeight ? window.innerHeight - collapsedHeight : e.clientY;
-        document.getElementById('layout-library').style.top = `${newHeight}px`;
-        document.getElementById('layout-main').style.bottom = `${window.innerHeight - newHeight}px`;
-
-        ResizeEvents.$emit('resize');
-      };
-      const stopResize = () => {
-        window.removeEventListener('mousemove', doResize);
-        window.removeEventListener('mouseup', stopResize);
-      };
-      window.addEventListener('mousemove', doResize);
-      window.addEventListener('mouseup', stopResize);
-    },
-    showHide() {
-      const newHeight = document.getElementById('layout-library').offsetTop === (window.innerHeight - collapsedHeight) ? fullHeight : (window.innerHeight - collapsedHeight);
-      document.getElementById('layout-library').style.top = `${newHeight}px`;
-      document.getElementById('layout-main').style.bottom = `${window.innerHeight - newHeight}px`;
-      ResizeEvents.$emit('resize');
-    },
-    // reset the library size when the window is resized
-    resetSize() {
-      document.getElementById('layout-library').style.top = "";
-      document.getElementById('layout-main').style.bottom = '';
-      fullHeight = document.getElementById('layout-library').offsetTop;
-    },
     // configure Huebee color pickers for each color picker input
     configurePickers() {
       const inputs = document.querySelectorAll('.input-color > input');
