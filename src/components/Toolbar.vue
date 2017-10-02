@@ -91,7 +91,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       </div>
     </section>
 
-    <section id="bottom">
+    <section id="bottom" :class="mode">
       <template  v-if="mode ==='floorplan'">
         <div id="instructions">Draw a floorplan and import images</div>
 
@@ -516,6 +516,11 @@ svg.icon, svg.button {
     }
   }
   #bottom {
+    &.components{
+      #instructions {
+        margin-right: 0;
+      }
+    }
     background-color: $gray-medium-light;
     display: flex;
     height: 2.5rem;
@@ -537,8 +542,9 @@ svg.icon, svg.button {
     }
 
     #instructions {
-      margin-right: auto;
       line-height: 2.5rem;
+      margin-right: auto;
+      min-width: 17.5rem;
     }
 
     #grid-tools {
