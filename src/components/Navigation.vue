@@ -11,33 +11,19 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     <nav id="navigation">
       <div id="right-bar" @mousedown="resizeBarClicked" v-on:dblclick="showHide" ref="resizebar" class="resize-bar"></div>
         <section id="selections">
-          <span>
-            {{displayNameForMode('stories')}}
-            <button @click="createItem('stories')" class="create-story">+</button>
-          </span>
-          <span>
-            <div class='input-select'>
-                <select v-model='mode'>
-                    <option v-for='mode in modes' :value="mode">{{displayNameForMode(mode)}}</option>
-                </select>
-                <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'>
-                    <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
-                </svg>
-            </div>
-
-            <input id="upload-image-input" ref="fileInput" @change="uploadImage" type="file"/>
-            <button v-show="mode==='images'" @click="$refs.fileInput.click()">
-                <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M208 122h-74V48c0-3.534-2.466-6.4-6-6.4s-6 2.866-6 6.4v74H48c-3.534 0-6.4 2.466-6.4 6s2.866 6 6.4 6h74v74c0 3.534 2.466 6.4 6 6.4s6-2.866 6-6.4v-74h74c3.534 0 6.4-2.466 6.4-6s-2.866-6-6.4-6z"/>
-                </svg>
-                {{displayNameForMode(mode)}}
-            </button>
-            <button v-if="mode!=='images'" @click="createItem()" class="add-sub-selection">+</button>
-         </span>
         </section>
 
         <div id="list">
             <section id="story-list">
+              <div>
+                <div class="story-controls">
+                  {{displayNameForMode('stories')}}
+                  <button @click="createItem('stories')" class="create-story">+</button>
+                </div>
+                <button @click="expandLibrary(libraryExpanded === 'story'? false : 'story')">
+                  {{ libraryExpanded === 'story' ? '<<' : '>>' }}
+                </button>
+              </div>
                 <div
                   v-for="item in stories"
                   :key="item.id"
@@ -51,8 +37,35 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                     </svg>
                 </div>
             </section>
+            <section id="story-library-section" v-if="libraryExpanded === 'story'">
+              <div class="library-goes-here" />
+            </section>
 
             <section id="subselection-list">
+              <div class="button-groups">
+                <div class="subselect-group">
+                  <div class='input-select'>
+                      <select v-model='mode'>
+                          <option v-for='mode in modes' :value="mode">{{displayNameForMode(mode)}}</option>
+                      </select>
+                      <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'>
+                          <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
+                      </svg>
+                  </div>
+
+                  <input id="upload-image-input" ref="fileInput" @change="uploadImage" type="file"/>
+                  <button v-show="mode==='images'" @click="$refs.fileInput.click()">
+                      <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M208 122h-74V48c0-3.534-2.466-6.4-6-6.4s-6 2.866-6 6.4v74H48c-3.534 0-6.4 2.466-6.4 6s2.866 6 6.4 6h74v74c0 3.534 2.466 6.4 6 6.4s6-2.866 6-6.4v-74h74c3.534 0 6.4-2.466 6.4-6s-2.866-6-6.4-6z"/>
+                      </svg>
+                      {{displayNameForMode(mode)}}
+                  </button>
+                  <button v-if="mode!=='images'" @click="createItem()" class="add-sub-selection">+</button>
+                </div>
+                <button @click="expandLibrary(libraryExpanded === 'subselect'? false : 'subselect')">
+                  {{ libraryExpanded === 'subselect' ? '<<' : '>>' }}
+                </button>
+             </div>
                 <div
                   v-for="item in items"
                   :key="item.id"
@@ -68,8 +81,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                     </svg>
                 </div>
             </section>
-        </div>
+            <section id="sublibrary-section" v-if="libraryExpanded === 'subselect'">
+              <div class="library-goes-here" />
+            </section>
 
+        </div>
     </nav>
 
   </div>
@@ -90,6 +106,11 @@ export default {
     this.selectedObject = this.items[0];
     fullWidth = document.getElementById('layout-navigation').offsetWidth;
     window.addEventListener('resize', this.resetSize);
+  },
+  data() {
+    return {
+      libraryExpanded: false,
+    };
   },
   beforeDestroy() { window.removeEventListener('resize', this.resetSize); },
   computed: {
@@ -225,8 +246,21 @@ export default {
       document.getElementById('layout-navigation').style.width = '';
       getSiblings(document.getElementById('layout-navigation')).forEach((el) => {
         el.style.left = '';
+        el.style.display = null;
       });
       fullWidth = document.getElementById('layout-navigation').offsetWidth;
+    },
+    expandLibrary(whichOne) {
+      if (!whichOne) {
+        this.resetSize();
+        this.libraryExpanded = false;
+        ResizeEvents.$emit('resize');
+        return;
+      }
+
+      document.getElementById('layout-navigation').style.width = '100%';
+      this.libraryExpanded = whichOne;
+      ResizeEvents.$emit('resize');
     },
     uploadImage(event) {
       const files = event.target.files;
@@ -411,19 +445,6 @@ export default {
     border-right: 1px solid $gray-darkest;
     font-size: 0.75rem;
     height: 100%;
-    #selections {
-        > span {
-          display: inherit;
-        }
-        display: flex;
-        padding: .25rem;
-        justify-content: space-between;
-
-            input[type="file"] {
-                position: absolute;
-                visibility: hidden;
-            }
-    }
     user-select: none;
 
     #selections > button, #breadcrumbs > button {
@@ -451,11 +472,31 @@ export default {
         #story-list {
             border-right: 1px solid $gray-darkest;
             flex-grow: 1;
+            .story-controls {
+              display:flex;
+            }
         }
         #subselection-list {
-            flex-grow: 2;
-        }
+            flex-grow: 1;
 
+            .button-groups {
+              display: flex;
+              .subselect-group {
+                display: flex;
+              }
+            }
+            input[type="file"] {
+                position: absolute;
+                visibility: hidden;
+            }
+            span {
+              display: flex;
+            }
+        }
+        #sublibrary-section, #story-library-section {
+          flex-grow: 15;
+          background:tomato;
+        }
         #story-list, #subselection-list {
             overflow: auto;
             height: calc(100% - 5rem);
