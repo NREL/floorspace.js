@@ -25,33 +25,52 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           <redo-svg @click.native="redo" class="button" :disabled="!timetravelInitialized" :class="{ 'disabled' : !timetravelInitialized }"></redo-svg>
         </div>
       </div>
+      <!-- <ul class="mode-tabs">
+        <li><a href="#">Home</a></li>
+        <li><a href="#">Vehicles</a></li>
+        <li><a href="#">Vans</a></li>
+        <li><a href="#">Camper Vans</a></li>
+        <li><a href="#">1989 VW Westfalia Vanagon</a></li>
+      </ul> -->
+      <ul id="mode-tabs">
+        <li @click="mode='floorplan'" class="tab" :class="{ active: mode === 'floorplan' }">
+          <span>
+            Floorplan
+            <tab-floorplan-svg class="icon"></tab-floorplan-svg>
+          </span>
+        </li>
 
-      <div id="mode-tabs">
-        <div @click="mode='floorplan'" class="tab" :class="{ active: mode === 'floorplan' }">
-          <span>Floorplan</span>
-          <tab-floorplan-svg class="icon"></tab-floorplan-svg>
-        </div>
+        <li @click="mode='shading'" class="tab" :class="{ active: mode === 'shading' }">
+          <span>
+            Shading
+            <tab-shading-svg class="icon"></tab-shading-svg>
+          </span>
+        </li>
 
-        <div @click="mode='shading'" class="tab" :class="{ active: mode === 'shading' }">
-          <span>Shading</span>
-          <tab-shading-svg class="icon"></tab-shading-svg>
-        </div>
+        <li @click="mode='images'" class="tab" :class="{ active: mode === 'images' }">
+          <span>
+            Images
+            <tab-floorplan-svg  class="icon"></tab-floorplan-svg>
+          </span>
+        </li>
 
-        <div @click="mode='images'" class="tab" :class="{ active: mode === 'images' }">
-          <span>Images</span>
-          <tab-floorplan-svg  class="icon"></tab-floorplan-svg>
-        </div>
+        <li @click="mode='components'" class="tab" :class="{ active: mode === 'components' }">
+          <span>
+            Components
+            <tab-components-svg  class="icon"></tab-components-svg>
+          </span>
+        </li>
 
-        <div @click="mode='components'" class="tab" :class="{ active: mode === 'components' }">
-          <span>Components</span>
-          <tab-components-svg  class="icon"></tab-components-svg>
-        </div>
-
-        <div @click="mode='assign'" class="tab" :class="{ active: mode === 'assign' }">
-          <span>Assign</span>
-          <tab-assign-svg  class="icon"></tab-assign-svg>
-        </div>
-      </div>
+        <li @click="mode='assign'" class="tab" :class="{ active: mode === 'assign' }">
+          <span>
+            Assign
+            <tab-assign-svg  class="icon"></tab-assign-svg>
+          </span>
+        </li>
+        <li>
+          <span />
+        </li>
+      </ul>
 
       <div id="grid-settings">
         <div class="input-checkbox">
@@ -427,48 +446,6 @@ svg.icon, svg.button {
       }
     }
 
-    #mode-tabs {
-      cursor: pointer;
-      display: flex;
-        .tab {
-          background-color: $gray-dark;
-          margin-right: 1.5rem;
-          padding: 0 0 0 1.5rem;
-          position: relative;
-          width: max-content;
-          &.active {
-            background-color: $gray-medium-light;
-            &::after {
-              color: $gray-medium-light;
-            }
-            &::before {
-                background-color: $gray-medium-light;
-            }
-          }
-        }
-        .tab:after {
-          background-color: $black;
-          color: $gray-dark;
-          border-left: 1.25rem solid;
-          border-top: 1.25rem solid transparent;
-          border-bottom: 1.25rem solid transparent;
-          display: inline-block;
-          content: '';
-          position: absolute;
-          right: -1.25rem;
-        }
-        .tab:before {
-          background-color: $gray-dark;
-          color: $black;
-          border-left: 1.25rem solid;
-          border-top: 1.25rem solid transparent;
-          border-bottom: 1.25rem solid transparent;
-          display: inline-block;
-          content: '';
-          position: absolute;
-          left: 0;
-        }
-    }
     #grid-settings {
       display: flex;
       margin-left: auto;
@@ -518,4 +495,96 @@ svg.icon, svg.button {
     }
   }
 }
+
+
+#mode-tabs {
+  list-style: none;
+  overflow: hidden;
+  padding-left: 0;
+  margin-top: 0;
+  margin-bottom:0;
+  display: flex;
+
+
+  li {
+    cursor: pointer;
+    float: left;
+    margin-top: 0;
+    background: $gray-dark;
+    span {
+      color: white;
+      text-decoration: none;
+      padding: 10px 0 10px 65px;
+      position: relative;
+      display: inline-block;
+      float: left;
+      white-space: nowrap;
+
+      svg {
+        display: inline-block;
+        vertical-align: middle;
+        margin-bottom: -10px;
+        margin-top: 0px;
+      }
+
+    }
+
+    span::after {
+      content: " ";
+      display: inline-block;
+      width: 0;
+      height: 0;
+      border-top: 50px solid transparent; /* Go big on the size, and let overflow hide */
+      border-bottom: 50px solid transparent;
+      border-left: 30px solid $gray-dark;
+      position: absolute;
+      top: 50%;
+      margin-top: -50px;
+      left: 100%;
+      z-index: 2;
+    }
+    span::before {
+      content: " ";
+      display: inline-block;
+      width: 0;
+      height: 0;
+      border-top: 50px solid transparent;
+      border-bottom: 50px solid transparent;
+      border-left: 30px solid white;
+      position: absolute;
+      top: 50%;
+      margin-top: -50px;
+      margin-left: 1px;
+      left: 100%;
+      z-index: 1;
+    }
+    &.active {
+      background: $gray-medium-light;
+      span:after {
+        border-left: 30px solid $gray-medium-light;
+      }
+    }
+    &:first-child span {
+      padding-left: 10px;
+    }
+    &:last-child {
+      height: 1.2em;
+      background: black !important;
+      pointer-events: none !important;
+      cursor: default !important;
+    }
+    &:last-child span::after {
+      border: 0;
+    }
+    span:hover {
+      background: $gray-medium-light;
+    }
+    span:hover:after {
+      border-left-color: $gray-medium-light !important;
+    }
+  }
+}
+
+
+
 </style>
