@@ -11,7 +11,7 @@
         <button @click="addRow">+</button>
       </div>
       <div class="control-group">
-        <button @click="compact = !compact">
+        <button @click="toggleCompact">
           {{ compact ? '>>' : '<<' }}
         </button>
       </div>
@@ -50,6 +50,28 @@ export default {
       sortDescending: true,
       compact: true,
     };
+  },
+  mounted() {
+    window.eventBus.$on('i-am-the-expanded-library-now', this.giveWayToOtherLibrary);
+  },
+  beforeDestroy() {
+    window.eventBus.$off('i-am-the-expanded-library-now', this.giveWayToOtherLibrary);
+  },
+  methods: {
+    toggleCompact() {
+      this.compact = !this.compact;
+      window.eventBus.$emit(
+        'i-am-the-expanded-library-now',
+        !this.compact ? this._uid : null,
+      );
+    },
+    giveWayToOtherLibrary(uid) {
+      if (uid === this._uid) {
+        // ignore events caused by myself.
+        return;
+      }
+      this.compact = true;
+    },
   },
   components: {
     EditableTable,

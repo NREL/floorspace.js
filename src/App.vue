@@ -51,19 +51,19 @@ export default {
   },
   mounted() {
 
-    this.$on('uploadImage', (event) => {
+    window.eventBus.$on('uploadImage', (event) => {
       document.getElementById('upload-image-input').click();
     });
-    // App will act as the eventBus for the application
-    this.$on('error', (err) => {
+
+    window.eventBus.$on('error', (err) => {
       this.error = err;
       setTimeout(() => { this.error = null; }, 5000);
     });
-    this.$on('success', (msg) => {
+    window.eventBus.$on('success', (msg) => {
       this.success = msg;
       setTimeout(() => { this.success = null; }, 5000);
     });
-    this.$on('reload-grid', () => {
+    window.eventBus.$on('reload-grid', () => {
       // This is unfortunate. oh well.
       document.getElementById('svg-grid')
         .dispatchEvent(new Event('reloadGrid'));

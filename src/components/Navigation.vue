@@ -46,13 +46,17 @@ export default {
     this.selectedObject = this.items[0];
     fullWidth = document.getElementById('layout-navigation').offsetWidth;
     window.addEventListener('resize', this.resetSize);
+    window.eventBus.$on('i-am-the-expanded-library-now', this.setWidthForOpenLibrary);
   },
   data() {
     return {
       libraryExpanded: false,
     };
   },
-  beforeDestroy() { window.removeEventListener('resize', this.resetSize); },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.resetSize);
+    window.eventBus.$off('i-am-the-expanded-library-now', this.setWidthForOpenLibrary);
+  },
   computed: {
     ...mapState({
       // available model types
@@ -192,16 +196,14 @@ export default {
       });
       fullWidth = document.getElementById('layout-navigation').offsetWidth;
     },
-    expandLibrary(whichOne) {
+    setWidthForOpenLibrary(whichOne) {
       if (!whichOne) {
         this.resetSize();
-        this.libraryExpanded = false;
         ResizeEvents.$emit('resize');
         return;
       }
 
       document.getElementById('layout-navigation').style.width = '100%';
-      this.libraryExpanded = whichOne;
       ResizeEvents.$emit('resize');
     },
     uploadImage(event) {
