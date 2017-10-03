@@ -7,7 +7,7 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 
 <template>
-  <div class="editable-select">
+  <div class="editable-table">
     <table class="table">
       <thead>
         <tr>
@@ -18,22 +18,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </tr>
       </thead>
       <tbody>
-        <tr
-            v-for="row in processedRows"
-            :class="{ 'selected-row': row.selected }"
-            @click="selectRow(row.id)"
-        >
+        <tr v-for="row in rows">
           <td
               v-for="col in visibleColumns"
-              :data-column="col.name"
-              @dblclick="setEditableRow(row, col)">
+              :data-column="col.name">
             <generic-input
               :col="col"
               :row="row"
               :onChange="updateRow.bind(null, row.id, col.name)"
-              :editable="row.editable"
-              :focus="row.editable && col.name === initialCol"
-              v-on:finishedEditing="editableId = null"
             />
           </td>
           <td class="destroy" @click.stop="deleteRow(row.id)">
@@ -57,33 +49,14 @@ import _ from 'lodash';
 import { mapState, mapGetters } from 'vuex';
 
 export default {
-  name: 'EditableSelectTable',
+  name: 'EditableTable',
   props: [
-    'columns', 'rows', 'newRow', 'deleteRow', 'updateRow', 'selectedId',
+    'columns', 'rows', 'newRow', 'deleteRow', 'updateRow',
     'selectRow',
   ],
-  data() {
-    return {
-      editableId: null,
-      initialCol: null,
-    };
-  },
-  methods: {
-    setEditableRow(row, col) {
-      this.editableId = row.id;
-      this.initialCol = col.name;
-    },
-  },
   computed: {
     visibleColumns() {
       return _.reject(this.columns, 'private');
-    },
-    processedRows() {
-      return this.rows.map(r => ({
-        ...r,
-        selected: r.id === this.selectedId,
-        editable: r.id === this.editableId,
-      }));
     },
   },
 };
@@ -94,17 +67,12 @@ export default {
   .editable-select {
     background-color: #24292c;
   }
-  input {
+  td {
+    width: 11em;
+    input {
       background-color: rgba(0,0,0,0);
       border: none;
       color: $gray-lightest;
-  }
-  tr.selected-row {
-    background-color: $gray-medium;
-  }
-  td {
-    width: 11em;
-    span, input {
       padding-top: 10px;
       padding-bottom: 10px;
       font-size: 1rem;

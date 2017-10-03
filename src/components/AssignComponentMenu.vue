@@ -8,7 +8,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
   <div id="assign-component-menu">
-    <editable-select-table
+    <editable-table
       :columns="currentComponentColumns"
       :rows="currentComponentDefinitions"
       :newRow="createComponentDefinition"
@@ -22,7 +22,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <script>
 import icon from './../assets/svg-icons/add_image.svg'
-import EditableSelectTable from './EditableSelectTable';
+import EditableTable from './EditableTable';
 import libconfig from '../store/modules/models/libconfig';
 import helpers from './../store/modules/models/helpers';
 
@@ -89,7 +89,7 @@ export default {
   },
   components: {
     icon,
-    'editable-select-table': EditableSelectTable,
+    'editable-table': EditableTable,
   },
 };
 </script>

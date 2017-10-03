@@ -27,18 +27,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
               <section id="story-library-section" v-if="libraryExpanded === 'story'">
                 <library :class="{ 'disabled-component': tool === 'Map' }"></library>
               </section>
-              <div v-else
-                v-for="item in stories"
-                :key="item.id"
-                :class="{ active: currentStory && currentStory.id === item.id }"
-                @click="selectItem(item, 'stories')" :style="{'background-color': item && item.color }"
-                :data-id="item.id"
-              >
-                  {{item.name}}
-                  <svg @click="destroyItem(item, 'stories')" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
-                  </svg>
-              </div>
+              <library-select
+                :rows="stories"
+                :selectItem="selectStory"
+                :destroyItem="destroyStory"
+                :selectedItemId="currentStory && currentStory.id"
+              />
             </section>
 
             <section id="subselection-list">
@@ -87,12 +81,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 </template>
 
 <script>
+import _ from 'lodash';
 import { mapState, mapGetters } from 'vuex';
 import { getSiblings } from './../utilities';
 import applicationHelpers from './../store/modules/application/helpers';
 import modelHelpers from './../store/modules/models/helpers';
 import ResizeEvents from './Resize/ResizeEvents';
 import Library from './Library.vue';
+import LibrarySelect from './LibrarySelect.vue';
 
 let fullWidth;
 const collapsedWidth = 8;
@@ -361,6 +357,7 @@ export default {
       }
       this.setCurrentItem();
     },
+    destroyStory(item) { this.destroyItem(item, 'stories'); },
 
     /*
     * set current selection for a type
@@ -385,7 +382,7 @@ export default {
           break;
       }
     },
-
+    selectStory(item) { this.selectItem(item, 'stories'); },
 
 
     setCurrentItem() {
@@ -423,6 +420,7 @@ export default {
   },
   components: {
     library: Library,
+    'library-select': LibrarySelect,
   }
 };
 </script>
@@ -461,7 +459,7 @@ export default {
         }
     }
 
-    #breadcrumbs, #story-list > div, #subselection-list > div {
+    #breadcrumbs, #subselection-list > div {
         align-items: center;
         display: flex;
         justify-content: space-between;
@@ -501,6 +499,8 @@ export default {
         #story-list, #subselection-list {
             overflow: auto;
             height: calc(100% - 5rem);
+          }
+          #subselection-list {
             > div  {
                 border-bottom: 1px solid $gray-darkest;
                 cursor: pointer;
