@@ -395,54 +395,13 @@ export default {
     height: 100%;
     user-select: none;
 
-    #selections > button {
-        display: flex;
-        line-height: 1rem;
-        svg {
-            height: 1rem;
-            margin: 0 .25rem 0 -.1rem;
-            width: 1rem;
-            path {
-                fill: $gray-lightest;
-            }
-        }
-    }
-
     #list {
-        height: 100%;
-        display: flex;
-        #story-list {
-            border-right: 1px solid $gray-darkest;
-            flex-grow: 1;
-            .story-controls {
-              display:flex;
-            }
-        }
-        #subselection-list {
-            flex-grow: 1;
-
-            .button-groups {
-              display: flex;
-              .subselect-group {
-                display: flex;
-              }
-            }
-            input[type="file"] {
-                position: absolute;
-                visibility: hidden;
-            }
-            span {
-              display: flex;
-            }
-        }
-        #sublibrary-section, #story-library-section {
-          flex-grow: 15;
-          background:tomato;
-        }
-        #story-list, #subselection-list {
-            overflow: auto;
-            height: calc(100% - 5rem);
-          }
+      display: flex;
+      height: 100%;
+      .editable-select-list {
+        border-right: 1px solid $gray-darkest;
+        height: calc(100% - 5rem);
+      }
     }
 }
 </style>
