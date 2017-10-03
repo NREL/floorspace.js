@@ -51,8 +51,7 @@ import { mapState, mapGetters } from 'vuex';
 export default {
   name: 'EditableTable',
   props: [
-    'columns', 'rows', 'newRow', 'deleteRow', 'updateRow',
-    'selectRow',
+    'columns', 'rows', 'deleteRow', 'updateRow',
   ],
   computed: {
     visibleColumns() {
@@ -64,7 +63,7 @@ export default {
 
 <style lang="scss" scoped>
 @import "./../scss/config";
-  .editable-select {
+  .editable-table {
     background-color: #24292c;
   }
   td {

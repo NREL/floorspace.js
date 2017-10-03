@@ -8,8 +8,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
   <div class='input-select'>
-      <select @change="onChange($event.target.value)">
-          <option :selected="!row[col.name]" value="null">None</option>
+      <select @change="$emit('change', $event.target.value)">
           <option v-for='opt in options' :value="opt.val" :selected="opt.val === value">{{ opt.display }}</option>
       </select>
       <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
@@ -23,7 +22,7 @@ import _ from 'lodash';
 
 export default {
   name: 'PrettySelect',
-  props: ['options', 'onChange', 'value'],
+  props: ['options', 'value'],
 }
 
 </script>

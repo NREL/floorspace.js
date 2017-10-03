@@ -15,63 +15,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
         <div id="list">
             <section id="story-list">
-              <div>
-                <div class="story-controls">
-                  {{displayNameForMode('stories')}}
-                  <button @click="createItem('stories')" class="create-story">+</button>
-                </div>
-                <button @click="expandLibrary(libraryExpanded === 'story'? false : 'story')">
-                  {{ libraryExpanded === 'story' ? '<<' : '>>' }}
-                </button>
-              </div>
-              <section id="story-library-section" v-if="libraryExpanded === 'story'">
-                <library :class="{ 'disabled-component': tool === 'Map' }"></library>
-              </section>
-              <library-select
-                :rows="stories"
-                :selectItem="selectStory"
-                :destroyItem="destroyStory"
-                :selectedItemId="currentStory && currentStory.id"
-              />
+              <Library :objectTypes="['stories']" :mode="'stories'" />
             </section>
 
             <section id="subselection-list">
-              <div class="button-groups">
-                <div class="subselect-group">
-                  <div class='input-select'>
-                      <select v-model='mode'>
-                          <option v-for='mode in modes' :value="mode">{{displayNameForMode(mode)}}</option>
-                      </select>
-                      <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'>
-                          <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
-                      </svg>
-                  </div>
-
-                  <input id="upload-image-input" ref="fileInput" @change="uploadImage" type="file"/>
-                  <button v-show="mode==='images'" @click="$refs.fileInput.click()">+</button>
-                  <button v-if="mode!=='images'" @click="createItem()" class="add-sub-selection">+</button>
-                </div>
-                <button @click="expandLibrary(libraryExpanded === 'subselect'? false : 'subselect')">
-                  {{ libraryExpanded === 'subselect' ? '<<' : '>>' }}
-                </button>
-              </div>
-              <section id="sublibrary-section" v-if="libraryExpanded === 'subselect'">
-                <library :class="{ 'disabled-component': tool === 'Map' }"></library>
-              </section>
-              <div v-else
-                v-for="item in items"
-                :key="item.id"
-                :class="{ active: selectedObject && selectedObject.id === item.id }"
-                @click="selectItem(item)"
-                :style="{'background-color': item && selectedObject && selectedObject.id === item.id ? item.color : ''}"
-                :data-id="item.id"
-              >
-                  <span :style="{'background-color': item && item.color }"></span>
-                  {{item.name}}
-                  <svg @click="destroyItem(item)" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
-                  </svg>
-              </div>
+              <Library :objectTypes="modes" :mode="'spaces'" />
             </section>
 
         </div>
@@ -419,8 +367,7 @@ export default {
     },
   },
   components: {
-    library: Library,
-    'library-select': LibrarySelect,
+    Library,
   }
 };
 </script>
@@ -446,7 +393,7 @@ export default {
     height: 100%;
     user-select: none;
 
-    #selections > button, #breadcrumbs > button {
+    #selections > button {
         display: flex;
         line-height: 1rem;
         svg {
@@ -457,12 +404,6 @@ export default {
                 fill: $gray-lightest;
             }
         }
-    }
-
-    #breadcrumbs, #subselection-list > div {
-        align-items: center;
-        display: flex;
-        justify-content: space-between;
     }
 
     #list {
@@ -500,55 +441,6 @@ export default {
             overflow: auto;
             height: calc(100% - 5rem);
           }
-          #subselection-list {
-            > div  {
-                border-bottom: 1px solid $gray-darkest;
-                cursor: pointer;
-                height: 2rem;
-                padding: 0 .5rem;
-                span {
-                    display: inline-block;
-                    height: 1rem;
-                    width: 1rem;
-                }
-                &.active {
-                    color: $primary;
-                    svg {
-                        cursor: pointer;
-                        height: 1rem;
-                        path {
-                            fill: $gray-lightest;
-                        }
-                        &:hover {
-                            path {
-                                fill: $secondary;
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
-
-    #breadcrumbs {
-        background-color: $gray-medium-dark;
-        border-bottom: 1px solid $gray-darkest;
-        border-top: 1px solid $gray-darkest;
-        height: 2.5rem;
-        justify-content: flex-start;
-        padding: 0 1rem;
-        span {
-            margin-left: 1rem;
-            cursor: pointer;
-        }
-        svg {
-            margin: 0 .25rem;
-            width: .5rem;
-            path {
-                fill: $gray-medium-light;
-            }
-        }
-    }
-
 }
 </style>
