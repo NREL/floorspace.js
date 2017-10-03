@@ -15,11 +15,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
         <div id="list">
             <section id="story-list">
-              <Library :objectTypes="['stories']" :mode="'stories'" />
+              <Library :objectTypes="['stories']" :initialMode="'stories'" />
             </section>
 
             <section id="subselection-list">
-              <Library :objectTypes="modes" :mode="'spaces'" />
+              <Library :objectTypes="modes" :initialMode="'spaces'" />
             </section>
 
         </div>

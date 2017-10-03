@@ -1,5 +1,5 @@
 <template>
-  <div class="editable-select-list">
+  <div class="editable-select-list" :style="{ 'flex-grow': compact ? 1 : 6 }">
     <div class="controls">
       <div class="control-group">
         <PrettySelect v-if="objectTypes.length > 1"
@@ -25,7 +25,7 @@
     />
     <EditableTable
       v-else
-      :columns="currentObjectTypeColumns"
+      :columns="columns"
       :rows="rows"
       :deleteRow="destroyRow"
       :updateRow="editRow"
@@ -60,5 +60,12 @@ export default {
 </script>
 <style lang="scss" scoped>
 @import "./../scss/config";
-
+.controls {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+}
+.control-group {
+  display: flex;
+}
 </style>

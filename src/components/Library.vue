@@ -13,7 +13,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
     :rows="rows"
     :columns="columns"
     :selectedRowId="selectedObject && selectedObject.id"
-    :selectRow="selectRow"
+    :selectRow="row => { selectedObject = row; }"
     :addRow="createObject"
     :editRow="modifyObject"
     :destroyRow="destroyObject"
@@ -28,13 +28,17 @@ import EditableSelectList from './EditableSelectList.vue';
 
 export default {
   name: 'Library',
-  props: ['objectTypes', 'mode'],
+  props: ['objectTypes', 'initialMode'],
   data() {
     const imageInput = document.createElement('input');
     imageInput.setAttribute('type', 'file');
     return {
       imageInput,
+      mode: this.initialMode,
     };
+  },
+  mounted() {
+    window.Library = this;
   },
   computed: {
     objectTypesDisplay() {
@@ -87,12 +91,12 @@ export default {
       },
     },
     keyForCurrentMode() {
-      return
+      return (
         this.mode === 'stories' ? 'currentStory' :
         this.mode === 'building_units' ? 'currentBuildingUnit' :
         this.mode === 'thermal_zones' ? 'currentThermalZone' :
         this.mode === 'space_types' ? 'currentSpaceType' :
-        'currentSubSelection';
+        'currentSubSelection');
     },
     ...mapState({
       stories: state => state.models.stories,
@@ -114,9 +118,6 @@ export default {
       }
       this.mode = newMode;
     },
-    selectRow(rowId) {
-      this.selectedObject = { id: rowId };
-    },
     modifyObject(rowId, colName, value) {
       throw new Error('not implemented');
     },
@@ -125,7 +126,6 @@ export default {
     * initializes an empty object
     */
     createObject() {
-      debugger;
       switch (this.mode) {
         case 'stories':
           this.$store.dispatch('models/initStory');

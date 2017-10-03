@@ -35,11 +35,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           </td>
         </tr>
       </tbody>
-      <tfoot>
-        <tr>
-          <button @click="newRow">+</button>
-        </tr>
-      </tfoot>
     </table>
   </div>
 </template>
