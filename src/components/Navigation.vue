@@ -9,7 +9,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
   <div id="layout-navigation">
     <nav id="navigation">
-      <div v-if="!libraryExpanded" id="right-bar" @mousedown="resizeBarClicked" v-on:dblclick="showHide" ref="resizebar" class="resize-bar"></div>
+      <!-- <div v-if="!libraryExpanded" id="right-bar" @mousedown="resizeBarClicked" v-on:dblclick="showHide" ref="resizebar" class="resize-bar"></div> -->
         <section id="selections">
         </section>
 
@@ -374,18 +374,18 @@ export default {
 
 <style lang="scss" scoped>
 @import "./../scss/config";
-#right-bar {
-  position: absolute;
-  right: 0;
-  width: 8px;
-  height: 100%;
-  transition: background 0.5s linear;
-
-  &:hover, &:active {
-    background-color: $gray-lightest;
-    cursor: e-resize;
-  }
-}
+// #right-bar {
+//   position: absolute;
+//   right: 0;
+//   width: 8px;
+//   height: 100%;
+//   transition: background 0.5s linear;
+//
+//   &:hover, &:active {
+//     background-color: $gray-lightest;
+//     cursor: e-resize;
+//   }
+// }
 #navigation {
     background-color: $gray-medium-dark;
     border-right: 1px solid $gray-darkest;
@@ -398,7 +398,7 @@ export default {
       height: 100%;
       .editable-select-list {
         border-right: 1px solid $gray-darkest;
-        height: calc(100% - 5rem);
+        height: calc(100% - 2rem);
         width: 180px;
 
         &.expanded {

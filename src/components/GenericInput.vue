@@ -7,28 +7,37 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 
 <template>
+  <span v-if="col.readonly || !col.input_type">
+    {{col.get ? col.get(row, rootState) : row[col.name]}}
+  </span>
   <input
+    v-else-if="col.input_type === 'text'"
     @keydown="blurOnEnter"
     @blur="onChange($event.target.value)"
     :value="row[col.name]"
   />
-  <!-- <div>
-    <input v-else-if="col.input_type === 'color'"
-       class="input-color"
-       :object-id="row.id"
-       :value="row[col.name]"
+  <div
+    v-else-if="col.input_type === 'color'"
+    class="color-wrapper"
+  >
+    <input
+      ref="color_input"
+      class="input-color"
+      :object-id="row.id"
+      :value="row[col.name]"
+      @change="onChange(row.id, col.name, $event.target.value)"
     />
   </div>
-
   <pretty-select v-else-if="col.input_type === 'select'"
     :onChange="onChange.bind(null, row.id, col.name)"
-    :options="_.toPairs(col.select_data(row, rootState)).map(([k, v]) => ({ val: v, display: k }))"
+    :options="selectData"
     :value="row[col.name]"
-  /> -->
+  />
 </template>
 
 <script>
 import _ from 'lodash';
+import Huebee from 'huebee';
 
 export default {
   name: 'GenericInput',
@@ -46,31 +55,32 @@ export default {
       }
       return;
     },
+    configurePicker() {
+      if (!this.$refs.color_input) {
+        return;
+      }
+
+      new Huebee(this.$refs.color_input, { saturations: 1, notation: 'hex' })
+        .on('change', (color) => {
+          this.onChange(this.row.id, this.col.name, color);
+        });
+    },
   },
-  // mounted() {
-  //   this.configurePickers();
-  // },
-  // configurePickers() {
-  //   const inputs = this.$el.querySelectorAll('.input-color');
-  //   for (let i = 0; i < inputs.length; i++) {
-  //     // TODO use a forEach instead so that this doesn't fail because it's not
-  //     // closing over i;
-  //     const
-  //       objectId = inputs[i].getAttribute('data-object-id'),
-  //       colName = inputs[i].getAttribute('data-column');
-  //
-  //
-  //     this.huebs[objectId] = new Huebee(inputs[i], { saturations: 1 });
-  //     this.huebs[objectId].handler = (color) => {
-  //       this.onChange(objectId, colName, color);
-  //     };
-  //     this.huebs[objectId].on('change', this.huebs[objectId].handler);
-  //   }
-  // },
+  mounted() {
+    this.configurePicker();
+  },
+  computed: {
+    selectData() {
+      return _.toPairs(this.col.select_data(this.row, this.$store.state))
+        .map(([k, v]) => ({ val: v, display: k }));
+    },
+    rootState() { return this.$store.state; },
+  },
 }
 
 </script>
 
 <style lang="scss" scoped>
 @import "./../scss/config";
+@import './../../node_modules/huebee/dist/huebee.min.css';
 </style>

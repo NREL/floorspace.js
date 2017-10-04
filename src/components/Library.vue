@@ -26,6 +26,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
 import { mapState } from 'vuex';
 import libconfig from '../store/modules/models/libconfig';
 import EditableSelectList from './EditableSelectList.vue';
+import helpers from '../store/modules/models/helpers';
 
 export default {
   name: 'Library',
@@ -120,7 +121,11 @@ export default {
       this.mode = newMode;
     },
     modifyObject(rowId, colName, value) {
-      throw new Error('not implemented');
+      const row = _.find(this.rows, { id: rowId });
+      const result = helpers.setValueForKey(row, this.$store, this.mode, colName, value);
+      if (!result.success) {
+        window.eventBus.$emit('error', result.error);
+      }
     },
     /*
     * CREATE OBJECT

@@ -73,6 +73,9 @@ export default {
       height: 18px;
     }
   }
+  tbody {
+    overflow-y: scroll;
+  }
 
   td.destroy {
       width: 2rem;

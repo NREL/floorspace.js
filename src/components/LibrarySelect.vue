@@ -36,10 +36,8 @@ export default {
 
 .library-select {
   padding: 0 0 !important;
-  display: flex;
-  flex-flow: column;
-  justify-content: flex-start;
-  height: calc(100% - 5rem);
+  height: 100%;
+  overflow-y: scroll;
 
   > div {
     border-bottom: 1px solid $gray-darkest;

@@ -113,6 +113,7 @@ export default {
   display: flex;
 }
 .editable-table {
-  overflow: scroll;
+  overflow-x: scroll;
+  overflow-y: auto;
 }
 </style>
