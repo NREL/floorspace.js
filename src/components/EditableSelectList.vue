@@ -16,17 +16,22 @@
         </button>
       </div>
     </div>
+    <input v-if="searchAvailable"
+      v-model="search"
+      class="search-bar"
+      placeholder="search"
+    />
     <LibrarySelect
       v-if="compact"
-      :rows="rows"
+      :rows="searchedRows"
       :selectItem="selectRow"
       :destroyItem="destroyRow"
       :selectedItemId="selectedRowId"
     />
     <EditableTable
       v-else
-      :columns="columns"
-      :rows="rows"
+      :columns="visibleColumns"
+      :rows="searchedRows"
       :deleteRow="destroyRow"
       :updateRow="editRow"
     />
@@ -41,7 +46,7 @@ export default {
   name: 'EditableSelectList',
   props: [
     'columns', 'rows', 'addRow', 'editRow', 'destroyRow', 'selectRow', 'selectedRowId',
-    'objectTypes', 'selectedObjectType',
+    'objectTypes', 'selectedObjectType', 'searchAvailable',
   ],
   data() {
     return {
@@ -56,6 +61,20 @@ export default {
   },
   beforeDestroy() {
     window.eventBus.$off('i-am-the-expanded-library-now', this.giveWayToOtherLibrary);
+  },
+  computed: {
+    visibleColumns() {
+      return _.reject(this.columns, 'private');
+    },
+    searchedRows() {
+      return this.rows.filter(
+        row => _.chain(row)
+          .values()
+          .compact()
+          .some(val => val.toLowerCase && val.toLowerCase().includes(this.search.toLowerCase()))
+          .value()
+      );
+    },
   },
   methods: {
     toggleCompact() {

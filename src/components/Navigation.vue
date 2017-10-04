@@ -9,19 +9,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
   <div id="layout-navigation">
     <nav id="navigation">
-      <div id="right-bar" @mousedown="resizeBarClicked" v-on:dblclick="showHide" ref="resizebar" class="resize-bar"></div>
+      <div v-if="!libraryExpanded" id="right-bar" @mousedown="resizeBarClicked" v-on:dblclick="showHide" ref="resizebar" class="resize-bar"></div>
         <section id="selections">
         </section>
 
         <div id="list">
-            <section id="story-list">
-              <Library :objectTypes="['stories']" :initialMode="'stories'" />
-            </section>
-
-            <section id="subselection-list">
-              <Library :objectTypes="modes" :initialMode="'spaces'" />
-            </section>
-
+          <Library :objectTypes="['stories']" :initialMode="'stories'" />
+          <Library :objectTypes="modes" :initialMode="'spaces'" :searchAvailable="true" />
         </div>
     </nav>
 
@@ -189,6 +183,9 @@ export default {
 
     // reset the nagiv   size when the window is resized
     resetSize() {
+      if (this.libraryExpanded) {
+        return;
+      }
       document.getElementById('layout-navigation').style.width = '';
       getSiblings(document.getElementById('layout-navigation')).forEach((el) => {
         el.style.left = '';
@@ -197,6 +194,7 @@ export default {
       fullWidth = document.getElementById('layout-navigation').offsetWidth;
     },
     setWidthForOpenLibrary(whichOne) {
+      this.libraryExpanded = whichOne;
       if (!whichOne) {
         this.resetSize();
         ResizeEvents.$emit('resize');

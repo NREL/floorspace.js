@@ -17,6 +17,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
     :addRow="createObject"
     :editRow="modifyObject"
     :destroyRow="destroyObject"
+    :searchAvailable="searchAvailable"
     v-on:selectObjectType="changeMode"
   />
 </template>
@@ -28,7 +29,7 @@ import EditableSelectList from './EditableSelectList.vue';
 
 export default {
   name: 'Library',
-  props: ['objectTypes', 'initialMode'],
+  props: ['objectTypes', 'initialMode', 'searchAvailable'],
   data() {
     const imageInput = document.createElement('input');
     imageInput.setAttribute('type', 'file');
