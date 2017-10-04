@@ -504,7 +504,7 @@ svg.icon, svg.button {
   margin-top: 0;
   margin-bottom:0;
   display: flex;
-
+  font-size: 13px;
 
   li {
     cursor: pointer;
@@ -514,7 +514,7 @@ svg.icon, svg.button {
     span {
       color: white;
       text-decoration: none;
-      padding: 10px 0 10px 65px;
+      padding: 10px 0 10px 45px;
       position: relative;
       display: inline-block;
       float: left;
@@ -534,12 +534,12 @@ svg.icon, svg.button {
       display: inline-block;
       width: 0;
       height: 0;
-      border-top: 50px solid transparent; /* Go big on the size, and let overflow hide */
-      border-bottom: 50px solid transparent;
+      border-top: 30px solid transparent; /* Go big on the size, and let overflow hide */
+      border-bottom: 30px solid transparent;
       border-left: 30px solid $gray-dark;
       position: absolute;
       top: 50%;
-      margin-top: -50px;
+      margin-top: -30px;
       left: 100%;
       z-index: 2;
     }
@@ -548,12 +548,12 @@ svg.icon, svg.button {
       display: inline-block;
       width: 0;
       height: 0;
-      border-top: 50px solid transparent;
-      border-bottom: 50px solid transparent;
+      border-top: 30px solid transparent;
+      border-bottom: 30px solid transparent;
       border-left: 30px solid white;
       position: absolute;
       top: 50%;
-      margin-top: -50px;
+      margin-top: -30px;
       margin-left: 1px;
       left: 100%;
       z-index: 1;
