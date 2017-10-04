@@ -204,38 +204,6 @@ export default {
       document.getElementById('layout-navigation').style.width = '100%';
       ResizeEvents.$emit('resize');
     },
-    uploadImage(event) {
-      const files = event.target.files;
-      const that = this;
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const reader = new FileReader();
-
-        reader.addEventListener('load', () => {
-          const image = new Image();
-          image.onload = () => {
-            const pxPerRWU = (document.getElementById('grid').clientWidth / (that.max_x - that.min_x));
-            const rwuHeight = (image.height / pxPerRWU) / 4;
-            const rwuWidth = (image.width / pxPerRWU) / 4;
-
-            that.$store.dispatch('models/createImageForStory', {
-              story_id: that.currentStory.id,
-              src: image.src,
-              // TODO: unique name
-              name: modelHelpers.generateName(that.$store.state.models, 'images', that.currentStory),
-              // translate image dimensions into rwu
-              height: rwuHeight,
-              width: rwuWidth,
-              x: that.min_x + (rwuWidth / 2),
-              y: that.max_y - (rwuHeight / 2),
-            });
-            that.$refs.fileInput.value = '';
-          };
-          image.src = reader.result;
-        }, false);
-        if (file) { reader.readAsDataURL(file); }
-      }
-    },
 
     /*
     * initialize an empty space, shading, building_unit, or thermal_zone depending on the selected mode

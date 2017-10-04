@@ -22,6 +22,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             </main>
             <!-- <inspector-view></inspector-view> -->
         </div>
+        <ImageUpload />
     </div>
 </template>
 
@@ -34,6 +35,7 @@ import Navigation from './components/Navigation.vue';
 import Grid from './components/Grid/Grid.vue';
 import Canvas from './components/Canvas/Canvas.vue';
 import Toolbar from './components/Toolbar.vue';
+import ImageUpload from './components/ImageUpload.vue';
 import Inspector from './components/Inspector.vue';
 import { Resize } from './components/Resize';
 
@@ -50,10 +52,6 @@ export default {
     this.$store.dispatch('models/initStory');
   },
   mounted() {
-
-    window.eventBus.$on('uploadImage', (event) => {
-      document.getElementById('upload-image-input').click();
-    });
 
     window.eventBus.$on('error', (err) => {
       this.error = err;
@@ -91,7 +89,8 @@ export default {
     'canvas-view': Canvas,
     'inspector-view': Inspector,
     navigation: Navigation,
-    toolbar: Toolbar
+    toolbar: Toolbar,
+    ImageUpload,
   },
 };
 </script>
