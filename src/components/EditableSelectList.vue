@@ -1,5 +1,8 @@
 <template>
-  <div class="editable-select-list" :style="{ 'flex-grow': compact ? 1 : 6 }">
+  <div
+    class="editable-select-list"
+    :class="{ 'expanded': !compact }"
+  >
     <div class="controls">
       <div class="control-group">
         <PrettySelect v-if="objectTypes.length > 1"
@@ -108,5 +111,8 @@ export default {
 }
 .control-group {
   display: flex;
+}
+.editable-table {
+  overflow: scroll;
 }
 </style>

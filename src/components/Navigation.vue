@@ -399,6 +399,11 @@ export default {
       .editable-select-list {
         border-right: 1px solid $gray-darkest;
         height: calc(100% - 5rem);
+        width: 180px;
+
+        &.expanded {
+          width: calc(100% - 180px);
+        }
       }
     }
 }
