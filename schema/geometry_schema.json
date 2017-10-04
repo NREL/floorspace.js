@@ -647,7 +647,7 @@
 						"null"
 					]
 				},
-				"type": {
+				"roof_type": {
 					"type": "string",
 					"enum": [
 						"gable",

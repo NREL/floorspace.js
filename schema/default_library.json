@@ -307,21 +307,21 @@
     {
       "id": "",
       "name": "Gable Pitched Roof",
-      "type": "gable",
+      "roof_type": "gable",
       "pitch": 6,
       "color": "#291FA9"
     },
     {
       "id": "",
       "name": "Hip Pitched Roof",
-      "type": "hip",
+      "roof_type": "hip",
       "pitch": 6,
       "color": "#E6C478"
     },
     {
       "id": "",
       "name": "Shed Pitched Roof",
-      "type": "shed",
+      "roof_type": "shed",
       "pitch": 6,
       "shed_direction": 0,
       "color": "#A91F1F
