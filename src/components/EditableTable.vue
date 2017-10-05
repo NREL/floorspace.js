@@ -11,14 +11,20 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     <table class="table">
       <thead>
         <tr>
-          <th v-for="col in visibleColumns">
-            {{col.displayName}}
+          <th v-for="col in visibleColumns" @click="sortBy(col.name)">
+            <span>{{col.displayName}}</span>
+            <svg v-show="col.name === sortKey && sortDescending" viewBox="0 0 10 3" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 .5l5 5 5-5H0z"/>
+            </svg>
+            <svg v-show="col.name === sortKey && !sortDescending" viewBox="0 0 10 3" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 5.5l5-5 5 5H0z"/>
+            </svg>
           </th>
           <th><!-- placeholder for delete column --></th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="row in rows">
+        <tr v-for="row in sortedRows">
           <td
               v-for="col in visibleColumns"
               :data-column="col.name">
@@ -48,9 +54,28 @@ export default {
   props: [
     'columns', 'rows', 'deleteRow', 'updateRow',
   ],
+  data() {
+    return {
+      sortKey: 'id',
+      sortDescending: true,
+    };
+  },
   computed: {
     visibleColumns() {
       return _.reject(this.columns, 'private');
+    },
+    sortedRows() {
+      const sRows = _.sortBy(this.rows, this.sortKey);
+      if (this.sortDescending) {
+        sRows.reverse();
+      }
+      return sRows;
+    },
+  },
+  methods: {
+    sortBy(colName) {
+      this.sortDescending = this.sortKey === colName ? !this.sortDescending : true;
+      this.sortKey = colName;
     },
   },
 };
@@ -60,6 +85,19 @@ export default {
 @import "./../scss/config";
   .editable-table {
     background-color: #24292c;
+  }
+  thead {
+    th {
+      border-bottom: 2px solid $gray-medium-light;
+    }
+    tr {
+      height: 3rem;
+      svg {
+        height: 1rem;
+        width: 1rem;
+        fill: $gray-medium-light;
+      }
+    }
   }
   td {
     width: 11em;

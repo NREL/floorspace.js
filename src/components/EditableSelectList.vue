@@ -54,8 +54,6 @@ export default {
   data() {
     return {
       search: '',
-      sortKey: 'id',
-      sortDescending: true,
       compact: true,
     };
   },
