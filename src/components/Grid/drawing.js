@@ -283,8 +283,13 @@ export function drawImage() {
 
     selection.exit().remove();
     const imageGroupE = selection.enter().append('g').attr('class', 'image-group');
-    imageGroupE.append('g').attr('class', 'controls');
     imageGroupE.append('image');
+    const controlsE = imageGroupE.append('g').attr('class', 'controls');
+    controlsE.append('circle').attr('class', 'center');
+    controlsE.append('circle').attr('class', 'rotation-handle');
+    controlsE.append('line').attr('class', 'rotation-to-center');
+    ['tl', 'tr', 'bl', 'br']
+      .forEach(corner => controlsE.append('circle').attr('class', `corner ${corner}`));
 
     const imageGroup = selection.merge(imageGroupE);
 
@@ -292,9 +297,34 @@ export function drawImage() {
       .attr('transform', d => `translate(${xScale(d.x)}, ${yScale(d.y)})`);
 
     imageGroup.select('image')
+      .attr('x', d => -1 * pxPerRWU * d.width / 2)
+      .attr('y', d => -1 * pxPerRWU * d.height / 2)
       .attr('width', d => pxPerRWU * d.width)
       .attr('height', d => pxPerRWU * d.height)
       .attr('xlink:href', d => d.src);
+
+    imageGroup.select('.controls .center')
+      .attr('cx', 0)
+      .attr('cy', 0)
+      .attr('r', 2);
+    imageGroup.select('.controls .rotation-handle')
+      .attr('cx', 0)
+      .attr('cy', d => pxPerRWU * d.height)
+      .attr('r', 2);
+    imageGroup.select('.controls .rotation-to-center')
+      .attr('x1', 0)
+      .attr('y1', 0)
+      .attr('x2', 0)
+      .attr('y2', d => pxPerRWU * d.height);
+    _.forIn(
+      { tl: [-1, 1], tr: [1, 1], bl: [-1, -1], br: [1, -1] },
+      ([xOff, yOff], label) => {
+        imageGroup.select(`.controls .${label}`)
+          .attr('cx', d => xOff * pxPerRWU * d.width / 2)
+          .attr('cy', d => yOff * pxPerRWU * d.height / 2)
+          .attr('r', 2);
+      });
+
   }
 
   chart.xScale = function (_) {

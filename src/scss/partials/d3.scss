@@ -167,3 +167,24 @@
       }
     }
 }
+
+.image-group {
+  .controls {
+    .center {
+      fill: red;
+      stroke: red;
+    }
+    .rotation-handle {
+      fill: red;
+      stroke: red;
+    }
+    .rotation-to-center {
+      stroke: black;
+      stroke-width: 1px;
+    }
+    .corner {
+      fill: blue;
+      stroke: blue;
+    }
+  }
+}

@@ -127,6 +127,10 @@ export default {
       currentShading: 'application/currentShading',
       currentComponent: 'application/currentComponent',
     }),
+    currentImage: {
+      get() { return this.$store.getters['application/currentImage']; },
+      set(item) { this.$store.dispatch('application/setCurrentSubSelectionId', { id: item.id }); },
+    },
     currentComponentType() { return this.currentComponent.type; },
     currentComponentDefinition() { return this.currentComponent.definition; },
     currentSubSelection: {
@@ -170,8 +174,10 @@ export default {
       }
       return [];
     },
-    images() { return this.currentStory.images; },
-
+    images() {
+      return this.currentStory.images
+        .map(img => ({ ...img, current: this.currentImage.id === img.id }));
+    },
     /*
     * map all faces for the current story to polygon representations (sets of ordered points) for d3 to render
     */
@@ -188,6 +194,7 @@ export default {
 
     currentMode() { this.draw(); },
     polygons() { this.draw(); },
+    images() { this.draw(); },
     windowDefs() { this.draw(); },
     currentTool() {
       this.points = [];
