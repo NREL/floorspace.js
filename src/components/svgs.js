@@ -24,6 +24,10 @@ import addImage from './../assets/svg-icons/add_image.svg';
 import componentsWindow from './../assets/svg-icons/components_window.svg';
 import componentsDaylighting from './../assets/svg-icons/components_daylighting.svg';
 
+import QuickstartIconNewMapFloorplan from './../assets/svg-icons/quickstart_icon_new_map_floorplan.svg';
+import QuickstartIconNewFloorplan from './../assets/svg-icons/quickstart_icon_newfloorplan.svg';
+import QuickstartIconOpenFloorplan from './../assets/svg-icons/quickstart_icon_openfloorplan.svg';
+
 export default {
   'open-floorplan-svg': openFloorplanSvg,
   'save-floorplan-svg': saveFloorplanSvg,
@@ -48,4 +52,8 @@ export default {
 
   'components-window': componentsWindow,
   'components-daylighting': componentsDaylighting,
+
+  QuickstartIconNewMapFloorplan,
+  QuickstartIconNewFloorplan,
+  QuickstartIconOpenFloorplan,
 };
