@@ -111,6 +111,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     </section>
 
     <section id="bottom" :class="mode">
+      <div id="grid-tools">
+        <zoom-in-svg class="button"></zoom-in-svg>
+        <zoom-out-svg class="button"></zoom-out-svg>
+        <pan-svg @click="tool = 'Pan'" :class="{ active: tool === 'Pan' }" class="button"></pan-svg>
+      </div>
+      <template v-if="mode === 'images'">
+        <div @click="tool = 'Drag'" :class="{ active: tool === 'Drag' }">
+          <tool-move-size-svg class="button"></tool-move-size-svg>
+        </div>
+      </template>
       <template  v-if="mode ==='floorplan'">
         <div id="instructions">Draw a floorplan and import images</div>
 
@@ -210,11 +220,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <button @click="snapMode = 'grid-verts-edges'" :class="{ active: snapMode === 'grid-verts-edges' }">Edges too</button>
       </div> -->
 
-      <div id="grid-tools">
-        <zoom-in-svg class="button"></zoom-in-svg>
-        <zoom-out-svg class="button"></zoom-out-svg>
-        <pan-svg @click="tool = 'Pan'" :class="{ active: tool === 'Pan' }" class="button"></pan-svg>
-      </div>
 
     </section>
 
