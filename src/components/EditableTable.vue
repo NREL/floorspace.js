@@ -24,10 +24,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </tr>
       </thead>
       <tbody>
-        <tr v-for="row in sortedRows">
+        <tr v-for="row in sortedRows" :key="row.id">
           <td
               v-for="col in visibleColumns"
-              :data-column="col.name">
+              :data-column="col.name"
+              :key="col.name"
+          >
             <generic-input
               :col="col"
               :row="row"
