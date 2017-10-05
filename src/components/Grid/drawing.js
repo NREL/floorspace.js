@@ -273,3 +273,39 @@ export function drawDaylightingControlGuideline() {
   };
   return chart;
 }
+
+export function drawImage() {
+  let
+    xScale = _.identity,
+    yScale = _.identity;
+  function chart(selection) {
+    const pxPerRWU = (xScale(100) - xScale(0)) / 100;
+
+    selection.exit().remove();
+    const imageGroupE = selection.enter().append('g').attr('class', 'image-group');
+    imageGroupE.append('g').attr('class', 'controls');
+    imageGroupE.append('image');
+
+    const imageGroup = selection.merge(imageGroupE);
+
+    imageGroup
+      .attr('transform', d => `translate(${xScale(d.x)}, ${yScale(d.y)})`);
+
+    imageGroup.select('image')
+      .attr('width', d => pxPerRWU * d.width)
+      .attr('height', d => pxPerRWU * d.height)
+      .attr('xlink:href', d => d.src);
+  }
+
+  chart.xScale = function (_) {
+    if (!arguments.length) return xScale;
+    xScale = _;
+    return chart;
+  };
+  chart.yScale = function (_) {
+    if (!arguments.length) return yScale;
+    yScale = _;
+    return chart;
+  };
+  return chart;
+}
