@@ -13,14 +13,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <marker v-for="id in ['perp-linecap', 'perp-linecap-highlight']" :id="id" markerWidth="1" markerHeight="10" orient="auto" markerUnits="strokeWidth" refY="4" refX="0.5">
           <rect x="0" y="1" width="1" height="6" shape-rendering="optimizeQuality"/>
         </marker>
-        <marker id="red-arrowhead-right" markerWidth="6" markerHeight="4" refX="6" refY="2"
-             orient="auto">
-          <path d="M 0,0 V 4 L6,2 Z" style="fill: red; stroke: none" />
-        </marker>
-        <marker id="red-arrowhead-left" markerWidth="6" markerHeight="4" refX="0" refY="2"
-             orient="auto">
-          <path d="M 6,0 V 4 L0,2 Z" style="fill: red; stroke: none" />
-        </marker>
       </defs>
       <g class="axis axis--x"></g>
       <g class="axis axis--y"></g>
