@@ -286,17 +286,30 @@ export function drawImage() {
     const pxPerRWU = (xScale(100) - xScale(0)) / 100;
 
     let startX, startY, currX, currY;
-    const moveable = d3.drag()
+    const
+      offset = (d) => {
+        const
+          x = (currX - startX),
+          y = (currY - startY),
+          invR = -1 * d.r * Math.PI / 180;
+        return {
+          dx: x * Math.cos(invR) - y * Math.sin(invR),
+          dy: x * Math.sin(invR) + y * Math.cos(invR),
+        };
+      },
+      moveable = d3.drag()
       .on('start.move', function() {
         d3.event.sourceEvent.stopPropagation(); // don't zoom when I'm draggin' an image!
         [startX, startY] = d3.mouse(document.querySelector('#grid svg'));
       })
-      .on('drag.move', function() {
+      .on('drag.move', function(d) {
         [currX, currY] = d3.mouse(document.querySelector('#grid svg'));
+        const { dx, dy } = offset(d);
         d3.select(this)
-          .attr('transform', `translate(${currX - startX}, ${currY - startY})`);
+          .attr('transform', `translate(${dx}, ${dy})`);
       })
       .on('end.move', function(d) {
+        const { dx, dy } = offset(d);
         updateImage({
           image: d,
           x: d.x + (currX - startX) / pxPerRWU,
@@ -339,15 +352,16 @@ export function drawImage() {
       rotationAngle = (d) => {
         const
           pxOrigin = { x: xScale(d.x), y: yScale(d.y) },
-          angleToCenter = edgeDirection({ start: pxOrigin, end: { x: currX, y: currY }});
-        return ((180 * angleToCenter / Math.PI)
-          + 90 // edgeDirection gives angle from east. We want angle from South.
-          + 180 * (pxOrigin.x < currX)
+          startAngle = edgeDirection({ start: pxOrigin, end: { x: startX, y: startY }}),
+          currAngle = edgeDirection({ start: pxOrigin, end: { x: currX, y: currY }});
+        return ((180 * (currAngle - startAngle) / Math.PI)
+          + 180 * (xScale(d.x) > currX !== xScale(d.x) > startX)
         );
       },
       rotateable = d3.drag()
         .on('start.rotate', function() {
           d3.event.sourceEvent.stopPropagation();
+          [startX, startY] = d3.mouse(document.querySelector('#grid svg'));
         })
         .on('drag.rotate', function(d) {
           [currX, currY] = d3.mouse(document.querySelector('#grid svg'));
@@ -358,7 +372,7 @@ export function drawImage() {
           const rotation = rotationAngle(d);
           updateImage({
             image: d,
-            r: rotation,
+            r: rotation + d.r,
           });
         });
 
@@ -376,7 +390,7 @@ export function drawImage() {
     const imageGroup = selection.merge(imageGroupE);
 
     imageGroup
-      .attr('transform', d => `translate(${xScale(d.x)}, ${yScale(d.y)})`);
+      .attr('transform', d => `translate(${xScale(d.x)}, ${yScale(d.y)}) rotate(${d.r})`);
 
     imageGroup.select('.moveable-wrapper')
       .attr('transform', 'translate(0,0)')
