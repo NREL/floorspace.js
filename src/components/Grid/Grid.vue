@@ -22,6 +22,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           <path d="M 6,0 V 4 L0,2 Z" style="fill: red; stroke: none" />
         </marker>
       </defs>
+      <g class="axis axis--x"></g>
+      <g class="axis axis--y"></g>
       <g class="polygons"></g>
       <g class="images"></g>
     </svg>
@@ -176,7 +178,7 @@ export default {
     },
     images() {
       return this.currentStory.images
-        .map(img => ({ ...img, current: this.currentImage.id === img.id }));
+        .map(img => ({ ...img, current: this.currentImage && this.currentImage.id === img.id }));
     },
     /*
     * map all faces for the current story to polygon representations (sets of ordered points) for d3 to render

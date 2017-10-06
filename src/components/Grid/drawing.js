@@ -1,3 +1,4 @@
+import * as d3 from 'd3';
 import 'd3-selection-multi';
 import _ from 'lodash';
 import { distanceBetweenPoints, unitPerpVector, unitVector, edgeDirection } from './../../store/modules/geometry/helpers';
@@ -274,17 +275,40 @@ export function drawDaylightingControlGuideline() {
   return chart;
 }
 
+
+
 export function drawImage() {
   let
     xScale = _.identity,
-    yScale = _.identity;
+    yScale = _.identity,
+    updateImage = (data) => window.application.$store.dispatch('models/updateImageWithData', data);
   function chart(selection) {
     const pxPerRWU = (xScale(100) - xScale(0)) / 100;
 
+    let startX, startY, currX, currY;
+    const moveable = d3.drag()
+      .on('start.move', function() {
+        d3.event.sourceEvent.stopPropagation(); // don't zoom when I'm draggin' an image!
+        [startX, startY] = d3.mouse(document.querySelector('#grid svg'));
+      })
+      .on('drag.move', function() {
+        [currX, currY] = d3.mouse(document.querySelector('#grid svg'));
+        d3.select(this)
+          .attr('transform', `translate(${currX - startX}, ${currY - startY})`);
+      })
+      .on('end.move', function(d) {
+        updateImage({
+          image: d,
+          x: d.x + (currX - startX) / pxPerRWU,
+          y: d.y - (currY - startY) / pxPerRWU,
+        });
+      });
+
     selection.exit().remove();
     const imageGroupE = selection.enter().append('g').attr('class', 'image-group');
-    imageGroupE.append('image');
-    const controlsE = imageGroupE.append('g').attr('class', 'controls');
+    const moveableWrapperE = imageGroupE.append('g').attr('class', 'moveable-wrapper');
+    moveableWrapperE.append('image');
+    const controlsE = moveableWrapperE.append('g').attr('class', 'controls');
     controlsE.append('circle').attr('class', 'center');
     controlsE.append('circle').attr('class', 'rotation-handle');
     controlsE.append('line').attr('class', 'rotation-to-center');
@@ -295,6 +319,10 @@ export function drawImage() {
 
     imageGroup
       .attr('transform', d => `translate(${xScale(d.x)}, ${yScale(d.y)})`);
+
+    imageGroup.select('.moveable-wrapper')
+      .attr('transform', 'translate(0,0)')
+      .call(moveable);
 
     imageGroup.select('image')
       .attr('x', d => -1 * pxPerRWU * d.width / 2)
