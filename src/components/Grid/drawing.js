@@ -298,6 +298,14 @@ function bestResizeCursor(xOff, yOff, rotation) {
 
   return _.minBy(RESIZE_CURSORS, c => distanceBetweenPoints(c.vec, pt)).cursor;
 }
+const rotateCursor = (
+  'url(data:image/svg+xml;base64,' + // eslint-disable-line
+  btoa(
+'<svg xmlns="http://www.w3.org/2000/svg" x="0" y="0" width="25.6" height="25.6" viewBox="0 0 25.6 25.6">' +
+'  <path transform="scale(0.5)" d="M25.6,44.8c7.9406,0,14.4-6.4594,14.4-14.4s-6.4594-14.4-14.4-14.4v9.6L9.6,12.8L25.6,0v9.6c11.4688,0,20.8,9.3313,20.8,20.8s-9.3313,20.8-20.8,20.8S4.8,41.8688,4.8,30.4h6.4C11.2,38.3406,17.6594,44.8,25.6,44.8z"/>' +
+'</svg>'
+  ) +
+  ') 12.8 12.8, pointer');
 
 export function drawImage() {
   let
@@ -432,6 +440,7 @@ export function drawImage() {
       .attr('cx', 0)
       .attr('cy', d => pxPerRWU * d.height)
       .attr('r', 5)
+      .style('cursor', rotateCursor)
       .call(rotateable);
     imageGroup.select('.controls .rotation-to-center')
       .attr('x1', 0)
