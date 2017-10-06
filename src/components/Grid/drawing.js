@@ -275,7 +275,29 @@ export function drawDaylightingControlGuideline() {
   return chart;
 }
 
+const RESIZE_CURSORS = [
+  { vec: { x: 1, y: 0 }, cursor: 'ew-resize' },
+  { vec: { x: -1, y: 0 }, cursor: 'ew-resize' },
+  { vec: { x: 0, y: 1 }, cursor: 'ns-resize' },
+  { vec: { x: 0, y: -1 }, cursor: 'ns-resize' },
+  { vec: { x: 1/Math.sqrt(2), y: 1/Math.sqrt(2) }, cursor: 'nwse-resize' },
+  { vec: { x: -1/Math.sqrt(2), y: -1/Math.sqrt(2) }, cursor: 'nwse-resize' },
+  { vec: { x: 1/Math.sqrt(2), y: -1/Math.sqrt(2) }, cursor: 'nesw-resize' },
+  { vec: { x: -1/Math.sqrt(2), y: 1/Math.sqrt(2) }, cursor: 'nesw-resize' },
+]
+function bestResizeCursor(xOff, yOff, rotation) {
+  const
+    norm = Math.sqrt(xOff * xOff + yOff * yOff),
+    x = xOff / norm,
+    y = yOff / norm,
+    a = Math.PI * rotation / 180,
+    pt = {
+      x: x * Math.cos(a) - y * Math.sin(a),
+      y: x * Math.sin(a) + y * Math.cos(a),
+    };
 
+  return _.minBy(RESIZE_CURSORS, c => distanceBetweenPoints(c.vec, pt)).cursor;
+}
 
 export function drawImage() {
   let
@@ -332,7 +354,6 @@ export function drawImage() {
         .on('start.resize', function() {
           d3.event.sourceEvent.stopPropagation();
           [startX, startY] = d3.mouse(document.querySelector('#grid svg'));
-          console.log('start of resizeable');
         })
         .on('drag.resize', function(d) {
           [currX, currY] = d3.mouse(document.querySelector('#grid svg'));
@@ -418,12 +439,13 @@ export function drawImage() {
       .attr('x2', 0)
       .attr('y2', d => pxPerRWU * d.height);
     _.forIn(
-      { tl: [-1, 1], tr: [1, 1], bl: [-1, -1], br: [1, -1] },
+      { tl: [-1, -1], tr: [1, -1], bl: [-1, 1], br: [1, 1] },
       ([xOff, yOff], label) => {
         imageGroup.select(`.controls .${label}`)
           .attr('cx', d => xOff * pxPerRWU * d.width / 2)
           .attr('cy', d => yOff * pxPerRWU * d.height / 2)
           .attr('r', 5)
+          .style('cursor', d => bestResizeCursor(xOff, yOff, d.r))
           .call(resizeable);
       });
 
