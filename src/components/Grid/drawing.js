@@ -304,14 +304,72 @@ export function drawImage() {
         });
       });
 
+    const
+      scalingFactor = (d) => {
+        const
+          pxOrigin = { x: xScale(d.x), y: yScale(d.y) },
+          distCurrToOrigin = distanceBetweenPoints(
+            { x: currX, y: currY }, pxOrigin),
+          distStartToOrigin = distanceBetweenPoints(
+            { x: startX, y: startY }, pxOrigin),
+          scale = distCurrToOrigin / distStartToOrigin;
+        return scale;
+      },
+      resizeable = d3.drag()
+        .on('start.resize', function() {
+          d3.event.sourceEvent.stopPropagation();
+          [startX, startY] = d3.mouse(document.querySelector('#grid svg'));
+          console.log('start of resizeable');
+        })
+        .on('drag.resize', function(d) {
+          [currX, currY] = d3.mouse(document.querySelector('#grid svg'));
+          d3.select(this.parentNode.parentNode)
+            .attr('transform', `scale(${scalingFactor(d)})`);
+        })
+        .on('end.resize', function(d) {
+          const scale = scalingFactor(d);
+          updateImage({
+            image: d,
+            width: d.width * scale,
+            height: d.height * scale,
+          });
+        });
+
+    const
+      rotationAngle = (d) => {
+        const
+          pxOrigin = { x: xScale(d.x), y: yScale(d.y) },
+          angleToCenter = edgeDirection({ start: pxOrigin, end: { x: currX, y: currY }});
+        return ((180 * angleToCenter / Math.PI)
+          + 90 // edgeDirection gives angle from east. We want angle from South.
+          + 180 * (pxOrigin.x < currX)
+        );
+      },
+      rotateable = d3.drag()
+        .on('start.rotate', function() {
+          d3.event.sourceEvent.stopPropagation();
+        })
+        .on('drag.rotate', function(d) {
+          [currX, currY] = d3.mouse(document.querySelector('#grid svg'));
+          d3.select(this.parentNode.parentNode)
+            .attr('transform', `rotate(${rotationAngle(d)})`);
+        })
+        .on('end.rotate', function(d) {
+          const rotation = rotationAngle(d);
+          updateImage({
+            image: d,
+            r: rotation,
+          });
+        });
+
     selection.exit().remove();
     const imageGroupE = selection.enter().append('g').attr('class', 'image-group');
     const moveableWrapperE = imageGroupE.append('g').attr('class', 'moveable-wrapper');
     moveableWrapperE.append('image');
     const controlsE = moveableWrapperE.append('g').attr('class', 'controls');
+    controlsE.append('line').attr('class', 'rotation-to-center');
     controlsE.append('circle').attr('class', 'center');
     controlsE.append('circle').attr('class', 'rotation-handle');
-    controlsE.append('line').attr('class', 'rotation-to-center');
     ['tl', 'tr', 'bl', 'br']
       .forEach(corner => controlsE.append('circle').attr('class', `corner ${corner}`));
 
@@ -334,11 +392,12 @@ export function drawImage() {
     imageGroup.select('.controls .center')
       .attr('cx', 0)
       .attr('cy', 0)
-      .attr('r', 2);
+      .attr('r', 3);
     imageGroup.select('.controls .rotation-handle')
       .attr('cx', 0)
       .attr('cy', d => pxPerRWU * d.height)
-      .attr('r', 2);
+      .attr('r', 5)
+      .call(rotateable);
     imageGroup.select('.controls .rotation-to-center')
       .attr('x1', 0)
       .attr('y1', 0)
@@ -350,7 +409,8 @@ export function drawImage() {
         imageGroup.select(`.controls .${label}`)
           .attr('cx', d => xOff * pxPerRWU * d.width / 2)
           .attr('cy', d => yOff * pxPerRWU * d.height / 2)
-          .attr('r', 2);
+          .attr('r', 5)
+          .call(resizeable);
       });
 
   }
