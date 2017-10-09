@@ -107,7 +107,7 @@ export default {
   },
   watch: {
     rows() {
-      if (!_.includes(this.rows, this.selectedObject)) {
+      if (!_.includes(this.rows, this.selectedObject) && this.rows.length > 0) {
         this.selectedObject = this.rows[0];
       }
     },

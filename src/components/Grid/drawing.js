@@ -329,18 +329,18 @@ export function drawImage() {
         };
       },
       moveable = d3.drag()
-      .on('start.move', function() {
+      .on('start', function() {
         d3.event.sourceEvent.stopPropagation(); // don't zoom when I'm draggin' an image!
         [startX, startY] = d3.mouse(document.querySelector('#grid svg'));
         currX = currY = undefined;
       })
-      .on('drag.move', function(d) {
+      .on('drag', function(d) {
         [currX, currY] = d3.mouse(document.querySelector('#grid svg'));
         const { dx, dy } = offset(d);
         d3.select(this)
           .attr('transform', `translate(${dx}, ${dy})`);
       })
-      .on('end.move', function(d) {
+      .on('end', function(d) {
         if (typeof currX === 'undefined') {
           // no movement since start of move.
           return;
@@ -365,17 +365,17 @@ export function drawImage() {
         return scale;
       },
       resizeable = d3.drag()
-        .on('start.resize', function() {
+        .on('start', function() {
           d3.event.sourceEvent.stopPropagation();
           [startX, startY] = d3.mouse(document.querySelector('#grid svg'));
           currX = currY = undefined;
         })
-        .on('drag.resize', function(d) {
+        .on('drag', function(d) {
           [currX, currY] = d3.mouse(document.querySelector('#grid svg'));
           d3.select(this.parentNode.parentNode)
             .attr('transform', `scale(${scalingFactor(d)})`);
         })
-        .on('end.resize', function(d) {
+        .on('end', function(d) {
           if (typeof currX === 'undefined') {
             // no movement since start of resize.
             return;
@@ -399,17 +399,17 @@ export function drawImage() {
         );
       },
       rotateable = d3.drag()
-        .on('start.rotate', function() {
+        .on('start', function() {
           d3.event.sourceEvent.stopPropagation();
           [startX, startY] = d3.mouse(document.querySelector('#grid svg'));
           currX = currY = undefined;
         })
-        .on('drag.rotate', function(d) {
+        .on('drag', function(d) {
           [currX, currY] = d3.mouse(document.querySelector('#grid svg'));
           d3.select(this.parentNode.parentNode)
             .attr('transform', `rotate(${rotationAngle(d)})`);
         })
-        .on('end.rotate', function(d) {
+        .on('end', function(d) {
           if (typeof currX === 'undefined') {
             // no movement since start of rotation.
             return;
@@ -435,12 +435,7 @@ export function drawImage() {
     const imageGroup = selection.merge(imageGroupE);
 
     imageGroup
-      .attr('transform', d => `translate(${xScale(d.x)}, ${yScale(d.y)}) rotate(${d.r})`)
-      .on('click', selectImage);
-
-    imageGroup.select('.moveable-wrapper')
-      .attr('transform', 'translate(0,0)')
-      .call(moveable);
+      .attr('transform', d => `translate(${xScale(d.x)}, ${yScale(d.y)}) rotate(${d.r})`);
 
     imageGroup.select('image')
       .attr('x', d => -1 * pxPerRWU * d.width / 2)
@@ -449,35 +444,58 @@ export function drawImage() {
       .attr('height', d => pxPerRWU * d.height)
       .attr('xlink:href', d => d.src);
 
+    imageGroup.select('.moveable-wrapper')
+      .attr('transform', 'translate(0,0)')
+      .style('cursor', d => d.current ? 'move' : 'pointer');
+
     imageGroup.select('.controls')
       .attr('display', d => d.current ? '' : 'none');
 
-    imageGroup.select('.controls .center')
-      .attr('cx', 0)
-      .attr('cy', 0)
-      .attr('r', 3);
+    imageGroup.each(function(d) {
+      window.d3 = d3;
+      const ig = d3.select(this);
+      if (!d.clickable) {
+        ig
+          .on('click', null);
+      } else {
+        ig.on('click', selectImage);
+      }
+      if (!d.current) {
+        console.log('removing events from', d);
+        ig.select('.moveable-wrapper, .rotation-handle, .corner')
+          .on('.drag', null);
+      } else {
+        ig.select('.moveable-wrapper')
+          .call(moveable);
 
-    imageGroup.select('.controls .rotation-handle')
-      .attr('cx', 0)
-      .attr('cy', d => pxPerRWU * d.height)
-      .attr('r', 5)
-      .style('cursor', rotateCursor)
-      .call(rotateable);
-    imageGroup.select('.controls .rotation-to-center')
-      .attr('x1', 0)
-      .attr('y1', 0)
-      .attr('x2', 0)
-      .attr('y2', d => pxPerRWU * d.height);
-    _.forIn(
-      { tl: [-1, -1], tr: [1, -1], bl: [-1, 1], br: [1, 1] },
-      ([xOff, yOff], label) => {
-        imageGroup.select(`.controls .${label}`)
-          .attr('cx', d => xOff * pxPerRWU * d.width / 2)
-          .attr('cy', d => yOff * pxPerRWU * d.height / 2)
+        ig.select('.controls .center')
+          .attr('cx', 0)
+          .attr('cy', 0)
+          .attr('r', 3);
+
+        ig.select('.controls .rotation-handle')
+          .attr('cx', 0)
+          .attr('cy', d => pxPerRWU * d.height)
           .attr('r', 5)
-          .style('cursor', d => bestResizeCursor(xOff, yOff, d.r))
-          .call(resizeable);
-      });
+          .style('cursor', rotateCursor)
+          .call(rotateable);
+        ig.select('.controls .rotation-to-center')
+          .attr('x1', 0)
+          .attr('y1', 0)
+          .attr('x2', 0)
+          .attr('y2', d => pxPerRWU * d.height);
+        _.forIn(
+          { tl: [-1, -1], tr: [1, -1], bl: [-1, 1], br: [1, 1] },
+          ([xOff, yOff], label) => {
+            ig.select(`.controls .${label}`)
+              .attr('cx', d => xOff * pxPerRWU * d.width / 2)
+              .attr('cy', d => yOff * pxPerRWU * d.height / 2)
+              .attr('r', 5)
+              .style('cursor', d => bestResizeCursor(xOff, yOff, d.r))
+              .call(resizeable);
+          });
+      }
+    });
 
   }
 

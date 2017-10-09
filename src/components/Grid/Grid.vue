@@ -160,8 +160,22 @@ export default {
       return [];
     },
     images() {
+      console.log('tool, currentImage', this.currentTool, this.currentImage);
       return this.currentStory.images
-        .map(img => ({ ...img, current: this.currentImage && this.currentImage.id === img.id }));
+        .map(img => ({
+          ...img,
+          current: (
+            // only allow interactions when the image tool is selected.
+            // otherwise, it's possible to move the image when we want to be
+            // panning the background.
+            this.currentTool === 'Image' &&
+            this.currentImage &&
+            this.currentImage.id === img.id),
+          clickable: (
+            this.currentTool === 'Image' &&
+            (!this.currentImage || this.currentImage.id !== img.id)
+          ),
+        }));
     },
     /*
     * map all faces for the current story to polygon representations (sets of ordered points) for d3 to render
