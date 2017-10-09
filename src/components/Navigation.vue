@@ -14,8 +14,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </section>
 
         <div id="list">
-          <Library :objectTypes="['stories']" :initialMode="'stories'" />
-          <Library :objectTypes="modes" :initialMode="'spaces'" :searchAvailable="true" />
+          <Library :objectTypes="['stories']" :mode="'stories'" />
+          <Library :objectTypes="modes" :mode="mode" @changeMode="newMode => { mode = newMode; }"  :searchAvailable="true"/>
         </div>
     </nav>
 

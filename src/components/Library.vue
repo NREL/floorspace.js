@@ -30,17 +30,13 @@ import helpers from '../store/modules/models/helpers';
 
 export default {
   name: 'Library',
-  props: ['objectTypes', 'initialMode', 'searchAvailable'],
+  props: ['objectTypes', 'mode', 'searchAvailable'],
   data() {
     const imageInput = document.createElement('input');
     imageInput.setAttribute('type', 'file');
     return {
       imageInput,
-      mode: this.initialMode,
     };
-  },
-  mounted() {
-    window.Library = this;
   },
   computed: {
     objectTypesDisplay() {
@@ -52,12 +48,6 @@ export default {
     columns() {
       if (!libconfig[this.mode]) return [];
       return libconfig[this.mode].columns
-    },
-    rows() {
-      switch(this.mode) {
-        case 'stories':
-          return this.stories;
-      }
     },
     currentStory: {
       get() { return this.$store.getters['application/currentStory']; },
@@ -113,12 +103,19 @@ export default {
       ) ? this[this.mode] : this.$store.state.models.library[this.mode];
     },
   },
+  watch: {
+    rows() {
+      if (!_.includes(this.rows, this.selectedObject)) {
+        this.selectedObject = this.rows[0];
+      }
+    },
+  },
   methods: {
     changeMode(newMode) {
       if (!_.includes(this.objectTypes, newMode)) {
         throw new Error(`Unable to find ${newMode} in options ${JSON.stringify(this.objectTypes)}`);
       }
-      this.mode = newMode;
+      this.$emit('changeMode', newMode);
     },
     modifyObject(rowId, colName, value) {
       const row = _.find(this.rows, { id: rowId });
