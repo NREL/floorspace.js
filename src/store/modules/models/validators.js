@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 export default {
   name(object, store, value, type) {
     let objs = store.getters['models/all'];
@@ -35,5 +37,13 @@ export default {
     }
 
     return error ? { success: false, error } : { success: true };
+  },
+  oneOf(...args) {
+    return (object, store, value, type) => {
+      if (!_.includes(args, value)) {
+        return { success: false, error: `Expected one of ${args}, got ${value}` };
+      }
+      return { success: true };
+    };
   },
 };
