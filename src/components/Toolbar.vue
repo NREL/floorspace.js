@@ -25,13 +25,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           <redo-svg @click.native="redo" class="button" :disabled="!timetravelInitialized" :class="{ 'disabled' : !timetravelInitialized }"></redo-svg>
         </div>
       </div>
-      <!-- <ul class="mode-tabs">
-        <li><a href="#">Home</a></li>
-        <li><a href="#">Vehicles</a></li>
-        <li><a href="#">Vans</a></li>
-        <li><a href="#">Camper Vans</a></li>
-        <li><a href="#">1989 VW Westfalia Vanagon</a></li>
-      </ul> -->
       <ul id="mode-tabs">
         <li @click="mode='floorplan'" class="tab" :class="{ active: mode === 'floorplan' }">
           <span>
@@ -125,8 +118,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           <div @click="tool = 'Select'" :class="{ active: tool === 'Select' }">
             <tool-move-size-svg class="button"></tool-move-size-svg>
           </div>
-          <div @click="tool = ''" :class="{ active: tool === '' }">
-            <tool-color-svg class="button"></tool-color-svg>
+          <div @click="tool = 'Image'" :class="{ active: tool === 'Image' }">
+            <tab-floorplan-svg class="button"></tab-floorplan-svg>
           </div>
         </div>
 
@@ -309,7 +302,7 @@ export default {
       let tools = [];
       switch (this.mode) {
         case 'floorplan':
-          tools = ['Rectangle', 'Polygon', 'Eraser', 'Select'];
+          tools = ['Rectangle', 'Polygon', 'Eraser', 'Select', 'Image'];
           break;
         case 'shading':
           tools = ['Rectangle', 'Polygon', 'Eraser', 'Select'];
