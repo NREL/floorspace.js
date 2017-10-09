@@ -47,13 +47,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           </span>
         </li>
 
-        <li @click="mode='images'" class="tab" :class="{ active: mode === 'images' }">
-          <span>
-            Images
-            <tab-floorplan-svg  class="icon"></tab-floorplan-svg>
-          </span>
-        </li>
-
         <li @click="mode='components'" class="tab" :class="{ active: mode === 'components' }">
           <span>
             Components
@@ -116,11 +109,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <zoom-out-svg class="button"></zoom-out-svg>
         <pan-svg @click="tool = 'Pan'" :class="{ active: tool === 'Pan' }" class="button"></pan-svg>
       </div>
-      <template v-if="mode === 'images'">
-        <div @click="tool = 'Drag'" :class="{ active: tool === 'Drag' }">
-          <tool-move-size-svg class="button"></tool-move-size-svg>
-        </div>
-      </template>
       <template  v-if="mode ==='floorplan'">
         <div id="instructions">Draw a floorplan and import images</div>
 
@@ -337,9 +325,6 @@ export default {
           break;
         case 'shading':
           tools = ['Rectangle', 'Polygon', 'Eraser', 'Select'];
-          break;
-        case 'images':
-          tools = ['Pan', 'Drag'];
           break;
         case 'components':
           tools = ['Place Component'];
