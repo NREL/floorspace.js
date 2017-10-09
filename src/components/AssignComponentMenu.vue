@@ -14,11 +14,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       :rows="currentComponentDefinitions"
       :columns="currentComponentColumns"
       :selectedRowId="currentComponent && currentComponent.definition && currentComponent.definition.id"
-      :selectRow="setComponentById"
+      :selectRow="selectComponent"
       :addRow="createComponentDefinition"
       :editRow="updateComponentDef"
       :destroyRow="deleteComponentDef"
       :searchAvailable="true"
+      :compact="compact"
+      @toggleCompact="compact = !compact"
     />
   </div>
 </template>
@@ -44,6 +46,7 @@ export default {
         daylighting_control_definitions: 'Daylighting Control Definitions',
         window_definitions: 'Window Definitions',
       },
+      compact: true,
     };
   },
   methods: {
@@ -70,8 +73,8 @@ export default {
         window.eventBus.$emit('error', result.error);
       }
     },
-    setComponentById(componentId) {
-      this.currentComponent = { definition: { id: componentId } };
+    selectComponent(component) {
+      this.currentComponent = { definition: component };
     },
   },
   computed: {
@@ -108,4 +111,14 @@ export default {
 
 <style lang="scss" scoped>
 @import "./../scss/config";
+.assign-component-menu {
+  min-width: 200px;
+  position: absolute;
+  top: 81px;
+  background-color: $gray-medium;
+  .editable-select-list {
+    max-height: 400px;
+    overflow:scroll;
+  }
+}
 </style>

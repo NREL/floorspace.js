@@ -49,19 +49,12 @@ export default {
   name: 'EditableSelectList',
   props: [
     'columns', 'rows', 'addRow', 'editRow', 'destroyRow', 'selectRow', 'selectedRowId',
-    'objectTypes', 'selectedObjectType', 'searchAvailable',
+    'objectTypes', 'selectedObjectType', 'searchAvailable', 'compact',
   ],
   data() {
     return {
       search: '',
-      compact: true,
     };
-  },
-  mounted() {
-    window.eventBus.$on('i-am-the-expanded-library-now', this.giveWayToOtherLibrary);
-  },
-  beforeDestroy() {
-    window.eventBus.$off('i-am-the-expanded-library-now', this.giveWayToOtherLibrary);
   },
   computed: {
     visibleColumns() {
@@ -79,18 +72,7 @@ export default {
   },
   methods: {
     toggleCompact() {
-      this.compact = !this.compact;
-      window.eventBus.$emit(
-        'i-am-the-expanded-library-now',
-        !this.compact ? this._uid : null,
-      );
-    },
-    giveWayToOtherLibrary(uid) {
-      if (uid === this._uid) {
-        // ignore events caused by myself.
-        return;
-      }
-      this.compact = true;
+      this.$emit('toggleCompact', !this.compact)
     },
   },
   components: {

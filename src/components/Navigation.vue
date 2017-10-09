@@ -14,8 +14,20 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </section>
 
         <div id="list">
-          <Library :objectTypes="['stories']" :mode="'stories'" />
-          <Library :objectTypes="modes" :mode="mode" @changeMode="newMode => { mode = newMode; }"  :searchAvailable="true"/>
+          <Library
+            :objectTypes="['stories']"
+            :mode="'stories'"
+            :compact="libraryExpanded !== 'stories'"
+            @toggleCompact="libraryExpanded = (libraryExpanded === 'stories' ? false : 'stories')"
+          />
+          <Library
+            :objectTypes="modes"
+            :mode="mode"
+            @changeMode="newMode => { mode = newMode; }"
+            :searchAvailable="true"
+            :compact="libraryExpanded !== 'subselection'"
+            @toggleCompact="libraryExpanded = (libraryExpanded === 'subselection' ? false : 'subselection')"
+          />
         </div>
     </nav>
 
@@ -193,9 +205,8 @@ export default {
       });
       fullWidth = document.getElementById('layout-navigation').offsetWidth;
     },
-    setWidthForOpenLibrary(whichOne) {
-      this.libraryExpanded = whichOne;
-      if (!whichOne) {
+    setWidthForOpenLibrary() {
+      if (!this.libraryExpanded) {
         this.resetSize();
         ResizeEvents.$emit('resize');
         return;
@@ -332,6 +343,9 @@ export default {
       if (row) {
         row.scrollIntoView();
       }
+    },
+    libraryExpanded() {
+      this.setWidthForOpenLibrary();
     },
   },
   components: {

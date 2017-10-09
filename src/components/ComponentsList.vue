@@ -41,12 +41,5 @@ export default {
   .active {
     background-color: $gray-medium;
   }
-  .assign-component-menu {
-    width: 300px;
-    height: 200px;
-    position: absolute;
-    top: 81px;
-    background-color: $gray-medium;
-  }
 }
 </style>

@@ -18,7 +18,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
     :editRow="modifyObject"
     :destroyRow="destroyObject"
     :searchAvailable="searchAvailable"
-    v-on:selectObjectType="changeMode"
+    :compact="compact"
+    @toggleCompact="c => $emit('toggleCompact', c)"
+    @selectObjectType="changeMode"
   />
 </template>
 
@@ -30,7 +32,7 @@ import helpers from '../store/modules/models/helpers';
 
 export default {
   name: 'Library',
-  props: ['objectTypes', 'mode', 'searchAvailable'],
+  props: ['objectTypes', 'mode', 'searchAvailable', 'compact'],
   data() {
     const imageInput = document.createElement('input');
     imageInput.setAttribute('type', 'file');
