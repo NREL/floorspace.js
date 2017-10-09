@@ -7,10 +7,10 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 
 <template>
-  <div id="assign-component-menu">
+  <div class="assign-component-menu">
     <EditableSelectList
-      :selectedObjectType="currentComponent && currentComponent.type"
-      :objectTypes="[currentComponent.definition.name]"
+      :selectedObjectType="type"
+      :objectTypes="[{ name: type, displayName }]"
       :rows="currentComponentDefinitions"
       :columns="currentComponentColumns"
       :selectedRowId="currentComponent && currentComponent.definition && currentComponent.definition.id"
@@ -25,13 +25,19 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <script>
 import icon from './../assets/svg-icons/add_image.svg'
-import EditableSelectList from './EditableSelectList';
+import EditableSelectList from './EditableSelectList.vue';
 import libconfig from '../store/modules/models/libconfig';
 import helpers from './../store/modules/models/helpers';
 
 export default {
   name: 'AssignComponentMenu',
-  props: ['type'],
+  props: {
+    type: {
+      type: String,
+      required: true,
+      validator: _.partial(_.includes, ['window_definitions', 'daylighting_control_definitions']),
+    },
+  },
   data() {
     return {
       componentTypes: {
@@ -89,6 +95,9 @@ export default {
         this.$store.dispatch('application/setCurrentComponentDefinitionId', { id: item.definition.id });
       },
     },
+    displayName() {
+      return this.componentTypes[this.type];
+    },
   },
   components: {
     icon,
@@ -99,9 +108,4 @@ export default {
 
 <style lang="scss" scoped>
 @import "./../scss/config";
-  #assign-component-menu {
-    position: absolute;
-    left: 17.5rem;
-    top:5rem;
-  }
 </style>

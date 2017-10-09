@@ -6,8 +6,10 @@
       <div @click="visibleComponentType = visibleComponentType === compType ? null : compType">
         <ComponentIcon :which="compType" class="button" />
       </div>
-      <div class="acm" v-if="visibleComponentType === compType"></div>
-        <AssignComponentMenu :type="compType" />
+      <AssignComponentMenu
+        v-if="visibleComponentType === compType"
+        :type="compType"
+      />
     </div>
   </div>
 </template>
@@ -33,9 +35,13 @@ export default {
 #component-icons {
   display: flex;
   align-items: center;
-  .active {
+  .button {
+    margin: 5px;
   }
-  .acm {
+  .active {
+    background-color: $gray-medium;
+  }
+  .assign-component-menu {
     width: 300px;
     height: 200px;
     position: absolute;
