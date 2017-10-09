@@ -1,11 +1,7 @@
 @import "./../config";
 
 main {
-     #images .konvajs-content {
-        z-index: 1;
-    }
-
-    #images, #map-container {
+    #map-container {
         position: absolute;
         top: 0;
         bottom: 0;

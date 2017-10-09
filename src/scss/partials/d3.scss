@@ -25,7 +25,7 @@
 // styling for svg elements created by d3
 // Vue's inline template styling will not work with dynamically created markup
 #grid svg {
-    * {
+    path, circle, line, rect, ellipse {
         // prevent glitchy points caused by moving mouse over overlapping svg paths
         pointer-events: none;
     }
@@ -166,4 +166,30 @@
         }
       }
     }
+}
+
+.image-group {
+  .moveable-wrapper {
+    cursor: move;
+  }
+  .controls {
+    .center {
+      fill: red;
+      stroke: red;
+    }
+    .rotation-handle {
+      fill: red;
+      stroke: red;
+      pointer-events: auto !important;
+    }
+    .rotation-to-center {
+      stroke: black;
+      stroke-width: 1px;
+    }
+    .corner {
+      fill: blue;
+      stroke: blue;
+      pointer-events: auto !important;
+    }
+  }
 }

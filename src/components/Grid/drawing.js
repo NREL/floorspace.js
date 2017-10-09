@@ -1,3 +1,4 @@
+import * as d3 from 'd3';
 import 'd3-selection-multi';
 import _ from 'lodash';
 import { distanceBetweenPoints, unitPerpVector, unitVector, edgeDirection } from './../../store/modules/geometry/helpers';
@@ -272,4 +273,256 @@ export function drawDaylightingControlGuideline() {
     return chart;
   };
   return chart;
+}
+
+const RESIZE_CURSORS = [
+  { vec: { x: 1, y: 0 }, cursor: 'ew-resize' },
+  { vec: { x: -1, y: 0 }, cursor: 'ew-resize' },
+  { vec: { x: 0, y: 1 }, cursor: 'ns-resize' },
+  { vec: { x: 0, y: -1 }, cursor: 'ns-resize' },
+  { vec: { x: 1/Math.sqrt(2), y: 1/Math.sqrt(2) }, cursor: 'nwse-resize' },
+  { vec: { x: -1/Math.sqrt(2), y: -1/Math.sqrt(2) }, cursor: 'nwse-resize' },
+  { vec: { x: 1/Math.sqrt(2), y: -1/Math.sqrt(2) }, cursor: 'nesw-resize' },
+  { vec: { x: -1/Math.sqrt(2), y: 1/Math.sqrt(2) }, cursor: 'nesw-resize' },
+]
+function bestResizeCursor(xOff, yOff, rotation) {
+  const
+    norm = Math.sqrt(xOff * xOff + yOff * yOff),
+    x = xOff / norm,
+    y = yOff / norm,
+    a = Math.PI * rotation / 180,
+    pt = {
+      x: x * Math.cos(a) - y * Math.sin(a),
+      y: x * Math.sin(a) + y * Math.cos(a),
+    };
+
+  return _.minBy(RESIZE_CURSORS, c => distanceBetweenPoints(c.vec, pt)).cursor;
+}
+const rotateCursor = (
+  'url(data:image/svg+xml;base64,' + // eslint-disable-line
+  btoa(
+'<svg xmlns="http://www.w3.org/2000/svg" x="0" y="0" width="25.6" height="25.6" viewBox="0 0 25.6 25.6">' +
+'  <path transform="scale(0.5)" d="M25.6,44.8c7.9406,0,14.4-6.4594,14.4-14.4s-6.4594-14.4-14.4-14.4v9.6L9.6,12.8L25.6,0v9.6c11.4688,0,20.8,9.3313,20.8,20.8s-9.3313,20.8-20.8,20.8S4.8,41.8688,4.8,30.4h6.4C11.2,38.3406,17.6594,44.8,25.6,44.8z"/>' +
+'</svg>'
+  ) +
+  ') 12.8 12.8, pointer');
+
+export function drawImage() {
+  let
+    xScale = _.identity,
+    yScale = _.identity,
+    updateImage = _.identity,
+    selectImage = _.identity;
+  function chart(selection) {
+    const pxPerRWU = (xScale(100) - xScale(0)) / 100;
+
+    let startX, startY, currX, currY;
+    const
+      offset = (d) => {
+        const
+          x = (currX - startX),
+          y = (currY - startY),
+          invR = -1 * d.r * Math.PI / 180;
+        return {
+          dx: x * Math.cos(invR) - y * Math.sin(invR),
+          dy: x * Math.sin(invR) + y * Math.cos(invR),
+        };
+      },
+      moveable = d3.drag()
+      .on('start.move', function() {
+        d3.event.sourceEvent.stopPropagation(); // don't zoom when I'm draggin' an image!
+        [startX, startY] = d3.mouse(document.querySelector('#grid svg'));
+        currX = currY = undefined;
+      })
+      .on('drag.move', function(d) {
+        [currX, currY] = d3.mouse(document.querySelector('#grid svg'));
+        const { dx, dy } = offset(d);
+        d3.select(this)
+          .attr('transform', `translate(${dx}, ${dy})`);
+      })
+      .on('end.move', function(d) {
+        if (typeof currX === 'undefined') {
+          // no movement since start of move.
+          return;
+        }
+        const { dx, dy } = offset(d);
+        updateImage({
+          image: d,
+          x: d.x + (currX - startX) / pxPerRWU,
+          y: d.y - (currY - startY) / pxPerRWU,
+        });
+      });
+
+    const
+      scalingFactor = (d) => {
+        const
+          pxOrigin = { x: xScale(d.x), y: yScale(d.y) },
+          distCurrToOrigin = distanceBetweenPoints(
+            { x: currX, y: currY }, pxOrigin),
+          distStartToOrigin = distanceBetweenPoints(
+            { x: startX, y: startY }, pxOrigin),
+          scale = distCurrToOrigin / distStartToOrigin;
+        return scale;
+      },
+      resizeable = d3.drag()
+        .on('start.resize', function() {
+          d3.event.sourceEvent.stopPropagation();
+          [startX, startY] = d3.mouse(document.querySelector('#grid svg'));
+          currX = currY = undefined;
+        })
+        .on('drag.resize', function(d) {
+          [currX, currY] = d3.mouse(document.querySelector('#grid svg'));
+          d3.select(this.parentNode.parentNode)
+            .attr('transform', `scale(${scalingFactor(d)})`);
+        })
+        .on('end.resize', function(d) {
+          if (typeof currX === 'undefined') {
+            // no movement since start of resize.
+            return;
+          }
+          const scale = scalingFactor(d);
+          updateImage({
+            image: d,
+            width: d.width * scale,
+            height: d.height * scale,
+          });
+        });
+
+    const
+      rotationAngle = (d) => {
+        const
+          pxOrigin = { x: xScale(d.x), y: yScale(d.y) },
+          startAngle = edgeDirection({ start: pxOrigin, end: { x: startX, y: startY }}),
+          currAngle = edgeDirection({ start: pxOrigin, end: { x: currX, y: currY }});
+        return ((180 * (currAngle - startAngle) / Math.PI)
+          + 180 * (xScale(d.x) > currX !== xScale(d.x) > startX)
+        );
+      },
+      rotateable = d3.drag()
+        .on('start.rotate', function() {
+          d3.event.sourceEvent.stopPropagation();
+          [startX, startY] = d3.mouse(document.querySelector('#grid svg'));
+          currX = currY = undefined;
+        })
+        .on('drag.rotate', function(d) {
+          [currX, currY] = d3.mouse(document.querySelector('#grid svg'));
+          d3.select(this.parentNode.parentNode)
+            .attr('transform', `rotate(${rotationAngle(d)})`);
+        })
+        .on('end.rotate', function(d) {
+          if (typeof currX === 'undefined') {
+            // no movement since start of rotation.
+            return;
+          }
+          const rotation = rotationAngle(d);
+          updateImage({
+            image: d,
+            r: rotation + d.r,
+          });
+        });
+
+    selection.exit().remove();
+    const imageGroupE = selection.enter().append('g').attr('class', 'image-group');
+    const moveableWrapperE = imageGroupE.append('g').attr('class', 'moveable-wrapper');
+    moveableWrapperE.append('image');
+    const controlsE = moveableWrapperE.append('g').attr('class', 'controls');
+    controlsE.append('line').attr('class', 'rotation-to-center');
+    controlsE.append('circle').attr('class', 'center');
+    controlsE.append('circle').attr('class', 'rotation-handle');
+    ['tl', 'tr', 'bl', 'br']
+      .forEach(corner => controlsE.append('circle').attr('class', `corner ${corner}`));
+
+    const imageGroup = selection.merge(imageGroupE);
+
+    imageGroup
+      .attr('transform', d => `translate(${xScale(d.x)}, ${yScale(d.y)}) rotate(${d.r})`)
+      .on('click', selectImage);
+
+    imageGroup.select('.moveable-wrapper')
+      .attr('transform', 'translate(0,0)')
+      .call(moveable);
+
+    imageGroup.select('image')
+      .attr('x', d => -1 * pxPerRWU * d.width / 2)
+      .attr('y', d => -1 * pxPerRWU * d.height / 2)
+      .attr('width', d => pxPerRWU * d.width)
+      .attr('height', d => pxPerRWU * d.height)
+      .attr('xlink:href', d => d.src);
+
+    imageGroup.select('.controls')
+      .attr('display', d => d.current ? '' : 'none');
+
+    imageGroup.select('.controls .center')
+      .attr('cx', 0)
+      .attr('cy', 0)
+      .attr('r', 3);
+
+    imageGroup.select('.controls .rotation-handle')
+      .attr('cx', 0)
+      .attr('cy', d => pxPerRWU * d.height)
+      .attr('r', 5)
+      .style('cursor', rotateCursor)
+      .call(rotateable);
+    imageGroup.select('.controls .rotation-to-center')
+      .attr('x1', 0)
+      .attr('y1', 0)
+      .attr('x2', 0)
+      .attr('y2', d => pxPerRWU * d.height);
+    _.forIn(
+      { tl: [-1, -1], tr: [1, -1], bl: [-1, 1], br: [1, 1] },
+      ([xOff, yOff], label) => {
+        imageGroup.select(`.controls .${label}`)
+          .attr('cx', d => xOff * pxPerRWU * d.width / 2)
+          .attr('cy', d => yOff * pxPerRWU * d.height / 2)
+          .attr('r', 5)
+          .style('cursor', d => bestResizeCursor(xOff, yOff, d.r))
+          .call(resizeable);
+      });
+
+  }
+
+  chart.xScale = function (_) {
+    if (!arguments.length) return xScale;
+    xScale = _;
+    return chart;
+  };
+  chart.yScale = function (_) {
+    if (!arguments.length) return yScale;
+    yScale = _;
+    return chart;
+  };
+  chart.updateImage = function (_) {
+    if (!arguments.length) return updateImage;
+    updateImage = _;
+    return chart;
+  };
+  chart.selectImage = function (_) {
+    if (!arguments.length) return selectImage;
+    selectImage = _;
+    return chart;
+  };
+  return chart;
+}
+
+export default function drawMethods({ xScale, yScale, updateImage, selectImage }) {
+
+  return {
+    drawWindow: drawWindow()
+      .xScale(xScale)
+      .yScale(yScale),
+    drawWindowGuideline: drawWindowGuideline()
+      .xScale(xScale)
+      .yScale(yScale),
+    drawDaylightingControl: drawDaylightingControl()
+      .xScale(xScale)
+      .yScale(yScale),
+    drawDaylightingControlGuideline: drawDaylightingControlGuideline()
+      .xScale(xScale)
+      .yScale(yScale),
+    drawImage: drawImage()
+      .xScale(xScale)
+      .yScale(yScale)
+      .updateImage(updateImage)
+      .selectImage(selectImage),
+  };
 }

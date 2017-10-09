@@ -229,7 +229,7 @@ export default {
       .classed('highlight', true)
       .selectAll('.daylighting-control')
       .data([loc])
-      .call(this.drawDC);
+      .call(this.drawDaylightingControl);
 
     const
       face = _.find(this.denormalizedGeometry.faces, { id: loc.face_id }),
@@ -240,7 +240,7 @@ export default {
       .classed('guideline', true)
       .selectAll('.daylighting-control-guideline')
       .data([{ loc, nearestEdge }])
-      .call(this.drawDCGuideline);
+      .call(this.drawDaylightingControlGuideline);
   },
 
   /*
@@ -569,7 +569,7 @@ export default {
   drawPolygons() {
     this.recalcScales();
     // remove expired polygons
-    let poly = d3.select('#grid svg').selectAll('g.poly')
+    let poly = d3.select('#grid svg .polygons').selectAll('g.poly')
       .data(this.polygons, d => d.face_id);
 
     poly.exit().remove();
@@ -619,14 +619,23 @@ export default {
     poly.select('.daylighting-controls')
       .selectAll('.daylighting-control')
       .data(d => d.daylighting_controls)
-      .call(this.drawDC);
+      .call(this.drawDaylightingControl);
 
     this.registerDrag();
 
     // render the selected model's face above the other polygons so that the border is not obscured
     d3.select('.current').raise();
   },
+  drawImages() {
+    d3.select('#grid svg .images').selectAll('.image-group')
+      .data(this.images, d => d.id)
+      .call(this.drawImage);
+  },
 
+  draw() {
+    this.drawPolygons();
+    this.drawImages();
+  },
   // ****************** SNAPPING TO EXISTING GEOMETRY ****************** //
   /*
   * given a point in grid units, find the closest vertex or edge within its snap tolerance
@@ -1027,7 +1036,7 @@ export default {
     // to force this to happen immediately.
     this.nullTransform();
 
-    this.drawPolygons();
+    this.draw();
   },
   reloadGridAndScales() {
     this.zoomXScale = null;
@@ -1115,7 +1124,7 @@ export default {
        this.padTickY(-12);
 
        // redraw the saved geometry
-       this.drawPolygons();
+       this.draw();
      })
      .on('end', () => {
        ResizeEvents.$emit('zoomStabilized');

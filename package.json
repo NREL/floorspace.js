@@ -15,11 +15,11 @@
   },
   "dependencies": {
     "d3": "^4.4.0",
+    "d3-selection": "^1.1.0",
     "d3-selection-multi": "^1.0.1",
     "google-maps-api": "^2.0.1",
     "huebee": "^1.0.1",
     "js-clipper": "^1.0.1",
-    "konva": "^1.5.0",
     "lodash": "^4.17.4",
     "openlayers": "^4.1.0",
     "polylabel": "^1.0.2",

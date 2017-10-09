@@ -13,15 +13,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <marker v-for="id in ['perp-linecap', 'perp-linecap-highlight']" :id="id" markerWidth="1" markerHeight="10" orient="auto" markerUnits="strokeWidth" refY="4" refX="0.5">
           <rect x="0" y="1" width="1" height="6" shape-rendering="optimizeQuality"/>
         </marker>
-        <marker id="red-arrowhead-right" markerWidth="6" markerHeight="4" refX="6" refY="2"
-             orient="auto">
-          <path d="M 0,0 V 4 L6,2 Z" style="fill: red; stroke: none" />
-        </marker>
-        <marker id="red-arrowhead-left" markerWidth="6" markerHeight="4" refX="0" refY="2"
-             orient="auto">
-          <path d="M 6,0 V 4 L0,2 Z" style="fill: red; stroke: none" />
-        </marker>
       </defs>
+      <g class="axis axis--x"></g>
+      <g class="axis axis--y"></g>
+      <g class="polygons"></g>
+      <g class="images"></g>
     </svg>
   </div>
 </template>
@@ -35,7 +31,7 @@ import geometryHelpers from './../../store/modules/geometry/helpers';
 import modelHelpers from './../../store/modules/models/helpers';
 import applicationHelpers from './../../store/modules/application/helpers';
 import { ResizeEvents } from '../../components/Resize';
-import { drawWindow, drawDaylightingControl, drawWindowGuideline, drawDaylightingControlGuideline } from './drawing';
+import drawMethods from './drawing';
 import { expandWindowAlongEdge, windowLocation } from './snapping';
 
 const d3 = require('d3');
@@ -58,18 +54,12 @@ export default {
         y: null,
       },
       handleMouseMove: null, // placeholder --> overwritten in mounted()
-      drawWindow: drawWindow()
-        .xScale(xScale)
-        .yScale(yScale),
-      drawWindowGuideline: drawWindowGuideline()
-        .xScale(xScale)
-        .yScale(yScale),
-      drawDC: drawDaylightingControl()
-        .xScale(xScale)
-        .yScale(yScale),
-      drawDCGuideline: drawDaylightingControlGuideline()
-        .xScale(xScale)
-        .yScale(yScale),
+      ...drawMethods({
+        xScale,
+        yScale,
+        selectImage: (img) => { this.currentImage = img; },
+        updateImage: (data) => window.application.$store.dispatch('models/updateImageWithData', data),
+      }),
     };
   },
   mounted() {
@@ -122,6 +112,10 @@ export default {
       currentShading: 'application/currentShading',
       currentComponent: 'application/currentComponent',
     }),
+    currentImage: {
+      get() { return this.$store.getters['application/currentImage']; },
+      set(item) { this.$store.dispatch('application/setCurrentSubSelectionId', { id: item.id }); },
+    },
     currentComponentType() { return this.currentComponent.type; },
     currentComponentDefinition() { return this.currentComponent.definition; },
     currentSubSelection: {
@@ -165,7 +159,10 @@ export default {
       }
       return [];
     },
-
+    images() {
+      return this.currentStory.images
+        .map(img => ({ ...img, current: this.currentImage && this.currentImage.id === img.id }));
+    },
     /*
     * map all faces for the current story to polygon representations (sets of ordered points) for d3 to render
     */
@@ -180,21 +177,22 @@ export default {
     gridVisible() { this.showOrHideAxes(); },
     spacing() { this.updateGrid(); },
 
-    currentMode() { this.drawPolygons(); },
-    polygons() { this.drawPolygons(); },
-    windowDefs() { this.drawPolygons(); },
+    currentMode() { this.draw(); },
+    polygons() { this.draw(); },
+    images() { this.draw(); },
+    windowDefs() { this.draw(); },
     currentTool() {
       this.points = [];
-      this.drawPolygons();
+      this.draw();
       this.clearHighlights();
     },
     currentSpace() {
       this.points = [];
-      this.drawPolygons();
+      this.draw();
     },
     currentShading() {
       this.points = [];
-      this.drawPolygons();
+      this.draw();
     },
     points() {
       if (this.points.length === 0) {
