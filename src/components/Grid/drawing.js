@@ -458,7 +458,10 @@ export function drawImage() {
         ig
           .on('click', null);
       } else {
-        ig.on('click', selectImage);
+        ig.on('click', function(d) {
+          d3.event.stopPropagation();
+          selectImage(d);
+        });
       }
       if (!d.current) {
         console.log('removing events from', d);

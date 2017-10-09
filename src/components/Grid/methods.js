@@ -38,6 +38,12 @@ export default {
         this.placeDaylightingControl();
       }
     }
+    if (this.currentTool === 'Image') {
+      this.deselectImages();
+    }
+  },
+  deselectImages() {
+    this.$store.dispatch('application/setCurrentSubSelectionId', this.currentStory.spaces[0]);
   },
   placeWindow() {
     const

@@ -160,7 +160,6 @@ export default {
       return [];
     },
     images() {
-      console.log('tool, currentImage', this.currentTool, this.currentImage);
       return this.currentStory.images
         .map(img => ({
           ...img,
