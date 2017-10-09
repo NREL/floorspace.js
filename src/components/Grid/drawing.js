@@ -331,6 +331,7 @@ export function drawImage() {
       .on('start.move', function() {
         d3.event.sourceEvent.stopPropagation(); // don't zoom when I'm draggin' an image!
         [startX, startY] = d3.mouse(document.querySelector('#grid svg'));
+        currX = currY = undefined;
       })
       .on('drag.move', function(d) {
         [currX, currY] = d3.mouse(document.querySelector('#grid svg'));
@@ -339,6 +340,10 @@ export function drawImage() {
           .attr('transform', `translate(${dx}, ${dy})`);
       })
       .on('end.move', function(d) {
+        if (typeof currX === 'undefined') {
+          // no movement since start of move.
+          return;
+        }
         const { dx, dy } = offset(d);
         updateImage({
           image: d,
@@ -362,6 +367,7 @@ export function drawImage() {
         .on('start.resize', function() {
           d3.event.sourceEvent.stopPropagation();
           [startX, startY] = d3.mouse(document.querySelector('#grid svg'));
+          currX = currY = undefined;
         })
         .on('drag.resize', function(d) {
           [currX, currY] = d3.mouse(document.querySelector('#grid svg'));
@@ -369,6 +375,10 @@ export function drawImage() {
             .attr('transform', `scale(${scalingFactor(d)})`);
         })
         .on('end.resize', function(d) {
+          if (typeof currX === 'undefined') {
+            // no movement since start of resize.
+            return;
+          }
           const scale = scalingFactor(d);
           updateImage({
             image: d,
@@ -391,6 +401,7 @@ export function drawImage() {
         .on('start.rotate', function() {
           d3.event.sourceEvent.stopPropagation();
           [startX, startY] = d3.mouse(document.querySelector('#grid svg'));
+          currX = currY = undefined;
         })
         .on('drag.rotate', function(d) {
           [currX, currY] = d3.mouse(document.querySelector('#grid svg'));
@@ -398,6 +409,10 @@ export function drawImage() {
             .attr('transform', `rotate(${rotationAngle(d)})`);
         })
         .on('end.rotate', function(d) {
+          if (typeof currX === 'undefined') {
+            // no movement since start of rotation.
+            return;
+          }
           const rotation = rotationAngle(d);
           updateImage({
             image: d,
