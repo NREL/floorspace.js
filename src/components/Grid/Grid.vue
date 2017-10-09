@@ -31,7 +31,7 @@ import geometryHelpers from './../../store/modules/geometry/helpers';
 import modelHelpers from './../../store/modules/models/helpers';
 import applicationHelpers from './../../store/modules/application/helpers';
 import { ResizeEvents } from '../../components/Resize';
-import { drawWindow, drawDaylightingControl, drawWindowGuideline, drawDaylightingControlGuideline, drawImage } from './drawing';
+import drawMethods from './drawing';
 import { expandWindowAlongEdge, windowLocation } from './snapping';
 
 const d3 = require('d3');
@@ -54,21 +54,12 @@ export default {
         y: null,
       },
       handleMouseMove: null, // placeholder --> overwritten in mounted()
-      drawWindow: drawWindow()
-        .xScale(xScale)
-        .yScale(yScale),
-      drawWindowGuideline: drawWindowGuideline()
-        .xScale(xScale)
-        .yScale(yScale),
-      drawDC: drawDaylightingControl()
-        .xScale(xScale)
-        .yScale(yScale),
-      drawDCGuideline: drawDaylightingControlGuideline()
-        .xScale(xScale)
-        .yScale(yScale),
-      drawImage: drawImage()
-        .xScale(xScale)
-        .yScale(yScale),
+      ...drawMethods({
+        xScale,
+        yScale,
+        selectImage: (img) => { this.currentImage = img; },
+        updateImage: (data) => window.application.$store.dispatch('models/updateImageWithData', data),
+      }),
     };
   },
   mounted() {

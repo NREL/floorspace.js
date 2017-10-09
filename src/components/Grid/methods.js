@@ -229,7 +229,7 @@ export default {
       .classed('highlight', true)
       .selectAll('.daylighting-control')
       .data([loc])
-      .call(this.drawDC);
+      .call(this.drawDaylightingControl);
 
     const
       face = _.find(this.denormalizedGeometry.faces, { id: loc.face_id }),
@@ -240,7 +240,7 @@ export default {
       .classed('guideline', true)
       .selectAll('.daylighting-control-guideline')
       .data([{ loc, nearestEdge }])
-      .call(this.drawDCGuideline);
+      .call(this.drawDaylightingControlGuideline);
   },
 
   /*
@@ -619,7 +619,7 @@ export default {
     poly.select('.daylighting-controls')
       .selectAll('.daylighting-control')
       .data(d => d.daylighting_controls)
-      .call(this.drawDC);
+      .call(this.drawDaylightingControl);
 
     this.registerDrag();
 

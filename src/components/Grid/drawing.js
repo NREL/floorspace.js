@@ -311,7 +311,8 @@ export function drawImage() {
   let
     xScale = _.identity,
     yScale = _.identity,
-    updateImage = (data) => window.application.$store.dispatch('models/updateImageWithData', data);
+    updateImage = _.identity,
+    selectImage = _.identity;
   function chart(selection) {
     const pxPerRWU = (xScale(100) - xScale(0)) / 100;
 
@@ -434,7 +435,8 @@ export function drawImage() {
     const imageGroup = selection.merge(imageGroupE);
 
     imageGroup
-      .attr('transform', d => `translate(${xScale(d.x)}, ${yScale(d.y)}) rotate(${d.r})`);
+      .attr('transform', d => `translate(${xScale(d.x)}, ${yScale(d.y)}) rotate(${d.r})`)
+      .on('click', selectImage);
 
     imageGroup.select('.moveable-wrapper')
       .attr('transform', 'translate(0,0)')
@@ -447,10 +449,14 @@ export function drawImage() {
       .attr('height', d => pxPerRWU * d.height)
       .attr('xlink:href', d => d.src);
 
+    imageGroup.select('.controls')
+      .attr('display', d => d.current ? '' : 'none');
+
     imageGroup.select('.controls .center')
       .attr('cx', 0)
       .attr('cy', 0)
       .attr('r', 3);
+
     imageGroup.select('.controls .rotation-handle')
       .attr('cx', 0)
       .attr('cy', d => pxPerRWU * d.height)
@@ -485,5 +491,38 @@ export function drawImage() {
     yScale = _;
     return chart;
   };
+  chart.updateImage = function (_) {
+    if (!arguments.length) return updateImage;
+    updateImage = _;
+    return chart;
+  };
+  chart.selectImage = function (_) {
+    if (!arguments.length) return selectImage;
+    selectImage = _;
+    return chart;
+  };
   return chart;
+}
+
+export default function drawMethods({ xScale, yScale, updateImage, selectImage }) {
+
+  return {
+    drawWindow: drawWindow()
+      .xScale(xScale)
+      .yScale(yScale),
+    drawWindowGuideline: drawWindowGuideline()
+      .xScale(xScale)
+      .yScale(yScale),
+    drawDaylightingControl: drawDaylightingControl()
+      .xScale(xScale)
+      .yScale(yScale),
+    drawDaylightingControlGuideline: drawDaylightingControlGuideline()
+      .xScale(xScale)
+      .yScale(yScale),
+    drawImage: drawImage()
+      .xScale(xScale)
+      .yScale(yScale)
+      .updateImage(updateImage)
+      .selectImage(selectImage),
+  };
 }
