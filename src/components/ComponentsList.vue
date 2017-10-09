@@ -1,0 +1,46 @@
+<template>
+  <div id="component-icons" class="components-list">
+    <div v-for="compType in ['window_definitions', 'daylighting_control_definitions']"
+        :key="compType"
+        :class="{ active: visibleComponentType === compType }">
+      <div @click="visibleComponentType = visibleComponentType === compType ? null : compType">
+        <ComponentIcon :which="compType" class="button" />
+      </div>
+      <div class="acm" v-if="visibleComponentType === compType"></div>
+        <AssignComponentMenu :type="compType" />
+    </div>
+  </div>
+</template>
+<script>
+import AssignComponentMenu from './AssignComponentMenu.vue';
+import svgs from './svgs';
+
+export default {
+  name: 'ComponentsList',
+  data() {
+    return {
+      visibleComponentType: false,
+    };
+  },
+  components: {
+    AssignComponentMenu,
+    ...svgs,
+  },
+}
+</script>
+<style lang="scss" scoped>
+@import "./../scss/config";
+#component-icons {
+  display: flex;
+  align-items: center;
+  .active {
+  }
+  .acm {
+    width: 300px;
+    height: 200px;
+    position: absolute;
+    top: 81px;
+    background-color: $gray-medium;
+  }
+}
+</style>

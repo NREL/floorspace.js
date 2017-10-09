@@ -21,8 +21,21 @@ import zoomOutSvg from './../assets/svg-icons/zoom_out.svg';
 import panSvg from './../assets/svg-icons/pan.svg';
 import addImage from './../assets/svg-icons/add_image.svg';
 
-import componentsWindow from './../assets/svg-icons/components_window.svg';
-import componentsDaylighting from './../assets/svg-icons/components_daylighting.svg';
+import ComponentsWindow from './../assets/svg-icons/components_window.svg';
+import ComponentsDaylighting from './../assets/svg-icons/components_daylighting.svg';
+
+const ComponentIcon = {
+  name: 'ComponentIcon',
+  template: `
+    <ComponentsWindow v-if="which === 'window_definitions'" class="button" />
+    <ComponentsDaylighting v-else-if="which === 'daylighting_control_definitions'" class="button" />
+  `,
+  props: ['which'],
+  components: {
+    ComponentsWindow,
+    ComponentsDaylighting,
+  }
+};
 
 import QuickstartIconNewMapFloorplan from './../assets/svg-icons/quickstart_icon_new_map_floorplan.svg';
 import QuickstartIconNewFloorplan from './../assets/svg-icons/quickstart_icon_newfloorplan.svg';
@@ -50,8 +63,7 @@ export default {
   'pan-svg': panSvg,
   'add-image': addImage,
 
-  'components-window': componentsWindow,
-  'components-daylighting': componentsDaylighting,
+  ComponentIcon,
 
   QuickstartIconNewMapFloorplan,
   QuickstartIconNewFloorplan,

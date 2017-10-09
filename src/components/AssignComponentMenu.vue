@@ -8,21 +8,24 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
   <div id="assign-component-menu">
-    <editable-table
-      :columns="currentComponentColumns"
+    <EditableSelectList
+      :selectedObjectType="currentComponent && currentComponent.type"
+      :objectTypes="[currentComponent.definition.name]"
       :rows="currentComponentDefinitions"
-      :newRow="createComponentDefinition"
-      :deleteRow="deleteComponentDef"
-      :updateRow="updateComponentDef"
-      :selectedId="currentComponent && currentComponent.definition && currentComponent.definition.id"
+      :columns="currentComponentColumns"
+      :selectedRowId="currentComponent && currentComponent.definition && currentComponent.definition.id"
       :selectRow="setComponentById"
+      :addRow="createComponentDefinition"
+      :editRow="updateComponentDef"
+      :destroyRow="deleteComponentDef"
+      :searchAvailable="true"
     />
   </div>
 </template>
 
 <script>
 import icon from './../assets/svg-icons/add_image.svg'
-import EditableTable from './EditableTable';
+import EditableSelectList from './EditableSelectList';
 import libconfig from '../store/modules/models/libconfig';
 import helpers from './../store/modules/models/helpers';
 
@@ -89,7 +92,7 @@ export default {
   },
   components: {
     icon,
-    'editable-table': EditableTable,
+    EditableSelectList,
   },
 };
 </script>

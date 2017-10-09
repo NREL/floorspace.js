@@ -166,25 +166,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
       <template v-if="mode === 'components'">
         <div id="instructions">Add fenestration, daylighting, and PV</div>
-        <div id="component-icons" class="components-list">
-
-          <div @click="visibleComponentType = visibleComponentType === 'window_definitions' ? null : 'window_definitions' " :class="{ active: visibleComponentType === 'window_definitions' }">
-            <components-window class="button" />
-          </div>
-          <div @click="visibleComponentType = visibleComponentType === 'daylighting_control_definitions' ? null : 'daylighting_control_definitions' " :class="{ active: visibleComponentType === 'daylighting_control_definitions' }">
-
-            <components-daylighting class="button" />
-          </div>
-        </div>
-
+        <ComponentsList />
         <!-- <span v-for="type in ['window_definitions', 'daylighting_control_definitions']"  >
           {{ type }}
           <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'>
               <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
           </svg>
         </span> -->
-
-        <assign-component-menu v-show="visibleComponentType" :type="visibleComponentType"></assign-component-menu>
       </template>
 
       <template v-if="mode==='assign'">
@@ -224,7 +212,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <script>
 import { mapState } from 'vuex';
 import SaveAsModal from './Modals/SaveAsModal.vue';
-import AssignComponentMenu from './AssignComponentMenu.vue';
+import ComponentsList from './ComponentsList.vue';
 import applicationHelpers from './../store/modules/application/helpers';
 import svgs from './svgs';
 
@@ -400,7 +388,7 @@ export default {
   },
   components: {
     'save-as-modal': SaveAsModal,
-    'assign-component-menu': AssignComponentMenu,
+    ComponentsList,
     ...svgs,
   },
 };
@@ -460,13 +448,6 @@ svg.icon, svg.button {
       margin-left: auto;
       .active {
         background-color: $gray-dark;
-      }
-    }
-    #component-icons {
-      display: flex;
-      margin-right: auto;
-      .active {
-        background-color: $gray-medium-light;
       }
     }
 
