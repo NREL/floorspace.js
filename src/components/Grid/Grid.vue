@@ -16,8 +16,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       </defs>
       <g class="axis axis--x"></g>
       <g class="axis axis--y"></g>
-      <g class="polygons"></g>
       <g class="images"></g>
+      <g class="polygons"></g>
     </svg>
   </div>
 </template>

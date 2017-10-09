@@ -446,7 +446,7 @@ export function drawImage() {
 
     imageGroup.select('.moveable-wrapper')
       .attr('transform', 'translate(0,0)')
-      .style('cursor', d => d.current ? 'move' : 'pointer');
+      .style('cursor', d => d.current ? 'move' : d.clickable ? 'pointer' : null);
 
     imageGroup.select('.controls')
       .attr('display', d => d.current ? '' : 'none');
