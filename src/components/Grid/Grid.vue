@@ -53,6 +53,7 @@ export default {
         x: null,
         y: null,
       },
+      transformAtLastRender: d3.zoomIdentity,
       handleMouseMove: null, // placeholder --> overwritten in mounted()
       ...drawMethods({
         xScale,

@@ -21,6 +21,20 @@ function ticksInRange(start, stop, spacing) {
     spacing);
 }
 
+function transformDiff(t1, t2) {
+  // returns a new transform that is sufficient to take you from
+  // t1 to t2.
+  // boy was this a doozy to figure out. Tricky bit is that the
+  // translation is dependent on the scaling factor. So we have to
+  // divide that out before we can subtract.
+  return new d3.zoomIdentity.constructor(
+    t2.k / t1.k,
+    (t2.x / t2.k - t1.x / t1.k) * t2.k,
+    (t2.y / t2.k - t1.y / t1.k) * t2.k,
+  );
+}
+
+
 export default {
   // ****************** USER INTERACTION EVENTS ****************** //
   /*
@@ -646,6 +660,10 @@ export default {
   },
 
   draw() {
+    this.transformAtLastRender = { ...this.transform };
+    d3.selectAll('#grid svg .images, #grid svg .polygons')
+      .attr('transform', '');
+
     this.drawPolygons();
     this.drawImages();
     this.raisePolygonOrImages();
@@ -1050,7 +1068,7 @@ export default {
     // to force this to happen immediately.
     this.nullTransform();
 
-    this.draw();
+    this.draw()
   },
   reloadGridAndScales() {
     this.zoomXScale = null;
@@ -1137,17 +1155,23 @@ export default {
        // axis padding
        this.padTickY(-12);
 
-       // redraw the saved geometry
-       this.draw();
+       // apply the zoom transform to image and polygon <g> tags.
+       // (more efficient than a full re-render)
+       this.translateEntities();
      })
      .on('end', () => {
-       ResizeEvents.$emit('zoomStabilized');
+       // redraw the saved geometry
+       this.draw();
      });
 
     svg.call(this.zoomBehavior);
     svg
       .on('mousemove', this.handleMouseMove)
       .on('click', this.gridClicked);
+  },
+  translateEntities() {
+    d3.selectAll('#grid svg .images, #grid svg .polygons')
+      .attr('transform', transformDiff(this.transformAtLastRender, d3.event.transform));
   },
   showOrHideAxes() {
     this.axis.x.style('visibility', this.gridVisible ? 'visible' : 'hidden');
