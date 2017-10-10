@@ -11,13 +11,15 @@
           :value="selectedObjectType"
         />
         <span v-else>{{ objectTypes[0].display }}</span>
-        <button @click="addRow">+</button>
+        <a @click="addRow">
+          <AddNew class="button"/>
+        </a>
       </div>
       <div class="control-group">
         <a @click="toggleCompact">
           <DoubleArrows
             class="button"
-            :transform="(compact ? '' : 'scale(-1, 1)') + 'translate(10,10)'"
+            :transform="compact ? '' : 'scale(-1, 1)'"
           />
         </a>
       </div>
@@ -48,6 +50,7 @@ import EditableTable from './EditableTable.vue';
 import LibrarySelect from './LibrarySelect.vue';
 import PrettySelect from './PrettySelect.vue';
 import DoubleArrows from './../assets/svg-icons/double_arrows.svg';
+import AddNew from './../assets/svg-icons/add_new.svg';
 
 export default {
   name: 'EditableSelectList',
@@ -84,6 +87,7 @@ export default {
     LibrarySelect,
     PrettySelect,
     DoubleArrows,
+    AddNew,
   },
 }
 </script>
