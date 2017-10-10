@@ -106,7 +106,9 @@ export default {
     spaces() { return this.currentStory.spaces; },
     shading() { return this.currentStory.shading; },
     images() { return this.currentStory.images; },
-
+    objectTypesForTab() {
+      switch (this.modeT) {}
+    },
     // list items to display for current mode
     items() { return this[this.mode]; },
     mode: {

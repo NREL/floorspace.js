@@ -33,13 +33,6 @@ import helpers from '../store/modules/models/helpers';
 export default {
   name: 'Library',
   props: ['objectTypes', 'mode', 'searchAvailable', 'compact'],
-  data() {
-    const imageInput = document.createElement('input');
-    imageInput.setAttribute('type', 'file');
-    return {
-      imageInput,
-    };
-  },
   computed: {
     objectTypesDisplay() {
       return this.objectTypes.map(ot => ({

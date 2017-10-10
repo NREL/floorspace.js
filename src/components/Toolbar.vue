@@ -26,28 +26,28 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </div>
       </div>
       <ul id="mode-tabs">
-        <li @click="mode='floorplan'" class="tab" :class="{ active: mode === 'floorplan' }">
+        <li @click="modeTab='floorplan'" class="tab" :class="{ active: modeTab === 'floorplan' }">
           <span>
             Floorplan
             <tab-floorplan-svg class="icon"></tab-floorplan-svg>
           </span>
         </li>
 
-        <li @click="mode='shading'" class="tab" :class="{ active: mode === 'shading' }">
+        <li @click="modeTab='shading'" class="tab" :class="{ active: modeTab === 'shading' }">
           <span>
             Shading
             <tab-shading-svg class="icon"></tab-shading-svg>
           </span>
         </li>
 
-        <li @click="mode='components'" class="tab" :class="{ active: mode === 'components' }">
+        <li @click="modeTab='components'" class="tab" :class="{ active: modeTab === 'components' }">
           <span>
             Components
             <tab-components-svg  class="icon"></tab-components-svg>
           </span>
         </li>
 
-        <li @click="mode='assign'" class="tab" :class="{ active: mode === 'assign' }">
+        <li @click="modeTab='assign'" class="tab" :class="{ active: modeTab === 'assign' }">
           <span>
             Assign
             <tab-assign-svg  class="icon"></tab-assign-svg>
@@ -96,13 +96,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       </div>
     </section>
 
-    <section id="bottom" :class="mode">
+    <section id="bottom" :class="modeTab">
       <div id="grid-tools">
         <zoom-in-svg class="button"></zoom-in-svg>
         <zoom-out-svg class="button"></zoom-out-svg>
         <pan-svg @click="tool = 'Pan'" :class="{ active: tool === 'Pan' }" class="button"></pan-svg>
       </div>
-      <template  v-if="mode ==='floorplan'">
+      <template  v-if="modeTab ==='floorplan'">
         <div id="instructions">Draw a floorplan and import images</div>
 
         <div id="drawing-tools" class="tools-list">
@@ -135,7 +135,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </div>
       </template>
 
-      <template  v-if="mode === 'shading'">
+      <template  v-if="modeTab === 'shading'">
         <div id="instructions">Draw shading objects</div>
 
         <div id="drawing-tools" class="tools-list">
@@ -157,7 +157,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </div>
       </template>
 
-      <template v-if="mode === 'components'">
+      <template v-if="modeTab === 'components'">
         <div id="instructions">Add fenestration, daylighting, and PV</div>
         <ComponentsList />
         <!-- <span v-for="type in ['window_definitions', 'daylighting_control_definitions']"  >
@@ -168,7 +168,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </span> -->
       </template>
 
-      <template v-if="mode==='assign'">
+      <template v-if="modeTab==='assign'">
         <div class='input-select'>
             <label>View By</label>
             <select v-model='currentMode'>
@@ -215,7 +215,7 @@ export default {
   name: 'toolbar',
   data() {
     return {
-      mode: 'floorplan',
+      modeTab: 'floorplan',
       componentTypes: {
         daylighting_control_definitions: 'Daylighting Control Definitions',
         window_definitions: 'Window Definitions',
@@ -300,7 +300,7 @@ export default {
     }),
     availableTools() {
       let tools = [];
-      switch (this.mode) {
+      switch (this.modeTab) {
         case 'floorplan':
           tools = ['Rectangle', 'Polygon', 'Eraser', 'Select', 'Image'];
           break;
@@ -316,7 +316,7 @@ export default {
         default:
           break;
       }
-      if (this.previousStoryVisible && (this.mode === 'floorplan' || this.currentMode === 'shading')) {
+      if (this.previousStoryVisible && (this.modeTab === 'floorplan' || this.currentMode === 'shading')) {
         tools.push('Fill');
       }
       return tools;
