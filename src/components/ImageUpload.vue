@@ -25,7 +25,9 @@ export default {
         return pixels / (rwuRange[1] - rwuRange[0]);
       },
       max_y: state => state.project.view.max_y,
+      min_y: state => state.project.view.min_y,
       min_x: state => state.project.view.min_x,
+      max_x: state => state.project.view.max_x,
     }),
     ...mapGetters({
       currentStory: 'application/currentStory',
@@ -44,7 +46,6 @@ export default {
           image.onload = () => {
             const rwuHeight = (image.height / that.pxPerRWU) / 4;
             const rwuWidth = (image.width / that.pxPerRWU) / 4;
-
             that.$store.dispatch('models/createImageForStory', {
               story_id: that.currentStory.id,
               src: image.src,
@@ -53,8 +54,8 @@ export default {
               // translate image dimensions into rwu
               height: rwuHeight,
               width: rwuWidth,
-              x: that.min_x + (rwuWidth / 2),
-              y: that.max_y - (rwuHeight / 2),
+              x: (that.min_x + that.max_x) / 2,
+              y: (that.min_y + that.max_y) / 2,
             });
             that.$refs.imageInput.value = '';
           };
