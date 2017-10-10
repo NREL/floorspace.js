@@ -381,10 +381,10 @@ export default {
       .editable-select-list {
         border-right: 1px solid $gray-darkest;
         height: calc(100% - 2rem);
-        width: 180px;
+        width: 200px;
 
         &.expanded {
-          width: calc(100% - 180px);
+          width: calc(100% - 200px);
         }
       }
     }
