@@ -14,9 +14,12 @@
         <button @click="addRow">+</button>
       </div>
       <div class="control-group">
-        <button @click="toggleCompact">
-          {{ compact ? '>>' : '<<' }}
-        </button>
+        <a @click="toggleCompact">
+          <DoubleArrows
+            class="button"
+            :transform="(compact ? '' : 'scale(-1, 1)') + 'translate(10,10)'"
+          />
+        </a>
       </div>
     </div>
     <input v-if="searchAvailable"
@@ -44,6 +47,7 @@
 import EditableTable from './EditableTable.vue';
 import LibrarySelect from './LibrarySelect.vue';
 import PrettySelect from './PrettySelect.vue';
+import DoubleArrows from './../assets/svg-icons/double_arrows.svg';
 
 export default {
   name: 'EditableSelectList',
@@ -79,6 +83,7 @@ export default {
     EditableTable,
     LibrarySelect,
     PrettySelect,
+    DoubleArrows,
   },
 }
 </script>
