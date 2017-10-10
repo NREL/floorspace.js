@@ -40,7 +40,7 @@ export default {
 
 .library-select {
   padding: 0 0 !important;
-  height: 100%;
+  height: calc(100% - 20px);
   overflow-y: scroll;
 
   > div {
