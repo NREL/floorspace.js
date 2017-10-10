@@ -66,6 +66,13 @@ export default {
     };
     this.$store.dispatch('models/createWindow', payload);
   },
+  raisePolygonOrImages() {
+    if (this.currentTool === 'Image') {
+      d3.select('#grid svg .images').raise();
+    } else {
+      d3.select('#grid svg .polygons').raise();
+    }
+  },
   placeDaylightingControl() {
     const
       gridCoords = d3.mouse(this.$refs.grid),
@@ -641,6 +648,7 @@ export default {
   draw() {
     this.drawPolygons();
     this.drawImages();
+    this.raisePolygonOrImages();
   },
   // ****************** SNAPPING TO EXISTING GEOMETRY ****************** //
   /*
