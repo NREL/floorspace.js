@@ -215,7 +215,6 @@ export default {
   name: 'toolbar',
   data() {
     return {
-      modeTab: 'floorplan',
       componentTypes: {
         daylighting_control_definitions: 'Daylighting Control Definitions',
         window_definitions: 'Window Definitions',
@@ -325,6 +324,10 @@ export default {
       get() { return this.$store.state.application.currentSelections.mode; },
       set(mode) { this.$store.dispatch('application/setCurrentMode', { mode }); },
     },
+    modeTab: {
+      get() { return this.$store.state.application.currentSelections.modeTab; },
+      set(mt) { this.$store.dispatch('application/setCurrentModeTab', { modeTab: mt }); },
+    },
     northAxis: {
       get() { return `${this.$store.state.project.config.north_axis}°`; },
       set(northAxis) { this.$store.dispatch('project/setNorthAxis', { north_axis: northAxis }); },
@@ -374,7 +377,9 @@ export default {
     tool(val) {
       if (this.availableTools.indexOf(val) === -1 && val !== 'Map') { this.tool = this.availableTools[0]; }
     },
-    currentMode() { this.tool = this.availableTools[0]; },
+    currentMode(val) {
+      this.tool = val === 'images' ? 'Image' : this.availableTools[0];
+    },
     latestCreatedCompId() {
       this.$store.dispatch('application/setCurrentComponentDefinitionId', { id: this.latestCreatedCompId });
     },

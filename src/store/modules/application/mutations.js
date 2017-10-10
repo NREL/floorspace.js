@@ -10,6 +10,9 @@ export default {
   setCurrentSpaceTypeId(state, payload) { state.currentSelections.space_type_id = payload.id; },
 
   setCurrentSnapMode(state, payload) { state.currentSelections.snapMode = payload.snapMode; },
+  setCurrentModeTab(state, payload) { state.currentSelections.modeTab = payload.modeTab; },
+  setCurrentSubselectionType(state, payload) { state.currentSelections.subselectionType = payload.subselectionType; },
+
   // editor rendering/drawing tool
   setCurrentTool(state, payload) { state.currentSelections.tool = payload.tool; },
   setCurrentMode(state, payload) { state.currentSelections.mode = payload.mode; },

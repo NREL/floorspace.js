@@ -42,7 +42,12 @@ export default {
     }
     context.commit('setCurrentSnapMode', { snapMode });
   },
-
+  setCurrentModeTab(context, { modeTab }) {
+    context.commit('setCurrentModeTab', { modeTab });
+  },
+  setCurrentSubselectionType(context, { subselectionType }) {
+    context.commit('setCurrentSubselectionType', { subselectionType });
+  },
   setCurrentTool(context, payload) {
     const { tool } = payload;
     if (context.state.tools.indexOf(tool) !== -1) {

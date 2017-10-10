@@ -24,6 +24,8 @@ export default {
       tool: 'Rectangle',
       mode: 'spaces',
       snapMode: 'grid-strict',
+      modeTab: 'floorplan',
+      subselectionType: 'spaces',
     },
     modes: ['spaces', 'shading', 'building_units', 'thermal_zones', 'space_types', 'images'],
     tools: ['Pan', 'Drag', 'Rectangle', 'Polygon', 'Eraser', 'Select', 'Map', 'Fill', 'Place Component', 'Image'], // 'Apply Property'

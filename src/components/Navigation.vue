@@ -21,9 +21,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             @toggleCompact="libraryExpanded = (libraryExpanded === 'stories' ? false : 'stories')"
           />
           <Library
-            :objectTypes="modes"
-            :mode="mode"
-            @changeMode="newMode => { mode = newMode; }"
+            :objectTypes="objectTypesForTab"
+            :mode="subselectionType"
+            @changeMode="newMode => { subselectionType = newMode; }"
             :searchAvailable="true"
             :compact="libraryExpanded !== 'subselection'"
             @toggleCompact="libraryExpanded = (libraryExpanded === 'subselection' ? false : 'subselection')"
@@ -67,7 +67,7 @@ export default {
     ...mapState({
       // available model types
       modes: state => state.application.modes,
-
+      modeTab: state => state.application.currentSelections.modeTab,
       tool: state => state.application.currentSelections.tool,
 
       // top level models
@@ -107,13 +107,26 @@ export default {
     shading() { return this.currentStory.shading; },
     images() { return this.currentStory.images; },
     objectTypesForTab() {
-      switch (this.modeT) {}
+      switch (this.modeTab) {
+        case 'floorplan':
+          return ['spaces', 'images'];
+        case 'shading':
+          return ['shading'];
+        case 'components':
+          return ['spaces'];
+        case 'assign':
+          return ['building_units', 'thermal_zones', 'space_types'];
+      }
     },
     // list items to display for current mode
     items() { return this[this.mode]; },
     mode: {
       get() { return this.$store.state.application.currentSelections.mode; },
       set(mode) { this.$store.dispatch('application/setCurrentMode', { mode }); },
+    },
+    subselectionType: {
+      get() { return this.$store.state.application.currentSelections.subselectionType; },
+      set(sst) { this.$store.dispatch('application/setCurrentSubselectionType', { subselectionType: sst }); },
     },
 
     currentThermalZone: {
@@ -348,6 +361,11 @@ export default {
     },
     libraryExpanded() {
       this.setWidthForOpenLibrary();
+    },
+    objectTypesForTab(val) {
+      if (!_.includes(val, this.subselectionType)){
+        this.subselectionType = val[0];
+      }
     },
   },
   components: {
