@@ -403,7 +403,7 @@ svg.icon, svg.button {
 
 #toolbar {
   background-color: $black;
-  z-index: 3;
+  z-index: 4;
 
   #top {
     height: 2.5rem;

@@ -88,25 +88,26 @@ export default {
 <style lang="scss" scoped>
 @import "./../scss/config";
   .editable-table {
-    background-color: #24292c;
+    background-color: $gray-medium;
   }
   thead {
     th {
-      border-bottom: 2px solid $gray-medium-light;
+      border-bottom: 2px solid $gray-medium-dark;
+      background-color: $gray-medium;
     }
     tr {
       height: 3rem;
       svg {
         height: 1rem;
         width: 1rem;
-        fill: $gray-medium-light;
+        fill: $gray-medium;
       }
     }
   }
   td {
     width: 11em;
     input {
-      background-color: rgba(0,0,0,0);
+      background-color: $gray-medium;
       border: none;
       color: $gray-lightest;
       padding-top: 10px;
@@ -114,6 +115,9 @@ export default {
       font-size: 1rem;
       height: 18px;
     }
+  }
+  tr {
+    border-bottom: 2px solid tomato;
   }
   tbody {
     overflow-y: scroll;

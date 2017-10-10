@@ -119,6 +119,7 @@ export default {
   .editable-select-list {
     max-height: 400px;
     overflow:scroll;
+    padding: 10px;
   }
 }
 </style>
