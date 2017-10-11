@@ -182,6 +182,11 @@ export default {
     },
 
   },
+  watch: {
+    compact() {
+      console.log('here in library, compact was toggled');
+    },
+  },
   components: {
     EditableSelectList,
   },

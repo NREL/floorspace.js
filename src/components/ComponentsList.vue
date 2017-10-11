@@ -6,7 +6,7 @@
       <div @click="visibleComponentType = visibleComponentType === compType ? null : compType">
         <ComponentIcon :which="compType" class="button" />
       </div>
-      <AssignComponentMenu
+      <ComponentMenu
         v-if="visibleComponentType === compType"
         :type="compType"
       />
@@ -14,7 +14,7 @@
   </div>
 </template>
 <script>
-import AssignComponentMenu from './AssignComponentMenu.vue';
+import ComponentMenu from './ComponentMenu.vue';
 import svgs from './svgs';
 
 export default {
@@ -25,7 +25,7 @@ export default {
     };
   },
   components: {
-    AssignComponentMenu,
+    ComponentMenu,
     ...svgs,
   },
 }

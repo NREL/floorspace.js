@@ -123,15 +123,17 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           </div>
         </div>
 
-        <div class='input-select'>
-            <label>View By</label>
-            <select v-model='currentMode'>
-                <option selected>--</option>
-                <option v-for="mode in ['building_units', 'thermal_zones', 'space_types']" :value="mode">{{ displayNameForMode(mode) }}</option>
-            </select>
-            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'>
-                <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
-            </svg>
+        <div class="render-by">
+          <div class='input-select'>
+              <label>View By</label>
+              <select v-model='currentMode'>
+                  <option selected>--</option>
+                  <option v-for="mode in ['building_units', 'thermal_zones', 'space_types']" :value="mode">{{ displayNameForMode(mode) }}</option>
+              </select>
+              <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'>
+                  <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
+              </svg>
+          </div>
         </div>
       </template>
 
@@ -169,14 +171,18 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       </template>
 
       <template v-if="modeTab==='assign'">
-        <div class='input-select'>
-            <label>View By</label>
-            <select v-model='currentMode'>
-                <option v-for="mode in ['building_units', 'thermal_zones', 'space_types']" :value="mode">{{ displayNameForMode(mode) }}</option>
-            </select>
-            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'>
-                <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
-            </svg>
+        <div id="instructions">Add connections &amp; Roof</div>
+        <AssignPropertiesList />
+        <div class="render-by">
+          <div class='input-select'>
+              <label>View By</label>
+              <select v-model='currentMode'>
+                  <option v-for="mode in ['building_units', 'thermal_zones', 'space_types']" :value="mode">{{ displayNameForMode(mode) }}</option>
+              </select>
+              <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'>
+                  <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
+              </svg>
+          </div>
         </div>
       </template>
 
@@ -206,6 +212,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 import { mapState } from 'vuex';
 import SaveAsModal from './Modals/SaveAsModal.vue';
 import ComponentsList from './ComponentsList.vue';
+import AssignPropertiesList from './AssignPropertiesList.vue';
 import applicationHelpers from './../store/modules/application/helpers';
 import svgs from './svgs';
 
@@ -387,6 +394,7 @@ export default {
   components: {
     'save-as-modal': SaveAsModal,
     ComponentsList,
+    AssignPropertiesList,
     ...svgs,
   },
 };
@@ -431,10 +439,15 @@ svg.icon, svg.button {
     }
   }
   #bottom {
-    &.components{
+    &.components, &.assign{
       #instructions {
         margin-right: 0;
       }
+    }
+    .render-by {
+      margin-left: auto;
+      margin-top: auto;
+      margin-bottom: auto;
     }
     background-color: $gray-medium-light;
     display: flex;

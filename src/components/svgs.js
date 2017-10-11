@@ -26,15 +26,35 @@ import ComponentsDaylighting from './../assets/svg-icons/components_daylighting.
 
 const ComponentIcon = {
   name: 'ComponentIcon',
+  props: ['which'],
   template: `
     <ComponentsWindow v-if="which === 'window_definitions'" class="button" />
     <ComponentsDaylighting v-else-if="which === 'daylighting_control_definitions'" class="button" />
   `,
-  props: ['which'],
   components: {
     ComponentsWindow,
     ComponentsDaylighting,
-  }
+  },
+};
+
+import AssignBldgModule from './../assets/svg-icons/assign_bldgmodule.svg';
+import AssignConstructions from './../assets/svg-icons/assign_constructions.svg';
+import AssignActivity from './../assets/svg-icons/assign_activity.svg';
+import AssignThermalZone from './../assets/svg-icons/assign_ThermalZone.svg';
+
+const AssignSpacePropIcon = {
+  name: 'AssignSpacePropIcon',
+  props: ['which'],
+  template: `
+    <AssignBldgModule v-if="which === 'building_units'" class="button" />
+    <AssignThermalZone v-else-if="which === 'thermal_zones'" class="button" />
+    <AssignActivity v-else-if="which === 'space_types'" class="button" />
+  `,
+  components: {
+    AssignBldgModule,
+    AssignThermalZone,
+    AssignActivity,
+  },
 };
 
 import QuickstartIconNewMapFloorplan from './../assets/svg-icons/quickstart_icon_new_map_floorplan.svg';
@@ -64,6 +84,7 @@ export default {
   'add-image': addImage,
 
   ComponentIcon,
+  AssignSpacePropIcon,
 
   QuickstartIconNewMapFloorplan,
   QuickstartIconNewFloorplan,
