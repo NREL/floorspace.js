@@ -32,7 +32,7 @@ export default {
       thermal_zone_id: null,
       space_type_id: null,
       construction_set_id: null,
-      pitched_roof_type_id: null,
+      pitched_roof_id: null,
       type: 'space',
     };
   },

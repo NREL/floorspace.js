@@ -74,7 +74,7 @@ export default function importFloorplan(context, payload) {
         construction_sets: payload.data.construction_sets,
         window_definitions: payload.data.window_definitions || [],
         daylighting_control_definitions: payload.data.daylighting_control_definitions || [],
-        pitched_roof_types: payload.data.pitched_roof_types || [],
+        pitched_roofs: payload.data.pitched_roofs || [],
       },
     },
     geometry,

@@ -58,7 +58,7 @@ export default {
             construction_sets: [],
             window_definitions: [],
             daylighting_control_definitions: [],
-            pitched_roof_types: [],
+            pitched_roofs: [],
         }
     },
     actions: actions,

@@ -350,16 +350,16 @@ const map = {
         },
       },
       {
-        name: 'pitched_roof_type_id',
+        name: 'pitched_roof_id',
         displayName: 'Pitched Roof',
         input_type: 'select',
         select_data(space, state) {
           return _.fromPairs(
-            state.models.library.pitched_roof_types
+            state.models.library.pitched_roofs
             .map(prt => [prt.name, prt.id]));
         },
         get(space, state) {
-          const prt = _.find(state.models.library.pitched_roof_types, { id: space.pitched_roof_type_id });
+          const prt = _.find(state.models.library.pitched_roofs, { id: space.pitched_roof_id });
           return prt ? prt.name : null;
         },
       },
@@ -457,8 +457,8 @@ const map = {
       },
     ],
   },
-  pitched_roof_types: {
-    displayName: 'Pitched Roof Type',
+  pitched_roofs: {
+    displayName: 'Pitched Roofs',
     columns: [
       {
         name: 'id',
@@ -477,10 +477,10 @@ const map = {
         displayName: 'Type',
         input_type: 'select',
         select_data() {
-          const options = ['gable', 'hip', 'shed'];
+          const options = ['Gable', 'Hip', 'Shed'];
           return _.zipObject(options, options);
         },
-        validator: validators.oneOf('gable', 'hip', 'shed'),
+        validator: validators.oneOf('Gable', 'Hip', 'Shed'),
       },
       {
         name: 'pitch',
