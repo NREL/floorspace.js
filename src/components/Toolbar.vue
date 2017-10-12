@@ -299,6 +299,7 @@ export default {
     },
     ...mapState({
       currentMode: state => state.application.currentSelections.mode,
+      currentSubselectionType: state => state.application.currentSelections.subselectionType,
       mapEnabled: state => state.project.map.enabled,
       timetravelInitialized: state => state.timetravelInitialized,
       showImportExport: state => state.project.showImportExport,
@@ -384,8 +385,10 @@ export default {
     tool(val) {
       if (this.availableTools.indexOf(val) === -1 && val !== 'Map') { this.tool = this.availableTools[0]; }
     },
-    currentMode(val) {
-      this.tool = val === 'images' ? 'Image' : this.availableTools[0];
+    currentSubselectionType(val) {
+      this.tool = val === 'images' ? 'Image' :
+                  _.includes(this.availableTools, this.tool) ? this.tool :
+                  this.availableTools[0];
     },
     latestCreatedCompId() {
       this.$store.dispatch('application/setCurrentComponentDefinitionId', { id: this.latestCreatedCompId });
