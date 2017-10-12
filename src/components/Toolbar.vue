@@ -159,27 +159,23 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       <template v-if="modeTab === 'components'">
         <div id="instructions">Add fenestration, daylighting, and PV</div>
         <ComponentsList />
-        <div id="drawing-tools" class="tools-list">
+        <!-- No need to show tool options if there's only the one choice. -->
+        <!-- <div id="drawing-tools" class="tools-list">
           <div @click="tool = 'Place Component'" :class="{ active: tool === 'Place Component' }">
             <tab-components-svg class="button"></tab-components-svg>
           </div>
-        </div>
-        <!-- <span v-for="type in ['window_definitions', 'daylighting_control_definitions']"  >
-          {{ type }}
-          <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'>
-              <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
-          </svg>
-        </span> -->
+        </div> -->
       </template>
 
       <template v-if="modeTab==='assign'">
         <div id="instructions">Add connections &amp; Roof</div>
         <AssignPropertiesList />
-        <div id="drawing-tools" class="tools-list">
+        <!-- No need to show tool options if there's only the one choice. -->
+        <!-- <div id="drawing-tools" class="tools-list">
           <div @click="tool = 'Apply Property'" :class="{ active: tool === 'Apply Property' }">
             <tab-assign-svg class="button"></tab-assign-svg>
           </div>
-        </div>
+        </div> -->
         <div class="render-by">
           <div class='input-select'>
               <label>View By</label>

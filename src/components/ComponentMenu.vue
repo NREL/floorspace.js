@@ -53,13 +53,13 @@ export default {
     createComponentDefinition() {
       this.$store.dispatch('models/createObjectWithType', { type: this.type })
     },
-    deleteComponentDef(componentId) {
+    deleteComponentDef(component) {
       switch (this.type) {
         case 'window_definitions':
-          this.$store.dispatch('models/destroyWindowDef', { object: { id: componentId } });
+          this.$store.dispatch('models/destroyWindowDef', { object: component });
           break;
         case 'daylighting_control_definitions':
-          this.$store.dispatch('models/destroyDaylightingControlDef', { object: { id: componentId } });
+          this.$store.dispatch('models/destroyDaylightingControlDef', { object: component });
           break;
         default:
           throw new Error(`unknown component type '${this.type}'`);
