@@ -258,7 +258,7 @@ export default {
             points,
             labelPosition: this.polygonLabelPosition(points),
             windows: this.windowsOnFace(face),
-            daylighting_controls: model.daylighting_controls
+            daylighting_controls: (model.daylighting_controls || [])
               .map(dc => geometryHelpers.vertexForId(dc.vertex_id, geometry)),
             ...extraPolygonAttrs,
           };
