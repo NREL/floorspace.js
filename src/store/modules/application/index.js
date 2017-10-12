@@ -15,6 +15,7 @@ export default {
 
       component_id: null,
       component_definition_id: null,
+      component_instance_id: null,
 
       building_unit_id: null,
       thermal_zone_id: null,

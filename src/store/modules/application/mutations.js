@@ -5,6 +5,7 @@ export default {
 
   setCurrentComponentId(state, payload) { state.currentSelections.component_id = payload.id; },
   setCurrentComponentDefinitionId(state, payload) { state.currentSelections.component_definition_id = payload.id; },
+  setCurrentComponentInstanceId(state, payload) { state.currentSelections.component_instance_id = payload.id; },
 
   setCurrentBuildingUnitId(state, payload) { state.currentSelections.building_unit_id = payload.id; },
   setCurrentThermalZoneId(state, payload) { state.currentSelections.thermal_zone_id = payload.id; },

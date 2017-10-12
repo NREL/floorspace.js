@@ -1,4 +1,6 @@
+import _ from 'lodash';
 import geometryHelpers from '../geometry/helpers';
+import { componentInstanceById } from './helpers';
 
 export default {
   // full story object for the currentSelections story_id
@@ -42,6 +44,12 @@ export default {
       type = 'daylighting_control_definitions';
     }
     return { type, definition };
+  },
+
+  currentComponentInstance(state, getters) {
+    const compDefId = state.currentSelections.component_instance_id;
+    if (!compDefId) { return null; }
+    return componentInstanceById(getters['currentStory'], compDefId);
   },
 
   currentBuildingUnit(state, getters, rootState) { return rootState.models.library.building_units.find(i => i.id === state.currentSelections.building_unit_id); },

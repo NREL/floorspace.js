@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import map from './appconfig';
 
 const helpers = {
@@ -9,3 +10,10 @@ const helpers = {
   config: map,
 };
 export default helpers;
+
+export function componentInstanceById(currStory, compInstId) {
+  return (
+    _.find(currStory.windows, { id: compInstId }) ||
+    _.find(_.flatMap(currStory.spaces, s => s.daylighting_controls), { id: compInstId }) ||
+    null);
+}

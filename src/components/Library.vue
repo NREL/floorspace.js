@@ -65,6 +65,10 @@ export default {
       get() { return this.$store.getters['application/currentSpaceType']; },
       set(item) { this.$store.dispatch('application/setCurrentSpaceTypeId', { id: item.id }); },
     },
+    currentComponentInstance: {
+      get() { return this.$store.getters['application/currentComponentInstance']; },
+      set(ci) { this.$store.dispatch('application/setCurrentComponentInstanceId', { id: item.id }); },
+    },
     /*
     * returns the currently selected object in the library
     * when set, dispatches an action to update the application's currentSelections in the store

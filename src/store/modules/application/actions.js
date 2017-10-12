@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { componentInstanceById } from './helpers';
 
 export default {
   setCurrentStoryId(context, payload) {
@@ -36,6 +37,16 @@ export default {
       context.commit('setCurrentComponentDefinitionId', { id });
     }
   },
+
+  setCurrentComponentInstanceId(context, payload) {
+    const { id } = payload;
+    if (!componentInstanceById(context.getters.currentStory, id)) {
+      console.error('unable to find an instance with that id on the current story');
+    } else {
+      context.commit('setCurrentComponentInstanceId', payload);
+    }
+  },
+
   setCurrentSnapMode(context, { snapMode }) {
     if (!_.includes(['grid-strict', 'grid-verts-edges'], snapMode)) {
       throw new Error(`Unknown grid mode ${snapMode}`);
