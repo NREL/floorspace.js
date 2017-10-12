@@ -104,11 +104,11 @@ export default {
       illuminance_setpoint: opts.illuminance_setpoint,
     };
   },
-  PitchedRoofType(opts = {}) {
+  PitchedRoof(opts = {}) {
     return {
       id: idFactory.generate(),
       name: opts.name,
-      type: opts.type || 'gable',
+      pitched_roof_type: opts.type || 'gable',
       pitch: opts.pitch,
       shed_direction: opts.shed_direction,
       color: opts.color,

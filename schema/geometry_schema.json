@@ -55,10 +55,10 @@
 				"$ref": "#/definitions/DaylightingControlDefinition"
 			}
 		},
-		"pitched_roof_types": {
+		"pitched_roofs": {
 			"type": "array",
 			"items": {
-				"$ref": "#/definitions/PitchedRoofType"
+				"$ref": "#/definitions/PitchedRoof"
 			}
 		}
 	},
@@ -421,7 +421,7 @@
 						"null"
 					]
 				},
-				"pitched_roof_type_id": {
+				"pitched_roof_id": {
 					"type": [
 						"string",
 						"null"
@@ -636,7 +636,7 @@
 				"name"
 			]
 		},
-		"PitchedRoofType": {
+		"PitchedRoof": {
 			"properties": {
 				"id": {
 					"type": "string"
@@ -647,12 +647,12 @@
 						"null"
 					]
 				},
-				"roof_type": {
+				"pitched_roof_type": {
 					"type": "string",
 					"enum": [
-						"gable",
-						"hip",
-						"shed"
+						"Gable",
+						"Hip",
+						"Shed"
 					]
 				},
 				"pitch": {

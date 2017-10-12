@@ -502,7 +502,7 @@ const map = {
         input_type: 'color',
       },
     ],
-    init: factory.PitchedRoofType,
+    init: factory.PitchedRoof,
   },
 };
 
