@@ -115,7 +115,7 @@ export default {
         case 'components':
           return ['spaces'];
         case 'assign':
-          return ['building_units', 'thermal_zones', 'space_types'];
+          return ['spaces'];
       }
     },
     // list items to display for current mode

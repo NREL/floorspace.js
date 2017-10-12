@@ -458,13 +458,12 @@ export function drawImage() {
         ig
           .on('click', null);
       } else {
-        ig.on('click', function(d) {
+        ig.on('click', (d) => {
           d3.event.stopPropagation();
           selectImage(d);
         });
       }
       if (!d.current) {
-        console.log('removing events from', d);
         ig.select('.moveable-wrapper, .rotation-handle, .corner')
           .on('.drag', null);
       } else {
