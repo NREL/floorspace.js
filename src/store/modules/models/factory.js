@@ -108,7 +108,7 @@ export default {
     return {
       id: idFactory.generate(),
       name: opts.name,
-      pitched_roof_type: opts.type || 'gable',
+      pitched_roof_type: opts.type || 'Gable',
       pitch: opts.pitch,
       shed_direction: opts.shed_direction,
       color: opts.color,
