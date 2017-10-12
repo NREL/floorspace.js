@@ -387,6 +387,7 @@ export default {
     },
     currentSubselectionType(val) {
       this.tool = val === 'images' ? 'Image' :
+                  val === 'spaces' && this.tool === 'Image' ? this.availableTools[0] :
                   _.includes(this.availableTools, this.tool) ? this.tool :
                   this.availableTools[0];
     },
