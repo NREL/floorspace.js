@@ -141,6 +141,12 @@ export default {
           this.$store.dispatch('models/createObjectWithType', { type: this.mode });
           break;
       }
+      this.selectLatest();
+    },
+    selectLatest() {
+      const newestRow = _.maxBy(this.rows, r => +r.id);
+      if (!newestRow) { return; }
+      this.selectedObject = newestRow;
     },
 
     /*
