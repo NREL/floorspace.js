@@ -458,7 +458,7 @@ const map = {
     ],
   },
   pitched_roofs: {
-    displayName: 'Pitched Roofs',
+    displayName: 'Pitched Roof',
     columns: [
       {
         name: 'id',
