@@ -215,7 +215,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import SaveAsModal from './Modals/SaveAsModal.vue';
 import ComponentsList from './ComponentsList.vue';
 import AssignPropertiesList from './AssignPropertiesList.vue';
@@ -303,8 +303,10 @@ export default {
     currentComponentDefinition() {
       return this.currentComponent.definition;
     },
+    ...mapGetters({
+      currentSpaceProperty: 'application/currentSpaceProperty',
+    }),
     ...mapState({
-      currentMode: state => state.application.currentSelections.mode,
       currentSubselectionType: state => state.application.currentSelections.subselectionType,
       mapEnabled: state => state.project.map.enabled,
       timetravelInitialized: state => state.timetravelInitialized,
@@ -388,6 +390,11 @@ export default {
     },
   },
   watch: {
+    currentSpaceProperty() {
+      if (this.currentSpaceProperty) {
+        this.currentMode = this.currentSpaceProperty.type;
+      }
+    },
     tool(val) {
       if (this.availableTools.indexOf(val) === -1 && val !== 'Map') { this.tool = this.availableTools[0]; }
     },
