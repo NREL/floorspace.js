@@ -97,6 +97,9 @@
       stroke-width: 3;
       stroke: black;
     }
+    .window.selected {
+      stroke: green;
+    }
     #perp-linecap rect {
       fill: black;
       stroke: none;
@@ -117,6 +120,11 @@
       .quadrants {
         fill: #ff7979;
         stroke-width: 0;
+      }
+    }
+    .daylighting-control.selected {
+      path {
+        fill: green;
       }
     }
     .highlight {

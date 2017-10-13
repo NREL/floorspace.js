@@ -94,6 +94,7 @@ export default {
     ...mapState({
       currentMode: state => state.application.currentSelections.mode,
       currentTool: state => state.application.currentSelections.tool,
+      currentComponentInstanceId: state => state.application.currentSelections.component_instance_id,
       snapMode: state => state.application.currentSelections.snapMode,
       previousStoryVisible: state => state.project.previous_story.visible,
       gridVisible: state => state.project.grid.visible,
@@ -240,7 +241,10 @@ export default {
       return _.flatMap(
         face.edges,
         e => _.filter(this.currentStory.windows , { edge_id: e.id })
-              .map(w => this.denormalizeWindow(e, w)));
+              .map(w => ({
+                ...this.denormalizeWindow(e, w),
+                selected: w.id === this.currentComponentInstanceId
+              })));
     },
     polygonsFromGeometry(geometry, extraPolygonAttrs = {}) {
       const
@@ -259,7 +263,10 @@ export default {
             labelPosition: this.polygonLabelPosition(points),
             windows: this.windowsOnFace(face),
             daylighting_controls: (model.daylighting_controls || [])
-              .map(dc => geometryHelpers.vertexForId(dc.vertex_id, geometry)),
+              .map(dc => ({
+                ...geometryHelpers.vertexForId(dc.vertex_id, geometry),
+                selected: dc.id === this.currentComponentInstanceId,
+              })),
             ...extraPolygonAttrs,
           };
         if (!points.length) {

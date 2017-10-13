@@ -14,6 +14,7 @@ export function drawWindow() {
     windowE.append('line');
     windowE.append('circle');
     const windw = selection.merge(windowE);
+    windw.classed('selected', d => d.selected);
     windw.select('line')
       .attr('x1', d => xScale(d.start.x))
       .attr('y1', d => yScale(d.start.y))
@@ -196,6 +197,7 @@ export function drawDaylightingControl() {
     dcE.append('circle').attr('class', 'bg');
     dcE.append('path').attr('class', 'quadrants');
     const dc = selection.merge(dcE);
+    dc.classed('selected', d => d.selected);
     dc.select('circle.bg')
       .attr('cx', d => xScale(d.x))
       .attr('cy', d => yScale(d.y))
