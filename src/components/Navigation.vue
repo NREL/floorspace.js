@@ -113,7 +113,7 @@ export default {
         case 'shading':
           return ['shading'];
         case 'components':
-          return ['spaces'];
+          return ['windows', 'daylighting_controls'];
         case 'assign':
           return ['spaces'];
       }

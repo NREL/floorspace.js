@@ -11,7 +11,7 @@
           :value="selectedObjectType"
         />
         <span v-else>{{ objectTypes[0].display }}</span>
-        <a @click="addRow">
+        <a @click="addRow" v-if="addRow">
           <AddNew class="button"/>
         </a>
       </div>

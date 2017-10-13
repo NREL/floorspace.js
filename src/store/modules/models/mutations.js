@@ -69,19 +69,20 @@ export default {
         Object.assign(object, payload);
         delete object.object;
     },
-  createWindow(state, { story_id, edge_id, window_defn_id, alpha }) {
+  createWindow(state, { story_id, edge_id, window_defn_id, alpha, id }) {
     const story = _.find(state.stories, { id: story_id });
     story.windows.push({
       window_defn_id,
       edge_id,
       alpha,
+      id,
     });
   },
   dropWindows(state, { story_id }) {
     const story = _.find(state.stories, { id: story_id });
     story.windows = [];
   },
-  createDaylightingControl(state, { story_id, face_id, daylighting_control_defn_id, vertex_id }) {
+  createDaylightingControl(state, { story_id, face_id, daylighting_control_defn_id, vertex_id, id }) {
     const
       story = _.find(state.stories, { id: story_id }),
       space = _.find(story.spaces, { face_id });
@@ -89,6 +90,7 @@ export default {
     space.daylighting_controls.push({
       daylighting_control_defn_id,
       vertex_id,
+      id,
     });
   },
   dropDaylightingControls(state, { story_id }) {
@@ -108,5 +110,33 @@ export default {
         space.daylighting_controls = _.reject(space.daylighting_controls, { daylighting_control_defn_id: id });
       });
     });
+  },
+  destroyDaylightingControl(state, { story_id, object: { id } }) {
+    const story = _.find(state.stories, { id: story_id });
+    story.spaces.forEach((space) => {
+      space.daylighting_controls = _.reject(space.daylighting_controls, { id });
+    });
+  },
+  modifyDaylightingControl(state, { story_id, id, key, value }) {
+    const story = _.find(state.stories, { id: story_id });
+    story.spaces.some((space) => {
+      const dc = _.find(space.daylighting_controls, { id });
+      if (dc) {
+        dc[key] = value;
+        return true;
+      }
+      // not on this space, maybe another?
+      return false;
+    });
+  },
+  destroyWindow(state, { story_id, object: { id } }) {
+    const story = _.find(state.stories, { id: story_id });
+    story.windows = _.reject(story.windows, { id });
+  },
+  modifyWindow(state, { story_id, id, key, value }) {
+    const
+      story = _.find(state.stories, { id: story_id }),
+      windew = _.find(story.windows, { id });
+    windew[key] = value;
   },
 }

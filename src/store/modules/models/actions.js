@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import libconfig from './libconfig';
 import factory from './factory';
+import idFactory from './../../utilities/generateId';
 import geometryFactory from '../geometry/factory';
 import helpers from './helpers';
 import geometryHelpers from '../geometry/helpers';
@@ -235,7 +236,7 @@ export default {
     } else if (alpha < 0 || alpha > 1) {
       throw new Error('Alpha must be between 0 and 1');
     }
-    context.commit('createWindow', payload);
+    context.commit('createWindow', { ...payload, id: idFactory.generate() });
   },
 
   createDaylightingControl(context, payload) {
@@ -259,9 +260,20 @@ export default {
       throw new Error('Unable to find or create vertex');
     }
     context.commit('geometry/ensureVertsExist', { geometry_id: geometry.id, vertices: [vertex] }, { root: true });
-    context.commit('createDaylightingControl', { ...payload, vertex_id: vertex.id });
+    context.commit('createDaylightingControl', { ...payload, vertex_id: vertex.id, id: idFactory.generate() });
   },
-
+  destroyDaylightingControl({ commit }, payload) {
+    commit('destroyDaylightingControl', payload);
+  },
+  destroyWindow({ commit }, payload) {
+    commit('destroyWindow', payload);
+  },
+  modifyDaylightingControl({ commit }, payload) {
+    commit('modifyDaylightingControl', payload);
+  },
+  modifyWindow({ commit }, payload) {
+    commit('modifyWindow', payload);
+  },
   destroyAllComponents({ state, rootState, commit }, { story_id }) {
     commit('dropDaylightingControls', { story_id });
     commit('dropWindows', { story_id });

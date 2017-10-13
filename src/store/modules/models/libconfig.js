@@ -443,6 +443,34 @@ const map = {
       },
     ],
   },
+  windows: {
+    displayName: 'Window',
+    columns: [
+      {
+        name: 'id',
+        private: true,
+      },
+      {
+        name: 'name',
+        displayName: 'Name',
+        input_type: 'text',
+      },
+    ],
+  },
+  daylighting_controls: {
+    displayName: 'Daylighting Control',
+    columns: [
+      {
+        name: 'id',
+        private: true,
+      },
+      {
+        name: 'name',
+        displayName: 'Name',
+        input_type: 'text',
+      },
+    ],
+  },
 };
 
 Object.keys(map).forEach((k) => {

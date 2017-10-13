@@ -14,7 +14,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
     :columns="columns"
     :selectedRowId="selectedObject && selectedObject.id"
     :selectRow="row => { selectedObject = row; }"
-    :addRow="createObject"
+    :addRow="!componentInstanceMode && createObject"
     :editRow="modifyObject"
     :destroyRow="destroyObject"
     :searchAvailable="searchAvailable"
@@ -67,7 +67,7 @@ export default {
     },
     currentComponentInstance: {
       get() { return this.$store.getters['application/currentComponentInstance']; },
-      set(ci) { this.$store.dispatch('application/setCurrentComponentInstanceId', { id: item.id }); },
+      set(ci) { this.$store.dispatch('application/setCurrentComponentInstanceId', { id: ci.id }); },
     },
     /*
     * returns the currently selected object in the library
@@ -87,6 +87,7 @@ export default {
         this.mode === 'building_units' ? 'currentBuildingUnit' :
         this.mode === 'thermal_zones' ? 'currentThermalZone' :
         this.mode === 'space_types' ? 'currentSpaceType' :
+        _.includes(['windows', 'daylighting_controls'], this.mode) ? 'currentComponentInstance' :
         'currentSubSelection');
     },
     ...mapState({
@@ -95,11 +96,18 @@ export default {
     spaces() { return this.currentStory.spaces; },
     shading() { return this.currentStory.shading; },
     images() { return this.currentStory.images; },
+    windows() { return this.currentStory.windows; },
+    daylighting_controls() {
+      return _.flatMap(this.currentStory.spaces, s => s.daylighting_controls);
+    },
     rows() {
       return _.includes(
-          ['stories', 'spaces', 'shading', 'images'],
+          ['stories', 'spaces', 'shading', 'images', 'windows', 'daylighting_controls'],
           this.mode,
       ) ? this[this.mode] : this.$store.state.models.library[this.mode];
+    },
+    componentInstanceMode() {
+      return _.includes(['windows', 'daylighting_controls'], this.mode);
     },
   },
   watch: {
@@ -117,10 +125,22 @@ export default {
       this.$emit('changeMode', newMode);
     },
     modifyObject(rowId, colName, value) {
+      if (this.componentInstanceMode) {
+        return this.modifyComponentInstance(rowId, colName, value);
+      }
       const row = _.find(this.rows, { id: rowId });
       const result = helpers.setValueForKey(row, this.$store, this.mode, colName, value);
       if (!result.success) {
         window.eventBus.$emit('error', result.error);
+      }
+    },
+    modifyComponentInstance(id, key, value) {
+      if (this.mode === 'windows') {
+        this.$store.dispatch('models/modifyWindow', { id, key, value, story_id: this.currentStory.id });
+      } else if (this.mode === 'daylighting_controls') {
+        this.$store.dispatch('models/modifyDaylightingControl', { id, key, value, story_id: this.currentStory.id });
+      } else {
+        throw new Error(`unrecognized component mode "${this.mode}"`);
       }
     },
     /*
@@ -140,6 +160,10 @@ export default {
           break;
         case 'images':
           window.eventBus.$emit('uploadImage');
+          break;
+        case 'windows':
+        case 'daylighting_controls':
+          window.eventBus.$emit('error', 'Create components by clicking where you would like it to be');
           break;
         default:
           this.$store.dispatch('models/createObjectWithType', { type: this.mode });
@@ -184,6 +208,12 @@ export default {
           break;
         case 'daylighting_control_definitions':
           this.$store.dispatch('models/destroyDaylightingControlDef', { object });
+          break;
+        case 'windows':
+          this.$store.dispatch('models/destroyWindow', { story_id: this.currentStory.id, object });
+          break;
+        case 'daylighting_controls':
+          this.$store.dispatch('models/destroyDaylightingControl', { story_id: this.currentStory.id, object });
           break;
         default:
           this.$store.dispatch('models/destroyObject', { object });
