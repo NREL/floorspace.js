@@ -58,6 +58,9 @@ export default {
     if (this.currentTool === 'Image') {
       this.deselectImages();
     }
+    if (this.currentTool === 'Apply Property') {
+      this.assignProperty();
+    }
   },
   deselectImages() {
     this.$store.dispatch('application/setCurrentSubSelectionId', this.currentStory.spaces[0]);

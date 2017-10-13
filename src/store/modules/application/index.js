@@ -17,9 +17,7 @@ export default {
       component_definition_id: null,
       component_instance_id: null,
 
-      building_unit_id: null,
-      thermal_zone_id: null,
-      space_type_id: null,
+      space_property_id: null,
 
       // current application mode and tool
       tool: 'Rectangle',

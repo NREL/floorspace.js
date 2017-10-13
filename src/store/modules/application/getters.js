@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import geometryHelpers from '../geometry/helpers';
-import { componentInstanceById } from './helpers';
+import { componentInstanceById, spacePropertyById } from './helpers';
 
 export default {
   // full story object for the currentSelections story_id
@@ -52,9 +52,12 @@ export default {
     return componentInstanceById(getters['currentStory'], compDefId);
   },
 
-  currentBuildingUnit(state, getters, rootState) { return rootState.models.library.building_units.find(i => i.id === state.currentSelections.building_unit_id); },
-  currentThermalZone(state, getters, rootState) { return rootState.models.library.thermal_zones.find(i => i.id === state.currentSelections.thermal_zone_id); },
-  currentSpaceType(state, getters, rootState) { return rootState.models.library.space_types.find(i => i.id === state.currentSelections.space_type_id); },
+  currentSpaceProperty(state, getters, rootState) {
+    const
+      spacePropertyId = state.currentSelections.space_property_id,
+      library = rootState.models.library;
+    return spacePropertyById(library, spacePropertyId);
+  },
 
   // geometry for the story being edited
   currentStoryGeometry(state, getters, rootState) {

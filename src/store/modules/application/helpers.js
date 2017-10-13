@@ -20,3 +20,17 @@ export function componentInstanceById(currStory, compInstId) {
 
   return null;
 }
+
+export function spacePropertyById(library, spacePropId) {
+  let type, prop;
+  if ((prop = _.find(library.space_types, { id: spacePropId }))) {
+    type = 'space_types';
+  } else if ((prop = _.find(library.building_units, { id: spacePropId }))) {
+    type = 'building_units';
+  } else if ((prop = _.find(library.thermal_zones, { id: spacePropId }))) {
+    type = 'thermal_zones';
+  } else {
+    return null;
+  }
+  return { ...prop, type };
+}

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { componentInstanceById } from './helpers';
+import { componentInstanceById, spacePropertyById } from './helpers';
 
 export default {
   setCurrentStoryId(context, payload) {
@@ -73,24 +73,12 @@ export default {
     }
   },
 
-  setCurrentBuildingUnitId(context, payload) {
+  setCurrentSpacePropertyId(context, payload) {
     const { id } = payload;
-    if (context.rootState.models.library.building_units.map(m => m.id).indexOf(id) !== -1) {
-      context.commit('setCurrentBuildingUnitId', { id });
-    }
-  },
-
-  setCurrentThermalZoneId(context, payload) {
-    const { id } = payload;
-    if (context.rootState.models.library.thermal_zones.map(m => m.id).indexOf(id) !== -1) {
-      context.commit('setCurrentThermalZoneId', { id });
-    }
-  },
-
-  setCurrentSpaceTypeId(context, payload) {
-    const { id } = payload;
-    if (context.rootState.models.library.space_types.map(m => m.id).indexOf(id) !== -1) {
-      context.commit('setCurrentSpaceTypeId', { id });
+    if (spacePropertyById(context.rootState.models.library, id)) {
+      context.commit('setCurrentSpacePropertyId', { id });
+    } else {
+      console.error(`unable to find space property with id: ${id}`);
     }
   },
 

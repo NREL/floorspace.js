@@ -4,7 +4,7 @@
         :key="spaceProp"
         :class="{
           active: visibleSpaceProp === spaceProp,
-          selected: selectedSpaceProp === spaceProp
+          selected: currentSpaceProperty && currentSpaceProperty.type === spaceProp
         }"
     >
       <div @click="visibleSpaceProp = visibleSpaceProp === spaceProp ? null : spaceProp">
@@ -32,21 +32,13 @@ export default {
   data() {
     return {
       visibleSpaceProp: false,
-      selectedSpaceProp: null,
       expanded: {},
     };
   },
   computed: {
     ...mapGetters({
-      currentBuildingUnit: 'application/currentBuildingUnit',
-      currentThermalZone: 'application/currentThermalZone',
-      currentSpaceType: 'application/currentSpaceType',
+      currentSpaceProperty: 'application/currentSpaceProperty',
     }),
-  },
-  watch: {
-    currentBuildingUnit(val) { if (val) this.selectedSpaceProp = 'building_units'; },
-    currentThermalZone(val) { if (val) this.selectedSpaceProp = 'thermal_zones'; },
-    currentSpaceType(val) { if (val) this.selectedSpaceProp = 'space_types'; },
   },
   methods: {
     toggleCompact(spaceProp) {

@@ -53,17 +53,9 @@ export default {
       get() { return this.$store.getters['application/currentSubSelection']; },
       set(item) { this.$store.dispatch('application/setCurrentSubSelectionId', { id: item.id }); },
     },
-    currentThermalZone: {
-      get() { return this.$store.getters['application/currentThermalZone']; },
-      set(item) { this.$store.dispatch('application/setCurrentThermalZoneId', { id: item.id }); },
-    },
-    currentBuildingUnit: {
-      get() { return this.$store.getters['application/currentBuildingUnit']; },
-      set(item) { this.$store.dispatch('application/setCurrentBuildingUnitId', { id: item.id }); },
-    },
-    currentSpaceType: {
-      get() { return this.$store.getters['application/currentSpaceType']; },
-      set(item) { this.$store.dispatch('application/setCurrentSpaceTypeId', { id: item.id }); },
+    currentSpaceProperty: {
+      get() { return this.$store.getters['application/currentSpaceProperty']; },
+      set(item) { this.$store.dispatch('application/setCurrentSpacePropertyId', { id: item.id }); },
     },
     currentComponentInstance: {
       get() { return this.$store.getters['application/currentComponentInstance']; },
@@ -84,9 +76,7 @@ export default {
     keyForCurrentMode() {
       return (
         this.mode === 'stories' ? 'currentStory' :
-        this.mode === 'building_units' ? 'currentBuildingUnit' :
-        this.mode === 'thermal_zones' ? 'currentThermalZone' :
-        this.mode === 'space_types' ? 'currentSpaceType' :
+        _.includes(['building_units', 'thermal_zones', 'space_types'], this.mode) ? 'currentSpaceProperty' :
         _.includes(['windows', 'daylighting_controls'], this.mode) ? 'currentComponentInstance' :
         'currentSubSelection');
     },
