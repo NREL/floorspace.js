@@ -110,6 +110,14 @@ export default {
       currentComponent: 'application/currentComponent',
       currentSpaceProperty: 'application/currentSpaceProperty',
     }),
+    spacePropertyKey() {
+      switch (this.currentSpaceProperty.type) {
+        case 'building_units': return 'building_unit_id';
+        case 'thermal_zones': return 'thermal_zone_id';
+        case 'space_types': return 'space_type_id';
+        default: throw new Error(`unrecognized space property type ${this.currentSpaceProperty.type}`);
+      }
+    },
     currentImage: {
       get() { return this.$store.getters['application/currentImage']; },
       set(item) { this.$store.dispatch('application/setCurrentSubSelectionId', { id: item.id }); },

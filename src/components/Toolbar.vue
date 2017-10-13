@@ -391,7 +391,11 @@ export default {
   },
   watch: {
     modeTab() {
-      this.currentMode = 'spaces';
+      if (this.modeTab === 'assign' && this.currentSpaceProperty) {
+        this.currentMode = this.currentSpaceProperty.type;
+      } else {
+        this.currentMode = 'spaces';
+      }
     },
     currentSpaceProperty() {
       if (this.currentSpaceProperty) {

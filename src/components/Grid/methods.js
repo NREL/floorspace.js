@@ -68,11 +68,15 @@ export default {
       gridCoords = d3.mouse(this.$refs.grid),
       gridPoint = { x: gridCoords[0], y: gridCoords[1] },
       rwuPoint = this.gridPointToRWU(gridPoint),
-      space = this.currentStory.spaces.some((sp) => {
+      space = this.currentStory.spaces.find((sp) => {
         const face = _.find(this.denormalizedGeometry.faces, { id: sp.face_id });
         return geometryHelpers.pointInFace(rwuPoint, face.vertices);
       });
     if (!space) { return; }
+    this.$store.dispatch('models/updateSpaceWithData', {
+      space,
+      [this.spacePropertyKey]: this.currentSpaceProperty.id,
+    });
   },
   deselectImages() {
     this.$store.dispatch('application/setCurrentSubSelectionId', this.currentStory.spaces[0]);
