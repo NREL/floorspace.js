@@ -160,11 +160,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <div id="instructions">Add fenestration, daylighting, and PV</div>
         <ComponentsList />
         <!-- No need to show tool options if there's only the one choice. -->
-        <!-- <div id="drawing-tools" class="tools-list">
+        <div id="drawing-tools" class="tools-list">
           <div @click="tool = 'Place Component'" :class="{ active: tool === 'Place Component' }">
             <tab-components-svg class="button"></tab-components-svg>
           </div>
-        </div> -->
+          <div @click="tool = 'Remove Component'" :class="{ active: tool === 'Remove Component' }">
+            <tool-erase-svg class="button"></tool-erase-svg>
+          </div>
+        </div>
       </template>
 
       <template v-if="modeTab==='assign'">
@@ -318,7 +321,7 @@ export default {
           tools = ['Rectangle', 'Polygon', 'Eraser', 'Select'];
           break;
         case 'components':
-          tools = ['Place Component'];
+          tools = ['Place Component', 'Remove Component'];
           break;
         case 'assign':
           tools = ['Apply Property'];

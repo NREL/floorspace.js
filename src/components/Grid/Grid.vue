@@ -180,6 +180,29 @@ export default {
       const currentStoryPolygons = this.polygonsFromGeometry(this.currentStoryGeometry);
       return this.previousStoryPolygons ? this.previousStoryPolygons.concat(currentStoryPolygons) : currentStoryPolygons;
     },
+    windowCenterLocs() {
+      return this.currentStory.windows
+        .map(w => ({ w, e: _.find(this.denormalizedGeometry.edges, { id: w.edge_id }) }))
+        .map(({ w, e }) => ({
+          id: w.id,
+          type: 'window',
+          ...windowLocation(e, w),
+        }));
+    },
+    daylightingControlLocs() {
+      return _.flatMap(this.currentStory.spaces, 'daylighting_controls')
+        .map(dc => ({
+          ...geometryHelpers.vertexForId(dc.vertex_id, this.currentStoryGeometry),
+          id: dc.id,
+          type: 'daylighting_control',
+        }));
+    },
+    allComponentInstanceLocs() {
+      return [
+        ...this.windowCenterLocs,
+        ...this.daylightingControlLocs,
+      ];
+    },
   },
   watch: {
     // showTicks() { this.showOrHideAxes(); },

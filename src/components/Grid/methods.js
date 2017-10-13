@@ -10,7 +10,7 @@ const d3 = require('d3');
 const polylabel = require('polylabel');
 import _ from 'lodash';
 import { snapTargets, snapWindowToEdge, snapToVertexWithinFace, findClosestEdge, findClosestWindow } from './snapping';
-import geometryHelpers from './../../store/modules/geometry/helpers';
+import geometryHelpers, { distanceBetweenPoints } from './../../store/modules/geometry/helpers';
 import modelHelpers from './../../store/modules/models/helpers';
 import { ResizeEvents } from '../../components/Resize';
 
@@ -52,12 +52,34 @@ export default {
         this.placeDaylightingControl();
       }
     }
+    if (this.currentTool === 'Remove Component') {
+      this.removeComponent();
+    }
     if (this.currentTool === 'Image') {
       this.deselectImages();
     }
   },
   deselectImages() {
     this.$store.dispatch('application/setCurrentSubSelectionId', this.currentStory.spaces[0]);
+  },
+  removeComponent() {
+    const
+      gridCoords = d3.mouse(this.$refs.grid),
+      gridPoint = { x: gridCoords[0], y: gridCoords[1] },
+      rwuPoint = this.gridPointToRWU(gridPoint),
+      component = _.minBy(this.allComponentInstanceLocs, ci => distanceBetweenPoints(ci, rwuPoint)),
+      distToComp = component && distanceBetweenPoints(component, rwuPoint);
+    if (!component || distToComp > this.spacing * 2) {
+      return;
+    }
+    const payload = { story_id: this.currentStory.id, object: { id: component.id } };
+    if (component.type === 'window') {
+      this.$store.dispatch('models/destroyWindow', payload);
+    } else if (component.type === 'daylighting_control') {
+      this.$store.dispatch('models/destroyDaylightingControl', payload);
+    } else {
+      console.error(`unrecognized component to remove: ${component}`);
+    }
   },
   placeWindow() {
     const
