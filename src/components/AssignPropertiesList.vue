@@ -2,7 +2,11 @@
   <div class="assign-properties-list">
     <div v-for="spaceProp in ['building_units', 'thermal_zones', 'space_types']"
         :key="spaceProp"
-        :class="{ active: visibleSpaceProp === spaceProp }">
+        :class="{
+          active: visibleSpaceProp === spaceProp,
+          selected: selectedSpaceProp === spaceProp
+        }"
+    >
       <div @click="visibleSpaceProp = visibleSpaceProp === spaceProp ? null : spaceProp">
         <AssignSpacePropIcon :which="spaceProp" class="button" />
       </div>
@@ -19,6 +23,7 @@
   </div>
 </template>
 <script>
+import { mapGetters } from 'vuex';
 import Library from './Library.vue';
 import svgs from './svgs';
 
@@ -27,8 +32,21 @@ export default {
   data() {
     return {
       visibleSpaceProp: false,
+      selectedSpaceProp: null,
       expanded: {},
     };
+  },
+  computed: {
+    ...mapGetters({
+      currentBuildingUnit: 'application/currentBuildingUnit',
+      currentThermalZone: 'application/currentThermalZone',
+      currentSpaceType: 'application/currentSpaceType',
+    }),
+  },
+  watch: {
+    currentBuildingUnit(val) { if (val) this.selectedSpaceProp = 'building_units'; },
+    currentThermalZone(val) { if (val) this.selectedSpaceProp = 'thermal_zones'; },
+    currentSpaceType(val) { if (val) this.selectedSpaceProp = 'space_types'; },
   },
   methods: {
     toggleCompact(spaceProp) {
@@ -51,6 +69,12 @@ export default {
   }
   .active {
     background-color: $gray-medium;
+  }
+  svg {
+    fill: #fff;
+  }
+  .selected svg {
+    fill: #008500;
   }
   .library {
     min-width: 200px;
