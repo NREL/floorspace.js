@@ -94,7 +94,7 @@ export default {
     ...mapState({
       currentMode: state => state.application.currentSelections.mode,
       currentTool: state => state.application.currentSelections.tool,
-      currentComponentInstanceId: state => state.application.currentSelections.component_instance_id,
+      currentComponentInstanceId: state => state.application.currentSelections.modeTab === 'components' && state.application.currentSelections.component_instance_id,
       snapMode: state => state.application.currentSelections.snapMode,
       previousStoryVisible: state => state.project.previous_story.visible,
       gridVisible: state => state.project.grid.visible,
