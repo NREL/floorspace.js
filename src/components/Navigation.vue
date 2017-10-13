@@ -9,7 +9,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
   <div id="layout-navigation">
     <nav id="navigation">
-      <!-- <div v-if="!libraryExpanded" id="right-bar" @mousedown="resizeBarClicked" v-on:dblclick="showHide" ref="resizebar" class="resize-bar"></div> -->
         <section id="selections">
         </section>
 
@@ -48,45 +47,14 @@ let fullWidth;
 const collapsedWidth = 8;
 export default {
   name: 'navigation',
-  mounted() {
-    this.selectedObject = this.items[0];
-    fullWidth = document.getElementById('layout-navigation').offsetWidth;
-    window.addEventListener('resize', this.resetSize);
-    window.eventBus.$on('i-am-the-expanded-library-now', this.setWidthForOpenLibrary);
-  },
   data() {
     return {
       libraryExpanded: false,
     };
   },
-  beforeDestroy() {
-    window.removeEventListener('resize', this.resetSize);
-    window.eventBus.$off('i-am-the-expanded-library-now', this.setWidthForOpenLibrary);
-  },
   computed: {
     ...mapState({
-      // available model types
-      modes: state => state.application.modes,
       modeTab: state => state.application.currentSelections.modeTab,
-      tool: state => state.application.currentSelections.tool,
-
-      // top level models
-      stories: state => state.models.stories,
-      building_units: state => state.models.library.building_units,
-      space_types: state => state.models.library.space_types,
-      thermal_zones: state => state.models.library.thermal_zones,
-
-      // for image upload placement
-      max_x: state => state.project.view.max_x,
-      max_y: state => state.project.view.max_y,
-      min_x: state => state.project.view.min_x,
-      min_y: state => state.project.view.min_y,
-    }),
-
-    ...mapGetters({
-      currentSpace: 'application/currentSpace',
-      currentShading: 'application/currentShading',
-      currentImage: 'application/currentImage',
     }),
 
     /*
@@ -118,8 +86,6 @@ export default {
           return ['spaces'];
       }
     },
-    // list items to display for current mode
-    items() { return this[this.mode]; },
     mode: {
       get() { return this.$store.state.application.currentSelections.mode; },
       set(mode) { this.$store.dispatch('application/setCurrentMode', { mode }); },
@@ -128,86 +94,8 @@ export default {
       get() { return this.$store.state.application.currentSelections.subselectionType; },
       set(sst) { this.$store.dispatch('application/setCurrentSubselectionType', { subselectionType: sst }); },
     },
-
-    currentThermalZone: {
-      get() { return this.$store.getters['application/currentThermalZone']; },
-      set(item) { this.$store.dispatch('application/setCurrentThermalZoneId', { id: item.id }); },
-    },
-    currentBuildingUnit: {
-      get() { return this.$store.getters['application/currentBuildingUnit']; },
-      set(item) { this.$store.dispatch('application/setCurrentBuildingUnitId', { id: item.id }); },
-    },
-    currentSpaceType: {
-      get() { return this.$store.getters['application/currentSpaceType']; },
-      set(item) { this.$store.dispatch('application/setCurrentSpaceTypeId', { id: item.id }); },
-    },
-
-    selectedObject: {
-      get() {
-        switch (this.mode) {
-          case 'stories':
-            return this.currentStory;
-          case 'building_units':
-            return this.currentBuildingUnit;
-          case 'thermal_zones':
-            return this.currentThermalZone;
-          case 'space_types':
-            return this.currentSpaceType;
-          default: // spaces, shading, images
-            return this.currentSubSelection;
-        }
-      },
-      set(item) {
-        switch (this.mode) {
-          case 'stories':
-            this.currentStory = item;
-            break;
-          case 'building_units':
-            this.currentBuildingUnit = item;
-            break;
-          case 'thermal_zones':
-            this.currentThermalZone = item;
-            break;
-          case 'space_types':
-            this.currentSpaceType = item;
-            break;
-          default: // spaces, shading, images
-            this.currentSubSelection = item;
-            break;
-        }
-      },
-    },
   },
   methods: {
-    /*
-    * Resize the library and adjust the positions of sibling elements
-    */
-    resizeBarClicked() {
-      const doResize = (e) => {
-        const newWidth = e.clientX > collapsedWidth ? e.clientX : collapsedWidth;
-        document.getElementById('layout-navigation').style.width = `${newWidth}px`;
-        getSiblings(document.getElementById('layout-navigation')).forEach((el) => {
-          el.style.left = `${newWidth}px`;
-        });
-
-        ResizeEvents.$emit('resize');
-      };
-      const stopResize = () => {
-        window.removeEventListener('mousemove', doResize);
-        window.removeEventListener('mouseup', stopResize);
-      };
-      window.addEventListener('mousemove', doResize);
-      window.addEventListener('mouseup', stopResize);
-    },
-    showHide() {
-      const newWidth = document.getElementById('layout-navigation').offsetWidth === collapsedWidth ? fullWidth : collapsedWidth;
-      document.getElementById('layout-navigation').style.width = `${newWidth}px`;
-      getSiblings(document.getElementById('layout-navigation')).forEach((el) => {
-        el.style.left = `${newWidth}px`;
-      });
-      ResizeEvents.$emit('resize');
-    },
-
     // reset the nagiv   size when the window is resized
     resetSize() {
       if (this.libraryExpanded) {
@@ -227,138 +115,12 @@ export default {
         return;
       }
 
-      document.getElementById('layout-navigation').style.width = '100%';
-      ResizeEvents.$emit('resize');
-    },
+    document.getElementById('layout-navigation').style.width = '100%';
+    ResizeEvents.$emit('resize');
+  },
 
-    /*
-    * initialize an empty space, shading, building_unit, or thermal_zone depending on the selected mode
-    * if initializing a story, "story" will be passed in as the mode argument
-    */
-    createItem(mode = this.mode) {
-      switch (mode) {
-        case 'stories':
-          this.$store.dispatch('models/initStory');
-          this.setCurrentItem();
-          return;
-        case 'spaces':
-          this.$store.dispatch('models/initSpace', { story: this.currentStory });
-          break;
-        case 'shading':
-          this.$store.dispatch('models/initShading', { story: this.currentStory });
-          break;
-        case 'building_units':
-        case 'thermal_zones':
-        case 'space_types':
-          this.$store.dispatch('models/createObjectWithType', { type: mode });
-          break;
-        default:
-          break;
-      }
-      // select the new item
-      this.selectItem(this.items[this.items.length - 1], mode);
-    },
-
-    /*
-    * dispatch an action to destroy the currently selected item
-    */
-    destroyItem(item, mode = this.mode) {
-      // don't allow deletion of the last item of a type
-      if (this[mode].length <= 1 && (mode === 'stories' || mode === 'spaces')) { return; }
-
-      switch (mode) {
-        case 'stories':
-          this.$store.dispatch('models/destroyStory', { story: item });
-          this.setCurrentItem();
-          break;
-        case 'spaces':
-          this.$store.dispatch('models/destroySpace', {
-            space: item,
-            story: this.currentStory,
-          });
-          break;
-        case 'shading':
-          this.$store.dispatch('models/destroyShading', {
-            shading: item,
-            story: this.currentStory,
-          });
-          break;
-        case 'images':
-          this.$store.dispatch('models/destroyImage', {
-            image: item,
-            story: this.currentStory,
-          });
-          break;
-        case 'building_units':
-        case 'thermal_zones':
-        case 'space_types':
-          this.$store.dispatch('models/destroyObject', { object: item });
-          break;
-        default:
-          break;
-      }
-      this.setCurrentItem();
-    },
-    destroyStory(item) { this.destroyItem(item, 'stories'); },
-
-    /*
-    * set current selection for a type
-    */
-    selectItem(item, mode = this.mode) {
-      switch (mode) {
-        case 'stories':
-          this.currentStory = item;
-          this.setCurrentItem();
-          break;
-        case 'building_units':
-          this.currentBuildingUnit = item;
-          break;
-        case 'thermal_zones':
-          this.currentThermalZone = item;
-          break;
-        case 'space_types':
-          this.currentSpaceType = item;
-          break;
-        default: // spaces, shading, images
-          this.currentSubSelection = item;
-          break;
-      }
-    },
-    selectStory(item) { this.selectItem(item, 'stories'); },
-
-
-    setCurrentItem() {
-      // to be used when, ex changing stories or deleting an item.
-      // According to issue #134, we don't want to ever allow a situation
-      // where no item is selected.
-      if (this.items.length && (!this.selectedObject || !_.includes(_.map(this.items, 'id'), this.selectedObject.id))) {
-        this.selectedObject = this.items[0];
-      }
-    },
-
-    /*
-    * look up the display name for the selected mode (library type)
-    */
-    displayNameForMode(mode = this.mode) { return applicationHelpers.displayNameForMode(mode); },
   },
   watch: {
-    mode() {
-      this.setCurrentItem();
-    },
-    selectedObject(obj) {
-      if (!obj) return;
-      const row = this.$el.querySelector(`[data-id="${obj.id}"]`);
-      if (row) {
-        row.scrollIntoView();
-      }
-    },
-    currentStory(obj) {
-      if (!obj) return;
-      const row = this.$el.querySelector(`[data-id="${obj.id}"]`);
-      if (row) {
-        row.scrollIntoView();
-      }
-    },
     libraryExpanded() {
       this.setWidthForOpenLibrary();
     },
@@ -376,37 +138,25 @@ export default {
 
 <style lang="scss" scoped>
 @import "./../scss/config";
-// #right-bar {
-//   position: absolute;
-//   right: 0;
-//   width: 8px;
-//   height: 100%;
-//   transition: background 0.5s linear;
-//
-//   &:hover, &:active {
-//     background-color: $gray-lightest;
-//     cursor: e-resize;
-//   }
-// }
 #navigation {
-    background-color: $gray-medium-dark;
-    border-right: 1px solid $gray-darkest;
-    font-size: 0.75rem;
+  background-color: $gray-medium-dark;
+  border-right: 1px solid $gray-darkest;
+  font-size: 0.75rem;
+  height: 100%;
+  user-select: none;
+
+  #list {
+    display: flex;
     height: 100%;
-    user-select: none;
+    .editable-select-list {
+      border-right: 1px solid $gray-darkest;
+      height: calc(100% - 2rem);
+      width: 200px;
 
-    #list {
-      display: flex;
-      height: 100%;
-      .editable-select-list {
-        border-right: 1px solid $gray-darkest;
-        height: calc(100% - 2rem);
-        width: 200px;
-
-        &.expanded {
-          width: calc(100% - 200px);
-        }
+      &.expanded {
+        width: calc(100% - 200px);
       }
     }
+  }
 }
 </style>
