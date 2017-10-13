@@ -54,6 +54,12 @@
 			"items": {
 				"$ref": "#/definitions/DaylightingControlDefinition"
 			}
+		},
+		"pitched_roofs": {
+			"type": "array",
+			"items": {
+				"$ref": "#/definitions/PitchedRoof"
+			}
 		}
 	},
 	"required": [
@@ -415,6 +421,12 @@
 						"null"
 					]
 				},
+				"pitched_roof_id": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
 				"daylighting_controls": {
 					"type": "array",
 					"items": {
@@ -622,6 +634,45 @@
 			"required": [
 				"id",
 				"name"
+			]
+		},
+		"PitchedRoof": {
+			"properties": {
+				"id": {
+					"type": "string"
+				},
+				"name": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"pitched_roof_type": {
+					"type": "string",
+					"enum": [
+						"Gable",
+						"Hip",
+						"Shed"
+					]
+				},
+				"pitch": {
+					"description": "Pitch of roof. A value of 6, for example, implies a 6 in 12 pitch (or 26.57 degrees).",
+					"type": "number",
+					"minimum": 0,
+					"exclusiveMinimum": true
+				},
+				"shed_direction": {
+					"description": "Direction of shed roof, from low edge to high edge, in clockwise degrees from the positive y-axis when viewed from above.",
+					"type": "number"
+				},
+				"color": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"id",
+				"type",
+				"pitch"
 			]
 		}
 	}
