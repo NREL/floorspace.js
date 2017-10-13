@@ -94,6 +94,10 @@
 						},
 						"north_axis": {
 							"type": "number"
+						},
+						"building_min_z": {
+							"description": "Minimum z coordinate for the building's first story. Use a value < 0 for buildings with below-grade spaces, or a value > 0 for, e.g., buildings on piers.",
+							"type": "number"
 						}
 					}
 				},
@@ -310,13 +314,18 @@
 					"type": "number"
 				},
 				"floor_to_ceiling_height": {
-					"type": "number"
+					"type": "number",
+					"minimum": 0,
+					"exclusiveMinimum": true
 				},
 				"above_ceiling_plenum_height": {
 					"type": "number"
 				},
 				"multiplier": {
-					"type": "number"
+					"type": "number",
+					"minimum": 0,
+					"exclusiveMinimum": true,
+					"default": 1
 				},
 				"color": {
 					"type": "string"
@@ -444,6 +453,23 @@
 							"vertex_id"
 						]
 					}
+				},
+				"floor_to_ceiling_height_override": {
+					"description": "If provided, overrides the story floor_to_ceiling_height.",
+					"type": "number",
+					"minimum": 0,
+					"exclusiveMinimum": true
+				},
+				"floor_offset": {
+					"description": "If provided, specifies the distance offset between the space floor and the story floor.",
+					"type": "number"
+				},
+				"has_no_floor": {
+					"description": "If true, defines a space that is open to below.",
+					"type": [
+						"boolean",
+						"null"
+					]
 				}
 			},
 			"required": [
