@@ -473,7 +473,7 @@ const map = {
         validator: validators.name,
       },
       {
-        name: 'roof_type',
+        name: 'pitched_roof_type',
         displayName: 'Type',
         input_type: 'select',
         select_data() {
