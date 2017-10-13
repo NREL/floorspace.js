@@ -11,17 +11,34 @@ export function drawWindow() {
   function chart(selection) {
     selection.exit().remove();
     const windowE = selection.enter().append('g').attr('class', 'window');
-    windowE.append('line');
+    windowE.append('line').attr('class', 'pane');
     windowE.append('circle');
+    windowE.append('line').attr('class', 'start-linecap');
+    windowE.append('line').attr('class', 'end-linecap');
     const windw = selection.merge(windowE);
     windw.classed('selected', d => d.selected);
-    windw.select('line')
+    windw.select('line.pane')
       .attr('x1', d => xScale(d.start.x))
       .attr('y1', d => yScale(d.start.y))
       .attr('x2', d => xScale(d.end.x))
-      .attr('y2', d => yScale(d.end.y))
-      .attr('marker-end', `url(#perp-linecap${highlight ? '-highlight' : ''})`)
-      .attr('marker-start', `url(#perp-linecap${highlight ? '-highlight' : ''})`);
+      .attr('y2', d => yScale(d.end.y));
+    windw.each(function (d) {
+      const
+        { dx, dy } = unitPerpVector(d.start, d.end),
+        linecapOffset = 10;
+
+      const $this = d3.select(this);
+      $this.select('.start-linecap')
+        .attr('x1', xScale(d.start.x) + linecapOffset * dx)
+        .attr('y1', yScale(d.start.y) + linecapOffset * dy)
+        .attr('x2', xScale(d.start.x) - linecapOffset * dx)
+        .attr('y2', yScale(d.start.y) - linecapOffset * dy);
+      $this.select('.end-linecap')
+        .attr('x1', xScale(d.end.x) + linecapOffset * dx)
+        .attr('y1', yScale(d.end.y) + linecapOffset * dy)
+        .attr('x2', xScale(d.end.x) - linecapOffset * dx)
+        .attr('y2', yScale(d.end.y) - linecapOffset * dy);
+    });
     windw.select('circle')
       .attr('cx', d => xScale(d.center.x))
       .attr('cy', d => yScale(d.center.y))
