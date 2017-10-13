@@ -116,7 +116,10 @@
     }
     .daylighting-control.selected {
       path {
-        fill: green;
+        fill: #dfda48;
+      }
+      circle{
+        stroke: #dfda48;
       }
     }
     .highlight {
