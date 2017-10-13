@@ -108,6 +108,7 @@ export default {
       currentSpace: 'application/currentSpace',
       currentShading: 'application/currentShading',
       currentComponent: 'application/currentComponent',
+      currentSpaceProperty: 'application/currentSpaceProperty',
     }),
     currentImage: {
       get() { return this.$store.getters['application/currentImage']; },

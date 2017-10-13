@@ -62,6 +62,18 @@ export default {
       this.assignProperty();
     }
   },
+  assignProperty() {
+    if (!this.currentSpaceProperty) { return; }
+    const
+      gridCoords = d3.mouse(this.$refs.grid),
+      gridPoint = { x: gridCoords[0], y: gridCoords[1] },
+      rwuPoint = this.gridPointToRWU(gridPoint),
+      space = this.currentStory.spaces.some((sp) => {
+        const face = _.find(this.denormalizedGeometry.faces, { id: sp.face_id });
+        return geometryHelpers.pointInFace(rwuPoint, face.vertices);
+      });
+    if (!space) { return; }
+  },
   deselectImages() {
     this.$store.dispatch('application/setCurrentSubSelectionId', this.currentStory.spaces[0]);
   },

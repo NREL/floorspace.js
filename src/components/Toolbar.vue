@@ -390,6 +390,9 @@ export default {
     },
   },
   watch: {
+    modeTab() {
+      this.currentMode = 'spaces';
+    },
     currentSpaceProperty() {
       if (this.currentSpaceProperty) {
         this.currentMode = this.currentSpaceProperty.type;
