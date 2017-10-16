@@ -25,11 +25,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       class="input-color"
       :object-id="row.id"
       :value="row[col.name]"
-      @change="onChange(row.id, col.name, $event.target.value)"
     />
   </div>
   <pretty-select v-else-if="col.input_type === 'select'"
-    :onChange="onChange.bind(null, row.id, col.name)"
+    :onChange="onChange"
     :options="selectData"
     :value="row[col.name]"
   />
@@ -62,7 +61,7 @@ export default {
 
       new Huebee(this.$refs.color_input, { saturations: 1, notation: 'hex' })
         .on('change', (color) => {
-          this.onChange(this.row.id, this.col.name, color);
+          this.onChange(color);
         });
     },
   },
