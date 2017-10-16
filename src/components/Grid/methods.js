@@ -107,7 +107,7 @@ export default {
       rwuPoint = this.gridPointToRWU(gridPoint),
       loc = snapWindowToEdge(
         this.snapMode,
-        this.denormalizedGeometry.edges, rwuPoint,
+        this.spaceEdges, rwuPoint,
         this.currentComponentDefinition.width, this.spacing * 2, this.spacing,
       );
 
@@ -138,7 +138,7 @@ export default {
       },
       loc = snapToVertexWithinFace(
         this.snapMode,
-        this.denormalizedGeometry.faces, rwuPoint, this.spacing);
+        this.spaceFaces, rwuPoint, this.spacing);
 
     if (!loc) { return; }
 
@@ -264,7 +264,7 @@ export default {
       rwuPoint = this.gridPointToRWU(gridPoint),
       loc = snapWindowToEdge(
         this.snapMode,
-        this.denormalizedGeometry.edges, rwuPoint,
+        this.spaceEdges, rwuPoint,
         this.currentComponentDefinition.width, this.spacing * 2, this.spacing,
       );
 
@@ -288,7 +288,7 @@ export default {
       rwuPoint = this.gridPointToRWU(gridPoint),
       loc = snapToVertexWithinFace(
         this.snapMode,
-        this.denormalizedGeometry.faces, rwuPoint,
+        this.spaceFaces, rwuPoint,
         this.spacing,
       );
     if (!loc) { return; }

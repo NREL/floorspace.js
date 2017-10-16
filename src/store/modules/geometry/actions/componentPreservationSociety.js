@@ -48,11 +48,13 @@ function replaceComponents(
   const
     { geometry_id, story_id, windows, perFaceComponents } = components,
     geometry = geometryHelpers.denormalize(_.find(context.rootState.geometry, { id: geometry_id })),
+    story = _.find(context.rootState.models.stories, { id: story_id }),
+    spaceFaces = geometry.faces.filter(f => _.find(story.spaces, { face_id: f.id })),
     spacing = context.rootState.project.grid.spacing;
 
   context.dispatch('models/destroyAllComponents', { story_id }, { root: true });
 
-  const edgesPresentOnFaces = _.flatMap(geometry.faces, 'edges');
+  const edgesPresentOnFaces = _.flatMap(spaceFaces, 'edges');
   windows.forEach((w) => {
     const
       { dx, dy } = movementsByFaceId[w.originalFaceIds[0]] || { dx: 0, dy: 0 },
@@ -60,7 +62,7 @@ function replaceComponents(
       loc = snapWindowToEdge(/* snapMode */ 'nonstrict', edgesPresentOnFaces, newLoc, 1, spacing / 4);
     if (!loc) { return; }
 
-    const facesWithEdge = _.map(facesContainingEdge(geometry.faces, loc.edge_id), 'id');
+    const facesWithEdge = _.map(facesContainingEdge(spaceFaces, loc.edge_id), 'id');
     if (w.originalFaceIds.length !== facesWithEdge.length ||
         (w.originalFaceIds.length > 1 && _.intersection(Object.keys(movementsByFaceId), w.originalFaceIds))) {
       // Suppose we add some windows to an edge that's shared between two spaces.
@@ -87,7 +89,7 @@ function replaceComponents(
       const
         { dx, dy } = movementsByFaceId[face_id] || { dx: 0, dy: 0 },
         newLoc = { x: d.vertex.x + dx, y: d.vertex.y + dy },
-        loc = snapToVertexWithinFace(/* snapMode */ 'nonstrict', geometry.faces, newLoc, spacing / 4);
+        loc = snapToVertexWithinFace(/* snapMode */ 'nonstrict', spaceFaces, newLoc, spacing / 4);
       if (!loc) { return; }
 
       context.dispatch('models/createDaylightingControl', {

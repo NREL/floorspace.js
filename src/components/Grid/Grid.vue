@@ -212,6 +212,14 @@ export default {
         ...this.daylightingControlLocs,
       ];
     },
+    spaceFaces() {
+      // as opposed to shading faces
+      return this.denormalizedGeometry.faces
+        .filter(f => _.find(this.currentStory.spaces, { face_id: f.id }));
+    },
+    spaceEdges() {
+      return _.flatMap(this.spaceFaces, 'edges');
+    },
   },
   watch: {
     // showTicks() { this.showOrHideAxes(); },
