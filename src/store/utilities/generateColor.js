@@ -1,14 +1,8 @@
-import appconfig from './../modules/application/appconfig.js'
+import appconfig from './../modules/application/appconfig';
 
-export default (function colorFactory () {
-    var typeIndices = {
-        space: 0,
-        building_unit: 0,
-        thermal_zone: 0,
-        space_type: 0
-    };
-    return (type) => {
-        typeIndices[type]++;
-        return appconfig.palette.colors[typeIndices[type] % appconfig.palette.colors.length]
-    }
-})();
+const typeIndices = {};
+
+export default function colorFactory(type) {
+  typeIndices[type] = (typeIndices[type] || 0) + 1;
+  return appconfig.palette.colors[typeIndices[type] % appconfig.palette.colors.length];
+}

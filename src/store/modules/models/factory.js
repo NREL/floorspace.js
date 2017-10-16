@@ -111,7 +111,7 @@ export default {
       pitched_roof_type: opts.type || 'Gable',
       pitch: opts.pitch || 6,
       shed_direction: opts.shed_direction,
-      color: opts.color,
+      color: generateColor('pitched_roof'),
     };
   },
 };
