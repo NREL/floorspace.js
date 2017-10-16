@@ -269,8 +269,13 @@ export default {
         margin-right: 10px;
     }
 
-    input:focus {
-        outline: none;
+    input {
+      &:focus {
+          outline: none;
+      }
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+      font-size: medium;
     }
 }
 
