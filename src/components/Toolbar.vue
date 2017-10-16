@@ -100,25 +100,24 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       <div id="grid-tools">
         <zoom-in-svg class="button"></zoom-in-svg>
         <zoom-out-svg class="button"></zoom-out-svg>
-        <pan-svg @click="tool = 'Pan'" :class="{ active: tool === 'Pan' }" class="button"></pan-svg>
       </div>
       <template  v-if="modeTab ==='floorplan'">
         <div id="instructions">Draw a floorplan and import images</div>
 
         <div id="drawing-tools" class="tools-list">
-          <div @click="tool = 'Rectangle'" :class="{ active: tool === 'Rectangle' }">
+          <div @click="tool = 'Rectangle'" title="Rectangle" :class="{ active: tool === 'Rectangle' }">
             <tool-draw-rectangle-svg class="button"></tool-draw-rectangle-svg>
           </div>
-          <div @click="tool = 'Polygon'" :class="{ active: tool === 'Polygon' }">
+          <div @click="tool = 'Polygon'" title="Polygon" :class="{ active: tool === 'Polygon' }">
             <tool-draw-polygon-svg class="button"></tool-draw-polygon-svg>
           </div>
-          <div @click="tool = 'Eraser'" :class="{ active: tool === 'Eraser' }">
+          <div @click="tool = 'Eraser'" title="Eraser" :class="{ active: tool === 'Eraser' }">
             <tool-erase-svg class="button"></tool-erase-svg>
           </div>
-          <div @click="tool = 'Select'" :class="{ active: tool === 'Select' }">
+          <div @click="tool = 'Select'" title="Select" :class="{ active: tool === 'Select' }">
             <tool-move-size-svg class="button"></tool-move-size-svg>
           </div>
-          <div @click="tool = 'Image'" :class="{ active: tool === 'Image' }">
+          <div @click="tool = 'Image'" title="Image" :class="{ active: tool === 'Image' }">
             <tab-floorplan-svg class="button"></tab-floorplan-svg>
           </div>
         </div>
@@ -141,16 +140,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <div id="instructions">Draw shading objects</div>
 
         <div id="drawing-tools" class="tools-list">
-          <div @click="tool = 'Rectangle'" :class="{ active: tool === 'Rectangle' }">
+          <div @click="tool = 'Rectangle'" title="Rectangle" :class="{ active: tool === 'Rectangle' }">
             <tool-draw-rectangle-svg class="button"></tool-draw-rectangle-svg>
           </div>
-          <div @click="tool = 'Polygon'" :class="{ active: tool === 'Polygon' }">
+          <div @click="tool = 'Polygon'" title="Polygon" :class="{ active: tool === 'Polygon' }">
             <tool-draw-polygon-svg class="button"></tool-draw-polygon-svg>
           </div>
-          <div @click="tool = 'Eraser'" :class="{ active: tool === 'Eraser' }">
+          <div @click="tool = 'Eraser'" title="Eraser" :class="{ active: tool === 'Eraser' }">
             <tool-erase-svg class="button"></tool-erase-svg>
           </div>
-          <div @click="tool = 'Select'" :class="{ active: tool === 'Select' }">
+          <div @click="tool = 'Select'" title="Select" :class="{ active: tool === 'Select' }">
             <tool-move-size-svg class="button"></tool-move-size-svg>
           </div>
         </div>
@@ -161,10 +160,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <ComponentsList />
         <!-- No need to show tool options if there's only the one choice. -->
         <div id="drawing-tools" class="tools-list">
-          <div @click="tool = 'Place Component'" :class="{ active: tool === 'Place Component' }">
+          <div @click="tool = 'Place Component'" title="Place Component" :class="{ active: tool === 'Place Component' }">
             <tab-components-svg class="button"></tab-components-svg>
           </div>
-          <div @click="tool = 'Remove Component'" :class="{ active: tool === 'Remove Component' }">
+          <div @click="tool = 'Remove Component'" title="Remove Component" :class="{ active: tool === 'Remove Component' }">
             <tool-erase-svg class="button"></tool-erase-svg>
           </div>
         </div>
@@ -175,7 +174,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <AssignPropertiesList />
         <!-- No need to show tool options if there's only the one choice. -->
         <!-- <div id="drawing-tools" class="tools-list">
-          <div @click="tool = 'Apply Property'" :class="{ active: tool === 'Apply Property' }">
+          <div @click="tool = 'Apply Property'" title="Apply Property" :class="{ active: tool === 'Apply Property' }">
             <tab-assign-svg class="button"></tab-assign-svg>
           </div>
         </div> -->

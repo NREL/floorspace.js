@@ -2,6 +2,7 @@
   <div class="assign-properties-list">
     <div v-for="spaceProp in ['building_units', 'thermal_zones', 'space_types']"
         :key="spaceProp"
+        :title="displayName(spaceProp)"
         :class="{
           active: visibleSpaceProp === spaceProp,
           selected: currentSpaceProperty && currentSpaceProperty.type === spaceProp
@@ -25,6 +26,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import Library from './Library.vue';
+import libconfig from '../store/modules/models/libconfig';
 import svgs from './svgs';
 
 export default {
@@ -43,6 +45,9 @@ export default {
   methods: {
     toggleCompact(spaceProp) {
       this.expanded = { ...this.expanded, [spaceProp]: !this.expanded[spaceProp] };
+    },
+    displayName(spaceProp) {
+      return libconfig[spaceProp].displayName;
     },
   },
   components: {

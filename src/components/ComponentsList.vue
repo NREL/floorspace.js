@@ -2,6 +2,7 @@
   <div id="component-icons" class="components-list">
     <div v-for="compType in ['window_definitions', 'daylighting_control_definitions']"
         :key="compType"
+        :title="displayName(compType)"
         :class="{ active: visibleComponentType === compType, selected: selectedComponentType === compType }">
       <div @click="visibleComponentType = visibleComponentType === compType ? null : compType">
         <ComponentIcon :which="compType" class="button" />
@@ -16,6 +17,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import ComponentMenu from './ComponentMenu.vue';
+import libconfig from '../store/modules/models/libconfig';
 import svgs from './svgs';
 
 export default {
@@ -31,6 +33,11 @@ export default {
     }),
     selectedComponentType() {
       return this.currentComponent && this.currentComponent.type;
+    },
+  },
+  methods: {
+    displayName(compType) {
+      return libconfig[compType].displayName;
     },
   },
   components: {
