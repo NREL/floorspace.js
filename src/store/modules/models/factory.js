@@ -10,9 +10,9 @@ export default {
       handle: null,
       geometry_id: null,
       below_floor_plenum_height: 0,
-      floor_to_ceiling_height: 0,
+      floor_to_ceiling_height: 8,
       above_floor_plenum_height: 0,
-      multiplier: 0,
+      multiplier: 1,
       spaces: [],
       daylighting_controls: [],
       windows: [],
@@ -91,17 +91,17 @@ export default {
     return {
       id: idFactory.generate(),
       name: opts.name,
-      height: opts.height,
-      width: opts.width || 0,
-      sill_height: opts.sill_height,
+      height: opts.height || 4,
+      width: opts.width || 2,
+      sill_height: opts.sill_height || 3,
     };
   },
   DaylightingControlDefn(opts = {}) {
     return {
       id: idFactory.generate(),
       name: opts.name,
-      height: opts.height,
-      illuminance_setpoint: opts.illuminance_setpoint,
+      height: opts.height || 3,
+      illuminance_setpoint: opts.illuminance_setpoint || 300,
     };
   },
   PitchedRoof(opts = {}) {
@@ -109,7 +109,7 @@ export default {
       id: idFactory.generate(),
       name: opts.name,
       pitched_roof_type: opts.type || 'Gable',
-      pitch: opts.pitch,
+      pitch: opts.pitch || 6,
       shed_direction: opts.shed_direction,
       color: opts.color,
     };
