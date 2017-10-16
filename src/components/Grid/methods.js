@@ -1212,6 +1212,20 @@ export default {
     svg
       .on('mousemove', this.handleMouseMove)
       .on('click', this.gridClicked);
+    window.d3 = d3;
+  },
+  zoomBy(factor) {
+    const newScale = this.transform.k * factor;
+    d3.select(this.$refs.grid)
+      .transition()
+      .duration(400)
+      .call(this.zoomBehavior.transform, d3.zoomIdentity.scale(newScale));
+  },
+  zoomIn() {
+    this.zoomBy(1.2);
+  },
+  zoomOut() {
+    this.zoomBy(1 / 1.2);
   },
   translateEntities() {
     d3.selectAll('#grid svg .images, #grid svg .polygons')
