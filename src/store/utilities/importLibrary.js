@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import idFactory from './generateId';
 
 export default function importLibrary(context, payload) {
@@ -27,12 +28,13 @@ export default function importLibrary(context, payload) {
 
   window.eventBus.$emit('success', `Imported ${count} object${count !== 1 ? 's' : ''}`);
   // merge the import data with the existing library objects
-  context.commit('importLibrary', {
-    building_units: context.state.models.library.building_units.concat(payload.data.building_units || []),
-    thermal_zones: context.state.models.library.thermal_zones.concat(payload.data.thermal_zones || []),
-    space_types: context.state.models.library.space_types.concat(payload.data.space_types || []),
-    construction_sets: context.state.models.library.construction_sets.concat(payload.data.construction_sets || []),
-    window_definitions: context.state.models.library.window_definitions.concat(payload.data.window_definitions || []),
-    daylighting_control_definitions: context.state.models.library.daylighting_control_definitions.concat(payload.data.daylighting_control_definitions || []),
-  });
+  context.commit(
+    'importLibrary',
+    _.fromPairs([
+      'building_units', 'thermal_zones', 'space_types', 'construction_sets',
+      'window_definitions', 'daylighting_control_definitions', 'pitched_roofs',
+    ].map(k => (
+      [k, context.state.models.library[k].concat(payload.data[k] || [])]
+    ))),
+  );
 }

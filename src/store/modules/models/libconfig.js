@@ -350,6 +350,20 @@ const map = {
         },
       },
       {
+        name: 'pitched_roof_id',
+        displayName: 'Pitched Roof',
+        input_type: 'select',
+        select_data(space, state) {
+          return _.fromPairs(
+            state.models.library.pitched_roofs
+            .map(prt => [prt.name, prt.id]));
+        },
+        get(space, state) {
+          const prt = _.find(state.models.library.pitched_roofs, { id: space.pitched_roof_id });
+          return prt ? prt.name : null;
+        },
+      },
+      {
         name: 'color',
         displayName: 'Color',
         input_type: 'color',
@@ -470,6 +484,47 @@ const map = {
         input_type: 'text',
       },
     ],
+  },
+  pitched_roofs: {
+    displayName: 'Pitched Roof',
+    columns: [
+      {
+        name: 'id',
+        displayName: 'ID',
+        readonly: true,
+        validator: validators.name,
+      },
+      {
+        name: 'pitched_roof_type',
+        displayName: 'Type',
+        input_type: 'select',
+        select_data() {
+          const options = ['Gable', 'Hip', 'Shed'];
+          return _.zipObject(options, options);
+        },
+        validator: validators.oneOf('Gable', 'Hip', 'Shed'),
+      },
+      {
+        name: 'pitch',
+        displayName: 'Pitch',
+        input_type: 'text',
+        validator: validators.number,
+        converter: converters.number,
+      },
+      {
+        name: 'shed_direction',
+        displayName: 'Shed Direction',
+        input_type: 'text',
+        validator: validators.number,
+        converter: converters.number,
+      },
+      {
+        name: 'color',
+        displayName: 'Color',
+        input_type: 'color',
+      },
+    ],
+    init: factory.PitchedRoof,
   },
 };
 
