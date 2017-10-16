@@ -11,7 +11,7 @@ const config = {
     pitched_roofs: 'Pitched Roof',
   },
   palette: {
-    shading: '#bbc3c7',
+    shading: '#E8E3E5',
     neutral: '#bbc3c7',
     // colors to associate with new models
     colors: [
