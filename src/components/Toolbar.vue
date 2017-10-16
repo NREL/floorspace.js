@@ -488,6 +488,10 @@ svg.icon, svg.button {
       .active {
         background-color: $gray-dark;
       }
+      > div {
+        padding-left: 5px;
+        padding-right: 5px;
+      }
     }
 
     #instructions {
