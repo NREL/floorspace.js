@@ -76,7 +76,7 @@ export default {
     keyForCurrentMode() {
       return (
         this.mode === 'stories' ? 'currentStory' :
-        _.includes(['building_units', 'thermal_zones', 'space_types'], this.mode) ? 'currentSpaceProperty' :
+        _.includes(['building_units', 'thermal_zones', 'space_types', 'pitched_roofs'], this.mode) ? 'currentSpaceProperty' :
         _.includes(['windows', 'daylighting_controls'], this.mode) ? 'currentComponentInstance' :
         'currentSubSelection');
     },

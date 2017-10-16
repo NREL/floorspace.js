@@ -115,6 +115,7 @@ export default {
         case 'building_units': return 'building_unit_id';
         case 'thermal_zones': return 'thermal_zone_id';
         case 'space_types': return 'space_type_id';
+        case 'pitched_roofs': return 'pitched_roof_id';
         default: throw new Error(`unrecognized space property type ${this.currentSpaceProperty.type}`);
       }
     },
@@ -314,7 +315,11 @@ export default {
           } else if (this.currentMode === 'building_units') {
             const buildingUnit = modelHelpers.libraryObjectWithId(this.$store.state.models, model.building_unit_id);
             polygon.color = buildingUnit ? buildingUnit.color : applicationHelpers.config.palette.neutral;
+          } else if (this.currentMode === 'pitched_roofs') {
+            const pitchedRoof = modelHelpers.libraryObjectWithId(this.$store.state.models, model.pitched_roof_id);
+            polygon.color = pitchedRoof ? pitchedRoof.color : applicationHelpers.config.palette.neutral;
           }
+
         }
         return polygon;
       });

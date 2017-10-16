@@ -29,6 +29,8 @@ export function spacePropertyById(library, spacePropId) {
     type = 'building_units';
   } else if ((prop = _.find(library.thermal_zones, { id: spacePropId }))) {
     type = 'thermal_zones';
+  } else if ((prop = _.find(library.pitched_roofs, { id: spacePropId }))) {
+    type = 'pitched_roofs';
   } else {
     return null;
   }

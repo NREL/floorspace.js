@@ -127,7 +127,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
               <label>View By</label>
               <select v-model='currentMode'>
                   <option selected>--</option>
-                  <option v-for="mode in ['building_units', 'thermal_zones', 'space_types']" :value="mode">{{ displayNameForMode(mode) }}</option>
+                  <option v-for="mode in ['building_units', 'thermal_zones', 'space_types', 'pitched_roofs']" :value="mode">{{ displayNameForMode(mode) }}</option>
               </select>
               <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'>
                   <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
@@ -182,7 +182,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           <div class='input-select'>
               <label>View By</label>
               <select v-model='currentMode'>
-                  <option v-for="mode in ['building_units', 'thermal_zones', 'space_types']" :value="mode">{{ displayNameForMode(mode) }}</option>
+                  <option v-for="mode in ['building_units', 'thermal_zones', 'space_types', 'pitched_roofs']" :value="mode">{{ displayNameForMode(mode) }}</option>
               </select>
               <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'>
                   <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>

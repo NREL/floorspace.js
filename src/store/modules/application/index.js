@@ -26,7 +26,7 @@ export default {
       modeTab: 'floorplan',
       subselectionType: 'spaces',
     },
-    modes: ['spaces', 'shading', 'building_units', 'thermal_zones', 'space_types', 'images'],
+    modes: ['spaces', 'shading', 'building_units', 'thermal_zones', 'pitched_roofs', 'space_types', 'images'],
     tools: ['Pan', 'Drag', 'Rectangle', 'Polygon', 'Eraser', 'Select', 'Map', 'Fill', 'Place Component', 'Remove Component', 'Image', 'Apply Property'],
     // d3 scale functions px -> rwu
     scale: {

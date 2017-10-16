@@ -8,6 +8,7 @@ const config = {
     building_units: 'Building Unit',
     thermal_zones: 'Thermal Zone',
     space_types: 'Space Type',
+    pitched_roofs: 'Pitched Roof',
   },
   palette: {
     shading: '#bbc3c7',
