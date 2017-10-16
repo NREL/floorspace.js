@@ -17,6 +17,7 @@ export default {
       context.dispatch('geometry/initGeometry', { story_id: story.id }, { root: true });
       // create space and select
       context.dispatch('initSpace', { story });
+      context.dispatch('initShading', { story });
       context.dispatch('selectStory', { story });
     },
 
