@@ -24,11 +24,13 @@
         </a>
       </div>
     </div>
-    <input v-if="searchAvailable"
-      v-model="search"
-      class="search-bar"
-      placeholder="search"
-    />
+    <div class="input-text search-spot">
+      <input v-if="searchAvailable"
+        v-model="search"
+        class="search-bar"
+        placeholder="search"
+      />
+    </div>
     <LibrarySelect
       v-if="compact"
       :rows="searchedRows"
@@ -111,5 +113,11 @@ export default {
 .editable-table {
   overflow-x: scroll;
   overflow-y: auto;
+}
+.search-spot {
+  height: 2rem;
+  input {
+    height: 1.5rem;
+  }
 }
 </style>
