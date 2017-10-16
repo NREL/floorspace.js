@@ -20,7 +20,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 <path d="M0 5.5l5-5 5 5H0z"/>
             </svg>
           </th>
-          <th><!-- placeholder for delete column --></th>
+          <th class="destroy"><!-- placeholder for delete column --></th>
         </tr>
       </thead>
       <tbody>
@@ -94,6 +94,10 @@ export default {
     th {
       border-bottom: 2px solid $gray-medium-dark;
       background-color: $gray-medium;
+      width: 11em;
+      &.destroy {
+        width: 2rem;
+      }
     }
     tr {
       height: 3rem;

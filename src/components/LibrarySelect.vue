@@ -66,6 +66,9 @@ export default {
 
     svg {
       height: 1rem;
+      width: 1rem;
+      margin-top: -5px;
+      margin-left: 10px;
       fill: $gray-lightest;
 
       &:hover {
