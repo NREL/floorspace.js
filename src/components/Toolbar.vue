@@ -111,6 +111,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           <div @click="tool = 'Polygon'" title="Polygon" :class="{ active: tool === 'Polygon' }">
             <tool-draw-polygon-svg class="button"></tool-draw-polygon-svg>
           </div>
+          <div @click="tool = 'Fill'" title="Fill" :class="{ active: tool === 'Fill' }">
+            <span style="top:10px; position: relative;">Fill</span>
+          </div>
           <div @click="tool = 'Eraser'" title="Eraser" :class="{ active: tool === 'Eraser' }">
             <tool-erase-svg class="button"></tool-erase-svg>
           </div>
