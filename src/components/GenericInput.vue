@@ -28,7 +28,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     />
   </div>
   <pretty-select v-else-if="col.input_type === 'select'"
-    :onChange="onChange"
+    @change="val => onChange(val)"
     :options="selectData"
     :value="row[col.name]"
   />
