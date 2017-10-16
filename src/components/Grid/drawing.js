@@ -446,7 +446,6 @@ export function drawImage() {
     moveableWrapperE.append('image');
     const controlsE = moveableWrapperE.append('g').attr('class', 'controls');
     controlsE.append('line').attr('class', 'rotation-to-center');
-    controlsE.append('circle').attr('class', 'center');
     controlsE.append('circle').attr('class', 'rotation-handle');
     ['tl', 'tr', 'bl', 'br']
       .forEach(corner => controlsE.append('circle').attr('class', `corner ${corner}`));
@@ -471,7 +470,6 @@ export function drawImage() {
       .attr('display', d => d.current ? '' : 'none');
 
     imageGroup.each(function(d) {
-      window.d3 = d3;
       const ig = d3.select(this);
       if (!d.clickable) {
         ig
@@ -496,23 +494,23 @@ export function drawImage() {
 
         ig.select('.controls .rotation-handle')
           .attr('cx', 0)
-          .attr('cy', d => pxPerRWU * d.height)
+          .attr('cy', pxPerRWU * d.height * 0.7)
           .attr('r', 5)
           .style('cursor', rotateCursor)
           .call(rotateable);
         ig.select('.controls .rotation-to-center')
           .attr('x1', 0)
-          .attr('y1', 0)
+          .attr('y1', pxPerRWU * d.height / 2)
           .attr('x2', 0)
-          .attr('y2', d => pxPerRWU * d.height);
+          .attr('y2', pxPerRWU * d.height * 0.7 - 5);
         _.forIn(
           { tl: [-1, -1], tr: [1, -1], bl: [-1, 1], br: [1, 1] },
           ([xOff, yOff], label) => {
             ig.select(`.controls .${label}`)
-              .attr('cx', d => xOff * pxPerRWU * d.width / 2)
-              .attr('cy', d => yOff * pxPerRWU * d.height / 2)
+              .attr('cx', xOff * pxPerRWU * d.width / 2)
+              .attr('cy', yOff * pxPerRWU * d.height / 2)
               .attr('r', 5)
-              .style('cursor', d => bestResizeCursor(xOff, yOff, d.r))
+              .style('cursor', bestResizeCursor(xOff, yOff, d.r))
               .call(resizeable);
           });
       }

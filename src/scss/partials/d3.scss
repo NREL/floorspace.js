@@ -182,13 +182,9 @@
     opacity: 0.6;
   }
   .controls {
-    .center {
-      fill: red;
-      stroke: red;
-    }
     .rotation-handle {
-      fill: red;
-      stroke: red;
+      fill: rgba(255, 255, 255, 0.0);
+      stroke: black;
       pointer-events: auto !important;
     }
     .rotation-to-center {
