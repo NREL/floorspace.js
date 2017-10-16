@@ -29,4 +29,8 @@ export default {
 
 <style lang="scss" scoped>
 @import "./../scss/config";
+select {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
 </style>

@@ -100,6 +100,13 @@ export default {
 }
 .control-group {
   display: flex;
+  align-items: center;
+  svg {
+    margin-top: 4px;
+    width: 1.7rem;
+    height: 1.7rem;
+    margin-left: 4px;
+  }
 }
 .editable-table {
   overflow-x: scroll;
