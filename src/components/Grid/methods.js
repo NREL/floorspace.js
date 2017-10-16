@@ -169,12 +169,13 @@ export default {
     }
 
     // create the point
-    var newPoint = snapTarget.type === 'edge' ? snapTarget.projection : snapTarget;
+    const newPoint = snapTarget.type === 'edge' ? snapTarget.projection : snapTarget;
     this.points.push(newPoint);
+    this.drawPoints();
     // if the Rectangle or Eraser tool is active and two points have been drawn (to define a rectangle)
     // complete the corresponding operation for the tool
     if (this.currentTool === 'Eraser' && this.points.length === 2) { this.eraseRectangularSelection(); }
-    if (this.currentTool === 'Rectangle' && this.points.length === 2) { this.saveRectuangularFace(); }
+    if (this.currentTool === 'Rectangle' && this.points.length === 2) { this.saveRectangularFace(); }
   },
 
   /*
@@ -451,6 +452,8 @@ export default {
   * translate the points into RWU and save the face for the selected space or shading
   */
   savePolygonFace() {
+    d3.selectAll('#grid .point-path').remove();
+
     const payload = {
       // translate grid points from grid units to RWU
       points: this.points.map(p => ({
@@ -475,7 +478,9 @@ export default {
   * create a rectangular face from the two points on the grid
   * save the rectangle as a face for the selected space or shading
   */
-  saveRectuangularFace () {
+  saveRectangularFace() {
+    d3.selectAll('#grid .point-path').remove();
+
     // infer 4 corners of the rectangle based on the two points that have been drawn
     const payload = {};
 
@@ -535,27 +540,24 @@ export default {
   /*
   * render points for the face being drawn, connect them with a guideline
   */
-  drawPoints () {
+  drawPoints() {
     // remove expired points and guidelines
     d3.selectAll('#grid .point-path').remove();
 
     // draw points
-    d3.select('#grid svg')
-    .selectAll('ellipse').data(this.points)
-    .enter().append('ellipse')
+    const pointPath = d3.select('#grid svg')
+    .selectAll('ellipse.point-path').data(this.points);
+
+    pointPath.merge(
+      pointPath.enter().append('ellipse').attr('class', 'point-path')
+    )
+    .classed('origin', (d, ix) => ix === 0)
     .attr('cx', d => d.x)
     .attr('cy', d => d.y)
-    .attr('rx', 2)
-    .attr('ry', 2)
-    .attr('vector-effect', 'non-scaling-stroke');
-
-    // apply custom CSS for origin of polygons
-    d3.select('#grid svg').select('ellipse').attr('class', 'point-path')
-    .attr('rx', 7)
-    .attr('ry', 7)
-    .classed('origin', true)
+    .attr('rx', (d, ix) => (ix === 0 ? 7 : 2))
+    .attr('ry', (d, ix) => (ix === 0 ? 7 : 2))
     .attr('vector-effect', 'non-scaling-stroke')
-    .attr('fill', 'none');
+    .attr('fill', (d, ix) => (ix === 0 ? 'none' : ''));
 
     // connect the points for the face being drawn with a line
     d3.select('#grid svg').append('path').attr('class', 'point-path')

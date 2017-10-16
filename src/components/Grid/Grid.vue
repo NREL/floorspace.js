@@ -244,12 +244,6 @@ export default {
       this.points = [];
       this.draw();
     },
-    points() {
-      if (this.points.length === 0) {
-        this.eraseGuidelines();
-      }
-      this.drawPoints();
-    },
     transform(newTransform, lastTransform) {
       // hide polygon names if zoomed out enough
       if (newTransform.k < 0.5) {
