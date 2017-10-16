@@ -461,7 +461,7 @@
 					"exclusiveMinimum": true
 				},
 				"floor_offset": {
-					"description": "If provided, specifies the distance offset between the space floor and the story floor.",
+					"description": "If provided, specifies the vertical offset between the space floor and the story floor.",
 					"type": "number"
 				},
 				"has_no_floor": {
