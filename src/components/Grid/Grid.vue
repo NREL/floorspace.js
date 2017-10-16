@@ -285,6 +285,7 @@ export default {
           polygon = {
             face_id: face.id,
             name: model.name,
+            modelType: model.type,
             color: model.color,
             points,
             labelPosition: this.polygonLabelPosition(points),

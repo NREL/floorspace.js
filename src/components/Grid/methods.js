@@ -657,6 +657,7 @@ export default {
       return null;
     })
     .classed('poly', true)
+    .attr('data-model-type', d => d.modelType)
     .attr('id', p => `poly-${p.face_id}`)
     .attr('transform', null);
 
