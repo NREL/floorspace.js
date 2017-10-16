@@ -40,7 +40,8 @@ const ComponentIcon = {
 import AssignBldgModule from './../assets/svg-icons/assign_bldgmodule.svg';
 import AssignConstructions from './../assets/svg-icons/assign_constructions.svg';
 import AssignActivity from './../assets/svg-icons/assign_activity.svg';
-import AssignThermalZone from './../assets/svg-icons/assign_ThermalZone.svg';
+import AssignThermalZone from './../assets/svg-icons/assign_thermalzone.svg';
+import AssignRoof from './../assets/svg-icons/assign_roof.svg';
 
 const AssignSpacePropIcon = {
   name: 'AssignSpacePropIcon',
@@ -49,11 +50,13 @@ const AssignSpacePropIcon = {
     <AssignBldgModule v-if="which === 'building_units'" class="button" />
     <AssignThermalZone v-else-if="which === 'thermal_zones'" class="button" />
     <AssignActivity v-else-if="which === 'space_types'" class="button" />
+    <AssignRoof v-else-if="which === 'pitched_roofs'" class="button" />
   `,
   components: {
     AssignBldgModule,
     AssignThermalZone,
     AssignActivity,
+    AssignRoof,
   },
 };
 

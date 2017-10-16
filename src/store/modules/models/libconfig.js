@@ -79,6 +79,7 @@ const map = {
         input_type: 'text',
         validator: validators.gt0,
         converter: converters.number,
+        numeric: true,
       },
       {
         name: 'width',
@@ -86,6 +87,7 @@ const map = {
         input_type: 'text',
         validator: validators.gt0,
         converter: converters.number,
+        numeric: true,
       },
       {
         name: 'sill_height',
@@ -93,6 +95,7 @@ const map = {
         input_type: 'text',
         validator: validators.gt0,
         converter: converters.number,
+        numeric: true,
       },
     ],
     init: factory.WindowDefn,
@@ -160,6 +163,7 @@ const map = {
         input_type: 'text',
         validator: validators.gt0,
         converter: converters.number,
+        numeric: true,
       },
       {
         name: 'illuminance_setpoint',
@@ -167,6 +171,7 @@ const map = {
         input_type: 'text',
         validator: validators.gt0,
         converter: converters.number,
+        numeric: true,
       },
     ],
     init: factory.DaylightingControlDefn,
@@ -201,6 +206,7 @@ const map = {
         displayName: 'Below Floor Plenum Height',
         input_type: 'text',
         converter: converters.number,
+        numeric: true,
         validator: validators.number,
       },
       {
@@ -208,6 +214,7 @@ const map = {
         displayName: 'Above Floor Plenum Height',
         input_type: 'text',
         converter: converters.number,
+        numeric: true,
         validator: validators.number,
       },
       {
@@ -215,6 +222,7 @@ const map = {
         displayName: 'Floor To Ceiling Height',
         input_type: 'text',
         converter: converters.number,
+        numeric: true,
         validator: validators.gt0,
       },
       {
@@ -222,6 +230,7 @@ const map = {
         displayName: 'Multiplier',
         input_type: 'text',
         converter: converters.number,
+        numeric: true,
         validator: validators.gt0,
       },
       {
@@ -492,8 +501,12 @@ const map = {
       {
         name: 'id',
         displayName: 'ID',
-        readonly: true,
-        validator: validators.name,
+        private: true,
+      },
+      {
+        name: 'name',
+        displayName: 'Name',
+        input_type: 'text',
       },
       {
         name: 'pitched_roof_type',
@@ -511,6 +524,7 @@ const map = {
         input_type: 'text',
         validator: validators.gt0,
         converter: converters.number,
+        numeric: true,
       },
       {
         name: 'shed_direction',
@@ -518,6 +532,7 @@ const map = {
         input_type: 'text',
         validator: validators.number,
         converter: converters.number,
+        numeric: true,
       },
       {
         name: 'color',

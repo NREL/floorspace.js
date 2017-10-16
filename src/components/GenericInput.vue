@@ -15,6 +15,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     @keydown="blurOnEnter"
     @blur="onChange($event.target.value)"
     :value="row[col.name]"
+    :class="{ numeric: col.numeric }"
   />
   <div
     v-else-if="col.input_type === 'color'"
@@ -82,4 +83,7 @@ export default {
 <style lang="scss" scoped>
 @import "./../scss/config";
 @import './../../node_modules/huebee/dist/huebee.min.css';
+input.numeric {
+  text-align: right;
+}
 </style>

@@ -1,6 +1,6 @@
 <template>
   <div class="assign-properties-list">
-    <div v-for="spaceProp in ['building_units', 'thermal_zones', 'space_types']"
+    <div v-for="spaceProp in ['building_units', 'thermal_zones', 'space_types', 'pitched_roofs']"
         :key="spaceProp"
         :title="displayName(spaceProp)"
         :class="{
