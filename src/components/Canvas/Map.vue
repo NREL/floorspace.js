@@ -41,6 +41,7 @@ export default {
     return {
       view: null,
       map: null,
+      startResolution: null,
       autocomplete: null,
       mapModalVisible: window.api ? window.api.config.showMapDialogOnStart : true,
       showGrid: false,
@@ -91,6 +92,7 @@ export default {
     * empty the map element and (re)load openlayers map canvas inside of it
     */
     loadMap() {
+      window.ol = ol;
       this.$refs.map.innerHTML = '';
       this.view = new ol.View();
       this.map = new ol.Map({
@@ -106,6 +108,7 @@ export default {
     * position the map
     */
     updateMapView() {
+      console.log('updateMapView');
       this.map.updateSize();
       // center of grid in RWU
       let gridCenterX = (this.min_x + this.max_x) / 2;
@@ -131,6 +134,8 @@ export default {
       // subtract the vertical grid center from the y adjustment because the y axis is inverted
       let deltaY = ((gridCenterX * Math.cos(this.rotation)) - (gridCenterY * Math.sin(this.rotation)));
       let deltaX = ((gridCenterY * Math.cos(this.rotation)) + (gridCenterX * Math.sin(this.rotation)));
+
+      this.startResolution = this.startResolution || resolution;
 
       // Web Mercator projections use different resolutions at different latitudes
       // if the map has been placed, adjust the values for the current latitude
@@ -159,6 +164,25 @@ export default {
       this.longitude = center[0];
       this.latitude = center[1];
 
+      const resolutionAdjustment = 1 / ol.proj.getPointResolution(this.view.getProjection(), 1, this.view.getCenter());
+      console.log('resolution ratio', this.startResolution / (this.view.getResolution()));
+      window.eventBus.$emit('transformTo', d3.zoomIdentity
+        //.translate(-1 * Grid.min_x, -1 * Grid.min_y)
+        .scale(this.startResolution / (resolutionAdjustment * this.view.getResolution()))
+        //.translate(-1 * Grid.min_x, -1 * Grid.min_y)
+      );
+      /*
+      Grid = $vm0;
+      offX = Grid.min_x;
+      offY = Grid.min_y;
+      t = d3.zoomIdentity
+        .translate(-1 * offX , -1 * offY)
+        .scale(0.5)
+        .translate(-1 * offX, -1 * offY)
+      console.log(t.toString())
+      window.eventBus.$emit('transformTo', t);
+      console.log('x range', Grid.min_x, Grid.max_x);
+      */
       this.rotation = this.view.getRotation();
 
       this.$store.dispatch('project/setMapInitialized', { initialized: true });

@@ -78,6 +78,7 @@ export default {
     ResizeEvents.$on('resize', this.reloadGridAndScales);
 
     window.eventBus.$on('zoomIn', this.zoomIn);
+    window.eventBus.$on('transformTo', this.transformTo);
     window.eventBus.$on('zoomOut', this.zoomOut);
   },
   beforeDestroy() {
@@ -89,6 +90,7 @@ export default {
     ResizeEvents.$off('resize', this.reloadGridAndScales);
 
     window.eventBus.$off('zoomIn', this.zoomIn);
+    window.eventBus.$off('transformTo', this.transformTo);
     window.eventBus.$off('zoomOut', this.zoomOut);
   },
   computed: {

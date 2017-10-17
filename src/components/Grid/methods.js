@@ -1214,6 +1214,10 @@ export default {
       .on('click', this.gridClicked);
     window.d3 = d3;
   },
+  transformTo(t) {
+    d3.select(this.$refs.grid)
+      .call(this.zoomBehavior.transform, t);
+  },
   zoomBy(factor) {
     const newScale = this.transform.k * factor;
     d3.select(this.$refs.grid)
