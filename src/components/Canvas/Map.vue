@@ -135,11 +135,12 @@ export default {
       let deltaY = ((gridCenterX * Math.cos(this.rotation)) - (gridCenterY * Math.sin(this.rotation)));
       let deltaX = ((gridCenterY * Math.cos(this.rotation)) + (gridCenterX * Math.sin(this.rotation)));
 
-      this.startResolution = this.startResolution || resolution;
 
       // Web Mercator projections use different resolutions at different latitudes
       // if the map has been placed, adjust the values for the current latitude
       if (this.view.getCenter()) {
+        this.startResolution = this.startResolution || ol.proj.getPointResolution(this.view.getProjection(), this.view.getResolution(), this.view.getCenter());
+        console.log("start resolution", this.startResolution);
         const resolutionAdjustment = 1 / ol.proj.getPointResolution(this.view.getProjection(), 1, this.view.getCenter());
 
         resolution *= resolutionAdjustment;
@@ -151,6 +152,7 @@ export default {
       mapCenter[0] += deltaY;
       mapCenter[1] += deltaX;
 
+      console.log('setting view resolution', resolution);
       this.view.setResolution(resolution);
       this.view.setCenter(mapCenter);
       this.view.setRotation(this.rotation);
@@ -164,25 +166,11 @@ export default {
       this.longitude = center[0];
       this.latitude = center[1];
 
-      const resolutionAdjustment = 1 / ol.proj.getPointResolution(this.view.getProjection(), 1, this.view.getCenter());
-      console.log('resolution ratio', this.startResolution / (this.view.getResolution()));
+      const resolution = ol.proj.getPointResolution(this.view.getProjection(), this.view.getResolution(), this.view.getCenter());
+      const scale = this.startResolution / resolution;
       window.eventBus.$emit('transformTo', d3.zoomIdentity
-        //.translate(-1 * Grid.min_x, -1 * Grid.min_y)
-        .scale(this.startResolution / (resolutionAdjustment * this.view.getResolution()))
-        //.translate(-1 * Grid.min_x, -1 * Grid.min_y)
-      );
-      /*
-      Grid = $vm0;
-      offX = Grid.min_x;
-      offY = Grid.min_y;
-      t = d3.zoomIdentity
-        .translate(-1 * offX , -1 * offY)
-        .scale(0.5)
-        .translate(-1 * offX, -1 * offY)
-      console.log(t.toString())
-      window.eventBus.$emit('transformTo', t);
-      console.log('x range', Grid.min_x, Grid.max_x);
-      */
+        .translate((this.max_x - this.min_x) * (1 - scale), (this.max_y - this.min_y) * (1 - scale))
+        .scale(scale));
       this.rotation = this.view.getRotation();
 
       this.$store.dispatch('project/setMapInitialized', { initialized: true });

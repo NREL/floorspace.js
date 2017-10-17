@@ -1057,6 +1057,7 @@ export default {
      - (min_x, max_x) is the same or a smaller interval
      - (min_y, max_y) is the same or a smaller interval
     */
+    console.log('resolveBounds');
     const
       width = this.$refs.grid.clientWidth,
       height = this.$refs.grid.clientHeight,
