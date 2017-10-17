@@ -508,7 +508,7 @@ svg.icon, svg.button {
     #instructions {
       line-height: 2.5rem;
       margin-right: auto;
-      min-width: 17.5rem;
+      min-width: 19.5rem;
     }
 
     #grid-tools {
