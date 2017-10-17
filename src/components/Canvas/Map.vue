@@ -57,6 +57,7 @@ export default {
     this.initAutoComplete();
     this.loadMap();
     ResizeEvents.$on('resize', this.updateMapView);
+    window.eventBus.$on('boundsResolved', this.clearStartResolution);
   },
 
   /*
@@ -64,9 +65,14 @@ export default {
   */
   beforeDestroy() {
     ResizeEvents.$off('resize', this.updateMapView);
+    window.eventBus.$off('boundsResolved', this.clearStartResolution);
   },
 
   methods: {
+    clearStartResolution() {
+      this.startResolution = null;
+      this.updateMapView();
+    },
     /*
     * Asynchronously load google maps autocomplete
     * attatch to address search field
@@ -171,6 +177,7 @@ export default {
       window.eventBus.$emit('transformTo', d3.zoomIdentity
         .translate((this.max_x - this.min_x) * (1 - scale), (this.max_y - this.min_y) * (1 - scale))
         .scale(scale));
+
       this.rotation = this.view.getRotation();
 
       this.$store.dispatch('project/setMapInitialized', { initialized: true });
