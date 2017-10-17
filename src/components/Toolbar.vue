@@ -26,7 +26,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </div>
       </div>
       <ul id="mode-tabs">
-        <li @click="modeTab='floorplan'" class="tab" :class="{ active: modeTab === 'floorplan' }">
+        <li @click="modeTab='floorplan'" class="tab" data-modetab="floorplan" :class="{ active: modeTab === 'floorplan' }">
           <span>
             Floorplan
             <tab-floorplan-svg class="icon"></tab-floorplan-svg>
@@ -40,7 +40,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           </span>
         </li>
 
-        <li @click="modeTab='components'" class="tab" :class="{ active: modeTab === 'components' }">
+        <li @click="modeTab='components'" class="tab" data-modetab="components" :class="{ active: modeTab === 'components' }">
           <span>
             Components
             <tab-components-svg  class="icon"></tab-components-svg>

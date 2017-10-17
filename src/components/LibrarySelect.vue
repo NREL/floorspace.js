@@ -16,7 +16,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
     >
         <span :style="{ 'background-color': item.color }"></span>
         {{item.name}}
-        <a @click="destroyItem(item)">
+        <a @click="destroyItem(item)" class="destroy">
           <Delete class="button" />
         </a>
     </div>

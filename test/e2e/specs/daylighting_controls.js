@@ -7,14 +7,15 @@ module.exports = {
     withScales(failOnError(browser))
       .waitForElementVisible('.modal .new-floorplan', 5000)
       .setFlagOnError()
-      .click('.modal .new-floorplan')
+      .click('.modal .new-floorplan svg')
       .getScales() // assigns to client.xScale, client.yScale.
       // unfortunately, it does so asyncronously, so we have to use .perform()
       // if we want to access them.
       .perform(draw50By50Square)
-      .click('#library-type-select option[value="daylighting_control_definitions"]')
-      .click('#library-new-object')
-      .click('.tools [data-tool="Place Component"]')
+      .click('[data-modetab="components"]')
+      .click('#component-icons [title="Daylighting Control Definition"]')
+      .click('[data-object-type="daylighting_control_definitions"] .add-new')
+      .click('#component-icons [title="Daylighting Control Definition"]')
       .perform((client, done) => {
         client
         .moveToElement('#grid svg', client.xScale(-40), client.yScale(40))
@@ -25,20 +26,23 @@ module.exports = {
   },
   'deleting defn deletes all instances': (browser) => {
     browser
-      .click('.library-table .destroy')
+    .click('#component-icons [title="Daylighting Control Definition"]')
+    .click('#component-icons [data-object-type="daylighting_control_definitions"]')
+    .click('#component-icons [data-object-type="daylighting_control_definitions"] .destroy')
       // switching tools clears the .highlight
-      .click('.tools [data-tool="Select"]')
+      .click('.tools-list [title="Remove Component"]')
       .assert.elementCount('.daylighting-control', 0)
       .checkForErrors()
       .end();
   },
   'replacing section of space moves daylighting control to new space': (browser) => {
     browser
-      .click('.tools [data-tool="Rectangle"]')
-      .click('#selections .add-sub-selection')
+      .click('[data-modetab="floorplan"]')
+      .click('[data-object-type="spaces"] .add-new')
       .perform(drawSquare(-50, 0, 30, 50))
       .assert.elementCount('.daylighting-control', 1)
       .checkForErrors()
+      .pause()
       .end();
   },
   'daylighting control wont "jump" to stay in space': (browser) => {

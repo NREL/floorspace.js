@@ -2,6 +2,7 @@
   <div
     class="editable-select-list"
     :class="{ 'expanded': !compact }"
+    :data-object-type="selectedObjectType"
   >
     <div class="controls">
       <div class="control-group">
@@ -11,7 +12,7 @@
           :value="selectedObjectType"
         />
         <span v-else>{{ objectTypes[0].display }}</span>
-        <a @click="addRow" v-if="addRow">
+        <a @click="addRow" v-if="addRow" class="add-new">
           <AddNew class="button"/>
         </a>
       </div>
