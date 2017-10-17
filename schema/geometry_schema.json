@@ -91,13 +91,6 @@
 						},
 						"language": {
 							"type": "string"
-						},
-						"north_axis": {
-							"type": "number"
-						},
-						"building_min_z": {
-							"description": "Minimum z coordinate for the building's first story. Use a value < 0 for buildings with below-grade spaces, or a value > 0 for, e.g., buildings on piers.",
-							"type": "number"
 						}
 					}
 				},
@@ -168,6 +161,18 @@
 				},
 				"showImportExport": {
 					"type": "boolean"
+				}
+			}
+		},
+		"Building": {
+			"type": "object",
+			"properties": {
+				"north_axis": {
+					"type": "number"
+				},
+				"floor offset": {
+					"description": "If provided, specifies the vertical offset between the building floor and the ground plane. Use a value < 0 for buildings with below-grade spaces, or a value > 0 for, e.g., buildings on piers.",
+					"type": "number"
 				}
 			}
 		},
@@ -321,6 +326,10 @@
 				"above_ceiling_plenum_height": {
 					"type": "number"
 				},
+				"floor_offset": {
+					"description": "If provided, specifies the vertical offset between the story floor and the below story ceiling.",
+					"type": "number"
+				},
 				"multiplier": {
 					"type": "number",
 					"minimum": 0,
@@ -454,18 +463,26 @@
 						]
 					}
 				},
-				"floor_to_ceiling_height_override": {
+				"below_floor_plenum_height": {
+					"description": "If provided, overrides the story below_floor_plenum_height.",
+					"type": "number"
+				},
+				"floor_to_ceiling_height": {
 					"description": "If provided, overrides the story floor_to_ceiling_height.",
 					"type": "number",
 					"minimum": 0,
 					"exclusiveMinimum": true
 				},
+				"above_ceiling_plenum_height": {
+					"description": "If provided, overrides the story above_ceiling_plenum_height.",
+					"type": "number"
+				},
 				"floor_offset": {
 					"description": "If provided, specifies the vertical offset between the space floor and the story floor.",
 					"type": "number"
 				},
-				"has_no_floor": {
-					"description": "If true, defines a space that is open to below.",
+				"open_to_below": {
+					"description": "If true, defines a space that is open to below (has no floor).",
 					"type": [
 						"boolean",
 						"null"
