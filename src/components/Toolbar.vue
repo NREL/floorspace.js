@@ -40,6 +40,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           </span>
         </li>
 
+        <li @click="modeTab='assign'" class="tab" :class="{ active: modeTab === 'assign' }">
+          <span>
+            Assign
+            <tab-assign-svg  class="icon"></tab-assign-svg>
+          </span>
+        </li>
+
         <li @click="modeTab='components'" class="tab" data-modetab="components" :class="{ active: modeTab === 'components' }">
           <span>
             Components
@@ -47,12 +54,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           </span>
         </li>
 
-        <li @click="modeTab='assign'" class="tab" :class="{ active: modeTab === 'assign' }">
-          <span>
-            Assign
-            <tab-assign-svg  class="icon"></tab-assign-svg>
-          </span>
-        </li>
         <li>
           <span />
         </li>
