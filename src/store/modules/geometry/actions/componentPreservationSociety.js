@@ -97,7 +97,7 @@ function replaceComponents(
         x: loc.x,
         y: loc.y,
         story_id,
-        face_id,
+        face_id: loc.face_id,
       }, { root: true });
     });
   });

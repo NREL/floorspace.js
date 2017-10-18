@@ -512,8 +512,10 @@ export default {
   * infer a rectangular eraser selection based on two points on the grid
   * remove the intersection of all geometry on the current story with the eraser selection
   */
-  eraseRectangularSelection () {
+  eraseRectangularSelection() {
     // infer 4 corners of the rectangle based on the two points that have been drawn
+    d3.selectAll('#grid .point-path').remove();
+
     const payload = {
       points: [
         this.points[0],

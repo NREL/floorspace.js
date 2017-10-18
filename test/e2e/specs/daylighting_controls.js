@@ -22,33 +22,32 @@ module.exports = {
         .mouseButtonClick();
 
         done();
-      });
+      })
+      .click('[data-modetab="floorplan"]');
   },
   'deleting defn deletes all instances': (browser) => {
     browser
+    .click('[data-modetab="components"]')
     .click('#component-icons [title="Daylighting Control Definition"]')
     .click('#component-icons [data-object-type="daylighting_control_definitions"]')
     .click('#component-icons [data-object-type="daylighting_control_definitions"] .destroy')
       // switching tools clears the .highlight
-      .click('.tools-list [title="Remove Component"]')
+      .click('.tools [data-tool="Remove Component"]')
       .assert.elementCount('.daylighting-control', 0)
       .checkForErrors()
       .end();
   },
   'replacing section of space moves daylighting control to new space': (browser) => {
     browser
-      .click('[data-modetab="floorplan"]')
       .click('[data-object-type="spaces"] .add-new')
       .perform(drawSquare(-50, 0, 30, 50))
-      .assert.elementCount('.daylighting-control', 1)
+      .assert.elementCount('.current.poly .daylighting-control', 1)
       .checkForErrors()
-      .pause()
       .end();
   },
   'daylighting control wont "jump" to stay in space': (browser) => {
     browser
       .click('.tools [data-tool="Eraser"]')
-      .click('#selections .add-sub-selection')
       .perform(drawSquare(-50, 25, 30, 20))
       .assert.elementCount('.daylighting-control', 0)
       .checkForErrors()
@@ -65,7 +64,7 @@ module.exports = {
   'splitting edge preserves daylighting controls': (browser) => {
     browser
       .click('.tools [data-tool="Rectangle"]')
-      .click('#selections .add-sub-selection')
+      .click('[data-object-type="spaces"] .add-new')
       .perform(drawSquare(-10, 50, 10, 10))
       .assert.elementCount('.daylighting-control', 1)
       .checkForErrors()
@@ -74,7 +73,7 @@ module.exports = {
   'covering daylighting control should not remove it': (browser) => {
     browser
       .click('.tools [data-tool="Rectangle"]')
-      .click('#selections .add-sub-selection')
+      .click('[data-object-type="spaces"] .add-new')
       .perform(drawSquare(-45, 35, 30, 30))
       .assert.elementCount('.daylighting-control', 1)
       .checkForErrors()
