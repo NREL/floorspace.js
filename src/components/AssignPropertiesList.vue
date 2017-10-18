@@ -21,6 +21,9 @@
         />
       </div>
     </div>
+    <span class="current-space-prop" v-if="currentSpaceProperty">
+      {{ currentSpaceProperty.name }}
+    </span>
   </div>
 </template>
 <script>
@@ -72,6 +75,9 @@ export default {
   }
   .selected svg {
     fill: #008500;
+  }
+  .current-space-prop {
+    margin-left: 1em;
   }
   .library {
     min-width: 200px;

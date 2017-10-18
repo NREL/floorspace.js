@@ -12,6 +12,9 @@
         :type="compType"
       />
     </div>
+    <span v-if="selectedComponentType" class="current-component">
+      {{ currentComponent.definition.name }}
+    </span>
   </div>
 </template>
 <script>
@@ -62,6 +65,9 @@ export default {
     svg {
       fill: #008500;
     }
+  }
+  .current-component {
+    margin-left: 1em;
   }
   .active {
     background-color: $gray-medium;
