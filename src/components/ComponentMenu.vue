@@ -46,7 +46,7 @@ export default {
         daylighting_control_definitions: 'Daylighting Control Definitions',
         window_definitions: 'Window Definitions',
       },
-      compact: true,
+      compact: false,
     };
   },
   methods: {

@@ -16,7 +16,7 @@
           v-if="visibleSpaceProp === spaceProp"
           :objectTypes="[spaceProp]"
           :mode="spaceProp"
-          :compact="!expanded[spaceProp]"
+          :compact="expanded[spaceProp]"
           @toggleCompact="toggleCompact(spaceProp)"
         />
       </div>

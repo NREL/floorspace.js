@@ -8,9 +8,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
   <div class="editable-table">
-    <table class="table">
+    <table class="table" cellspacing="0">
       <thead>
         <tr>
+          <th class="select"><!-- placeholder for select column --></th>
           <th v-for="col in visibleColumns" @click="sortBy(col.name)">
             <span>{{col.displayName}}</span>
             <svg v-show="col.name === sortKey && sortDescending" viewBox="0 0 10 3" xmlns="http://www.w3.org/2000/svg">
@@ -24,7 +25,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </tr>
       </thead>
       <tbody>
-        <tr v-for="row in sortedRows" :key="row.id">
+        <tr v-for="row in sortedRows" :key="row.id" :class="{ selected: selectedItemId === row.id }">
+          <td class="select" @click.stop="selectRow(row)">
+            <input type="radio" :checked="selectedItemId === row.id" />
+          </td>
           <td
               v-for="col in visibleColumns"
               :data-column="col.name"
@@ -54,6 +58,7 @@ export default {
   name: 'EditableTable',
   props: [
     'columns', 'rows', 'deleteRow', 'updateRow',
+    'selectRow', 'selectedItemId',
   ],
   data() {
     return {
@@ -95,7 +100,7 @@ export default {
       border-bottom: 2px solid $gray-medium-dark;
       background-color: $gray-medium;
       width: 11em;
-      &.destroy {
+      &.destroy, &.select {
         width: 2rem;
       }
     }
@@ -122,12 +127,20 @@ export default {
   }
   tr {
     border-bottom: 2px solid tomato;
+    padding-right: 2px;
+    margin-right: -2px;
+    &.selected {
+      background-color: $gray-medium-light;
+      input {
+        background-color: $gray-medium-light;
+      }
+    }
   }
   tbody {
     overflow-y: scroll;
   }
 
-  td.destroy {
+  td.destroy, td.select {
       width: 2rem;
       svg {
           cursor: pointer;

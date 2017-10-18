@@ -41,6 +41,8 @@
     />
     <EditableTable
       v-else
+      :selectRow="selectRow"
+      :selectedItemId="selectedRowId"
       :columns="visibleColumns"
       :rows="searchedRows"
       :deleteRow="destroyRow"
