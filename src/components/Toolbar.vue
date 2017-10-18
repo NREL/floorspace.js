@@ -33,7 +33,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           </span>
         </li>
 
-        <li @click="modeTab='shading'" class="tab" :class="{ active: modeTab === 'shading' }">
+        <li @click="modeTab='shading'" class="tab" data-modetab="shading" :class="{ active: modeTab === 'shading' }">
           <span>
             Shading
             <tab-shading-svg class="icon"></tab-shading-svg>
