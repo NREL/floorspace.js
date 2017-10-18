@@ -117,7 +117,7 @@ export default {
   top: 81px;
   background-color: $gray-medium;
   .editable-select-list {
-    max-height: 400px;
+    max-height: 250px;
     overflow:scroll;
     padding: 10px;
   }
