@@ -31,11 +31,11 @@ module.exports = {
     .click('#component-icons [title="Daylighting Control Definition"]')
     .click('#component-icons [data-object-type="daylighting_control_definitions"]')
     .click('#component-icons [data-object-type="daylighting_control_definitions"] .destroy')
-      // switching tools clears the .highlight
-      .click('.tools [data-tool="Remove Component"]')
-      .assert.elementCount('.daylighting-control', 0)
-      .checkForErrors()
-      .end();
+    // switching tools clears the .highlight
+    .click('.tools [data-tool="Remove Component"]')
+    .assert.elementCount('.daylighting-control', 0)
+    .checkForErrors()
+    .end();
   },
   'replacing section of space moves daylighting control to new space': (browser) => {
     browser
