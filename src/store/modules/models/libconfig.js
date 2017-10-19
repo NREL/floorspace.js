@@ -97,6 +97,19 @@ const map = {
         converter: converters.number,
         numeric: true,
       },
+      {
+        name: 'total_count',
+        displayName: 'Total Count',
+        readonly: true,
+        numeric: true,
+        get(windowDefn, state) {
+          return _.chain(state.models.stories)
+            .flatMap('windows')
+            .filter({ window_defn_id: windowDefn.id })
+            .value()
+            .length;
+        },
+      },
     ],
     init: factory.WindowDefn,
   },
@@ -172,6 +185,20 @@ const map = {
         validator: validators.gt0,
         converter: converters.number,
         numeric: true,
+      },
+      {
+        name: 'total_count',
+        displayName: 'Total Count',
+        readonly: true,
+        numeric: true,
+        get(dcDefn, state) {
+          return _.chain(state.models.stories)
+            .flatMap('spaces')
+            .flatMap('daylighting_controls')
+            .filter({ daylighting_control_defn_id: dcDefn.id })
+            .value()
+            .length;
+        },
       },
     ],
     init: factory.DaylightingControlDefn,
