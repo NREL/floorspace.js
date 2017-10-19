@@ -107,6 +107,9 @@
     .window.selected {
       stroke: green;
     }
+    .window.facing-removal {
+      stroke: blue;
+    }
     .daylighting-control {
       circle {
         stroke: #222;
@@ -127,6 +130,14 @@
       }
       circle{
         stroke: #dfda48;
+      }
+    }
+    .daylighting-control.facing-removal {
+      path {
+        fill: blue;
+      }
+      circle{
+        stroke: blue;
       }
     }
     .highlight {

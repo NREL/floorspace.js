@@ -81,7 +81,7 @@ export default {
   deselectImages() {
     this.$store.dispatch('application/setCurrentSubSelectionId', this.currentStory.spaces[0]);
   },
-  removeComponent() {
+  componentToRemove() {
     const
       gridCoords = d3.mouse(this.$refs.grid),
       gridPoint = { x: gridCoords[0], y: gridCoords[1] },
@@ -89,6 +89,13 @@ export default {
       component = _.minBy(this.allComponentInstanceLocs, ci => distanceBetweenPoints(ci, rwuPoint)),
       distToComp = component && distanceBetweenPoints(component, rwuPoint);
     if (!component || distToComp > this.spacing * 2) {
+      return null;
+    }
+    return component;
+  },
+  removeComponent() {
+    const component = this.componentToRemove();
+    if (!component) {
       return;
     }
     const payload = { story_id: this.currentStory.id, object: { id: component.id } };
@@ -99,6 +106,10 @@ export default {
     } else {
       console.error(`unrecognized component to remove: ${component}`);
     }
+  },
+  highlightComponentToRemove() {
+    const component = this.componentToRemove();
+    this.componentFacingRemoval = component && component.id;
   },
   placeWindow() {
     const
@@ -188,6 +199,7 @@ export default {
     // only highlight snap targets in drawing modes when a space or shading has been selected
     if (!(this.currentTool === 'Eraser' ||
     (this.currentTool === 'Place Component' && this.currentComponentDefinition) ||
+    (this.currentTool === 'Remove Component') ||
     ((this.currentTool === 'Rectangle' || this.currentTool === 'Polygon') && (this.currentSpace || this.currentShading)))) { return; }
 
     // unhighlight expired snap targets
@@ -199,6 +211,9 @@ export default {
 
     if (this.currentTool === 'Place Component' && this.currentComponentDefinition) {
       this.highlightComponent(gridPoint);
+      return;
+    } else if (this.currentTool === 'Remove Component') {
+      this.highlightComponentToRemove();
       return;
     }
 
@@ -249,6 +264,7 @@ export default {
 
   clearHighlights() {
     d3.selectAll('#grid .highlight, #grid .gridpoint, #grid .guideline').remove();
+    this.componentFacingRemoval = null;
   },
 
 

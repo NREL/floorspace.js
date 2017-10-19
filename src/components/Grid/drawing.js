@@ -17,6 +17,7 @@ export function drawWindow() {
     windowE.append('line').attr('class', 'end-linecap');
     const windw = selection.merge(windowE);
     windw.classed('selected', d => d.selected);
+    windw.classed('facing-removal', d => d.facingRemoval);
     windw.select('line.pane')
       .attr('x1', d => xScale(d.start.x))
       .attr('y1', d => yScale(d.start.y))
@@ -215,6 +216,7 @@ export function drawDaylightingControl() {
     dcE.append('path').attr('class', 'quadrants');
     const dc = selection.merge(dcE);
     dc.classed('selected', d => d.selected);
+    dc.classed('facing-removal', d => d.facingRemoval);
     dc.select('circle.bg')
       .attr('cx', d => xScale(d.x))
       .attr('cy', d => yScale(d.y))

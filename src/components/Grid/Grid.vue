@@ -48,6 +48,7 @@ export default {
         x: null,
         y: null,
       },
+      componentFacingRemoval: null,
       transformAtLastRender: d3.zoomIdentity,
       handleMouseMove: null, // placeholder --> overwritten in mounted()
       ...drawMethods({
@@ -286,7 +287,8 @@ export default {
         e => _.filter(this.currentStory.windows , { edge_id: e.id })
               .map(w => ({
                 ...this.denormalizeWindow(e, w),
-                selected: w.id === this.currentComponentInstanceId
+                selected: w.id === this.currentComponentInstanceId,
+                facingRemoval: w.id === this.componentFacingRemoval,
               })));
     },
     polygonsFromGeometry(geometry, extraPolygonAttrs = {}) {
@@ -310,6 +312,7 @@ export default {
               .map(dc => ({
                 ...geometryHelpers.vertexForId(dc.vertex_id, geometry),
                 selected: dc.id === this.currentComponentInstanceId,
+                facingRemoval:  dc.id === this.componentFacingRemoval,
               })),
             ...extraPolygonAttrs,
           };
