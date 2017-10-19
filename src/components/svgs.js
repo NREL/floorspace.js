@@ -19,6 +19,7 @@ import toolImageSvg from './../assets/svg-icons/image_icon.svg';
 import toolFillSvg from './../assets/svg-icons/fill_icon.svg';
 import toolPlaceComponent from './../assets/svg-icons/lego_brick_icon.svg';
 
+import ZoomToFitSvg from './../assets/svg-icons/zoom_to_fit.svg';
 import zoomInSvg from './../assets/svg-icons/zoom_in.svg';
 import zoomOutSvg from './../assets/svg-icons/zoom_out.svg';
 import panSvg from './../assets/svg-icons/pan.svg';
@@ -91,6 +92,7 @@ export default {
   'zoom-out-svg': zoomOutSvg,
   'pan-svg': panSvg,
   'add-image': addImage,
+  ZoomToFitSvg,
 
   ComponentIcon,
   AssignSpacePropIcon,

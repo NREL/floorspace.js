@@ -10,7 +10,7 @@ const d3 = require('d3');
 const polylabel = require('polylabel');
 import _ from 'lodash';
 import { snapTargets, snapWindowToEdge, snapToVertexWithinFace, findClosestEdge, findClosestWindow } from './snapping';
-import geometryHelpers, { distanceBetweenPoints } from './../../store/modules/geometry/helpers';
+import geometryHelpers, { distanceBetweenPoints, fitToAspectRatio } from './../../store/modules/geometry/helpers';
 import modelHelpers from './../../store/modules/models/helpers';
 import { ResizeEvents } from '../../components/Resize';
 
@@ -1078,20 +1078,14 @@ export default {
     const
       width = this.$refs.grid.clientWidth,
       height = this.$refs.grid.clientHeight,
-      xSpan = this.max_x - this.min_x,
-      ySpan = this.max_y - this.min_y,
-      xAccordingToY = ySpan * (width / height),
-      yAccordingToX = xSpan * (height / width),
-      xDiff = xAccordingToY - xSpan,
-      yDiff = yAccordingToX - ySpan;
-
-    if (xDiff < 0) {
-      this.min_x -= xDiff / 2;
-      this.max_x += xDiff / 2;
-    } else {
-      this.min_y -= yDiff / 2;
-      this.max_y += yDiff / 2;
-    }
+      { xExtent, yExtent } = fitToAspectRatio(
+        [this.min_x, this.max_x],
+        [this.min_x, this.max_x],
+        width / height,
+        'contract',
+      );
+    [this.min_x, this.max_x] = xExtent;
+    [this.min_y, this.max_y] = yExtent;
   },
   nullTransform() {
     d3.select(this.$refs.grid).call(this.zoomBehavior.transform, d3.zoomIdentity);
@@ -1239,11 +1233,28 @@ export default {
       .duration(400)
       .call(this.zoomBehavior.transform, d3.zoomIdentity.scale(newScale));
   },
-  zoomIn() {
-    this.zoomBy(1.2);
-  },
-  zoomOut() {
-    this.zoomBy(1 / 1.2);
+  zoomToFit() {
+    const
+      width = this.$refs.grid.clientWidth,
+      height = this.$refs.grid.clientHeight;
+
+    const
+      oldXExtent = d3.extent(this.currentStoryGeometry.vertices, d => this.zoomXScale(d.x)),
+      oldYExtent = d3.extent(this.currentStoryGeometry.vertices, d => this.zoomYScale(d.y)),
+      { xExtent, yExtent } = fitToAspectRatio(oldXExtent, oldYExtent, width / height),
+      dx = xExtent[1] - xExtent[0],
+      dy = yExtent[1] - yExtent[0],
+      x = (xExtent[0] + xExtent[1]) / 2,
+      y = (yExtent[0] + yExtent[1]) / 2,
+      scale = 0.9 / Math.max(dx / width, dy / height),
+      translate = [width / 2 - scale * x, height / 2 - scale * y],
+      svg = d3.select('#grid svg'),
+      transform = d3.zoomIdentity.scale(scale).translate(...translate)
+
+    console.log('transform', transform);
+    debugger;
+    svg.call(this.zoomBehavior.transform, transform);
+
   },
   translateEntities() {
     d3.selectAll('#grid svg .images, #grid svg .polygons')

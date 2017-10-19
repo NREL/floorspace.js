@@ -1,4 +1,6 @@
-import Validator from './../../utilities/validator.js'
+import * as d3 from 'd3';
+import { fitToAspectRatio } from './../geometry/helpers';
+import Validator from './../../utilities/validator';
 
 export default {
     // CONFIG
@@ -116,4 +118,8 @@ export default {
     setTransform(context, payload) {
       context.commit('setTransform', payload);
     },
+
+  zoomToFit(context, { geometry_id, widthOverHeight }) {
+    context.commit('setView', { xExtent, yExtent });
+  },
 }

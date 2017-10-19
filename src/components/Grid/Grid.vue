@@ -78,8 +78,7 @@ export default {
 
     ResizeEvents.$on('resize', this.reloadGridAndScales);
 
-    window.eventBus.$on('zoomIn', this.zoomIn);
-    window.eventBus.$on('zoomOut', this.zoomOut);
+    window.eventBus.$on('zoomToFit', this.zoomToFit);
   },
   beforeDestroy() {
     this.$refs.grid.removeEventListener('reloadGrid', this.reloadGridAndScales);
@@ -89,8 +88,7 @@ export default {
 
     ResizeEvents.$off('resize', this.reloadGridAndScales);
 
-    window.eventBus.$off('zoomIn', this.zoomIn);
-    window.eventBus.$off('zoomOut', this.zoomOut);
+    window.eventBus.$off('zoomToFit', this.zoomToFit);
   },
   computed: {
     ...mapState({

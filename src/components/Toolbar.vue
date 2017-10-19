@@ -92,8 +92,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
     <section id="bottom" :class="modeTab">
       <div id="grid-tools">
-        <zoom-in-svg class="button" @click.native="zoomIn"></zoom-in-svg>
-        <zoom-out-svg class="button" @click.native="zoomOut"></zoom-out-svg>
+        <ZoomToFitSvg class="button" @click.native="zoomToFit"></ZoomToFitSvg>
       </div>
       <template  v-if="modeTab ==='floorplan'">
         <div id="instructions">Draw a floorplan and import images</div>
@@ -234,12 +233,8 @@ export default {
     };
   },
   methods: {
-    zoomIn() {
-      console.log('toolbar zoomin');
-      window.eventBus.$emit('zoomIn');
-    },
-    zoomOut() {
-      window.eventBus.$emit('zoomOut');
+    zoomToFit() {
+      window.eventBus.$emit('zoomToFit');
     },
     exportData() {
       this.thingWereSaving = 'Floorplan';
