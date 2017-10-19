@@ -77,7 +77,7 @@ export default {
     objectTypesForTab() {
       switch (this.modeTab) {
         case 'floorplan':
-          return ['spaces', 'images'];
+          return ['spaces', 'shading', 'images'];
         case 'shading':
           return ['shading'];
         case 'components':
