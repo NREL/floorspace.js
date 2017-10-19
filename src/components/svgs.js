@@ -15,6 +15,9 @@ import toolDrawPolygonSvg from './../assets/svg-icons/tool_draw_polygon.svg';
 import toolEraseSvg from './../assets/svg-icons/tool_erase.svg';
 import toolMoveSizeSvg from './../assets/svg-icons/tool_move_size.svg';
 import toolColorSvg from './../assets/svg-icons/tool_color.svg';
+import toolImageSvg from './../assets/svg-icons/image_icon.svg';
+import toolFillSvg from './../assets/svg-icons/fill_icon.svg';
+import toolPlaceComponent from './../assets/svg-icons/lego_brick_icon.svg';
 
 import zoomInSvg from './../assets/svg-icons/zoom_in.svg';
 import zoomOutSvg from './../assets/svg-icons/zoom_out.svg';
@@ -80,6 +83,9 @@ export default {
   'tool-draw-polygon-svg': toolDrawPolygonSvg,
   'tool-erase-svg': toolEraseSvg,
   'tool-move-size-svg': toolMoveSizeSvg,
+  'tool-image-svg': toolImageSvg,
+  'tool-fill-svg': toolFillSvg,
+  'tool-component-svg': toolPlaceComponent,
 
   'zoom-in-svg': zoomInSvg,
   'zoom-out-svg': zoomOutSvg,

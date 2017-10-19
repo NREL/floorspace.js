@@ -106,7 +106,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <tool-draw-polygon-svg class="button"></tool-draw-polygon-svg>
           </div>
           <div @click="tool = 'Fill'" data-tool="Fill" title="Fill" :class="{ active: tool === 'Fill' }">
-            <span style="top:10px; position: relative;">Fill</span>
+            <tool-fill-svg class="button"></tool-fill-svg>
           </div>
           <div @click="tool = 'Eraser'" data-tool="Eraser" title="Eraser" :class="{ active: tool === 'Eraser' }">
             <tool-erase-svg class="button"></tool-erase-svg>
@@ -115,7 +115,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <tool-move-size-svg class="button"></tool-move-size-svg>
           </div>
           <div @click="tool = 'Image'" data-tool="Image" title="Image" :class="{ active: tool === 'Image' }">
-            <tab-floorplan-svg class="button"></tab-floorplan-svg>
+            <tool-image-svg class="button"></tool-image-svg>
           </div>
         </div>
 
@@ -158,7 +158,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <!-- No need to show tool options if there's only the one choice. -->
         <div id="drawing-tools" class="tools-list tools">
           <div @click="tool = 'Place Component'" data-tool="Place Component" title="Place Component" :class="{ active: tool === 'Place Component' }">
-            <tab-components-svg class="button"></tab-components-svg>
+            <tool-component-svg class="button"></tool-component-svg>
           </div>
           <div @click="tool = 'Remove Component'" data-tool="Remove Component" title="Remove Component" :class="{ active: tool === 'Remove Component' }">
             <tool-erase-svg class="button"></tool-erase-svg>
