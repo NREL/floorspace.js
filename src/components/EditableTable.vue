@@ -107,9 +107,10 @@ export default {
     tr {
       height: 3rem;
       svg {
+        margin-left: 1em;
         height: 1rem;
         width: 1rem;
-        fill: $gray-medium;
+        fill: $gray-lightest;
       }
     }
   }
