@@ -154,6 +154,7 @@ export default {
     position: absolute;
     height: calc(100% - 110px);
     background-color: $gray-medium;
+    width: calc(100% - 200px);
   }
 
 </style>
