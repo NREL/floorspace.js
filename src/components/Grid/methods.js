@@ -1229,6 +1229,18 @@ export default {
       .duration(400)
       .call(this.zoomBehavior.transform, d3.zoomIdentity.scale(newScale));
   },
+  scaleTo(scale) {
+    const
+      width = this.$refs.grid.clientWidth,
+      height = this.$refs.grid.clientHeight,
+      x = (this.zoomXScale(this.max_x) + this.zoomXScale(this.min_x)) / 2,
+      y = (this.zoomYScale(this.max_y) + this.zoomYScale(this.min_y)) / 2,
+      translate = [width / 2 - scale * x, height / 2 - scale * y];
+    d3.select(this.$refs.grid)
+      .call(this.zoomBehavior.transform, d3.zoomIdentity
+          .translate(...translate)
+          .scale(scale));
+  },
   zoomIn() {
     this.zoomBy(1.2);
   },
