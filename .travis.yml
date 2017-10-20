@@ -13,6 +13,10 @@ before_install:
   - sudo apt-get install -y libappindicator1 fonts-liberation
   - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
   - sudo dpkg -i google-chrome*.deb
+  - eval "$(ssh-agent -s)"
+  - openssl aes-256-cbc -K $encrypted_f2baaaee3923_key -iv $encrypted_f2baaaee3923_iv -in publish-key.enc -out publish-key -d
+  - chmod 600 publish-key
+  - ssh-add publish-key
 install:
   - npm install
   - npm update
@@ -25,10 +29,7 @@ script:
   - npm run test && node check_version.js
   - npm run build
 deploy:
-  provider: pages
-  skip_cleanup: true
-  github_token:
-    secure: "KAGTRfcckq3RIjhwEohhfrXp9SC3Lu6bStWckDo9nPpO3Hp9TrTVCcfg5Ot8b0p7yNBEXnn2LXHhJVvh3WUVSS/F36syzoaTt2Dk1IXgYo1SNOQLDGMI/oY7rMgBaE5dOMnzLDbpem7R5YL1ck0/C0EqoRwJO5MTvl/bhw8SslwUaXBOdyaNSFOe7jZdwo5AZb4l2InsgfOUAURexnttAoJagLTpqQJpwr5AEhcqNph3ognOykqFmy5UrxOYN3CCBqCFqOzV9ow+YXdLzV9nCLqiR7577kavjD9zX6+Rke5ZVSf6IEqeYugKsFPFNUBgdtH1YSzgFumKsP7ZRzulqrj5Jr/sue5Rg83ZrmPDNMaYK79By3VDlfYEQ5DRwHeoJomLIPNokuyKwz0qNZa4yvgTRykJSBlkd4rJ/BfEYA1JUPD4xar3iOuIfCkbX+0UQd9/gkN8N4/caVpsli/aZRQeq6IXVhbweaiZnWl29Y3OGPkSvla6S+7WnWQncFbvJU75wwBZZSx4/u6cenI034/JW6ucQjSPWa1Wjpsu7A5i4RRlqNRphIwqYFj34AUnn0o+gHLf/PajHQ3TARdNZl/w0UvrRCsx4ecKMCn0e8+NdPzo43Zj0dx8ZZlcVItHcFD3E+RyXK2Vr/psr349S4dtv0e+PNiZw/4eshJDUJM="
-  local_dir: dist
+  provider: script
+  script: npm run deploy
   on:
     branch: develop
