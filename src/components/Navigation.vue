@@ -150,9 +150,9 @@ export default {
     height: 100%;
     .editable-select-list {
       border-right: 1px solid $gray-darkest;
-      height: calc(100% - 2rem);
+      height: 100%;
       width: 200px;
-
+      background-color: $gray-medium-dark;
       &.expanded {
         width: calc(100% - 200px);
       }

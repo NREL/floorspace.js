@@ -124,6 +124,7 @@ export default {
       padding-bottom: 10px;
       font-size: 1rem;
       height: 18px;
+      width: 100%;
     }
   }
   tr {
@@ -150,7 +151,9 @@ export default {
   }
   .inner-table {
     overflow: scroll;
-    height: 100%;
+    position: absolute;
+    height: calc(100% - 110px);
+    background-color: $gray-medium;
   }
 
 </style>
