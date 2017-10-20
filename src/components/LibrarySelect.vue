@@ -7,18 +7,20 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 <template>
   <div class="library-select">
-    <div
-      v-for="item in rows"
-      :key="item.id"
-      :class="{ active: selectedItemId === item.id }"
-      @click="selectItem(item)"
-      :data-id="item.id"
-    >
-        <span :style="{ 'background-color': item.color }"></span>
-        {{item.name}}
-        <a @click="destroyItem(item)" class="destroy">
-          <Delete class="button" />
-        </a>
+    <div class="rows">
+      <div
+        v-for="item in rows"
+        :key="item.id"
+        :class="{ active: selectedItemId === item.id }"
+        @click="selectItem(item)"
+        :data-id="item.id"
+      >
+          <span :style="{ 'background-color': item.color }"></span>
+          {{item.name}}
+          <a @click="destroyItem(item)" class="destroy">
+            <Delete class="button" />
+          </a>
+      </div>
     </div>
   </div>
 </template>
@@ -40,42 +42,42 @@ export default {
 
 .library-select {
   padding: 0 0 !important;
-  height: calc(100% - 20px);
+  max-height: calc(100% - 40px);
   overflow-y: scroll;
+  .rows {
+    > div {
+      border-bottom: 1px solid $gray-darkest;
+      cursor: pointer;
+      width: calc(100% - 1rem);;
+      height: 2rem;
+      padding: 0 .5rem;
 
-  > div {
-    border-bottom: 1px solid $gray-darkest;
-    cursor: pointer;
-    width: calc(100% - 1rem);;
-    height: 2rem;
-    padding: 0 .5rem;
+      align-items: center;
+      display: flex;
+      justify-content: space-between;
 
-    align-items: center;
-    display: flex;
-    justify-content: space-between;
+      &.active {
+        color: $primary;
+        background: $gray-medium-light;
+      }
+      span {
+        display: inline-block;
+        height: 1rem;
+        width: 1rem;
+      }
 
-    &.active {
-      color: $primary;
-      background: $gray-medium-light;
-    }
-    span {
-      display: inline-block;
-      height: 1rem;
-      width: 1rem;
-    }
+      svg {
+        height: 1rem;
+        width: 1rem;
+        margin-top: -5px;
+        margin-left: 10px;
+        fill: $gray-lightest;
 
-    svg {
-      height: 1rem;
-      width: 1rem;
-      margin-top: -5px;
-      margin-left: 10px;
-      fill: $gray-lightest;
-
-      &:hover {
-        fill: $secondary;
+        &:hover {
+          fill: $secondary;
+        }
       }
     }
-
   }
   // overflow: auto;
   // height: calc(100% - 5rem);

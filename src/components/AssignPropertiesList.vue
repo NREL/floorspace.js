@@ -60,7 +60,7 @@ export default {
   },
 }
 </script>
-<style lang="scss" scoped>
+<style lang="scss">
 @import "./../scss/config";
 .assign-properties-list {
   display: flex;
@@ -89,6 +89,12 @@ export default {
       max-height: 250px;
       overflow: scroll;
       padding: 10px;
+      .inner-table {
+        max-height: 132px !important;
+      }
+    }
+    .library-select {
+      max-height: 132px !important;
     }
   }
 

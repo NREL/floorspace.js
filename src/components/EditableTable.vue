@@ -8,23 +8,23 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
   <div class="editable-table">
-    <table class="table" cellspacing="0">
-      <thead>
-        <tr>
-          <th class="select"><!-- placeholder for select column --></th>
-          <th v-for="col in visibleColumns" @click="sortBy(col.name)">
-            <span>{{col.displayName}}</span>
-            <svg v-show="col.name === sortKey && sortDescending" viewBox="0 0 10 3" xmlns="http://www.w3.org/2000/svg">
-                <path d="M0 .5l5 5 5-5H0z"/>
-            </svg>
-            <svg v-show="col.name === sortKey && !sortDescending" viewBox="0 0 10 3" xmlns="http://www.w3.org/2000/svg">
-                <path d="M0 5.5l5-5 5 5H0z"/>
-            </svg>
-          </th>
-          <th class="destroy"><!-- placeholder for delete column --></th>
-        </tr>
-      </thead>
-      <tbody>
+    <table class="table head" cellspacing="0">
+      <tr>
+        <th class="select"><!-- placeholder for select column --></th>
+        <th v-for="col in visibleColumns" @click="sortBy(col.name)">
+          <span>{{col.displayName}}</span>
+          <svg v-show="col.name === sortKey && sortDescending" viewBox="0 0 10 3" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0 .5l5 5 5-5H0z"/>
+          </svg>
+          <svg v-show="col.name === sortKey && !sortDescending" viewBox="0 0 10 3" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0 5.5l5-5 5 5H0z"/>
+          </svg>
+        </th>
+        <th class="destroy"><!-- placeholder for delete column --></th>
+      </tr>
+    </table>
+    <div class="inner-table">
+      <table cellspacing="0">
         <tr v-for="row in sortedRows" :key="row.id" :class="{ selected: selectedItemId === row.id }">
           <td class="select" @click.stop="selectRow(row)">
             <input type="radio" :checked="selectedItemId === row.id" />
@@ -44,8 +44,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <Delete class="button" />
           </td>
         </tr>
-      </tbody>
-    </table>
+      </table>
+    </div>
   </div>
 </template>
 
@@ -95,7 +95,7 @@ export default {
   .editable-table {
     background-color: $gray-medium;
   }
-  thead {
+  table.head {
     th {
       border-bottom: 2px solid $gray-medium-dark;
       background-color: $gray-medium;
@@ -137,10 +137,6 @@ export default {
       }
     }
   }
-  tbody {
-    overflow-y: scroll;
-  }
-
   td.destroy, td.select {
       width: 2rem;
       svg {
@@ -151,6 +147,10 @@ export default {
               fill: $secondary;
           }
       }
+  }
+  .inner-table {
+    overflow: scroll;
+    height: 100%;
   }
 
 </style>

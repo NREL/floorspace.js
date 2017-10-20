@@ -109,7 +109,7 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 @import "./../scss/config";
 .component-menu {
   min-width: 200px;
@@ -120,6 +120,12 @@ export default {
     max-height: 250px;
     overflow:scroll;
     padding: 10px;
+    .inner-table {
+      max-height: 132px !important;
+    }
+  }
+  .library-select {
+    max-height: 132px !important;
   }
 }
 </style>
