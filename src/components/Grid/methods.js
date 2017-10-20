@@ -1239,9 +1239,8 @@ export default {
       height = this.$refs.grid.clientHeight;
 
     const
-      oldXExtent = d3.extent(this.currentStoryGeometry.vertices, d => this.zoomXScale(d.x)),
-      oldYExtent = d3.extent(this.currentStoryGeometry.vertices, d => this.zoomYScale(d.y)),
-      { xExtent, yExtent } = fitToAspectRatio(oldXExtent, oldYExtent, width / height),
+      xExtent = d3.extent(this.currentStoryGeometry.vertices, d => this.zoomXScale(d.x)),
+      yExtent = d3.extent(this.currentStoryGeometry.vertices, d => this.zoomYScale(d.y)),
       dx = xExtent[1] - xExtent[0],
       dy = yExtent[1] - yExtent[0],
       x = (xExtent[0] + xExtent[1]) / 2,
@@ -1249,12 +1248,9 @@ export default {
       scale = 0.9 / Math.max(dx / width, dy / height),
       translate = [width / 2 - scale * x, height / 2 - scale * y],
       svg = d3.select('#grid svg'),
-      transform = d3.zoomIdentity.scale(scale).translate(...translate)
+      transform = d3.zoomIdentity.translate(...translate).scale(scale);
 
-    console.log('transform', transform);
-    debugger;
     svg.call(this.zoomBehavior.transform, transform);
-
   },
   translateEntities() {
     d3.selectAll('#grid svg .images, #grid svg .polygons')
