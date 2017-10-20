@@ -30,7 +30,7 @@ module.exports = {
       .click('[data-modetab="components"]')
       .click('#component-icons [title="Window Definition"]')
       .click('#component-icons [data-object-type="window_definitions"]')
-      .click('#component-icons [data-object-type="window_definitions"] .destroy')
+      .click('#component-icons [data-object-type="window_definitions"] td.destroy')
       // switching tools clears the .highlight
       .click('.tools [data-tool="Remove Component"]')
       .assert.elementCount('.window', 0)

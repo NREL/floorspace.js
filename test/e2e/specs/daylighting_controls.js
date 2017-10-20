@@ -30,7 +30,7 @@ module.exports = {
     .click('[data-modetab="components"]')
     .click('#component-icons [title="Daylighting Control Definition"]')
     .click('#component-icons [data-object-type="daylighting_control_definitions"]')
-    .click('#component-icons [data-object-type="daylighting_control_definitions"] .destroy')
+    .click('#component-icons [data-object-type="daylighting_control_definitions"] td.destroy')
     // switching tools clears the .highlight
     .click('.tools [data-tool="Remove Component"]')
     .assert.elementCount('.daylighting-control', 0)

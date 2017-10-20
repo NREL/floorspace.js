@@ -37,7 +37,7 @@ module.exports = {
       .checkForErrors()
       .end();
   },
-  'switch to spacing and back, preserve selected space': (browser) => {
+  'switch to shading and back, preserve selected space': (browser) => {
     const devServer = browser.globals.devServerURL;
 
     failOnError(browser)
@@ -46,8 +46,8 @@ module.exports = {
       .waitForElementVisible('.modal .new-floorplan', 5000)
       .setFlagOnError()
       .click('.modal .new-floorplan svg')
-      .click('[data-modetab="shading"]')
-      .click('[data-modetab="floorplan"]')
+      .click('.editable-select-list .controls select option[value="shading"]')
+      .click('.editable-select-list .controls select option[value="spaces"]')
       .assert.elementCount('[data-object-type="spaces"] .active', 1)
       .checkForErrors()
       .end();
