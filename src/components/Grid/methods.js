@@ -1086,6 +1086,10 @@ export default {
       );
     [this.min_x, this.max_x] = xExtent;
     [this.min_y, this.max_y] = yExtent;
+    _.defer(() => {
+      console.log('boundsResolved');
+      window.eventBus.$emit('boundsResolved');
+    });
   },
   nullTransform() {
     d3.select(this.$refs.grid).call(this.zoomBehavior.transform, d3.zoomIdentity);
@@ -1226,6 +1230,10 @@ export default {
       .on('click', this.gridClicked);
     window.d3 = d3;
   },
+  transformTo(t) {
+    d3.select(this.$refs.grid)
+      .call(this.zoomBehavior.transform, t);
+  },
   zoomBy(factor) {
     const newScale = this.transform.k * factor;
     d3.select(this.$refs.grid)
@@ -1251,6 +1259,18 @@ export default {
       transform = d3.zoomIdentity.translate(...translate).scale(scale);
 
     svg.call(this.zoomBehavior.transform, transform);
+  },
+  scaleTo(scale) {
+    const
+      width = this.$refs.grid.clientWidth,
+      height = this.$refs.grid.clientHeight,
+      x = (this.zoomXScale(this.max_x) + this.zoomXScale(this.min_x)) / 2,
+      y = (this.zoomYScale(this.max_y) + this.zoomYScale(this.min_y)) / 2,
+      translate = [width / 2 - scale * x, height / 2 - scale * y];
+    d3.select(this.$refs.grid)
+      .call(this.zoomBehavior.transform, d3.zoomIdentity
+          .translate(...translate)
+          .scale(scale));
   },
   translateEntities() {
     d3.selectAll('#grid svg .images, #grid svg .polygons')
