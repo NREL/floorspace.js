@@ -1087,7 +1087,6 @@ export default {
     [this.min_x, this.max_x] = xExtent;
     [this.min_y, this.max_y] = yExtent;
     _.defer(() => {
-      console.log('boundsResolved');
       window.eventBus.$emit('boundsResolved');
     });
   },
