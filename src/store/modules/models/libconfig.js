@@ -401,6 +401,48 @@ const map = {
         },
       },
       {
+        name: 'below_floor_plenum_height',
+        displayName: 'Below Floor Plenum Height',
+        input_type: 'text',
+        numeric: true,
+        validator: validators.number,
+        converter: converters.number,
+      },
+      {
+        name: 'floor_to_ceiling_height',
+        displayName: 'Floor to Ceiling Height',
+        input_type: 'text',
+        numeric: true,
+        validator: validators.number,
+        converter: converters.number,
+      },
+      {
+        name: 'above_ceiling_plenum_height',
+        displayName: 'Above Ceiling Plenum Height',
+        input_type: 'text',
+        numeric: true,
+        validator: validators.number,
+        converter: converters.number,
+      },
+      {
+        name: 'floor_offset',
+        displayName: 'Floor Offset',
+        input_type: 'text',
+        numeric: true,
+        validator: validators.number,
+        converter: converters.number,
+      },
+      {
+        name: 'open_to_below',
+        displayName: 'Open To Below',
+        input_type: 'select',
+        select_data() {
+          const bools = ['False', 'True'];
+          return _.zipObject(bools, bools);
+        },
+        converter: converters.bool,
+      },
+      {
         name: 'color',
         displayName: 'Color',
         input_type: 'color',
