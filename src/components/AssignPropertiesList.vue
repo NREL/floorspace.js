@@ -91,6 +91,8 @@ export default {
       padding: 10px;
       .inner-table {
         max-height: 132px !important;
+        position: static;
+        width: auto;
       }
     }
     .library-select {
