@@ -94,6 +94,12 @@ export default {
         position: static;
         width: auto;
       }
+      &.expanded {
+        position: fixed;
+        background-color: $gray-medium;
+        right: 0;
+        left: 19.5rem;
+      }
     }
     .library-select {
       max-height: 132px !important;

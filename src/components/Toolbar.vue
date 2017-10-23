@@ -443,7 +443,7 @@ svg.icon, svg.button {
 
 #toolbar {
   background-color: $black;
-  z-index: 4;
+  z-index: 3;
 
   #top {
     height: 2.5rem;
