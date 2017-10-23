@@ -89,7 +89,7 @@ export default {
       max-height: 250px;
       overflow: scroll;
       padding: 10px;
-      .inner-table {
+      tbody {
         max-height: 132px !important;
         position: static;
         width: auto;
