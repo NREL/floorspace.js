@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 window.api = {
   config: null,
   initAlreadyRun: false,
@@ -30,6 +32,9 @@ window.api = {
     if (config === undefined) {
       config = {}; // eslint-disable-line
     }
+    if (config.snapMode && !_.includes(['grid-strict', 'grid-verts-edges'], config.snapMod)) {
+      throw new Error(`unrecognized value for snapMode: ${config.snapMode}. expected 'grid-strict' or 'grid-verts-edges'`);
+    }
     window.api.config = Object.assign({
       showImportExport: true,
       units: 'm',
@@ -41,6 +46,7 @@ window.api = {
         latitude: 39.7653,
         longitude: -104.9863,
       },
+      snapMode: 'grid-strict',
       onChange: () => { window.versionNumber += 1; },
     }, config);
   },
@@ -64,6 +70,7 @@ window.api = {
     window.application.$store.dispatch('project/setMapLatitude', { latitude: window.api.config.defaultLocation.latitude });
     window.application.$store.dispatch('project/setMapLongitude', { longitude: window.api.config.defaultLocation.longitude });
 
+    window.application.$store.dispatch('application/setCurrentSnapMode', { snapMode: window.api.config.snapMode });
     this.initAlreadyRun = true;
   },
 };

@@ -22,7 +22,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             </main>
             <!-- <inspector-view></inspector-view> -->
         </div>
-        <library :class="{ 'disabled-component': tool === 'Map' }"></library>
+        <ImageUpload />
     </div>
 </template>
 
@@ -35,8 +35,8 @@ import Navigation from './components/Navigation.vue';
 import Grid from './components/Grid/Grid.vue';
 import Canvas from './components/Canvas/Canvas.vue';
 import Toolbar from './components/Toolbar.vue';
+import ImageUpload from './components/ImageUpload.vue';
 import Inspector from './components/Inspector.vue';
-import Library from './components/Library.vue';
 import { Resize } from './components/Resize';
 
 
@@ -53,19 +53,15 @@ export default {
   },
   mounted() {
 
-    this.$on('uploadImage', (event) => {
-      document.getElementById('upload-image-input').click();
-    });
-    // App will act as the eventBus for the application
-    this.$on('error', (err) => {
+    window.eventBus.$on('error', (err) => {
       this.error = err;
       setTimeout(() => { this.error = null; }, 5000);
     });
-    this.$on('success', (msg) => {
+    window.eventBus.$on('success', (msg) => {
       this.success = msg;
       setTimeout(() => { this.success = null; }, 5000);
     });
-    this.$on('reload-grid', () => {
+    window.eventBus.$on('reload-grid', () => {
       // This is unfortunate. oh well.
       document.getElementById('svg-grid')
         .dispatchEvent(new Event('reloadGrid'));
@@ -92,9 +88,9 @@ export default {
     'grid-view': Grid,
     'canvas-view': Canvas,
     'inspector-view': Inspector,
-    library: Library,
     navigation: Navigation,
-    toolbar: Toolbar
+    toolbar: Toolbar,
+    ImageUpload,
   },
 };
 </script>

@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { componentInstanceById, spacePropertyById } from './helpers';
 
 export default {
   setCurrentStoryId(context, payload) {
@@ -36,13 +37,28 @@ export default {
       context.commit('setCurrentComponentDefinitionId', { id });
     }
   },
+
+  setCurrentComponentInstanceId(context, payload) {
+    const { id } = payload;
+    if (!componentInstanceById(context.getters.currentStory, id)) {
+      console.error('unable to find an instance with that id on the current story');
+    } else {
+      context.commit('setCurrentComponentInstanceId', payload);
+    }
+  },
+
   setCurrentSnapMode(context, { snapMode }) {
     if (!_.includes(['grid-strict', 'grid-verts-edges'], snapMode)) {
       throw new Error(`Unknown grid mode ${snapMode}`);
     }
     context.commit('setCurrentSnapMode', { snapMode });
   },
-
+  setCurrentModeTab(context, { modeTab }) {
+    context.commit('setCurrentModeTab', { modeTab });
+  },
+  setCurrentSubselectionType(context, { subselectionType }) {
+    context.commit('setCurrentSubselectionType', { subselectionType });
+  },
   setCurrentTool(context, payload) {
     const { tool } = payload;
     if (context.state.tools.indexOf(tool) !== -1) {
@@ -57,24 +73,12 @@ export default {
     }
   },
 
-  setCurrentBuildingUnitId(context, payload) {
+  setCurrentSpacePropertyId(context, payload) {
     const { id } = payload;
-    if (context.rootState.models.library.building_units.map(m => m.id).indexOf(id) !== -1) {
-      context.commit('setCurrentBuildingUnitId', { id });
-    }
-  },
-
-  setCurrentThermalZoneId(context, payload) {
-    const { id } = payload;
-    if (context.rootState.models.library.thermal_zones.map(m => m.id).indexOf(id) !== -1) {
-      context.commit('setCurrentThermalZoneId', { id });
-    }
-  },
-
-  setCurrentSpaceTypeId(context, payload) {
-    const { id } = payload;
-    if (context.rootState.models.library.space_types.map(m => m.id).indexOf(id) !== -1) {
-      context.commit('setCurrentSpaceTypeId', { id });
+    if (spacePropertyById(context.rootState.models.library, id)) {
+      context.commit('setCurrentSpacePropertyId', { id });
+    } else {
+      console.error(`unable to find space property with id: ${id}`);
     }
   },
 

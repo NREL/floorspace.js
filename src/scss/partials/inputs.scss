@@ -22,9 +22,7 @@
     input {
         background-color: $gray-dark;
         border: 0;
-        border-radius: 0.35rem;
         color: $gray-lightest;
-        height: 2rem;
         padding: 0 .75rem;
         -webkit-appearance: none;
     }
@@ -34,7 +32,7 @@
 }
 // reusable number inputs
 .input-number input {
-    width: 2.5rem;
+    width: 1rem;
 }
 
 // reusable select inputs
@@ -43,36 +41,38 @@
 
     select {
         background-color: $gray-dark;
-        border: 0;
+        border-radius: 0;
         color: $gray-lightest;
         flex-grow: 2;
-        height: 2rem;
         padding: 0 1.75rem 0 .75rem;
         -webkit-appearance: none;
     }
 
     svg {
-        pointer-events: none;
-        position: absolute;
-        right: .5rem;
-        top: calc(50% - 3px);
+      height: .5rem;
+      pointer-events: none;
+      position: absolute;
+      right: .25rem;
+      fill: white;
+      top: calc(50% - 0.25rem);
         path {
-            fill: $gray-medium-light;
+            fill: $white;
         }
     }
 }
 
-button {
-    background-color: $gray-dark;
-    border: 1px solid $gray-medium-light;
-    border-radius: 0.35rem;
+svg.button {
     cursor: pointer;
-    color: $gray-lightest;
     height: 2rem;
-    outline: none;
-    padding: 0 .75rem;
-    &[disabled] {
+    width: 2rem;
+    vertical-align: middle;
+    &.disabled {
       cursor: not-allowed;
-      background-color: $gray-medium-dark;
     }
+}
+
+.huebee {
+  position: fixed !important;
+  left: auto !important;
+  top: auto !important;
 }

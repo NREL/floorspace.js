@@ -41,6 +41,7 @@ export default {
     return {
       view: null,
       map: null,
+      startResolution: null,
       autocomplete: null,
       mapModalVisible: window.api ? window.api.config.showMapDialogOnStart : true,
       showGrid: false,
@@ -56,6 +57,7 @@ export default {
     this.initAutoComplete();
     this.loadMap();
     ResizeEvents.$on('resize', this.updateMapView);
+    window.eventBus.$on('boundsResolved', this.clearStartResolution);
   },
 
   /*
@@ -63,9 +65,14 @@ export default {
   */
   beforeDestroy() {
     ResizeEvents.$off('resize', this.updateMapView);
+    window.eventBus.$off('boundsResolved', this.clearStartResolution);
   },
 
   methods: {
+    clearStartResolution() {
+      this.startResolution = null;
+      this.updateMapView();
+    },
     /*
     * Asynchronously load google maps autocomplete
     * attatch to address search field
@@ -91,6 +98,7 @@ export default {
     * empty the map element and (re)load openlayers map canvas inside of it
     */
     loadMap() {
+      window.ol = ol;
       this.$refs.map.innerHTML = '';
       this.view = new ol.View();
       this.map = new ol.Map({
@@ -106,6 +114,7 @@ export default {
     * position the map
     */
     updateMapView() {
+      console.log('updateMapView');
       this.map.updateSize();
       // center of grid in RWU
       let gridCenterX = (this.min_x + this.max_x) / 2;
@@ -132,9 +141,12 @@ export default {
       let deltaY = ((gridCenterX * Math.cos(this.rotation)) - (gridCenterY * Math.sin(this.rotation)));
       let deltaX = ((gridCenterY * Math.cos(this.rotation)) + (gridCenterX * Math.sin(this.rotation)));
 
+
       // Web Mercator projections use different resolutions at different latitudes
       // if the map has been placed, adjust the values for the current latitude
       if (this.view.getCenter()) {
+        this.startResolution = this.startResolution || ol.proj.getPointResolution(this.view.getProjection(), this.view.getResolution(), this.view.getCenter());
+        console.log("start resolution", this.startResolution);
         const resolutionAdjustment = 1 / ol.proj.getPointResolution(this.view.getProjection(), 1, this.view.getCenter());
 
         resolution *= resolutionAdjustment;
@@ -146,6 +158,7 @@ export default {
       mapCenter[0] += deltaY;
       mapCenter[1] += deltaX;
 
+      console.log('setting view resolution', resolution);
       this.view.setResolution(resolution);
       this.view.setCenter(mapCenter);
       this.view.setRotation(this.rotation);
@@ -158,6 +171,10 @@ export default {
       const center = ol.proj.transform(this.view.getCenter(), 'EPSG:3857', 'EPSG:4326')
       this.longitude = center[0];
       this.latitude = center[1];
+
+      const resolution = ol.proj.getPointResolution(this.view.getProjection(), this.view.getResolution(), this.view.getCenter());
+      const scale = this.startResolution / resolution;
+      window.eventBus.$emit('scaleTo', scale);
 
       this.rotation = this.view.getRotation();
 
@@ -269,8 +286,13 @@ export default {
         margin-right: 10px;
     }
 
-    input:focus {
-        outline: none;
+    input {
+      &:focus {
+          outline: none;
+      }
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+      font-size: medium;
     }
 }
 

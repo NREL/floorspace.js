@@ -21,11 +21,18 @@
       pointer-events: none;
   }
 }
+.tool_apply.property [data-model-type="space"] polygon {
+  cursor: pointer;
+}
+
+.tool_map #grid svg path.domain {
+  pointer-events: none;
+}
 
 // styling for svg elements created by d3
 // Vue's inline template styling will not work with dynamically created markup
 #grid svg {
-    * {
+    path, circle, line, rect, ellipse, polygon, .polygons {
         // prevent glitchy points caused by moving mouse over overlapping svg paths
         pointer-events: none;
     }
@@ -97,13 +104,11 @@
       stroke-width: 3;
       stroke: black;
     }
-    #perp-linecap rect {
-      fill: black;
-      stroke: none;
+    .window.selected {
+      stroke: green;
     }
-    #perp-linecap-highlight rect {
-      fill: #008500;
-      stroke: none;
+    .window.facing-removal {
+      stroke: blue;
     }
     .daylighting-control {
       circle {
@@ -117,6 +122,22 @@
       .quadrants {
         fill: #ff7979;
         stroke-width: 0;
+      }
+    }
+    .daylighting-control.selected {
+      path {
+        fill: #dfda48;
+      }
+      circle{
+        stroke: #dfda48;
+      }
+    }
+    .daylighting-control.facing-removal {
+      path {
+        fill: blue;
+      }
+      circle{
+        stroke: blue;
       }
     }
     .highlight {
@@ -164,6 +185,31 @@
           stroke: inherit;
           stroke-width: 0.5;
         }
+        text {
+          fill: blue;
+        }
       }
     }
+}
+
+.image-group {
+  image {
+    opacity: 0.6;
+  }
+  .controls {
+    .rotation-handle {
+      fill: rgba(255, 255, 255, 0.0);
+      stroke: black;
+      pointer-events: auto !important;
+    }
+    .rotation-to-center {
+      stroke: black;
+      stroke-width: 1px;
+    }
+    .corner {
+      fill: blue;
+      stroke: blue;
+      pointer-events: auto !important;
+    }
+  }
 }

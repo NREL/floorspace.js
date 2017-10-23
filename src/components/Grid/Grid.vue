@@ -9,19 +9,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
   <div id="grid" :style="{ 'pointer-events': (currentTool === 'Drag' || currentTool === 'Map') ? 'none': 'auto' }">
     <svg ref="grid" id="svg-grid">
-      <defs>
-        <marker v-for="id in ['perp-linecap', 'perp-linecap-highlight']" :id="id" markerWidth="1" markerHeight="10" orient="auto" markerUnits="strokeWidth" refY="4" refX="0.5">
-          <rect x="0" y="1" width="1" height="6" shape-rendering="optimizeQuality"/>
-        </marker>
-        <marker id="red-arrowhead-right" markerWidth="6" markerHeight="4" refX="6" refY="2"
-             orient="auto">
-          <path d="M 0,0 V 4 L6,2 Z" style="fill: red; stroke: none" />
-        </marker>
-        <marker id="red-arrowhead-left" markerWidth="6" markerHeight="4" refX="0" refY="2"
-             orient="auto">
-          <path d="M 6,0 V 4 L0,2 Z" style="fill: red; stroke: none" />
-        </marker>
-      </defs>
+      <g class="axis axis--x"></g>
+      <g class="axis axis--y"></g>
+      <g class="images"></g>
+      <g class="polygons"></g>
     </svg>
   </div>
 </template>
@@ -35,7 +26,7 @@ import geometryHelpers from './../../store/modules/geometry/helpers';
 import modelHelpers from './../../store/modules/models/helpers';
 import applicationHelpers from './../../store/modules/application/helpers';
 import { ResizeEvents } from '../../components/Resize';
-import { drawWindow, drawDaylightingControl, drawWindowGuideline, drawDaylightingControlGuideline } from './drawing';
+import drawMethods from './drawing';
 import { expandWindowAlongEdge, windowLocation } from './snapping';
 
 const d3 = require('d3');
@@ -57,19 +48,15 @@ export default {
         x: null,
         y: null,
       },
+      componentFacingRemoval: null,
+      transformAtLastRender: d3.zoomIdentity,
       handleMouseMove: null, // placeholder --> overwritten in mounted()
-      drawWindow: drawWindow()
-        .xScale(xScale)
-        .yScale(yScale),
-      drawWindowGuideline: drawWindowGuideline()
-        .xScale(xScale)
-        .yScale(yScale),
-      drawDC: drawDaylightingControl()
-        .xScale(xScale)
-        .yScale(yScale),
-      drawDCGuideline: drawDaylightingControlGuideline()
-        .xScale(xScale)
-        .yScale(yScale),
+      ...drawMethods({
+        xScale,
+        yScale,
+        selectImage: (img) => { this.currentImage = img; },
+        updateImage: (data) => window.application.$store.dispatch('models/updateImageWithData', data),
+      }),
     };
   },
   mounted() {
@@ -90,6 +77,9 @@ export default {
     window.addEventListener('resize', this.reloadGridAndScales);
 
     ResizeEvents.$on('resize', this.reloadGridAndScales);
+
+    window.eventBus.$on('zoomToFit', this.zoomToFit);
+    window.eventBus.$on('scaleTo', this.scaleTo);
   },
   beforeDestroy() {
     this.$refs.grid.removeEventListener('reloadGrid', this.reloadGridAndScales);
@@ -98,11 +88,15 @@ export default {
     window.removeEventListener('resize', this.reloadGridAndScales);
 
     ResizeEvents.$off('resize', this.reloadGridAndScales);
+
+    window.eventBus.$off('zoomToFit', this.zoomToFit);
+    window.eventBus.$off('scaleTo', this.scaleTo);
   },
   computed: {
     ...mapState({
       currentMode: state => state.application.currentSelections.mode,
       currentTool: state => state.application.currentSelections.tool,
+      currentComponentInstanceId: state => state.application.currentSelections.modeTab === 'components' && state.application.currentSelections.component_instance_id,
       snapMode: state => state.application.currentSelections.snapMode,
       previousStoryVisible: state => state.project.previous_story.visible,
       gridVisible: state => state.project.grid.visible,
@@ -121,7 +115,21 @@ export default {
       currentSpace: 'application/currentSpace',
       currentShading: 'application/currentShading',
       currentComponent: 'application/currentComponent',
+      currentSpaceProperty: 'application/currentSpaceProperty',
     }),
+    spacePropertyKey() {
+      switch (this.currentSpaceProperty.type) {
+        case 'building_units': return 'building_unit_id';
+        case 'thermal_zones': return 'thermal_zone_id';
+        case 'space_types': return 'space_type_id';
+        case 'pitched_roofs': return 'pitched_roof_id';
+        default: throw new Error(`unrecognized space property type ${this.currentSpaceProperty.type}`);
+      }
+    },
+    currentImage: {
+      get() { return this.$store.getters['application/currentImage']; },
+      set(item) { this.$store.dispatch('application/setCurrentSubSelectionId', { id: item.id }); },
+    },
     currentComponentType() { return this.currentComponent.type; },
     currentComponentDefinition() { return this.currentComponent.definition; },
     currentSubSelection: {
@@ -165,13 +173,60 @@ export default {
       }
       return [];
     },
-
+    images() {
+      return this.currentStory.images
+        .map(img => ({
+          ...img,
+          current: (
+            // only allow interactions when the image tool is selected.
+            // otherwise, it's possible to move the image when we want to be
+            // panning the background.
+            this.currentTool === 'Image' &&
+            this.currentImage &&
+            this.currentImage.id === img.id),
+          clickable: (
+            this.currentTool === 'Image' &&
+            (!this.currentImage || this.currentImage.id !== img.id)
+          ),
+        }));
+    },
     /*
     * map all faces for the current story to polygon representations (sets of ordered points) for d3 to render
     */
     polygons() {
       const currentStoryPolygons = this.polygonsFromGeometry(this.currentStoryGeometry);
       return this.previousStoryPolygons ? this.previousStoryPolygons.concat(currentStoryPolygons) : currentStoryPolygons;
+    },
+    windowCenterLocs() {
+      return this.currentStory.windows
+        .map(w => ({ w, e: _.find(this.denormalizedGeometry.edges, { id: w.edge_id }) }))
+        .map(({ w, e }) => ({
+          id: w.id,
+          type: 'window',
+          ...windowLocation(e, w),
+        }));
+    },
+    daylightingControlLocs() {
+      return _.flatMap(this.currentStory.spaces, 'daylighting_controls')
+        .map(dc => ({
+          ...geometryHelpers.vertexForId(dc.vertex_id, this.currentStoryGeometry),
+          id: dc.id,
+          type: 'daylighting_control',
+        }));
+    },
+    allComponentInstanceLocs() {
+      return [
+        ...this.windowCenterLocs,
+        ...this.daylightingControlLocs,
+      ];
+    },
+    spaceFaces() {
+      // as opposed to shading faces
+      return this.denormalizedGeometry.faces
+        .filter(f => _.find(this.currentStory.spaces, { face_id: f.id }));
+    },
+    spaceEdges() {
+      return _.flatMap(this.spaceFaces, 'edges');
     },
   },
   watch: {
@@ -180,27 +235,29 @@ export default {
     gridVisible() { this.showOrHideAxes(); },
     spacing() { this.updateGrid(); },
 
-    currentMode() { this.drawPolygons(); },
-    polygons() { this.drawPolygons(); },
-    windowDefs() { this.drawPolygons(); },
+    currentMode() { this.draw(); },
+    polygons() { this.draw(); },
+    images() { this.draw(); },
+    windowDefs() { this.draw(); },
     currentTool() {
       this.points = [];
-      this.drawPolygons();
+      this.draw();
       this.clearHighlights();
+      if (this.currentTool === 'Image' && this.currentStory.images.length && (
+            !this.currentImage ||
+            !_.includes(_.map(this.currentStory.images, 'id'), this.currentImage.id))) {
+        this.currentImage = this.currentStory.images[0];
+      } else if (!_.includes(_.map(this.currentStory.spaces, 'id'), this.currentSubSelection.id)) {
+        this.currentSubSelection = this.currentStory.spaces[0];
+      }
     },
     currentSpace() {
       this.points = [];
-      this.drawPolygons();
+      this.draw();
     },
     currentShading() {
       this.points = [];
-      this.drawPolygons();
-    },
-    points() {
-      if (this.points.length === 0) {
-        this.eraseGuidelines();
-      }
-      this.drawPoints();
+      this.draw();
     },
     transform(newTransform, lastTransform) {
       // hide polygon names if zoomed out enough
@@ -228,7 +285,11 @@ export default {
       return _.flatMap(
         face.edges,
         e => _.filter(this.currentStory.windows , { edge_id: e.id })
-              .map(w => this.denormalizeWindow(e, w)));
+              .map(w => ({
+                ...this.denormalizeWindow(e, w),
+                selected: w.id === this.currentComponentInstanceId,
+                facingRemoval: w.id === this.componentFacingRemoval,
+              })));
     },
     polygonsFromGeometry(geometry, extraPolygonAttrs = {}) {
       const
@@ -242,12 +303,17 @@ export default {
           polygon = {
             face_id: face.id,
             name: model.name,
+            modelType: model.type,
             color: model.color,
             points,
             labelPosition: this.polygonLabelPosition(points),
             windows: this.windowsOnFace(face),
             daylighting_controls: (model.daylighting_controls || [])
-              .map(dc => geometryHelpers.vertexForId(dc.vertex_id, geometry)),
+              .map(dc => ({
+                ...geometryHelpers.vertexForId(dc.vertex_id, geometry),
+                selected: dc.id === this.currentComponentInstanceId,
+                facingRemoval:  dc.id === this.componentFacingRemoval,
+              })),
             ...extraPolygonAttrs,
           };
         if (!points.length) {
@@ -265,7 +331,11 @@ export default {
           } else if (this.currentMode === 'building_units') {
             const buildingUnit = modelHelpers.libraryObjectWithId(this.$store.state.models, model.building_unit_id);
             polygon.color = buildingUnit ? buildingUnit.color : applicationHelpers.config.palette.neutral;
+          } else if (this.currentMode === 'pitched_roofs') {
+            const pitchedRoof = modelHelpers.libraryObjectWithId(this.$store.state.models, model.pitched_roof_id);
+            polygon.color = pitchedRoof ? pitchedRoof.color : applicationHelpers.config.palette.neutral;
           }
+
         }
         return polygon;
       });

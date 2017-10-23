@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import libconfig from './libconfig';
 import factory from './factory';
+import idFactory, { genName } from './../../utilities/generateId';
 import geometryFactory from '../geometry/factory';
 import helpers from './helpers';
 import geometryHelpers from '../geometry/helpers';
@@ -16,6 +17,7 @@ export default {
       context.dispatch('geometry/initGeometry', { story_id: story.id }, { root: true });
       // create space and select
       context.dispatch('initSpace', { story });
+      context.dispatch('initShading', { story });
       context.dispatch('selectStory', { story });
     },
 
@@ -235,7 +237,11 @@ export default {
     } else if (alpha < 0 || alpha > 1) {
       throw new Error('Alpha must be between 0 and 1');
     }
-    context.commit('createWindow', payload);
+    context.commit('createWindow', {
+      ...payload,
+      id: idFactory.generate(),
+      name: genName(windowDefn.name),
+    });
   },
 
   createDaylightingControl(context, payload) {
@@ -250,7 +256,7 @@ export default {
     if (!story) {
       throw new Error('Story not found');
     } else if (!daylightingDefn) {
-      throw new Error('Window Definition not found');
+      throw new Error('Daylighting Control Definition not found');
     } else if (!geometry) {
       throw new Error('Geometry not found');
     } else if (!face) {
@@ -259,9 +265,25 @@ export default {
       throw new Error('Unable to find or create vertex');
     }
     context.commit('geometry/ensureVertsExist', { geometry_id: geometry.id, vertices: [vertex] }, { root: true });
-    context.commit('createDaylightingControl', { ...payload, vertex_id: vertex.id });
+    context.commit('createDaylightingControl', {
+      ...payload,
+      vertex_id: vertex.id,
+      id: idFactory.generate(),
+      name: genName(daylightingDefn.name),
+    });
   },
-
+  destroyDaylightingControl({ commit }, payload) {
+    commit('destroyDaylightingControl', payload);
+  },
+  destroyWindow({ commit }, payload) {
+    commit('destroyWindow', payload);
+  },
+  modifyDaylightingControl({ commit }, payload) {
+    commit('modifyDaylightingControl', payload);
+  },
+  modifyWindow({ commit }, payload) {
+    commit('modifyWindow', payload);
+  },
   destroyAllComponents({ state, rootState, commit }, { story_id }) {
     commit('dropDaylightingControls', { story_id });
     commit('dropWindows', { story_id });

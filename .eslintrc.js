@@ -26,5 +26,6 @@ module.exports = {
     'func-names': 0, // not every anonymous function should be an arrow func.
     'no-mixed-operators': 0, // many 5th graders know PEMDAS.
     'no-console': 0, // logging is healthy. logging is good.
+    'no-cond-assign': [2, 'except-parens'],
   }
 };

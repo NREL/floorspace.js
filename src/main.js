@@ -14,6 +14,13 @@ import store from './store/index';
 
 import timetravel from './store/timetravel';
 import App from './App.vue';
+import PrettySelect from './components/PrettySelect.vue';
+import GenericInput from './components/GenericInput.vue';
+
+Vue.component('pretty-select', PrettySelect);
+Vue.component('generic-input', GenericInput);
+
+window.eventBus = new Vue();
 
 // mount the root vue instance
 window.application = new Vue({
@@ -24,5 +31,3 @@ window.application = new Vue({
 });
 
 timetravel.init(store);
-
-window.eventBus = window.application.$children[0];

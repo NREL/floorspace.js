@@ -77,22 +77,38 @@ const map = {
         name: 'height',
         displayName: 'Height',
         input_type: 'text',
-        validator: validators.number,
+        validator: validators.gt0,
         converter: converters.number,
+        numeric: true,
       },
       {
         name: 'width',
         displayName: 'Width',
         input_type: 'text',
-        validator: validators.number,
+        validator: validators.gt0,
         converter: converters.number,
+        numeric: true,
       },
       {
         name: 'sill_height',
         displayName: 'Sill Height',
         input_type: 'text',
-        validator: validators.number,
+        validator: validators.gt0,
         converter: converters.number,
+        numeric: true,
+      },
+      {
+        name: 'total_count',
+        displayName: 'Total Count',
+        readonly: true,
+        numeric: true,
+        get(windowDefn, state) {
+          return _.chain(state.models.stories)
+            .flatMap('windows')
+            .filter({ window_defn_id: windowDefn.id })
+            .value()
+            .length;
+        },
       },
     ],
     init: factory.WindowDefn,
@@ -158,15 +174,31 @@ const map = {
         name: 'height',
         displayName: 'Height',
         input_type: 'text',
-        validator: validators.number,
+        validator: validators.gt0,
         converter: converters.number,
+        numeric: true,
       },
       {
         name: 'illuminance_setpoint',
-        displayName: 'Illuminance Setpoint',
+        displayName: 'Illuminance Setpoint (lux)',
         input_type: 'text',
-        validator: validators.number,
+        validator: validators.gt0,
         converter: converters.number,
+        numeric: true,
+      },
+      {
+        name: 'total_count',
+        displayName: 'Total Count',
+        readonly: true,
+        numeric: true,
+        get(dcDefn, state) {
+          return _.chain(state.models.stories)
+            .flatMap('spaces')
+            .flatMap('daylighting_controls')
+            .filter({ daylighting_control_defn_id: dcDefn.id })
+            .value()
+            .length;
+        },
       },
     ],
     init: factory.DaylightingControlDefn,
@@ -201,6 +233,7 @@ const map = {
         displayName: 'Below Floor Plenum Height',
         input_type: 'text',
         converter: converters.number,
+        numeric: true,
         validator: validators.number,
       },
       {
@@ -208,6 +241,7 @@ const map = {
         displayName: 'Above Floor Plenum Height',
         input_type: 'text',
         converter: converters.number,
+        numeric: true,
         validator: validators.number,
       },
       {
@@ -215,13 +249,16 @@ const map = {
         displayName: 'Floor To Ceiling Height',
         input_type: 'text',
         converter: converters.number,
-        validator: validators.number,
+        numeric: true,
+        validator: validators.gt0,
       },
       {
         name: 'multiplier',
         displayName: 'Multiplier',
         input_type: 'text',
-        validator: validators.number,
+        converter: converters.number,
+        numeric: true,
+        validator: validators.gt0,
       },
       {
         name: 'spaces',
@@ -364,6 +401,48 @@ const map = {
         },
       },
       {
+        name: 'below_floor_plenum_height',
+        displayName: 'Below Floor Plenum Height',
+        input_type: 'text',
+        numeric: true,
+        validator: validators.number,
+        converter: converters.number,
+      },
+      {
+        name: 'floor_to_ceiling_height',
+        displayName: 'Floor to Ceiling Height',
+        input_type: 'text',
+        numeric: true,
+        validator: validators.number,
+        converter: converters.number,
+      },
+      {
+        name: 'above_ceiling_plenum_height',
+        displayName: 'Above Ceiling Plenum Height',
+        input_type: 'text',
+        numeric: true,
+        validator: validators.number,
+        converter: converters.number,
+      },
+      {
+        name: 'floor_offset',
+        displayName: 'Floor Offset',
+        input_type: 'text',
+        numeric: true,
+        validator: validators.number,
+        converter: converters.number,
+      },
+      {
+        name: 'open_to_below',
+        displayName: 'Open To Below',
+        input_type: 'select',
+        select_data() {
+          const bools = ['False', 'True'];
+          return _.zipObject(bools, bools);
+        },
+        converter: converters.bool,
+      },
+      {
         name: 'color',
         displayName: 'Color',
         input_type: 'color',
@@ -457,20 +536,46 @@ const map = {
       },
     ],
   },
-  pitched_roofs: {
-    displayName: 'Pitched Roof',
+  windows: {
+    displayName: 'Window',
     columns: [
       {
         name: 'id',
-        displayName: 'ID',
-        readonly: true,
         private: true,
       },
       {
         name: 'name',
         displayName: 'Name',
         input_type: 'text',
-        validator: validators.name,
+      },
+    ],
+  },
+  daylighting_controls: {
+    displayName: 'Daylighting Control',
+    columns: [
+      {
+        name: 'id',
+        private: true,
+      },
+      {
+        name: 'name',
+        displayName: 'Name',
+        input_type: 'text',
+      },
+    ],
+  },
+  pitched_roofs: {
+    displayName: 'Pitched Roof',
+    columns: [
+      {
+        name: 'id',
+        displayName: 'ID',
+        private: true,
+      },
+      {
+        name: 'name',
+        displayName: 'Name',
+        input_type: 'text',
       },
       {
         name: 'pitched_roof_type',
@@ -486,8 +591,9 @@ const map = {
         name: 'pitch',
         displayName: 'Pitch',
         input_type: 'text',
-        validator: validators.number,
+        validator: validators.gt0,
         converter: converters.number,
+        numeric: true,
       },
       {
         name: 'shed_direction',
@@ -495,6 +601,7 @@ const map = {
         input_type: 'text',
         validator: validators.number,
         converter: converters.number,
+        numeric: true,
       },
       {
         name: 'color',

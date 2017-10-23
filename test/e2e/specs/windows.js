@@ -5,30 +5,34 @@ module.exports = {
   tags: ['components', 'windows'],
   setUp: (browser) => {
     withScales(failOnError(browser))
-      .waitForElementVisible('.modal .new-floorplan', 5000)
+      .waitForElementVisible('.modal .new-floorplan svg', 5000)
       .setFlagOnError()
-      .click('.modal .new-floorplan')
+      .click('.modal .new-floorplan svg')
       .getScales() // assigns to client.xScale, client.yScale.
       // unfortunately, it does so asyncronously, so we have to use .perform()
       // if we want to access them.
       .perform(draw50By50Square)
-      .click('#library-type-select option[value="window_definitions"]')
-      .click('#library-new-object')
-      .setValue('.library-table [data-column="width"] input', '12')
-      .click('.tools [data-tool="Place Component"]')
+      .click('[data-modetab="components"]')
+      .click('#component-icons [title="Window Definition"]')
+      .click('[data-object-type="window_definitions"] .add-new')
+      .click('#component-icons [title="Window Definition"]')
       .perform((client, done) => {
         client
         .moveToElement('#grid svg', client.xScale(-40), client.yScale(50))
         .mouseButtonClick();
 
         done();
-      });
+      })
+      .click('[data-modetab="floorplan"]');
   },
   'deleting defn deletes all instances': (browser) => {
     browser
-      .click('.library-table .destroy')
+      .click('[data-modetab="components"]')
+      .click('#component-icons [title="Window Definition"]')
+      .click('#component-icons [data-object-type="window_definitions"]')
+      .click('#component-icons [data-object-type="window_definitions"] td.destroy')
       // switching tools clears the .highlight
-      .click('.tools [data-tool="Select"]')
+      .click('.tools [data-tool="Remove Component"]')
       .assert.elementCount('.window', 0)
       .checkForErrors()
       .end();
@@ -44,7 +48,7 @@ module.exports = {
   'replacing section of space moves window to new space': (browser) => {
     browser
       .click('.tools [data-tool="Rectangle"]')
-      .click('#selections .add-sub-selection')
+      .click('[data-object-type="spaces"] .add-new')
       .perform(drawSquare(-50, 0, 30, 50))
       .assert.elementCount('.window', 1)
       .checkForErrors()
@@ -53,7 +57,7 @@ module.exports = {
   'splitting edge preserves windows': (browser) => {
     browser
       .click('.tools [data-tool="Rectangle"]')
-      .click('#selections .add-sub-selection')
+      .click('[data-object-type="spaces"] .add-new')
       .perform(drawSquare(-10, 50, 10, 10))
       .assert.elementCount('.window', 1)
       .checkForErrors()
@@ -62,7 +66,7 @@ module.exports = {
   'covering edge removes windows': (browser) => {
     browser
       .click('.tools [data-tool="Rectangle"]')
-      .click('#selections .add-sub-selection')
+      .click('[data-object-type="spaces"] .add-new')
       .perform(drawSquare(-55, 40, 30, 20))
       .assert.elementCount('.window', 0)
       .checkForErrors()
@@ -88,7 +92,7 @@ module.exports = {
   'windows on exterior edges that become interior should be removed': (browser) => {
     browser
       .click('.tools [data-tool="Rectangle"]')
-      .click('#selections .add-sub-selection')
+      .click('[data-object-type="spaces"] .add-new')
       .perform(drawSquare(-50, 50, 50, 10))
       .assert.elementCount('.window', 0)
       .checkForErrors()
@@ -97,7 +101,7 @@ module.exports = {
   'windows on exterior edges that become interior should be removed (partial overlap)': (browser) => {
     browser
       .click('.tools [data-tool="Rectangle"]')
-      .click('#selections .add-sub-selection')
+      .click('[data-object-type="spaces"] .add-new')
       .perform(drawSquare(-50, 50, 40, 10))
       .assert.elementCount('.window', 0)
       .checkForErrors()
@@ -124,11 +128,12 @@ module.exports = {
 
     browser
       .click('.tools [data-tool="Rectangle"]')
-      .click('#selections .add-sub-selection')
+      .click('[data-object-type="spaces"] .add-new')
       .perform(drawSquare(0, 0, 30, 50))
       .assert.elementCount('.window', 1) // original window draw in setUp
-      .click('.tools [data-tool="Place Component"]')
+      .click('[data-modetab="components"]')
       .perform(rightSideWindow)
+      .click('[data-modetab="floorplan"]')
       .click('.tools [data-tool="Select"]')
       .assert.elementCount('.window', 3) // Two for the new one (two faces),
       // one for the existing one.
@@ -136,8 +141,9 @@ module.exports = {
       .assert.elementCount('.window', 1) // back to just the original one.
       .click('.tools [data-tool="Rectangle"]')
       .perform(drawSquare(0, 10, 20, 40))
-      .click('.tools [data-tool="Place Component"]')
+      .click('[data-modetab="components"]')
       .perform(rightSideWindow)
+      .click('[data-modetab="floorplan"]')
       .click('.tools [data-tool="Select"]')
       .perform(move15ToRight)
       .assert.elementCount('.window', 1)

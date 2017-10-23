@@ -10,7 +10,7 @@ const d3 = require('d3');
 const polylabel = require('polylabel');
 import _ from 'lodash';
 import { snapTargets, snapWindowToEdge, snapToVertexWithinFace, findClosestEdge, findClosestWindow } from './snapping';
-import geometryHelpers from './../../store/modules/geometry/helpers';
+import geometryHelpers, { distanceBetweenPoints, fitToAspectRatio } from './../../store/modules/geometry/helpers';
 import modelHelpers from './../../store/modules/models/helpers';
 import { ResizeEvents } from '../../components/Resize';
 
@@ -20,6 +20,20 @@ function ticksInRange(start, stop, spacing) {
     stop,
     spacing);
 }
+
+function transformDiff(t1, t2) {
+  // returns a new transform that is sufficient to take you from
+  // t1 to t2.
+  // boy was this a doozy to figure out. Tricky bit is that the
+  // translation is dependent on the scaling factor. So we have to
+  // divide that out before we can subtract.
+  return new d3.zoomIdentity.constructor(
+    t2.k / t1.k,
+    (t2.x / t2.k - t1.x / t1.k) * t2.k,
+    (t2.y / t2.k - t1.y / t1.k) * t2.k,
+  );
+}
+
 
 export default {
   // ****************** USER INTERACTION EVENTS ****************** //
@@ -38,6 +52,64 @@ export default {
         this.placeDaylightingControl();
       }
     }
+    if (this.currentTool === 'Remove Component') {
+      this.removeComponent();
+    }
+    if (this.currentTool === 'Image') {
+      this.deselectImages();
+    }
+    if (this.currentTool === 'Apply Property') {
+      this.assignProperty();
+    }
+  },
+  assignProperty() {
+    if (!this.currentSpaceProperty) { return; }
+    const
+      gridCoords = d3.mouse(this.$refs.grid),
+      gridPoint = { x: gridCoords[0], y: gridCoords[1] },
+      rwuPoint = this.gridPointToRWU(gridPoint),
+      space = this.currentStory.spaces.find((sp) => {
+        const face = _.find(this.denormalizedGeometry.faces, { id: sp.face_id });
+        return geometryHelpers.pointInFace(rwuPoint, face.vertices);
+      });
+    if (!space) { return; }
+    this.$store.dispatch('models/updateSpaceWithData', {
+      space,
+      [this.spacePropertyKey]: this.currentSpaceProperty.id,
+    });
+  },
+  deselectImages() {
+    this.$store.dispatch('application/setCurrentSubSelectionId', this.currentStory.spaces[0]);
+  },
+  componentToRemove() {
+    const
+      gridCoords = d3.mouse(this.$refs.grid),
+      gridPoint = { x: gridCoords[0], y: gridCoords[1] },
+      rwuPoint = this.gridPointToRWU(gridPoint),
+      component = _.minBy(this.allComponentInstanceLocs, ci => distanceBetweenPoints(ci, rwuPoint)),
+      distToComp = component && distanceBetweenPoints(component, rwuPoint);
+    if (!component || distToComp > this.spacing * 2) {
+      return null;
+    }
+    return component;
+  },
+  removeComponent() {
+    const component = this.componentToRemove();
+    if (!component) {
+      return;
+    }
+    const payload = { story_id: this.currentStory.id, object: { id: component.id } };
+    if (component.type === 'window') {
+      this.$store.dispatch('models/destroyWindow', payload);
+    } else if (component.type === 'daylighting_control') {
+      this.$store.dispatch('models/destroyDaylightingControl', payload);
+    } else {
+      console.error(`unrecognized component to remove: ${component}`);
+    }
+  },
+  highlightComponentToRemove() {
+    const component = this.componentToRemove();
+    this.componentFacingRemoval = component && component.id;
   },
   placeWindow() {
     const
@@ -46,7 +118,7 @@ export default {
       rwuPoint = this.gridPointToRWU(gridPoint),
       loc = snapWindowToEdge(
         this.snapMode,
-        this.denormalizedGeometry.edges, rwuPoint,
+        this.spaceEdges, rwuPoint,
         this.currentComponentDefinition.width, this.spacing * 2, this.spacing,
       );
 
@@ -60,6 +132,13 @@ export default {
     };
     this.$store.dispatch('models/createWindow', payload);
   },
+  raiseOrLowerImages() {
+    if (this.currentTool === 'Image') {
+      d3.select('#grid svg .images').raise();
+    } else {
+      d3.select('#grid svg .images').lower();
+    }
+  },
   placeDaylightingControl() {
     const
       gridCoords = d3.mouse(this.$refs.grid),
@@ -70,7 +149,7 @@ export default {
       },
       loc = snapToVertexWithinFace(
         this.snapMode,
-        this.denormalizedGeometry.faces, rwuPoint, this.spacing);
+        this.spaceFaces, rwuPoint, this.spacing);
 
     if (!loc) { return; }
 
@@ -101,12 +180,13 @@ export default {
     }
 
     // create the point
-    var newPoint = snapTarget.type === 'edge' ? snapTarget.projection : snapTarget;
+    const newPoint = snapTarget.type === 'edge' ? snapTarget.projection : snapTarget;
     this.points.push(newPoint);
+    this.drawPoints();
     // if the Rectangle or Eraser tool is active and two points have been drawn (to define a rectangle)
     // complete the corresponding operation for the tool
     if (this.currentTool === 'Eraser' && this.points.length === 2) { this.eraseRectangularSelection(); }
-    if (this.currentTool === 'Rectangle' && this.points.length === 2) { this.saveRectuangularFace(); }
+    if (this.currentTool === 'Rectangle' && this.points.length === 2) { this.saveRectangularFace(); }
   },
 
   /*
@@ -119,6 +199,7 @@ export default {
     // only highlight snap targets in drawing modes when a space or shading has been selected
     if (!(this.currentTool === 'Eraser' ||
     (this.currentTool === 'Place Component' && this.currentComponentDefinition) ||
+    (this.currentTool === 'Remove Component') ||
     ((this.currentTool === 'Rectangle' || this.currentTool === 'Polygon') && (this.currentSpace || this.currentShading)))) { return; }
 
     // unhighlight expired snap targets
@@ -130,6 +211,9 @@ export default {
 
     if (this.currentTool === 'Place Component' && this.currentComponentDefinition) {
       this.highlightComponent(gridPoint);
+      return;
+    } else if (this.currentTool === 'Remove Component') {
+      this.highlightComponentToRemove();
       return;
     }
 
@@ -180,6 +264,7 @@ export default {
 
   clearHighlights() {
     d3.selectAll('#grid .highlight, #grid .gridpoint, #grid .guideline').remove();
+    this.componentFacingRemoval = null;
   },
 
 
@@ -196,7 +281,7 @@ export default {
       rwuPoint = this.gridPointToRWU(gridPoint),
       loc = snapWindowToEdge(
         this.snapMode,
-        this.denormalizedGeometry.edges, rwuPoint,
+        this.spaceEdges, rwuPoint,
         this.currentComponentDefinition.width, this.spacing * 2, this.spacing,
       );
 
@@ -220,7 +305,7 @@ export default {
       rwuPoint = this.gridPointToRWU(gridPoint),
       loc = snapToVertexWithinFace(
         this.snapMode,
-        this.denormalizedGeometry.faces, rwuPoint,
+        this.spaceFaces, rwuPoint,
         this.spacing,
       );
     if (!loc) { return; }
@@ -229,7 +314,7 @@ export default {
       .classed('highlight', true)
       .selectAll('.daylighting-control')
       .data([loc])
-      .call(this.drawDC);
+      .call(this.drawDaylightingControl);
 
     const
       face = _.find(this.denormalizedGeometry.faces, { id: loc.face_id }),
@@ -240,7 +325,7 @@ export default {
       .classed('guideline', true)
       .selectAll('.daylighting-control-guideline')
       .data([{ loc, nearestEdge }])
-      .call(this.drawDCGuideline);
+      .call(this.drawDaylightingControlGuideline);
   },
 
   /*
@@ -383,6 +468,8 @@ export default {
   * translate the points into RWU and save the face for the selected space or shading
   */
   savePolygonFace() {
+    d3.selectAll('#grid .point-path').remove();
+
     const payload = {
       // translate grid points from grid units to RWU
       points: this.points.map(p => ({
@@ -407,7 +494,9 @@ export default {
   * create a rectangular face from the two points on the grid
   * save the rectangle as a face for the selected space or shading
   */
-  saveRectuangularFace () {
+  saveRectangularFace() {
+    d3.selectAll('#grid .point-path').remove();
+
     // infer 4 corners of the rectangle based on the two points that have been drawn
     const payload = {};
 
@@ -439,8 +528,10 @@ export default {
   * infer a rectangular eraser selection based on two points on the grid
   * remove the intersection of all geometry on the current story with the eraser selection
   */
-  eraseRectangularSelection () {
+  eraseRectangularSelection() {
     // infer 4 corners of the rectangle based on the two points that have been drawn
+    d3.selectAll('#grid .point-path').remove();
+
     const payload = {
       points: [
         this.points[0],
@@ -467,27 +558,24 @@ export default {
   /*
   * render points for the face being drawn, connect them with a guideline
   */
-  drawPoints () {
+  drawPoints() {
     // remove expired points and guidelines
     d3.selectAll('#grid .point-path').remove();
 
     // draw points
-    d3.select('#grid svg')
-    .selectAll('ellipse').data(this.points)
-    .enter().append('ellipse')
+    const pointPath = d3.select('#grid svg')
+    .selectAll('ellipse.point-path').data(this.points);
+
+    pointPath.merge(
+      pointPath.enter().append('ellipse').attr('class', 'point-path')
+    )
+    .classed('origin', (d, ix) => ix === 0)
     .attr('cx', d => d.x)
     .attr('cy', d => d.y)
-    .attr('rx', 2)
-    .attr('ry', 2)
-    .attr('vector-effect', 'non-scaling-stroke');
-
-    // apply custom CSS for origin of polygons
-    d3.select('#grid svg').select('ellipse').attr('class', 'point-path')
-    .attr('rx', 7)
-    .attr('ry', 7)
-    .classed('origin', true)
+    .attr('rx', (d, ix) => (ix === 0 ? 7 : 2))
+    .attr('ry', (d, ix) => (ix === 0 ? 7 : 2))
     .attr('vector-effect', 'non-scaling-stroke')
-    .attr('fill', 'none');
+    .attr('fill', (d, ix) => (ix === 0 ? 'none' : ''));
 
     // connect the points for the face being drawn with a line
     d3.select('#grid svg').append('path').attr('class', 'point-path')
@@ -569,7 +657,7 @@ export default {
   drawPolygons() {
     this.recalcScales();
     // remove expired polygons
-    let poly = d3.select('#grid svg').selectAll('g.poly')
+    let poly = d3.select('#grid svg .polygons').selectAll('g.poly')
       .data(this.polygons, d => d.face_id);
 
     poly.exit().remove();
@@ -589,6 +677,7 @@ export default {
       return null;
     })
     .classed('poly', true)
+    .attr('data-model-type', d => d.modelType)
     .attr('id', p => `poly-${p.face_id}`)
     .attr('transform', null);
 
@@ -619,14 +708,28 @@ export default {
     poly.select('.daylighting-controls')
       .selectAll('.daylighting-control')
       .data(d => d.daylighting_controls)
-      .call(this.drawDC);
+      .call(this.drawDaylightingControl);
 
     this.registerDrag();
 
     // render the selected model's face above the other polygons so that the border is not obscured
     d3.select('.current').raise();
   },
+  drawImages() {
+    d3.select('#grid svg .images').selectAll('.image-group')
+      .data(this.images, d => d.id)
+      .call(this.drawImage);
+  },
 
+  draw() {
+    this.transformAtLastRender = { ...this.transform };
+    d3.selectAll('#grid svg .images, #grid svg .polygons')
+      .attr('transform', '');
+
+    this.drawPolygons();
+    this.drawImages();
+    this.raiseOrLowerImages();
+  },
   // ****************** SNAPPING TO EXISTING GEOMETRY ****************** //
   /*
   * given a point in grid units, find the closest vertex or edge within its snap tolerance
@@ -975,20 +1078,18 @@ export default {
     const
       width = this.$refs.grid.clientWidth,
       height = this.$refs.grid.clientHeight,
-      xSpan = this.max_x - this.min_x,
-      ySpan = this.max_y - this.min_y,
-      xAccordingToY = ySpan * (width / height),
-      yAccordingToX = xSpan * (height / width),
-      xDiff = xAccordingToY - xSpan,
-      yDiff = yAccordingToX - ySpan;
-
-    if (xDiff < 0) {
-      this.min_x -= xDiff / 2;
-      this.max_x += xDiff / 2;
-    } else {
-      this.min_y -= yDiff / 2;
-      this.max_y += yDiff / 2;
-    }
+      { xExtent, yExtent } = fitToAspectRatio(
+        [this.min_x, this.max_x],
+        [this.min_x, this.max_x],
+        width / height,
+        'contract',
+      );
+    [this.min_x, this.max_x] = xExtent;
+    [this.min_y, this.max_y] = yExtent;
+    _.defer(() => {
+      console.log('boundsResolved');
+      window.eventBus.$emit('boundsResolved');
+    });
   },
   nullTransform() {
     d3.select(this.$refs.grid).call(this.zoomBehavior.transform, d3.zoomIdentity);
@@ -1027,7 +1128,7 @@ export default {
     // to force this to happen immediately.
     this.nullTransform();
 
-    this.drawPolygons();
+    this.draw()
   },
   reloadGridAndScales() {
     this.zoomXScale = null;
@@ -1114,17 +1215,65 @@ export default {
        // axis padding
        this.padTickY(-12);
 
-       // redraw the saved geometry
-       this.drawPolygons();
+       // apply the zoom transform to image and polygon <g> tags.
+       // (more efficient than a full re-render)
+       this.translateEntities();
      })
      .on('end', () => {
-       ResizeEvents.$emit('zoomStabilized');
+       // redraw the saved geometry
+       this.draw();
      });
 
     svg.call(this.zoomBehavior);
     svg
       .on('mousemove', this.handleMouseMove)
       .on('click', this.gridClicked);
+  },
+  transformTo(t) {
+    d3.select(this.$refs.grid)
+      .call(this.zoomBehavior.transform, t);
+  },
+  zoomBy(factor) {
+    const newScale = this.transform.k * factor;
+    d3.select(this.$refs.grid)
+      .transition()
+      .duration(400)
+      .call(this.zoomBehavior.transform, d3.zoomIdentity.scale(newScale));
+  },
+  zoomToFit() {
+    const
+      width = this.$refs.grid.clientWidth,
+      height = this.$refs.grid.clientHeight;
+
+    const
+      xExtent = d3.extent(this.currentStoryGeometry.vertices, d => this.zoomXScale(d.x)),
+      yExtent = d3.extent(this.currentStoryGeometry.vertices, d => this.zoomYScale(d.y)),
+      dx = xExtent[1] - xExtent[0],
+      dy = yExtent[1] - yExtent[0],
+      x = (xExtent[0] + xExtent[1]) / 2,
+      y = (yExtent[0] + yExtent[1]) / 2,
+      scale = 0.9 / Math.max(dx / width, dy / height),
+      translate = [width / 2 - scale * x, height / 2 - scale * y],
+      svg = d3.select('#grid svg'),
+      transform = d3.zoomIdentity.translate(...translate).scale(scale);
+
+    svg.call(this.zoomBehavior.transform, transform);
+  },
+  scaleTo(scale) {
+    const
+      width = this.$refs.grid.clientWidth,
+      height = this.$refs.grid.clientHeight,
+      x = (this.zoomXScale(this.max_x) + this.zoomXScale(this.min_x)) / 2,
+      y = (this.zoomYScale(this.max_y) + this.zoomYScale(this.min_y)) / 2,
+      translate = [width / 2 - scale * x, height / 2 - scale * y];
+    d3.select(this.$refs.grid)
+      .call(this.zoomBehavior.transform, d3.zoomIdentity
+          .translate(...translate)
+          .scale(scale));
+  },
+  translateEntities() {
+    d3.selectAll('#grid svg .images, #grid svg .polygons')
+      .attr('transform', transformDiff(this.transformAtLastRender, d3.event.transform));
   },
   showOrHideAxes() {
     this.axis.x.style('visibility', this.gridVisible ? 'visible' : 'hidden');

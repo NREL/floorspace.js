@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { gen } from 'testcheck';
-import helpers from '../../../../src/store/modules/geometry/helpers';
+import helpers, { fitToAspectRatio } from '../../../../src/store/modules/geometry/helpers';
 import {
   assert, refute, nearlyEqual, assertProperty, isNearlyEqual,
   assertEqual,
@@ -12,6 +12,47 @@ import {
   genRegularPolygonPieces,
 } from '../../test_helpers';
 import * as geometryExamples from './examples';
+
+describe('fitToAspectRatio', () => {
+  it("doesn't mess with values when they already fit", () => {
+    const { xExtent, yExtent } = fitToAspectRatio([0, 10], [0, 6], 10 / 6);
+    assert(
+        nearlyEqual(xExtent[0], 0) &&
+        nearlyEqual(xExtent[1], 10) &&
+        nearlyEqual(yExtent[0], 0) &&
+        nearlyEqual(yExtent[1], 6));
+  });
+
+  it('expands x when necessary', () => {
+    const { xExtent, yExtent } = fitToAspectRatio(
+      [0, 5],
+      [0, 6],
+      10 / 6,
+      'expand');
+    assert(isNearlyEqual(yExtent, [0, 6]), 'yExtent should be unchanged');
+    assert(
+      nearlyEqual(0 - xExtent[0], xExtent[1] - 5),
+      'x was expanded equally on either side');
+    assert(
+      nearlyEqual(xExtent[1] - xExtent[0], 10),
+      'x has been expanded to fit the aspect ratio');
+  });
+
+  it('contracts y when necessary', () => {
+    const { xExtent, yExtent } = fitToAspectRatio(
+      [0, 5],
+      [0, 6],
+      5 / 3,
+      'contract');
+    assert(isNearlyEqual(xExtent, [0, 5]), 'xExtent should be unchanged');
+    assert(
+      nearlyEqual(0 - yExtent[0], yExtent[1] - 6),
+      'y was contracted equally on either side');
+    assert(
+      nearlyEqual(yExtent[1] - yExtent[0], 3),
+      'y has been contracted to fit the aspect ratio');
+  });
+});
 
 describe('syntheticRectangleSnaps', () => {
   it('should work', () => {

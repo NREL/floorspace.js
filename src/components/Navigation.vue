@@ -9,128 +9,52 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
   <div id="layout-navigation">
     <nav id="navigation">
-      <div id="right-bar" @mousedown="resizeBarClicked" v-on:dblclick="showHide" ref="resizebar" class="resize-bar"></div>
         <section id="selections">
-            <div class='input-select'>
-                <select v-model='mode'>
-                    <option v-for='mode in modes' :value="mode">{{displayNameForMode(mode)}}</option>
-                </select>
-                <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
-                    <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
-                </svg>
-            </div>
-
-            <input id="upload-image-input" ref="fileInput" @change="uploadImage" type="file"/>
-            <button v-show="mode==='images'" @click="$refs.fileInput.click()">
-                <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M208 122h-74V48c0-3.534-2.466-6.4-6-6.4s-6 2.866-6 6.4v74H48c-3.534 0-6.4 2.466-6.4 6s2.866 6 6.4 6h74v74c0 3.534 2.466 6.4 6 6.4s6-2.866 6-6.4v-74h74c3.534 0 6.4-2.466 6.4-6s-2.866-6-6.4-6z"/>
-                </svg>
-                {{displayNameForMode(mode)}}
-            </button>
-
-            <button v-if="mode!=='images'" @click="createItem()" class="add-sub-selection">
-                <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M208 122h-74V48c0-3.534-2.466-6.4-6-6.4s-6 2.866-6 6.4v74H48c-3.534 0-6.4 2.466-6.4 6s2.866 6 6.4 6h74v74c0 3.534 2.466 6.4 6 6.4s6-2.866 6-6.4v-74h74c3.534 0 6.4-2.466 6.4-6s-2.866-6-6.4-6z"/>
-                </svg>
-                {{displayNameForMode(mode)}}
-            </button>
-        </section>
-
-        <section id="breadcrumbs">
-            <button @click="createItem('stories')" class="create-story">
-                <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M208 122h-74V48c0-3.534-2.466-6.4-6-6.4s-6 2.866-6 6.4v74H48c-3.534 0-6.4 2.466-6.4 6s2.866 6 6.4 6h74v74c0 3.534 2.466 6.4 6 6.4s6-2.866 6-6.4v-74h74c3.534 0 6.4-2.466 6.4-6s-2.866-6-6.4-6z"/>
-                </svg>
-                {{displayNameForMode('stories')}}
-            </button>
-            <span>
-                {{ currentStory.name }}
-                <template v-if="selectedObject">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14"><path d="M.5 0v14l11-7-11-7z"/></svg>
-                    {{ selectedObject.name }}
-                </template>
-            </span>
-
         </section>
 
         <div id="list">
-            <section id="story-list">
-                <div
-                  v-for="item in stories"
-                  :key="item.id"
-                  :class="{ active: currentStory && currentStory.id === item.id }"
-                  @click="selectItem(item, 'stories')" :style="{'background-color': item && item.color }"
-                  :data-id="item.id"
-                >
-                    {{item.name}}
-                    <svg @click="destroyItem(item, 'stories')" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
-                    </svg>
-                </div>
-            </section>
-
-            <section id="subselection-list">
-                <div
-                  v-for="item in items"
-                  :key="item.id"
-                  :class="{ active: selectedObject && selectedObject.id === item.id }"
-                  @click="selectItem(item)"
-                  :style="{'background-color': item && selectedObject && selectedObject.id === item.id ? item.color : ''}"
-                  :data-id="item.id"
-                >
-                    <span :style="{'background-color': item && item.color }"></span>
-                    {{item.name}}
-                    <svg @click="destroyItem(item)" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M137.05 128l75.476-75.475c2.5-2.5 2.5-6.55 0-9.05s-6.55-2.5-9.05 0L128 118.948 52.525 43.474c-2.5-2.5-6.55-2.5-9.05 0s-2.5 6.55 0 9.05L118.948 128l-75.476 75.475c-2.5 2.5-2.5 6.55 0 9.05 1.25 1.25 2.888 1.876 4.525 1.876s3.274-.624 4.524-1.874L128 137.05l75.475 75.476c1.25 1.25 2.888 1.875 4.525 1.875s3.275-.624 4.525-1.874c2.5-2.5 2.5-6.55 0-9.05L137.05 128z"/>
-                    </svg>
-                </div>
-            </section>
+          <Library
+            :objectTypes="['stories']"
+            :mode="'stories'"
+            :compact="libraryExpanded !== 'stories'"
+            @toggleCompact="libraryExpanded = (libraryExpanded === 'stories' ? false : 'stories')"
+          />
+          <Library
+            :objectTypes="objectTypesForTab"
+            :mode="subselectionType"
+            @changeMode="newMode => { subselectionType = newMode; }"
+            :searchAvailable="true"
+            :compact="libraryExpanded !== 'subselection'"
+            @toggleCompact="libraryExpanded = (libraryExpanded === 'subselection' ? false : 'subselection')"
+          />
         </div>
-
     </nav>
 
   </div>
 </template>
 
 <script>
+import _ from 'lodash';
 import { mapState, mapGetters } from 'vuex';
 import { getSiblings } from './../utilities';
 import applicationHelpers from './../store/modules/application/helpers';
 import modelHelpers from './../store/modules/models/helpers';
 import ResizeEvents from './Resize/ResizeEvents';
+import Library from './Library.vue';
+import LibrarySelect from './LibrarySelect.vue';
 
 let fullWidth;
 const collapsedWidth = 8;
 export default {
   name: 'navigation',
-  mounted() {
-    this.selectedObject = this.items[0];
-    fullWidth = document.getElementById('layout-navigation').offsetWidth;
-    window.addEventListener('resize', this.resetSize);
+  data() {
+    return {
+      libraryExpanded: false,
+    };
   },
-  beforeDestroy() { window.removeEventListener('resize', this.resetSize); },
   computed: {
     ...mapState({
-      // available model types
-      modes: state => state.application.modes,
-
-      // top level models
-      stories: state => state.models.stories,
-      building_units: state => state.models.library.building_units,
-      space_types: state => state.models.library.space_types,
-      thermal_zones: state => state.models.library.thermal_zones,
-
-      // for image upload placement
-      max_x: state => state.project.view.max_x,
-      max_y: state => state.project.view.max_y,
-      min_x: state => state.project.view.min_x,
-      min_y: state => state.project.view.min_y,
-    }),
-
-    ...mapGetters({
-      currentSpace: 'application/currentSpace',
-      currentShading: 'application/currentShading',
-      currentImage: 'application/currentImage',
+      modeTab: state => state.application.currentSelections.modeTab,
     }),
 
     /*
@@ -150,377 +74,89 @@ export default {
     spaces() { return this.currentStory.spaces; },
     shading() { return this.currentStory.shading; },
     images() { return this.currentStory.images; },
-
-    // list items to display for current mode
-    items() { return this[this.mode]; },
+    objectTypesForTab() {
+      switch (this.modeTab) {
+        case 'floorplan':
+          return ['spaces', 'shading', 'images'];
+        case 'shading':
+          return ['shading'];
+        case 'components':
+          return ['windows', 'daylighting_controls'];
+        case 'assign':
+          return ['spaces'];
+      }
+    },
     mode: {
       get() { return this.$store.state.application.currentSelections.mode; },
       set(mode) { this.$store.dispatch('application/setCurrentMode', { mode }); },
     },
-
-    currentThermalZone: {
-      get() { return this.$store.getters['application/currentThermalZone']; },
-      set(item) { this.$store.dispatch('application/setCurrentThermalZoneId', { id: item.id }); },
-    },
-    currentBuildingUnit: {
-      get() { return this.$store.getters['application/currentBuildingUnit']; },
-      set(item) { this.$store.dispatch('application/setCurrentBuildingUnitId', { id: item.id }); },
-    },
-    currentSpaceType: {
-      get() { return this.$store.getters['application/currentSpaceType']; },
-      set(item) { this.$store.dispatch('application/setCurrentSpaceTypeId', { id: item.id }); },
-    },
-
-    selectedObject: {
-      get() {
-        switch (this.mode) {
-          case 'stories':
-            return this.currentStory;
-          case 'building_units':
-            return this.currentBuildingUnit;
-          case 'thermal_zones':
-            return this.currentThermalZone;
-          case 'space_types':
-            return this.currentSpaceType;
-          default: // spaces, shading, images
-            return this.currentSubSelection;
-        }
-      },
-      set(item) {
-        switch (this.mode) {
-          case 'stories':
-            this.currentStory = item;
-            break;
-          case 'building_units':
-            this.currentBuildingUnit = item;
-            break;
-          case 'thermal_zones':
-            this.currentThermalZone = item;
-            break;
-          case 'space_types':
-            this.currentSpaceType = item;
-            break;
-          default: // spaces, shading, images
-            this.currentSubSelection = item;
-            break;
-        }
-      },
+    subselectionType: {
+      get() { return this.$store.state.application.currentSelections.subselectionType; },
+      set(sst) { this.$store.dispatch('application/setCurrentSubselectionType', { subselectionType: sst }); },
     },
   },
   methods: {
-    /*
-    * Resize the library and adjust the positions of sibling elements
-    */
-    resizeBarClicked() {
-      const doResize = (e) => {
-        const newWidth = e.clientX > collapsedWidth ? e.clientX : collapsedWidth;
-        document.getElementById('layout-navigation').style.width = `${newWidth}px`;
-        getSiblings(document.getElementById('layout-navigation')).forEach((el) => {
-          el.style.left = `${newWidth}px`;
-        });
-
-        ResizeEvents.$emit('resize');
-      };
-      const stopResize = () => {
-        window.removeEventListener('mousemove', doResize);
-        window.removeEventListener('mouseup', stopResize);
-      };
-      window.addEventListener('mousemove', doResize);
-      window.addEventListener('mouseup', stopResize);
-    },
-    showHide() {
-      const newWidth = document.getElementById('layout-navigation').offsetWidth === collapsedWidth ? fullWidth : collapsedWidth;
-      document.getElementById('layout-navigation').style.width = `${newWidth}px`;
-      getSiblings(document.getElementById('layout-navigation')).forEach((el) => {
-        el.style.left = `${newWidth}px`;
-      });
-      ResizeEvents.$emit('resize');
-    },
-
     // reset the nagiv   size when the window is resized
     resetSize() {
+      if (this.libraryExpanded) {
+        return;
+      }
       document.getElementById('layout-navigation').style.width = '';
       getSiblings(document.getElementById('layout-navigation')).forEach((el) => {
         el.style.left = '';
+        el.style.display = null;
       });
       fullWidth = document.getElementById('layout-navigation').offsetWidth;
     },
-    uploadImage(event) {
-      const files = event.target.files;
-      const that = this;
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const reader = new FileReader();
-
-        reader.addEventListener('load', () => {
-          const image = new Image();
-          image.onload = () => {
-            const pxPerRWU = (document.getElementById('grid').clientWidth / (that.max_x - that.min_x));
-            const rwuHeight = (image.height / pxPerRWU) / 4;
-            const rwuWidth = (image.width / pxPerRWU) / 4;
-
-            that.$store.dispatch('models/createImageForStory', {
-              story_id: that.currentStory.id,
-              src: image.src,
-              // TODO: unique name
-              name: modelHelpers.generateName(that.$store.state.models, 'images', that.currentStory),
-              // translate image dimensions into rwu
-              height: rwuHeight,
-              width: rwuWidth,
-              x: that.min_x + (rwuWidth / 2),
-              y: that.max_y - (rwuHeight / 2),
-            });
-            that.$refs.fileInput.value = '';
-          };
-          image.src = reader.result;
-        }, false);
-        if (file) { reader.readAsDataURL(file); }
+    setWidthForOpenLibrary() {
+      if (!this.libraryExpanded) {
+        this.resetSize();
+        ResizeEvents.$emit('resize');
+        return;
       }
-    },
 
-    /*
-    * initialize an empty space, shading, building_unit, or thermal_zone depending on the selected mode
-    * if initializing a story, "story" will be passed in as the mode argument
-    */
-    createItem(mode = this.mode) {
-      switch (mode) {
-        case 'stories':
-          this.$store.dispatch('models/initStory');
-          this.setCurrentItem();
-          return;
-        case 'spaces':
-          this.$store.dispatch('models/initSpace', { story: this.currentStory });
-          break;
-        case 'shading':
-          this.$store.dispatch('models/initShading', { story: this.currentStory });
-          break;
-        case 'building_units':
-        case 'thermal_zones':
-        case 'space_types':
-          this.$store.dispatch('models/createObjectWithType', { type: mode });
-          break;
-        default:
-          break;
-      }
-      // select the new item
-      this.selectItem(this.items[this.items.length - 1], mode);
-    },
+    document.getElementById('layout-navigation').style.width = '100%';
+    ResizeEvents.$emit('resize');
+  },
 
-    /*
-    * dispatch an action to destroy the currently selected item
-    */
-    destroyItem(item, mode = this.mode) {
-      // don't allow deletion of the last item of a type
-      if (this[mode].length <= 1 && (mode === 'stories' || mode === 'spaces')) { return; }
-
-      switch (mode) {
-        case 'stories':
-          this.$store.dispatch('models/destroyStory', { story: item });
-          this.setCurrentItem();
-          break;
-        case 'spaces':
-          this.$store.dispatch('models/destroySpace', {
-            space: item,
-            story: this.currentStory,
-          });
-          break;
-        case 'shading':
-          this.$store.dispatch('models/destroyShading', {
-            shading: item,
-            story: this.currentStory,
-          });
-          break;
-        case 'images':
-          this.$store.dispatch('models/destroyImage', {
-            image: item,
-            story: this.currentStory,
-          });
-          break;
-        case 'building_units':
-        case 'thermal_zones':
-        case 'space_types':
-          this.$store.dispatch('models/destroyObject', { object: item });
-          break;
-        default:
-          break;
-      }
-      this.setCurrentItem();
-    },
-
-    /*
-    * set current selection for a type
-    */
-    selectItem(item, mode = this.mode) {
-      switch (mode) {
-        case 'stories':
-          this.currentStory = item;
-          this.setCurrentItem();
-          break;
-        case 'building_units':
-          this.currentBuildingUnit = item;
-          break;
-        case 'thermal_zones':
-          this.currentThermalZone = item;
-          break;
-        case 'space_types':
-          this.currentSpaceType = item;
-          break;
-        default: // spaces, shading, images
-          this.currentSubSelection = item;
-          break;
-      }
-    },
-
-
-
-    setCurrentItem() {
-      // to be used when, ex changing stories or deleting an item.
-      // According to issue #134, we don't want to ever allow a situation
-      // where no item is selected.
-      if (this.items.length && (!this.selectedObject || !_.includes(_.map(this.items, 'id'), this.selectedObject.id))) {
-        this.selectedObject = this.items[0];
-      }
-    },
-
-    /*
-    * look up the display name for the selected mode (library type)
-    */
-    displayNameForMode(mode = this.mode) { return applicationHelpers.displayNameForMode(mode); },
   },
   watch: {
-    mode() {
-      this.setCurrentItem();
+    libraryExpanded() {
+      this.setWidthForOpenLibrary();
     },
-    selectedObject(obj) {
-      if (!obj) return;
-      const row = this.$el.querySelector(`[data-id="${obj.id}"]`);
-      if (row) {
-        row.scrollIntoView();
-      }
-    },
-    currentStory(obj) {
-      if (!obj) return;
-      const row = this.$el.querySelector(`[data-id="${obj.id}"]`);
-      if (row) {
-        row.scrollIntoView();
+    objectTypesForTab(val) {
+      if (!_.includes(val, this.subselectionType)){
+        this.subselectionType = val[0];
       }
     },
   },
+  components: {
+    Library,
+  }
 };
 </script>
 
 <style lang="scss" scoped>
 @import "./../scss/config";
-#right-bar {
-  position: absolute;
-  right: 0;
-  width: 8px;
-  height: 100%;
-  transition: background 0.5s linear;
-
-  &:hover, &:active {
-    background-color: $gray-lightest;
-    cursor: e-resize;
-  }
-}
 #navigation {
-    background-color: $gray-medium-dark;
-    border-right: 1px solid $gray-darkest;
-    font-size: 0.75rem;
+  background-color: $gray-medium-dark;
+  border-right: 1px solid $gray-darkest;
+  font-size: 0.75rem;
+  height: 100%;
+  user-select: none;
+
+  #list {
+    display: flex;
     height: 100%;
-    #selections {
-        display: flex;
-        padding: .25rem;
-        justify-content: space-between;
-
-            input[type="file"] {
-                position: absolute;
-                visibility: hidden;
-            }
+    .editable-select-list {
+      border-right: 1px solid $gray-darkest;
+      height: 100%;
+      width: 200px;
+      background-color: $gray-medium-dark;
+      &.expanded {
+        width: calc(100% - 200px);
+      }
     }
-    user-select: none;
-
-    #selections > button, #breadcrumbs > button {
-        display: flex;
-        line-height: 1rem;
-        svg {
-            height: 1rem;
-            margin: 0 .25rem 0 -.1rem;
-            width: 1rem;
-            path {
-                fill: $gray-lightest;
-            }
-        }
-    }
-
-    #breadcrumbs, #story-list > div, #subselection-list > div {
-        align-items: center;
-        display: flex;
-        justify-content: space-between;
-    }
-
-    #list {
-        height: 100%;
-        display: flex;
-        #story-list {
-            border-right: 1px solid $gray-darkest;
-            flex-grow: 1;
-        }
-        #subselection-list {
-            flex-grow: 2;
-        }
-
-        #story-list, #subselection-list {
-            overflow: auto;
-            height: calc(100% - 5rem);
-            > div  {
-                border-bottom: 1px solid $gray-darkest;
-                cursor: pointer;
-                height: 2rem;
-                padding: 0 .5rem;
-                span {
-                    display: inline-block;
-                    height: 1rem;
-                    width: 1rem;
-                }
-                &.active {
-                    color: $primary;
-                    svg {
-                        cursor: pointer;
-                        height: 1rem;
-                        path {
-                            fill: $gray-lightest;
-                        }
-                        &:hover {
-                            path {
-                                fill: $secondary;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    #breadcrumbs {
-        background-color: $gray-medium-dark;
-        border-bottom: 1px solid $gray-darkest;
-        border-top: 1px solid $gray-darkest;
-        height: 2.5rem;
-        justify-content: flex-start;
-        padding: 0 1rem;
-        span {
-            margin-left: 1rem;
-            cursor: pointer;
-        }
-        svg {
-            margin: 0 .25rem;
-            width: .5rem;
-            path {
-                fill: $gray-medium-light;
-            }
-        }
-    }
-
+  }
 }
 </style>

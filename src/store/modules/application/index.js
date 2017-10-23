@@ -15,18 +15,19 @@ export default {
 
       component_id: null,
       component_definition_id: null,
+      component_instance_id: null,
 
-      building_unit_id: null,
-      thermal_zone_id: null,
-      space_type_id: null,
+      space_property_id: null,
 
       // current application mode and tool
       tool: 'Rectangle',
       mode: 'spaces',
       snapMode: 'grid-strict',
+      modeTab: 'floorplan',
+      subselectionType: 'spaces',
     },
-    modes: ['spaces', 'shading', 'building_units', 'thermal_zones', 'space_types', 'images'],
-    tools: ['Pan', 'Drag', 'Rectangle', 'Polygon', 'Eraser', 'Select', 'Map', 'Fill', 'Place Component'], // 'Apply Property'
+    modes: ['spaces', 'shading', 'building_units', 'thermal_zones', 'pitched_roofs', 'space_types', 'images'],
+    tools: ['Pan', 'Drag', 'Rectangle', 'Polygon', 'Eraser', 'Select', 'Map', 'Fill', 'Place Component', 'Remove Component', 'Image', 'Apply Property'],
     // d3 scale functions px -> rwu
     scale: {
       x: d3.scaleLinear().range([0, 0]).domain([0, 0]),

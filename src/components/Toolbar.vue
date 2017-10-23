@@ -8,76 +8,195 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
   <nav id="toolbar">
-    <section class="settings">
 
-      <div class="input-checkbox">
-        <label>Story Below</label>
-        <input type="checkbox" v-model="previousStoryVisible">
-      </div>
+    <section id="top">
+      <div id="navigation-head">
+        <template v-if="showImportExport">
+          <input ref="importLibrary" @change="importDataAsFile($event, 'library')" type="file" />
+          <input ref="importInput" @change="importDataAsFile($event, 'floorplan')" type="file" />
 
-      <div v-if="mapEnabled" class="input-checkbox">
-        <label>map</label>
-        <input type="checkbox" v-model="mapVisible">
-      </div>
+          <open-floorplan-svg @click.native="$refs.importInput.click()" id="import" class="button"></open-floorplan-svg>
+          <save-floorplan-svg @click.native="exportData" id="export" class="button"></save-floorplan-svg>
+          <import-library-svg @click.native="$refs.importLibrary.click()" class="button"></import-library-svg>
+        </template>
 
-      <div class="input-checkbox">
-        <label>grid</label>
-        <input type="checkbox" v-model="gridVisible">
-      </div>
-
-      <div class="input-number input-select">
-        <label>spacing</label>
-        <input v-model.number.lazy="spacing">
-        <select ref="unitSelect" @change="updateUnits">
-          <option value="ft">ft</option>
-          <option value="m">m</option>
-        </select>
-        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
-            <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
-        </svg>
-      </div>
-
-      <div class="input-number">
-        <label>north axis</label>
-        <input v-model.number.lazy="northAxis" :disabled="mapEnabled">
-      </div>
-
-      <div id="import-export" v-if="showImportExport">
-        <input ref="importLibrary" @change="importDataAsFile($event, 'library')" type="file" />
-        <button @click="$refs.importLibrary.click()">Import Library</button>
-        <input ref="importInput" @change="importDataAsFile($event, 'floorplan')" type="file" />
-        <button @click="$refs.importInput.click()" id="import">Open Floorplan</button>
-        <button @click="exportData" id="export">Save Floorplan</button>
-      </div>
-
-    </section>
-
-    <section class="tools">
-      <div class="undo-redo">
-        <button @click="undo" :disabled="!timetravelInitialized">Undo</button>
-        <button @click="redo" :disabled="!timetravelInitialized">Redo</button>
-      </div>
-      <div class="snapping-options">
-        <button @click="snapMode = 'grid-strict'" :class="{ active: snapMode === 'grid-strict' }">Strict Grid</button>
-        <button @click="snapMode = 'grid-verts-edges'" :class="{ active: snapMode === 'grid-verts-edges' }">Edges too</button>
-      </div>
-      <div id="component-menus" v-if="tool === 'Place Component'">
-        <div class='input-select'>
-            <label>Component</label>
-            <select v-model='currentComponent'>
-                <optgroup v-for="ct in allComponents" :label="ct.name">
-                  <option v-for='definition in ct.defs' :value="{ definition, type: ct.type }">{{ definition.name }}</option>
-                </optgroup>
-            </select>
-            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
-                <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
-            </svg>
+        <div id="undo-redo">
+          <undo-svg @click.native="undo" class="button" :class="{ 'disabled' : !timetravelInitialized }"></undo-svg>
+          <redo-svg @click.native="redo" class="button" :disabled="!timetravelInitialized" :class="{ 'disabled' : !timetravelInitialized }"></redo-svg>
         </div>
       </div>
+      <ul id="mode-tabs">
+        <li @click="modeTab='floorplan'" class="tab" data-modetab="floorplan" :class="{ active: modeTab === 'floorplan' }">
+          <span>
+            Floorplan
+            <tab-floorplan-svg class="icon"></tab-floorplan-svg>
+          </span>
+        </li>
 
-      <div>
-        <button @click="tool = item" :class="{ active: tool === item }" v-for="item in availableTools" :data-tool="item">{{ item }}</button>
+        <li @click="modeTab='assign'" class="tab" :class="{ active: modeTab === 'assign' }">
+          <span>
+            Assign
+            <tab-assign-svg  class="icon"></tab-assign-svg>
+          </span>
+        </li>
+
+        <li @click="modeTab='components'" class="tab" data-modetab="components" :class="{ active: modeTab === 'components' }">
+          <span>
+            Components
+            <tab-components-svg  class="icon"></tab-components-svg>
+          </span>
+        </li>
+
+        <li>
+          <span />
+        </li>
+      </ul>
+
+      <div id="grid-settings">
+        <div class="input-checkbox">
+          <label>Story Below</label>
+          <input type="checkbox" v-model="previousStoryVisible">
+        </div>
+
+        <div v-if="mapEnabled" class="input-checkbox">
+          <label>map</label>
+          <input type="checkbox" v-model="mapVisible">
+        </div>
+
+        <div class="input-checkbox">
+          <label>grid</label>
+          <input type="checkbox" v-model="gridVisible">
+        </div>
+
+        <div class="input-number">
+          <label>spacing</label>
+          <input v-model.number.lazy="spacing">
+        </div>
+
+        <div class="input-select">
+          <select ref="unitSelect" @change="updateUnits">
+            <option value="ft">ft</option>
+            <option value="m">m</option>
+          </select>
+          <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'>
+              <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
+          </svg>
+        </div>
+
+        <div class="input-number">
+          <label>north axis</label>
+          <input v-model.number.lazy="northAxis" :disabled="mapEnabled">
+        </div>
       </div>
+    </section>
+
+    <section id="bottom" :class="modeTab">
+      <div id="grid-tools">
+        <ZoomToFitSvg class="button" @click.native="zoomToFit"></ZoomToFitSvg>
+      </div>
+      <template  v-if="modeTab ==='floorplan'">
+        <div id="instructions">Draw a floorplan and import images</div>
+
+        <div id="drawing-tools" class="tools-list tools">
+          <div @click="tool = 'Rectangle'" data-tool="Rectangle" title="Rectangle" :class="{ active: tool === 'Rectangle' }">
+            <tool-draw-rectangle-svg class="button"></tool-draw-rectangle-svg>
+          </div>
+          <div @click="tool = 'Polygon'" data-tool="Polygon" title="Polygon" :class="{ active: tool === 'Polygon' }">
+            <tool-draw-polygon-svg class="button"></tool-draw-polygon-svg>
+          </div>
+          <div @click="tool = 'Fill'" data-tool="Fill" title="Fill" :class="{ active: tool === 'Fill' }">
+            <tool-fill-svg class="button"></tool-fill-svg>
+          </div>
+          <div @click="tool = 'Eraser'" data-tool="Eraser" title="Eraser" :class="{ active: tool === 'Eraser' }">
+            <tool-erase-svg class="button"></tool-erase-svg>
+          </div>
+          <div @click="tool = 'Select'" data-tool="Select" title="Select" :class="{ active: tool === 'Select' }">
+            <tool-move-size-svg class="button"></tool-move-size-svg>
+          </div>
+          <div @click="tool = 'Image'" data-tool="Image" title="Image" :class="{ active: tool === 'Image' }">
+            <tool-image-svg class="button"></tool-image-svg>
+          </div>
+        </div>
+
+        <div class="render-by">
+          <div class='input-select'>
+              <label>View By</label>
+              <select v-model='currentMode'>
+                  <option selected>--</option>
+                  <option v-for="mode in ['building_units', 'thermal_zones', 'space_types', 'pitched_roofs']" :value="mode">{{ displayNameForMode(mode) }}</option>
+              </select>
+              <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'>
+                  <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
+              </svg>
+          </div>
+        </div>
+      </template>
+
+      <template  v-if="modeTab === 'shading'">
+        <div id="instructions">Draw shading objects</div>
+
+        <div id="drawing-tools" class="tools-list tools">
+          <div @click="tool = 'Rectangle'" data-tool="Rectangle" title="Rectangle" :class="{ active: tool === 'Rectangle' }">
+            <tool-draw-rectangle-svg class="button"></tool-draw-rectangle-svg>
+          </div>
+          <div @click="tool = 'Polygon'" data-tool="Polygon" title="Polygon" :class="{ active: tool === 'Polygon' }">
+            <tool-draw-polygon-svg class="button"></tool-draw-polygon-svg>
+          </div>
+          <div @click="tool = 'Eraser'" data-tool="Eraser" title="Eraser" :class="{ active: tool === 'Eraser' }">
+            <tool-erase-svg class="button"></tool-erase-svg>
+          </div>
+          <div @click="tool = 'Select'" data-tool="Select" title="Select" :class="{ active: tool === 'Select' }">
+            <tool-move-size-svg class="button"></tool-move-size-svg>
+          </div>
+        </div>
+      </template>
+
+      <template v-if="modeTab === 'components'">
+        <div id="instructions">Add fenestration, daylighting, and PV</div>
+        <ComponentsList />
+        <!-- No need to show tool options if there's only the one choice. -->
+        <div id="drawing-tools" class="tools-list tools">
+          <div @click="tool = 'Place Component'" data-tool="Place Component" title="Place Component" :class="{ active: tool === 'Place Component' }">
+            <tool-component-svg class="button"></tool-component-svg>
+          </div>
+          <div @click="tool = 'Remove Component'" data-tool="Remove Component" title="Remove Component" :class="{ active: tool === 'Remove Component' }">
+            <tool-erase-svg class="button"></tool-erase-svg>
+          </div>
+        </div>
+      </template>
+
+      <template v-if="modeTab==='assign'">
+        <div id="instructions">Add connections &amp; Roof</div>
+        <AssignPropertiesList />
+        <!-- No need to show tool options if there's only the one choice. -->
+        <!-- <div id="drawing-tools" class="tools-list tools">
+          <div @click="tool = 'Apply Property'" data-tool="Apply Property" title="Apply Property" :class="{ active: tool === 'Apply Property' }">
+            <tab-assign-svg class="button"></tab-assign-svg>
+          </div>
+        </div> -->
+        <div class="render-by">
+          <div class='input-select'>
+              <label>View By</label>
+              <select v-model='currentMode'>
+                  <option v-for="mode in ['building_units', 'thermal_zones', 'space_types', 'pitched_roofs']" :value="mode">{{ displayNameForMode(mode) }}</option>
+              </select>
+              <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'>
+                  <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
+              </svg>
+          </div>
+        </div>
+      </template>
+
+
+
+
+
+      <!-- <div id="snapping-options">
+        <button @click="snapMode = 'grid-strict'" :class="{ active: snapMode === 'grid-strict' }">Strict Grid</button>
+        <button @click="snapMode = 'grid-verts-edges'" :class="{ active: snapMode === 'grid-verts-edges' }">Edges too</button>
+      </div> -->
+
+
     </section>
 
     <section class="modals" v-if="showSaveModal">
@@ -91,9 +210,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import SaveAsModal from './Modals/SaveAsModal.vue';
+import ComponentsList from './ComponentsList.vue';
+import AssignPropertiesList from './AssignPropertiesList.vue';
+import applicationHelpers from './../store/modules/application/helpers';
+import svgs from './svgs';
 
+// svgs
 
 export default {
   name: 'toolbar',
@@ -105,14 +229,17 @@ export default {
       },
       showSaveModal: false,
       thingWereSaving: '',
+      visibleComponentType: null
     };
   },
   methods: {
+    zoomToFit() {
+      window.eventBus.$emit('zoomToFit');
+    },
     exportData() {
       this.thingWereSaving = 'Floorplan';
       this.showSaveModal = true;
-      const data = this.$store.getters['exportData'];
-      return data;
+      return this.$store.getters['exportData'];
     },
     importDataAsFile(event, type) {
       const file = event.target.files[0];
@@ -139,12 +266,8 @@ export default {
 
       if (file) { reader.readAsText(file); }
     },
-    undo() {
-      this.$store.timetravel.undo();
-    },
-    redo() {
-      this.$store.timetravel.redo();
-    },
+    undo() { this.$store.timetravel.undo(); },
+    redo() { this.$store.timetravel.redo(); },
     updateUnits() {
       if (this.allowSettingUnits) {
         this.rwUnits = this.$refs.unitSelect.value;
@@ -153,6 +276,7 @@ export default {
         this.$refs.unitSelect.value = this.rwUnits;
       }
     },
+    displayNameForMode(mode) { return applicationHelpers.displayNameForMode(mode); },
   },
   computed: {
     latestCreatedCompId() {
@@ -165,7 +289,7 @@ export default {
         .value() + '';
     },
     allComponents() {
-      return Object.keys(this.componentTypes).map((ct) => ({
+      return Object.keys(this.componentTypes).map(ct => ({
         defs: this.$store.state.models.library[ct],
         name: this.componentTypes[ct],
         type: ct,
@@ -177,30 +301,46 @@ export default {
     currentComponentDefinition() {
       return this.currentComponent.definition;
     },
+    ...mapGetters({
+      currentSpaceProperty: 'application/currentSpaceProperty',
+    }),
     ...mapState({
-      currentMode: state => state.application.currentSelections.mode,
+      currentSubselectionType: state => state.application.currentSelections.subselectionType,
       mapEnabled: state => state.project.map.enabled,
       timetravelInitialized: state => state.timetravelInitialized,
       showImportExport: state => state.project.showImportExport,
       allowSettingUnits: state => state.geometry.length === 1 && state.geometry[0].vertices.length === 0,
     }),
     availableTools() {
-      return this.$store.state.application.tools
-      .filter((t) => {
-        if (t === 'Rectangle' || t === 'Polygon' || t === 'Eraser' || t === 'Select') {
-          // only allow drawing tools in space and shade mode
-          return (this.currentMode === 'spaces' || this.currentMode === 'shading');
-        } else if (t === 'Drag' || t === 'Pan') {
-          // only allow dragging in image mode
-          return (this.currentMode === 'images');
-        } else if (t === 'Fill') {
-          // only allow cloning in space and shade mode if previousStoryVisible
-          return this.previousStoryVisible && (this.currentMode === 'spaces' || this.currentMode === 'shading');
-        }
-        return true;
-      })
-      // never display the map tool, it is only used when the map is initialized
-      .filter(t => t !== 'Map');
+      let tools = [];
+      switch (this.modeTab) {
+        case 'floorplan':
+          tools = ['Rectangle', 'Polygon', 'Eraser', 'Select', 'Image'];
+          break;
+        case 'shading':
+          tools = ['Rectangle', 'Polygon', 'Eraser', 'Select'];
+          break;
+        case 'components':
+          tools = ['Place Component', 'Remove Component'];
+          break;
+        case 'assign':
+          tools = ['Apply Property'];
+          break;
+        default:
+          break;
+      }
+      if (this.previousStoryVisible && (this.modeTab === 'floorplan' || this.currentMode === 'shading')) {
+        tools.push('Fill');
+      }
+      return tools;
+    },
+    currentMode: {
+      get() { return this.$store.state.application.currentSelections.mode; },
+      set(mode) { this.$store.dispatch('application/setCurrentMode', { mode }); },
+    },
+    modeTab: {
+      get() { return this.$store.state.application.currentSelections.modeTab; },
+      set(mt) { this.$store.dispatch('application/setCurrentModeTab', { modeTab: mt }); },
     },
     northAxis: {
       get() { return `${this.$store.state.project.config.north_axis}°`; },
@@ -248,90 +388,217 @@ export default {
     },
   },
   watch: {
+    modeTab() {
+      if (this.modeTab === 'assign' && this.currentSpaceProperty) {
+        this.currentMode = this.currentSpaceProperty.type;
+      } else {
+        this.currentMode = 'spaces';
+      }
+    },
+    currentSpaceProperty() {
+      if (this.currentSpaceProperty) {
+        this.currentMode = this.currentSpaceProperty.type;
+      }
+    },
     tool(val) {
       if (this.availableTools.indexOf(val) === -1 && val !== 'Map') { this.tool = this.availableTools[0]; }
     },
-    currentMode() { this.tool = this.availableTools[0]; },
+    availableTools() {
+      if (!_.includes(this.availableTools, this.tool)) {
+        this.tool = this.availableTools[0];
+      }
+    },
+    currentSubselectionType(val) {
+      this.tool = val === 'images' ? 'Image' :
+                  val === 'spaces' && this.tool === 'Image' ? this.availableTools[0] :
+                  _.includes(this.availableTools, this.tool) ? this.tool :
+                  this.availableTools[0];
+    },
     latestCreatedCompId() {
       this.$store.dispatch('application/setCurrentComponentDefinitionId', { id: this.latestCreatedCompId });
     },
   },
   components: {
     'save-as-modal': SaveAsModal,
+    ComponentsList,
+    AssignPropertiesList,
+    ...svgs,
   },
 };
 </script>
 
 <style lang="scss" scoped>
-@import "./../scss/config";
+// @import "./../scss/config";
+
+$gray-dark: #333333;
+$black: #000000;
+$gray-medium-light: #5b5b5b;
+
+svg.icon, svg.button {
+  margin-top: .5rem;
+  vertical-align: middle;
+  height: 2rem;
+  width: 2rem;
+}
 
 #toolbar {
+  background-color: $black;
   z-index: 3;
 
-  section {
-    align-items: center;
-    display: flex;
+  #top {
     height: 2.5rem;
-    padding: 0 2.5rem;
-    &.settings {
-      background-color: $gray-medium-dark;
-      text-align: right;
-      .input-number, .input-checkbox {
-        margin-right: 1.5rem;
+    display: flex;
+    #navigation-head {
+      #undo-redo {
+        float: right;
       }
-      // buttons to trigger file inputs
-      #import-export {
-        position: absolute;
-        right: 2.5rem;
-        button {
-          margin-left: 1rem;
-        }
-      }
-      // hidden file inputs
-      input[type="file"],
-      input[type="text"] {
-        position: absolute;
-        visibility: hidden;
+      input {
+        display: none;
       }
     }
-    &.tools {
-      background-color: $gray-medium-light;
-      justify-content: flex-end;
-      button {
-        &:last-child {
-          margin: 0;
-        }
-        margin: 0 1rem 0 0;
+
+    #grid-settings {
+      display: flex;
+      margin-left: auto;
+      >div {
+        margin-right: .5rem;
       }
+    }
+  }
+  #bottom {
+    user-select: none;
+    &.components, &.assign{
+      #instructions {
+        margin-right: 0;
+      }
+    }
+    .render-by {
+      margin-left: auto;
+      margin-top: auto;
+      margin-bottom: auto;
+    }
+    background-color: $gray-medium-light;
+    display: flex;
+    height: 2.5rem;
+
+    .tools-list {
+      display: flex;
+      margin-right: 3rem;
+      margin-left: auto;
       .active {
-        border: 2px solid $primary;
+        background-color: $gray-dark;
       }
-      > .undo-redo {
-        margin-right: auto;
+      > div {
+        padding-left: 5px;
+        padding-right: 5px;
       }
-      #component-menus {
-        margin: 0 auto;
-        .input-select {
-          display: inline-block;
-          &:last-child {
-            margin-left: 1rem;
-          }
-        }
-      }
-      > .snapping-options {
-        margin-right: auto;
-        :first-child {
-          margin-right: -2px;
-          border-bottom-right-radius: 0;
-          border-top-right-radius: 0;
-        }
-        :last-child {
-          margin-left: -2px;
-          border-bottom-left-radius: 0;
-          border-top-left-radius: 0;
-        }
+    }
+
+    #instructions {
+      line-height: 2.5rem;
+      margin-right: auto;
+      min-width: 19.5rem;
+    }
+
+    #grid-tools {
+      display: flex;
+      float: right;
+      div {
+        padding: 0 1rem;
       }
     }
   }
 }
+
+
+#mode-tabs {
+  list-style: none;
+  overflow: hidden;
+  padding-left: 0;
+  margin-top: 0;
+  margin-bottom:0;
+  display: flex;
+  font-size: 13px;
+
+  li {
+    cursor: pointer;
+    float: left;
+    margin-top: 0;
+    background: $gray-dark;
+    span {
+      color: white;
+      text-decoration: none;
+      padding: 10px 0 10px 45px;
+      position: relative;
+      display: inline-block;
+      float: left;
+      white-space: nowrap;
+
+      svg {
+        display: inline-block;
+        vertical-align: middle;
+        margin-bottom: -10px;
+        margin-top: 0px;
+      }
+
+    }
+
+    span::after {
+      content: " ";
+      display: inline-block;
+      width: 0;
+      height: 0;
+      border-top: 30px solid transparent; /* Go big on the size, and let overflow hide */
+      border-bottom: 30px solid transparent;
+      border-left: 30px solid $gray-dark;
+      position: absolute;
+      top: 50%;
+      margin-top: -30px;
+      left: 100%;
+      z-index: 2;
+    }
+    span::before {
+      content: " ";
+      display: inline-block;
+      width: 0;
+      height: 0;
+      border-top: 30px solid transparent;
+      border-bottom: 30px solid transparent;
+      border-left: 30px solid white;
+      position: absolute;
+      top: 50%;
+      margin-top: -30px;
+      margin-left: 1px;
+      left: 100%;
+      z-index: 1;
+    }
+    &.active {
+      background: $gray-medium-light;
+      span:after {
+        border-left: 30px solid $gray-medium-light;
+      }
+    }
+    &:first-child span {
+      padding-left: 10px;
+    }
+    &:last-child {
+      height: 1.2em;
+      background: black !important;
+      pointer-events: none !important;
+      cursor: default !important;
+    }
+    &:last-child span::after {
+      border: 0;
+    }
+    span:hover {
+      background: $gray-medium-light;
+    }
+    span:hover:after {
+      border-left-color: $gray-medium-light !important;
+    }
+  }
+}
+
+
+
 </style>

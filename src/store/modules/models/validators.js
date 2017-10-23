@@ -46,4 +46,7 @@ export default {
       return { success: true };
     };
   },
+  gt0(object, story, value, type) {
+    return value > 0 ? { success: true } : { success: false, error: 'Expected value to be greater than zero' };
+  },
 };

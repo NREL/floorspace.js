@@ -21,17 +21,12 @@ module.exports = {
     withScales(failOnError(browser))
       .waitForElementVisible('.modal .new-floorplan', 5000)
       .setFlagOnError()
-      .click('.modal .new-floorplan')
+      .click('.modal .new-floorplan svg')
       .getScales() // assigns to client.xScale, client.yScale.
       // unfortunately, it does so asyncronously, so we have to use .perform()
       // if we want to access them.
       .perform(draw50By50Square)
-      .perform((client, done) => {
-        client.click('.create-story')
-        .pause(10);
-
-        done();
-      })
+      .click('[data-object-type="stories"] .add-new')
       .perform((client, done) => {
         client.expect.element('.previousStory polygon')
           .to.have.css('stroke-dasharray').which.contains('10');
@@ -42,7 +37,7 @@ module.exports = {
       .checkForErrors()
       .end();
   },
-  'switch to spacing and back, preserve selected space': (browser) => {
+  'switch to shading and back, preserve selected space': (browser) => {
     const devServer = browser.globals.devServerURL;
 
     failOnError(browser)
@@ -50,11 +45,10 @@ module.exports = {
       .resizeWindow(1000, 800)
       .waitForElementVisible('.modal .new-floorplan', 5000)
       .setFlagOnError()
-      .click('.modal .new-floorplan')
-      .click('#navigation #selections select option[value="shading"]')
-      .click('.add-sub-selection')
-      .click('#navigation #selections select option[value="spaces"]')
-      .assert.elementCount('#subselection-list .active', 1)
+      .click('.modal .new-floorplan svg')
+      .click('.editable-select-list .controls select option[value="shading"]')
+      .click('.editable-select-list .controls select option[value="spaces"]')
+      .assert.elementCount('[data-object-type="spaces"] .active', 1)
       .checkForErrors()
       .end();
   },
@@ -62,7 +56,7 @@ module.exports = {
     withScales(failOnError(browser))
       .waitForElementVisible('.modal .new-floorplan', 5000)
       .setFlagOnError()
-      .click('.modal .new-floorplan')
+      .click('.modal .new-floorplan svg')
       .getScales() // assigns to client.xScale, client.yScale.
       // unfortunately, it does so asyncronously, so we have to use .perform()
       // if we want to access them.
@@ -92,10 +86,10 @@ module.exports = {
       .resizeWindow(1000, 800)
       .waitForElementVisible('.modal .new-floorplan', 5000)
       .setFlagOnError()
-      .click('.modal .new-floorplan')
-      .click('#navigation #selections select option[value="images"]')
-      .click('.create-story')
-      .assert.value('#navigation #selections select', 'images')
+      .click('.modal .new-floorplan svg')
+      .click('.editable-select-list .controls select option[value="images"]')
+      .click('[data-object-type="stories"] .add-new')
+      .assert.value('#navigation .editable-select-list .controls select', 'images')
       .checkForErrors()
       .end();
   },
@@ -103,13 +97,13 @@ module.exports = {
     withScales(failOnError(browser))
       .waitForElementVisible('.modal .new-floorplan', 5000)
       .setFlagOnError()
-      .click('.modal .new-floorplan')
+      .click('.modal .new-floorplan svg')
       .getScales()
       .perform(draw50By50Square)
       .click('.tools [data-tool="Rectangle"]')
-      .click('#selections .add-sub-selection')
+      .click('[data-object-type="spaces"] .add-new')
       .perform(drawSquare(-10, 50, 10, 10))
-      .click('#selections .add-sub-selection')
+      .click('[data-object-type="spaces"] .add-new')
       .perform(drawSquare(-55, 40, 30, 20))
       .execute(() => window.application.$store.state.geometry[0], [], ({ value }) => {
         const { faces, edges } = value,

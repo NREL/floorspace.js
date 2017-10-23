@@ -11,15 +11,31 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     <div class="overlay"></div>
     <div class="modal">
         <header>
-            <h2>Quick Start</h2>
+            <h2>Quickstart</h2>
         </header>
 
         <div class="content">
-            <p>Choose to either open an existing floorplan, start a new floorplan without a map, or start a new floorplan with a geolocated map.</p>
-
-            <button @click="$refs.importInput.click()" id="import" class="open-floorplan">Open Floorplan</button>
-            <button @click="mapEnabled = false; mapVisible = false; $emit('close')" class="new-floorplan">New Floorplan</button>
-            <button @click="mapEnabled = true; tool='Map'; $emit('close')" :disabled="!online">New Floorplan w/ Map</button>
+            <p>
+              <a @click="$refs.importInput.click()" id="import" class="quickstart-action open-floorplan">
+                <div class="title">Open</div>
+                <QuickstartIconOpenFloorplan />
+                <div class="explanation">Open an existing floorplan</div>
+              </a>
+            </p>
+            <p>
+              <a @click="mapEnabled = false; mapVisible = false; $emit('close')" class="quickstart-action new-floorplan">
+                <div class="title">New</div>
+                <QuickstartIconNewFloorplan />
+                <div class="explanation">Create a new floorplan without a map</div>
+              </a>
+            </p>
+            <p>
+              <a @click="mapEnabled = true; tool='Map'; $emit('close')" :disabled="!online" class="quickstart-action">
+                <div class="title">New With Map</div>
+                <QuickstartIconNewMapFloorplan />
+                <div class="explanation">New Floorplan w/ Map</div>
+              </a>
+            </p>
             <input id="importInput" ref="importInput" @change="importFloorplanAsFile" type="file"/>
         </div>
     </div>
@@ -27,6 +43,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 </template>
 
 <script>
+import svgs from '../svgs';
 
 export default {
   name: 'MapModal',
@@ -67,26 +84,54 @@ export default {
       this.$emit('close');
     },
   },
+  components: {
+    ...svgs,
+  },
 };
 </script>
 
 <style lang="scss" scoped>
 @import "./../../scss/config";
-.content {
-    margin: 0 2rem 2rem 2rem;
-    text-align: center;
 
-    button {
-        margin: 1rem .5rem;
+.modal {
+    width: 35rem;
+    background: #CCCCCC;
+    header h2 {
+      font-weight: bold;
     }
 
-    input[type=file] {
-        display: none;
+    .content {
+        margin: 0 2rem 2rem 2rem;
+        text-align: center;
+        display: flex;
+        justify-content: space-around;
+
+        button {
+            margin: 1rem .5rem;
+        }
+
+        input[type=file] {
+            display: none;
+        }
+
+        .explanation {
+          color: #5D5D5D;
+        }
+        .title {
+          color: #5D5D5D;
+          text-transform: uppercase;
+          font-weight: bold;
+          margin-top: 2rem;
+        }
     }
 }
 
-.modal {
-    width: 30rem;
+.quickstart-action {
+  margin: auto;
+  svg {
+    height: 4rem;
+    width: 4rem;
+  }
 }
 
 </style>

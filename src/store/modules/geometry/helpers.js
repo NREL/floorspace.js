@@ -9,6 +9,32 @@ export function distanceBetweenPoints(p1, p2) {
   return Math.sqrt((dx * dx) + (dy * dy));
 }
 
+export function fitToAspectRatio(xExtent, yExtent, widthOverHeight, adjustToFit = 'expand') {
+  const
+    xSpan = xExtent[1] - xExtent[0],
+    ySpan = yExtent[1] - yExtent[0],
+    xAccordingToY = ySpan * widthOverHeight,
+    yAccordingToX = xSpan / widthOverHeight,
+    xDiff = xAccordingToY - xSpan,
+    yDiff = yAccordingToX - ySpan;
+
+  // xDiff and yDiff are either both zero (already have correct aspect ratio),
+  // or they have opposite signs.
+
+  if ((xDiff > 0) === (adjustToFit === 'expand')) {
+    // xDiff > 0 and adjustToFit === 'expand ==> this expands region
+    // xDiff <= 0 and adjustToFit !== 'expand' ==> this contracts region
+    return {
+      xExtent: [xExtent[0] - xDiff / 2, xExtent[1] + xDiff / 2],
+      yExtent,
+    };
+  }
+  return {
+    xExtent,
+    yExtent: [yExtent[0] - yDiff / 2, yExtent[1] + yDiff / 2],
+  };
+}
+
 export function edgeDirection({ start, end }) {
   // return the angle from east, in radians.
   const
