@@ -1,6 +1,15 @@
 const d3 = require('d3');
 const _ = require('lodash');
 
+function errorMessages(logs) {
+  return _(logs)
+    .filter({ level: 'SEVERE' })
+    .map('message')
+    .reject(log => /favicon.ico - Failed to load resource:/.test(log))
+    .reject(log => /has been blocked by CORS policy:/.test(log))
+    .value();
+}
+
 function failOnError(browser) {
   browser.setFlagOnError = () => {
     browser.execute(
@@ -13,11 +22,7 @@ function failOnError(browser) {
       browser.assert.ok(!value);
     })
     .getLog('browser', (logs) => {
-      const errors = _(logs)
-        .filter({ level: 'SEVERE' })
-        .reject(log => /favicon.ico - Failed to load resource:/.test(log.message))
-        .map('message')
-        .value();
+      const errors = errorMessages(logs);
       if (errors.length) {
         console.error('errors found');
         errors.forEach(e => console.error(e));
@@ -29,11 +34,7 @@ function failOnError(browser) {
   browser.assertErrorOccurred = () => {
     browser
       .getLog('browser', (logs) => {
-        const errors = _(logs)
-          .filter({ level: 'SEVERE' })
-          .reject(log => /favicon.ico - Failed to load resource:/.test(log.message))
-          .map('message')
-          .value();
+        const errors = errorMessages(logs);
         browser.assert.ok(errors.length > 0);
       });
     return browser;

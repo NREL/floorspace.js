@@ -1228,7 +1228,6 @@ export default {
     svg
       .on('mousemove', this.handleMouseMove)
       .on('click', this.gridClicked);
-    window.d3 = d3;
   },
   transformTo(t) {
     d3.select(this.$refs.grid)
