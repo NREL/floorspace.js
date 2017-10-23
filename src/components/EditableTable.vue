@@ -8,23 +8,23 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
   <div class="editable-table">
-    <table class="table head" cellspacing="0">
-      <tr>
-        <th class="select"><!-- placeholder for select column --></th>
-        <th v-for="col in visibleColumns" @click="sortBy(col.name)">
-          <span>{{col.displayName}}</span>
-          <svg v-show="col.name === sortKey && sortDescending" viewBox="0 0 10 3" xmlns="http://www.w3.org/2000/svg">
-              <path d="M0 .5l5 5 5-5H0z"/>
-          </svg>
-          <svg v-show="col.name === sortKey && !sortDescending" viewBox="0 0 10 3" xmlns="http://www.w3.org/2000/svg">
-              <path d="M0 5.5l5-5 5 5H0z"/>
-          </svg>
-        </th>
-        <th class="destroy"><!-- placeholder for delete column --></th>
-      </tr>
-    </table>
-    <div class="inner-table">
-      <table cellspacing="0">
+    <table class="table" cellspacing="0">
+      <thead>
+        <tr>
+          <th class="select"><!-- placeholder for select column --></th>
+          <th v-for="col in visibleColumns" @click="sortBy(col.name)">
+            <span>{{col.displayName}}</span>
+            <svg v-show="col.name === sortKey && sortDescending" viewBox="0 0 10 3" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 .5l5 5 5-5H0z"/>
+            </svg>
+            <svg v-show="col.name === sortKey && !sortDescending" viewBox="0 0 10 3" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 5.5l5-5 5 5H0z"/>
+            </svg>
+          </th>
+          <th class="destroy"><!-- placeholder for delete column --></th>
+        </tr>
+      </thead>
+      <tbody cellspacing="0">
         <tr v-for="row in sortedRows" :key="row.id" :class="{ selected: selectedItemId === row.id }">
           <td class="select" @click.stop="selectRow(row)">
             <input type="radio" :checked="selectedItemId === row.id" />
@@ -44,8 +44,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <Delete class="button" />
           </td>
         </tr>
-      </table>
-    </div>
+      </tbody>
+    </table>
   </div>
 </template>
 
@@ -92,69 +92,75 @@ export default {
 
 <style lang="scss" scoped>
 @import "./../scss/config";
+
+  .editable-table {
+    width: 100%;
+    overflow-x: scroll;
+    table {
+      overflow-y: scroll;
+      thead {
+        display: table-row;
+        svg {
+          margin-left: 1em;
+          height: 1rem;
+          width: 1rem;
+        }
+
+      }
+      tbody {
+        overflow-x: scroll;
+        display: block;
+        height: calc(100vh - 190px);
+      }
+      td, th {
+        width: 134px;
+        span {
+          display: block;
+        }
+        > * {
+          width: 134px;
+        }
+        &.destroy, &.select {
+          width: 2rem;
+          > * {
+            width: 2rem;
+          }
+        }
+      }
+      th {
+        height: 3rem;
+      }
+    }
+  }
+
+
   .editable-table {
     background-color: $gray-medium;
-  }
-  table.head {
-    th {
-      border-bottom: 2px solid $gray-medium-dark;
-      background-color: $gray-medium;
-      width: 11em;
-      &.destroy, &.select {
-        width: 2rem;
-      }
-    }
-    tr {
-      height: 3rem;
-      svg {
-        margin-left: 1em;
-        height: 1rem;
-        width: 1rem;
-        fill: $gray-lightest;
-      }
-    }
-  }
-  td {
-    width: 11em;
-    input {
-      background-color: $gray-medium;
-      border: none;
-      color: $gray-lightest;
-      padding-top: 10px;
-      padding-bottom: 10px;
-      font-size: 1rem;
-      height: 18px;
-      width: 100%;
-    }
-  }
-  tr {
-    border-bottom: 2px solid tomato;
-    padding-right: 2px;
-    margin-right: -2px;
-    &.selected {
-      background-color: $gray-medium-light;
-      input {
-        background-color: $gray-medium-light;
-      }
-    }
-  }
-  td.destroy, td.select {
-      width: 2rem;
-      svg {
-          cursor: pointer;
-          height: 1.25rem;
+    table {
+      thead {
+        border-bottom: 2px solid $gray-medium-dark;
+        svg {
           fill: $gray-lightest;
-          &:hover {
-              fill: $secondary;
-          }
+        }
       }
-  }
-  .inner-table {
-    overflow: scroll;
-    position: absolute;
-    height: calc(100% - 110px);
-    background-color: $gray-medium;
-    width: calc(100% - 200px);
+      tbody {
+        input {
+          background-color: $gray-medium;
+          border: none;
+          color: $gray-lightest;
+          padding-top: 10px;
+          padding-bottom: 10px;
+          height: 18px;
+          font-size: 16px;
+        }
+        tr.selected {
+          background-color: $gray-medium-light;
+          input {
+            background-color: $gray-medium-light;
+          }
+        }
+      }
+    }
   }
 
 </style>
