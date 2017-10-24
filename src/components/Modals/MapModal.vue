@@ -16,13 +16,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
         <div class="content">
             <p>
-              <a @click="$refs.importInput.click()" id="import" class="quickstart-action open-floorplan">
-                <div class="title">Open</div>
-                <QuickstartIconOpenFloorplan />
-                <div class="explanation">Open an existing floorplan</div>
-              </a>
-            </p>
-            <p>
               <a @click="mapEnabled = false; mapVisible = false; $emit('close')" class="quickstart-action new-floorplan">
                 <div class="title">New</div>
                 <QuickstartIconNewFloorplan />
@@ -33,7 +26,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
               <a @click="mapEnabled = true; tool='Map'; $emit('close')" :disabled="!online" class="quickstart-action">
                 <div class="title">New With Map</div>
                 <QuickstartIconNewMapFloorplan />
-                <div class="explanation">New Floorplan w/ Map</div>
+                <div class="explanation">Create a new floorplan with a map</div>
+              </a>
+            </p>
+            <p>
+              <a @click="$refs.importInput.click()" id="import" class="quickstart-action open-floorplan">
+                <div class="title">Open</div>
+                <QuickstartIconOpenFloorplan />
+                <div class="explanation">Open an existing floorplan</div>
               </a>
             </p>
             <input id="importInput" ref="importInput" @change="importFloorplanAsFile" type="file"/>
