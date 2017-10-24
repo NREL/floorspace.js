@@ -11,18 +11,28 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
     <section id="top">
       <div id="navigation-head">
-        <template v-if="showImportExport">
+        <div v-if="showImportExport" class="import-export-buttons">
           <input ref="importLibrary" @change="importDataAsFile($event, 'library')" type="file" />
           <input ref="importInput" @change="importDataAsFile($event, 'floorplan')" type="file" />
 
-          <open-floorplan-svg @click.native="$refs.importInput.click()" id="import" class="button"></open-floorplan-svg>
-          <save-floorplan-svg @click.native="exportData" id="export" class="button"></save-floorplan-svg>
-          <import-library-svg @click.native="$refs.importLibrary.click()" class="button"></import-library-svg>
-        </template>
+          <div title="open floorplan">
+            <open-floorplan-svg @click.native="$refs.importInput.click()" id="import" class="button"></open-floorplan-svg>
+          </div>
+          <div title="save floorplan">
+            <save-floorplan-svg @click.native="exportData" id="export" class="button"></save-floorplan-svg>
+          </div>
+          <div title="import library">
+            <import-library-svg @click.native="$refs.importLibrary.click()" class="button"></import-library-svg>
+          </div>
+        </div>
 
         <div id="undo-redo">
-          <undo-svg @click.native="undo" class="button" :class="{ 'disabled' : !timetravelInitialized }"></undo-svg>
-          <redo-svg @click.native="redo" class="button" :disabled="!timetravelInitialized" :class="{ 'disabled' : !timetravelInitialized }"></redo-svg>
+          <div title="undo">
+            <undo-svg @click.native="undo" class="button" :class="{ 'disabled' : !timetravelInitialized }"></undo-svg>
+          </div>
+          <div title="redo">
+            <redo-svg @click.native="redo" class="button" :disabled="!timetravelInitialized" :class="{ 'disabled' : !timetravelInitialized }"></redo-svg>
+          </div>
         </div>
       </div>
       <ul id="mode-tabs">
@@ -430,7 +440,16 @@ svg.icon, svg.button {
     height: 2.5rem;
     display: flex;
     #navigation-head {
+      .import-export-buttons {
+        display: inline-block;
+        > div {
+          display: inline-block;
+        }
+      }
       #undo-redo {
+        > div {
+          display: inline-block;
+        }
         float: right;
       }
       input {
