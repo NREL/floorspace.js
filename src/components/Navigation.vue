@@ -53,6 +53,9 @@ export default {
     };
   },
   computed: {
+    ...mapGetters({
+      currentComponent: 'application/currentComponent',
+    }),
     ...mapState({
       modeTab: state => state.application.currentSelections.modeTab,
     }),
@@ -128,6 +131,14 @@ export default {
       if (!_.includes(val, this.subselectionType)){
         this.subselectionType = val[0];
       }
+    },
+    currentComponent() {
+      if (!this.currentComponent) { return; }
+      if (this.modeTab !== 'components') { return; }
+
+      this.subselectionType = this.currentComponent.type === 'window_definitions' ? 'windows' :
+        this.currentComponent.type === 'daylighting_control_definitions' ? 'daylighting_controls' :
+        this.subselectionType;
     },
   },
   components: {
