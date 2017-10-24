@@ -131,25 +131,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <RenderByDropdown />
       </template>
 
-      <template  v-if="modeTab === 'shading'">
-        <div id="instructions">Draw shading objects</div>
-
-        <div id="drawing-tools" class="tools-list tools">
-          <div @click="tool = 'Rectangle'" data-tool="Rectangle" title="Rectangle" :class="{ active: tool === 'Rectangle' }">
-            <tool-draw-rectangle-svg class="button"></tool-draw-rectangle-svg>
-          </div>
-          <div @click="tool = 'Polygon'" data-tool="Polygon" title="Polygon" :class="{ active: tool === 'Polygon' }">
-            <tool-draw-polygon-svg class="button"></tool-draw-polygon-svg>
-          </div>
-          <div @click="tool = 'Eraser'" data-tool="Eraser" title="Eraser" :class="{ active: tool === 'Eraser' }">
-            <tool-erase-svg class="button"></tool-erase-svg>
-          </div>
-          <div @click="tool = 'Select'" data-tool="Select" title="Select" :class="{ active: tool === 'Select' }">
-            <tool-move-size-svg class="button"></tool-move-size-svg>
-          </div>
-        </div>
-      </template>
-
       <template v-if="modeTab === 'components'">
         <div id="instructions">Add fenestration, daylighting, and PV</div>
         <ComponentsList />
@@ -165,7 +146,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       </template>
 
       <template v-if="modeTab==='assign'">
-        <div id="instructions">Add connections &amp; Roof</div>
+        <div id="instructions">Assign thermal zones, etc, to spaces</div>
         <AssignPropertiesList />
         <!-- No need to show tool options if there's only the one choice. -->
         <!-- <div id="drawing-tools" class="tools-list tools">
