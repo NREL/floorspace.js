@@ -106,6 +106,11 @@ export default {
         target: 'map',
         view: this.view,
       });
+      this.view.on('propertychange', (e) => {
+        if (e.key === 'rotation') {
+          this.rotation = this.view.getRotation();
+        }
+      });
 
       this.updateMapView();
     },
