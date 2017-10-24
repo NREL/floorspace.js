@@ -110,7 +110,7 @@ export default {
       tbody {
         overflow-x: auto;
         display: block;
-        height: calc(100vh - 190px);
+        height: calc(100vh - 208px);
       }
       td, th {
         width: 134px;
