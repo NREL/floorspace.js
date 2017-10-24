@@ -1244,9 +1244,13 @@ export default {
       width = this.$refs.grid.clientWidth,
       height = this.$refs.grid.clientHeight;
 
+    if (!this.allVertices.length) {
+      return;
+    }
+
     const
-      xExtent = d3.extent(this.currentStoryGeometry.vertices, d => this.zoomXScale(d.x)),
-      yExtent = d3.extent(this.currentStoryGeometry.vertices, d => this.zoomYScale(d.y)),
+      xExtent = d3.extent(this.allVertices, d => this.zoomXScale(d.x)),
+      yExtent = d3.extent(this.allVertices, d => this.zoomYScale(d.y)),
       dx = xExtent[1] - xExtent[0],
       dy = yExtent[1] - yExtent[0],
       x = (xExtent[0] + xExtent[1]) / 2,

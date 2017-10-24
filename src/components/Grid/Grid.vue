@@ -107,6 +107,7 @@ export default {
       scaleY: state => state.application.scale.y,
       windowDefs: state => state.models.library.window_definitions,
       windowWidths: state => _.sumBy(state.models.library.window_definitions, 'width'),
+      allVertices: state => _.flatMap(state.geometry, 'vertices'),
     }),
     ...mapGetters({
       currentStory: 'application/currentStory',
