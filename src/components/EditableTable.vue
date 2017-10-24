@@ -95,9 +95,9 @@ export default {
 
   .editable-table {
     width: 100%;
-    overflow-x: scroll;
+    overflow-x: auto;
     table {
-      overflow-y: scroll;
+      overflow-y: auto;
       thead {
         display: table-row;
         svg {
@@ -108,7 +108,7 @@ export default {
 
       }
       tbody {
-        overflow-x: scroll;
+        overflow-x: auto;
         display: block;
         height: calc(100vh - 190px);
       }

@@ -96,7 +96,7 @@ export default {
 
   .list {
     height: calc(100vh - 4.75rem);
-    overflow: scroll;
+    overflow: auto;
 
     header {
       background-color: $gray-dark;

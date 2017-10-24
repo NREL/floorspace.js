@@ -43,7 +43,7 @@ export default {
 .library-select {
   padding: 0 0 !important;
   max-height: calc(100% - 65px);
-  overflow-y: scroll;
+  overflow-y: auto;
   .rows {
     > div {
       border-bottom: 1px solid $gray-darkest;

@@ -87,7 +87,7 @@ export default {
     background-color: $gray-medium;
     .editable-select-list {
       max-height: 250px;
-      overflow: scroll;
+      overflow: auto;
       padding: 10px;
       tbody {
         max-height: 132px !important;

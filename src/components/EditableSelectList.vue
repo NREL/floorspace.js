@@ -114,7 +114,7 @@ export default {
   }
 }
 .editable-table {
-  overflow-x: scroll;
+  overflow-x: auto;
   overflow-y: auto;
 }
 .search-spot {
