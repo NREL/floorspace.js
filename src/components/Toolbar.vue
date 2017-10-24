@@ -118,18 +118,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           </div>
         </div>
 
-        <div class="render-by">
-          <div class='input-select'>
-              <label>View By</label>
-              <select v-model='currentMode'>
-                  <option selected>--</option>
-                  <option v-for="mode in ['building_units', 'thermal_zones', 'space_types', 'pitched_roofs']" :value="mode">{{ displayNameForMode(mode) }}</option>
-              </select>
-              <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'>
-                  <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
-              </svg>
-          </div>
-        </div>
+        <RenderByDropdown />
       </template>
 
       <template  v-if="modeTab === 'shading'">
@@ -174,17 +163,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <tab-assign-svg class="button"></tab-assign-svg>
           </div>
         </div> -->
-        <div class="render-by">
-          <div class='input-select'>
-              <label>View By</label>
-              <select v-model='currentMode'>
-                  <option v-for="mode in ['building_units', 'thermal_zones', 'space_types', 'pitched_roofs']" :value="mode">{{ displayNameForMode(mode) }}</option>
-              </select>
-              <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'>
-                  <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
-              </svg>
-          </div>
-        </div>
+        <RenderByDropdown />
       </template>
 
 
@@ -216,6 +195,7 @@ import ComponentsList from './ComponentsList.vue';
 import AssignPropertiesList from './AssignPropertiesList.vue';
 import applicationHelpers from './../store/modules/application/helpers';
 import svgs from './svgs';
+import RenderByDropdown from './RenderByDropdown.vue';
 
 // svgs
 
@@ -422,6 +402,7 @@ export default {
     'save-as-modal': SaveAsModal,
     ComponentsList,
     AssignPropertiesList,
+    RenderByDropdown,
     ...svgs,
   },
 };

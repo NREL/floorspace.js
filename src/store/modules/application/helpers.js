@@ -1,15 +1,18 @@
 import _ from 'lodash';
 import map from './appconfig';
 
+export function displayNameForMode(mode) {
+  return map.modes[mode];
+}
+
 const helpers = {
   // TODO: refactor
   // returns the displayName for a given mode
-  displayNameForMode(mode) {
-    return map.modes[mode];
-  },
+  displayNameForMode,
   config: map,
 };
 export default helpers;
+
 
 export function componentInstanceById(currStory, compInstId) {
   const windew = _.find(currStory.windows, { id: compInstId });

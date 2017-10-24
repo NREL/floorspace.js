@@ -8,6 +8,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
   <div class='input-select'>
+      <label v-if="label">{{ label }}</label>
       <select @change="$emit('change', $event.target.value)">
           <option v-for='opt in options' :value="opt.val" :selected="opt.val === value">{{ opt.display }}</option>
       </select>
@@ -22,7 +23,7 @@ import _ from 'lodash';
 
 export default {
   name: 'PrettySelect',
-  props: ['options', 'value'],
+  props: ['options', 'value', 'label'],
 }
 
 </script>
