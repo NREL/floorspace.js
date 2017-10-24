@@ -467,11 +467,6 @@ svg.icon, svg.button {
   }
   #bottom {
     user-select: none;
-    &.components, &.assign{
-      #instructions {
-        margin-right: 0;
-      }
-    }
     .render-by {
       margin-left: auto;
       margin-top: auto;
@@ -481,10 +476,13 @@ svg.icon, svg.button {
     display: flex;
     height: 2.5rem;
 
+    .components-list {
+      margin-right: auto;
+    }
     .tools-list {
       display: flex;
       margin-right: 3rem;
-      margin-left: auto;
+      margin-left: 0;
       .active {
         background-color: $gray-dark;
       }
@@ -496,7 +494,7 @@ svg.icon, svg.button {
 
     #instructions {
       line-height: 2.5rem;
-      margin-right: auto;
+      margin-right: 0;
       min-width: 19.5rem;
     }
 
