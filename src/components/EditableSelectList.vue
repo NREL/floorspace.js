@@ -113,10 +113,6 @@ export default {
     margin-left: 4px;
   }
 }
-.editable-table {
-  overflow-x: auto;
-  overflow-y: auto;
-}
 .search-spot {
   height: 2rem;
   input {
