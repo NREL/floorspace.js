@@ -94,6 +94,38 @@
 						},
 						"north_axis": {
 							"type": "number"
+						},
+						"ground": {
+							"type": "object",
+							"properties": {
+								"floor_offset": {
+									"description": "Specifies the vertical offset between the building floor and the ground plane. Use a value < 0 for buildings with below-grade spaces, or a value > 0 for, e.g., buildings on piers.",
+									"type": "number",
+									"default": 0
+								},
+								"azimuth_angle": {
+									"description": "Direction of the ground plane, in clockwise degrees from the positive y-axis when viewed from above.",
+									"type": "number"
+								},
+								"tilt_angle": {
+									"description": "Angle of the ground plane, in degrees, from horizontal.",
+									"type": "number",
+									"minimum": 0,
+									"maximum": 90,
+									"exclusiveMaximum": true,
+									"default": 0
+								},
+								"x_shift": {
+									"description": "Specifies the x-axis shift from the origin.",
+									"type": "number",
+									"default": 0
+								},
+								"y_shift": {
+									"description": "Specifies the y-axis shift from the origin.",
+									"type": "number",
+									"default": 0
+								}
+							}
 						}
 					}
 				},
@@ -164,15 +196,6 @@
 				},
 				"showImportExport": {
 					"type": "boolean"
-				}
-			}
-		},
-		"Building": {
-			"type": "object",
-			"properties": {
-				"floor offset": {
-					"description": "If provided, specifies the vertical offset between the building floor and the ground plane. Use a value < 0 for buildings with below-grade spaces, or a value > 0 for, e.g., buildings on piers.",
-					"type": "number"
 				}
 			}
 		},
