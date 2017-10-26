@@ -12,7 +12,7 @@
     "e2e": "node test/e2e/runner.js",
     "test": "karma start test/unit/karma.conf.js --single-run && node test/e2e/runner.js",
     "lint": "eslint --ext .js,.vue src test/unit/specs test/e2e/specs",
-    "deploy": "./node_modules/.bin/gh-pages -d dist/ -b gh-pages -r git@github.com:${TRAVIS_REPO_SLUG}.git",
+    "deploy": "./node_modules/.bin/gh-pages -d dist/ -b gh-pages -r git@github.com:${TRAVIS_REPO_SLUG}.git"
   },
   "dependencies": {
     "d3": "^4.4.0",
