@@ -91,6 +91,9 @@
 						},
 						"language": {
 							"type": "string"
+						},
+						"north_axis": {
+							"type": "number"
 						}
 					}
 				},
@@ -167,9 +170,6 @@
 		"Building": {
 			"type": "object",
 			"properties": {
-				"north_axis": {
-					"type": "number"
-				},
 				"floor offset": {
 					"description": "If provided, specifies the vertical offset between the building floor and the ground plane. Use a value < 0 for buildings with below-grade spaces, or a value > 0 for, e.g., buildings on piers.",
 					"type": "number"
