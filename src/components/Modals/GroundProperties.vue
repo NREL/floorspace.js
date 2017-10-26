@@ -8,18 +8,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
   <ModalBase
-    :title="`Save ${saveWhat} as`"
+    title="Ground Properties"
     @close="$emit('close')"
   >
-    <span class="input-text">
-      <input ref="downloadName" type="text"
-        @keyup.enter="downloadFile"
-        :value="saveWhat.toLowerCase()"
-        spellcheck="false"
-      />
-      .json
-      <button class="download-button" @click="downloadFile">Download</button>
-    </span>
+    <div class="ground-properties">
+      <label>Floor Offset <input type="text" v-model="floor_offset" /></label>
+      <label>Asimuth Angle <input type="text" v-model="azimuth_angle" /></label>
+      <label>Tilt Angle <input type="text" v-model="tilt_angle" /></label>
+      <label>x-shift <input type="text" v-model="x_shift" /></label>
+      <label>y-shift <input type="text" v-model="y_shift" /></label>
+    </div>
   </ModalBase>
 </template>
 
@@ -27,33 +25,53 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 import ModalBase from './ModalBase.vue';
 
 export default {
-  name: 'SaveAsModal',
-  props: ['saveWhat', 'dataToDownload'],
-  mounted() {
-    this.$refs.downloadName.focus();
-  },
-  methods: {
-    downloadFile: function() {
-      const a = document.createElement('a');
-      a.setAttribute('href', `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(this.dataToDownload))}`);
-      a.setAttribute('download', this.$refs.downloadName.value + '.json');
-      a.click();
-
-      console.log(`exporting:\n${JSON.stringify(this.dataToDownload)}`); // eslint-disable-line
-      this.$emit('close');
-    },
-  },
+  name: 'GroundProperties',
   components: {
     ModalBase,
   },
 };
 </script>
 
-<style lang="scss" scoped>
-@import "./../../scss/config";
-.download-button {
-  cursor: pointer;
-  text-transform: uppercase;
-}
 
-</style>
+
+          </div>
+      </div>
+  </aside>
+</template>
+
+<script>
+import { mapState } from 'vuex';
+import ModalBase from './ModalBase.vue';
+
+export default {
+  name: 'GroundProperties',
+  computed: {
+    ...mapState({
+        ground: state => state.project.config.ground,
+    }),
+    floor_offset: {
+      get() { return this.ground.floor_offset; },
+      set(val) { this.$store.dispatch('project/modifyGround', { key: 'floor_offset', val }); },
+    },
+    azimuth_angle: {
+      get() { return this.ground.azimuth_angle; },
+      set(val) { this.$store.dispatch('project/modifyGround', { key: 'azimuth_angle', val }); },
+    },
+    tilt_angle: {
+      get() { return this.ground.tilt_angle; },
+      set(val) { this.$store.dispatch('project/modifyGround', { key: 'tilt_angle', val }); },
+    },
+    x_shift: {
+      get() { return this.ground.x_shift; },
+      set(val) { this.$store.dispatch('project/modifyGround', { key: 'x_shift', val }); },
+    },
+    y_shift: {
+      get() { return this.ground.y_shift; },
+      set(val) { this.$store.dispatch('project/modifyGround', { key: 'y_shift', val }); },
+    },
+  },
+  components: {
+    ModalBase,
+  },
+}
+</script>

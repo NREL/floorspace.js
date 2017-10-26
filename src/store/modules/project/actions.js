@@ -1,5 +1,4 @@
-import * as d3 from 'd3';
-import { fitToAspectRatio } from './../geometry/helpers';
+import _ from 'lodash';
 import Validator from './../../utilities/validator';
 
 export default {
@@ -121,5 +120,21 @@ export default {
 
   zoomToFit(context, { geometry_id, widthOverHeight }) {
     context.commit('setView', { xExtent, yExtent });
+  },
+
+  modifyGround({ state, commit }, { key, val }) {
+    let value = +val;
+    if (isNaN(value)) {
+      value = 0;
+    }
+    if (!_.includes(Object.keys(state.config.ground), key)) {
+      console.error(`unrecognized ground property "${key}"`);
+      return;
+    }
+    if (key === 'tilt_angle' && (value < 0 || value >= 90)) {
+      window.eventBus.$emit('error', 'Tilt Angle must be in [0, 90)');
+      return;
+    }
+    commit('modifyGround', { key, value });
   },
 }

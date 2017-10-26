@@ -100,4 +100,8 @@ export default {
   setTransform(state, payload) {
     state.transform = payload;
   },
-}
+
+  modifyGround(state, { key, value }) {
+    state.config.ground[key] = value;
+  },
+};
