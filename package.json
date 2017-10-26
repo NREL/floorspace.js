@@ -11,12 +11,14 @@
     "unit": "karma start test/unit/karma.conf.js",
     "e2e": "node test/e2e/runner.js",
     "test": "karma start test/unit/karma.conf.js --single-run && node test/e2e/runner.js",
-    "lint": "eslint --ext .js,.vue src test/unit/specs test/e2e/specs"
+    "lint": "eslint --ext .js,.vue src test/unit/specs test/e2e/specs",
+    "deploy": "./node_modules/.bin/gh-pages -d dist/ -b gh-pages -r git@github.com:${TRAVIS_REPO_SLUG}.git",
   },
   "dependencies": {
     "d3": "^4.4.0",
     "d3-selection": "^1.1.0",
     "d3-selection-multi": "^1.0.1",
+    "gh-pages": "^1.0.0",
     "google-maps-api": "^2.0.1",
     "huebee": "^1.0.1",
     "js-clipper": "^1.0.1",
