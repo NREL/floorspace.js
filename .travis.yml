@@ -20,14 +20,14 @@ before_install:
 install:
   - npm install
   - npm update
-script:
-  - jdk_switcher use oraclejdk8
-  - npm run test
+# script:
+#   - jdk_switcher use oraclejdk8
+#   - npm run test
 notifications:
   email: false
 script:
   - npm run test && node check_version.js
-  - npm run build
+  - npm run build && sed -i 's/\/static/static/g' dist/index.html
 deploy:
   skip_cleanup: true
   provider: script
