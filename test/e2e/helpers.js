@@ -5,7 +5,7 @@ function errorMessages(logs) {
   return _(logs)
     .filter({ level: 'SEVERE' })
     .map('message')
-    .reject(log => /favicon.ico - Failed to load resource:/.test(log))
+    .reject(log => /Failed to load resource:/.test(log))
     .reject(log => /has been blocked by CORS policy:/.test(log))
     .value();
 }
