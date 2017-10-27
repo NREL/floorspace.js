@@ -8,15 +8,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
   <ModalBase
+    class="ground-props-modal"
     title="Ground Properties"
     @close="$emit('close')"
   >
     <div class="ground-properties">
-      <label>Floor Offset <input type="text" v-model="floor_offset" /></label>
-      <label>Asimuth Angle <input type="text" v-model="azimuth_angle" /></label>
-      <label>Tilt Angle <input type="text" v-model="tilt_angle" /></label>
-      <label>x-shift <input type="text" v-model="x_shift" /></label>
-      <label>y-shift <input type="text" v-model="y_shift" /></label>
+      <p><label class="input-text">Floor Offset <input type="text" v-model="floor_offset" /></label></p>
+      <p><label class="input-text">Asimuth Angle <input type="text" v-model="azimuth_angle" /></label></p>
+      <p><label class="input-text">Tilt Angle <input type="text" v-model="tilt_angle" /></label></p>
+      <p><label class="input-text">x-shift <input type="text" v-model="x_shift" /></label></p>
+      <p><label class="input-text">y-shift <input type="text" v-model="y_shift" /></label></p>
     </div>
   </ModalBase>
 </template>
@@ -75,3 +76,22 @@ export default {
   },
 }
 </script>
+<style lang="scss">
+@import "./../../scss/config";
+.ground-props-modal .modal {
+  width: 260px;
+}
+
+.ground-properties {
+  margin: 0 auto;
+  width: 180px;
+  input {
+    height: 20px;
+    font-size: 16px;
+    margin-left: auto;
+    width: 30px;
+  }
+
+}
+
+</style>
