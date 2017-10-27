@@ -21,25 +21,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     </div>
   </ModalBase>
 </template>
-
-<script>
-import ModalBase from './ModalBase.vue';
-
-export default {
-  name: 'GroundProperties',
-  components: {
-    ModalBase,
-  },
-};
-</script>
-
-
-
-          </div>
-      </div>
-  </aside>
-</template>
-
 <script>
 import { mapState } from 'vuex';
 import ModalBase from './ModalBase.vue';

@@ -50,19 +50,6 @@ export default {
     }
 }
 
-// .overlay {
-//   background-color: $gray-darkest;
-//   height: 100%;
-//   left: 0;
-//   opacity: .5;
-//   position: fixed;
-//   top: 0;
-//   width: 100%;
-//   z-index: 4;
-//   pointer-events: all;
-// }
-
-
 .modal {
     width: 30rem;
     position: fixed;

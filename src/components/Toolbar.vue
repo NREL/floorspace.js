@@ -182,7 +182,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       />
       <GroundProperties
         v-else-if="showGroundPropsModal"
-        @close="() => {showGroundPropsModal = false }"
+        @close="showGroundPropsModal = false"
       />
     </section>
   </nav>
