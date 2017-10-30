@@ -8,52 +8,71 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
   <ModalBase
-    :title="`Save ${saveWhat} as`"
+    class="ground-props-modal"
+    title="Ground Properties"
     @close="$emit('close')"
   >
-    <span class="input-text">
-      <input ref="downloadName" type="text"
-        @keyup.enter="downloadFile"
-        :value="saveWhat.toLowerCase()"
-        spellcheck="false"
-      />
-      .json
-      <button class="download-button" @click="downloadFile">Download</button>
-    </span>
+    <div class="ground-properties">
+      <p><label class="input-text">Floor Offset <input type="text" v-model="floor_offset" /></label></p>
+      <p><label class="input-text">Asimuth Angle <input type="text" v-model="azimuth_angle" /></label></p>
+      <p><label class="input-text">Tilt Angle <input type="text" v-model="tilt_angle" /></label></p>
+      <p><label class="input-text">x-shift <input type="text" v-model="x_shift" /></label></p>
+      <p><label class="input-text">y-shift <input type="text" v-model="y_shift" /></label></p>
+    </div>
   </ModalBase>
 </template>
-
 <script>
+import { mapState } from 'vuex';
 import ModalBase from './ModalBase.vue';
 
 export default {
-  name: 'SaveAsModal',
-  props: ['saveWhat', 'dataToDownload'],
-  mounted() {
-    this.$refs.downloadName.focus();
-  },
-  methods: {
-    downloadFile: function() {
-      const a = document.createElement('a');
-      a.setAttribute('href', `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(this.dataToDownload))}`);
-      a.setAttribute('download', this.$refs.downloadName.value + '.json');
-      a.click();
-
-      console.log(`exporting:\n${JSON.stringify(this.dataToDownload)}`); // eslint-disable-line
-      this.$emit('close');
+  name: 'GroundProperties',
+  computed: {
+    ...mapState({
+        ground: state => state.project.config.ground,
+    }),
+    floor_offset: {
+      get() { return this.ground.floor_offset; },
+      set(val) { this.$store.dispatch('project/modifyGround', { key: 'floor_offset', val }); },
+    },
+    azimuth_angle: {
+      get() { return this.ground.azimuth_angle; },
+      set(val) { this.$store.dispatch('project/modifyGround', { key: 'azimuth_angle', val }); },
+    },
+    tilt_angle: {
+      get() { return this.ground.tilt_angle; },
+      set(val) { this.$store.dispatch('project/modifyGround', { key: 'tilt_angle', val }); },
+    },
+    x_shift: {
+      get() { return this.ground.x_shift; },
+      set(val) { this.$store.dispatch('project/modifyGround', { key: 'x_shift', val }); },
+    },
+    y_shift: {
+      get() { return this.ground.y_shift; },
+      set(val) { this.$store.dispatch('project/modifyGround', { key: 'y_shift', val }); },
     },
   },
   components: {
     ModalBase,
   },
-};
+}
 </script>
-
-<style lang="scss" scoped>
+<style lang="scss">
 @import "./../../scss/config";
-.download-button {
-  cursor: pointer;
-  text-transform: uppercase;
+.ground-props-modal .modal {
+  width: 260px;
+}
+
+.ground-properties {
+  margin: 0 auto;
+  width: 180px;
+  input {
+    height: 20px;
+    font-size: 16px;
+    margin-left: auto;
+    width: 30px;
+  }
+
 }
 
 </style>

@@ -97,6 +97,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           <label>north axis</label>
           <input v-model.number.lazy="northAxis" :disabled="mapEnabled">
         </div>
+
+        <button @click="showGroundPropsModal = true">
+          Ground Properties
+        </button>
       </div>
     </section>
 
@@ -169,11 +173,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
     </section>
 
-    <section class="modals" v-if="showSaveModal">
-      <save-as-modal
+    <section class="modals">
+      <SaveAsModal
+        v-if="showSaveModal"
         :saveWhat="thingWereSaving"
         :dataToDownload="dataToDownload"
-        :onClose="() => {showSaveModal = false; thingWereSaving = '';}"
+        @close="() => {showSaveModal = false; thingWereSaving = '';}"
+      />
+      <GroundProperties
+        v-else-if="showGroundPropsModal"
+        @close="showGroundPropsModal = false"
       />
     </section>
   </nav>
@@ -182,6 +191,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <script>
 import { mapState, mapGetters } from 'vuex';
 import SaveAsModal from './Modals/SaveAsModal.vue';
+import GroundProperties from './Modals/GroundProperties.vue';
 import ComponentsList from './ComponentsList.vue';
 import AssignPropertiesList from './AssignPropertiesList.vue';
 import applicationHelpers from './../store/modules/application/helpers';
@@ -200,7 +210,8 @@ export default {
       },
       showSaveModal: false,
       thingWereSaving: '',
-      visibleComponentType: null
+      visibleComponentType: null,
+      showGroundPropsModal: false,
     };
   },
   methods: {
@@ -390,7 +401,8 @@ export default {
     },
   },
   components: {
-    'save-as-modal': SaveAsModal,
+    SaveAsModal,
+    GroundProperties,
     ComponentsList,
     AssignPropertiesList,
     RenderByDropdown,
