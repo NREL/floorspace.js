@@ -109,20 +109,8 @@
 							"description": "Direction of the ground plane, in clockwise degrees from the positive y-axis when viewed from above.",
 							"type": "number"
 						},
-						"tilt_angle": {
-							"description": "Angle of the ground plane, in degrees, from horizontal.",
-							"type": "number",
-							"minimum": 0,
-							"maximum": 90,
-							"default": 0
-						},
-						"x_shift": {
-							"description": "Specifies the x-axis shift from the origin.",
-							"type": "number",
-							"default": 0
-						},
-						"y_shift": {
-							"description": "Specifies the y-axis shift from the origin.",
+						"tilt_slope": {
+							"description": "Slope of the ground plane from horizontal. For example, a value of 1 implies a 45-deg angle.",
 							"type": "number",
 							"default": 0
 						}
