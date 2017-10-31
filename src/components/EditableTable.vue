@@ -40,7 +40,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
               :onChange="updateRow.bind(null, row.id, col.name)"
             />
           </td>
-          <td class="destroy" @click.stop="deleteRow(row)">
+          <td class="destroy" @click.stop="deleteRow(row)" title="delete">
             <Delete class="button" />
           </td>
         </tr>

@@ -12,12 +12,12 @@
           :value="selectedObjectType"
         />
         <span v-else>{{ objectTypes[0].display || objectTypes[0].displayName }}</span>
-        <a @click="addRow" v-if="addRow" class="add-new">
+        <a @click="addRow" v-if="addRow" class="add-new" title="Create new">
           <AddNew class="button"/>
         </a>
       </div>
       <div class="control-group">
-        <a @click="toggleCompact">
+        <a @click="toggleCompact" :title="compact ? 'expand' : 'contract'">
           <DoubleArrows
             class="button"
             :transform="compact ? '' : 'scale(-1, 1)'"

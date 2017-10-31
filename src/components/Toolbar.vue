@@ -106,7 +106,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
     <section id="bottom" :class="modeTab">
       <div id="grid-tools">
-        <ZoomToFitSvg class="button" @click.native="zoomToFit"></ZoomToFitSvg>
+        <div title="zoom to fit">
+          <ZoomToFitSvg class="button" @click.native="zoomToFit"></ZoomToFitSvg>
+        </div>
       </div>
       <template  v-if="modeTab ==='floorplan'">
         <div id="instructions">Draw a floorplan and import images</div>
