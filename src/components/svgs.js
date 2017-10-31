@@ -24,6 +24,7 @@ import zoomInSvg from './../assets/svg-icons/zoom_in.svg';
 import zoomOutSvg from './../assets/svg-icons/zoom_out.svg';
 import panSvg from './../assets/svg-icons/pan.svg';
 import addImage from './../assets/svg-icons/add_image.svg';
+import GroundPropertiesIcon from './../assets/svg-icons/ground_props_icon.svg';
 
 import ComponentsWindow from './../assets/svg-icons/components_window.svg';
 import ComponentsDaylighting from './../assets/svg-icons/components_daylighting.svg';
@@ -100,4 +101,6 @@ export default {
   QuickstartIconNewMapFloorplan,
   QuickstartIconNewFloorplan,
   QuickstartIconOpenFloorplan,
+
+  GroundPropertiesIcon,
 };

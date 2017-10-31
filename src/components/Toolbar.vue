@@ -98,9 +98,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           <input v-model.number.lazy="northAxis" :disabled="mapEnabled">
         </div>
 
-        <button @click="showGroundPropsModal = true">
-          Ground Properties
-        </button>
+        <div @click="showGroundPropsModal = true" title="Ground Properties">
+          <GroundPropertiesIcon class="button"/>
+        </div>
       </div>
     </section>
 
