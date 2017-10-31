@@ -1,4 +1,5 @@
 import _ from 'lodash';
+
 const serializeState = (state) => {
   const clone = JSON.parse(JSON.stringify(state));
 
@@ -22,6 +23,7 @@ const filteredActions = [
   'application/setCurrentShading',
   'application/setCurrentImage',
   'application/setCurrentSpacePropertyId',
+  'application/setCurrentSubSelectionType',
   'project/setPreviousStoryVisible',
   'project/setGridVisible',
   'project/setMapLatitude',

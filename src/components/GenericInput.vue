@@ -86,4 +86,9 @@ export default {
 .numeric {
   text-align: right;
 }
+input {
+  border-width: 2px;
+  border-style: inset;
+  border-color: $gray-lightest;
+}
 </style>

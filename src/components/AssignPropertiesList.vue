@@ -28,7 +28,6 @@
   </div>
 </template>
 <script>
-import { mapGetters } from 'vuex';
 import Library from './Library.vue';
 import libconfig from '../store/modules/models/libconfig';
 import svgs from './svgs';
@@ -42,9 +41,17 @@ export default {
     };
   },
   computed: {
-    ...mapGetters({
-      currentSpaceProperty: 'application/currentSpaceProperty',
-    }),
+    currentSpaceProperty: {
+      get() { return this.$store.getters['application/currentSpaceProperty']; },
+      set(item) { this.$store.dispatch('application/setCurrentSpacePropertyId', { id: item && item.id }); },
+    },
+    currentMode: {
+      get() { return this.$store.state.application.currentSelections.mode; },
+      set(mode) { this.$store.dispatch('application/setCurrentMode', { mode }); },
+    },
+    visibleOptions() {
+      return this.$store.state.models.library[this.visibleSpaceProp] || [];
+    },
   },
   methods: {
     toggleCompact(spaceProp) {
@@ -52,6 +59,14 @@ export default {
     },
     displayName(spaceProp) {
       return libconfig[spaceProp].displayName;
+    },
+  },
+  watch: {
+    visibleSpaceProp() {
+      this.currentMode = this.visibleSpaceProp;
+      if (this.visibleSpaceProp !== (this.currentSpaceProperty && this.currentSpaceProperty.type)) {
+        this.currentSpaceProperty = this.visibleOptions[0];
+      }
     },
   },
   components: {

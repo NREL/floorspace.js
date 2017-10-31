@@ -9,7 +9,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
   <div class="editable-table">
     <table class="table" cellspacing="0">
-      <thead>
+      <thead cellspacing="0">
         <tr>
           <th class="select"><!-- placeholder for select column --></th>
           <th v-for="col in visibleColumns" @click="sortBy(col.name)">
@@ -40,7 +40,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
               :onChange="updateRow.bind(null, row.id, col.name)"
             />
           </td>
-          <td class="destroy" @click.stop="deleteRow(row)">
+          <td class="destroy" @click.stop="deleteRow(row)" title="delete">
             <Delete class="button" />
           </td>
         </tr>
@@ -62,7 +62,7 @@ export default {
   ],
   data() {
     return {
-      sortKey: 'id',
+      sortKey: r => +r.id,
       sortDescending: true,
     };
   },
@@ -120,11 +120,18 @@ export default {
         > * {
           width: 134px;
         }
+        input {
+          width: 117px;
+          margin-left: 5px;
+          margin-right: 6px;
+        }
         &.destroy, &.select {
-          width: 2rem;
-          > * {
-            width: 2rem;
+          width: 35px;
+          > [type="radio"] {
+            width: 25px;
           }
+          margin: 0 auto;
+          padding: 0;
         }
       }
       th {
@@ -146,11 +153,12 @@ export default {
       tbody {
         input {
           background-color: $gray-medium;
-          border: none;
           color: $gray-lightest;
-          padding-top: 10px;
-          padding-bottom: 10px;
-          height: 18px;
+          padding-top: 5px;
+          padding-bottom: 5px;
+          margin-top: 5px;
+          margin-bottom: 5px;
+          height: 16px;
           font-size: 16px;
         }
         tr.selected {
