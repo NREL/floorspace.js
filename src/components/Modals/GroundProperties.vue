@@ -18,6 +18,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       <p><label class="input-text">Tilt Angle <input type="text" v-model="tilt_angle" /></label></p>
       <p><label class="input-text">x-shift <input type="text" v-model="x_shift" /></label></p>
       <p><label class="input-text">y-shift <input type="text" v-model="y_shift" /></label></p>
+      <button class="button" @click="$emit('close')">Okay</button>
     </div>
   </ModalBase>
 </template>
