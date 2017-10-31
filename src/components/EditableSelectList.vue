@@ -88,6 +88,15 @@ export default {
       this.$emit('toggleCompact', !this.compact)
     },
   },
+  watch: {
+    'rows.length': {
+      handler(newLen, oldLen) {
+        if (newLen > oldLen) {
+          this.selectRow(_.maxBy(this.rows, r => +r.id));
+        }
+      },
+    },
+  },
   components: {
     EditableTable,
     LibrarySelect,
