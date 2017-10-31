@@ -75,6 +75,7 @@ export default {
     searchedRows() {
       return this.rows.filter(
         row => _.chain(row)
+          .omit(['color'])
           .values()
           .compact()
           .some(val => val.toLowerCase && val.toLowerCase().includes(this.search.toLowerCase()))
