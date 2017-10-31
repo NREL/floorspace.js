@@ -120,6 +120,11 @@ export default {
         > * {
           width: 134px;
         }
+        input {
+          width: 124px;
+          margin-left: 5px;
+          margin-right: 5px;
+        }
         &.destroy, &.select {
           width: 2rem;
           > * {
@@ -146,11 +151,12 @@ export default {
       tbody {
         input {
           background-color: $gray-medium;
-          border: none;
           color: $gray-lightest;
-          padding-top: 10px;
-          padding-bottom: 10px;
-          height: 18px;
+          padding-top: 5px;
+          padding-bottom: 5px;
+          margin-top: 5px;
+          margin-bottom: 5px;
+          height: 16px;
           font-size: 16px;
         }
         tr.selected {
