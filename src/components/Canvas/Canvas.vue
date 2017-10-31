@@ -29,7 +29,7 @@ export default {
         ...mapState({
             mapEnabled: state => state.project.map.enabled,
             mapVisible: state => state.project.map.visible,
-            northAxis: state => state.project.config.north_axis,
+            northAxis: state => state.project.north_axis,
         })
     },
     components: {

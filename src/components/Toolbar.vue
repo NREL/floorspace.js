@@ -325,7 +325,7 @@ export default {
       set(mt) { this.$store.dispatch('application/setCurrentModeTab', { modeTab: mt }); },
     },
     northAxis: {
-      get() { return `${this.$store.state.project.config.north_axis}°`; },
+      get() { return `${this.$store.state.project.north_axis}°`; },
       set(northAxis) { this.$store.dispatch('project/setNorthAxis', { north_axis: northAxis }); },
     },
     gridVisible: {

@@ -127,7 +127,7 @@ export default {
     if (isNaN(value)) {
       value = 0;
     }
-    if (!_.includes(Object.keys(state.config.ground), key)) {
+    if (!_.includes(Object.keys(state.ground), key)) {
       console.error(`unrecognized ground property "${key}"`);
       return;
     }
