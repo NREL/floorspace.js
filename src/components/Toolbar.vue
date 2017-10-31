@@ -129,7 +129,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           </div>
         </div>
 
-        <RenderByDropdown />
       </template>
 
       <template v-if="modeTab === 'components'">
@@ -155,10 +154,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <tab-assign-svg class="button"></tab-assign-svg>
           </div>
         </div> -->
-        <RenderByDropdown />
       </template>
 
       <div id="grid-tools">
+        <RenderByDropdown />
         <div title="zoom to fit">
           <ZoomToFitSvg class="button" @click.native="zoomToFit"></ZoomToFitSvg>
         </div>
@@ -493,6 +492,7 @@ svg.icon, svg.button {
     }
 
     #grid-tools {
+      margin-left: auto;
       display: flex;
       float: right;
       div {
