@@ -75,7 +75,7 @@ export default {
 
   setCurrentSpacePropertyId(context, payload) {
     const { id } = payload;
-    if (spacePropertyById(context.rootState.models.library, id)) {
+    if (!id || spacePropertyById(context.rootState.models.library, id)) {
       context.commit('setCurrentSpacePropertyId', { id });
     } else {
       console.error(`unable to find space property with id: ${id}`);

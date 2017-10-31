@@ -376,11 +376,6 @@ export default {
         this.currentMode = 'spaces';
       }
     },
-    currentSpaceProperty() {
-      if (this.currentSpaceProperty) {
-        this.currentMode = this.currentSpaceProperty.type;
-      }
-    },
     tool(val) {
       if (this.availableTools.indexOf(val) === -1 && val !== 'Map') { this.tool = this.availableTools[0]; }
     },
