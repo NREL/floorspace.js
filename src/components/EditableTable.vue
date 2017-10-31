@@ -9,7 +9,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
   <div class="editable-table">
     <table class="table" cellspacing="0">
-      <thead>
+      <thead cellspacing="0">
         <tr>
           <th class="select"><!-- placeholder for select column --></th>
           <th v-for="col in visibleColumns" @click="sortBy(col.name)">
@@ -121,15 +121,17 @@ export default {
           width: 134px;
         }
         input {
-          width: 124px;
+          width: 117px;
           margin-left: 5px;
-          margin-right: 5px;
+          margin-right: 6px;
         }
         &.destroy, &.select {
-          width: 2rem;
-          > * {
-            width: 2rem;
+          width: 35px;
+          > [type="radio"] {
+            width: 25px;
           }
+          margin: 0 auto;
+          padding: 0;
         }
       }
       th {
