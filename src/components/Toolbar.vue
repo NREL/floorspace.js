@@ -105,11 +105,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     </section>
 
     <section id="bottom" :class="modeTab">
-      <div id="grid-tools">
-        <div title="zoom to fit">
-          <ZoomToFitSvg class="button" @click.native="zoomToFit"></ZoomToFitSvg>
-        </div>
-      </div>
       <template  v-if="modeTab ==='floorplan'">
         <div id="instructions">Draw a floorplan and import images</div>
 
@@ -163,8 +158,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <RenderByDropdown />
       </template>
 
-
-
+      <div id="grid-tools">
+        <div title="zoom to fit">
+          <ZoomToFitSvg class="button" @click.native="zoomToFit"></ZoomToFitSvg>
+        </div>
+      </div>
 
 
       <!-- <div id="snapping-options">
@@ -490,6 +488,7 @@ svg.icon, svg.button {
     #instructions {
       line-height: 2.5rem;
       margin-right: 0;
+      margin-left: 10px;
       min-width: 19.5rem;
     }
 
