@@ -14,9 +14,7 @@ export default {
     ground: {
       floor_offset: 0,
       azimuth_angle: 0,
-      tilt_angle: 0,
-      x_shift: 0,
-      y_shift: 0,
+      tilt_slope: 0,
     },
     grid: {
       visible: true,

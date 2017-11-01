@@ -8,28 +8,54 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
   <ModalBase
-    class="ground-props-modal"
-    title="Ground Properties"
+    class="settings-modal"
+    title="Settings"
     @close="$emit('close')"
   >
-    <div class="ground-properties">
-      <p><label class="input-text">Floor Offset <input type="text" v-model="floor_offset" /></label></p>
-      <p><label class="input-text">Asimuth Angle <input type="text" v-model="azimuth_angle" /></label></p>
-      <p><label class="input-text">Tilt Angle <input type="text" v-model="tilt_angle" /></label></p>
-      <p><label class="input-text">x-shift <input type="text" v-model="x_shift" /></label></p>
-      <p><label class="input-text">y-shift <input type="text" v-model="y_shift" /></label></p>
+    <div class="settings">
+      <p>
+        <label class="input-text">
+          Floor Offset
+          <Info>
+            Specifies the vertical offset between the building floor and the ground plane.
+            Use a value &lt; 0 for buildings with below-grade spaces, or a value &gt; 0 for,
+            e.g., buildings on piers.
+          </Info>
+          <input type="text" v-model="floor_offset" />
+        </label>
+      </p>
+      <p>
+        <label class="input-text">
+          Asimuth Angle
+          <Info>
+            Direction of the ground plane, in clockwise degrees from the
+            positive y-axis when viewed from above.
+          </Info>
+          <input type="text" v-model="azimuth_angle" />
+        </label>
+      </p>
+      <p>
+        <label class="input-text">
+          Tilt Slope
+          <Info>
+            Slope of the ground plane from horizontal. For example, a value of 1 implies a 45&deg; angle.
+          </Info>
+          <input type="text" v-model="tilt_slope" />
+        </label>
+      </p>
     </div>
   </ModalBase>
 </template>
 <script>
 import { mapState } from 'vuex';
 import ModalBase from './ModalBase.vue';
+import Info from '../Info.vue';
 
 export default {
-  name: 'GroundProperties',
+  name: 'Settings',
   computed: {
     ...mapState({
-        ground: state => state.project.config.ground,
+        ground: state => state.project.ground,
     }),
     floor_offset: {
       get() { return this.ground.floor_offset; },
@@ -39,33 +65,26 @@ export default {
       get() { return this.ground.azimuth_angle; },
       set(val) { this.$store.dispatch('project/modifyGround', { key: 'azimuth_angle', val }); },
     },
-    tilt_angle: {
-      get() { return this.ground.tilt_angle; },
-      set(val) { this.$store.dispatch('project/modifyGround', { key: 'tilt_angle', val }); },
-    },
-    x_shift: {
-      get() { return this.ground.x_shift; },
-      set(val) { this.$store.dispatch('project/modifyGround', { key: 'x_shift', val }); },
-    },
-    y_shift: {
-      get() { return this.ground.y_shift; },
-      set(val) { this.$store.dispatch('project/modifyGround', { key: 'y_shift', val }); },
+    tilt_slope: {
+      get() { return this.ground.tilt_slope; },
+      set(val) { this.$store.dispatch('project/modifyGround', { key: 'tilt_slope', val }); },
     },
   },
   components: {
     ModalBase,
+    Info,
   },
 }
 </script>
 <style lang="scss">
 @import "./../../scss/config";
-.ground-props-modal .modal {
+.settings-modal .modal {
   width: 260px;
 }
 
-.ground-properties {
+.settings {
   margin: 0 auto;
-  width: 180px;
+  width: 200px;
   input {
     height: 20px;
     font-size: 16px;
