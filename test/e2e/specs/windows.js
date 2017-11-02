@@ -31,8 +31,8 @@ module.exports = {
       .click('#component-icons [title="Window Definition"]')
       .click('#component-icons [data-object-type="window_definitions"]')
       .click('#component-icons [data-object-type="window_definitions"] td.destroy')
-      // switching tools clears the .highlight
-      .click('.tools [data-tool="Remove Component"]')
+      // switching modes clears the .highlight
+      .click('[data-modetab="floorplan"]')
       .assert.elementCount('.window', 0)
       .checkForErrors()
       .end();
