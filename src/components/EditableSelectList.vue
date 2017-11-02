@@ -12,12 +12,12 @@
           :value="selectedObjectType"
         />
         <span v-else>{{ objectTypes[0].display || objectTypes[0].displayName }}</span>
-        <a @click="addRow" v-if="addRow" class="add-new">
+        <a @click="addRow" v-if="addRow" class="add-new" title="Create new">
           <AddNew class="button"/>
         </a>
       </div>
       <div class="control-group">
-        <a @click="toggleCompact">
+        <a @click="toggleCompact" :title="compact ? 'expand' : 'contract'">
           <DoubleArrows
             class="button"
             :transform="compact ? '' : 'scale(-1, 1)'"
@@ -75,6 +75,7 @@ export default {
     searchedRows() {
       return this.rows.filter(
         row => _.chain(row)
+          .omit(['color'])
           .values()
           .compact()
           .some(val => val.toLowerCase && val.toLowerCase().includes(this.search.toLowerCase()))
@@ -85,6 +86,15 @@ export default {
   methods: {
     toggleCompact() {
       this.$emit('toggleCompact', !this.compact)
+    },
+  },
+  watch: {
+    'rows.length': {
+      handler(newLen, oldLen) {
+        if (newLen > oldLen) {
+          this.selectRow(_.maxBy(this.rows, r => +r.id));
+        }
+      },
     },
   },
   components: {

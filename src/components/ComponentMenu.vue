@@ -32,13 +32,18 @@ import libconfig from '../store/modules/models/libconfig';
 import helpers from './../store/modules/models/helpers';
 
 export default {
-  name: 'AssignComponentMenu',
+  name: 'ComponentMenu',
   props: {
     type: {
       type: String,
       required: true,
       validator: _.partial(_.includes, ['window_definitions', 'daylighting_control_definitions']),
     },
+  },
+  mounted() {
+    if (this.currentComponent.type !== this.type && this.currentComponentDefinitions.length) {
+      this.selectComponent(this.currentComponentDefinitions[0]);
+    }
   },
   data() {
     return {

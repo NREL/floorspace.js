@@ -19,7 +19,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
               <a @click="mapEnabled = false; mapVisible = false; $emit('close')" class="quickstart-action new-floorplan">
                 <div class="title">New</div>
                 <QuickstartIconNewFloorplan />
-                <div class="explanation">Create a new floorplan without a map</div>
+                <div class="explanation">Create a new floorplan</div>
               </a>
             </p>
             <p>

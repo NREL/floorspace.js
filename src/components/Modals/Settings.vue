@@ -43,6 +43,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           <input type="text" v-model="tilt_slope" />
         </label>
       </p>
+      <button class="button" @click="$emit('close')">Okay</button>
     </div>
   </ModalBase>
 </template>

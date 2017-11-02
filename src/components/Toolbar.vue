@@ -45,7 +45,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
         <li @click="modeTab='assign'" class="tab" :class="{ active: modeTab === 'assign' }">
           <span>
-            Assign
+            Assignments
             <tab-assign-svg  class="icon"></tab-assign-svg>
           </span>
         </li>
@@ -98,16 +98,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           <input v-model.number.lazy="northAxis" :disabled="mapEnabled">
         </div>
 
-        <div @click="showGroundPropsModal = true">
+        <div @click="showGroundPropsModal = true" title="settings">
           <SettingsGear class="button" />
         </div>
       </div>
     </section>
 
     <section id="bottom" :class="modeTab">
-      <div id="grid-tools">
-        <ZoomToFitSvg class="button" @click.native="zoomToFit"></ZoomToFitSvg>
-      </div>
       <template  v-if="modeTab ==='floorplan'">
         <div id="instructions">Draw a floorplan and import images</div>
 
@@ -132,7 +129,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           </div>
         </div>
 
-        <RenderByDropdown />
       </template>
 
       <template v-if="modeTab === 'components'">
@@ -158,11 +154,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <tab-assign-svg class="button"></tab-assign-svg>
           </div>
         </div> -->
-        <RenderByDropdown />
       </template>
 
-
-
+      <div id="grid-tools">
+        <RenderByDropdown />
+        <div title="zoom to fit">
+          <ZoomToFitSvg class="button" @click.native="zoomToFit"></ZoomToFitSvg>
+        </div>
+      </div>
 
 
       <!-- <div id="snapping-options">
@@ -377,11 +376,6 @@ export default {
         this.currentMode = 'spaces';
       }
     },
-    currentSpaceProperty() {
-      if (this.currentSpaceProperty) {
-        this.currentMode = this.currentSpaceProperty.type;
-      }
-    },
     tool(val) {
       if (this.availableTools.indexOf(val) === -1 && val !== 'Map') { this.tool = this.availableTools[0]; }
     },
@@ -488,10 +482,12 @@ svg.icon, svg.button {
     #instructions {
       line-height: 2.5rem;
       margin-right: 0;
+      margin-left: 10px;
       min-width: 19.5rem;
     }
 
     #grid-tools {
+      margin-left: auto;
       display: flex;
       float: right;
       div {
