@@ -46,15 +46,11 @@ export default {
       this.addPoint();
     }
     if (this.currentTool === 'Place Component') {
-      if (this.currentComponentType === 'window_definitions') {
-        this.placeWindow();
-      } else if (this.currentComponentType === 'daylighting_control_definitions') {
-        this.placeDaylightingControl();
-      }
+      this.placesOrSelectComponent();
     }
-    if (this.currentTool === 'Remove Component') {
-      this.removeComponent();
-    }
+    // if (this.currentTool === 'Remove Component') {
+    //   this.removeComponent();
+    // }
     if (this.currentTool === 'Image') {
       this.deselectImages();
     }
@@ -81,7 +77,7 @@ export default {
   deselectImages() {
     this.$store.dispatch('application/setCurrentSubSelectionId', this.currentStory.spaces[0]);
   },
-  componentToRemove() {
+  componentToSelect() {
     const
       gridCoords = d3.mouse(this.$refs.grid),
       gridPoint = { x: gridCoords[0], y: gridCoords[1] },
@@ -94,7 +90,7 @@ export default {
     return component;
   },
   removeComponent() {
-    const component = this.componentToRemove();
+    const component = this.componentToSelect();
     if (!component) {
       return;
     }
@@ -107,9 +103,28 @@ export default {
       console.error(`unrecognized component to remove: ${component}`);
     }
   },
-  highlightComponentToRemove() {
-    const component = this.componentToRemove();
-    this.componentFacingRemoval = component && component.id;
+  placesOrSelectComponent() {
+    // hold down shift to force placement when we might otherwise select
+    const toSelect = d3.event.shiftKey ? false : this.componentToSelect();
+    if (toSelect) {
+      this.currentComponentInstanceId = toSelect.id;
+      return;
+    }
+    // user is holding shift, or we didn't find a component to select
+    // => we're placing
+    if (this.currentComponentType === 'window_definitions') {
+      this.placeWindow();
+    } else if (this.currentComponentType === 'daylighting_control_definitions') {
+      this.placeDaylightingControl();
+    }
+  },
+  highlightComponentToSelect() {
+    if (d3.event.shiftKey) {
+      return null;
+    }
+    const component = this.componentToSelect();
+    this.componentFacingSelection = component && component.id;
+    return component;
   },
   placeWindow() {
     const
@@ -209,11 +224,8 @@ export default {
     const gridCoords = d3.mouse(this.$refs.grid),
       gridPoint = { x: gridCoords[0], y: gridCoords[1] };
 
-    if (this.currentTool === 'Place Component' && this.currentComponentDefinition) {
-      this.highlightComponent(gridPoint);
-      return;
-    } else if (this.currentTool === 'Remove Component') {
-      this.highlightComponentToRemove();
+    if (this.currentTool === 'Place Component') {
+      this.highlightComponentToPlaceOrSelect(gridPoint);
       return;
     }
 
@@ -264,11 +276,19 @@ export default {
 
   clearHighlights() {
     d3.selectAll('#grid .highlight, #grid .gridpoint, #grid .guideline').remove();
-    this.componentFacingRemoval = null;
+    this.componentFacingSelection = null;
   },
 
 
-  highlightComponent(gridPoint) {
+  highlightComponentToPlaceOrSelect(gridPoint) {
+    if (this.highlightComponentToSelect()) {
+      return;
+    }
+    // no component to select, let's highlight one to place.
+    this.highlightComponentToPlace(gridPoint);
+  },
+
+  highlightComponentToPlace(gridPoint) {
     if (this.currentComponentType === 'window_definitions') {
       this.highlightWindow(gridPoint);
     } else {

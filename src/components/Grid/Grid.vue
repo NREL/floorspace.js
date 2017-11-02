@@ -48,7 +48,7 @@ export default {
         x: null,
         y: null,
       },
-      componentFacingRemoval: null,
+      componentFacingSelection: null,
       transformAtLastRender: d3.zoomIdentity,
       handleMouseMove: null, // placeholder --> overwritten in mounted()
       ...drawMethods({
@@ -96,7 +96,6 @@ export default {
     ...mapState({
       currentMode: state => state.application.currentSelections.mode,
       currentTool: state => state.application.currentSelections.tool,
-      currentComponentInstanceId: state => state.application.currentSelections.modeTab === 'components' && state.application.currentSelections.component_instance_id,
       snapMode: state => state.application.currentSelections.snapMode,
       previousStoryVisible: state => state.project.previous_story.visible,
       gridVisible: state => state.project.grid.visible,
@@ -137,6 +136,17 @@ export default {
       get() { return this.$store.getters['application/currentSubSelection']; },
       set(item) { this.$store.dispatch('application/setCurrentSubSelectionId', { id: item.id }); },
     },
+    currentComponentInstanceId: {
+      get() {
+        return (
+          this.$store.state.application.currentSelections.modeTab === 'components' &&
+          this.$store.state.application.currentSelections.component_instance_id);
+      },
+      set(id) {
+        this.$store.dispatch('application/setCurrentComponentInstanceId', { id });
+      },
+    },
+
     // grid dimensions in real world units
     min_x: {
       get() { return this.$store.state.project.view.min_x; },
@@ -289,7 +299,7 @@ export default {
               .map(w => ({
                 ...this.denormalizeWindow(e, w),
                 selected: w.id === this.currentComponentInstanceId,
-                facingRemoval: w.id === this.componentFacingRemoval,
+                facingSelection: w.id === this.componentFacingSelection,
               })));
     },
     polygonsFromGeometry(geometry, extraPolygonAttrs = {}) {
@@ -313,7 +323,7 @@ export default {
               .map(dc => ({
                 ...geometryHelpers.vertexForId(dc.vertex_id, geometry),
                 selected: dc.id === this.currentComponentInstanceId,
-                facingRemoval:  dc.id === this.componentFacingRemoval,
+                facingSelection:  dc.id === this.componentFacingSelection,
               })),
             ...extraPolygonAttrs,
           };

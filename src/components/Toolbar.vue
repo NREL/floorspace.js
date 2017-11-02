@@ -53,7 +53,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <li @click="modeTab='components'" class="tab" data-modetab="components" :class="{ active: modeTab === 'components' }">
           <span>
             Components
-            <tab-components-svg  class="icon"></tab-components-svg>
+            <tool-component-svg  class="icon"></tool-component-svg>
           </span>
         </li>
 
@@ -130,14 +130,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <div id="instructions">Add fenestration, daylighting, and PV</div>
         <ComponentsList />
         <!-- No need to show tool options if there's only the one choice. -->
-        <div id="drawing-tools" class="tools-list tools">
+        <!-- <div id="drawing-tools" class="tools-list tools">
           <div @click="tool = 'Place Component'" data-tool="Place Component" title="Place Component" :class="{ active: tool === 'Place Component' }">
             <tool-component-svg class="button"></tool-component-svg>
           </div>
-          <div @click="tool = 'Remove Component'" data-tool="Remove Component" title="Remove Component" :class="{ active: tool === 'Remove Component' }">
-            <tool-erase-svg class="button"></tool-erase-svg>
-          </div>
-        </div>
+        </div> -->
       </template>
 
       <template v-if="modeTab==='assign'">
@@ -298,7 +295,7 @@ export default {
           tools = ['Rectangle', 'Polygon', 'Eraser', 'Select'];
           break;
         case 'components':
-          tools = ['Place Component', 'Remove Component'];
+          tools = ['Place Component'];
           break;
         case 'assign':
           tools = ['Apply Property'];
