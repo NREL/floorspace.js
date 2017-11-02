@@ -10,8 +10,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       :class="`tool_${tool.toLowerCase()}`">
         <toolbar :class="{ 'disabled-component': tool === 'Map' }"></toolbar>
 
-        <div id="layout-main">
-            <navigation :class="{ 'disabled-component': tool === 'Map' }"></navigation>
+        <div id="layout-main" :class="{ 'nav-on-top': navigationExpanded }">
+            <navigation
+              :class="{ 'disabled-component': tool === 'Map' }"
+              @expanded="(val) => { navigationExpanded = val; }"
+            ></navigation>
 
             <main>
               <div id="alert-text" v-show="error || success" :class="{ error, success }">
@@ -46,6 +49,7 @@ export default {
     return {
       error: null,
       success: null,
+      navigationExpanded: false,
     };
   },
   beforeCreate() {

@@ -39,6 +39,21 @@ main {
         left: 19.5rem;
         right: 0;
     }
+    &.nav-on-top {
+      #layout-navigation {
+        bottom: 50%;
+        width: 100%;
+
+        .editable-table table tbody {
+          height: calc(50vh - 170px);
+        }
+      }
+      main {
+        left: 0;
+        top: 50%;
+      }
+
+    }
 }
 #layout-library {
   height: 100%;

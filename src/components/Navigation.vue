@@ -104,23 +104,11 @@ export default {
       if (this.libraryExpanded) {
         return;
       }
-      document.getElementById('layout-navigation').style.width = '';
-      getSiblings(document.getElementById('layout-navigation')).forEach((el) => {
-        el.style.left = '';
-        el.style.display = null;
-      });
-      fullWidth = document.getElementById('layout-navigation').offsetWidth;
     },
     setWidthForOpenLibrary() {
-      if (!this.libraryExpanded) {
-        this.resetSize();
-        ResizeEvents.$emit('resize');
-        return;
-      }
-
-    document.getElementById('layout-navigation').style.width = '100%';
-    ResizeEvents.$emit('resize');
-  },
+      this.$emit('expanded', !!this.libraryExpanded);
+      ResizeEvents.$emit('resize');
+    },
 
   },
   watch: {
