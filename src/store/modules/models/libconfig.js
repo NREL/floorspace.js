@@ -550,6 +550,14 @@ const map = {
         displayName: 'Name',
         input_type: 'text',
       },
+      {
+        name: 'window_defn_id',
+        displayName: 'Definition',
+        input_type: 'select',
+        select_data(space, state) {
+          return _.fromPairs(state.models.library.window_definitions.map(b => [b.name, b.id]));
+        },
+      },
     ],
   },
   daylighting_controls: {
@@ -563,6 +571,14 @@ const map = {
         name: 'name',
         displayName: 'Name',
         input_type: 'text',
+      },
+      {
+        name: 'daylighting_control_defn_id',
+        displayName: 'Definition',
+        input_type: 'select',
+        select_data(space, state) {
+          return _.fromPairs(state.models.library.daylighting_control_definitions.map(b => [b.name, b.id]));
+        },
       },
     ],
   },

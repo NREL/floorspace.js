@@ -121,7 +121,10 @@ export default {
   position: absolute;
   top: 81px;
   background-color: $gray-medium;
+
   .editable-select-list {
+    border: 2px solid black;
+    border-top: none;
     max-height: 250px;
     overflow:scroll;
     padding: 10px;
