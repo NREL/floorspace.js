@@ -15,6 +15,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     <div class="settings">
       <p>
         <label class="input-text">
+          North Axis
+          <input type="text" v-model.number.lazy="northAxis" :disabled="mapEnabled" />
+        </label>
+      </p>
+      <p>
+        <label class="input-text">
           Floor Offset
           <Info>
             Specifies the vertical offset between the building floor and the ground plane.
@@ -57,6 +63,7 @@ export default {
   computed: {
     ...mapState({
         ground: state => state.project.ground,
+        mapEnabled: state => state.project.map.enabled,
     }),
     floor_offset: {
       get() { return this.ground.floor_offset; },
@@ -69,6 +76,10 @@ export default {
     tilt_slope: {
       get() { return this.ground.tilt_slope; },
       set(val) { this.$store.dispatch('project/modifyGround', { key: 'tilt_slope', val }); },
+    },
+    northAxis: {
+      get() { return `${this.$store.state.project.north_axis}°`; },
+      set(northAxis) { this.$store.dispatch('project/setNorthAxis', { north_axis: northAxis }); },
     },
   },
   components: {

@@ -93,11 +93,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           </svg>
         </div>
 
-        <div class="input-number">
-          <label>north axis</label>
-          <input v-model.number.lazy="northAxis" :disabled="mapEnabled">
-        </div>
-
         <div @click="showGroundPropsModal = true" title="settings">
           <SettingsGear class="button" />
         </div>
@@ -322,10 +317,6 @@ export default {
     modeTab: {
       get() { return this.$store.state.application.currentSelections.modeTab; },
       set(mt) { this.$store.dispatch('application/setCurrentModeTab', { modeTab: mt }); },
-    },
-    northAxis: {
-      get() { return `${this.$store.state.project.north_axis}°`; },
-      set(northAxis) { this.$store.dispatch('project/setNorthAxis', { north_axis: northAxis }); },
     },
     gridVisible: {
       get() { return this.$store.state.project.grid.visible; },
