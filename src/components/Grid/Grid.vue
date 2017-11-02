@@ -211,19 +211,28 @@ export default {
     windowCenterLocs() {
       return this.currentStory.windows
         .map(w => ({ w, e: _.find(this.denormalizedGeometry.edges, { id: w.edge_id }) }))
-        .map(({ w, e }) => ({
-          id: w.id,
-          type: 'window',
-          ...windowLocation(e, w),
-        }));
+        .map(({ w, e }) => {
+          const wind = this.denormalizeWindow(e, w);
+          return {
+            ...wind,
+            id: w.id,
+            type: 'window',
+            ...wind.center,
+          };
+        });
     },
     daylightingControlLocs() {
-      return _.flatMap(this.currentStory.spaces, 'daylighting_controls')
-        .map(dc => ({
-          ...geometryHelpers.vertexForId(dc.vertex_id, this.currentStoryGeometry),
-          id: dc.id,
-          type: 'daylighting_control',
-        }));
+      return _.flatten(
+        this.currentStory.spaces.map((space) => {
+          return space.daylighting_controls
+            .map(dc => ({
+              ...dc,
+              ...geometryHelpers.vertexForId(dc.vertex_id, this.currentStoryGeometry),
+              id: dc.id,
+              type: 'daylighting_control',
+              face_id: space.face_id,
+            }));
+      }));
     },
     allComponentInstanceLocs() {
       return [

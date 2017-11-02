@@ -124,6 +124,13 @@ export default {
     }
     const component = this.componentToSelect();
     this.componentFacingSelection = component && component.id;
+    if (!component) {
+      // do no highlighting
+    } else if (component.type === 'window') {
+      this.highlightWindowGuideline(component);
+    } else if (component.type === 'daylighting_control') {
+      this.highlightDaylightingControlGuideline(component);
+    }
     return component;
   },
   placeWindow() {
@@ -214,7 +221,6 @@ export default {
     // only highlight snap targets in drawing modes when a space or shading has been selected
     if (!(this.currentTool === 'Eraser' ||
     (this.currentTool === 'Place Component' && this.currentComponentDefinition) ||
-    (this.currentTool === 'Remove Component') ||
     ((this.currentTool === 'Rectangle' || this.currentTool === 'Polygon') && (this.currentSpace || this.currentShading)))) { return; }
 
     // unhighlight expired snap targets
@@ -312,7 +318,9 @@ export default {
       .selectAll('.window')
       .data([loc])
       .call(this.drawWindow.highlight(true));
-
+    this.highlightWindowGuideline(loc);
+  },
+  highlightWindowGuideline(loc) {
     d3.select('#grid svg')
       .append('g')
       .classed('guideline', true)
@@ -336,6 +344,9 @@ export default {
       .data([loc])
       .call(this.drawDaylightingControl);
 
+    this.highlightDaylightingControlGuideline(loc);
+  },
+  highlightDaylightingControlGuideline(loc) {
     const
       face = _.find(this.denormalizedGeometry.faces, { id: loc.face_id }),
       windows = this.windowsOnFace(face),
