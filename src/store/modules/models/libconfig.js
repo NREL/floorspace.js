@@ -264,16 +264,18 @@ const map = {
         name: 'spaces',
         displayName: 'Spaces',
         readonly: true,
+        numeric: true,
         get(story, state) {
-          return story.spaces.map(s => s.name).join(', ');
+          return story.spaces.length;
         },
       },
       {
         name: 'shading',
         displayName: 'Shading',
         readonly: true,
+        numeric: true,
         get(story, state) {
-          return story.shading.map(s => s.name).join(', ');
+          return story.shading.length;
         },
       },
       {
