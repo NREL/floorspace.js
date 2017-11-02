@@ -30,6 +30,16 @@ import libconfig from '../store/modules/models/libconfig';
 import EditableSelectList from './EditableSelectList.vue';
 import helpers from '../store/modules/models/helpers';
 
+
+function keyForMode(mode) {
+  return (
+    mode === 'stories' ? 'currentStory' :
+    _.includes(['building_units', 'thermal_zones', 'space_types', 'pitched_roofs'], mode) ? 'currentSpaceProperty' :
+    _.includes(['windows', 'daylighting_controls'], mode) ? 'currentComponentInstance' :
+    'currentSubSelection');
+}
+
+
 export default {
   name: 'Library',
   props: ['objectTypes', 'mode', 'searchAvailable', 'compact'],
@@ -74,11 +84,7 @@ export default {
       },
     },
     keyForCurrentMode() {
-      return (
-        this.mode === 'stories' ? 'currentStory' :
-        _.includes(['building_units', 'thermal_zones', 'space_types', 'pitched_roofs'], this.mode) ? 'currentSpaceProperty' :
-        _.includes(['windows', 'daylighting_controls'], this.mode) ? 'currentComponentInstance' :
-        'currentSubSelection');
+      return keyForMode(this.mode);
     },
     ...mapState({
       stories: state => state.models.stories,
@@ -99,6 +105,10 @@ export default {
     componentInstanceMode() {
       return _.includes(['windows', 'daylighting_controls'], this.mode);
     },
+    renderByMode: {
+      get() { return this.$store.state.application.currentSelections.mode; },
+      set(mode) { this.$store.dispatch('application/setCurrentMode', { mode }); },
+    },
   },
   watch: {
     rows() {
@@ -106,6 +116,13 @@ export default {
         this.selectedObject = this.rows[0];
       }
     },
+    mode(currMode, oldMode) {
+      if (keyForMode(currMode) === 'currentSpaceProperty') {
+        this.renderByMode = this.mode;
+      } else if (keyForMode(oldMode) === 'currentSpaceProperty') {
+        this.renderByMode = 'spaces';
+      }
+    }
   },
   methods: {
     changeMode(newMode) {

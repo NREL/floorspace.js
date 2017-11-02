@@ -142,7 +142,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
       <template v-if="modeTab==='assign'">
         <div id="instructions">Assign thermal zones, etc, to spaces</div>
-        <AssignPropertiesList />
         <!-- No need to show tool options if there's only the one choice. -->
         <!-- <div id="drawing-tools" class="tools-list tools">
           <div @click="tool = 'Apply Property'" data-tool="Apply Property" title="Apply Property" :class="{ active: tool === 'Apply Property' }">
@@ -187,7 +186,6 @@ import { mapState, mapGetters } from 'vuex';
 import SaveAsModal from './Modals/SaveAsModal.vue';
 import Settings from './Modals/Settings.vue';
 import ComponentsList from './ComponentsList.vue';
-import AssignPropertiesList from './AssignPropertiesList.vue';
 import applicationHelpers from './../store/modules/application/helpers';
 import svgs from './svgs';
 import RenderByDropdown from './RenderByDropdown.vue';
@@ -281,12 +279,15 @@ export default {
       currentSpaceProperty: 'application/currentSpaceProperty',
     }),
     ...mapState({
-      currentSubselectionType: state => state.application.currentSelections.subselectionType,
       mapEnabled: state => state.project.map.enabled,
       timetravelInitialized: state => state.timetravelInitialized,
       showImportExport: state => state.project.showImportExport,
       allowSettingUnits: state => state.geometry.length === 1 && state.geometry[0].vertices.length === 0,
     }),
+    currentSubselectionType: {
+      get() { return this.$store.state.application.currentSelections.subselectionType; },
+      set(sst) { this.$store.dispatch('application/setCurrentSubselectionType', { subselectionType: sst }); },
+    },
     availableTools() {
       let tools = [];
       switch (this.modeTab) {
@@ -369,6 +370,11 @@ export default {
     },
     tool(val) {
       if (this.availableTools.indexOf(val) === -1 && val !== 'Map') { this.tool = this.availableTools[0]; }
+      if (this.tool === 'Image' && this.currentSubselectionType !== 'images') {
+        this.currentSubselectionType = 'images';
+      } else if (this.tool !== 'Image' && this.currentSubselectionType === 'images') {
+        this.currentSubselectionType = 'spaces';
+      }
     },
     availableTools() {
       if (!_.includes(this.availableTools, this.tool)) {
@@ -376,10 +382,11 @@ export default {
       }
     },
     currentSubselectionType(val) {
-      this.tool = val === 'images' ? 'Image' :
-                  val === 'spaces' && this.tool === 'Image' ? this.availableTools[0] :
-                  _.includes(this.availableTools, this.tool) ? this.tool :
-                  this.availableTools[0];
+      if (val === 'images' && this.tool !== 'Image') {
+        this.tool = 'Image';
+      } else if (val !== 'images' && this.tool === 'Image') {
+        this.tool = this.availableTools[0];
+      }
     },
     latestCreatedCompId() {
       this.$store.dispatch('application/setCurrentComponentDefinitionId', { id: this.latestCreatedCompId });
@@ -389,7 +396,6 @@ export default {
     SaveAsModal,
     Settings,
     ComponentsList,
-    AssignPropertiesList,
     RenderByDropdown,
     ...svgs,
   },

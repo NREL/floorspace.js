@@ -86,7 +86,7 @@ export default {
         case 'components':
           return ['windows', 'daylighting_controls'];
         case 'assign':
-          return ['spaces'];
+          return ['spaces', 'building_units', 'thermal_zones', 'space_types', 'pitched_roofs'];
       }
     },
     mode: {
