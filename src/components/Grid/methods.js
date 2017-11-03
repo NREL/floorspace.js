@@ -46,14 +46,7 @@ export default {
       this.addPoint();
     }
     if (this.currentTool === 'Place Component') {
-      if (this.currentComponentType === 'window_definitions') {
-        this.placeWindow();
-      } else if (this.currentComponentType === 'daylighting_control_definitions') {
-        this.placeDaylightingControl();
-      }
-    }
-    if (this.currentTool === 'Remove Component') {
-      this.removeComponent();
+      this.placesOrSelectComponent();
     }
     if (this.currentTool === 'Image') {
       this.deselectImages();
@@ -70,6 +63,10 @@ export default {
       rwuPoint = this.gridPointToRWU(gridPoint),
       space = this.currentStory.spaces.find((sp) => {
         const face = _.find(this.denormalizedGeometry.faces, { id: sp.face_id });
+        if (!face) {
+          // this space has no geometry. It can't be the one that was clicked.
+          return false;
+        }
         return geometryHelpers.pointInFace(rwuPoint, face.vertices);
       });
     if (!space) { return; }
@@ -81,7 +78,7 @@ export default {
   deselectImages() {
     this.$store.dispatch('application/setCurrentSubSelectionId', this.currentStory.spaces[0]);
   },
-  componentToRemove() {
+  componentToSelect() {
     const
       gridCoords = d3.mouse(this.$refs.grid),
       gridPoint = { x: gridCoords[0], y: gridCoords[1] },
@@ -93,8 +90,19 @@ export default {
     }
     return component;
   },
-  removeComponent() {
-    const component = this.componentToRemove();
+  handleKeyDown(e) {
+    if ((e.keyCode === 8 || e.keyCode === 46) &&
+        !_.includes(['input', 'textarea'], document.activeElement.tagName.toLowerCase())) {
+      this.deleteElement();
+    }
+  },
+  deleteElement() {
+    if (this.modeTab === 'components') {
+      this.removeSelectedComponent();
+    }
+  },
+  removeSelectedComponent() {
+    const component = this.currentComponentInstance;
     if (!component) {
       return;
     }
@@ -107,9 +115,35 @@ export default {
       console.error(`unrecognized component to remove: ${component}`);
     }
   },
-  highlightComponentToRemove() {
-    const component = this.componentToRemove();
-    this.componentFacingRemoval = component && component.id;
+  placesOrSelectComponent() {
+    // hold down shift to force placement when we might otherwise select
+    const toSelect = d3.event.shiftKey ? false : this.componentToSelect();
+    if (toSelect) {
+      this.currentComponentInstanceId = toSelect.id;
+      return;
+    }
+    // user is holding shift, or we didn't find a component to select
+    // => we're placing
+    if (this.currentComponentType === 'window_definitions') {
+      this.placeWindow();
+    } else if (this.currentComponentType === 'daylighting_control_definitions') {
+      this.placeDaylightingControl();
+    }
+  },
+  highlightComponentToSelect() {
+    if (d3.event.shiftKey) {
+      return null;
+    }
+    const component = this.componentToSelect();
+    this.componentFacingSelection = component && component.id;
+    if (!component) {
+      // do no highlighting
+    } else if (component.type === 'window') {
+      this.highlightWindowGuideline(component);
+    } else if (component.type === 'daylighting_control') {
+      this.highlightDaylightingControlGuideline(component);
+    }
+    return component;
   },
   placeWindow() {
     const
@@ -199,7 +233,6 @@ export default {
     // only highlight snap targets in drawing modes when a space or shading has been selected
     if (!(this.currentTool === 'Eraser' ||
     (this.currentTool === 'Place Component' && this.currentComponentDefinition) ||
-    (this.currentTool === 'Remove Component') ||
     ((this.currentTool === 'Rectangle' || this.currentTool === 'Polygon') && (this.currentSpace || this.currentShading)))) { return; }
 
     // unhighlight expired snap targets
@@ -209,11 +242,8 @@ export default {
     const gridCoords = d3.mouse(this.$refs.grid),
       gridPoint = { x: gridCoords[0], y: gridCoords[1] };
 
-    if (this.currentTool === 'Place Component' && this.currentComponentDefinition) {
-      this.highlightComponent(gridPoint);
-      return;
-    } else if (this.currentTool === 'Remove Component') {
-      this.highlightComponentToRemove();
+    if (this.currentTool === 'Place Component') {
+      this.highlightComponentToPlaceOrSelect(gridPoint);
       return;
     }
 
@@ -264,11 +294,19 @@ export default {
 
   clearHighlights() {
     d3.selectAll('#grid .highlight, #grid .gridpoint, #grid .guideline').remove();
-    this.componentFacingRemoval = null;
+    this.componentFacingSelection = null;
   },
 
 
-  highlightComponent(gridPoint) {
+  highlightComponentToPlaceOrSelect(gridPoint) {
+    if (this.highlightComponentToSelect()) {
+      return;
+    }
+    // no component to select, let's highlight one to place.
+    this.highlightComponentToPlace(gridPoint);
+  },
+
+  highlightComponentToPlace(gridPoint) {
     if (this.currentComponentType === 'window_definitions') {
       this.highlightWindow(gridPoint);
     } else {
@@ -292,7 +330,9 @@ export default {
       .selectAll('.window')
       .data([loc])
       .call(this.drawWindow.highlight(true));
-
+    this.highlightWindowGuideline(loc);
+  },
+  highlightWindowGuideline(loc) {
     d3.select('#grid svg')
       .append('g')
       .classed('guideline', true)
@@ -316,6 +356,9 @@ export default {
       .data([loc])
       .call(this.drawDaylightingControl);
 
+    this.highlightDaylightingControlGuideline(loc);
+  },
+  highlightDaylightingControlGuideline(loc) {
     const
       face = _.find(this.denormalizedGeometry.faces, { id: loc.face_id }),
       windows = this.windowsOnFace(face),
@@ -1076,8 +1119,8 @@ export default {
      - (min_y, max_y) is the same or a smaller interval
     */
     const
-      width = this.$refs.grid.clientWidth,
-      height = this.$refs.grid.clientHeight,
+      width = this.$refs.gridParent.clientWidth,
+      height = this.$refs.gridParent.clientHeight,
       { xExtent, yExtent } = fitToAspectRatio(
         [this.min_x, this.max_x],
         [this.min_x, this.max_x],
@@ -1096,8 +1139,8 @@ export default {
   // ****************** GRID ****************** //
   renderGrid() {
     const
-      w = this.$refs.grid.clientWidth,
-      h = this.$refs.grid.clientHeight;
+      w = this.$refs.gridParent.clientWidth,
+      h = this.$refs.gridParent.clientHeight;
 
     this.resolveBounds();
     // scaleX amd scaleY are used during drawing to translate from px to RWU given the current grid dimensions in rwu
@@ -1137,8 +1180,9 @@ export default {
   },
   recalcScales() {
     const
-      width = this.$refs.grid.clientWidth,
-      height = this.$refs.grid.clientHeight;
+      width = this.$refs.gridParent.clientWidth,
+      height = this.$refs.gridParent.clientHeight;
+
     this.xScale = d3.scaleLinear()
       .domain([this.min_x, this.max_x])
       .range([0, width]);
@@ -1153,9 +1197,8 @@ export default {
   calcGrid() {
     this.recalcScales();
     const
-      width = this.$refs.grid.clientWidth,
-      height = this.$refs.grid.clientHeight;
-
+      width = this.$refs.gridParent.clientWidth,
+      height = this.$refs.gridParent.clientHeight;
     const
       svg = d3.select('#grid svg'),
       // keep font size and stroke width visually consistent
@@ -1288,8 +1331,8 @@ export default {
       return;
     }
     const
-      width = this.$refs.grid.clientWidth,
-      height = this.$refs.grid.clientHeight,
+      width = this.$refs.gridParent.clientWidth,
+      height = this.$refs.gridParent.clientHeight,
       rwuWidth = this.max_x - this.min_x,
       rwuHeight = this.max_y - this.min_y,
       xTicks = ticksInRange(this.min_x, this.max_x, this.spacing),

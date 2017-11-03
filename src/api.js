@@ -1,5 +1,4 @@
-import _ from 'lodash';
-
+/* global _ */
 window.api = {
   config: null,
   initAlreadyRun: false,
@@ -38,6 +37,7 @@ window.api = {
     window.api.config = Object.assign({
       showImportExport: true,
       units: 'm',
+      unitsEditable: true,
       showMapDialogOnStart: false,
       online: true,
       initialGridSize: 50,
@@ -59,7 +59,7 @@ window.api = {
     delete window.startApp;
 
     // don't dispatch actions until the application and data store are instantiated
-    window.application.$store.dispatch('project/setUnits', { units: window.api.config.units });
+    window.application.$store.dispatch('project/setUnits', { units: window.api.config.units, editable: window.api.config.unitsEditable });
     window.application.$store.dispatch('project/setShowImportExport', window.api.config.showImportExport);
     window.application.$store.dispatch('project/setSpacing', { spacing: window.api.config.initialGridSize });
     window.application.$store.dispatch('project/setNorthAxis', { north_axis: window.api.config.initialNorthAxis });

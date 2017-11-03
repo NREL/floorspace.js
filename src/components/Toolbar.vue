@@ -53,7 +53,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <li @click="modeTab='components'" class="tab" data-modetab="components" :class="{ active: modeTab === 'components' }">
           <span>
             Components
-            <tab-components-svg  class="icon"></tab-components-svg>
+            <tool-component-svg  class="icon"></tool-component-svg>
           </span>
         </li>
 
@@ -81,25 +81,18 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <div class="input-number">
           <label>spacing</label>
           <input v-model.number.lazy="spacing">
+          <label v-if="!allowSettingUnits" >{{rwUnits}}</label>
         </div>
+        <PrettySelect
+          v-if="allowSettingUnits"
+          ref="unitsSelect"
+          :options="['ft', 'm']"
+          :value="rwUnits"
+          @change="updateUnits"
+        />
 
-        <div class="input-select">
-          <select ref="unitSelect" @change="updateUnits">
-            <option value="ft">ft</option>
-            <option value="m">m</option>
-          </select>
-          <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'>
-              <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
-          </svg>
-        </div>
-
-        <div class="input-number">
-          <label>north axis</label>
-          <input v-model.number.lazy="northAxis" :disabled="mapEnabled">
-        </div>
-
-        <div @click="showGroundPropsModal = true" title="Ground Properties">
-          <GroundPropertiesIcon class="button"/>
+        <div @click="showGroundPropsModal = true" title="settings">
+          <SettingsGear class="button" />
         </div>
       </div>
     </section>
@@ -135,19 +128,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <div id="instructions">Add fenestration, daylighting, and PV</div>
         <ComponentsList />
         <!-- No need to show tool options if there's only the one choice. -->
-        <div id="drawing-tools" class="tools-list tools">
+        <!-- <div id="drawing-tools" class="tools-list tools">
           <div @click="tool = 'Place Component'" data-tool="Place Component" title="Place Component" :class="{ active: tool === 'Place Component' }">
             <tool-component-svg class="button"></tool-component-svg>
           </div>
-          <div @click="tool = 'Remove Component'" data-tool="Remove Component" title="Remove Component" :class="{ active: tool === 'Remove Component' }">
-            <tool-erase-svg class="button"></tool-erase-svg>
-          </div>
-        </div>
+        </div> -->
       </template>
 
       <template v-if="modeTab==='assign'">
         <div id="instructions">Assign thermal zones, etc, to spaces</div>
-        <AssignPropertiesList />
         <!-- No need to show tool options if there's only the one choice. -->
         <!-- <div id="drawing-tools" class="tools-list tools">
           <div @click="tool = 'Apply Property'" data-tool="Apply Property" title="Apply Property" :class="{ active: tool === 'Apply Property' }">
@@ -179,7 +168,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         :dataToDownload="dataToDownload"
         @close="() => {showSaveModal = false; thingWereSaving = '';}"
       />
-      <GroundProperties
+      <Settings
         v-else-if="showGroundPropsModal"
         @close="showGroundPropsModal = false"
       />
@@ -190,9 +179,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <script>
 import { mapState, mapGetters } from 'vuex';
 import SaveAsModal from './Modals/SaveAsModal.vue';
-import GroundProperties from './Modals/GroundProperties.vue';
+import Settings from './Modals/Settings.vue';
 import ComponentsList from './ComponentsList.vue';
-import AssignPropertiesList from './AssignPropertiesList.vue';
+import PrettySelect from './PrettySelect.vue';
 import applicationHelpers from './../store/modules/application/helpers';
 import svgs from './svgs';
 import RenderByDropdown from './RenderByDropdown.vue';
@@ -249,12 +238,11 @@ export default {
     },
     undo() { this.$store.timetravel.undo(); },
     redo() { this.$store.timetravel.redo(); },
-    updateUnits() {
+    updateUnits(val) {
       if (this.allowSettingUnits) {
-        this.rwUnits = this.$refs.unitSelect.value;
+        this.rwUnits = val;
       } else {
         window.eventBus.$emit('error', 'Units must be set before any geometry is drawn.');
-        this.$refs.unitSelect.value = this.rwUnits;
       }
     },
     displayNameForMode(mode) { return applicationHelpers.displayNameForMode(mode); },
@@ -286,12 +274,15 @@ export default {
       currentSpaceProperty: 'application/currentSpaceProperty',
     }),
     ...mapState({
-      currentSubselectionType: state => state.application.currentSelections.subselectionType,
       mapEnabled: state => state.project.map.enabled,
       timetravelInitialized: state => state.timetravelInitialized,
       showImportExport: state => state.project.showImportExport,
-      allowSettingUnits: state => state.geometry.length === 1 && state.geometry[0].vertices.length === 0,
+      allowSettingUnits: state => state.project.config.unitsEditable && state.geometry.length === 1 && state.geometry[0].vertices.length === 0,
     }),
+    currentSubselectionType: {
+      get() { return this.$store.state.application.currentSelections.subselectionType; },
+      set(sst) { this.$store.dispatch('application/setCurrentSubselectionType', { subselectionType: sst }); },
+    },
     availableTools() {
       let tools = [];
       switch (this.modeTab) {
@@ -302,7 +293,7 @@ export default {
           tools = ['Rectangle', 'Polygon', 'Eraser', 'Select'];
           break;
         case 'components':
-          tools = ['Place Component', 'Remove Component'];
+          tools = ['Place Component'];
           break;
         case 'assign':
           tools = ['Apply Property'];
@@ -322,10 +313,6 @@ export default {
     modeTab: {
       get() { return this.$store.state.application.currentSelections.modeTab; },
       set(mt) { this.$store.dispatch('application/setCurrentModeTab', { modeTab: mt }); },
-    },
-    northAxis: {
-      get() { return `${this.$store.state.project.config.north_axis}°`; },
-      set(northAxis) { this.$store.dispatch('project/setNorthAxis', { north_axis: northAxis }); },
     },
     gridVisible: {
       get() { return this.$store.state.project.grid.visible; },
@@ -378,6 +365,11 @@ export default {
     },
     tool(val) {
       if (this.availableTools.indexOf(val) === -1 && val !== 'Map') { this.tool = this.availableTools[0]; }
+      if (this.tool === 'Image' && this.currentSubselectionType !== 'images') {
+        this.currentSubselectionType = 'images';
+      } else if (this.tool !== 'Image' && this.currentSubselectionType === 'images') {
+        this.currentSubselectionType = 'spaces';
+      }
     },
     availableTools() {
       if (!_.includes(this.availableTools, this.tool)) {
@@ -385,20 +377,21 @@ export default {
       }
     },
     currentSubselectionType(val) {
-      this.tool = val === 'images' ? 'Image' :
-                  val === 'spaces' && this.tool === 'Image' ? this.availableTools[0] :
-                  _.includes(this.availableTools, this.tool) ? this.tool :
-                  this.availableTools[0];
+      if (val === 'images' && this.tool !== 'Image') {
+        this.tool = 'Image';
+      } else if (val !== 'images' && this.tool === 'Image') {
+        this.tool = this.availableTools[0];
+      }
     },
     latestCreatedCompId() {
       this.$store.dispatch('application/setCurrentComponentDefinitionId', { id: this.latestCreatedCompId });
     },
   },
   components: {
+    PrettySelect,
     SaveAsModal,
-    GroundProperties,
+    Settings,
     ComponentsList,
-    AssignPropertiesList,
     RenderByDropdown,
     ...svgs,
   },
@@ -421,7 +414,7 @@ svg.icon, svg.button {
 
 #toolbar {
   background-color: $black;
-  z-index: 3;
+  z-index: 4;
 
   #top {
     height: 2.5rem;

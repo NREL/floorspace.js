@@ -1,5 +1,16 @@
 import idFactory from './generateId';
 
+function maybeUpdateProject(project) {
+  // backwards compatibility changes:
+  // 1. project.config.north_axis is now at project.north_axis
+  if (project.config.north_axis) {
+    // don't overwrite current key, if it's set
+    project.north_axis = project.north_axis || project.config.north_axis;
+    delete project.config.north_axis;
+  }
+  return project;
+}
+
 export default function importFloorplan(context, payload) {
   // intializr a versionNumber if the app is running in embedded mode
   if (window.api) { window.versionNumber = 0; }
@@ -63,7 +74,7 @@ export default function importFloorplan(context, payload) {
   idFactory.setId(largestId);
 
   context.commit('importState', {
-    project: payload.data.project,
+    project: maybeUpdateProject(payload.data.project),
     application: context.state.application,
     models: {
       stories,

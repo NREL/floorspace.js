@@ -17,7 +17,7 @@ export function drawWindow() {
     windowE.append('line').attr('class', 'end-linecap');
     const windw = selection.merge(windowE);
     windw.classed('selected', d => d.selected);
-    windw.classed('facing-removal', d => d.facingRemoval);
+    windw.classed('facing-selection', d => d.facingSelection);
     windw.select('line.pane')
       .attr('x1', d => xScale(d.start.x))
       .attr('y1', d => yScale(d.start.y))
@@ -39,6 +39,9 @@ export function drawWindow() {
         .attr('y1', yScale(d.end.y) + linecapOffset * dy)
         .attr('x2', xScale(d.end.x) - linecapOffset * dx)
         .attr('y2', yScale(d.end.y) - linecapOffset * dy);
+      if (d.selected || d.facingSelection) {
+        $this.raise();
+      }
     });
     windw.select('circle')
       .attr('cx', d => xScale(d.center.x))
@@ -216,7 +219,7 @@ export function drawDaylightingControl() {
     dcE.append('path').attr('class', 'quadrants');
     const dc = selection.merge(dcE);
     dc.classed('selected', d => d.selected);
-    dc.classed('facing-removal', d => d.facingRemoval);
+    dc.classed('facing-selection', d => d.facingSelection);
     dc.select('circle.bg')
       .attr('cx', d => xScale(d.x))
       .attr('cy', d => yScale(d.y))
@@ -226,6 +229,11 @@ export function drawDaylightingControl() {
         const x = xScale(d.x), y = yScale(d.y), r = 10;
         return `M${x} ${y} L${x + r} ${y} A ${r} ${r} 0 0 1 ${x} ${y + r} L ${x} ${y - r} A ${r} ${r} 0 0 0 ${x - r} ${y} Z`;
       });
+    dc.each(function (d) {
+      if (d.selected || d.facingSelection) {
+        d3.select(this).raise();
+      }
+    });
   }
 
   chart.xScale = function (_) {
@@ -295,16 +303,16 @@ export function drawDaylightingControlGuideline() {
   };
   return chart;
 }
-
+const invRoot2 = 1 / Math.sqrt(2);
 const RESIZE_CURSORS = [
   { vec: { x: 1, y: 0 }, cursor: 'ew-resize' },
   { vec: { x: -1, y: 0 }, cursor: 'ew-resize' },
   { vec: { x: 0, y: 1 }, cursor: 'ns-resize' },
   { vec: { x: 0, y: -1 }, cursor: 'ns-resize' },
-  { vec: { x: 1/Math.sqrt(2), y: 1/Math.sqrt(2) }, cursor: 'nwse-resize' },
-  { vec: { x: -1/Math.sqrt(2), y: -1/Math.sqrt(2) }, cursor: 'nwse-resize' },
-  { vec: { x: 1/Math.sqrt(2), y: -1/Math.sqrt(2) }, cursor: 'nesw-resize' },
-  { vec: { x: -1/Math.sqrt(2), y: 1/Math.sqrt(2) }, cursor: 'nesw-resize' },
+  { vec: { x: invRoot2, y: invRoot2 }, cursor: 'nwse-resize' },
+  { vec: { x: -1 * invRoot2, y: -1 * invRoot2 }, cursor: 'nwse-resize' },
+  { vec: { x: invRoot2, y: -1 * invRoot2 }, cursor: 'nesw-resize' },
+  { vec: { x: -1 * invRoot2, y: invRoot2 }, cursor: 'nesw-resize' },
 ]
 function bestResizeCursor(xOff, yOff, rotation) {
   const

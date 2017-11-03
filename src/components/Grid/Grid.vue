@@ -7,7 +7,11 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 
 <template>
-  <div id="grid" :style="{ 'pointer-events': (currentTool === 'Drag' || currentTool === 'Map') ? 'none': 'auto' }">
+  <div
+    id="grid"
+    :style="{ 'pointer-events': (currentTool === 'Drag' || currentTool === 'Map') ? 'none': 'auto' }"
+    ref="gridParent"
+  >
     <svg ref="grid" id="svg-grid">
       <g class="axis axis--x"></g>
       <g class="axis axis--y"></g>
@@ -48,7 +52,7 @@ export default {
         x: null,
         y: null,
       },
-      componentFacingRemoval: null,
+      componentFacingSelection: null,
       transformAtLastRender: d3.zoomIdentity,
       handleMouseMove: null, // placeholder --> overwritten in mounted()
       ...drawMethods({
@@ -74,6 +78,7 @@ export default {
     this.$refs.grid.addEventListener('reloadGrid', this.reloadGridAndScales);
 
     window.addEventListener('keyup', this.escapeAction);
+    window.addEventListener('keydown', this.handleKeyDown);
     window.addEventListener('resize', this.reloadGridAndScales);
 
     ResizeEvents.$on('resize', this.reloadGridAndScales);
@@ -85,6 +90,7 @@ export default {
     this.$refs.grid.removeEventListener('reloadGrid', this.reloadGridAndScales);
 
     window.removeEventListener('keyup', this.escapeAction);
+    window.removeEventListener('keydown', this.handleKeyDown);
     window.removeEventListener('resize', this.reloadGridAndScales);
 
     ResizeEvents.$off('resize', this.reloadGridAndScales);
@@ -95,8 +101,8 @@ export default {
   computed: {
     ...mapState({
       currentMode: state => state.application.currentSelections.mode,
+      modeTab: state => state.application.currentSelections.modeTab,
       currentTool: state => state.application.currentSelections.tool,
-      currentComponentInstanceId: state => state.application.currentSelections.modeTab === 'components' && state.application.currentSelections.component_instance_id,
       snapMode: state => state.application.currentSelections.snapMode,
       previousStoryVisible: state => state.project.previous_story.visible,
       gridVisible: state => state.project.grid.visible,
@@ -116,6 +122,7 @@ export default {
       currentSpace: 'application/currentSpace',
       currentShading: 'application/currentShading',
       currentComponent: 'application/currentComponent',
+      currentComponentInstance: 'application/currentComponentInstance',
       currentSpaceProperty: 'application/currentSpaceProperty',
     }),
     spacePropertyKey() {
@@ -137,6 +144,17 @@ export default {
       get() { return this.$store.getters['application/currentSubSelection']; },
       set(item) { this.$store.dispatch('application/setCurrentSubSelectionId', { id: item.id }); },
     },
+    currentComponentInstanceId: {
+      get() {
+        return (
+          this.$store.state.application.currentSelections.modeTab === 'components' &&
+          this.$store.state.application.currentSelections.component_instance_id);
+      },
+      set(id) {
+        this.$store.dispatch('application/setCurrentComponentInstanceId', { id });
+      },
+    },
+
     // grid dimensions in real world units
     min_x: {
       get() { return this.$store.state.project.view.min_x; },
@@ -201,19 +219,28 @@ export default {
     windowCenterLocs() {
       return this.currentStory.windows
         .map(w => ({ w, e: _.find(this.denormalizedGeometry.edges, { id: w.edge_id }) }))
-        .map(({ w, e }) => ({
-          id: w.id,
-          type: 'window',
-          ...windowLocation(e, w),
-        }));
+        .map(({ w, e }) => {
+          const wind = this.denormalizeWindow(e, w);
+          return {
+            ...wind,
+            id: w.id,
+            type: 'window',
+            ...wind.center,
+          };
+        });
     },
     daylightingControlLocs() {
-      return _.flatMap(this.currentStory.spaces, 'daylighting_controls')
-        .map(dc => ({
-          ...geometryHelpers.vertexForId(dc.vertex_id, this.currentStoryGeometry),
-          id: dc.id,
-          type: 'daylighting_control',
-        }));
+      return _.flatten(
+        this.currentStory.spaces.map((space) => {
+          return space.daylighting_controls
+            .map(dc => ({
+              ...dc,
+              ...geometryHelpers.vertexForId(dc.vertex_id, this.currentStoryGeometry),
+              id: dc.id,
+              type: 'daylighting_control',
+              face_id: space.face_id,
+            }));
+      }));
     },
     allComponentInstanceLocs() {
       return [
@@ -289,7 +316,7 @@ export default {
               .map(w => ({
                 ...this.denormalizeWindow(e, w),
                 selected: w.id === this.currentComponentInstanceId,
-                facingRemoval: w.id === this.componentFacingRemoval,
+                facingSelection: w.id === this.componentFacingSelection,
               })));
     },
     polygonsFromGeometry(geometry, extraPolygonAttrs = {}) {
@@ -313,7 +340,7 @@ export default {
               .map(dc => ({
                 ...geometryHelpers.vertexForId(dc.vertex_id, geometry),
                 selected: dc.id === this.currentComponentInstanceId,
-                facingRemoval:  dc.id === this.componentFacingRemoval,
+                facingSelection:  dc.id === this.componentFacingSelection,
               })),
             ...extraPolygonAttrs,
           };

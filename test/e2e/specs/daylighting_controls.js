@@ -31,8 +31,8 @@ module.exports = {
     .click('#component-icons [title="Daylighting Control Definition"]')
     .click('#component-icons [data-object-type="daylighting_control_definitions"]')
     .click('#component-icons [data-object-type="daylighting_control_definitions"] td.destroy')
-    // switching tools clears the .highlight
-    .click('.tools [data-tool="Remove Component"]')
+    // switching modes clears the .highlight
+    .click('[data-modetab="floorplan"]')
     .assert.elementCount('.daylighting-control', 0)
     .checkForErrors()
     .end();

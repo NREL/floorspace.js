@@ -8,15 +8,14 @@ export default {
     // project
     config: {
       units: 'ft',
+      unitsEditable: true,
       language: 'EN-US',
-      north_axis: 0,
-      ground: {
-        floor_offset: 0,
-        azimuth_angle: 0,
-        tilt_angle: 0,
-        x_shift: 0,
-        y_shift: 0,
-      },
+    },
+    north_axis: 0,
+    ground: {
+      floor_offset: 0,
+      azimuth_angle: 0,
+      tilt_slope: 0,
     },
     grid: {
       visible: true,

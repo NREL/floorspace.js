@@ -69,6 +69,9 @@ import QuickstartIconNewMapFloorplan from './../assets/svg-icons/quickstart_icon
 import QuickstartIconNewFloorplan from './../assets/svg-icons/quickstart_icon_newfloorplan.svg';
 import QuickstartIconOpenFloorplan from './../assets/svg-icons/quickstart_icon_openfloorplan.svg';
 
+import InfoIcon from './../assets/svg-icons/info_icon.svg';
+import SettingsGear from './../assets/svg-icons/settings_gear.svg';
+
 export default {
   'open-floorplan-svg': openFloorplanSvg,
   'save-floorplan-svg': saveFloorplanSvg,
@@ -102,5 +105,7 @@ export default {
   QuickstartIconNewFloorplan,
   QuickstartIconOpenFloorplan,
 
+  InfoIcon,
+  SettingsGear,
   GroundPropertiesIcon,
 };
