@@ -8,6 +8,7 @@ export default {
     // project
     config: {
       units: 'ft',
+      unitsEditable: true,
       language: 'EN-US',
     },
     north_axis: 0,

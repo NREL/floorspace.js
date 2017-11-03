@@ -10,7 +10,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
   <div class='input-select'>
       <label v-if="label">{{ label }}</label>
       <select @change="$emit('change', $event.target.value)">
-          <option v-for='opt in options' :value="opt.val" :selected="opt.val === value">{{ opt.display }}</option>
+          <option v-for='opt in normalizedOpts' :value="opt.val" :selected="opt.val === value">{{ opt.display }}</option>
       </select>
       <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
           <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
@@ -24,6 +24,23 @@ import _ from 'lodash';
 export default {
   name: 'PrettySelect',
   props: ['options', 'value', 'label'],
+  computed: {
+    normalizedOpts() {
+      if (_.isArray(this.options)) {
+        if (!this.options.length) {
+          return [];
+        }
+        if (_.has(this.options[0], 'val') && _.has(this.options[0], 'display')) {
+          return this.options;
+        }
+        if (_.isString(this.options[0])) {
+          return this.options.map(o => ({ val: o, display: o }));
+        }
+      }
+      console.warn('unrecognized options structure', this.options);
+      return this.options;
+    }
+  },
 }
 
 </script>

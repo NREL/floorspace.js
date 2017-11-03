@@ -1,10 +1,13 @@
 export default {
     // CONFIG
-    setUnits (state, payload) {
-        if ('units' in payload) {
-            state.config.units = payload.units;
-        }
-    },
+  setUnits(state, payload) {
+    if ('units' in payload) {
+      state.config.units = payload.units;
+    }
+    if ('editable' in payload) {
+      state.config.unitsEditable = payload.editable;
+    }
+  },
     setLanguage (state, payload) {
         if ('language' in payload) {
             state.config.language = payload.language;

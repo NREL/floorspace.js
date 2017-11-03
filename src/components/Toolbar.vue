@@ -81,17 +81,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <div class="input-number">
           <label>spacing</label>
           <input v-model.number.lazy="spacing">
+          <label v-if="!allowSettingUnits" >{{rwUnits}}</label>
         </div>
-
-        <div class="input-select">
-          <select ref="unitSelect" @change="updateUnits">
-            <option value="ft">ft</option>
-            <option value="m">m</option>
-          </select>
-          <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'>
-              <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
-          </svg>
-        </div>
+        <PrettySelect
+          v-if="allowSettingUnits"
+          ref="unitsSelect"
+          :options="['ft', 'm']"
+          :value="rwUnits"
+          @change="updateUnits"
+        />
 
         <div @click="showGroundPropsModal = true" title="settings">
           <SettingsGear class="button" />
@@ -183,6 +181,7 @@ import { mapState, mapGetters } from 'vuex';
 import SaveAsModal from './Modals/SaveAsModal.vue';
 import Settings from './Modals/Settings.vue';
 import ComponentsList from './ComponentsList.vue';
+import PrettySelect from './PrettySelect.vue';
 import applicationHelpers from './../store/modules/application/helpers';
 import svgs from './svgs';
 import RenderByDropdown from './RenderByDropdown.vue';
@@ -239,12 +238,11 @@ export default {
     },
     undo() { this.$store.timetravel.undo(); },
     redo() { this.$store.timetravel.redo(); },
-    updateUnits() {
+    updateUnits(val) {
       if (this.allowSettingUnits) {
-        this.rwUnits = this.$refs.unitSelect.value;
+        this.rwUnits = val;
       } else {
         window.eventBus.$emit('error', 'Units must be set before any geometry is drawn.');
-        this.$refs.unitSelect.value = this.rwUnits;
       }
     },
     displayNameForMode(mode) { return applicationHelpers.displayNameForMode(mode); },
@@ -279,7 +277,7 @@ export default {
       mapEnabled: state => state.project.map.enabled,
       timetravelInitialized: state => state.timetravelInitialized,
       showImportExport: state => state.project.showImportExport,
-      allowSettingUnits: state => state.geometry.length === 1 && state.geometry[0].vertices.length === 0,
+      allowSettingUnits: state => state.project.config.unitsEditable && state.geometry.length === 1 && state.geometry[0].vertices.length === 0,
     }),
     currentSubselectionType: {
       get() { return this.$store.state.application.currentSelections.subselectionType; },
@@ -390,6 +388,7 @@ export default {
     },
   },
   components: {
+    PrettySelect,
     SaveAsModal,
     Settings,
     ComponentsList,
