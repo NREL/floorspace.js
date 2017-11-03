@@ -1,5 +1,4 @@
-import _ from 'lodash';
-
+/* global _ */
 window.api = {
   config: null,
   initAlreadyRun: false,
