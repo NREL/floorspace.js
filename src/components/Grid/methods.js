@@ -48,9 +48,6 @@ export default {
     if (this.currentTool === 'Place Component') {
       this.placesOrSelectComponent();
     }
-    // if (this.currentTool === 'Remove Component') {
-    //   this.removeComponent();
-    // }
     if (this.currentTool === 'Image') {
       this.deselectImages();
     }
@@ -93,8 +90,19 @@ export default {
     }
     return component;
   },
-  removeComponent() {
-    const component = this.componentToSelect();
+  handleKeyDown(e) {
+    if ((e.keyCode === 8 || e.keyCode === 46) &&
+        !_.includes(['input', 'textarea'], document.activeElement.tagName.toLowerCase())) {
+      this.deleteElement();
+    }
+  },
+  deleteElement() {
+    if (this.modeTab === 'components') {
+      this.removeSelectedComponent();
+    }
+  },
+  removeSelectedComponent() {
+    const component = this.currentComponentInstance;
     if (!component) {
       return;
     }

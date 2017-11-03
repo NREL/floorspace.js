@@ -78,6 +78,7 @@ export default {
     this.$refs.grid.addEventListener('reloadGrid', this.reloadGridAndScales);
 
     window.addEventListener('keyup', this.escapeAction);
+    window.addEventListener('keydown', this.handleKeyDown);
     window.addEventListener('resize', this.reloadGridAndScales);
 
     ResizeEvents.$on('resize', this.reloadGridAndScales);
@@ -89,6 +90,7 @@ export default {
     this.$refs.grid.removeEventListener('reloadGrid', this.reloadGridAndScales);
 
     window.removeEventListener('keyup', this.escapeAction);
+    window.removeEventListener('keydown', this.handleKeyDown);
     window.removeEventListener('resize', this.reloadGridAndScales);
 
     ResizeEvents.$off('resize', this.reloadGridAndScales);
@@ -99,6 +101,7 @@ export default {
   computed: {
     ...mapState({
       currentMode: state => state.application.currentSelections.mode,
+      modeTab: state => state.application.currentSelections.modeTab,
       currentTool: state => state.application.currentSelections.tool,
       snapMode: state => state.application.currentSelections.snapMode,
       previousStoryVisible: state => state.project.previous_story.visible,
@@ -119,6 +122,7 @@ export default {
       currentSpace: 'application/currentSpace',
       currentShading: 'application/currentShading',
       currentComponent: 'application/currentComponent',
+      currentComponentInstance: 'application/currentComponentInstance',
       currentSpaceProperty: 'application/currentSpaceProperty',
     }),
     spacePropertyKey() {
