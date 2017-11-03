@@ -66,6 +66,10 @@ export default {
       rwuPoint = this.gridPointToRWU(gridPoint),
       space = this.currentStory.spaces.find((sp) => {
         const face = _.find(this.denormalizedGeometry.faces, { id: sp.face_id });
+        if (!face) {
+          // this space has no geometry. It can't be the one that was clicked.
+          return false;
+        }
         return geometryHelpers.pointInFace(rwuPoint, face.vertices);
       });
     if (!space) { return; }
@@ -1107,8 +1111,8 @@ export default {
      - (min_y, max_y) is the same or a smaller interval
     */
     const
-      width = this.$refs.grid.clientWidth,
-      height = this.$refs.grid.clientHeight,
+      width = this.$refs.gridParent.clientWidth,
+      height = this.$refs.gridParent.clientHeight,
       { xExtent, yExtent } = fitToAspectRatio(
         [this.min_x, this.max_x],
         [this.min_x, this.max_x],
@@ -1127,8 +1131,8 @@ export default {
   // ****************** GRID ****************** //
   renderGrid() {
     const
-      w = this.$refs.grid.clientWidth,
-      h = this.$refs.grid.clientHeight;
+      w = this.$refs.gridParent.clientWidth,
+      h = this.$refs.gridParent.clientHeight;
 
     this.resolveBounds();
     // scaleX amd scaleY are used during drawing to translate from px to RWU given the current grid dimensions in rwu
@@ -1168,8 +1172,9 @@ export default {
   },
   recalcScales() {
     const
-      width = this.$refs.grid.clientWidth,
-      height = this.$refs.grid.clientHeight;
+      width = this.$refs.gridParent.clientWidth,
+      height = this.$refs.gridParent.clientHeight;
+
     this.xScale = d3.scaleLinear()
       .domain([this.min_x, this.max_x])
       .range([0, width]);
@@ -1184,9 +1189,8 @@ export default {
   calcGrid() {
     this.recalcScales();
     const
-      width = this.$refs.grid.clientWidth,
-      height = this.$refs.grid.clientHeight;
-
+      width = this.$refs.gridParent.clientWidth,
+      height = this.$refs.gridParent.clientHeight;
     const
       svg = d3.select('#grid svg'),
       // keep font size and stroke width visually consistent
@@ -1319,8 +1323,8 @@ export default {
       return;
     }
     const
-      width = this.$refs.grid.clientWidth,
-      height = this.$refs.grid.clientHeight,
+      width = this.$refs.gridParent.clientWidth,
+      height = this.$refs.gridParent.clientHeight,
       rwuWidth = this.max_x - this.min_x,
       rwuHeight = this.max_y - this.min_y,
       xTicks = ticksInRange(this.min_x, this.max_x, this.spacing),
