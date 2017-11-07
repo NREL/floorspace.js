@@ -13,7 +13,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <header>
             <h2>Quickstart</h2>
         </header>
-
+        <NonChromeWarning />
         <div class="content">
             <p>
               <a @click="mapEnabled = false; mapVisible = false; $emit('close')" class="quickstart-action new-floorplan">
@@ -44,6 +44,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <script>
 import svgs from '../svgs';
+import NonChromeWarning from '../NonChromeWarning.vue';
 
 export default {
   name: 'MapModal',
@@ -86,6 +87,7 @@ export default {
   },
   components: {
     ...svgs,
+    NonChromeWarning,
   },
 };
 </script>
