@@ -33,6 +33,11 @@ export default {
       space_type_id: null,
       construction_set_id: null,
       pitched_roof_id: null,
+      below_floor_plenum_height: null,
+      floor_to_ceiling_height: null,
+      above_ceiling_plenum_height: null,
+      floor_offset: null,
+      open_to_below: false,
       type: 'space',
     };
   },
