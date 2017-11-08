@@ -52,6 +52,41 @@ module.exports = {
       .checkForErrors()
       .end();
   },
+  'switch between floors, preserve selected space': (browser) => {
+    const devServer = browser.globals.devServerURL;
+
+    failOnError(browser)
+      .url(devServer)
+      .resizeWindow(1000, 800)
+      .waitForElementVisible('.modal .new-floorplan', 5000)
+      .setFlagOnError()
+      .click('.modal .new-floorplan svg')
+      .click('[data-object-type="spaces"] .add-new')
+      .click('[data-object-type="spaces"] .add-new')
+       // choose the second one
+      .click('[data-object-type="spaces"] .rows > div:nth-child(2)')
+      .click('[data-object-type="stories"] .add-new')
+      // back to first story
+      .click('[data-object-type="stories"] .rows > div:nth-child(1)')
+      // the second one should still be selected.
+      .assert.elementCount('[data-object-type="spaces"] .rows > div:nth-child(2).active', 1)
+      .checkForErrors()
+      .end();
+  },
+  'adding new space selects new space': (browser) => {
+    const devServer = browser.globals.devServerURL;
+
+    failOnError(browser)
+      .url(devServer)
+      .resizeWindow(1000, 800)
+      .waitForElementVisible('.modal .new-floorplan', 5000)
+      .setFlagOnError()
+      .click('.modal .new-floorplan svg')
+      .click('[data-object-type="spaces"] .add-new')
+      .assert.elementCount('[data-object-type="spaces"] .rows > div:nth-child(2).active', 1)
+      .checkForErrors()
+      .end();
+  },
   'no text for empty polygons': (browser) => {
     withScales(failOnError(browser))
       .waitForElementVisible('.modal .new-floorplan', 5000)

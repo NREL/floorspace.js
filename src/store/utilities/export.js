@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import version from '../../version';
 
 export default function exportData(state, getters) {
@@ -19,17 +20,17 @@ export default function exportData(state, getters) {
 }
 
 function formatObject(obj) {
-    for (var key in obj) {
-        // coerce all numeric ids to strings
-        if ((key === "id" || ~key.indexOf("_id")) && typeof obj[key] === "number") {
-            obj[key] = String(obj[key]);
-        }
-        if (~key.indexOf("_ids") && typeof obj[key] === "object") {
-            obj[key] = obj[key].map(id => String(id));
-        }
-        // recurse
-        if (obj[key] !== null && typeof obj[key] === "object") {
-            formatObject(obj[key]);
-        }
+  Object.keys(obj).forEach((key) => {
+    // coerce all numeric ids to strings
+    if ((key === 'id' || key.indexOf('_id') >= 0) && _.isNumber(obj[key])) {
+      obj[key] = String(obj[key]);
     }
+    if (key.indexOf('_ids') >= 0 && _.isObject(obj[key])) {
+      obj[key] = _.mapKeys(obj[key], id => String(id));
+    }
+    // recurse
+    if (obj[key] !== null && _.isObject(obj[key])) {
+      formatObject(obj[key]);
+    }
+  });
 }

@@ -11,7 +11,7 @@ export default {
       // models currently being edited
       story: null,
       story_id: null,
-      subselection_id: null, // space, shading, image
+      subselection_ids: {}, // story_id -> space, shading, or image id.
 
       component_id: null,
       component_definition_id: null,
