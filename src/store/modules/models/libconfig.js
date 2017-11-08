@@ -439,8 +439,7 @@ const map = {
         displayName: 'Open To Below',
         input_type: 'select',
         select_data() {
-          const bools = ['False', 'True'];
-          return _.zipObject(bools, bools);
+          return { False: false, True: true };
         },
         converter: converters.bool,
       },
