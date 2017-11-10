@@ -125,7 +125,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       </template>
 
       <template v-if="modeTab === 'components'">
-        <div id="instructions">Add fenestration, daylighting, and PV</div>
+        <div id="instructions">
+          <span v-if="!currentComponentDefinition">Add fenestration, daylighting, and PV</span>
+          <span v-else>Click to place a {{currentComponentDefinition.name}}</span>
+        </div>
         <ComponentsList />
         <!-- No need to show tool options if there's only the one choice. -->
         <!-- <div id="drawing-tools" class="tools-list tools">
