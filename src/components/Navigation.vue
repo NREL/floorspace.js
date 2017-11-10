@@ -117,7 +117,11 @@ export default {
     },
     objectTypesForTab(val) {
       if (!_.includes(val, this.subselectionType)){
-        this.subselectionType = val[0];
+        if (this.modeTab === 'assign') {
+          this.subselectionType = 'thermal_zones';
+        } else {
+          this.subselectionType = val[0];
+        }
       }
     },
     currentComponent() {
