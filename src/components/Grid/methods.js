@@ -46,7 +46,7 @@ export default {
       this.addPoint();
     }
     if (this.currentTool === 'Place Component') {
-      this.placesOrSelectComponent();
+      this.placeOrSelectComponent();
     }
     if (this.currentTool === 'Image') {
       this.deselectImages();
@@ -83,9 +83,9 @@ export default {
       gridCoords = d3.mouse(this.$refs.grid),
       gridPoint = { x: gridCoords[0], y: gridCoords[1] },
       rwuPoint = this.gridPointToRWU(gridPoint),
-      component = _.minBy(this.allComponentInstanceLocs, ci => distanceBetweenPoints(ci, rwuPoint)),
+      component = _.minBy(this.currentComponentTypeLocs, ci => distanceBetweenPoints(ci, rwuPoint)),
       distToComp = component && distanceBetweenPoints(component, rwuPoint);
-    if (!component || distToComp > this.spacing * 2) {
+    if (!component || distToComp > this.spacing / 2) {
       return null;
     }
     return component;
@@ -115,7 +115,7 @@ export default {
       console.error(`unrecognized component to remove: ${component}`);
     }
   },
-  placesOrSelectComponent() {
+  placeOrSelectComponent() {
     // hold down shift to force placement when we might otherwise select
     const toSelect = d3.event.shiftKey ? false : this.componentToSelect();
     if (toSelect) {
@@ -128,6 +128,8 @@ export default {
       this.placeWindow();
     } else if (this.currentComponentType === 'daylighting_control_definitions') {
       this.placeDaylightingControl();
+    } else {
+      throw new Error(`unrecognized componentType: ${this.currentComponentType}`);
     }
   },
   highlightComponentToSelect() {
@@ -142,6 +144,8 @@ export default {
       this.highlightWindowGuideline(component);
     } else if (component.type === 'daylighting_control') {
       this.highlightDaylightingControlGuideline(component);
+    } else {
+      throw new Error(`unrecognized componentType: ${this.currentComponentType}`);
     }
     return component;
   },

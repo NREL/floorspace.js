@@ -242,11 +242,14 @@ export default {
             }));
       }));
     },
-    allComponentInstanceLocs() {
-      return [
-        ...this.windowCenterLocs,
-        ...this.daylightingControlLocs,
-      ];
+    currentComponentTypeLocs() {
+      if (this.currentComponentType === 'window_definitions') {
+        return this.windowCenterLocs;
+      } else if (this.currentComponentType === 'daylighting_control_definitions') {
+        return this.daylightingControlLocs;
+      } else {
+        throw new Error(`unrecognized componentType: ${this.currentComponentType}`);
+      }
     },
     spaceFaces() {
       // as opposed to shading faces
