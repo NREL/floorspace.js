@@ -1,3 +1,6 @@
+
+export const assignableProperties = ['building_units', 'thermal_zones', 'space_types', 'construction_sets', 'pitched_roofs'];
+
 const config = {
   // map modes to displaynames
   modes: {
@@ -9,7 +12,9 @@ const config = {
     thermal_zones: 'Thermal Zone',
     space_types: 'Space Type',
     pitched_roofs: 'Pitched Roof',
+    construction_sets: 'Construction Set',
   },
+  assignableProperties,
   palette: {
     shading: '#E8E3E5',
     neutral: '#bbc3c7',

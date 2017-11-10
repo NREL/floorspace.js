@@ -29,12 +29,13 @@ import { mapState } from 'vuex';
 import libconfig from '../store/modules/models/libconfig';
 import EditableSelectList from './EditableSelectList.vue';
 import helpers from '../store/modules/models/helpers';
+import { assignableProperties } from '../store/modules/application/appconfig';
 
 
 function keyForMode(mode) {
   return (
     mode === 'stories' ? 'currentStory' :
-    _.includes(['building_units', 'thermal_zones', 'space_types', 'pitched_roofs'], mode) ? 'currentSpaceProperty' :
+    _.includes(assignableProperties, mode) ? 'currentSpaceProperty' :
     _.includes(['windows', 'daylighting_controls'], mode) ? 'currentComponentInstance' :
     'currentSubSelection');
 }
@@ -112,7 +113,7 @@ export default {
   },
   watch: {
     rows() {
-      if (!_.includes(this.rows, this.selectedObject) && this.rows.length > 0) {
+      if (!(this.selectedObject && _.includes(_.map(this.rows, 'id'), this.selectedObject.id)) && this.rows.length > 0) {
         this.selectedObject = this.rows[0];
       }
     },

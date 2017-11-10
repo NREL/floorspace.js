@@ -16,7 +16,7 @@ import PrettySelect from './PrettySelect';
 export default {
   computed: {
     renderableProperties() {
-      return ['spaces', 'building_units', 'thermal_zones', 'space_types', 'pitched_roofs'];
+      return ['spaces', 'building_units', 'thermal_zones', 'space_types', 'construction_sets', 'pitched_roofs'];
     },
     renderableOptions() {
       return this.renderableProperties.map(p => ({
