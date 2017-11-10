@@ -271,10 +271,12 @@ export default {
       this.points = [];
       this.draw();
       this.clearHighlights();
-      if (this.currentTool === 'Image' && this.currentStory.images.length && (
-            !this.currentImage ||
-            !_.includes(_.map(this.currentStory.images, 'id'), this.currentImage.id))) {
-        this.currentImage = this.currentStory.images[0];
+      if (this.currentTool === 'Image' && this.currentStory.images.length) {
+        if (!this.currentImage ||
+            !_.includes(_.map(this.currentStory.images, 'id'), this.currentImage.id)
+           ) {
+              this.currentImage = this.currentStory.images[0];
+        }
       } else if (!_.includes(_.map(this.currentStory.spaces, 'id'), this.currentSubSelection.id)) {
         this.currentSubSelection = this.currentStory.spaces[0];
       }

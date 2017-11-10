@@ -117,7 +117,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           <div @click="tool = 'Select'" data-tool="Select" title="Select" :class="{ active: tool === 'Select' }">
             <tool-move-size-svg class="button"></tool-move-size-svg>
           </div>
-          <div @click="tool = 'Image'" data-tool="Image" title="Image" :class="{ active: tool === 'Image' }">
+          <div @click="setImageTool" data-tool="Image" title="Image" :class="{ active: tool === 'Image' }">
             <tool-image-svg class="button"></tool-image-svg>
           </div>
         </div>
@@ -203,6 +203,12 @@ export default {
     };
   },
   methods: {
+    setImageTool() {
+      this.tool = 'Image';
+      if (this.currentStory.images.length === 0) {
+        window.eventBus.$emit('uploadImage');
+      }
+    },
     zoomToFit() {
       window.eventBus.$emit('zoomToFit');
     },
@@ -272,6 +278,7 @@ export default {
     },
     ...mapGetters({
       currentSpaceProperty: 'application/currentSpaceProperty',
+      currentStory: 'application/currentStory',
     }),
     ...mapState({
       mapEnabled: state => state.project.map.enabled,
