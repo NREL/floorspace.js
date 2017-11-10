@@ -32,7 +32,7 @@ import applicationHelpers from './../../store/modules/application/helpers';
 import { ResizeEvents } from '../../components/Resize';
 import drawMethods from './drawing';
 import { expandWindowAlongEdge, windowLocation } from './snapping';
-
+import ComponentType from '../types/ComponentType.ts';
 const d3 = require('d3');
 
 export default {
@@ -138,7 +138,7 @@ export default {
       get() { return this.$store.getters['application/currentImage']; },
       set(item) { this.$store.dispatch('application/setCurrentSubSelectionId', { id: item.id }); },
     },
-    currentComponentType() { return this.currentComponent.type; },
+    currentComponentType() : ComponentType { return this.currentComponent.type; },
     currentComponentDefinition() { return this.currentComponent.definition; },
     currentSubSelection: {
       get() { return this.$store.getters['application/currentSubSelection']; },

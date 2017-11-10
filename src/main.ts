@@ -20,14 +20,19 @@ import GenericInput from './components/GenericInput.vue';
 Vue.component('pretty-select', PrettySelect);
 Vue.component('generic-input', GenericInput);
 
+declare global {
+  interface Window { eventBus: Vue; application: Vue }
+}
+
 window.eventBus = new Vue();
 
 // mount the root vue instance
 window.application = new Vue({
   store,
   el: '#app',
-  template: '<App/>',
+  // template: '<App/>',
   components: { App },
+  render: (h) => h(App),
 });
 
 timetravel.init(store);
