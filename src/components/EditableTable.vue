@@ -130,6 +130,11 @@ export default {
           > [type="radio"] {
             width: 25px;
           }
+          > svg {
+            width: 25px;
+            margin-top: 10px;
+            margin-left: 5px;
+          }
           margin: 0 auto;
           padding: 0;
         }
