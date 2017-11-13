@@ -303,9 +303,9 @@ export default {
       }
 
       // cancel current drawing action if actual zoom and not just accidental drag
-      if (this.points.length && (newTransform.k !== lastTransform.k || Math.abs(lastTransform.y - newTransform.y) > 3 || Math.abs(lastTransform.x - newTransform.x) > 3)) {
-        this.points = [];
-      }
+      // if (this.points.length && (newTransform.k !== lastTransform.k || Math.abs(lastTransform.y - newTransform.y) > 3 || Math.abs(lastTransform.x - newTransform.x) > 3)) {
+      //   this.points = [];
+      // }
     },
   },
   methods: {
