@@ -242,8 +242,18 @@ export default {
     this.clearHighlights();
 
     // location of the mouse in grid units
-    const gridCoords = d3.mouse(this.$refs.grid),
+
+    let gridPoint;
+    if (d3.event instanceof MouseEvent) {
+      // d3.mouse() will fail if d3.event is a ZoomEvent, or other
+      const gridCoords = d3.mouse(this.$refs.grid);
       gridPoint = { x: gridCoords[0], y: gridCoords[1] };
+    } else {
+      gridPoint = this.lastMousePosition;
+    }
+    if (!gridPoint) {
+      return;
+    }
 
     if (this.currentTool === 'Place Component') {
       this.highlightComponentToPlaceOrSelect(gridPoint);
@@ -269,6 +279,7 @@ export default {
       .attr('rx', 5)
       .attr('ry', 5)
       .classed('highlight', true)
+      .attr('data-transform-plz', '')
       .attr('vector-effect', 'non-scaling-stroke');
     } else {
       d3.select('#grid svg')
@@ -278,6 +289,7 @@ export default {
       .attr('rx', 2)
       .attr('ry', 2)
       .classed('gridpoint', true)
+      .attr('data-transform-plz', '')
       .attr('vector-effect', 'non-scaling-stroke');
     }
 
@@ -291,8 +303,12 @@ export default {
       .attr('y2', this.rwuToGrid(snapTarget.v2GridCoords.y, 'y'))
       .attr('stroke-width', 1)
       .classed('highlight', true)
+      .attr('data-transform-plz', '')
       .attr('vector-effect', 'non-scaling-stroke');
     }
+    // save off mouse pos so that we can redo highlight if zoom occurs during
+    // point drawing.
+    this.lastMousePosition = gridPoint;
   },
 
   clearHighlights() {
@@ -418,6 +434,7 @@ export default {
     .attr('fill', 'none')
     .classed('guideline guideline-line', true)
     .attr('vector-effect', 'non-scaling-stroke')
+    .attr('data-transform-plz', '')
     .attr('d', d3.line().x(d => this.rwuToGrid(d.x, 'x'))
                         .y(d => this.rwuToGrid(d.y, 'y')))
     .lower();
@@ -433,6 +450,7 @@ export default {
       ).join(' '))
     .classed('guideline guideline-area guideLine', true)
     .attr('vector-effect', 'non-scaling-stroke')
+    .attr('data-transform-plz', '')
     .attr('fill', () => {
       if (this.currentTool === 'Eraser') { return 'none'; }
       if (this.currentSpace) { return this.currentSpace.color; }
@@ -451,6 +469,7 @@ export default {
     .attr('x', d => this.rwuToGrid(d[0].x, 'x') + (this.rwuToGrid(d[1].x, 'x') - this.rwuToGrid(d[0].x, 'x')) / 2)
     .attr('y', d => this.rwuToGrid(d[0].y, 'y') + (this.rwuToGrid(d[1].y, 'y') - this.rwuToGrid(d[0].y, 'y')) / 2)
     .attr('dx', -1.25 * (this.transform.k > 1 ? 1 : this.transform.k) + 'em')
+    .attr('data-transform-plz', '')
     .text((d) => {
       const dist = this.distanceBetweenPoints(d[0], d[1]);
       return dist ? dist.toFixed(2) : '';
@@ -481,6 +500,7 @@ export default {
       .attr('y', this.rwuToGrid(y, 'y'))
       .text(areaText)
       .classed('guideline guideline-text guideline-area-text guideLine', true)
+      .attr('data-transform-plz', '')
       .attr('text-anchor', 'middle')
       .attr('font-family', 'sans-serif')
       .attr('fill', 'red')
@@ -598,9 +618,10 @@ export default {
     .selectAll('ellipse.point-path').data(this.points);
 
     pointPath.merge(
-      pointPath.enter().append('ellipse').attr('class', 'point-path')
+      pointPath.enter().append('ellipse').attr('class', 'point-path'),
     )
     .classed('origin', (d, ix) => ix === 0)
+    .attr('data-transform-plz', '')
     .attr('cx', d => this.rwuToGrid(d.x, 'x'))
     .attr('cy', d => this.rwuToGrid(d.y, 'y'))
     .attr('rx', (d, ix) => (ix === 0 ? 7 : 2))
@@ -613,6 +634,7 @@ export default {
     .datum(this.points)
     .attr('fill', 'none')
     .attr('vector-effect', 'non-scaling-stroke')
+    .attr('data-transform-plz', '')
     .attr('d', d3.line().x(d => this.rwuToGrid(d.x, 'x')).y(d => this.rwuToGrid(d.y, 'y')))
     // prevent edges from overlapping points - interferes with click events
     .lower();
@@ -749,14 +771,20 @@ export default {
       .call(this.drawImage);
   },
 
-  draw() {
+  draw({ zoomEnd } = {}) {
     this.transformAtLastRender = { ...this.transform };
-    d3.selectAll('#grid svg .images, #grid svg .polygons')
+    d3.selectAll('[data-transform-plz]')
       .attr('transform', '');
 
     this.drawPolygons();
     this.drawImages();
     this.raiseOrLowerImages();
+
+    const redrawPoints = zoomEnd && this.points.length > 0;
+    if (redrawPoints) {
+      this.highlightSnapTarget();
+      this.drawPoints();
+    }
   },
   // ****************** SNAPPING TO EXISTING GEOMETRY ****************** //
   /*
@@ -1220,7 +1248,6 @@ export default {
 
        this.axis_generator.x.scale(newScaleX);
        this.axis_generator.y.scale(newScaleY);
-       this.clearHighlights();
        this.updateGrid();
 
        // axis padding
@@ -1232,7 +1259,7 @@ export default {
      })
      .on('end', () => {
        // redraw the saved geometry
-       this.draw();
+       this.draw({ zoomEnd: true });
      });
 
     svg.call(this.zoomBehavior);
@@ -1287,7 +1314,7 @@ export default {
           .scale(scale));
   },
   translateEntities() {
-    d3.selectAll('#grid svg .images, #grid svg .polygons')
+    d3.selectAll('[data-transform-plz]')
       .attr('transform', transformDiff(this.transformAtLastRender, d3.event.transform));
   },
   showOrHideAxes() {
