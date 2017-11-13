@@ -1314,6 +1314,17 @@ export default {
           .scale(scale));
   },
   translateEntities() {
+    // During a zoom, we don't do a full re-render because it would fire many
+    // times and slow down the event loop. Instead, we do a visual
+    // transformation, to keep the elements in the correct position on the page
+    //
+    // It used to be just .images and .polygons that needed to be translated
+    // but, now that mid-draw artifacts can persist through a zoom or pan, we
+    // needed to add them as well. Rather than listing all the selectors for
+    // anyone who might want to be translated, we use [data-transform-plz] to
+    // let elements opt-in and say "I would like to be translated when the user
+    // pans, plz".
+
     d3.selectAll('[data-transform-plz]')
       .attr('transform', transformDiff(this.transformAtLastRender, d3.event.transform));
   },
