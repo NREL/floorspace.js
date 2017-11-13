@@ -1,6 +1,6 @@
 <template>
   <EditBar
-    v-if="componentInstance"
+    v-if="showInstanceEditor"
     :row="componentInstance"
     :columns="visibleColumns"
     :updateRow="modifyComponentInstance"
@@ -17,6 +17,7 @@ export default {
     ...mapGetters({
       componentInstance: 'application/currentComponentInstance',
       currentStory: 'application/currentStory',
+      currentComponent: 'application/currentComponent',
     }),
     instanceType() {
       return this.componentInstance && this.componentInstance.type;
@@ -27,6 +28,10 @@ export default {
     },
     visibleColumns() {
       return _.reject(this.columns, 'private');
+    },
+    showInstanceEditor() {
+      return (this.instanceType &&
+        this.currentComponent.type.replace(/_definitions$/, 's') === this.instanceType);
     },
   },
   methods: {
