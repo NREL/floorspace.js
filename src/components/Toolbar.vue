@@ -114,9 +114,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           <div @click="tool = 'Eraser'" data-tool="Eraser" title="Eraser" :class="{ active: tool === 'Eraser' }">
             <tool-erase-svg class="button"></tool-erase-svg>
           </div>
-          <div @click="tool = 'Select'" data-tool="Select" title="Select" :class="{ active: tool === 'Select' }">
+          <!-- remove Select/Move tool -->
+          <!-- <div @click="tool = 'Select'" data-tool="Select" title="Select" :class="{ active: tool === 'Select' }">
             <tool-move-size-svg class="button"></tool-move-size-svg>
-          </div>
+          </div> -->
           <div @click="setImageTool" data-tool="Image" title="Image" :class="{ active: tool === 'Image' }">
             <tool-image-svg class="button"></tool-image-svg>
           </div>
