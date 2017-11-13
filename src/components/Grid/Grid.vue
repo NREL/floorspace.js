@@ -224,7 +224,7 @@ export default {
           return {
             ...wind,
             id: w.id,
-            type: 'window',
+            type: 'windows',
             ...wind.center,
           };
         });
@@ -237,7 +237,7 @@ export default {
               ...dc,
               ...geometryHelpers.vertexForId(dc.vertex_id, this.currentStoryGeometry),
               id: dc.id,
-              type: 'daylighting_control',
+              type: 'daylighting_controls',
               face_id: space.face_id,
             }));
       }));

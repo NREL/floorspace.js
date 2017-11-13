@@ -107,9 +107,9 @@ export default {
       return;
     }
     const payload = { story_id: this.currentStory.id, object: { id: component.id } };
-    if (component.type === 'window') {
+    if (component.type === 'windows') {
       this.$store.dispatch('models/destroyWindow', payload);
-    } else if (component.type === 'daylighting_control') {
+    } else if (component.type === 'daylighting_controls') {
       this.$store.dispatch('models/destroyDaylightingControl', payload);
     } else {
       console.error(`unrecognized component to remove: ${component}`);
@@ -140,9 +140,9 @@ export default {
     this.componentFacingSelection = component && component.id;
     if (!component) {
       // do no highlighting
-    } else if (component.type === 'window') {
+    } else if (component.type === 'windows') {
       this.highlightWindowGuideline(component);
-    } else if (component.type === 'daylighting_control') {
+    } else if (component.type === 'daylighting_controls') {
       this.highlightDaylightingControlGuideline(component);
     } else {
       throw new Error(`unrecognized componentType: ${this.currentComponentType}`);

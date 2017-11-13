@@ -4,11 +4,12 @@ import { componentInstanceById, spacePropertyById } from './helpers';
 
 export default {
   // full story object for the currentSelections story_id
-  currentStory(state, getters, rootState) { return rootState.models.stories.find(s => s.id === state.currentSelections.story_id); },
+  currentStory(state, getters, rootState) { console.log('trying to get currentStory', rootState.models.stories); return rootState.models.stories.find(s => s.id === state.currentSelections.story_id); },
 
   // full space, shading, or image object for the currentSelections subselection_id
   currentSubSelection(state, getters) {
     const currentStory = getters['currentStory'];
+    if (!currentStory) { return null; }
     const subSelectionId = state.currentSelections.subselection_ids[currentStory.id];
     return currentStory.spaces.find(i => i.id === subSelectionId) ||
       currentStory.shading.find(i => i.id === subSelectionId) ||
@@ -17,6 +18,7 @@ export default {
 
   currentSubSelectionType(state, getters) {
     const currentStory = getters['currentStory'];
+    if (!currentStory) { return null; }
     const subSelectionId = state.currentSelections.subselection_ids[currentStory.id];
     if (currentStory.spaces.find(i => i.id === subSelectionId)) {
       return 'spaces';
@@ -66,10 +68,14 @@ export default {
 
   // geometry for the story being edited
   currentStoryGeometry(state, getters, rootState) {
-    return rootState.geometry.find(g => g.id === getters['currentStory'].geometry_id);
+    const currentStory = getters['currentStory'];
+    if (!currentStory) { return null; }
+    return rootState.geometry.find(g => g.id === currentStory.geometry_id);
   },
   currentStoryDenormalizedGeom(state, getters) {
-    return geometryHelpers.denormalize(getters['currentStoryGeometry']);
+    const currentStoryGeom = getters['currentStoryGeometry'];
+    if (!currentStoryGeom) { return null; }
+    return geometryHelpers.denormalize(currentStoryGeom);
   },
 
   // face for the shading or space being edited

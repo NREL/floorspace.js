@@ -129,6 +129,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           <span v-if="!currentComponentDefinition">Add fenestration, daylighting, and PV</span>
           <span v-else>Click to place a {{currentComponentDefinition.name}}</span>
         </div>
+        <ComponentInstanceEditBar />
         <!-- No need to show tool options if there's only the one choice. -->
         <!-- <div id="drawing-tools" class="tools-list tools">
           <div @click="tool = 'Place Component'" data-tool="Place Component" title="Place Component" :class="{ active: tool === 'Place Component' }">
@@ -186,6 +187,7 @@ import PrettySelect from './PrettySelect.vue';
 import applicationHelpers from './../store/modules/application/helpers';
 import svgs from './svgs';
 import RenderByDropdown from './RenderByDropdown.vue';
+import ComponentInstanceEditBar from './ComponentInstanceEditBar.vue';
 import appconfig, { componentTypes } from '../store/modules/application/appconfig';
 
 
@@ -402,6 +404,7 @@ export default {
     SaveAsModal,
     Settings,
     RenderByDropdown,
+    ComponentInstanceEditBar,
     ...svgs,
   },
 };

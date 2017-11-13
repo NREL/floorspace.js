@@ -16,10 +16,10 @@ export default helpers;
 
 export function componentInstanceById(currStory, compInstId) {
   const windew = _.find(currStory.windows, { id: compInstId });
-  if (windew) { return { ...windew, type: 'window' }; }
+  if (windew) { return { ...windew, type: 'windows' }; }
 
   const dc = _.find(_.flatMap(currStory.spaces, s => s.daylighting_controls), { id: compInstId });
-  if (dc) { return { ...dc, type: 'daylighting_control' }; }
+  if (dc) { return { ...dc, type: 'daylighting_controls' }; }
 
   return null;
 }
