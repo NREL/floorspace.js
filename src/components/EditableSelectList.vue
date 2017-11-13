@@ -89,12 +89,14 @@ export default {
     },
   },
   watch: {
-    'rows.length': {
-      handler(newLen, oldLen) {
-        if (newLen > oldLen) {
-          this.selectRow(_.maxBy(this.rows, r => +r.id));
-        }
-      },
+    rows(newRows, oldRows) {
+      if (newRows !== oldRows) {
+        // looking at a different array, ignore.
+        return;
+      }
+      if (newRows.length > oldRows.length) {
+        this.selectRow(_.maxBy(this.rows, r => +r.id));
+      }
     },
   },
   components: {

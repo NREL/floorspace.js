@@ -337,7 +337,7 @@ const map = {
         displayName: 'Building Unit',
         input_type: 'select',
         select_data(space, state) {
-          const options = {};
+          const options = { '(none)': null };
           state.models.library.building_units.forEach((b) => { options[b.name] = b.id; });
           return options;
         },
@@ -351,7 +351,7 @@ const map = {
         displayName: 'Thermal Zone',
         input_type: 'select',
         select_data(space, state) {
-          const options = {};
+          const options = { '(none)': null };
           state.models.library.thermal_zones.forEach((t) => { options[t.name] = t.id; });
           return options;
         },
@@ -365,7 +365,7 @@ const map = {
         displayName: 'Space Type',
         input_type: 'select',
         select_data(space, state) {
-          const options = {};
+          const options = { '(none)': null };
           state.models.library.space_types.forEach((s) => { options[s.name] = s.id; });
           return options;
         },
@@ -379,7 +379,7 @@ const map = {
         displayName: 'Construction Set',
         input_type: 'select',
         select_data(space, state) {
-          const options = {};
+          const options = { '(none)': null };
           state.models.library.construction_sets.forEach((c) => { options[c.name] = c.id; });
           return options;
         },
@@ -393,9 +393,12 @@ const map = {
         displayName: 'Pitched Roof',
         input_type: 'select',
         select_data(space, state) {
-          return _.fromPairs(
-            state.models.library.pitched_roofs
-            .map(prt => [prt.name, prt.id]));
+          return {
+            '(none)': null,
+            ..._.fromPairs(
+              state.models.library.pitched_roofs
+              .map(prt => [prt.name, prt.id])),
+          };
         },
         get(space, state) {
           const prt = _.find(state.models.library.pitched_roofs, { id: space.pitched_roof_id });
@@ -439,8 +442,7 @@ const map = {
         displayName: 'Open To Below',
         input_type: 'select',
         select_data() {
-          const bools = ['False', 'True'];
-          return _.zipObject(bools, bools);
+          return { False: false, True: true };
         },
         converter: converters.bool,
       },

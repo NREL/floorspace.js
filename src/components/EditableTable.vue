@@ -63,7 +63,7 @@ export default {
   data() {
     return {
       sortKey: r => +r.id,
-      sortDescending: true,
+      sortDescending: false,
     };
   },
   computed: {

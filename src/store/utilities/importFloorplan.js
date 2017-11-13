@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import idFactory from './generateId';
 
 function maybeUpdateProject(project) {
@@ -89,6 +90,13 @@ export default function importFloorplan(context, payload) {
       },
     },
     geometry,
+  });
+  _.defer(() => {
+    context.dispatch(
+      'application/setCurrentStoryId',
+      { id: stories[0].id },
+      { root: true });
+    _.defer(() => window.eventBus.$emit('zoomToFit'));
   });
 
   document.getElementById('svg-grid').dispatchEvent(new Event('reloadGrid'));

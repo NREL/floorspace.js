@@ -9,7 +9,7 @@ export default {
   // full space, shading, or image object for the currentSelections subselection_id
   currentSubSelection(state, getters) {
     const currentStory = getters['currentStory'];
-    const subSelectionId = state.currentSelections.subselection_id;
+    const subSelectionId = state.currentSelections.subselection_ids[currentStory.id];
     return currentStory.spaces.find(i => i.id === subSelectionId) ||
       currentStory.shading.find(i => i.id === subSelectionId) ||
       currentStory.images.find(i => i.id === subSelectionId);
@@ -17,7 +17,7 @@ export default {
 
   currentSubSelectionType(state, getters) {
     const currentStory = getters['currentStory'];
-    const subSelectionId = state.currentSelections.subselection_id;
+    const subSelectionId = state.currentSelections.subselection_ids[currentStory.id];
     if (currentStory.spaces.find(i => i.id === subSelectionId)) {
       return 'spaces';
     } else if (currentStory.shading.find(i => i.id === subSelectionId)) {

@@ -1,7 +1,17 @@
 export default {
   // current selections
   setCurrentStoryId(state, payload) { state.currentSelections.story_id = payload.id; },
-  setCurrentSubSelectionId(state, payload) { state.currentSelections.subselection_id = payload.id; },
+  setCurrentSubSelectionId(state, payload) {
+    const storyId = state.currentSelections.story_id;
+    if (!storyId) {
+      console.error('expected a story to be selected, in order to set a subselection');
+      return;
+    }
+    state.currentSelections.subselection_ids = {
+      ...state.currentSelections.subselection_ids,
+      [storyId]: payload.id,
+    };
+  },
 
   setCurrentComponentId(state, payload) { state.currentSelections.component_id = payload.id; },
   setCurrentComponentDefinitionId(state, payload) { state.currentSelections.component_definition_id = payload.id; },
