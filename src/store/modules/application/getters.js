@@ -49,8 +49,7 @@ export default {
   },
 
   currentComponentDefinition(state, getters) {
-    const { definition } = getters['currentComponent'];
-    return definition;
+    return getters['currentComponent']['definition'];
   },
 
   currentComponentInstance(state, getters) {

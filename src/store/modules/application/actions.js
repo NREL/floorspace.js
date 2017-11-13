@@ -78,7 +78,6 @@ export default {
     if (!id || spacePropertyById(context.rootState.models.library, id)) {
       context.commit('setCurrentSpacePropertyId', { id });
     } else {
-      debugger;
       console.error(`unable to find space property with id: ${id}`);
     }
   },
