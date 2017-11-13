@@ -11,6 +11,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     id="grid"
     :style="{ 'pointer-events': (currentTool === 'Drag' || currentTool === 'Map') ? 'none': 'auto' }"
     ref="gridParent"
+    :class="{ 'reduce-ticks': reduceTicks }"
   >
     <svg ref="grid" id="svg-grid">
       <g class="axis axis--x"></g>
@@ -52,6 +53,7 @@ export default {
         x: null,
         y: null,
       },
+      reduceTicks: false,
       componentFacingSelection: null,
       transformAtLastRender: d3.zoomIdentity,
       handleMouseMove: null, // placeholder --> overwritten in mounted()

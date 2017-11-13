@@ -213,3 +213,9 @@
     }
   }
 }
+
+.reduce-ticks {
+  .tick line {
+    visibility: hidden;
+  }
+}
