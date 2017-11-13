@@ -32,6 +32,24 @@ export default {
 @import "./../scss/config";
 .edit-bar {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
+  > span {
+    margin-right: 4px;
+  }
+
+  input {
+    background-color: $gray-medium;
+    color: $gray-lightest;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    height: 16px;
+    font-size: 12px;
+  }
+
+  .destroy svg {
+    height: 1.3rem;
+    width: 1rem;
+  }
 }
 </style>
