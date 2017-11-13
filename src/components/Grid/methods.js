@@ -242,8 +242,18 @@ export default {
     this.clearHighlights();
 
     // location of the mouse in grid units
-    const gridCoords = d3.mouse(this.$refs.grid),
+
+    let gridPoint;
+    if (d3.event instanceof MouseEvent) {
+      // d3.mouse() will fail if d3.event is a ZoomEvent, or other
+      const gridCoords = d3.mouse(this.$refs.grid);
       gridPoint = { x: gridCoords[0], y: gridCoords[1] };
+    } else {
+      gridPoint = this.lastMousePosition;
+    }
+    if (!gridPoint) {
+      return;
+    }
 
     if (this.currentTool === 'Place Component') {
       this.highlightComponentToPlaceOrSelect(gridPoint);
@@ -264,20 +274,22 @@ export default {
     if (snapTarget.type === 'edge' || snapTarget.type === 'vertex') {
       d3.select('#grid svg')
       .append('ellipse')
-      .attr('cx', ellipsePoint.x, 'x')
-      .attr('cy', ellipsePoint.y, 'y')
+      .attr('cx', this.rwuToGrid(ellipsePoint.x, 'x'))
+      .attr('cy', this.rwuToGrid(ellipsePoint.y, 'y'))
       .attr('rx', 5)
       .attr('ry', 5)
       .classed('highlight', true)
+      .attr('data-transform-plz', '')
       .attr('vector-effect', 'non-scaling-stroke');
     } else {
       d3.select('#grid svg')
       .append('ellipse')
-      .attr('cx', ellipsePoint.x)
-      .attr('cy', ellipsePoint.y)
+      .attr('cx', this.rwuToGrid(ellipsePoint.x, 'x'))
+      .attr('cy', this.rwuToGrid(ellipsePoint.y, 'y'))
       .attr('rx', 2)
       .attr('ry', 2)
       .classed('gridpoint', true)
+      .attr('data-transform-plz', '')
       .attr('vector-effect', 'non-scaling-stroke');
     }
 
@@ -285,14 +297,18 @@ export default {
     if (snapTarget.type === 'edge' && this.currentTool !== 'Eraser') {
       d3.select('#grid svg')
       .append('line')
-      .attr('x1', snapTarget.v1GridCoords.x)
-      .attr('y1', snapTarget.v1GridCoords.y)
-      .attr('x2', snapTarget.v2GridCoords.x)
-      .attr('y2', snapTarget.v2GridCoords.y)
+      .attr('x1', this.rwuToGrid(snapTarget.v1GridCoords.x, 'x'))
+      .attr('y1', this.rwuToGrid(snapTarget.v1GridCoords.y, 'y'))
+      .attr('x2', this.rwuToGrid(snapTarget.v2GridCoords.x, 'x'))
+      .attr('y2', this.rwuToGrid(snapTarget.v2GridCoords.y, 'y'))
       .attr('stroke-width', 1)
       .classed('highlight', true)
+      .attr('data-transform-plz', '')
       .attr('vector-effect', 'non-scaling-stroke');
     }
+    // save off mouse pos so that we can redo highlight if zoom occurs during
+    // point drawing.
+    this.lastMousePosition = gridPoint;
   },
 
   clearHighlights() {
@@ -378,13 +394,13 @@ export default {
   * called on mousemove events, shows the user what geometry will be created by clicking at the current mouse location by
   * drawing a guide rectangle or a guideline between the last point drawn and the guidepoint
   */
-  drawGuideLines (e, guidePoint) {
+  drawGuideLines(e, guidePoint) {
     if (!this.points.length) { return; }
 
     // remove expired guideline paths and text
     this.eraseGuidelines();
 
-    var guidelinePoints, guidelinePaths;
+    let guidelinePoints, guidelinePaths;
 
     // if the polygon tool is active, draw a line connecting the last point in the polygon to the guide point
     // if the rectangle or eraser tool is active, infer a rectangle from the first point that was drawn and the guide point
@@ -397,18 +413,19 @@ export default {
         { x: guidePoint.x, y: this.points[0].y },
         guidePoint,
         { x: this.points[0].x, y: guidePoint.y },
-        this.points[0]
+        this.points[0],
       ];
 
       guidelinePaths = [
-        [guidelinePoints[0],guidelinePoints[1]],
-        [guidelinePoints[1],guidelinePoints[2]]
+        [guidelinePoints[0], guidelinePoints[1]],
+        [guidelinePoints[1], guidelinePoints[2]],
       ];
     }
 
-    const guidelineArea = this.currentTool === 'Polygon' ? [...this.points, guidePoint, this.points[0]] : guidelinePoints,
-    guidelinePolys = [guidelineArea,this.points],
-    svg = d3.select('#grid svg');
+    const
+      guidelineArea = this.currentTool === 'Polygon' ? [...this.points, guidePoint, this.points[0]] : guidelinePoints,
+      guidelinePolys = [guidelineArea, this.points],
+      svg = d3.select('#grid svg');
 
     // render a guideline or rectangle
     svg.selectAll('.guideline-line')
@@ -417,7 +434,9 @@ export default {
     .attr('fill', 'none')
     .classed('guideline guideline-line', true)
     .attr('vector-effect', 'non-scaling-stroke')
-    .attr('d', d3.line().x(d => d.x).y(d => d.y))
+    .attr('data-transform-plz', '')
+    .attr('d', d3.line().x(d => this.rwuToGrid(d.x, 'x'))
+                        .y(d => this.rwuToGrid(d.y, 'y')))
     .lower();
 
     // render unfinished area polygon(s)
@@ -425,13 +444,18 @@ export default {
     .data(guidelinePolys)
     .enter()
     .append('polygon')
-    .attr('points',d => d.map(p => [p.x,p.y].join(",")).join(" "))
-    .classed('guideline guideline-area guideLine',true)
+    .attr('points', d => d.map(p =>
+        [this.rwuToGrid(p.x, 'x'), this.rwuToGrid(p.y, 'y')]
+        .join(','),
+      ).join(' '))
+    .classed('guideline guideline-area guideLine', true)
     .attr('vector-effect', 'non-scaling-stroke')
+    .attr('data-transform-plz', '')
     .attr('fill', () => {
       if (this.currentTool === 'Eraser') { return 'none'; }
-      else if (this.currentSpace) { return this.currentSpace.color; }
-      else if (this.currentShading) { return this.currentShading.color; }
+      if (this.currentSpace) { return this.currentSpace.color; }
+      if (this.currentShading) { return this.currentShading.color; }
+      return null;
     });
 
     // don't render area/distance when erasing
@@ -442,37 +466,28 @@ export default {
     .data(guidelinePaths)
     .enter()
     .append('text')
-    .attr('x', d => d[0].x + (d[1].x - d[0].x)/2)
-    .attr('y', d => d[0].y + (d[1].y - d[0].y)/2)
-    .attr('dx', - 1.25 * (this.transform.k > 1 ? 1 : this.transform.k) + "em")
-    .text(d => {
-      const dist = this.distanceBetweenPoints(
-        {
-          x: this.gridToRWU(d[0].x, 'x'),
-          y: this.gridToRWU(d[0].y, 'y'),
-        },
-        {
-          x: this.gridToRWU(d[1].x, 'x'),
-          y: this.gridToRWU(d[1].y, 'y'),
-        });
-
+    .attr('x', d => this.rwuToGrid(d[0].x, 'x') + (this.rwuToGrid(d[1].x, 'x') - this.rwuToGrid(d[0].x, 'x')) / 2)
+    .attr('y', d => this.rwuToGrid(d[0].y, 'y') + (this.rwuToGrid(d[1].y, 'y') - this.rwuToGrid(d[0].y, 'y')) / 2)
+    .attr('dx', -1.25 * (this.transform.k > 1 ? 1 : this.transform.k) + 'em')
+    .attr('data-transform-plz', '')
+    .text((d) => {
+      const dist = this.distanceBetweenPoints(d[0], d[1]);
       return dist ? dist.toFixed(2) : '';
     })
-    .classed('guideline guideline-text guideline-dist',true)
-    .attr("font-family", "sans-serif")
-    .attr("fill", "red")
-    .style("font-size","1em");
+    .classed('guideline guideline-text guideline-dist', true)
+    .attr('font-family', 'sans-serif')
+    .attr('fill', 'red')
+    .style('font-size', '1em');
 
     if (guidelineArea.length > 3) {
-      let areaPoints = guidelineArea.map(p => {
-        let x = this.gridToRWU(p.x,'x'),
-        y = this.gridToRWU(p.y,'y');
-
-        return { x, y, X: x, Y: y };
-      }),
-      { x, y, area } = this.polygonLabelPosition(areaPoints),
-      areaText = area ? area.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,"): "";
-      areaText += ` ${this.units}²`;
+      const
+        areaPoints = guidelineArea.map((p) => {
+          const x = p.x, y = p.y;
+          return { x, y, X: x, Y: y };
+        }),
+        { x, y, area } = this.polygonLabelPosition(areaPoints),
+        areaTextNoUnits = area ? area.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') : '',
+        areaText = `${areaTextNoUnits} ${this.units}²`;
 
       if (x === null || y === null) {
         // either polygon has 0 area or something went wrong --> don't draw area text
@@ -484,11 +499,12 @@ export default {
       .attr('x', this.rwuToGrid(x, 'x'))
       .attr('y', this.rwuToGrid(y, 'y'))
       .text(areaText)
-      .classed('guideline guideline-text guideline-area-text guideLine',true)
-      .attr("text-anchor", "middle")
-      .attr("font-family", "sans-serif")
-      .attr("fill", "red")
-      .style("font-size","1em")
+      .classed('guideline guideline-text guideline-area-text guideLine', true)
+      .attr('data-transform-plz', '')
+      .attr('text-anchor', 'middle')
+      .attr('font-family', 'sans-serif')
+      .attr('fill', 'red')
+      .style('font-size', '1em')
       .raise();
     }
 
@@ -497,13 +513,13 @@ export default {
   /*
   * Erase any drawn guidelines
   */
-  eraseGuidelines () {
+  eraseGuidelines() {
     d3.selectAll('#grid .guideline').remove();
   },
   /*
   * Handle escape key presses to cancel current drawing operation
   */
-  escapeAction (e) {
+  escapeAction(e) {
     if (e.code === 'Escape' || e.which === 27) {
       this.points = [];
     }
@@ -514,14 +530,11 @@ export default {
   * translate the points into RWU and save the face for the selected space or shading
   */
   savePolygonFace() {
+    this.clearHighlights();
     d3.selectAll('#grid .point-path').remove();
 
     const payload = {
-      // translate grid points from grid units to RWU
-      points: this.points.map(p => ({
-        x: this.gridToRWU(p.x, 'x'),
-        y: this.gridToRWU(p.y, 'y'),
-      })),
+      points: [...this.points],
     };
 
     if (this.currentSpace) {
@@ -541,21 +554,18 @@ export default {
   * save the rectangle as a face for the selected space or shading
   */
   saveRectangularFace() {
+    this.clearHighlights();
     d3.selectAll('#grid .point-path').remove();
 
     // infer 4 corners of the rectangle based on the two points that have been drawn
     const payload = {};
 
-    // translate points from grid units to RWU
     payload.points = [
       this.points[0],
       { x: this.points[1].x, y: this.points[0].y },
       this.points[1],
-      { x: this.points[0].x, y: this.points[1].y }
-    ].map(p => ({
-      x: this.gridToRWU(p.x, 'x'),
-      y: this.gridToRWU(p.y, 'y')
-    }));
+      { x: this.points[0].x, y: this.points[1].y },
+    ];
 
     if (this.currentSpace) {
       payload.model_id = this.currentSpace.id;
@@ -576,6 +586,7 @@ export default {
   */
   eraseRectangularSelection() {
     // infer 4 corners of the rectangle based on the two points that have been drawn
+    this.clearHighlights();
     d3.selectAll('#grid .point-path').remove();
 
     const payload = {
@@ -583,15 +594,9 @@ export default {
         this.points[0],
         { x: this.points[1].x, y: this.points[0].y },
         this.points[1],
-        { x: this.points[0].x, y: this.points[1].y }
-      ]
+        { x: this.points[0].x, y: this.points[1].y },
+      ],
     };
-
-    // translate points from grid units to RWU
-    payload.points = payload.points.map(p => ({
-      x: this.gridToRWU(p.x, 'x'),
-      y: this.gridToRWU(p.y, 'y')
-    }));
 
     this.$store.dispatch('geometry/eraseSelection', payload);
 
@@ -613,11 +618,12 @@ export default {
     .selectAll('ellipse.point-path').data(this.points);
 
     pointPath.merge(
-      pointPath.enter().append('ellipse').attr('class', 'point-path')
+      pointPath.enter().append('ellipse').attr('class', 'point-path'),
     )
     .classed('origin', (d, ix) => ix === 0)
-    .attr('cx', d => d.x)
-    .attr('cy', d => d.y)
+    .attr('data-transform-plz', '')
+    .attr('cx', d => this.rwuToGrid(d.x, 'x'))
+    .attr('cy', d => this.rwuToGrid(d.y, 'y'))
     .attr('rx', (d, ix) => (ix === 0 ? 7 : 2))
     .attr('ry', (d, ix) => (ix === 0 ? 7 : 2))
     .attr('vector-effect', 'non-scaling-stroke')
@@ -628,7 +634,8 @@ export default {
     .datum(this.points)
     .attr('fill', 'none')
     .attr('vector-effect', 'non-scaling-stroke')
-    .attr('d', d3.line().x(d => d.x).y(d => d.y))
+    .attr('data-transform-plz', '')
+    .attr('d', d3.line().x(d => this.rwuToGrid(d.x, 'x')).y(d => this.rwuToGrid(d.y, 'y')))
     // prevent edges from overlapping points - interferes with click events
     .lower();
 
@@ -654,10 +661,7 @@ export default {
   registerFillEvents(polygons) {
     polygons.on('click', (d) => {
       if (this.currentSpace || this.currentShading) {
-        this.points = d.points.map(p => ({
-          x: this.rwuToGrid(p.x, 'x'),
-          y: this.rwuToGrid(p.y, 'y'),
-        }));
+        this.points = [...d.points];
         this.savePolygonFace();
       }
     });
@@ -767,14 +771,20 @@ export default {
       .call(this.drawImage);
   },
 
-  draw() {
+  draw({ zoomEnd } = {}) {
     this.transformAtLastRender = { ...this.transform };
-    d3.selectAll('#grid svg .images, #grid svg .polygons')
+    d3.selectAll('[data-transform-plz]')
       .attr('transform', '');
 
     this.drawPolygons();
     this.drawImages();
     this.raiseOrLowerImages();
+
+    const redrawPoints = zoomEnd && this.points.length > 0;
+    if (redrawPoints) {
+      this.highlightSnapTarget();
+      this.drawPoints();
+    }
   },
   // ****************** SNAPPING TO EXISTING GEOMETRY ****************** //
   /*
@@ -790,19 +800,14 @@ export default {
       y: this.gridToRWU(gridPoint.y, 'y'),
     };
     if (this.snapMode === 'grid-strict') {
-      const gridSnap = this.strictSnapTargets(rwuPoint)[0];
-      return {
-        ...gridSnap,
-        x: this.rwuToGrid(gridSnap.x, 'x'),
-        y: this.rwuToGrid(gridSnap.y, 'y'),
-      };
+      return this.strictSnapTargets(rwuPoint)[0];
     }
 
     if (event.shiftKey) {
       // disable snapping when shift is held down
       return {
         type: 'gridpoint',
-        ...gridPoint,
+        ...rwuPoint,
       };
     }
 
@@ -811,7 +816,7 @@ export default {
       const snappingEdge = this.snappingEdgeData(rwuPoint);
       return snappingEdge || {
         type: 'gridpoint',
-        ...gridPoint,
+        ...rwuPoint,
       };
     }
     // if a snappable vertex exists, don't check for edges
@@ -900,8 +905,7 @@ export default {
     if (this.points.length >= 3 && this.currentTool === 'Polygon') {
       // convert the polygon origin from grid units to real world units before adding it as a snappable vertex
       snappableVertices.push({
-        x: this.gridToRWU(this.points[0].x, 'x'),
-        y: this.gridToRWU(this.points[0].y, 'y'),
+        ...this.points[0],
         origin: true, // set a flag to mark the origin
       });
     }
@@ -927,8 +931,7 @@ export default {
     if (this.points.length >= 3 && this.currentTool === 'Polygon') {
       // convert the polygon origin from grid units to real world units before adding it as a snappable vertex
       snappableVertices.push({
-        x: this.gridToRWU(this.points[0].x, 'x'),
-        y: this.gridToRWU(this.points[0].y, 'y'),
+        ...this.points[0],
         origin: true, // set a flag to mark the origin
       });
     }
@@ -937,15 +940,12 @@ export default {
       snappableVertices = snappableVertices.concat(
         geometryHelpers.syntheticRectangleSnaps(
           snappableVertices,
-          {
-            x: this.gridToRWU(this.points[0].x, 'x'),
-            y: this.gridToRWU(this.points[0].y, 'y'),
-          },
+          this.points[0],
           point),
       );
     }
 
-    if (!snappableVertices.length) { return; }
+    if (!snappableVertices.length) { return null; }
 
     // find the vertex closest to the point being tested
     const nearestVertex = snappableVertices.reduce((a, b) => {
@@ -956,17 +956,10 @@ export default {
 
     // return the nearest vertex if it is within the snap tolerance of the point
     if (this.distanceBetweenPoints(nearestVertex, point) < this.$store.getters['project/snapTolerance']) {
-      const retval = {
+      return {
         ...nearestVertex,
-        x: this.rwuToGrid(nearestVertex.x, 'x'),
-        y: this.rwuToGrid(nearestVertex.y, 'y'),
         type: 'vertex',
       };
-      if (retval.synthetic) {
-        retval.originalPt.x = this.rwuToGrid(retval.originalPt.x, 'x');
-        retval.originalPt.y = this.rwuToGrid(retval.originalPt.y, 'y');
-      }
-      return retval;
     }
   },
 
@@ -975,10 +968,10 @@ export default {
   * if the projection of the point to the edge is within the snap tolerance of the point, return the edge and coordinates of the projection in grid units
   * and the distance from the projection to the point
   */
-  snappingEdgeData (point) {
+  snappingEdgeData(point) {
     // build a list of edges (in RWU) available for snapping
     // deep copy all vertices on the current story
-    var snappableEdges = [...this.currentStoryGeometry.edges];
+    let snappableEdges = [...this.currentStoryGeometry.edges];
 
     // TODO: conditionally combine this list with edges from the next story down if it is visible
     if (this.previousStoryGeometry) {
@@ -988,7 +981,7 @@ export default {
       })))));
     }
 
-    if (!snappableEdges.length) { return; }
+    if (!snappableEdges.length) { return null; }
 
     // find the edge closest to the point being tested
     const nearestEdge = snappableEdges.reduce((a, b) => {
@@ -1067,11 +1060,12 @@ export default {
         dist: nearestEdge.dist,
         type: 'edge',
         // projection and snapping edge vertices translated into grid coordinates (to display snapping point and highlight edges)
-        projection: { x: this.rwuToGrid(projection.x, 'x'), y: this.rwuToGrid(projection.y, 'y') },
-        v1GridCoords: { x: this.rwuToGrid(nearestEdgeV1.x, 'x'), y: this.rwuToGrid(nearestEdgeV1.y, 'y') },
-        v2GridCoords: { x: this.rwuToGrid(nearestEdgeV2.x, 'x'), y: this.rwuToGrid(nearestEdgeV2.y, 'y') }
+        projection,
+        v1GridCoords: nearestEdgeV1,
+        v2GridCoords: nearestEdgeV2,
       }
     }
+    return null;
   },
 
   // ****************** SNAPPING HELPERS ****************** //
@@ -1254,7 +1248,6 @@ export default {
 
        this.axis_generator.x.scale(newScaleX);
        this.axis_generator.y.scale(newScaleY);
-       this.clearHighlights();
        this.updateGrid();
 
        // axis padding
@@ -1266,7 +1259,7 @@ export default {
      })
      .on('end', () => {
        // redraw the saved geometry
-       this.draw();
+       this.draw({ zoomEnd: true });
      });
 
     svg.call(this.zoomBehavior);
@@ -1321,7 +1314,18 @@ export default {
           .scale(scale));
   },
   translateEntities() {
-    d3.selectAll('#grid svg .images, #grid svg .polygons')
+    // During a zoom, we don't do a full re-render because it would fire many
+    // times and slow down the event loop. Instead, we do a visual
+    // transformation, to keep the elements in the correct position on the page
+    //
+    // It used to be just .images and .polygons that needed to be translated
+    // but, now that mid-draw artifacts can persist through a zoom or pan, we
+    // needed to add them as well. Rather than listing all the selectors for
+    // anyone who might want to be translated, we use [data-transform-plz] to
+    // let elements opt-in and say "I would like to be translated when the user
+    // pans, plz".
+
+    d3.selectAll('[data-transform-plz]')
       .attr('transform', transformDiff(this.transformAtLastRender, d3.event.transform));
   },
   showOrHideAxes() {

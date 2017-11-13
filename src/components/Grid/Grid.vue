@@ -16,8 +16,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     <svg ref="grid" id="svg-grid">
       <g class="axis axis--x"></g>
       <g class="axis axis--y"></g>
-      <g class="images"></g>
-      <g class="polygons"></g>
+      <g class="images" data-transform-plz></g>
+      <g class="polygons" data-transform-plz></g>
     </svg>
   </div>
 </template>
@@ -56,6 +56,7 @@ export default {
       reduceTicks: false,
       componentFacingSelection: null,
       transformAtLastRender: d3.zoomIdentity,
+      lastMousePosition: null,
       handleMouseMove: null, // placeholder --> overwritten in mounted()
       ...drawMethods({
         xScale,
