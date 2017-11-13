@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import map from './appconfig';
+import map, { assignableProperties } from './appconfig';
 
 export function displayNameForMode(mode) {
   return map.modes[mode];
@@ -16,26 +16,22 @@ export default helpers;
 
 export function componentInstanceById(currStory, compInstId) {
   const windew = _.find(currStory.windows, { id: compInstId });
-  if (windew) { return { ...windew, type: 'window' }; }
+  if (windew) { return { ...windew, type: 'windows' }; }
 
   const dc = _.find(_.flatMap(currStory.spaces, s => s.daylighting_controls), { id: compInstId });
-  if (dc) { return { ...dc, type: 'daylighting_control' }; }
+  if (dc) { return { ...dc, type: 'daylighting_controls' }; }
 
   return null;
 }
 
 export function spacePropertyById(library, spacePropId) {
   let type, prop;
-  if ((prop = _.find(library.space_types, { id: spacePropId }))) {
-    type = 'space_types';
-  } else if ((prop = _.find(library.building_units, { id: spacePropId }))) {
-    type = 'building_units';
-  } else if ((prop = _.find(library.thermal_zones, { id: spacePropId }))) {
-    type = 'thermal_zones';
-  } else if ((prop = _.find(library.pitched_roofs, { id: spacePropId }))) {
-    type = 'pitched_roofs';
-  } else {
-    return null;
-  }
-  return { ...prop, type };
+  assignableProperties.some((ap) => {
+    if ((prop = _.find(library[ap], { id: spacePropId }))) {
+      type = ap;
+    }
+    return !!prop;
+  });
+
+  return prop ? { ...prop, type } : null;
 }

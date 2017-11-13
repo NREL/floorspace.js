@@ -29,12 +29,17 @@ import { mapState } from 'vuex';
 import libconfig from '../store/modules/models/libconfig';
 import EditableSelectList from './EditableSelectList.vue';
 import helpers from '../store/modules/models/helpers';
+import { assignableProperties, componentTypes } from '../store/modules/application/appconfig';
 
+function potentiallyShorten(displayName) {
+  return displayName === 'Daylighting Control Definition' ? 'Daylighting Control Defn' : displayName;
+}
 
 function keyForMode(mode) {
   return (
     mode === 'stories' ? 'currentStory' :
-    _.includes(['building_units', 'thermal_zones', 'space_types', 'pitched_roofs'], mode) ? 'currentSpaceProperty' :
+    _.includes(componentTypes, mode) ? 'currentComponentDef' :
+    _.includes(assignableProperties, mode) ? 'currentSpaceProperty' :
     _.includes(['windows', 'daylighting_controls'], mode) ? 'currentComponentInstance' :
     'currentSubSelection');
 }
@@ -47,7 +52,7 @@ export default {
     objectTypesDisplay() {
       return this.objectTypes.map(ot => ({
         val: ot,
-        display: libconfig[ot].displayName,
+        display: potentiallyShorten(libconfig[ot].displayName),
       }));
     },
     columns() {
@@ -66,6 +71,10 @@ export default {
     currentSpaceProperty: {
       get() { return this.$store.getters['application/currentSpaceProperty']; },
       set(item) { this.$store.dispatch('application/setCurrentSpacePropertyId', { id: item.id }); },
+    },
+    currentComponentDef: {
+      get() { return this.$store.getters['application/currentComponentDefinition']; },
+      set(item) { this.$store.dispatch('application/setCurrentComponentDefinitionId', { id: item.id }); },
     },
     currentComponentInstance: {
       get() { return this.$store.getters['application/currentComponentInstance']; },
@@ -112,7 +121,7 @@ export default {
   },
   watch: {
     rows() {
-      if (!_.includes(this.rows, this.selectedObject) && this.rows.length > 0) {
+      if (!(this.selectedObject && _.includes(_.map(this.rows, 'id'), this.selectedObject.id)) && this.rows.length > 0) {
         this.selectedObject = this.rows[0];
       }
     },

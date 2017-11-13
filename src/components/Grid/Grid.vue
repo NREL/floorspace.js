@@ -11,6 +11,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     id="grid"
     :style="{ 'pointer-events': (currentTool === 'Drag' || currentTool === 'Map') ? 'none': 'auto' }"
     ref="gridParent"
+    :class="{ 'reduce-ticks': reduceTicks }"
   >
     <svg ref="grid" id="svg-grid">
       <g class="axis axis--x"></g>
@@ -52,6 +53,7 @@ export default {
         x: null,
         y: null,
       },
+      reduceTicks: false,
       componentFacingSelection: null,
       transformAtLastRender: d3.zoomIdentity,
       handleMouseMove: null, // placeholder --> overwritten in mounted()
@@ -224,7 +226,7 @@ export default {
           return {
             ...wind,
             id: w.id,
-            type: 'window',
+            type: 'windows',
             ...wind.center,
           };
         });
@@ -237,16 +239,19 @@ export default {
               ...dc,
               ...geometryHelpers.vertexForId(dc.vertex_id, this.currentStoryGeometry),
               id: dc.id,
-              type: 'daylighting_control',
+              type: 'daylighting_controls',
               face_id: space.face_id,
             }));
       }));
     },
-    allComponentInstanceLocs() {
-      return [
-        ...this.windowCenterLocs,
-        ...this.daylightingControlLocs,
-      ];
+    currentComponentTypeLocs() {
+      if (this.currentComponentType === 'window_definitions') {
+        return this.windowCenterLocs;
+      } else if (this.currentComponentType === 'daylighting_control_definitions') {
+        return this.daylightingControlLocs;
+      } else {
+        throw new Error(`unrecognized componentType: ${this.currentComponentType}`);
+      }
     },
     spaceFaces() {
       // as opposed to shading faces
@@ -271,10 +276,12 @@ export default {
       this.points = [];
       this.draw();
       this.clearHighlights();
-      if (this.currentTool === 'Image' && this.currentStory.images.length && (
-            !this.currentImage ||
-            !_.includes(_.map(this.currentStory.images, 'id'), this.currentImage.id))) {
-        this.currentImage = this.currentStory.images[0];
+      if (this.currentTool === 'Image' && this.currentStory.images.length) {
+        if (!this.currentImage ||
+            !_.includes(_.map(this.currentStory.images, 'id'), this.currentImage.id)
+           ) {
+              this.currentImage = this.currentStory.images[0];
+        }
       } else if (!_.includes(_.map(this.currentStory.spaces, 'id'), this.currentSubSelection.id)) {
         this.currentSubSelection = this.currentStory.spaces[0];
       }
@@ -296,9 +303,9 @@ export default {
       }
 
       // cancel current drawing action if actual zoom and not just accidental drag
-      if (this.points.length && (newTransform.k !== lastTransform.k || Math.abs(lastTransform.y - newTransform.y) > 3 || Math.abs(lastTransform.x - newTransform.x) > 3)) {
-        this.points = [];
-      }
+      // if (this.points.length && (newTransform.k !== lastTransform.k || Math.abs(lastTransform.y - newTransform.y) > 3 || Math.abs(lastTransform.x - newTransform.x) > 3)) {
+      //   this.points = [];
+      // }
     },
   },
   methods: {

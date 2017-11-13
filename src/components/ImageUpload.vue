@@ -14,9 +14,7 @@ import modelHelpers from './../store/modules/models/helpers';
 export default {
   name: 'ImageUpload',
   mounted() {
-    window.eventBus.$on('uploadImage', (event) => {
-      this.$refs.imageInput.click();
-    });
+    window.eventBus.$on('uploadImage', this.promptUpload.bind(this));
   },
   computed: {
     ...mapState({
@@ -34,6 +32,9 @@ export default {
     }),
   },
   methods: {
+    promptUpload() {
+      this.$refs.imageInput.click();
+    },
     uploadImage(event) {
       const files = event.target.files;
       const that = this;

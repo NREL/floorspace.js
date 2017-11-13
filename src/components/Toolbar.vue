@@ -114,10 +114,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           <div @click="tool = 'Eraser'" data-tool="Eraser" title="Eraser" :class="{ active: tool === 'Eraser' }">
             <tool-erase-svg class="button"></tool-erase-svg>
           </div>
-          <div @click="tool = 'Select'" data-tool="Select" title="Select" :class="{ active: tool === 'Select' }">
+          <!-- remove Select/Move tool -->
+          <!-- <div @click="tool = 'Select'" data-tool="Select" title="Select" :class="{ active: tool === 'Select' }">
             <tool-move-size-svg class="button"></tool-move-size-svg>
-          </div>
-          <div @click="tool = 'Image'" data-tool="Image" title="Image" :class="{ active: tool === 'Image' }">
+          </div> -->
+          <div @click="setImageTool" data-tool="Image" title="Image" :class="{ active: tool === 'Image' }">
             <tool-image-svg class="button"></tool-image-svg>
           </div>
         </div>
@@ -125,8 +126,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       </template>
 
       <template v-if="modeTab === 'components'">
-        <div id="instructions">Add fenestration, daylighting, and PV</div>
-        <ComponentsList />
+        <div id="instructions">
+          <span v-if="!currentComponentDefinition">Add fenestration, daylighting, and PV</span>
+          <span v-else>Click to place a {{currentComponentDefinition.name}}</span>
+        </div>
+        <ComponentInstanceEditBar />
         <!-- No need to show tool options if there's only the one choice. -->
         <!-- <div id="drawing-tools" class="tools-list tools">
           <div @click="tool = 'Place Component'" data-tool="Place Component" title="Place Component" :class="{ active: tool === 'Place Component' }">
@@ -180,11 +184,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 import { mapState, mapGetters } from 'vuex';
 import SaveAsModal from './Modals/SaveAsModal.vue';
 import Settings from './Modals/Settings.vue';
-import ComponentsList from './ComponentsList.vue';
 import PrettySelect from './PrettySelect.vue';
 import applicationHelpers from './../store/modules/application/helpers';
 import svgs from './svgs';
 import RenderByDropdown from './RenderByDropdown.vue';
+import ComponentInstanceEditBar from './ComponentInstanceEditBar.vue';
+import appconfig, { componentTypes } from '../store/modules/application/appconfig';
+
 
 // svgs
 
@@ -203,6 +209,12 @@ export default {
     };
   },
   methods: {
+    setImageTool() {
+      this.tool = 'Image';
+      if (this.currentStory.images.length === 0) {
+        window.eventBus.$emit('uploadImage');
+      }
+    },
     zoomToFit() {
       window.eventBus.$emit('zoomToFit');
     },
@@ -258,9 +270,9 @@ export default {
         .value() + '';
     },
     allComponents() {
-      return Object.keys(this.componentTypes).map(ct => ({
+      return componentTypes.map(ct => ({
         defs: this.$store.state.models.library[ct],
-        name: this.componentTypes[ct],
+        name: appconfig.modes[ct],
         type: ct,
       }));
     },
@@ -272,6 +284,7 @@ export default {
     },
     ...mapGetters({
       currentSpaceProperty: 'application/currentSpaceProperty',
+      currentStory: 'application/currentStory',
     }),
     ...mapState({
       mapEnabled: state => state.project.map.enabled,
@@ -391,8 +404,8 @@ export default {
     PrettySelect,
     SaveAsModal,
     Settings,
-    ComponentsList,
     RenderByDropdown,
+    ComponentInstanceEditBar,
     ...svgs,
   },
 };

@@ -6,13 +6,12 @@
 // (4) Other than as required in clauses (1) and (2), distributions in any form of modifications or other derivative works may not use the "OpenStudio" trademark, "OS", "os", or any other confusingly similar designation without specific prior written permission from Alliance for Sustainable Energy, LLC.
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-const d3 = require('d3');
-const polylabel = require('polylabel');
+import * as d3 from 'd3';
+import polylabel from 'polylabel';
 import _ from 'lodash';
 import { snapTargets, snapWindowToEdge, snapToVertexWithinFace, findClosestEdge, findClosestWindow } from './snapping';
 import geometryHelpers, { distanceBetweenPoints, fitToAspectRatio } from './../../store/modules/geometry/helpers';
 import modelHelpers from './../../store/modules/models/helpers';
-import { ResizeEvents } from '../../components/Resize';
 
 function ticksInRange(start, stop, spacing) {
   return _.range(
@@ -46,7 +45,7 @@ export default {
       this.addPoint();
     }
     if (this.currentTool === 'Place Component') {
-      this.placesOrSelectComponent();
+      this.placeOrSelectComponent();
     }
     if (this.currentTool === 'Image') {
       this.deselectImages();
@@ -83,9 +82,9 @@ export default {
       gridCoords = d3.mouse(this.$refs.grid),
       gridPoint = { x: gridCoords[0], y: gridCoords[1] },
       rwuPoint = this.gridPointToRWU(gridPoint),
-      component = _.minBy(this.allComponentInstanceLocs, ci => distanceBetweenPoints(ci, rwuPoint)),
+      component = _.minBy(this.currentComponentTypeLocs, ci => distanceBetweenPoints(ci, rwuPoint)),
       distToComp = component && distanceBetweenPoints(component, rwuPoint);
-    if (!component || distToComp > this.spacing * 2) {
+    if (!component || distToComp > this.spacing / 2) {
       return null;
     }
     return component;
@@ -107,15 +106,15 @@ export default {
       return;
     }
     const payload = { story_id: this.currentStory.id, object: { id: component.id } };
-    if (component.type === 'window') {
+    if (component.type === 'windows') {
       this.$store.dispatch('models/destroyWindow', payload);
-    } else if (component.type === 'daylighting_control') {
+    } else if (component.type === 'daylighting_controls') {
       this.$store.dispatch('models/destroyDaylightingControl', payload);
     } else {
       console.error(`unrecognized component to remove: ${component}`);
     }
   },
-  placesOrSelectComponent() {
+  placeOrSelectComponent() {
     // hold down shift to force placement when we might otherwise select
     const toSelect = d3.event.shiftKey ? false : this.componentToSelect();
     if (toSelect) {
@@ -128,6 +127,8 @@ export default {
       this.placeWindow();
     } else if (this.currentComponentType === 'daylighting_control_definitions') {
       this.placeDaylightingControl();
+    } else {
+      throw new Error(`unrecognized componentType: ${this.currentComponentType}`);
     }
   },
   highlightComponentToSelect() {
@@ -138,10 +139,12 @@ export default {
     this.componentFacingSelection = component && component.id;
     if (!component) {
       // do no highlighting
-    } else if (component.type === 'window') {
+    } else if (component.type === 'windows') {
       this.highlightWindowGuideline(component);
-    } else if (component.type === 'daylighting_control') {
+    } else if (component.type === 'daylighting_controls') {
       this.highlightDaylightingControlGuideline(component);
+    } else {
+      throw new Error(`unrecognized componentType: ${this.currentComponentType}`);
     }
     return component;
   },
