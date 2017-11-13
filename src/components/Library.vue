@@ -29,12 +29,16 @@ import { mapState } from 'vuex';
 import libconfig from '../store/modules/models/libconfig';
 import EditableSelectList from './EditableSelectList.vue';
 import helpers from '../store/modules/models/helpers';
-import { assignableProperties } from '../store/modules/application/appconfig';
+import { assignableProperties, componentTypes } from '../store/modules/application/appconfig';
 
+function potentiallyShorten(displayName) {
+  return displayName === 'Daylighting Control Definition' ? 'Daylighting Control Defn' : displayName;
+}
 
 function keyForMode(mode) {
   return (
     mode === 'stories' ? 'currentStory' :
+    _.includes(componentTypes, mode) ? 'currentComponentDef' :
     _.includes(assignableProperties, mode) ? 'currentSpaceProperty' :
     _.includes(['windows', 'daylighting_controls'], mode) ? 'currentComponentInstance' :
     'currentSubSelection');
@@ -48,7 +52,7 @@ export default {
     objectTypesDisplay() {
       return this.objectTypes.map(ot => ({
         val: ot,
-        display: libconfig[ot].displayName,
+        display: potentiallyShorten(libconfig[ot].displayName),
       }));
     },
     columns() {
@@ -67,6 +71,10 @@ export default {
     currentSpaceProperty: {
       get() { return this.$store.getters['application/currentSpaceProperty']; },
       set(item) { this.$store.dispatch('application/setCurrentSpacePropertyId', { id: item.id }); },
+    },
+    currentComponentDef: {
+      get() { return this.$store.getters['application/currentComponentDefinition']; },
+      set(item) { this.$store.dispatch('application/setCurrentComponentDefinitionId', { id: item.id }); },
     },
     currentComponentInstance: {
       get() { return this.$store.getters['application/currentComponentInstance']; },

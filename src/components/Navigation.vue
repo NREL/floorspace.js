@@ -84,7 +84,7 @@ export default {
         case 'shading':
           return ['shading'];
         case 'components':
-          return ['windows', 'daylighting_controls'];
+          return ['window_definitions', 'daylighting_control_definitions'];
         case 'assign':
           return ['building_units', 'thermal_zones', 'space_types', 'construction_sets', 'pitched_roofs'];
       }
@@ -123,14 +123,6 @@ export default {
           this.subselectionType = val[0];
         }
       }
-    },
-    currentComponent() {
-      if (!this.currentComponent) { return; }
-      if (this.modeTab !== 'components') { return; }
-
-      this.subselectionType = this.currentComponent.type === 'window_definitions' ? 'windows' :
-        this.currentComponent.type === 'daylighting_control_definitions' ? 'daylighting_controls' :
-        this.subselectionType;
     },
   },
   components: {

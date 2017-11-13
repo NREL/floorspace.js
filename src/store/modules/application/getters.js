@@ -46,6 +46,11 @@ export default {
     return { type, definition };
   },
 
+  currentComponentDefinition(state, getters) {
+    const { definition } = getters['currentComponent'];
+    return definition;
+  },
+
   currentComponentInstance(state, getters) {
     const compDefId = state.currentSelections.component_instance_id;
     if (!compDefId) { return null; }
