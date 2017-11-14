@@ -10,7 +10,7 @@
         :onChange="updateRow.bind(null, row.id, col.name)"
       />
     </span>
-    <span class="destroy">
+    <span class="destroy" @click="destroy()">
       <Delete class="button" />
     </span>
   </div>
