@@ -89,7 +89,8 @@ export default {
     ConstructionSet: function (opts = {}) {
         return {
             id: idFactory.generate(),
-            name: opts.name
+            name: opts.name,
+            color: generateColor('construction_set'),
         };
     },
   WindowDefn(opts = {}) {

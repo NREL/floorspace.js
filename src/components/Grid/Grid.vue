@@ -134,6 +134,7 @@ export default {
         case 'thermal_zones': return 'thermal_zone_id';
         case 'space_types': return 'space_type_id';
         case 'pitched_roofs': return 'pitched_roof_id';
+        case 'construction_sets': return 'construction_set_id';
         default: throw new Error(`unrecognized space property type ${this.currentSpaceProperty.type}`);
       }
     },
@@ -302,11 +303,6 @@ export default {
       } else {
         d3.select('#svg-grid').selectAll('.polygon-text').style('display', 'initial');
       }
-
-      // cancel current drawing action if actual zoom and not just accidental drag
-      // if (this.points.length && (newTransform.k !== lastTransform.k || Math.abs(lastTransform.y - newTransform.y) > 3 || Math.abs(lastTransform.x - newTransform.x) > 3)) {
-      //   this.points = [];
-      // }
     },
   },
   methods: {
@@ -370,6 +366,9 @@ export default {
           } else if (this.currentMode === 'pitched_roofs') {
             const pitchedRoof = modelHelpers.libraryObjectWithId(this.$store.state.models, model.pitched_roof_id);
             polygon.color = pitchedRoof ? pitchedRoof.color : applicationHelpers.config.palette.neutral;
+          } else if (this.currentMode === 'construction_sets') {
+            const constructionSet = modelHelpers.libraryObjectWithId(this.$store.state.models, model.construction_set_id);
+            polygon.color = constructionSet ? constructionSet.color : applicationHelpers.config.palette.neutral;
           }
 
         }

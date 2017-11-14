@@ -522,6 +522,8 @@ export default {
   escapeAction(e) {
     if (e.code === 'Escape' || e.which === 27) {
       this.points = [];
+      this.clearHighlights();
+      d3.selectAll('#grid .point-path').remove();
     }
   },
   // ****************** SAVING FACES ****************** //

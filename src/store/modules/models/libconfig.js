@@ -59,7 +59,7 @@ const map = {
     init: factory.ThermalZone,
   },
   window_definitions: {
-    displayName: 'Window Definition',
+    displayName: 'Window',
     columns: [
       {
         name: 'id',
@@ -152,11 +152,17 @@ const map = {
         input_type: 'text',
         validator: validators.name,
       },
+      {
+        name: 'color',
+        displayName: 'Color',
+        input_type: 'color',
+        validator: validators.color,
+      },
     ],
     init: factory.ConstructionSet,
   },
   daylighting_control_definitions: {
-    displayName: 'Daylighting Control Definition',
+    displayName: 'Daylighting Control',
     columns: [
       {
         name: 'id',

@@ -36,12 +36,12 @@ export default {
   },
   methods: {
     destroyComponent() {
-      if (this.instanceType === 'window_definitions') {
-        this.$store.dispatch('models/destroyWindowDef', { object: this.componentInstance });
-      } else if (this.instanceType === 'daylighting_control_definitions') {
-        this.$store.dispatch('models/destroyDaylightingControlDef', { object: this.componentInstance });
+      if (this.instanceType === 'windows') {
+        this.$store.dispatch('models/destroyWindow', { story_id: this.currentStory.id,  object: this.componentInstance });
+      } else if (this.instanceType === 'daylighting_controls') {
+        this.$store.dispatch('models/destroyDaylightingControl', { story_id: this.currentStory.id, object: this.componentInstance });
       } else {
-        throw new Error(`Unrecognized component type ${componentType}`);
+        throw new Error(`Unrecognized component type ${this.instanceType}`);
       }
     },
     modifyComponentInstance(id, key, value) {

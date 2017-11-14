@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { assignableProperties } from './appconfig';
 import { componentInstanceById, spacePropertyById } from './helpers';
 
 export default {
@@ -68,8 +69,10 @@ export default {
 
   setCurrentMode(context, payload) {
     const { mode } = payload;
-    if (context.state.modes.indexOf(mode) !== -1) {
+    if (mode === 'spaces' || _.includes(assignableProperties, mode)) {
       context.commit('setCurrentMode', { mode });
+    } else {
+      console.error(`unrecognized view-by option: ${mode}`);
     }
   },
 

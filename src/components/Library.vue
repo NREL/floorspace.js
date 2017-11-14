@@ -14,7 +14,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
     :columns="columns"
     :selectedRowId="selectedObject && selectedObject.id"
     :selectRow="row => { selectedObject = row; }"
-    :addRow="!componentInstanceMode && createObject"
+    :addRow="addRowPermitted && createObject"
     :editRow="modifyObject"
     :destroyRow="destroyObject"
     :searchAvailable="searchAvailable"
@@ -31,9 +31,6 @@ import EditableSelectList from './EditableSelectList.vue';
 import helpers from '../store/modules/models/helpers';
 import { assignableProperties, componentTypes } from '../store/modules/application/appconfig';
 
-function potentiallyShorten(displayName) {
-  return displayName === 'Daylighting Control Definition' ? 'Daylighting Control Defn' : displayName;
-}
 
 function keyForMode(mode) {
   return (
@@ -52,7 +49,7 @@ export default {
     objectTypesDisplay() {
       return this.objectTypes.map(ot => ({
         val: ot,
-        display: potentiallyShorten(libconfig[ot].displayName),
+        display: libconfig[ot].displayName,
       }));
     },
     columns() {
@@ -97,6 +94,7 @@ export default {
     },
     ...mapState({
       stories: state => state.models.stories,
+       modeTab: state => state.application.currentSelections.modeTab,
     }),
     spaces() { return this.currentStory.spaces; },
     shading() { return this.currentStory.shading; },
@@ -113,6 +111,9 @@ export default {
     },
     componentInstanceMode() {
       return _.includes(['windows', 'daylighting_controls'], this.mode);
+    },
+    addRowPermitted() {
+      return this.mode !== 'stories' || this.modeTab === 'floorplan';
     },
     renderByMode: {
       get() { return this.$store.state.application.currentSelections.mode; },
