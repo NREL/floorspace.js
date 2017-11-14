@@ -31,9 +31,6 @@ import EditableSelectList from './EditableSelectList.vue';
 import helpers from '../store/modules/models/helpers';
 import { assignableProperties, componentTypes } from '../store/modules/application/appconfig';
 
-function potentiallyShorten(displayName) {
-  return displayName === 'Daylighting Control Definition' ? 'Daylighting Control Defn' : displayName;
-}
 
 function keyForMode(mode) {
   return (
@@ -52,7 +49,7 @@ export default {
     objectTypesDisplay() {
       return this.objectTypes.map(ot => ({
         val: ot,
-        display: potentiallyShorten(libconfig[ot].displayName),
+        display: libconfig[ot].displayName,
       }));
     },
     columns() {
