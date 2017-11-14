@@ -152,6 +152,12 @@ const map = {
         input_type: 'text',
         validator: validators.name,
       },
+      {
+        name: 'color',
+        displayName: 'Color',
+        input_type: 'color',
+        validator: validators.color,
+      },
     ],
     init: factory.ConstructionSet,
   },
