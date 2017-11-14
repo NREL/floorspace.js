@@ -14,7 +14,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
     :columns="columns"
     :selectedRowId="selectedObject && selectedObject.id"
     :selectRow="row => { selectedObject = row; }"
-    :addRow="!componentInstanceMode && createObject"
+    :addRow="addRowPermitted && createObject"
     :editRow="modifyObject"
     :destroyRow="destroyObject"
     :searchAvailable="searchAvailable"
@@ -94,6 +94,7 @@ export default {
     },
     ...mapState({
       stories: state => state.models.stories,
+       modeTab: state => state.application.currentSelections.modeTab,
     }),
     spaces() { return this.currentStory.spaces; },
     shading() { return this.currentStory.shading; },
@@ -110,6 +111,9 @@ export default {
     },
     componentInstanceMode() {
       return _.includes(['windows', 'daylighting_controls'], this.mode);
+    },
+    addRowPermitted() {
+      return this.mode !== 'stories' || this.modeTab === 'floorplan';
     },
     renderByMode: {
       get() { return this.$store.state.application.currentSelections.mode; },
