@@ -183,7 +183,7 @@ export function drawWindowGuideline() {
     drawMeasure.xScale(xScale).yScale(yScale);
     selection.exit().remove();
     selection
-      .merge(selection.enter().append('g').classed('window-guideline', true))
+      .merge(selection.enter().append('g').classed('window-guideline component-guideline', true))
       .selectAll('.distance-measure')
       .data(
         // there must be a better way to do this...
@@ -260,7 +260,7 @@ export function drawDaylightingControlGuideline() {
     drawMeasure.xScale(xScale).yScale(yScale);
     selection.exit().remove();
     const guideE = selection.enter().append('g')
-      .classed('daylighting-control-guideline', true);
+      .classed('daylighting-control-guideline component-guideline', true);
 
     const data = _.flatMap(
       selection.merge(selection.enter()).data(),

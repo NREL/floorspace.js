@@ -315,8 +315,10 @@ export default {
     d3.selectAll('#grid .highlight, #grid .gridpoint, #grid .guideline').remove();
     this.componentFacingSelection = null;
   },
-
-
+  clearComponentHighlights() {
+    d3.selectAll('#grid .highlight, #grid .component-guideline').remove();
+    this.componentFacingSelection = null;
+  },
   highlightComponentToPlaceOrSelect(gridPoint) {
     if (this.highlightComponentToSelect()) {
       return;
@@ -1258,6 +1260,7 @@ export default {
        // apply the zoom transform to image and polygon <g> tags.
        // (more efficient than a full re-render)
        this.translateEntities();
+       this.clearComponentHighlights();
      })
      .on('end', () => {
        // redraw the saved geometry
