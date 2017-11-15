@@ -50,5 +50,10 @@ export default {
 select {
   padding-top: 4px;
   padding-bottom: 4px;
+  border-width: 1px;
+  option {
+    padding-left: 2px;
+    padding-right: 2px;
+  }
 }
 </style>
