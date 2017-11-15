@@ -1127,8 +1127,8 @@ export default {
       return [i - d, s + d];
     };
     if (this.visibleVerts.length) {
-      currXExtent = plusMargin(d3.extent(this.visibleVerts, d => d.x));
-      currYExtent = plusMargin(d3.extent(this.visibleVerts, d => d.y));
+      currXExtent = plusMargin(d3.extent(this.allVertices, d => d.x));
+      currYExtent = plusMargin(d3.extent(this.allVertices, d => d.y));
     }
     const
       width = this.$refs.gridParent.clientWidth,
