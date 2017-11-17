@@ -24,7 +24,7 @@
         border: 0;
         color: $gray-lightest;
         padding: 0 .75rem;
-        -webkit-appearance: none;
+        appearance: none;
     }
 }
 .input-text input {
@@ -45,7 +45,7 @@
         color: $gray-lightest;
         flex-grow: 2;
         padding: 0 1.75rem 0 .75rem;
-        -webkit-appearance: none;
+        appearance: none;
     }
 
     svg {

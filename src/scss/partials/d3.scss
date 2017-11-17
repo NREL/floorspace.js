@@ -69,6 +69,10 @@
         }
     }
 
+    .poly polygon {
+      pointer-events: all;
+    }
+
     .current {
       polygon, rect, path {
         stroke: $secondary;

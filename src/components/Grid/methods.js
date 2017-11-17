@@ -1119,14 +1119,25 @@ export default {
      - (min_x, max_x) is the same or a smaller interval
      - (min_y, max_y) is the same or a smaller interval
     */
+    let
+      currXExtent = [this.min_x, this.max_x],
+      currYExtent = [this.min_y, this.max_y];
+    const plusMargin = ([i, s]) => {
+      const d = (s - i) / 20;
+      return [i - d, s + d];
+    };
+    if (this.visibleVerts.length) {
+      currXExtent = plusMargin(d3.extent(this.allVertices, d => d.x));
+      currYExtent = plusMargin(d3.extent(this.allVertices, d => d.y));
+    }
     const
       width = this.$refs.gridParent.clientWidth,
       height = this.$refs.gridParent.clientHeight,
       { xExtent, yExtent } = fitToAspectRatio(
-        [this.min_x, this.max_x],
-        [this.min_x, this.max_x],
+        currXExtent,
+        currYExtent,
         width / height,
-        'contract',
+        'expand',
       );
     [this.min_x, this.max_x] = xExtent;
     [this.min_y, this.max_y] = yExtent;
@@ -1234,7 +1245,7 @@ export default {
 
     // configure zoom behavior in rwu
     this.zoomBehavior = d3.zoom()
-    .scaleExtent([0.02, 200])
+    .scaleExtent([0, Infinity])
      .on('zoom', () => {
        const transform = d3.event.transform;
        // update stored transform for grid hiding, etc.

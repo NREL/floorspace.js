@@ -37,6 +37,26 @@ module.exports = {
       .checkForErrors()
       .end();
   },
+  'fill space to next story': (browser) => {
+    withScales(failOnError(browser))
+      .waitForElementVisible('.modal .new-floorplan', 5000)
+      .setFlagOnError()
+      .click('.modal .new-floorplan svg')
+      .getScales()
+      .perform(draw50By50Square)
+      .click('[data-object-type="stories"] .add-new')
+      .click('.tools [data-tool="Fill"]')
+      .perform((client, done) => {
+        client
+          .moveToElement('#grid svg', client.xScale(-25), client.yScale(25))
+          .pause(10)
+          .mouseButtonClick();
+        done();
+      })
+      .assert.elementCount('.poly:not(.previousStory)', 1)
+      .checkForErrors()
+      .end();
+  },
   'switch to shading and back, preserve selected space': (browser) => {
     const devServer = browser.globals.devServerURL;
 

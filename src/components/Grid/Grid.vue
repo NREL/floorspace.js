@@ -263,6 +263,12 @@ export default {
     spaceEdges() {
       return _.flatMap(this.spaceFaces, 'edges');
     },
+    visibleVerts() {
+      return this.allVertices.filter(d =>
+        (this.min_x <= d.x && d.x <= this.max_x &&
+         this.min_y <= d.y && d.y <= this.max_y),
+      );
+    },
   },
   watch: {
     // showTicks() { this.showOrHideAxes(); },
