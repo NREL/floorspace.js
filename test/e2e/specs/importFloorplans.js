@@ -1,5 +1,11 @@
 const path = require('path');
+const fs = require('fs');
+const downloads = path.join(require('os').homedir(), 'Downloads');
 const failOnError = require('../helpers').failOnError;
+const draw50By50Square = require('../helpers').draw50By50Square;
+const withScales = require('../helpers').withScales;
+
+const exported = path.join(downloads, 'floorplan_nightwatch_exported.json');
 
 module.exports = {
   tags: ['import-floorplan'],
@@ -19,6 +25,26 @@ module.exports = {
       .checkForErrors()
       .end();
   },
+  'export is importable': (browser) => {
+    withScales(browser)
+      .click('.modal .new-floorplan svg')
+      .getScales()
+      .perform(draw50By50Square)
+      .click('[title="save floorplan"]')
+      .setValue('#download-name', '_nightwatch_exported')
+      .click('.download-button')
+      .pause(10)
+      .checkForErrors();
+
+    browser
+      .refresh()
+      .waitForElementVisible('.modal .open-floorplan', 100)
+      .setFlagOnError()
+      .setValue('#importInput', exported)
+      .waitForElementVisible('#grid svg polygon', 100)
+      .checkForErrors()
+      .end();
+  },
   'project.north_axis new location': (browser) => {
     browser
       .setValue('#importInput', path.join(__dirname, '../fixtures/floorplan-2017-08-31.json'))
@@ -31,5 +57,12 @@ module.exports = {
       })
       .checkForErrors()
       .end();
+  },
+  after: () => {
+    fs.stat(exported, (statErr) => {
+      if (!statErr) {
+        fs.unlink(exported, (err) => { console.error(err); });
+      }
+    });
   },
 };
