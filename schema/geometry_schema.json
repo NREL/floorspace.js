@@ -500,8 +500,7 @@
 			},
 			"required": [
 				"id",
-				"name",
-				"face_id"
+				"name"
 			]
 		},
 		"Shading": {
@@ -522,8 +521,7 @@
 			},
 			"required": [
 				"id",
-				"name",
-				"face_id"
+				"name"
 			]
 		},
 		"ThermalZone": {
