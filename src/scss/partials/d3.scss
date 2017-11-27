@@ -63,7 +63,6 @@
     polygon, rect, path {
         fill-opacity: .9;
         z-index: 3;
-        pointer-events: all;
         stroke: $gray-light;
         &.domain {
           stroke: #fff;
