@@ -2,10 +2,7 @@
   <p v-if="!isChrome"
     class="non-chrome-warning"
   >
-    Warning. This web-app is designed to be embedded within the OpenStudio
-    destkop app. Since we have control over that environment, we only test
-    against recent versions of Chrome. Most things should work in firefox,
-    but you'll have the best luck using Chrome.
+    Warning. This web-app is currently only tested against recent versions of Chrome. 
   </p>
 </template>
 
@@ -13,7 +10,7 @@
 export default {
   computed: {
     isChrome() {
-      var isChromium = window.chrome,
+      var isChromium = (window.chrome || window.qt),
         winNav = window.navigator,
         vendorName = winNav.vendor,
         isOpera = winNav.userAgent.indexOf("OPR") > -1,
