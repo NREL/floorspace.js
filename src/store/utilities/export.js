@@ -1,36 +1,33 @@
 import _ from 'lodash';
 import version from '../../version';
 
-export default function exportData(state, getters) {
-    var exportObject = {
-      application: state.application,
-      project: state.project,
-      stories: state.models.stories,
-      ...state.models.library,
-      version,
-    };
-    const geometrySets = getters['geometry/exportData']
-    exportObject = JSON.parse(JSON.stringify(exportObject));
-    exportObject.stories.forEach((story) => {
-        story.geometry = geometrySets.find((geometry) => { return geometry.id === story.geometry_id; });
-        delete story.geometry_id;
+function formatObject(obj) {
+  if (_.isArray(obj)) {
+    return obj.map(formatObject);
+  } else if (_.isObject(obj)) {
+    return _.mapValues(obj, (val, key) => {
+      if ((key === 'id' || key.indexOf('_id') >= 0) && _.isNumber(val)) {
+        return String(val);
+      }
+      return formatObject(val);
     });
-    formatObject(exportObject);
-    return exportObject;
+  }
+  return obj;
 }
 
-function formatObject(obj) {
-  Object.keys(obj).forEach((key) => {
-    // coerce all numeric ids to strings
-    if ((key === 'id' || key.indexOf('_id') >= 0) && _.isNumber(obj[key])) {
-      obj[key] = String(obj[key]);
-    }
-    if (key.indexOf('_ids') >= 0 && _.isObject(obj[key])) {
-      obj[key] = _.mapKeys(obj[key], id => String(id));
-    }
-    // recurse
-    if (obj[key] !== null && _.isObject(obj[key])) {
-      formatObject(obj[key]);
-    }
+export default function exportData(state, getters) {
+  let exportObject = {
+    application: state.application,
+    project: state.project,
+    stories: state.models.stories,
+    ...state.models.library,
+    version,
+  };
+  const geometrySets = getters['geometry/exportData'];
+  exportObject = JSON.parse(JSON.stringify(exportObject));
+  exportObject.stories.forEach((story) => {
+    story.geometry = _.find(geometrySets, { id: story.geometry_id });
+    delete story.geometry_id;
   });
+  return formatObject(exportObject);
 }

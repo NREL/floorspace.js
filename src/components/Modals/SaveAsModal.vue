@@ -13,6 +13,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
   >
     <span class="input-text">
       <input ref="downloadName" type="text"
+        id="download-name"
         @keyup.enter="downloadFile"
         :value="saveWhat.toLowerCase()"
         spellcheck="false"
