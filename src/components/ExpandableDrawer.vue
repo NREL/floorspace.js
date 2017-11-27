@@ -1,6 +1,11 @@
 <template>
-  <div class="expandable-drawer">
-    <p @click="expanded = !expanded">
+  <div
+    :class="{
+      'expandable-drawer': true,
+      expanded: expanded,
+    }"
+  >
+    <p @click="expanded = !expanded" class="title">
       {{ caret }} {{ title }}
     </p>
     <p v-if="expanded">
@@ -23,6 +28,3 @@ export default {
   },
 }
 </script>
-<style lang="scss" scoped>
-
-</style>

@@ -19,7 +19,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           <input type="text" v-model.number.lazy="northAxis" :disabled="mapEnabled" />
         </label>
       </p>
-      <ExpandableDrawer title="Ground Properties">
+      <ExpandableDrawer title="Ground Properties" class="ground-props-drawer">
         <p>
           <label class="input-text">
             Floor Offset
@@ -106,6 +106,18 @@ export default {
     font-size: 16px;
     margin-left: auto;
     width: 30px;
+  }
+
+  .ground-props-drawer {
+    .title {
+      text-align: left;
+    }
+    border: grey 1px solid;
+    border-radius: 5px;
+    padding: 4px;
+    padding-left: 10px;
+    width: 210px;
+    margin-left: -12px;
   }
 
 }
