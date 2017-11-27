@@ -10,6 +10,7 @@ window.api = {
         data: JSON.parse(data),
       });
     } catch (err) {
+      console.error(err);
       return false;
     }
     return true;
