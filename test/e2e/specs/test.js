@@ -57,6 +57,34 @@ module.exports = {
       .checkForErrors()
       .end();
   },
+  'in-progress spaces should not capture clicks': (browser) => {
+    withScales(failOnError(browser))
+      .waitForElementVisible('.modal .new-floorplan', 5000)
+      .setFlagOnError()
+      .click('.modal .new-floorplan svg')
+      .getScales()
+      .perform((client, done) => {
+        const x0 = -50, y0 = 50;
+        console.log(`moving to ${client.xScale(x0)}, ${client.yScale(y0)}`);
+        client
+          .waitForElementVisible('#grid svg', 200)
+          .pause(10)
+          .moveToElement('#grid svg', client.xScale(x0), client.yScale(y0))
+          .pause(10)
+          .mouseButtonClick()
+          .pause(10)
+          .moveToElement('#grid svg', client.xScale(x0 + 50), client.yScale(y0 - 50))
+          .pause(10)
+          .moveToElement('#grid svg', client.xScale(x0 + 48), client.yScale(y0 - 48))
+          .mouseButtonClick();
+
+        done();
+      })
+      .keys([browser.Keys.ESCAPE])
+      .assert.elementCount('.poly', 1)
+      .checkForErrors()
+      .end();
+  },
   'switch to shading and back, preserve selected space': (browser) => {
     const devServer = browser.globals.devServerURL;
 
