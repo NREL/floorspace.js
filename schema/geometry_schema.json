@@ -95,6 +95,7 @@
 					}
 				},
 				"north_axis": {
+					"description": "Angle between building north and true north in degrees (clockwise is positive)",
 					"type": "number"
 				},
 				"ground": {
