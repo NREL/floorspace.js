@@ -1,5 +1,8 @@
 const path = require('path');
 const fs = require('fs');
+const Ajv = require('ajv');
+const jsonSchemaDraft4 = require('ajv/lib/refs/json-schema-draft-04.json');
+const schema = require('../../../schema/geometry_schema.json');
 const downloads = path.join(require('os').homedir(), 'Downloads');
 const failOnError = require('../helpers').failOnError;
 const draw50By50Square = require('../helpers').draw50By50Square;
@@ -44,6 +47,29 @@ module.exports = {
       .waitForElementVisible('#grid svg polygon', 100)
       .checkForErrors()
       .end();
+  },
+  'exported floorplan satisfies schema': (browser) => {
+    const ajv = new Ajv({ allErrors: true });
+    ajv.addMetaSchema(jsonSchemaDraft4);
+
+    withScales(browser)
+      .click('.modal .new-floorplan svg')
+      .getScales()
+      .perform(draw50By50Square)
+      .click('[title="save floorplan"]')
+      .setValue('#download-name', '_nightwatch_exported')
+      .click('.download-button')
+      .pause(10)
+      .checkForErrors();
+
+    fs.readFile(exported, 'utf8', (err, data) => {
+      browser.assert.ok(!err, 'floorplan file was found');
+      const valid = ajv.validate(schema, JSON.parse(data));
+      if (!valid) {
+        browser.assert.ok(false, 'schema failed to validate:' + JSON.stringify(ajv.errors, null, '  '));
+      }
+      browser.end();
+    });
   },
   'project.north_axis new location': (browser) => {
     browser
