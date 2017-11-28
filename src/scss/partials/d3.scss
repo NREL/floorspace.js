@@ -32,7 +32,7 @@
 // styling for svg elements created by d3
 // Vue's inline template styling will not work with dynamically created markup
 #grid svg {
-    path, circle, line, rect, ellipse, polygon, .polygons {
+    path, circle, line, rect, ellipse, polygon, .polygons, .image-group {
         // prevent glitchy points caused by moving mouse over overlapping svg paths
         pointer-events: none;
     }
