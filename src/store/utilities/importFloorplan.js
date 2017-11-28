@@ -18,7 +18,8 @@ function withStoryDefaults(stories) {
     story_defaults = factory.Story(),
     space_defaults = factory.Space();
   return stories.map((story) => {
-    const multiplier = story.multiplier >= 1 ? story.multiplier : story_defaults.multiplier;
+    const multiplier = story.multiplier >= 1 ?
+      story.multiplier : story_defaults.multiplier;
 
     return {
       ...story_defaults,
@@ -117,6 +118,9 @@ export default function importFloorplan(context, payload) {
       'application/setCurrentStoryId',
       { id: stories[0].id },
       { root: true });
+
+    stories.forEach(story => context.dispatch('geometry/trimGeometry', { geometry_id: story.geometry_id }));
+
     _.defer(() => window.eventBus.$emit('zoomToFit'));
   });
 
