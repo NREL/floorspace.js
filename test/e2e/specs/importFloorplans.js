@@ -32,6 +32,10 @@ function assertValidSchema(browser, cb) {
   });
 }
 
+const oldFloorplans = [
+  '../fixtures/floorplan-2017-08-31.json',
+];
+
 module.exports = {
   tags: ['import-floorplan'],
   setUp: (browser) => {
@@ -44,16 +48,24 @@ module.exports = {
       .setFlagOnError();
   },
   'import succeeds, export is updated to be valid against schema': (browser) => {
-    browser
-      .setValue('#importInput', path.join(__dirname, '../fixtures/floorplan-2017-08-31.json'))
-      .waitForElementVisible('#grid svg polygon', 100)
-      .click('[title="save floorplan"]')
-      .setValue('#download-name', '_nightwatch_exported')
-      .click('.download-button')
-      .pause(10)
-      .checkForErrors();
+    oldFloorplans.forEach((floorplanPath) => {
+      console.log(`testing import, update of ${floorplanPath}`);
+      browser
+        .setValue('#importInput', path.join(__dirname, floorplanPath))
+        .waitForElementVisible('#grid svg polygon', 100)
+        .click('[title="save floorplan"]')
+        .setValue('#download-name', '_nightwatch_exported')
+        .click('.download-button')
+        .pause(10)
+        .checkForErrors();
 
-    assertValidSchema(browser, () => browser.end());
+      assertValidSchema(
+        browser,
+        () => browser
+          .refresh()
+          .waitForElementVisible('.modal .open-floorplan', 100)
+          .setFlagOnError());
+    });
   },
   'export is importable': (browser) => {
     withScales(browser)
