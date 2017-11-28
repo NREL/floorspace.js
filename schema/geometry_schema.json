@@ -589,12 +589,6 @@
 							"alpha"
 						]
 					}
-				},
-				"image_ids": {
-					"type": "array",
-					"items": {
-						"type": "string"
-					}
 				}
 			},
 			"required": [
@@ -611,8 +605,7 @@
 				"images",
 				"spaces",
 				"shading",
-				"windows",
-				"image_ids"
+				"windows"
 			]
 		},
 		"Space": {
