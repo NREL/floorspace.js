@@ -67,34 +67,38 @@ export default {
       opacity: 1,
     };
   },
-    BuildingUnit: function (opts = {}) {
-        return {
-            id: idFactory.generate(),
-            color: generateColor('building_unit'),
-            name: opts.name
-        };
-    },
-    ThermalZone: function (opts = {}) {
-        return {
-            id: idFactory.generate(),
-            color: generateColor('thermal_zone'),
-            name: opts.name
-        };
-    },
-    SpaceType: function (opts = {}) {
-        return {
-            id: idFactory.generate(),
-            color: generateColor('space_type'),
-            name: opts.name
-        };
-    },
-    ConstructionSet: function (opts = {}) {
-        return {
-            id: idFactory.generate(),
-            name: opts.name,
-            color: generateColor('construction_set'),
-        };
-    },
+  BuildingUnit(opts = {}) {
+    return {
+      id: idFactory.generate(),
+      color: generateColor('building_unit'),
+      name: opts.name,
+      handle: opts.handle || null,
+    };
+  },
+  ThermalZone(opts = {}) {
+    return {
+      id: idFactory.generate(),
+      color: generateColor('thermal_zone'),
+      name: opts.name,
+      handle: opts.handle || null,
+    };
+  },
+  SpaceType(opts = {}) {
+    return {
+      id: idFactory.generate(),
+      color: generateColor('space_type'),
+      name: opts.name,
+      handle: opts.handle || null,
+    };
+  },
+  ConstructionSet(opts = {}) {
+    return {
+      id: idFactory.generate(),
+      name: opts.name,
+      color: generateColor('construction_set'),
+      handle: opts.handle || null,
+    };
+  },
   WindowDefn(opts = {}) {
     return {
       id: idFactory.generate(),
@@ -118,7 +122,7 @@ export default {
       name: opts.name,
       pitched_roof_type: opts.type || 'Gable',
       pitch: opts.pitch || 6,
-      shed_direction: opts.shed_direction,
+      shed_direction: opts.shed_direction || 0,
       color: generateColor('pitched_roof'),
     };
   },
