@@ -100,9 +100,6 @@ export default {
   setShowImportExport(state, payload) {
     state.show_import_export = payload;
   },
-  setTransform(state, payload) {
-    state.transform = payload;
-  },
 
   modifyGround(state, { key, value }) {
     state.config.ground[key] = value;

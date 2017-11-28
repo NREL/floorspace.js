@@ -114,10 +114,6 @@ export default {
       context.commit('setShowImportExport', payload);
     },
 
-    setTransform(context, payload) {
-      context.commit('setTransform', payload);
-    },
-
   zoomToFit(context, { geometry_id, widthOverHeight }) {
     context.commit('setView', { xExtent, yExtent });
   },
