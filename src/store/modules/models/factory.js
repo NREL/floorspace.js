@@ -12,12 +12,14 @@ export default {
       below_floor_plenum_height: 0,
       floor_to_ceiling_height: 8,
       above_floor_plenum_height: 0,
+      above_ceiling_plenum_height: 0,
       multiplier: 1,
       spaces: [],
       daylighting_controls: [],
       windows: [],
       shading: [],
       images: [],
+      image_visible: true,
     };
   },
   Space(name) {

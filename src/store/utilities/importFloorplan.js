@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import idFactory from './generateId';
+import factory from '../modules/models/factory';
 
 function maybeUpdateProject(project) {
   // backwards compatibility changes:
@@ -12,8 +13,28 @@ function maybeUpdateProject(project) {
   return project;
 }
 
+function withStoryDefaults(stories) {
+  const
+    story_defaults = factory.Story(),
+    space_defaults = factory.Space();
+  return stories.map((story) => {
+    const multiplier = story.multiplier >= 1 ? story.multiplier : story_defaults.multiplier;
+
+    return {
+      ...story_defaults,
+      ...story,
+      spaces: story.spaces
+        .map(space => ({
+          ...space_defaults,
+          ...space,
+        })),
+      multiplier,
+    };
+  });
+}
+
 export default function importFloorplan(context, payload) {
-  // intializr a versionNumber if the app is running in embedded mode
+  // intialize a versionNumber if the app is running in embedded mode
   if (window.api) { window.versionNumber = 0; }
 
   // GEOMETRY
@@ -78,7 +99,7 @@ export default function importFloorplan(context, payload) {
     project: maybeUpdateProject(payload.data.project),
     application: context.state.application,
     models: {
-      stories,
+      stories: withStoryDefaults(stories),
       library: {
         building_units: payload.data.building_units,
         thermal_zones: payload.data.thermal_zones,
