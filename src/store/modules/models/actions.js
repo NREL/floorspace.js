@@ -221,9 +221,9 @@ export default {
 
   createWindow(context, payload) {
     const
-      { story_id, edge_id, window_defn_id, alpha } = payload,
+      { story_id, edge_id, window_definition_id, alpha } = payload,
       story = _.find(context.state.stories, { id: story_id }),
-      windowDefn = _.find(context.state.library.window_definitions, { id: window_defn_id }),
+      windowDefn = _.find(context.state.library.window_definitions, { id: window_definition_id }),
       geometry = story && _.find(context.rootState.geometry, { id: story.geometry_id }),
       edge = geometry && _.find(geometry.edges, { id: edge_id });
     if (!story) {
@@ -246,9 +246,9 @@ export default {
 
   createDaylightingControl(context, payload) {
     const
-      { story_id, face_id, daylighting_control_defn_id, x, y } = payload,
+      { story_id, face_id, daylighting_control_definition_id, x, y } = payload,
       story = _.find(context.state.stories, { id: story_id }),
-      daylightingDefn = _.find(context.state.library.daylighting_control_definitions, { id: daylighting_control_defn_id }),
+      daylightingDefn = _.find(context.state.library.daylighting_control_definitions, { id: daylighting_control_definition_id }),
       geometry = story && _.find(context.rootState.geometry, { id: story.geometry_id }),
       face = geometry && _.find(geometry.faces, { id: face_id }),
       vertex = geometry && (

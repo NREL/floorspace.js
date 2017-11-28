@@ -69,10 +69,10 @@ export default {
         Object.assign(object, payload);
         delete object.object;
     },
-  createWindow(state, { story_id, edge_id, window_defn_id, alpha, id, name }) {
+  createWindow(state, { story_id, edge_id, window_definition_id, alpha, id, name }) {
     const story = _.find(state.stories, { id: story_id });
     story.windows.push({
-      window_defn_id,
+      window_definition_id,
       edge_id,
       alpha,
       id,
@@ -83,13 +83,13 @@ export default {
     const story = _.find(state.stories, { id: story_id });
     story.windows = [];
   },
-  createDaylightingControl(state, { story_id, face_id, daylighting_control_defn_id, vertex_id, name, id }) {
+  createDaylightingControl(state, { story_id, face_id, daylighting_control_definition_id, vertex_id, name, id }) {
     const
       story = _.find(state.stories, { id: story_id }),
       space = _.find(story.spaces, { face_id });
 
     space.daylighting_controls.push({
-      daylighting_control_defn_id,
+      daylighting_control_definition_id,
       vertex_id,
       id,
       name,
@@ -103,13 +103,13 @@ export default {
   },
   destroyWindowsByDefinition(state, { id }) {
     state.stories.forEach((story) => {
-      story.windows = _.reject(story.windows, { window_defn_id: id });
+      story.windows = _.reject(story.windows, { window_definition_id: id });
     });
   },
   destroyDaylightingControlsByDefinition(state, { id }) {
     state.stories.forEach((story) => {
       story.spaces.forEach((space) => {
-        space.daylighting_controls = _.reject(space.daylighting_controls, { daylighting_control_defn_id: id });
+        space.daylighting_controls = _.reject(space.daylighting_controls, { daylighting_control_definition_id: id });
       });
     });
   },

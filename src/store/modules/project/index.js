@@ -41,7 +41,7 @@ export default {
     previous_story: {
       visible: true
     },
-    showImportExport: true,
+    show_import_export: true,
     transform: {
       k: 1, x: 0, y: 0,
     },

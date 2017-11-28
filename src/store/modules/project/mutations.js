@@ -98,7 +98,7 @@ export default {
         }
     },
   setShowImportExport(state, payload) {
-    state.showImportExport = payload;
+    state.show_import_export = payload;
   },
   setTransform(state, payload) {
     state.transform = payload;

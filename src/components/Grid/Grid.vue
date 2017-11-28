@@ -313,9 +313,9 @@ export default {
   },
   methods: {
     ...methods,
-    denormalizeWindow(edge, { edge_id, alpha, window_defn_id }) {
+    denormalizeWindow(edge, { edge_id, alpha, window_definition_id }) {
       const
-        windowDefn = _.find(this.windowDefs, { id: window_defn_id }),
+        windowDefn = _.find(this.windowDefs, { id: window_definition_id }),
         center = windowLocation(edge, { alpha });
       return expandWindowAlongEdge(edge, center, windowDefn.width);
     },

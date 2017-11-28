@@ -164,7 +164,7 @@ export default {
     const payload = {
       story_id: this.currentStory.id,
       edge_id: loc.edge_id,
-      window_defn_id: this.currentComponentDefinition.id,
+      window_definition_id: this.currentComponentDefinition.id,
       alpha: loc.alpha,
     };
     this.$store.dispatch('models/createWindow', payload);
@@ -193,7 +193,7 @@ export default {
     const payload = {
       story_id: this.currentStory.id,
       face_id: loc.face_id,
-      daylighting_control_defn_id: this.currentComponentDefinition.id,
+      daylighting_control_definition_id: this.currentComponentDefinition.id,
       ...loc,
     };
     this.$store.dispatch('models/createDaylightingControl', payload);

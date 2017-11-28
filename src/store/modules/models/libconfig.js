@@ -105,7 +105,7 @@ const map = {
         get(windowDefn, state) {
           return _.chain(state.models.stories)
             .flatMap('windows')
-            .filter({ window_defn_id: windowDefn.id })
+            .filter({ window_definition_id: windowDefn.id })
             .value()
             .length;
         },
@@ -201,7 +201,7 @@ const map = {
           return _.chain(state.models.stories)
             .flatMap('spaces')
             .flatMap('daylighting_controls')
-            .filter({ daylighting_control_defn_id: dcDefn.id })
+            .filter({ daylighting_control_definition_id: dcDefn.id })
             .value()
             .length;
         },
@@ -559,7 +559,7 @@ const map = {
         input_type: 'text',
       },
       {
-        name: 'window_defn_id',
+        name: 'window_definition_id',
         displayName: 'Definition',
         input_type: 'select',
         select_data(space, state) {
@@ -581,7 +581,7 @@ const map = {
         input_type: 'text',
       },
       {
-        name: 'daylighting_control_defn_id',
+        name: 'daylighting_control_definition_id',
         displayName: 'Definition',
         input_type: 'select',
         select_data(space, state) {
