@@ -289,6 +289,12 @@ const map = {
         readonly: true,
         private: true,
       },
+      {
+        name: 'color',
+        displayName: 'Color',
+        input_type: 'color',
+        validator: validators.color,
+      },
     ],
   },
   spaces: {

@@ -7,6 +7,7 @@ export default {
     return {
       id: idFactory.generate(),
       name,
+      color: generateColor('story'),
       handle: null,
       geometry_id: null,
       below_floor_plenum_height: 0,
