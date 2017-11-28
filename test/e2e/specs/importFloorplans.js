@@ -8,7 +8,29 @@ const failOnError = require('../helpers').failOnError;
 const draw50By50Square = require('../helpers').draw50By50Square;
 const withScales = require('../helpers').withScales;
 
+const ajv = new Ajv({ allErrors: true });
+ajv.addMetaSchema(jsonSchemaDraft4);
 const exported = path.join(downloads, 'floorplan_nightwatch_exported.json');
+
+function assertValidSchema(browser, cb) {
+  browser.perform(() => {
+    // we need to read the file *after* the browser code has run, not when it's
+    // being defined. Hence .perform()
+    fs.readFile(exported, 'utf8', (err, data) => {
+      browser.assert.ok(!err, 'floorplan file was found');
+      if (!err) {
+        const valid = ajv.validate(schema, JSON.parse(data));
+        if (!valid) {
+          browser.assert.ok(
+            false,
+            'schema failed to validate: ' + JSON.stringify(ajv.errors, null, '  '), // eslint-disable-line
+          );
+        }
+      }
+      cb();
+    });
+  });
+}
 
 module.exports = {
   tags: ['import-floorplan'],
@@ -21,12 +43,17 @@ module.exports = {
       .waitForElementVisible('.modal .open-floorplan', 100)
       .setFlagOnError();
   },
-  'import succeeds': (browser) => {
+  'import succeeds, export is updated to be valid against schema': (browser) => {
     browser
       .setValue('#importInput', path.join(__dirname, '../fixtures/floorplan-2017-08-31.json'))
       .waitForElementVisible('#grid svg polygon', 100)
-      .checkForErrors()
-      .end();
+      .click('[title="save floorplan"]')
+      .setValue('#download-name', '_nightwatch_exported')
+      .click('.download-button')
+      .pause(10)
+      .checkForErrors();
+
+    assertValidSchema(browser, () => browser.end());
   },
   'export is importable': (browser) => {
     withScales(browser)
@@ -49,9 +76,6 @@ module.exports = {
       .end();
   },
   'exported floorplan satisfies schema': (browser) => {
-    const ajv = new Ajv({ allErrors: true });
-    ajv.addMetaSchema(jsonSchemaDraft4);
-
     withScales(browser)
       .click('.modal .new-floorplan svg')
       .getScales()
@@ -62,14 +86,7 @@ module.exports = {
       .pause(10)
       .checkForErrors();
 
-    fs.readFile(exported, 'utf8', (err, data) => {
-      browser.assert.ok(!err, 'floorplan file was found');
-      const valid = ajv.validate(schema, JSON.parse(data));
-      if (!valid) {
-        browser.assert.ok(false, 'schema failed to validate:' + JSON.stringify(ajv.errors, null, '  '));
-      }
-      browser.end();
-    });
+    assertValidSchema(browser, () => browser.end());
   },
   'project.north_axis new location': (browser) => {
     browser
