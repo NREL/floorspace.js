@@ -32,8 +32,15 @@ function assertValidSchema(browser, cb) {
   });
 }
 
+function deleteFloorplan() {
+  if (fs.existsSync(exported)) {
+    fs.unlinkSync(exported);
+  }
+}
+
 const oldFloorplans = [
   '../fixtures/floorplan-2017-08-31.json',
+  '../fixtures/floorplan_two_story_2017_11_28.json',
 ];
 
 module.exports = {
@@ -49,28 +56,34 @@ module.exports = {
   },
   'import succeeds, export is updated to be valid against schema': (browser) => {
     oldFloorplans.forEach((floorplanPath) => {
-      console.log(`testing import, update of ${floorplanPath}`);
       browser
-        .setValue('#importInput', path.join(__dirname, floorplanPath))
-        .waitForElementVisible('#grid svg polygon', 100)
-        .click('[title="save floorplan"]')
-        .setValue('#download-name', '_nightwatch_exported')
-        .click('.download-button')
-        .pause(10)
-        .checkForErrors();
+        .perform(() => {
+          console.log(`testing import, update of ${floorplanPath}`);
+          browser
+            .setValue('#importInput', path.join(__dirname, floorplanPath))
+            .waitForElementVisible('#grid svg polygon', 100)
+            .perform(deleteFloorplan) // delete floorplan so download has correct name
+            .click('[title="save floorplan"]')
+            .setValue('#download-name', '_nightwatch_exported')
+            .click('.download-button')
+            .pause(10)
+            .checkForErrors();
 
-      assertValidSchema(
-        browser,
-        () => browser
-          .refresh()
-          .waitForElementVisible('.modal .open-floorplan', 100)
-          .setFlagOnError());
+          assertValidSchema(
+            browser,
+            () => browser
+              .refresh()
+              .waitForElementVisible('.modal .open-floorplan', 100)
+              .setFlagOnError());
+        });
     });
+    browser.end();
   },
   'export is importable': (browser) => {
     withScales(browser)
       .click('.modal .new-floorplan svg')
       .getScales()
+      .perform(deleteFloorplan) // delete floorplan so download has correct name
       .perform(draw50By50Square)
       .click('[title="save floorplan"]')
       .setValue('#download-name', '_nightwatch_exported')
@@ -91,6 +104,7 @@ module.exports = {
     withScales(browser)
       .click('.modal .new-floorplan svg')
       .getScales()
+      .perform(deleteFloorplan) // delete floorplan so download has correct name
       .perform(draw50By50Square)
       .click('[title="save floorplan"]')
       .setValue('#download-name', '_nightwatch_exported')
@@ -112,12 +126,5 @@ module.exports = {
       })
       .checkForErrors()
       .end();
-  },
-  after: () => {
-    fs.stat(exported, (statErr) => {
-      if (!statErr) {
-        fs.unlink(exported, (err) => { console.error(err); });
-      }
-    });
   },
 };
