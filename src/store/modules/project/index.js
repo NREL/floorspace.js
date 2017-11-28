@@ -1,6 +1,6 @@
-import actions from './actions'
-import mutations from './mutations'
-import getters from './getters'
+import actions from './actions';
+import mutations from './mutations';
+import getters from './getters';
 
 export default {
   namespaced: true,
@@ -34,16 +34,23 @@ export default {
       visible: true,
       latitude: 39.7653,
       longitude: -104.9863,
-      zoom: 4.5, // 18,
-      rotation: 0, //.791,
-      elevation: 0
+      zoom: 4.5,
+      rotation: 0,
+      elevation: 0,
     },
     previous_story: {
-      visible: true
+      visible: true,
     },
     show_import_export: true,
+    default_wwr: {
+      apply_default_wwr_to: null,
+      north_wwr: null,
+      east_wwr: null,
+      south_wwr: null,
+      west_wwr: null,
+    },
   },
-  actions: actions,
-  mutations: mutations,
-  getters: getters
-}
+  actions,
+  mutations,
+  getters,
+};
