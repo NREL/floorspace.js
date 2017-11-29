@@ -19,36 +19,38 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           <input type="text" v-model.number.lazy="northAxis" :disabled="mapEnabled" />
         </label>
       </p>
-      <p>
-        <label class="input-text">
-          Floor Offset
-          <Info>
-            Specifies the vertical offset between the building floor and the ground plane.
-            Use a value &lt; 0 for buildings with below-grade spaces, or a value &gt; 0 for,
-            e.g., buildings on piers.
-          </Info>
-          <input type="text" v-model="floor_offset" />
-        </label>
-      </p>
-      <p>
-        <label class="input-text">
-          Asimuth Angle
-          <Info>
-            Direction of the ground plane, in clockwise degrees from the
-            positive y-axis when viewed from above.
-          </Info>
-          <input type="text" v-model="azimuth_angle" />
-        </label>
-      </p>
-      <p>
-        <label class="input-text">
-          Tilt Slope
-          <Info>
-            Slope of the ground plane from horizontal. For example, a value of 1 implies a 45&deg; angle.
-          </Info>
-          <input type="text" v-model="tilt_slope" />
-        </label>
-      </p>
+      <ExpandableDrawer title="Ground Properties" class="ground-props-drawer">
+        <p>
+          <label class="input-text">
+            Floor Offset
+            <Info>
+              Specifies the vertical offset between the building floor and the ground plane.
+              Use a value &lt; 0 for buildings with below-grade spaces, or a value &gt; 0 for,
+              e.g., buildings on piers.
+            </Info>
+            <input type="text" v-model="floor_offset" />
+          </label>
+        </p>
+        <p>
+          <label class="input-text">
+            Asimuth Angle
+            <Info>
+              Direction of the ground plane, in clockwise degrees from the
+              positive y-axis when viewed from above.
+            </Info>
+            <input type="text" v-model="azimuth_angle" />
+          </label>
+        </p>
+        <p>
+          <label class="input-text">
+            Tilt Slope
+            <Info>
+              Slope of the ground plane from horizontal. For example, a value of 1 implies a 45&deg; angle.
+            </Info>
+            <input type="text" v-model="tilt_slope" />
+          </label>
+        </p>
+      </ExpandableDrawer>
       <button class="button" @click="$emit('close')">Okay</button>
     </div>
   </ModalBase>
@@ -57,6 +59,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 import { mapState } from 'vuex';
 import ModalBase from './ModalBase.vue';
 import Info from '../Info.vue';
+import ExpandableDrawer from '../ExpandableDrawer.vue';
 
 export default {
   name: 'Settings',
@@ -85,6 +88,7 @@ export default {
   components: {
     ModalBase,
     Info,
+    ExpandableDrawer,
   },
 }
 </script>
@@ -102,6 +106,18 @@ export default {
     font-size: 16px;
     margin-left: auto;
     width: 30px;
+  }
+
+  .ground-props-drawer {
+    .title {
+      text-align: left;
+    }
+    border: grey 1px solid;
+    border-radius: 5px;
+    padding: 4px;
+    padding-left: 10px;
+    width: 210px;
+    margin-left: -12px;
   }
 
 }
