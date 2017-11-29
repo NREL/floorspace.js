@@ -120,68 +120,6 @@
 					],
 					"default": 0
 				},
-				"default_wwr": {
-					"description": "Default Window to Wall Ratio settings",
-					"type": "object",
-					"properties": {
-						"apply_default_wwr_to": {
-							"description": "Describes which surfaces the window to wall ratios will be applied to.  If \"All exterior surfaces\" then individual windows will be removed.  If \"Exterior surfaces with no windows\" then only surfaces without explicit windows will be modified to have the default wwr. If \"No exterior surfaces\" then the default wwr values will not be applied to any surfaces.",
-							"type": [
-								"string",
-								"null"
-							],
-							"enum": [
-								"All exterior surfaces",
-								"Exterior surfaces with no windows",
-								"No exterior surfaces"
-							],
-							"default": "Exterior surfaces with no windows"
-						},
-						"north_wwr": {
-							"description": "Default wwr to apply, if null then no wwr will be applied",
-							"type": [
-								"number",
-								"null"
-							],
-							"minimum": 0,
-							"maximum": 0.99
-						},
-						"east_wwr": {
-							"description": "Default wwr to apply, if null then no wwr will be applied",
-							"type": [
-								"number",
-								"null"
-							],
-							"minimum": 0,
-							"maximum": 0.99
-						},
-						"south_wwr": {
-							"description": "Default wwr to apply, if null then no wwr will be applied",
-							"type": [
-								"number",
-								"null"
-							],
-							"minimum": 0,
-							"maximum": 0.99
-						},
-						"west_wwr": {
-							"description": "Default wwr to apply, if null then no wwr will be applied",
-							"type": [
-								"number",
-								"null"
-							],
-							"minimum": 0,
-							"maximum": 0.99
-						}
-					},
-					"required": [
-						"apply_default_wwr_to",
-						"north_wwr",
-						"east_wwr",
-						"south_wwr",
-						"west_wwr"
-					]
-				},
 				"ground": {
 					"type": "object",
 					"properties": {
@@ -359,7 +297,6 @@
 			"required": [
 				"config",
 				"north_axis",
-				"default_wwr",
 				"ground",
 				"grid",
 				"view",
