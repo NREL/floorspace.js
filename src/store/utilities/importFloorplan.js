@@ -13,6 +13,16 @@ function maybeUpdateProject(project) {
   return project;
 }
 
+function withHandleProp(arr) {
+  if (!arr || !arr.length) {
+    return [];
+  }
+  return arr.map(obj => ({
+    ...obj,
+    handle: obj.handle || null,
+  }));
+}
+
 function withStoryDefaults(stories) {
   const
     story_defaults = factory.Story(),
@@ -29,6 +39,7 @@ function withStoryDefaults(stories) {
           ...space_defaults,
           ...space,
         })),
+      shading: withHandleProp(story.shading),
       multiplier,
     };
   });
@@ -102,10 +113,10 @@ export default function importFloorplan(context, payload) {
     models: {
       stories: withStoryDefaults(stories),
       library: {
-        building_units: payload.data.building_units,
-        thermal_zones: payload.data.thermal_zones,
-        space_types: payload.data.space_types,
-        construction_sets: payload.data.construction_sets,
+        building_units: withHandleProp(payload.data.building_units),
+        thermal_zones: withHandleProp(payload.data.thermal_zones),
+        space_types: withHandleProp(payload.data.space_types),
+        construction_sets: withHandleProp(payload.data.construction_sets),
         window_definitions: payload.data.window_definitions || [],
         daylighting_control_definitions: payload.data.daylighting_control_definitions || [],
         pitched_roofs: payload.data.pitched_roofs || [],
