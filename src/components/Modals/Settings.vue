@@ -33,7 +33,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </p>
         <p>
           <label class="input-text">
-            Asimuth Angle
+            Azimuth Angle
             <Info>
               Direction of the ground plane, in clockwise degrees from the
               positive y-axis when viewed from above.
