@@ -12,10 +12,10 @@ const ajv = new Ajv({ allErrors: true });
 ajv.addMetaSchema(jsonSchemaDraft4);
 const exported = path.join(downloads, 'floorplan_nightwatch_exported.json');
 
-function assertValidSchema(browser, cb = () => {}) {
+function assertValidSchema(browser) {
   browser.perform(() => {
-    // we need to read the file *after* the browser code has run, not when it's
-    // being defined. Hence .perform()
+    // we need to read the file *after* the browser code has run, not when
+    // the command pipeline being defined. Hence .perform()
     fs.readFile(exported, 'utf8', (err, data) => {
       browser.assert.ok(!err, 'floorplan file was found');
       if (!err) {
@@ -27,7 +27,6 @@ function assertValidSchema(browser, cb = () => {}) {
           );
         }
       }
-      cb();
     });
   });
 }
@@ -110,7 +109,8 @@ module.exports = {
       .pause(10)
       .checkForErrors();
 
-    assertValidSchema(browser, () => browser.end());
+    assertValidSchema(browser);
+    browser.end();
   },
   'project.north_axis new location': (browser) => {
     browser

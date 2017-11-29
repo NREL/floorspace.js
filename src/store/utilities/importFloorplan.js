@@ -18,8 +18,8 @@ function withHandleProp(arr) {
     return [];
   }
   return arr.map(obj => ({
+    handle: null,
     ...obj,
-    handle: obj.handle || null,
   }));
 }
 
@@ -119,7 +119,10 @@ export default function importFloorplan(context, payload) {
         construction_sets: withHandleProp(payload.data.construction_sets),
         window_definitions: payload.data.window_definitions || [],
         daylighting_control_definitions: payload.data.daylighting_control_definitions || [],
-        pitched_roofs: payload.data.pitched_roofs || [],
+        pitched_roofs: (payload.data.pitched_roofs || []).map(pr => ({
+          shed_direction: null,
+          ...pr,
+        })),
       },
     },
     geometry,
