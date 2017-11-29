@@ -12,7 +12,7 @@ const ajv = new Ajv({ allErrors: true });
 ajv.addMetaSchema(jsonSchemaDraft4);
 const exported = path.join(downloads, 'floorplan_nightwatch_exported.json');
 
-function assertValidSchema(browser, cb) {
+function assertValidSchema(browser, cb = () => {}) {
   browser.perform(() => {
     // we need to read the file *after* the browser code has run, not when it's
     // being defined. Hence .perform()
@@ -60,6 +60,9 @@ module.exports = {
         .perform(() => {
           console.log(`testing import, update of ${floorplanPath}`);
           browser
+            .refresh()
+            .waitForElementVisible('.modal .open-floorplan', 100)
+            .setFlagOnError()
             .setValue('#importInput', path.join(__dirname, floorplanPath))
             .waitForElementVisible('#grid svg polygon', 100)
             .perform(deleteFloorplan) // delete floorplan so download has correct name
@@ -69,12 +72,7 @@ module.exports = {
             .pause(10)
             .checkForErrors();
 
-          assertValidSchema(
-            browser,
-            () => browser
-              .refresh()
-              .waitForElementVisible('.modal .open-floorplan', 100)
-              .setFlagOnError());
+          assertValidSchema(browser);
         });
     });
     browser.end();
