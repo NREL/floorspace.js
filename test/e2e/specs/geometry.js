@@ -1,4 +1,3 @@
-const _ = require('lodash');
 const { failOnError, withScales, draw50By50Square, drawSquare } = require('../helpers');
 
 module.exports = {
@@ -22,7 +21,7 @@ module.exports = {
     done();
   },
   after: (browser) => { browser.end(); },
-  'duplicate vertex case': (browser) => {
+  'drawing overlapping polygon should not duplicate vertices': (browser) => {
     browser
       .perform(draw50By50Square)
       .click('[data-object-type="spaces"] .add-new')
