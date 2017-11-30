@@ -1,8 +1,14 @@
-import helpers from './helpers'
+import _ from 'lodash';
+import helpers from './helpers';
+import checkGeometry from '../../../utilities/checkGeometry';
 
 export default {
   denormalized(state) {
     return state.map(g => helpers.denormalize(g));
+  },
+
+  errors(state, getters) {
+    return _.flatMap(getters['denormalized'], checkGeometry);
   },
 
     /*

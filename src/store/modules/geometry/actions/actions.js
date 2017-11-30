@@ -135,7 +135,7 @@ export default {
     // (eg: when a new polygon overlaps existing ones, we need to replace the
     //  existing polygon's face points with new ones)
     // it's possible for duplicate vertices to sneak in.
-    const replacementVertIds = _.chain(vertices)
+    let replacementVertIds = _.chain(vertices)
       .map((vert) => {
         const gVert = _.find(geom.vertices, _.pick(vert, ['x', 'y']));
         if (!gVert) return null; // this vertex doesn't match any existing ones
@@ -145,6 +145,7 @@ export default {
       .compact()
       .fromPairs()
       .value();
+    replacementVertIds = {};
 
     vertices.forEach((v) => {
       v.id = replacementVertIds[v.id] || v.id;
