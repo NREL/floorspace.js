@@ -1,6 +1,26 @@
 import _ from 'lodash';
 import { ptsAreCollinear, distanceBetweenPoints } from '../store/modules/geometry/helpers';
 
+export function checkFace(face) {
+  const errors = [];
+
+  face.vertices
+    .map((v, ix, a) => [
+      a[ix === 0 ? a.length - 1 : ix - 1],
+      a[ix],
+      a[(ix + 1) % a.length],
+    ])
+    .forEach(([fst, snd, thd]) => {
+      if (
+        ptsAreCollinear(fst, snd, thd) &&
+        distanceBetweenPoints(fst, snd) > distanceBetweenPoints(fst, thd)
+      ) {
+        errors.push(`face ${face.id} has a backwards section (${JSON.stringify(fst)} -> ${JSON.stringify(snd)} -> ${JSON.stringify(thd)})`);
+      }
+    });
+  return errors;
+}
+
 export default function checkGeometry(geom) {
   const
     errors = [],
@@ -22,21 +42,8 @@ export default function checkGeometry(geom) {
     }
   });
 
-  geom.faces.forEach((face) => {
-    face.vertices
-      .map((v, ix, a) => [
-        a[ix === 0 ? a.length - 1 : ix - 1],
-        a[ix],
-        a[(ix + 1) % a.length],
-      ])
-      .forEach(([fst, snd, thd]) => {
-        if (
-          ptsAreCollinear(fst, snd, thd) &&
-          distanceBetweenPoints(fst, snd) > distanceBetweenPoints(fst, thd)
-        ) {
-          errors.push(`face ${face.id} has a backwards section (${JSON.stringify(fst)} -> ${JSON.stringify(snd)} -> ${JSON.stringify(thd)})`);
-        }
-      });
-  });
+  geom.faces.map(checkFace)
+    .forEach(errs => errors.push(...errs));
+
   return errors;
 }
