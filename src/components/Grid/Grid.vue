@@ -55,6 +55,7 @@ export default {
       },
       reduceTicks: false,
       componentFacingSelection: null,
+      transform: { k: 1, x: 0, y: 0 },
       transformAtLastRender: d3.zoomIdentity,
       lastMousePosition: null,
       handleMouseMove: null, // placeholder --> overwritten in mounted()
@@ -175,10 +176,6 @@ export default {
     max_y: {
       get() { return this.$store.state.project.view.max_y; },
       set(val) { this.$store.dispatch('project/setViewMaxY', { max_y: val }); },
-    },
-    transform: {
-      get() { return this.$store.state.project.transform; },
-      set(t) { this.$store.dispatch('project/setTransform', t); },
     },
     // previous story
     previousStory() {
@@ -313,9 +310,9 @@ export default {
   },
   methods: {
     ...methods,
-    denormalizeWindow(edge, { edge_id, alpha, window_defn_id }) {
+    denormalizeWindow(edge, { edge_id, alpha, window_definition_id }) {
       const
-        windowDefn = _.find(this.windowDefs, { id: window_defn_id }),
+        windowDefn = _.find(this.windowDefs, { id: window_definition_id }),
         center = windowLocation(edge, { alpha });
       return expandWindowAlongEdge(edge, center, windowDefn.width);
     },

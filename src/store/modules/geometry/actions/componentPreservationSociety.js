@@ -80,7 +80,7 @@ function replaceComponents(
       story_id,
       edge_id: loc.edge_id,
       alpha: loc.alpha,
-      window_defn_id: w.window_defn_id,
+      window_definition_id: w.window_definition_id,
     }, { root: true });
   });
 
@@ -93,7 +93,7 @@ function replaceComponents(
       if (!loc) { return; }
 
       context.dispatch('models/createDaylightingControl', {
-        daylighting_control_defn_id: d.daylighting_control_defn_id,
+        daylighting_control_definition_id: d.daylighting_control_definition_id,
         x: loc.x,
         y: loc.y,
         story_id,

@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import idFactory from './generateId';
+import factory from '../modules/models/factory';
 
 function maybeUpdateProject(project) {
   // backwards compatibility changes:
@@ -12,8 +13,40 @@ function maybeUpdateProject(project) {
   return project;
 }
 
+function withHandleProp(arr) {
+  if (!arr || !arr.length) {
+    return [];
+  }
+  return arr.map(obj => ({
+    handle: null,
+    ...obj,
+  }));
+}
+
+function withStoryDefaults(stories) {
+  const
+    story_defaults = factory.Story(),
+    space_defaults = factory.Space();
+  return stories.map((story) => {
+    const multiplier = story.multiplier >= 1 ?
+      story.multiplier : story_defaults.multiplier;
+
+    return {
+      ...story_defaults,
+      ...story,
+      spaces: story.spaces
+        .map(space => ({
+          ...space_defaults,
+          ...space,
+        })),
+      shading: withHandleProp(story.shading),
+      multiplier,
+    };
+  });
+}
+
 export default function importFloorplan(context, payload) {
-  // intializr a versionNumber if the app is running in embedded mode
+  // intialize a versionNumber if the app is running in embedded mode
   if (window.api) { window.versionNumber = 0; }
 
   // GEOMETRY
@@ -78,15 +111,18 @@ export default function importFloorplan(context, payload) {
     project: maybeUpdateProject(payload.data.project),
     application: context.state.application,
     models: {
-      stories,
+      stories: withStoryDefaults(stories),
       library: {
-        building_units: payload.data.building_units,
-        thermal_zones: payload.data.thermal_zones,
-        space_types: payload.data.space_types,
-        construction_sets: payload.data.construction_sets,
+        building_units: withHandleProp(payload.data.building_units),
+        thermal_zones: withHandleProp(payload.data.thermal_zones),
+        space_types: withHandleProp(payload.data.space_types),
+        construction_sets: withHandleProp(payload.data.construction_sets),
         window_definitions: payload.data.window_definitions || [],
         daylighting_control_definitions: payload.data.daylighting_control_definitions || [],
-        pitched_roofs: payload.data.pitched_roofs || [],
+        pitched_roofs: (payload.data.pitched_roofs || []).map(pr => ({
+          shed_direction: null,
+          ...pr,
+        })),
       },
     },
     geometry,
@@ -96,6 +132,9 @@ export default function importFloorplan(context, payload) {
       'application/setCurrentStoryId',
       { id: stories[0].id },
       { root: true });
+
+    stories.forEach(story => context.dispatch('geometry/trimGeometry', { geometry_id: story.geometry_id }));
+
     _.defer(() => window.eventBus.$emit('zoomToFit'));
   });
 

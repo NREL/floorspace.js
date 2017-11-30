@@ -5,6 +5,7 @@
 	"type": "object",
 	"properties": {
 		"version": {
+			"description": "File format version",
 			"type": "string"
 		},
 		"application": {
@@ -63,6 +64,8 @@
 		}
 	},
 	"required": [
+		"version",
+		"application",
 		"project",
 		"stories",
 		"building_units",
@@ -70,122 +73,237 @@
 		"space_types",
 		"construction_sets",
 		"window_definitions",
-		"daylighting_control_definitions"
+		"daylighting_control_definitions",
+		"pitched_roofs"
 	],
 	"definitions": {
 		"Application": {
+			"description": "Reserved for application data, not for external use",
 			"type": "object"
 		},
 		"Project": {
+			"description": "Information that applies to the entire project",
 			"type": "object",
 			"properties": {
 				"config": {
 					"type": "object",
 					"properties": {
 						"units": {
-							"type": "string",
+							"type": [
+								"string",
+								"null"
+							],
 							"enum": [
 								"ft",
 								"m"
-							]
+							],
+							"default": "m"
 						},
 						"language": {
-							"type": "string"
+							"type": [
+								"string",
+								"null"
+							],
+							"default": "EN-US"
 						}
-					}
+					},
+					"required": [
+						"units",
+						"language"
+					]
 				},
 				"north_axis": {
 					"description": "Angle between building north and true north in degrees (clockwise is positive)",
-					"type": "number"
+					"type": [
+						"number",
+						"null"
+					],
+					"default": 0
 				},
 				"ground": {
 					"type": "object",
 					"properties": {
 						"floor_offset": {
 							"description": "Specifies the vertical offset between the building floor and the ground plane. Use a value < 0 for buildings with below-grade spaces, or a value > 0 for, e.g., buildings on piers.",
-							"type": "number",
+							"type": [
+								"number",
+								"null"
+							],
 							"default": 0
 						},
 						"azimuth_angle": {
 							"description": "Direction of the ground plane, in clockwise degrees from the positive y-axis when viewed from above.",
-							"type": "number"
+							"type": [
+								"number",
+								"null"
+							],
+							"default": 0
 						},
 						"tilt_slope": {
 							"description": "Slope of the ground plane from horizontal. For example, a value of 1 implies a 45-deg angle.",
-							"type": "number",
+							"type": [
+								"number",
+								"null"
+							],
 							"default": 0
 						}
-					}
+					},
+					"required": [
+						"floor_offset",
+						"azimuth_angle",
+						"tilt_slope"
+					]
 				},
 				"grid": {
 					"type": "object",
 					"properties": {
 						"visible": {
-							"type": "boolean"
+							"type": [
+								"boolean",
+								"null"
+							]
 						},
 						"spacing": {
-							"type": "number"
+							"type": [
+								"number",
+								"null"
+							]
 						}
-					}
+					},
+					"required": [
+						"visible",
+						"spacing"
+					]
 				},
 				"view": {
 					"type": "object",
 					"properties": {
 						"min_x": {
-							"type": "number"
+							"type": [
+								"number",
+								"null"
+							]
 						},
 						"min_y": {
-							"type": "number"
+							"type": [
+								"number",
+								"null"
+							]
 						},
 						"max_x": {
-							"type": "number"
+							"type": [
+								"number",
+								"null"
+							]
 						},
 						"max_y": {
-							"type": "number"
+							"type": [
+								"number",
+								"null"
+							]
 						}
-					}
+					},
+					"required": [
+						"min_x",
+						"min_y",
+						"max_x",
+						"max_y"
+					]
 				},
 				"map": {
 					"type": "object",
 					"properties": {
 						"visible": {
-							"type": "boolean"
+							"type": [
+								"boolean",
+								"null"
+							]
 						},
 						"latitude": {
-							"type": "number"
+							"type": [
+								"number",
+								"null"
+							]
 						},
 						"longitude": {
-							"type": "number"
+							"type": [
+								"number",
+								"null"
+							]
 						},
 						"zoom": {
-							"type": "number"
+							"type": [
+								"number",
+								"null"
+							]
 						},
 						"elevation": {
-							"type": "number"
+							"type": [
+								"number",
+								"null"
+							]
 						},
 						"enabled": {
-							"type": "boolean"
+							"type": [
+								"boolean",
+								"null"
+							]
 						},
 						"initialized": {
-							"type": "boolean"
+							"type": [
+								"boolean",
+								"null"
+							]
 						},
 						"rotation": {
-							"type": "number"
+							"type": [
+								"number",
+								"null"
+							]
 						}
-					}
+					},
+					"required": [
+						"visible",
+						"latitude",
+						"longitude",
+						"zoom",
+						"elevation",
+						"enabled",
+						"initialized",
+						"rotation"
+					]
 				},
 				"previous_story": {
 					"type": "object",
 					"properties": {
 						"visible": {
-							"type": "boolean"
+							"type": [
+								"boolean",
+								"null"
+							]
 						}
-					}
+					},
+					"required": [
+						"visible"
+					]
 				},
-				"showImportExport": {
-					"type": "boolean"
+				"show_import_export": {
+					"type": [
+						"boolean",
+						"null"
+					]
 				}
-			}
+			},
+			"required": [
+				"config",
+				"north_axis",
+				"ground",
+				"grid",
+				"view",
+				"map",
+				"previous_story",
+				"show_import_export"
+			]
 		},
 		"Geometry": {
 			"type": "object",
@@ -213,6 +331,7 @@
 				}
 			},
 			"required": [
+				"id",
 				"vertices",
 				"edges",
 				"faces"
@@ -323,29 +442,47 @@
 						"null"
 					]
 				},
-				"imageVisible": {
-					"type": "boolean"
+				"image_visible": {
+					"type": [
+						"boolean",
+						"null"
+					]
 				},
 				"below_floor_plenum_height": {
-					"type": "number",
+					"type": [
+						"number",
+						"null"
+					],
 					"minimum": 0
 				},
 				"floor_to_ceiling_height": {
-					"type": "number",
+					"type": [
+						"number",
+						"null"
+					],
 					"minimum": 0
 				},
 				"above_ceiling_plenum_height": {
-					"type": "number",
+					"type": [
+						"number",
+						"null"
+					],
 					"minimum": 0
 				},
 				"multiplier": {
-					"type": "integer",
+					"type": [
+						"integer",
+						"null"
+					],
 					"minimum": 1,
 					"multipleOf": 1,
 					"default": 1
 				},
 				"color": {
-					"type": "string"
+					"type": [
+						"string",
+						"null"
+					]
 				},
 				"geometry": {
 					"$ref": "#/definitions/Geometry"
@@ -370,7 +507,7 @@
 					"items": {
 						"type": "object",
 						"properties": {
-							"window_defn_id": {
+							"window_definition_id": {
 								"type": "string"
 							},
 							"edge_id": {
@@ -384,22 +521,28 @@
 							}
 						},
 						"required": [
-							"window_defn_id",
+							"window_definition_id",
 							"edge_id",
 							"alpha"
 						]
-					}
-				},
-				"image_ids": {
-					"type": "array",
-					"items": {
-						"type": "string"
 					}
 				}
 			},
 			"required": [
 				"id",
-				"name"
+				"handle",
+				"name",
+				"image_visible",
+				"below_floor_plenum_height",
+				"floor_to_ceiling_height",
+				"above_ceiling_plenum_height",
+				"multiplier",
+				"color",
+				"geometry",
+				"images",
+				"spaces",
+				"shading",
+				"windows"
 			]
 		},
 		"Space": {
@@ -421,7 +564,10 @@
 					]
 				},
 				"face_id": {
-					"type": "string"
+					"type": [
+						"string",
+						"null"
+					]
 				},
 				"building_unit_id": {
 					"type": [
@@ -458,7 +604,7 @@
 					"items": {
 						"type": "object",
 						"properties": {
-							"daylighting_control_defn_id": {
+							"daylighting_control_definition_id": {
 								"type": "string"
 							},
 							"vertex_id": {
@@ -466,29 +612,41 @@
 							}
 						},
 						"required": [
-							"daylighting_control_defn_id",
+							"daylighting_control_definition_id",
 							"vertex_id"
 						]
 					}
 				},
 				"below_floor_plenum_height": {
 					"description": "If provided, overrides the story below_floor_plenum_height.",
-					"type": "number",
+					"type": [
+						"number",
+						"null"
+					],
 					"minimum": 0
 				},
 				"floor_to_ceiling_height": {
 					"description": "If provided, overrides the story floor_to_ceiling_height.",
-					"type": "number",
+					"type": [
+						"number",
+						"null"
+					],
 					"minimum": 0
 				},
 				"above_ceiling_plenum_height": {
 					"description": "If provided, overrides the story above_ceiling_plenum_height.",
-					"type": "number",
+					"type": [
+						"number",
+						"null"
+					],
 					"minimum": 0
 				},
 				"floor_offset": {
 					"description": "If provided, specifies the vertical offset between the space floor and the story floor.",
-					"type": "number"
+					"type": [
+						"number",
+						"null"
+					]
 				},
 				"open_to_below": {
 					"description": "If true, defines a space that is open to below (has no floor).",
@@ -500,8 +658,20 @@
 			},
 			"required": [
 				"id",
+				"handle",
 				"name",
-				"face_id"
+				"face_id",
+				"building_unit_id",
+				"thermal_zone_id",
+				"space_type_id",
+				"construction_set_id",
+				"pitched_roof_id",
+				"daylighting_controls",
+				"below_floor_plenum_height",
+				"floor_to_ceiling_height",
+				"above_ceiling_plenum_height",
+				"floor_offset",
+				"open_to_below"
 			]
 		},
 		"Shading": {
@@ -510,6 +680,12 @@
 				"id": {
 					"type": "string"
 				},
+				"handle": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
 				"name": {
 					"type": [
 						"string",
@@ -517,11 +693,15 @@
 					]
 				},
 				"face_id": {
-					"type": "string"
+					"type": [
+						"string",
+						"null"
+					]
 				}
 			},
 			"required": [
 				"id",
+				"handle",
 				"name",
 				"face_id"
 			]
@@ -545,12 +725,17 @@
 					]
 				},
 				"color": {
-					"type": "string"
+					"type": [
+						"string",
+						"null"
+					]
 				}
 			},
 			"required": [
 				"id",
-				"name"
+				"handle",
+				"name",
+				"color"
 			]
 		},
 		"SpaceType": {
@@ -572,12 +757,17 @@
 					]
 				},
 				"color": {
-					"type": "string"
+					"type": [
+						"string",
+						"null"
+					]
 				}
 			},
 			"required": [
 				"id",
-				"name"
+				"handle",
+				"name",
+				"color"
 			]
 		},
 		"BuildingUnit": {
@@ -599,12 +789,17 @@
 					]
 				},
 				"color": {
-					"type": "string"
+					"type": [
+						"string",
+						"null"
+					]
 				}
 			},
 			"required": [
 				"id",
-				"name"
+				"handle",
+				"name",
+				"color"
 			]
 		},
 		"ConstructionSet": {
@@ -628,6 +823,7 @@
 			},
 			"required": [
 				"id",
+				"handle",
 				"name"
 			]
 		},
@@ -658,7 +854,10 @@
 			},
 			"required": [
 				"id",
-				"name"
+				"name",
+				"height",
+				"width",
+				"sill_height"
 			]
 		},
 		"DaylightingControlDefinition": {
@@ -670,7 +869,6 @@
 				"name": {
 					"type": [
 						"string",
-						"number",
 						"null"
 					]
 				},
@@ -685,10 +883,13 @@
 			},
 			"required": [
 				"id",
-				"name"
+				"name",
+				"illuminance_setpoint",
+				"height"
 			]
 		},
 		"PitchedRoof": {
+			"type": "object",
 			"properties": {
 				"id": {
 					"type": "string"
@@ -714,16 +915,25 @@
 				},
 				"shed_direction": {
 					"description": "Direction of shed roof, from low edge to high edge, in clockwise degrees from the positive y-axis when viewed from above.",
-					"type": "number"
+					"type": [
+						"number",
+						"null"
+					]
 				},
 				"color": {
-					"type": "string"
+					"type": [
+						"string",
+						"null"
+					]
 				}
 			},
 			"required": [
 				"id",
+				"name",
+				"pitched_roof_type",
 				"pitch",
-				"type"
+				"shed_direction",
+				"color"
 			]
 		}
 	}

@@ -289,7 +289,7 @@ export default {
     ...mapState({
       mapEnabled: state => state.project.map.enabled,
       timetravelInitialized: state => state.timetravelInitialized,
-      showImportExport: state => state.project.showImportExport,
+      showImportExport: state => state.project.show_import_export,
       allowSettingUnits: state => state.project.config.unitsEditable && state.geometry.length === 1 && state.geometry[0].vertices.length === 0,
     }),
     currentSubselectionType: {

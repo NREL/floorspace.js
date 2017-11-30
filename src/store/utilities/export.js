@@ -1,3 +1,4 @@
+
 import _ from 'lodash';
 import version from '../../version';
 
@@ -15,19 +16,28 @@ function formatObject(obj) {
   return obj;
 }
 
+
+function mungeStories(stories, geometries) {
+  return stories.map((story) => {
+    const geometry = JSON.parse(JSON.stringify(
+      _.find(geometries, { id: story.geometry_id }),
+    ));
+    return {
+      ...story,
+      spaces: story.spaces,
+      geometry,
+      geometry_id: undefined,
+    };
+  });
+}
+
 export default function exportData(state, getters) {
-  let exportObject = {
+  const exportObject = {
     application: state.application,
     project: state.project,
-    stories: state.models.stories,
+    stories: mungeStories(state.models.stories, getters['geometry/exportData']),
     ...state.models.library,
     version,
   };
-  const geometrySets = getters['geometry/exportData'];
-  exportObject = JSON.parse(JSON.stringify(exportObject));
-  exportObject.stories.forEach((story) => {
-    story.geometry = _.find(geometrySets, { id: story.geometry_id });
-    delete story.geometry_id;
-  });
   return formatObject(exportObject);
 }

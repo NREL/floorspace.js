@@ -1,11 +1,46 @@
 const path = require('path');
 const fs = require('fs');
+const Ajv = require('ajv');
+const jsonSchemaDraft4 = require('ajv/lib/refs/json-schema-draft-04.json');
+const schema = require('../../../schema/geometry_schema.json');
 const downloads = path.join(require('os').homedir(), 'Downloads');
 const failOnError = require('../helpers').failOnError;
 const draw50By50Square = require('../helpers').draw50By50Square;
 const withScales = require('../helpers').withScales;
 
+const ajv = new Ajv({ allErrors: true });
+ajv.addMetaSchema(jsonSchemaDraft4);
 const exported = path.join(downloads, 'floorplan_nightwatch_exported.json');
+
+function assertValidSchema(browser) {
+  browser.perform(() => {
+    // we need to read the file *after* the browser code has run, not when
+    // the command pipeline being defined. Hence .perform()
+    fs.readFile(exported, 'utf8', (err, data) => {
+      browser.assert.ok(!err, 'floorplan file was found');
+      if (!err) {
+        const valid = ajv.validate(schema, JSON.parse(data));
+        if (!valid) {
+          browser.assert.ok(
+            false,
+            'schema failed to validate: ' + JSON.stringify(ajv.errors, null, '  '), // eslint-disable-line
+          );
+        }
+      }
+    });
+  });
+}
+
+function deleteFloorplan() {
+  if (fs.existsSync(exported)) {
+    fs.unlinkSync(exported);
+  }
+}
+
+const oldFloorplans = [
+  '../fixtures/floorplan-2017-08-31.json',
+  '../fixtures/floorplan_two_story_2017_11_28.json',
+];
 
 module.exports = {
   tags: ['import-floorplan'],
@@ -18,17 +53,34 @@ module.exports = {
       .waitForElementVisible('.modal .open-floorplan', 100)
       .setFlagOnError();
   },
-  'import succeeds': (browser) => {
-    browser
-      .setValue('#importInput', path.join(__dirname, '../fixtures/floorplan-2017-08-31.json'))
-      .waitForElementVisible('#grid svg polygon', 100)
-      .checkForErrors()
-      .end();
+  'import succeeds, export is updated to be valid against schema': (browser) => {
+    oldFloorplans.forEach((floorplanPath) => {
+      browser
+        .perform(() => {
+          console.log(`testing import, update of ${floorplanPath}`);
+          browser
+            .refresh()
+            .waitForElementVisible('.modal .open-floorplan', 100)
+            .setFlagOnError()
+            .setValue('#importInput', path.join(__dirname, floorplanPath))
+            .waitForElementVisible('#grid svg polygon', 100)
+            .perform(deleteFloorplan) // delete floorplan so download has correct name
+            .click('[title="save floorplan"]')
+            .setValue('#download-name', '_nightwatch_exported')
+            .click('.download-button')
+            .pause(10)
+            .checkForErrors();
+
+          assertValidSchema(browser);
+        });
+    });
+    browser.end();
   },
   'export is importable': (browser) => {
     withScales(browser)
       .click('.modal .new-floorplan svg')
       .getScales()
+      .perform(deleteFloorplan) // delete floorplan so download has correct name
       .perform(draw50By50Square)
       .click('[title="save floorplan"]')
       .setValue('#download-name', '_nightwatch_exported')
@@ -45,6 +97,21 @@ module.exports = {
       .checkForErrors()
       .end();
   },
+  'exported floorplan satisfies schema': (browser) => {
+    withScales(browser)
+      .click('.modal .new-floorplan svg')
+      .getScales()
+      .perform(deleteFloorplan) // delete floorplan so download has correct name
+      .perform(draw50By50Square)
+      .click('[title="save floorplan"]')
+      .setValue('#download-name', '_nightwatch_exported')
+      .click('.download-button')
+      .pause(10)
+      .checkForErrors();
+
+    assertValidSchema(browser);
+    browser.end();
+  },
   'project.north_axis new location': (browser) => {
     browser
       .setValue('#importInput', path.join(__dirname, '../fixtures/floorplan-2017-08-31.json'))
@@ -57,12 +124,5 @@ module.exports = {
       })
       .checkForErrors()
       .end();
-  },
-  after: () => {
-    fs.stat(exported, (statErr) => {
-      if (!statErr) {
-        fs.unlink(exported, (err) => { console.error(err); });
-      }
-    });
   },
 };
