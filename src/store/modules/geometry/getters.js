@@ -1,6 +1,10 @@
 import helpers from './helpers'
 
 export default {
+  denormalized(state) {
+    return state.map(g => helpers.denormalize(g));
+  },
+
     /*
     * When the user saves a floorplan, format the geometry for openstudio
     */
