@@ -860,8 +860,8 @@
 					"maximum": 1,
 					"exclusiveMaximum": true
 				},
-				"height": {
-					"description": "Vertical height of each window. In drawing units. Used if window_definition_type is \"Single Window\" or \"Multiple Windows\".",
+				"sill_height": {
+					"description": "Vertical distance from the floor to the window sill. In drawing units.",
 					"type": [
 						"number",
 						"null"
@@ -878,6 +878,15 @@
 					"minimum": 0,
 					"exclusiveMinimum": true
 				},
+				"height": {
+					"description": "Vertical height of each window. In drawing units. Used if window_definition_type is \"Single Window\" or \"Multiple Windows\".",
+					"type": [
+						"number",
+						"null"
+					],
+					"minimum": 0,
+					"exclusiveMinimum": true
+				},
 				"width": {
 					"description": "Horizontal width of each window. In drawing units. Used if window_definition_type is \"Single Window\" or \"Multiple Windows\".",
 					"type": [
@@ -887,22 +896,25 @@
 					"minimum": 0,
 					"exclusiveMinimum": true
 				},
-				"sill_height": {
-					"description": "Vertical distance from the floor to the window sill. In drawing units.",
+				"overhang_projection_factor": {
+					"description": "Projection factor for overhangs, set to null for no overhang.  Overhang depth = overhang_projection_factor*height.",
 					"type": [
 						"number",
 						"null"
 					],
 					"minimum": 0,
-					"exclusiveMinimum": true
+					"exclusiveMinimum": true,
+					"default": null
 				},
-				"overhang_projection_factor": {
-					"description": "Projection factor for overhangs, set to null or 0 for no overhang.",
+				"fin_projection_factor": {
+					"description": "Projection factor for fins, set to null for no overhang. Projection factor for overhangs, set to null for no overhang.  Fin depth = fin_projection_factor*height.",
 					"type": [
 						"number",
 						"null"
 					],
-					"minimum": 0
+					"minimum": 0,
+					"exclusiveMinimum": true,
+					"default": null
 				}
 			},
 			"required": [
@@ -910,11 +922,12 @@
 				"name",
 				"window_definition_type",
 				"wwr",
-				"height",
-				"window_spacing",
-				"width",
 				"sill_height",
-				"overhang_projection_factor"
+				"window_spacing",
+				"height",
+				"width",
+				"overhang_projection_factor",
+				"fin_projection_factor"
 			]
 		},
 		"DaylightingControlDefinition": {
