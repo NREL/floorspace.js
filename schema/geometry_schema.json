@@ -846,7 +846,7 @@
 					"type": "string",
 					"enum": [
 						"Single Window",
-						"Multiple Windows",
+						"Repeating Windows",
 						"Window to Wall Ratio"
 					]
 				},
