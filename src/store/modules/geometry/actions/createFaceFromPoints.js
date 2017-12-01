@@ -394,7 +394,7 @@ export function edgesToSplit(geometry) {
       endpoint = geometryHelpers.vertexForId(edge.v2, geometry);
 
     // sort splittingVertices by location on original edge
-    _.sortBy(splittingVertices, v => distanceBetweenPoints(v, startpoint));
+    splittingVertices = _.sortBy(splittingVertices, v => distanceBetweenPoints(v, startpoint));
 
     // add startpoint and endpoint of original edge to splittingVertices array from which new edges will be created
     splittingVertices = [startpoint, ...splittingVertices, endpoint];
