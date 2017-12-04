@@ -49,4 +49,15 @@ export default {
   gt0(object, story, value, type) {
     return value > 0 ? { success: true } : { success: false, error: 'Expected value to be greater than zero' };
   },
+  halfOpenInterval(start, end) {
+    return (object, store, value, type) => {
+      if (value < start || value >= end) {
+        return { success: false, error: `Must be greater than or equal ${start} and less than ${end}` };
+      }
+      return { succes: true };
+    };
+  },
+  gt0orNull(object, story, value, type) {
+    return value || null;
+  },
 };
