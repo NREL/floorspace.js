@@ -9,7 +9,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
   <div class='input-select'>
       <label v-if="label">{{ label }}</label>
-      <select @change="$emit('change', $event.target.value)">
+      <select @change="$emit('change', $event.target.value)" :disabled="disabled">
           <option v-for='opt in normalizedOpts' :value="opt.val" :selected="opt.val === value">{{ opt.display }}</option>
       </select>
       <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
@@ -23,7 +23,7 @@ import _ from 'lodash';
 
 export default {
   name: 'PrettySelect',
-  props: ['options', 'value', 'label'],
+  props: ['options', 'value', 'label', 'disabled'],
   computed: {
     normalizedOpts() {
       if (_.isArray(this.options)) {

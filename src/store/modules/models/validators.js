@@ -54,10 +54,13 @@ export default {
       if (value < start || value >= end) {
         return { success: false, error: `Must be greater than or equal ${start} and less than ${end}` };
       }
-      return { succes: true };
+      return { success: true };
     };
   },
   gt0orNull(object, story, value, type) {
-    return value || null;
+    if (value === null || value === '' || value > 0) {
+      return { success: true };
+    }
+    return { success: false, error: 'If provided, value must be greater than 0' };
   },
 };
