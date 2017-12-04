@@ -349,7 +349,10 @@ export default {
       .append('g')
       .classed('highlight', true)
       .selectAll('.window')
-      .data([loc])
+      .data([{
+        ...loc,
+        window_definition_type: this.currentComponentDefinition.window_definition_type,
+      }])
       .call(this.drawWindow.highlight(true));
     this.highlightWindowGuideline(loc);
   },

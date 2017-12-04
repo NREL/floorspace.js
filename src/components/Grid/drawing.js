@@ -3,6 +3,50 @@ import 'd3-selection-multi';
 import _ from 'lodash';
 import { distanceBetweenPoints, unitPerpVector, unitVector, edgeDirection } from './../../store/modules/geometry/helpers';
 
+function drawSingleWindow(xScale, yScale, el, datum) {
+  const selection = d3.select(el)
+    .selectAll('.single-window')
+    .data([datum]);
+  const windowE = selection.enter().append('g').attr('class', 'single-window');
+  windowE.append('line').attr('class', 'pane');
+  windowE.append('circle');
+  windowE.append('line').attr('class', 'start-linecap');
+  windowE.append('line').attr('class', 'end-linecap');
+
+  const windw = selection.merge(windowE);
+  windw.classed('selected', d => d.selected);
+  windw.classed('facing-selection', d => d.facingSelection);
+  windw.select('line.pane')
+    .attr('x1', d => xScale(d.start.x))
+    .attr('y1', d => yScale(d.start.y))
+    .attr('x2', d => xScale(d.end.x))
+    .attr('y2', d => yScale(d.end.y));
+  windw.each(function (d) {
+    const
+      { dx, dy } = unitPerpVector(d.start, d.end),
+      linecapOffset = 10;
+
+    const $this = d3.select(this);
+    $this.select('.start-linecap')
+      .attr('x1', xScale(d.start.x) + linecapOffset * dx)
+      .attr('y1', yScale(d.start.y) + linecapOffset * dy)
+      .attr('x2', xScale(d.start.x) - linecapOffset * dx)
+      .attr('y2', yScale(d.start.y) - linecapOffset * dy);
+    $this.select('.end-linecap')
+      .attr('x1', xScale(d.end.x) + linecapOffset * dx)
+      .attr('y1', yScale(d.end.y) + linecapOffset * dy)
+      .attr('x2', xScale(d.end.x) - linecapOffset * dx)
+      .attr('y2', yScale(d.end.y) - linecapOffset * dy);
+    if (d.selected || d.facingSelection) {
+      $this.raise();
+    }
+  });
+  windw.select('circle')
+    .attr('cx', d => xScale(d.center.x))
+    .attr('cy', d => yScale(d.center.y))
+    .attr('r', '2');
+}
+
 export function drawWindow() {
   let
     xScale = _.identity,
@@ -10,43 +54,23 @@ export function drawWindow() {
     highlight = false;
   function chart(selection) {
     selection.exit().remove();
-    const windowE = selection.enter().append('g').attr('class', 'window');
-    windowE.append('line').attr('class', 'pane');
-    windowE.append('circle');
-    windowE.append('line').attr('class', 'start-linecap');
-    windowE.append('line').attr('class', 'end-linecap');
-    const windw = selection.merge(windowE);
-    windw.classed('selected', d => d.selected);
-    windw.classed('facing-selection', d => d.facingSelection);
-    windw.select('line.pane')
-      .attr('x1', d => xScale(d.start.x))
-      .attr('y1', d => yScale(d.start.y))
-      .attr('x2', d => xScale(d.end.x))
-      .attr('y2', d => yScale(d.end.y));
-    windw.each(function (d) {
-      const
-        { dx, dy } = unitPerpVector(d.start, d.end),
-        linecapOffset = 10;
-
-      const $this = d3.select(this);
-      $this.select('.start-linecap')
-        .attr('x1', xScale(d.start.x) + linecapOffset * dx)
-        .attr('y1', yScale(d.start.y) + linecapOffset * dy)
-        .attr('x2', xScale(d.start.x) - linecapOffset * dx)
-        .attr('y2', yScale(d.start.y) - linecapOffset * dy);
-      $this.select('.end-linecap')
-        .attr('x1', xScale(d.end.x) + linecapOffset * dx)
-        .attr('y1', yScale(d.end.y) + linecapOffset * dy)
-        .attr('x2', xScale(d.end.x) - linecapOffset * dx)
-        .attr('y2', yScale(d.end.y) - linecapOffset * dy);
-      if (d.selected || d.facingSelection) {
-        $this.raise();
+    const windws = selection.merge(
+      selection.enter().append('g').attr('class', 'window'),
+    );
+    windws.each(function (d) {
+      if (d.window_definition_type === 'Single Window') {
+        drawSingleWindow(xScale, yScale, this, d);
       }
     });
-    windw.select('circle')
-      .attr('cx', d => xScale(d.center.x))
-      .attr('cy', d => yScale(d.center.y))
-      .attr('r', '2');
+    // selection
+    //   .filter(d => d.window_definition_type === 'Single Window')
+    //   .call(drawSingleWindow({ xScale, yScale }));
+    // windws
+    //   .filter(d => d.window_definition_type === 'Multiple Windows')
+    //   .call(drawMultipleWindows);
+    // windws
+    //   .filter(d => d.window_definition_type === 'Window to Wall Ratio')
+    //   .call(drawWindowToWallRatio);
   }
 
   chart.xScale = function (_) {
