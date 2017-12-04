@@ -50,8 +50,7 @@ function drawSingleWindow(xScale, yScale, el, datum) {
 export function drawWindow() {
   let
     xScale = _.identity,
-    yScale = _.identity,
-    highlight = false;
+    yScale = _.identity;
   function chart(selection) {
     selection.exit().remove();
     const windws = selection.merge(
@@ -81,11 +80,6 @@ export function drawWindow() {
   chart.yScale = function (_) {
     if (!arguments.length) return yScale;
     yScale = _;
-    return chart;
-  };
-  chart.highlight = function(_) {
-    if (!arguments.length) return highlight;
-    highlight = _;
     return chart;
   };
 

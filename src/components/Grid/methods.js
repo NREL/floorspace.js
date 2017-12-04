@@ -353,7 +353,7 @@ export default {
         ...loc,
         window_definition_type: this.currentComponentDefinition.window_definition_type,
       }])
-      .call(this.drawWindow.highlight(true));
+      .call(this.drawWindow);
     this.highlightWindowGuideline(loc);
   },
   highlightWindowGuideline(loc) {
@@ -760,7 +760,7 @@ export default {
     poly.select('.windows')
       .selectAll('.window')
       .data(d => d.windows)
-      .call(this.drawWindow.highlight(false));
+      .call(this.drawWindow);
 
     poly.select('.daylighting-controls')
       .selectAll('.daylighting-control')
