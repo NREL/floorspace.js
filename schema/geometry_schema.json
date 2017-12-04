@@ -514,7 +514,7 @@
 								"type": "string"
 							},
 							"alpha": {
-								"description": "Distance along edge to center point of window, starting from first vertex of edge at a = 0 and ending at second vertex of edge at a =1.  v = v1 + a*(v2-v1).  Does not apply if window_definition_type is \"Multiple Windows\" or\"Window to Wall Ratio\".",
+								"description": "Distance along edge to center point of window, starting from first vertex of edge at a = 0 and ending at second vertex of edge at a =1.  v = v1 + a*(v2-v1).  Does not apply if window_definition_type is \"Repeating Windows\" or\"Window to Wall Ratio\".",
 								"type": [
 									"number",
 									"null"
@@ -870,7 +870,7 @@
 					"exclusiveMinimum": true
 				},
 				"window_spacing": {
-					"description": "Spacing between windows.  Only used if window_definition_type is  \"Multiple Windows\".",
+					"description": "Spacing between windows.  Only used if window_definition_type is  \"Repeating Windows\".",
 					"type": [
 						"number",
 						"null"
@@ -879,7 +879,7 @@
 					"exclusiveMinimum": true
 				},
 				"height": {
-					"description": "Vertical height of each window. In drawing units. Used if window_definition_type is \"Single Window\" or \"Multiple Windows\".",
+					"description": "Vertical height of each window. In drawing units. Used if window_definition_type is \"Single Window\" or \"Repeating Windows\".",
 					"type": [
 						"number",
 						"null"
@@ -888,7 +888,7 @@
 					"exclusiveMinimum": true
 				},
 				"width": {
-					"description": "Horizontal width of each window. In drawing units. Used if window_definition_type is \"Single Window\" or \"Multiple Windows\".",
+					"description": "Horizontal width of each window. In drawing units. Used if window_definition_type is \"Single Window\" or \"Repeating Windows\".",
 					"type": [
 						"number",
 						"null"

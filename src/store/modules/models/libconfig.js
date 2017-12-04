@@ -103,7 +103,7 @@ const map = {
         numeric: true,
         enabled(row) {
           return row.window_definition_type === 'Single Window' ||
-                 row.window_definition_type === 'Multiple Windows';
+                 row.window_definition_type === 'Repeating Windows';
         },
       },
       {
@@ -115,7 +115,7 @@ const map = {
         numeric: true,
         enabled(row) {
           return row.window_definition_type === 'Single Window' ||
-                 row.window_definition_type === 'Multiple Windows';
+                 row.window_definition_type === 'Repeating Windows';
         },
       },
       {
@@ -134,7 +134,7 @@ const map = {
         converter: converters.number,
         numeric: true,
         enabled(row) {
-          return row.window_definition_type === 'Multiple Windows';
+          return row.window_definition_type === 'Repeating Windows';
         },
       },
       {

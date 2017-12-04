@@ -65,8 +65,8 @@ export function drawWindow() {
     //   .filter(d => d.window_definition_type === 'Single Window')
     //   .call(drawSingleWindow({ xScale, yScale }));
     // windws
-    //   .filter(d => d.window_definition_type === 'Multiple Windows')
-    //   .call(drawMultipleWindows);
+    //   .filter(d => d.window_definition_type === 'Repeating Windows')
+    //   .call(drawRepeatingWindows);
     // windws
     //   .filter(d => d.window_definition_type === 'Window to Wall Ratio')
     //   .call(drawWindowToWallRatio);
