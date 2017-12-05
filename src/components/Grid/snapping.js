@@ -42,6 +42,7 @@ export function expandWindowAlongEdge(edge, center, { width, window_definition_t
       alpha: 0.5,
       start: edge.v1,
       end: edge.v2,
+      window_definition_type,
     };
   }
   const
@@ -64,6 +65,7 @@ export function expandWindowAlongEdge(edge, center, { width, window_definition_t
       x: center.x + windowDeltaX,
       y: center.y + windowDeltaY,
     },
+    window_definition_type,
   };
 }
 

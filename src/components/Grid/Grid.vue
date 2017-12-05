@@ -23,7 +23,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         >
           <path d='M-1,1 l2,-2
                    M0,10 l10,-10
-                   M9,11 l2,-2' stroke='black' stroke-width='2'/>
+                   M9,11 l2,-2' :stroke="color" stroke-width='2'/>
         </pattern>
       </defs>
       <g class="axis axis--x"></g>
@@ -79,6 +79,7 @@ export default {
       }),
       crosshatchModifiers: {
         '-highlight': 'green',
+        '-selected': 'green',
         '-facing-selection': 'blue',
         '': '#222'
       },

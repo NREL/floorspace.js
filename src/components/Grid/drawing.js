@@ -47,12 +47,8 @@ function drawWindowToWallRatio(xScale, yScale, el, datum) {
 
     const $this = d3.select(this);
 
-    const fillModifier = d.selected ? '-highlight' :
-      d.facingSelection ? '-facing-selection' : '';
     $this.select('.hatch')
-      .attr('d', line(rect))
-      .style('stroke-width', '2')
-      .style('fill', `url(#crosshatch${fillModifier})`);
+      .attr('d', line(rect));
   });
 }
 
@@ -265,8 +261,9 @@ export function drawWindowGuideline() {
       .data(
         // there must be a better way to do this...
         selection.merge(selection.enter()).data()
-        .map(d => ({ start: d.edge_start, end: d.center }))
+          .map(d => ({ start: d.edge_start, end: d.center })),
       )
+      .filter(d => d.window_definition_type === 'Single Window')
       .call(drawMeasure);
   }
 

@@ -60,7 +60,7 @@
     }
 
     // shapes
-    polygon, rect, path {
+    polygon, rect, > path {
         fill-opacity: .9;
         z-index: 3;
         stroke: $gray-light;
@@ -106,12 +106,22 @@
       .window {
         stroke-width: 3;
         stroke: black;
+        .hatch {
+          stroke-width: 2;
+          fill: url(#crosshatch);
+        }
       }
       .window .facing-selection {
         stroke: blue;
+        .hatch {
+          fill: url(#crosshatch-facing-selection);
+        }
       }
       .window .selected {
         stroke: green;
+        .hatch {
+          fill: url(#crosshatch-selected);
+        }
       }
     }
     .daylighting-control {
@@ -148,6 +158,12 @@
       .window {
         stroke: #008500;
         fill: black;
+
+        .window-wall-ratio {
+          .hatch {
+            fill: url(#crosshatch-highlight);
+          }
+        }
       }
       .daylighting-control {
         circle, path {
