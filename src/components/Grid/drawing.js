@@ -4,11 +4,16 @@ import _ from 'lodash';
 import { distanceBetweenPoints, unitPerpVector, unitVector, edgeDirection } from './../../store/modules/geometry/helpers';
 
 function drawWindowToWallRatio(xScale, yScale, el, datum) {
+  d3.select(el)
+    .selectAll('.single-window')
+    .remove();
   const selection = d3.select(el)
     .selectAll('.window-wall-ratio')
     .data([datum]);
   const wwrE = selection.enter().append('g').attr('class', 'window-wall-ratio');
-  wwrE.append('rect').attr('class', 'hatch');
+  wwrE.append('path').attr('class', 'hatch');
+
+  const line = d3.line();
 
   const wwr = selection.merge(wwrE);
   wwr.classed('selected', d => d.selected);
@@ -16,15 +21,46 @@ function drawWindowToWallRatio(xScale, yScale, el, datum) {
   wwr.each(function (d) {
     const
       { dx, dy } = unitPerpVector(d.start, d.end),
-      hatchOffset = 10;
+      hatchOffset = 6,
+      rect = [
+        [
+          xScale(d.start.x) + hatchOffset * dx,
+          yScale(d.start.y) + hatchOffset * dy,
+        ],
+        [
+          xScale(d.start.x) - hatchOffset * dx,
+          yScale(d.start.y) - hatchOffset * dy,
+        ],
+        [
+          xScale(d.end.x) - hatchOffset * dx,
+          yScale(d.end.y) - hatchOffset * dy,
+        ],
+        [
+          xScale(d.end.x) + hatchOffset * dx,
+          yScale(d.end.y) + hatchOffset * dy,
+        ],
+        [
+          xScale(d.start.x) + hatchOffset * dx,
+          yScale(d.start.y) + hatchOffset * dy,
+        ],
+      ];
 
     const $this = d3.select(this);
-    $this.select('.hatch')
-  });
 
+    const fillModifier = d.selected ? '-highlight' :
+      d.facingSelection ? '-facing-selection' : '';
+    $this.select('.hatch')
+      .attr('d', line(rect))
+      .style('stroke-width', '2')
+      .style('fill', `url(#crosshatch${fillModifier})`);
+  });
 }
 
 function drawSingleWindow(xScale, yScale, el, datum) {
+  d3.select(el)
+    .selectAll('.window-wall-ratio')
+    .remove();
+
   const selection = d3.select(el)
     .selectAll('.single-window')
     .data([datum]);

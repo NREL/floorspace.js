@@ -73,8 +73,8 @@
       pointer-events: all;
     }
 
-    .current {
-      polygon, rect, path {
+    .poly.current {
+      > polygon, > rect, > path {
         stroke: $secondary;
         stroke-width: 2px;
       }
@@ -102,16 +102,17 @@
       shape-rendering: crispEdges;
       stroke: $gray-medium;
     }
-
-    .window {
-      stroke-width: 3;
-      stroke: black;
-    }
-    .window .facing-selection {
-      stroke: blue;
-    }
-    .window .selected {
-      stroke: green;
+    .polygons .windows {
+      .window {
+        stroke-width: 3;
+        stroke: black;
+      }
+      .window .facing-selection {
+        stroke: blue;
+      }
+      .window .selected {
+        stroke: green;
+      }
     }
     .daylighting-control {
       circle {
