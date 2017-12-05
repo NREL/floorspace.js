@@ -315,7 +315,7 @@ export default {
         windowDefn = _.find(this.windowDefs, { id: window_definition_id }),
         center = windowLocation(edge, { alpha });
       return {
-        ...expandWindowAlongEdge(edge, center, windowDefn.width),
+        ...expandWindowAlongEdge(edge, center, windowDefn),
         window_definition_type: windowDefn.window_definition_type,
       };
     },

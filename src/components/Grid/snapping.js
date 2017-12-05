@@ -31,11 +31,23 @@ export function snapTargets(vertices, gridSpacing, cursor) {
   return _.orderBy(targets, ['dist', 'origin', 'type'], ['asc', 'asc', 'desc']);
 }
 
-export function expandWindowAlongEdge(edge, center, windowWidth) {
+export function expandWindowAlongEdge(edge, center, { width, window_definition_type }) {
+  if (window_definition_type === 'Window to Wall Ratio' ||
+      window_definition_type === 'Repeating Windows'
+  ) {
+    return {
+      edge_id: edge.id,
+      center,
+      edge_start: edge.v1,
+      alpha: 0.5,
+      start: edge.v1,
+      end: edge.v2,
+    };
+  }
   const
     theta = edgeDirection({ start: edge.v1, end: edge.v2 }),
-    windowDeltaX = (windowWidth * Math.cos(theta)) / 2,
-    windowDeltaY = (windowWidth * Math.sin(theta)) / 2,
+    windowDeltaX = (width * Math.cos(theta)) / 2,
+    windowDeltaY = (width * Math.sin(theta)) / 2,
     alpha = edge.v2.x === edge.v1.x ?
       (center.y - edge.v1.y) / (edge.v2.y - edge.v1.y) :
       (center.x - edge.v1.x) / (edge.v2.x - edge.v1.x);
@@ -84,7 +96,7 @@ function snapWindowToEdgeAnywhere(edges, cursor, windowWidth, maxSnapDist) {
   if (!closestEdge || closestEdge.dist > maxSnapDist) {
     return null;
   }
-  return expandWindowAlongEdge(closestEdge, closestEdge.proj, windowWidth);
+  return expandWindowAlongEdge(closestEdge, closestEdge.proj, { width: windowWidth });
 }
 
 function snapWindowToEdgeAtGridIntervals(edges, cursor, windowWidth, maxSnapDist, gridSpacing) {
@@ -104,7 +116,7 @@ function snapWindowToEdgeAtGridIntervals(edges, cursor, windowWidth, maxSnapDist
       y: closestEdge.v1.y + (roundedDist * (dy / norm)),
     };
 
-  return expandWindowAlongEdge(closestEdge, snapLoc, windowWidth);
+  return expandWindowAlongEdge(closestEdge, snapLoc, { width: windowWidth });
 }
 
 export function snapWindowToEdge(snapMode, ...args) {
@@ -130,8 +142,10 @@ export function snapToVertexWithinFace(snapMode, faces, cursor, gridSpacing) {
 }
 
 export function windowLocation(edge, windw) {
+  const alpha = windw.alpha || 0.5; // if not given, assume center
+  // (this is useful for repeating window groups and window-wall-ratios
   return {
-    x: edge.v1.x + (windw.alpha * (edge.v2.x - edge.v1.x)),
-    y: edge.v1.y + (windw.alpha * (edge.v2.y - edge.v1.y)),
+    x: edge.v1.x + (alpha * (edge.v2.x - edge.v1.x)),
+    y: edge.v1.y + (alpha * (edge.v2.y - edge.v1.y)),
   };
 }

@@ -3,6 +3,27 @@ import 'd3-selection-multi';
 import _ from 'lodash';
 import { distanceBetweenPoints, unitPerpVector, unitVector, edgeDirection } from './../../store/modules/geometry/helpers';
 
+function drawWindowToWallRatio(xScale, yScale, el, datum) {
+  const selection = d3.select(el)
+    .selectAll('.window-wall-ratio')
+    .data([datum]);
+  const wwrE = selection.enter().append('g').attr('class', 'window-wall-ratio');
+  wwrE.append('rect').attr('class', 'hatch');
+
+  const wwr = selection.merge(wwrE);
+  wwr.classed('selected', d => d.selected);
+  wwr.classed('facing-selection', d => d.facingSelection);
+  wwr.each(function (d) {
+    const
+      { dx, dy } = unitPerpVector(d.start, d.end),
+      hatchOffset = 10;
+
+    const $this = d3.select(this);
+    $this.select('.hatch')
+  });
+
+}
+
 function drawSingleWindow(xScale, yScale, el, datum) {
   const selection = d3.select(el)
     .selectAll('.single-window')
@@ -59,6 +80,8 @@ export function drawWindow() {
     windws.each(function (d) {
       if (d.window_definition_type === 'Single Window') {
         drawSingleWindow(xScale, yScale, this, d);
+      } else {
+        drawWindowToWallRatio(xScale, yScale, this, d);
       }
     });
     // selection
