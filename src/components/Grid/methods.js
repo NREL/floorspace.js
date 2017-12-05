@@ -156,7 +156,7 @@ export default {
       loc = snapWindowToEdge(
         this.snapMode,
         this.spaceEdges, rwuPoint,
-        this.currentComponentDefinition.width, this.spacing * 2, this.spacing,
+        this.currentComponentDefinition, this.spacing * 2, this.spacing,
       );
 
     if (!loc) { return; }
@@ -341,7 +341,7 @@ export default {
       loc = snapWindowToEdge(
         this.snapMode,
         this.spaceEdges, rwuPoint,
-        this.currentComponentDefinition.width, this.spacing * 2, this.spacing,
+        this.currentComponentDefinition, this.spacing * 2, this.spacing,
       );
 
     if (!loc) { return; }

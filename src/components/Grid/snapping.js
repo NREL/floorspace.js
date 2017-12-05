@@ -78,28 +78,35 @@ export function findClosestEdge(edges, cursor) {
 }
 
 export function findClosestWindow(windows, cursor) {
-  const withDistance = windows.map(w => ({
-    ...w,
-    dist: distanceBetweenPoints(cursor, w.center),
-    proj: w.center,
-    // alias start, end to v1, v2 so we can make this thing look like an edge.
-    // Then we can use the same code to display the distance markers from
-    // daylighting control to either closest window or closest edge.
-    v1: w.start,
-    v2: w.end,
-  }));
+  const withDistance = windows.map((w) => {
+    // single windows calculate distance to center,
+    // repeating and wwr calculate distance to the edge they live on
+    const dist = w.window_definition_type === 'Single Window' ?
+      { dist: distanceBetweenPoints(cursor, w.center), proj: w.center } :
+      pointDistanceToSegment(cursor, w);
+
+    return {
+      ...w,
+      ...dist,
+      // alias start, end to v1, v2 so we can make this thing look like an edge.
+      // Then we can use the same code to display the distance markers from
+      // daylighting control to either closest window or closest edge.
+      v1: w.start,
+      v2: w.end,
+    };
+  });
   return _.minBy(withDistance, 'dist');
 }
 
-function snapWindowToEdgeAnywhere(edges, cursor, windowWidth, maxSnapDist) {
+function snapWindowToEdgeAnywhere(edges, cursor, windowDefn, maxSnapDist) {
   const closestEdge = findClosestEdge(edges, cursor);
   if (!closestEdge || closestEdge.dist > maxSnapDist) {
     return null;
   }
-  return expandWindowAlongEdge(closestEdge, closestEdge.proj, { width: windowWidth });
+  return expandWindowAlongEdge(closestEdge, closestEdge.proj, windowDefn);
 }
 
-function snapWindowToEdgeAtGridIntervals(edges, cursor, windowWidth, maxSnapDist, gridSpacing) {
+function snapWindowToEdgeAtGridIntervals(edges, cursor, windowDefn, maxSnapDist, gridSpacing) {
   const closestEdge = findClosestEdge(edges, cursor);
   if (!closestEdge || closestEdge.dist > maxSnapDist) {
     return null;
@@ -116,7 +123,7 @@ function snapWindowToEdgeAtGridIntervals(edges, cursor, windowWidth, maxSnapDist
       y: closestEdge.v1.y + (roundedDist * (dy / norm)),
     };
 
-  return expandWindowAlongEdge(closestEdge, snapLoc, { width: windowWidth });
+  return expandWindowAlongEdge(closestEdge, snapLoc, windowDefn);
 }
 
 export function snapWindowToEdge(snapMode, ...args) {

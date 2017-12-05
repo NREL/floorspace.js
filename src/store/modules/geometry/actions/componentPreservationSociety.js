@@ -59,7 +59,7 @@ function replaceComponents(
     const
       { dx, dy } = movementsByFaceId[w.originalFaceIds[0]] || { dx: 0, dy: 0 },
       newLoc = { x: w.originalLoc.x + dx, y: w.originalLoc.y + dy },
-      loc = snapWindowToEdge(/* snapMode */ 'nonstrict', edgesPresentOnFaces, newLoc, 1, spacing / 4);
+      loc = snapWindowToEdge(/* snapMode */ 'nonstrict', edgesPresentOnFaces, newLoc, { width: 1 }, spacing / 4);
     if (!loc) { return; }
 
     const facesWithEdge = _.map(facesContainingEdge(spaceFaces, loc.edge_id), 'id');
