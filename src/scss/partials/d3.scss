@@ -158,9 +158,11 @@
       .window {
         stroke: #008500;
         fill: black;
+        stroke-width: 3;
 
         .window-wall-ratio {
           .hatch {
+            stroke-width: 2;
             fill: url(#crosshatch-highlight);
           }
         }

@@ -82,7 +82,9 @@ export default {
       gridCoords = d3.mouse(this.$refs.grid),
       gridPoint = { x: gridCoords[0], y: gridCoords[1] },
       rwuPoint = this.gridPointToRWU(gridPoint),
-      component = _.minBy(this.currentComponentTypeLocs, ci => distanceBetweenPoints(ci, rwuPoint)),
+      component = _.minBy(
+        this.currentComponentTypeLocs(rwuPoint),
+        ci => distanceBetweenPoints(ci, rwuPoint)),
       distToComp = component && distanceBetweenPoints(component, rwuPoint);
     if (!component || distToComp > this.spacing / 2) {
       return null;

@@ -39,7 +39,7 @@ import { mapState, mapGetters } from 'vuex';
 import { debounce } from '../../utilities';
 import d3AwareThrottle from '../../utilities/d3-aware-throttle';
 import methods from './methods';
-import geometryHelpers from './../../store/modules/geometry/helpers';
+import geometryHelpers, { pointDistanceToSegment } from './../../store/modules/geometry/helpers';
 import modelHelpers from './../../store/modules/models/helpers';
 import applicationHelpers from './../../store/modules/application/helpers';
 import { ResizeEvents } from '../../components/Resize';
@@ -235,19 +235,6 @@ export default {
       const currentStoryPolygons = this.polygonsFromGeometry(this.currentStoryGeometry);
       return this.previousStoryPolygons ? this.previousStoryPolygons.concat(currentStoryPolygons) : currentStoryPolygons;
     },
-    windowCenterLocs() {
-      return this.currentStory.windows
-        .map(w => ({ w, e: _.find(this.denormalizedGeometry.edges, { id: w.edge_id }) }))
-        .map(({ w, e }) => {
-          const wind = this.denormalizeWindow(e, w);
-          return {
-            ...wind,
-            id: w.id,
-            type: 'windows',
-            ...wind.center,
-          };
-        });
-    },
     daylightingControlLocs() {
       return _.flatten(
         this.currentStory.spaces.map((space) => {
@@ -260,15 +247,6 @@ export default {
               face_id: space.face_id,
             }));
       }));
-    },
-    currentComponentTypeLocs() {
-      if (this.currentComponentType === 'window_definitions') {
-        return this.windowCenterLocs;
-      } else if (this.currentComponentType === 'daylighting_control_definitions') {
-        return this.daylightingControlLocs;
-      } else {
-        throw new Error(`unrecognized componentType: ${this.currentComponentType}`);
-      }
     },
     spaceFaces() {
       // as opposed to shading faces
@@ -328,6 +306,31 @@ export default {
   },
   methods: {
     ...methods,
+    windowCenterLocs(cursor) {
+      // for each window, this should be the projection
+      // of cursor onto that edge.
+      return this.currentStory.windows
+        .map(w => ({ w, e: _.find(this.denormalizedGeometry.edges, { id: w.edge_id }) }))
+        .map(({ w, e }) => {
+          const wind = this.denormalizeWindow(e, w);
+          const { proj } = pointDistanceToSegment(cursor, wind);
+          return {
+            ...wind,
+            id: w.id,
+            type: 'windows',
+            ...proj,
+          };
+        });
+    },
+    currentComponentTypeLocs(cursor) {
+      if (this.currentComponentType === 'window_definitions') {
+        return this.windowCenterLocs(cursor);
+      } else if (this.currentComponentType === 'daylighting_control_definitions') {
+        return this.daylightingControlLocs;
+      } else {
+        throw new Error(`unrecognized componentType: ${this.currentComponentType}`);
+      }
+    },
     denormalizeWindow(edge, { edge_id, alpha, window_definition_id }) {
       const
         windowDefn = _.find(this.windowDefs, { id: window_definition_id }),
