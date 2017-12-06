@@ -185,6 +185,27 @@ export default {
 
   updateWindowDefinitionWithData({ state, dispatch }, payload) {
     const { object: { id } } = payload;
+
+    // blank out the keys that don't make sense for that type.
+    if (payload.window_definition_type === 'Window to Wall Ratio') {
+      Object.assign(payload, {
+        height: null,
+        width: null,
+        spacing: null,
+      });
+    } else if (payload.window_definition_type === 'Repeating Windows') {
+      Object.assign(payload, {
+        wwr: null,
+      });
+    } else if (payload.window_definition_type === 'Single Window') {
+      Object.assign(payload, {
+        wwr: null,
+        spacing: null,
+      });
+    } else if (payload.window_definition_type) {
+      throw new Error(`unrecognized window_definition_type: ${payload.window_definition_type}`);
+    }
+
     if (_.includes(['Window to Wall Ratio', 'Repeating Windows'], payload.window_definition_type)) {
       // upon change of window_definition_type, we need to
       // prevent multiple repeating/wwr from sharing the same edge
@@ -199,6 +220,7 @@ export default {
 
       windowsToDelete.forEach(pl => dispatch('destroyWindow', pl));
     }
+
     dispatch('updateObjectWithData', payload);
   },
 
