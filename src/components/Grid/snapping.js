@@ -31,18 +31,23 @@ export function snapTargets(vertices, gridSpacing, cursor) {
   return _.orderBy(targets, ['dist', 'origin', 'type'], ['asc', 'asc', 'desc']);
 }
 
-export function expandWindowAlongEdge(edge, center, { width, window_definition_type }) {
+export function expandWindowAlongEdge(edge, center, { width, spacing, window_definition_type }) {
   if (window_definition_type === 'Window to Wall Ratio' ||
       window_definition_type === 'Repeating Windows'
   ) {
     return {
       edge_id: edge.id,
-      center,
+      center: {
+        x: (edge.v1.x + edge.v2.x) / 2,
+        y: (edge.v1.y + edge.v2.y) / 2,
+      },
       edge_start: edge.v1,
       alpha: 0.5,
       start: edge.v1,
       end: edge.v2,
       window_definition_type,
+      width,
+      spacing,
     };
   }
   const

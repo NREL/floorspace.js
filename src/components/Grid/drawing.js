@@ -3,6 +3,33 @@ import 'd3-selection-multi';
 import _ from 'lodash';
 import { distanceBetweenPoints, unitPerpVector, unitVector, edgeDirection } from './../../store/modules/geometry/helpers';
 
+function boxAroundWindow({ xScale, yScale, edge, offset }) {
+  const
+    { dx, dy } = unitPerpVector(edge.start, edge.end);
+  return [
+    [
+      xScale(edge.start.x) + offset * dx,
+      yScale(edge.start.y) + offset * dy,
+    ],
+    [
+      xScale(edge.start.x) - offset * dx,
+      yScale(edge.start.y) - offset * dy,
+    ],
+    [
+      xScale(edge.end.x) - offset * dx,
+      yScale(edge.end.y) - offset * dy,
+    ],
+    [
+      xScale(edge.end.x) + offset * dx,
+      yScale(edge.end.y) + offset * dy,
+    ],
+    [
+      xScale(edge.start.x) + offset * dx,
+      yScale(edge.start.y) + offset * dy,
+    ],
+  ];
+}
+
 function drawWindowToWallRatio(xScale, yScale, el, datum) {
   d3.select(el)
     .selectAll('.single-window')
@@ -18,39 +45,12 @@ function drawWindowToWallRatio(xScale, yScale, el, datum) {
   const wwr = selection.merge(wwrE);
   wwr.classed('selected', d => d.selected);
   wwr.classed('facing-selection', d => d.facingSelection);
-  wwr.each(function (d) {
-    const
-      { dx, dy } = unitPerpVector(d.start, d.end),
-      hatchOffset = 6,
-      rect = [
-        [
-          xScale(d.start.x) + hatchOffset * dx,
-          yScale(d.start.y) + hatchOffset * dy,
-        ],
-        [
-          xScale(d.start.x) - hatchOffset * dx,
-          yScale(d.start.y) - hatchOffset * dy,
-        ],
-        [
-          xScale(d.end.x) - hatchOffset * dx,
-          yScale(d.end.y) - hatchOffset * dy,
-        ],
-        [
-          xScale(d.end.x) + hatchOffset * dx,
-          yScale(d.end.y) + hatchOffset * dy,
-        ],
-        [
-          xScale(d.start.x) + hatchOffset * dx,
-          yScale(d.start.y) + hatchOffset * dy,
-        ],
-      ];
-
-    const $this = d3.select(this);
-
-    $this.select('.hatch')
-      .attr('d', line(rect));
-  });
+  wwr.select('.hatch')
+    .attr('d', line(
+      boxAroundWindow({ edge: datum, xScale, yScale, offset: 6 }),
+    ));
 }
+
 
 function drawSingleWindow(xScale, yScale, el, datum) {
   d3.select(el)
@@ -100,22 +100,82 @@ function drawSingleWindow(xScale, yScale, el, datum) {
     .attr('r', '2');
 }
 
+
+function drawRepeatingWindows(xScale, yScale, el, datum) {
+  const { center, end, width, spacing } = datum;
+
+  const selection = d3.select(el)
+    .selectAll('.window-wall-ratio')
+    .data([datum]);
+  const rwE = selection.enter().append('g').attr('class', 'repeating-windows');
+  rwE.append('path').attr('class', 'box');
+  rwE.append('g').attr('class', 'repeated-windows');
+
+  const line = d3.line();
+
+  const rw = selection.merge(rwE);
+  rw.classed('selected', d => d.selected);
+  rw.classed('facing-selection', d => d.facingSelection);
+  rw.select('.box')
+    .attr('d', line(
+      boxAroundWindow({ edge: datum, xScale, yScale, offset: 6 })),
+    );
+
+  const
+    maxDist = distanceBetweenPoints(center, end),
+    centers = [center],
+    nextCenterDist = width + spacing,
+    direction = unitVector(center, end);
+  while (nextCenterDist + width / 2 < maxDist) {
+    // we have room to place another window
+    const
+      offX = direction.dx * nextCenterDist,
+      offY = direction.dy * nextCenterDist;
+    centers.push(
+      { x: center.x + offX, y: center.y + offY },
+      { x: center.x - offX, y: center.y - offY },
+    );
+  }
+
+  const
+    widthX = direction.dx * width,
+    widthY = direction.dy * width;
+  const windows = centers.map(thisCenter => ({
+    ...datum,
+    thisCenter,
+    start: { x: thisCenter.x - widthX, y: thisCenter.y - widthY },
+    end: { x: thisCenter.x + widthX, y: thisCenter.y + widthY },
+  }));
+  const windw = rw.select('.repeated-windows')
+    .selectAll('.window')
+    .data(windows);
+
+  windw
+    .merge(windw.enter().append('g').attr('class', 'window'))
+    .each(function (d) {
+      drawSingleWindow(xScale, yScale, this, d);
+    });
+}
+
 export function drawWindow() {
   let
     xScale = _.identity,
     yScale = _.identity;
   function chart(selection) {
     selection.exit().remove();
-    const windws = selection.merge(
-      selection.enter().append('g').attr('class', 'window'),
-    );
-    windws.each(function (d) {
-      if (d.window_definition_type === 'Single Window') {
-        drawSingleWindow(xScale, yScale, this, d);
-      } else {
-        drawWindowToWallRatio(xScale, yScale, this, d);
-      }
-    });
+    selection
+      .merge(selection.enter().append('g').attr('class', 'window'))
+      .each(function (d) {
+        if (d.window_definition_type === 'Single Window') {
+          drawSingleWindow(xScale, yScale, this, d);
+        } else if (d.window_definition_type === 'Window to Wall Ratio') {
+          drawWindowToWallRatio(xScale, yScale, this, d);
+        } else if (d.window_definition_type === 'Repeating Windows') {
+          drawRepeatingWindows(xScale, yScale, this, d);
+        } else {
+          throw new Error(`unexpected window_definition_type: ${d.window_definition_type}`);
+        }
+      });
     // selection
     //   .filter(d => d.window_definition_type === 'Single Window')
     //   .call(drawSingleWindow({ xScale, yScale }));
