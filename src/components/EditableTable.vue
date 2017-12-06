@@ -113,15 +113,15 @@ export default {
         height: calc(100vh - 208px);
       }
       td, th {
-        width: 134px;
+        width: 154px;
         span {
           display: block;
         }
         > * {
-          width: 134px;
+          width: 154px;
         }
         input {
-          width: 117px;
+          width: 137px;
           margin-left: 5px;
           margin-right: 6px;
         }
