@@ -139,7 +139,6 @@ export default {
     }
     const component = this.componentToSelect();
     this.componentFacingSelection = component && component.id;
-    console.log('component', component);
     if (!component) {
       // do no highlighting
     } else if (component.type === 'windows') {

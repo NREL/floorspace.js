@@ -40,59 +40,62 @@ const helpers = {
   * if validation passes or no validator exists (custom user defined keys), return { success: true }
   */
   setValueForKey(object, store, type, key, value) {
-      const result = {
-          success: true
-      };
+    const result = { success: true };
 
-      // if a validator is defined for the key, run it and store the result
-      if (this.map[type].keymap[key] && this.map[type].keymap[key].validator) {
-          const validationResult = this.map[type].keymap[key].validator(object, store, value, type);
-          result.success = validationResult.success;
-          if (!validationResult.success) {
-              result.error = validationResult.error;
-              return result;
-          }
+    // if a validator is defined for the key, run it and store the result
+    if (this.map[type].keymap[key] && this.map[type].keymap[key].validator) {
+      const validationResult = this.map[type].keymap[key].validator(object, store, value, type);
+      result.success = validationResult.success;
+      if (!validationResult.success) {
+        result.error = validationResult.error;
+        return result;
       }
-      if (this.map[type].keymap[key] && this.map[type].keymap[key].converter) {
-        value = this.map[type].keymap[key].converter(value);
-      }
-      // dispatch the correct action to update the specified type
-      if (type === 'stories') {
-          store.dispatch('models/updateStoryWithData', {
-              story: object,
-              [key]: value
-          });
-      } else if (type === 'spaces') {
-          store.dispatch('models/updateSpaceWithData', {
-              space: object,
-              [key]: value
-          });
-      } else if (type === 'shading') {
-          store.dispatch('models/updateShadingWithData', {
-              shading: object,
-              [key]: value
-          });
-      } else if (type === 'images') {
-          store.dispatch('models/updateImageWithData', {
-              image: object,
-              [key]: value
-          });
-      } else {
-          store.dispatch('models/updateObjectWithData', {
-              object: object,
-              [key]: value
-          });
-      }
+    }
+    if (this.map[type].keymap[key] && this.map[type].keymap[key].converter) {
+      value = this.map[type].keymap[key].converter(value);
+    }
+    // dispatch the correct action to update the specified type
+    if (type === 'stories') {
+      store.dispatch('models/updateStoryWithData', {
+        story: object,
+        [key]: value,
+      });
+    } else if (type === 'spaces') {
+      store.dispatch('models/updateSpaceWithData', {
+        space: object,
+        [key]: value,
+      });
+    } else if (type === 'shading') {
+      store.dispatch('models/updateShadingWithData', {
+        shading: object,
+        [key]: value,
+      });
+    } else if (type === 'images') {
+      store.dispatch('models/updateImageWithData', {
+        image: object,
+        [key]: value,
+      });
+    } else if (type === 'window_definitions') {
+      store.dispatch('models/updateWindowDefinitionWithData', {
+        object,
+        [key]: value,
+      });
+    } else {
+      store.dispatch('models/updateObjectWithData', {
+        object,
+        [key]: value,
+      });
+    }
 
-      return result;
+    return result;
   },
 
   inputTypeForKey(type, key) {
-      return this.map[type].keymap[key] && !this.map[type].keymap[key].readonly ? this.map[type].keymap[key].input_type : null;
+    return this.map[type].keymap[key] && !this.map[type].keymap[key].readonly ? this.map[type].keymap[key].input_type : null;
   },
 
   selectOptionsForKey(object, state, type, key) {
-      return this.map[type].keymap[key] && !this.map[type].keymap[key].readonly && this.map[type].keymap[key].input_type === 'select' ? this.map[type].keymap[key].select_data(object, state) : [];
+    return this.map[type].keymap[key] && !this.map[type].keymap[key].readonly && this.map[type].keymap[key].input_type === 'select' ? this.map[type].keymap[key].select_data(object, state) : [];
   },
 
 

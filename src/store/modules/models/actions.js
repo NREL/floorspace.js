@@ -183,6 +183,25 @@ export default {
         context.commit('updateImageWithData', cleanedPayload);
     },
 
+  updateWindowDefinitionWithData({ state, dispatch }, payload) {
+    const { object: { id } } = payload;
+    if (_.includes(['Window to Wall Ratio', 'Repeating Windows'], payload.window_definition_type)) {
+      // upon change of window_definition_type, we need to
+      // prevent multiple repeating/wwr from sharing the same edge
+      const windowsToDelete = _.flatMap(state.stories, story =>
+        _.chain(story.windows)
+          .filter({ window_definition_id: id })
+          .groupBy('edge_id')
+          .values()
+          .flatMap(_.tail)
+          .map(w => ({ story_id: story.id, object: { id: w.id } }))
+          .value());
+
+      windowsToDelete.forEach(pl => dispatch('destroyWindow', pl));
+    }
+    dispatch('updateObjectWithData', payload);
+  },
+
     updateObjectWithData (context, payload) {
         const object = helpers.libraryObjectWithId(context.state, payload.object.id);
         payload.object = object;
