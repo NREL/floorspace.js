@@ -110,6 +110,14 @@
           stroke-width: 2;
           fill: url(#crosshatch);
         }
+        .box {
+          stroke-width: 2;
+          stroke-dasharray: 4 3;
+          fill: none;
+        }
+        .sub-window {
+          stroke-width: 2;
+        }
       }
       .window .facing-selection {
         stroke: blue;
@@ -160,11 +168,17 @@
         fill: black;
         stroke-width: 3;
 
-        .window-wall-ratio {
-          .hatch {
-            stroke-width: 2;
-            fill: url(#crosshatch-highlight);
-          }
+        .window-wall-ratio .hatch {
+          stroke-width: 2;
+          fill: url(#crosshatch-highlight);
+        }
+        .repeating-windows .box {
+          stroke-dasharray: 4 3;
+          stroke-width: 2;
+          fill: none;
+        }
+        .sub-window {
+          stroke-width: 2;
         }
       }
       .daylighting-control {

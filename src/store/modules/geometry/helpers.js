@@ -128,6 +128,38 @@ export function ptsAreCollinear(p1, p2, p3) {
   return Math.abs(((n - b) * (x - m)) - ((y - n) * (m - a))) < 0.00001;
 }
 
+export function repeatingWindowCenters({ start, end, spacing, width }) {
+  const
+    maxDist = distanceBetweenPoints(start, end),
+    centers = [],
+    direction = unitVector(start, end);
+
+  let nextCenterDist = width / 2;
+  while (nextCenterDist + width / 2 < maxDist) {
+    // we have room to place another window
+    const
+      offX = direction.dx * nextCenterDist,
+      offY = direction.dy * nextCenterDist;
+    centers.push({ x: start.x + offX, y: start.y + offY, distFromStart: nextCenterDist });
+    nextCenterDist += width + (spacing || 1);
+  }
+  if (centers.length === 0) return [];
+  const
+    margin = (
+      (distanceBetweenPoints(centers[centers.length - 1], end) - width / 2)
+      / 2),
+    totalDist = distanceBetweenPoints(start, end),
+    offX = direction.dx * margin,
+    offY = direction.dy * margin;
+
+  // center the group by adjusting each center by margin
+  return centers.map(c => ({
+    x: c.x + offX,
+    y: c.y + offY,
+    alpha: (c.dist + margin) / totalDist,
+  }));
+}
+
 
 const helpers = {
   // ************************************ CLIPPER ************************************ //

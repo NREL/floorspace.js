@@ -338,6 +338,8 @@ export default {
       return {
         ...expandWindowAlongEdge(edge, center, windowDefn),
         window_definition_type: windowDefn.window_definition_type,
+        width: windowDefn.width,
+        spacing: windowDefn.window_spacing,
       };
     },
     windowsOnFace(face) {

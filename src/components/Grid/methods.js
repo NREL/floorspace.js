@@ -354,6 +354,8 @@ export default {
       .data([{
         ...loc,
         window_definition_type: this.currentComponentDefinition.window_definition_type,
+        width: this.currentComponentDefinition.width,
+        spacing: this.currentComponentDefinition.window_spacing,
       }])
       .call(this.drawWindow);
     this.highlightWindowGuideline(loc);
