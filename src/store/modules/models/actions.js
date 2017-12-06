@@ -237,6 +237,28 @@ export default {
     } else if (alpha < 0 || alpha > 1) {
       throw new Error('Alpha must be between 0 and 1');
     }
+
+    const windowsOnEdge = _.filter(story.windows, { edge_id })
+      .map(w => ({
+        ...w,
+        window_definition_type: _.find(
+          context.state.library.window_definitions,
+          { id: w.window_definition_id },
+        ).window_definition_type,
+      }));
+    let windowsToDelete;
+    if (windowDefn.window_definition_type === 'Single Window') {
+      // single windows can coexist with other single windows
+      windowsToDelete = _.reject(windowsOnEdge, { window_definition_type: 'Single Window' });
+    } else {
+      // Repeating and WWR cannot share with single window, or with one another.
+      windowsToDelete = windowsOnEdge;
+    }
+    windowsToDelete.forEach(
+      w => context.commit(
+        'destroyWindow',
+        { story_id, object: { id: w.id } }));
+
     context.commit('createWindow', {
       ...payload,
       id: idFactory.generate(),
@@ -284,7 +306,7 @@ export default {
   modifyWindow({ commit }, payload) {
     commit('modifyWindow', payload);
   },
-  destroyAllComponents({ state, rootState, commit }, { story_id }) {
+  destroyAllComponents({ commit }, { story_id }) {
     commit('dropDaylightingControls', { story_id });
     commit('dropWindows', { story_id });
   },
