@@ -156,7 +156,7 @@ export function repeatingWindowCenters({ start, end, spacing, width }) {
   return centers.map(c => ({
     x: c.x + offX,
     y: c.y + offY,
-    alpha: (c.dist + margin) / totalDist,
+    alpha: (c.distFromStart + margin) / totalDist,
   }));
 }
 
