@@ -1,6 +1,7 @@
 <template>
   <input
     type="file"
+    accept="image/jpeg,image/png,image/svg,image/gif"
     ref="imageInput"
     id="upload-image-input"
     style="display: none;"
