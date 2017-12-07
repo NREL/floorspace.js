@@ -82,7 +82,7 @@ export default {
       if (!this.col.enabled) {
         // columns are enabled by default, so any column that doesn't provide
         // an `enabled` callback is always enabled.
-        return true;
+        return false;
       }
       return !this.col.enabled(this.row)
     },
