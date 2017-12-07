@@ -1,52 +1,174 @@
 import * as d3 from 'd3';
 import 'd3-selection-multi';
 import _ from 'lodash';
-import { distanceBetweenPoints, unitPerpVector, unitVector, edgeDirection } from './../../store/modules/geometry/helpers';
+import {
+  distanceBetweenPoints, unitPerpVector, unitVector,
+  edgeDirection, repeatingWindowCenters,
+} from './../../store/modules/geometry/helpers';
+
+function boxAroundWindow({ xScale, yScale, edge, offset }) {
+  const
+    { dx, dy } = unitPerpVector(edge.start, edge.end);
+  return [
+    [
+      xScale(edge.start.x) + offset * dx,
+      yScale(edge.start.y) + offset * dy,
+    ],
+    [
+      xScale(edge.start.x) - offset * dx,
+      yScale(edge.start.y) - offset * dy,
+    ],
+    [
+      xScale(edge.end.x) - offset * dx,
+      yScale(edge.end.y) - offset * dy,
+    ],
+    [
+      xScale(edge.end.x) + offset * dx,
+      yScale(edge.end.y) + offset * dy,
+    ],
+    [
+      xScale(edge.start.x) + offset * dx,
+      yScale(edge.start.y) + offset * dy,
+    ],
+  ];
+}
+
+function drawWindowToWallRatio(xScale, yScale, el, datum) {
+  d3.select(el)
+    .selectAll('.single-window, .repeating-windows')
+    .remove();
+  const selection = d3.select(el)
+    .selectAll('.window-wall-ratio')
+    .data([datum]);
+  const wwrE = selection.enter().append('g').attr('class', 'window-wall-ratio');
+  wwrE.append('path').attr('class', 'hatch');
+
+  const line = d3.line();
+
+  const wwr = selection.merge(wwrE);
+  wwr.classed('selected', d => d.selected);
+  wwr.classed('facing-selection', d => d.facingSelection);
+  wwr.select('.hatch')
+    .attr('d', line(
+      boxAroundWindow({ edge: datum, xScale, yScale, offset: 6 }),
+    ));
+}
+
+
+function drawSingleWindow(xScale, yScale, el, datum) {
+  d3.select(el)
+    .selectAll('.window-wall-ratio, .repeating-windows')
+    .remove();
+
+  const selection = d3.select(el)
+    .selectAll('.single-window')
+    .data([datum]);
+  const windowE = selection.enter().append('g').attr('class', 'single-window');
+  windowE.append('line').attr('class', 'pane');
+  windowE.append('circle');
+  windowE.append('line').attr('class', 'start-linecap');
+  windowE.append('line').attr('class', 'end-linecap');
+
+  const windw = selection.merge(windowE);
+  windw.classed('selected', d => d.selected);
+  windw.classed('facing-selection', d => d.facingSelection);
+  windw.select('line.pane')
+    .attr('x1', d => xScale(d.start.x))
+    .attr('y1', d => yScale(d.start.y))
+    .attr('x2', d => xScale(d.end.x))
+    .attr('y2', d => yScale(d.end.y));
+  windw.each(function (d) {
+    const
+      { dx, dy } = unitPerpVector(d.start, d.end),
+      linecapOffset = 6;
+
+    const $this = d3.select(this);
+    $this.select('.start-linecap')
+      .attr('x1', xScale(d.start.x) + linecapOffset * dx)
+      .attr('y1', yScale(d.start.y) + linecapOffset * dy)
+      .attr('x2', xScale(d.start.x) - linecapOffset * dx)
+      .attr('y2', yScale(d.start.y) - linecapOffset * dy);
+    $this.select('.end-linecap')
+      .attr('x1', xScale(d.end.x) + linecapOffset * dx)
+      .attr('y1', yScale(d.end.y) + linecapOffset * dy)
+      .attr('x2', xScale(d.end.x) - linecapOffset * dx)
+      .attr('y2', yScale(d.end.y) - linecapOffset * dy);
+    if (d.selected || d.facingSelection) {
+      $this.raise();
+    }
+  });
+  windw.select('circle')
+    .attr('cx', d => xScale(d.center.x))
+    .attr('cy', d => yScale(d.center.y))
+    .attr('r', '2');
+}
+
+
+function drawRepeatingWindows(xScale, yScale, el, datum) {
+  const { start, end, width, spacing } = datum;
+  d3.select(el)
+    .selectAll('.window-wall-ratio, .single-window')
+    .remove();
+
+  const selection = d3.select(el)
+    .selectAll('.repeating-windows')
+    .data([datum]);
+  const rwE = selection.enter().append('g').attr('class', 'repeating-windows');
+  rwE.append('path').attr('class', 'box');
+  rwE.append('g').attr('class', 'sub-windows');
+
+  const line = d3.line();
+
+  const rw = selection.merge(rwE);
+  rw.classed('selected', d => d.selected);
+  rw.classed('facing-selection', d => d.facingSelection);
+  rw.select('.box')
+    .attr('d', line(
+      boxAroundWindow({ edge: datum, xScale, yScale, offset: 6 })),
+    );
+
+  const
+    direction = unitVector(start, end),
+    centers = repeatingWindowCenters({ start, end, spacing, width });
+  const
+    widthX = direction.dx * width,
+    widthY = direction.dy * width;
+  const windows = centers.map(thisCenter => ({
+    ...datum,
+    center: thisCenter,
+    start: { x: thisCenter.x - widthX / 2, y: thisCenter.y - widthY / 2 },
+    end: { x: thisCenter.x + widthX / 2, y: thisCenter.y + widthY / 2 },
+  }));
+  const windw = rw.select('.sub-windows')
+    .selectAll('.sub-window')
+    .data(windows);
+  windw.exit().remove();
+  windw
+    .merge(windw.enter().append('g').attr('class', 'sub-window'))
+    .each(function (d) {
+      drawSingleWindow(xScale, yScale, this, d);
+    });
+}
 
 export function drawWindow() {
   let
     xScale = _.identity,
-    yScale = _.identity,
-    highlight = false;
+    yScale = _.identity;
   function chart(selection) {
     selection.exit().remove();
-    const windowE = selection.enter().append('g').attr('class', 'window');
-    windowE.append('line').attr('class', 'pane');
-    windowE.append('circle');
-    windowE.append('line').attr('class', 'start-linecap');
-    windowE.append('line').attr('class', 'end-linecap');
-    const windw = selection.merge(windowE);
-    windw.classed('selected', d => d.selected);
-    windw.classed('facing-selection', d => d.facingSelection);
-    windw.select('line.pane')
-      .attr('x1', d => xScale(d.start.x))
-      .attr('y1', d => yScale(d.start.y))
-      .attr('x2', d => xScale(d.end.x))
-      .attr('y2', d => yScale(d.end.y));
-    windw.each(function (d) {
-      const
-        { dx, dy } = unitPerpVector(d.start, d.end),
-        linecapOffset = 10;
-
-      const $this = d3.select(this);
-      $this.select('.start-linecap')
-        .attr('x1', xScale(d.start.x) + linecapOffset * dx)
-        .attr('y1', yScale(d.start.y) + linecapOffset * dy)
-        .attr('x2', xScale(d.start.x) - linecapOffset * dx)
-        .attr('y2', yScale(d.start.y) - linecapOffset * dy);
-      $this.select('.end-linecap')
-        .attr('x1', xScale(d.end.x) + linecapOffset * dx)
-        .attr('y1', yScale(d.end.y) + linecapOffset * dy)
-        .attr('x2', xScale(d.end.x) - linecapOffset * dx)
-        .attr('y2', yScale(d.end.y) - linecapOffset * dy);
-      if (d.selected || d.facingSelection) {
-        $this.raise();
-      }
-    });
-    windw.select('circle')
-      .attr('cx', d => xScale(d.center.x))
-      .attr('cy', d => yScale(d.center.y))
-      .attr('r', '2');
+    selection
+      .merge(selection.enter().append('g').attr('class', 'window'))
+      .each(function (d) {
+        if (d.window_definition_type === 'Single Window') {
+          drawSingleWindow(xScale, yScale, this, d);
+        } else if (d.window_definition_type === 'Window to Wall Ratio') {
+          drawWindowToWallRatio(xScale, yScale, this, d);
+        } else if (d.window_definition_type === 'Repeating Windows') {
+          drawRepeatingWindows(xScale, yScale, this, d);
+        } else {
+          throw new Error(`unexpected window_definition_type: ${d.window_definition_type}`);
+        }
+      });
   }
 
   chart.xScale = function (_) {
@@ -57,11 +179,6 @@ export function drawWindow() {
   chart.yScale = function (_) {
     if (!arguments.length) return yScale;
     yScale = _;
-    return chart;
-  };
-  chart.highlight = function(_) {
-    if (!arguments.length) return highlight;
-    highlight = _;
     return chart;
   };
 
@@ -188,8 +305,9 @@ export function drawWindowGuideline() {
       .data(
         // there must be a better way to do this...
         selection.merge(selection.enter()).data()
-        .map(d => ({ start: d.edge_start, end: d.center }))
+          .map(d => ({ start: d.edge_start, end: d.center })),
       )
+      .filter(d => d.window_definition_type === 'Single Window')
       .call(drawMeasure);
   }
 

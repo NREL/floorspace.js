@@ -60,7 +60,7 @@
     }
 
     // shapes
-    polygon, rect, path {
+    polygon, rect, > path {
         fill-opacity: .9;
         z-index: 3;
         stroke: $gray-light;
@@ -73,8 +73,8 @@
       pointer-events: all;
     }
 
-    .current {
-      polygon, rect, path {
+    .poly.current {
+      > polygon, > rect, > path {
         stroke: $secondary;
         stroke-width: 2px;
       }
@@ -102,16 +102,35 @@
       shape-rendering: crispEdges;
       stroke: $gray-medium;
     }
-
-    .window {
-      stroke-width: 3;
-      stroke: black;
-    }
-    .window.facing-selection {
-      stroke: blue;
-    }
-    .window.selected {
-      stroke: green;
+    .polygons .windows {
+      .window {
+        stroke-width: 3;
+        stroke: black;
+        .hatch {
+          stroke-width: 2;
+          fill: url(#crosshatch);
+        }
+        .box {
+          stroke-width: 2;
+          stroke-dasharray: 4 3;
+          fill: none;
+        }
+        .sub-window {
+          stroke-width: 2;
+        }
+      }
+      .window .facing-selection {
+        stroke: blue;
+        .hatch {
+          fill: url(#crosshatch-facing-selection);
+        }
+      }
+      .window .selected {
+        stroke: green;
+        .hatch {
+          fill: url(#crosshatch-selected);
+        }
+      }
     }
     .daylighting-control {
       circle {
@@ -147,6 +166,20 @@
       .window {
         stroke: #008500;
         fill: black;
+        stroke-width: 3;
+
+        .window-wall-ratio .hatch {
+          stroke-width: 2;
+          fill: url(#crosshatch-highlight);
+        }
+        .repeating-windows .box {
+          stroke-dasharray: 4 3;
+          stroke-width: 2;
+          fill: none;
+        }
+        .sub-window {
+          stroke-width: 2;
+        }
       }
       .daylighting-control {
         circle, path {

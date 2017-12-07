@@ -74,12 +74,37 @@ const map = {
         validator: validators.name,
       },
       {
+        name: 'window_definition_type',
+        displayName: 'Type',
+        input_type: 'select',
+        select_data() {
+          const options = ['Single Window', 'Repeating Windows', 'Window to Wall Ratio'];
+          return _.zipObject(options, options);
+        },
+        validator: validators.oneOf('Single Window', 'Repeating Windows', 'Window to Wall Ratio'),
+      },
+      {
+        name: 'wwr',
+        displayName: 'Window to Wall ratio',
+        input_type: 'text',
+        validator: validators.halfOpenInterval(0, 1),
+        converter: converters.number,
+        numeric: true,
+        enabled(row) {
+          return row.window_definition_type === 'Window to Wall Ratio';
+        },
+      },
+      {
         name: 'height',
         displayName: 'Height',
         input_type: 'text',
         validator: validators.gt0,
         converter: converters.number,
         numeric: true,
+        enabled(row) {
+          return row.window_definition_type === 'Single Window' ||
+                 row.window_definition_type === 'Repeating Windows';
+        },
       },
       {
         name: 'width',
@@ -88,6 +113,10 @@ const map = {
         validator: validators.gt0,
         converter: converters.number,
         numeric: true,
+        enabled(row) {
+          return row.window_definition_type === 'Single Window' ||
+                 row.window_definition_type === 'Repeating Windows';
+        },
       },
       {
         name: 'sill_height',
@@ -95,6 +124,33 @@ const map = {
         input_type: 'text',
         validator: validators.gt0,
         converter: converters.number,
+        numeric: true,
+      },
+      {
+        name: 'window_spacing',
+        displayName: 'Spacing',
+        input_type: 'text',
+        validator: validators.gt0,
+        converter: converters.number,
+        numeric: true,
+        enabled(row) {
+          return row.window_definition_type === 'Repeating Windows';
+        },
+      },
+      {
+        name: 'overhang_projection_factor',
+        displayName: 'Overhang Projection Factor',
+        input_type: 'text',
+        validator: validators.gt0orNull,
+        converter: converters.gt0orNull,
+        numeric: true,
+      },
+      {
+        name: 'fin_projection_factor',
+        displayName: 'Fin Projection Factor',
+        input_type: 'text',
+        validator: validators.gt0orNull,
+        converter: converters.gt0orNull,
         numeric: true,
       },
       {

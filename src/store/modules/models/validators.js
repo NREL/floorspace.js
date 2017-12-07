@@ -54,7 +54,20 @@ export default {
       if (value < start || value > end) {
         return { success: false, error: `Must be between ${start} and ${end}` };
       }
+    };
+  },
+  halfOpenInterval(start, end) {
+    return (object, store, value, type) => {
+      if (value < start || value >= end) {
+        return { success: false, error: `Must be greater than or equal ${start} and less than ${end}` };
+      }
       return { success: true };
     };
+  },
+  gt0orNull(object, story, value, type) {
+    if (value === null || value === '' || value > 0) {
+      return { success: true };
+    }
+    return { success: false, error: 'If provided, value must be greater than 0' };
   },
 };

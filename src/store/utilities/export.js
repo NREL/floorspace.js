@@ -1,6 +1,6 @@
-
 import _ from 'lodash';
 import version from '../../version';
+import { repeatingWindowCenters } from '../../store/modules/geometry/helpers';
 
 function formatObject(obj) {
   if (_.isArray(obj)) {
@@ -16,8 +16,34 @@ function formatObject(obj) {
   return obj;
 }
 
+function mungeWindows(windows, geometry, windowDefs) {
+  const repeatingWindowDefs = _.chain(windowDefs)
+    .filter({ window_definition_type: 'Repeating Windows' })
+    .map(wd => [wd.id, wd])
+    .fromPairs()
+    .value();
 
-function mungeStories(stories, geometries) {
+  return windows.map((w) => {
+    const def = repeatingWindowDefs[w.window_definition_id];
+    if (def) {
+      const edge = _.find(geometry.edges, { id: w.edge_id });
+      const centers = repeatingWindowCenters({
+        start: _.find(geometry.vertices, { id: edge.vertex_ids[0] }),
+        end: _.find(geometry.vertices, { id: edge.vertex_ids[1] }),
+        spacing: def.window_spacing,
+        width: def.width,
+      });
+      return {
+        ...w,
+        alpha: _.map(centers, 'alpha'),
+      };
+    }
+    return w;
+  });
+}
+
+
+function mungeStories(stories, geometries, windowDefs) {
   return stories.map((story) => {
     const geometry = JSON.parse(JSON.stringify(
       _.find(geometries, { id: story.geometry_id }),
@@ -26,6 +52,7 @@ function mungeStories(stories, geometries) {
       ...story,
       spaces: story.spaces,
       geometry,
+      windows: mungeWindows(story.windows, geometry, windowDefs),
       geometry_id: undefined,
     };
   });
@@ -35,7 +62,11 @@ export default function exportData(state, getters) {
   const exportObject = {
     application: state.application,
     project: state.project,
-    stories: mungeStories(state.models.stories, getters['geometry/exportData']),
+    stories: mungeStories(
+      state.models.stories,
+      getters['geometry/exportData'],
+      state.models.library.window_definitions,
+    ),
     ...state.models.library,
     version,
   };

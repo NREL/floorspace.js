@@ -14,6 +14,18 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     :class="{ 'reduce-ticks': reduceTicks }"
   >
     <svg ref="grid" id="svg-grid">
+      <defs>
+        <pattern
+          v-for="(color, modifier) in crosshatchModifiers"
+          :id="`crosshatch${modifier}`"
+          patternUnits="userSpaceOnUse"
+          width="10" height="10"
+        >
+          <path d='M-1,1 l2,-2
+                   M0,10 l10,-10
+                   M9,11 l2,-2' :stroke="color" stroke-width='2'/>
+        </pattern>
+      </defs>
       <g class="axis axis--x"></g>
       <g class="axis axis--y"></g>
       <g class="images" data-transform-plz></g>
@@ -27,7 +39,7 @@ import { mapState, mapGetters } from 'vuex';
 import { debounce } from '../../utilities';
 import d3AwareThrottle from '../../utilities/d3-aware-throttle';
 import methods from './methods';
-import geometryHelpers from './../../store/modules/geometry/helpers';
+import geometryHelpers, { pointDistanceToSegment } from './../../store/modules/geometry/helpers';
 import modelHelpers from './../../store/modules/models/helpers';
 import applicationHelpers from './../../store/modules/application/helpers';
 import { ResizeEvents } from '../../components/Resize';
@@ -65,6 +77,12 @@ export default {
         selectImage: (img) => { this.currentImage = img; },
         updateImage: (data) => window.application.$store.dispatch('models/updateImageWithData', data),
       }),
+      crosshatchModifiers: {
+        '-highlight': 'green',
+        '-selected': 'green',
+        '-facing-selection': 'blue',
+        '': '#222'
+      },
     };
   },
   mounted() {
@@ -217,19 +235,6 @@ export default {
       const currentStoryPolygons = this.polygonsFromGeometry(this.currentStoryGeometry);
       return this.previousStoryPolygons ? this.previousStoryPolygons.concat(currentStoryPolygons) : currentStoryPolygons;
     },
-    windowCenterLocs() {
-      return this.currentStory.windows
-        .map(w => ({ w, e: _.find(this.denormalizedGeometry.edges, { id: w.edge_id }) }))
-        .map(({ w, e }) => {
-          const wind = this.denormalizeWindow(e, w);
-          return {
-            ...wind,
-            id: w.id,
-            type: 'windows',
-            ...wind.center,
-          };
-        });
-    },
     daylightingControlLocs() {
       return _.flatten(
         this.currentStory.spaces.map((space) => {
@@ -242,15 +247,6 @@ export default {
               face_id: space.face_id,
             }));
       }));
-    },
-    currentComponentTypeLocs() {
-      if (this.currentComponentType === 'window_definitions') {
-        return this.windowCenterLocs;
-      } else if (this.currentComponentType === 'daylighting_control_definitions') {
-        return this.daylightingControlLocs;
-      } else {
-        throw new Error(`unrecognized componentType: ${this.currentComponentType}`);
-      }
     },
     spaceFaces() {
       // as opposed to shading faces
@@ -310,11 +306,41 @@ export default {
   },
   methods: {
     ...methods,
+    windowCenterLocs(cursor) {
+      // for each window, this should be the projection
+      // of cursor onto that edge.
+      return this.currentStory.windows
+        .map(w => ({ w, e: _.find(this.denormalizedGeometry.edges, { id: w.edge_id }) }))
+        .map(({ w, e }) => {
+          const wind = this.denormalizeWindow(e, w);
+          const { proj } = pointDistanceToSegment(cursor, wind);
+          return {
+            ...wind,
+            id: w.id,
+            type: 'windows',
+            ...proj,
+          };
+        });
+    },
+    currentComponentTypeLocs(cursor) {
+      if (this.currentComponentType === 'window_definitions') {
+        return this.windowCenterLocs(cursor);
+      } else if (this.currentComponentType === 'daylighting_control_definitions') {
+        return this.daylightingControlLocs;
+      } else {
+        throw new Error(`unrecognized componentType: ${this.currentComponentType}`);
+      }
+    },
     denormalizeWindow(edge, { edge_id, alpha, window_definition_id }) {
       const
         windowDefn = _.find(this.windowDefs, { id: window_definition_id }),
         center = windowLocation(edge, { alpha });
-      return expandWindowAlongEdge(edge, center, windowDefn.width);
+      return {
+        ...expandWindowAlongEdge(edge, center, windowDefn),
+        window_definition_type: windowDefn.window_definition_type,
+        width: windowDefn.width,
+        spacing: windowDefn.window_spacing,
+      };
     },
     windowsOnFace(face) {
       return _.flatMap(

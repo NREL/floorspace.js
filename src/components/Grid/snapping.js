@@ -31,11 +31,29 @@ export function snapTargets(vertices, gridSpacing, cursor) {
   return _.orderBy(targets, ['dist', 'origin', 'type'], ['asc', 'asc', 'desc']);
 }
 
-export function expandWindowAlongEdge(edge, center, windowWidth) {
+export function expandWindowAlongEdge(edge, center, { width, spacing, window_definition_type }) {
+  if (window_definition_type === 'Window to Wall Ratio' ||
+      window_definition_type === 'Repeating Windows'
+  ) {
+    return {
+      edge_id: edge.id,
+      center: {
+        x: (edge.v1.x + edge.v2.x) / 2,
+        y: (edge.v1.y + edge.v2.y) / 2,
+      },
+      edge_start: edge.v1,
+      alpha: 0.5,
+      start: edge.v1,
+      end: edge.v2,
+      window_definition_type,
+      width,
+      spacing,
+    };
+  }
   const
     theta = edgeDirection({ start: edge.v1, end: edge.v2 }),
-    windowDeltaX = (windowWidth * Math.cos(theta)) / 2,
-    windowDeltaY = (windowWidth * Math.sin(theta)) / 2,
+    windowDeltaX = (width * Math.cos(theta)) / 2,
+    windowDeltaY = (width * Math.sin(theta)) / 2,
     alpha = edge.v2.x === edge.v1.x ?
       (center.y - edge.v1.y) / (edge.v2.y - edge.v1.y) :
       (center.x - edge.v1.x) / (edge.v2.x - edge.v1.x);
@@ -52,6 +70,7 @@ export function expandWindowAlongEdge(edge, center, windowWidth) {
       x: center.x + windowDeltaX,
       y: center.y + windowDeltaY,
     },
+    window_definition_type,
   };
 }
 
@@ -66,28 +85,35 @@ export function findClosestEdge(edges, cursor) {
 }
 
 export function findClosestWindow(windows, cursor) {
-  const withDistance = windows.map(w => ({
-    ...w,
-    dist: distanceBetweenPoints(cursor, w.center),
-    proj: w.center,
-    // alias start, end to v1, v2 so we can make this thing look like an edge.
-    // Then we can use the same code to display the distance markers from
-    // daylighting control to either closest window or closest edge.
-    v1: w.start,
-    v2: w.end,
-  }));
+  const withDistance = windows.map((w) => {
+    // single windows calculate distance to center,
+    // repeating and wwr calculate distance to the edge they live on
+    const dist = w.window_definition_type === 'Single Window' ?
+      { dist: distanceBetweenPoints(cursor, w.center), proj: w.center } :
+      pointDistanceToSegment(cursor, w);
+
+    return {
+      ...w,
+      ...dist,
+      // alias start, end to v1, v2 so we can make this thing look like an edge.
+      // Then we can use the same code to display the distance markers from
+      // daylighting control to either closest window or closest edge.
+      v1: w.start,
+      v2: w.end,
+    };
+  });
   return _.minBy(withDistance, 'dist');
 }
 
-function snapWindowToEdgeAnywhere(edges, cursor, windowWidth, maxSnapDist) {
+function snapWindowToEdgeAnywhere(edges, cursor, windowDefn, maxSnapDist) {
   const closestEdge = findClosestEdge(edges, cursor);
   if (!closestEdge || closestEdge.dist > maxSnapDist) {
     return null;
   }
-  return expandWindowAlongEdge(closestEdge, closestEdge.proj, windowWidth);
+  return expandWindowAlongEdge(closestEdge, closestEdge.proj, windowDefn);
 }
 
-function snapWindowToEdgeAtGridIntervals(edges, cursor, windowWidth, maxSnapDist, gridSpacing) {
+function snapWindowToEdgeAtGridIntervals(edges, cursor, windowDefn, maxSnapDist, gridSpacing) {
   const closestEdge = findClosestEdge(edges, cursor);
   if (!closestEdge || closestEdge.dist > maxSnapDist) {
     return null;
@@ -104,7 +130,7 @@ function snapWindowToEdgeAtGridIntervals(edges, cursor, windowWidth, maxSnapDist
       y: closestEdge.v1.y + (roundedDist * (dy / norm)),
     };
 
-  return expandWindowAlongEdge(closestEdge, snapLoc, windowWidth);
+  return expandWindowAlongEdge(closestEdge, snapLoc, windowDefn);
 }
 
 export function snapWindowToEdge(snapMode, ...args) {
@@ -130,8 +156,10 @@ export function snapToVertexWithinFace(snapMode, faces, cursor, gridSpacing) {
 }
 
 export function windowLocation(edge, windw) {
+  const alpha = windw.alpha || 0.5; // if not given, assume center
+  // (this is useful for repeating window groups and window-wall-ratios
   return {
-    x: edge.v1.x + (windw.alpha * (edge.v2.x - edge.v1.x)),
-    y: edge.v1.y + (windw.alpha * (edge.v2.y - edge.v1.y)),
+    x: edge.v1.x + (alpha * (edge.v2.x - edge.v1.x)),
+    y: edge.v1.y + (alpha * (edge.v2.y - edge.v1.y)),
   };
 }

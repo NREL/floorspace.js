@@ -23,6 +23,15 @@ function withHandleProp(arr) {
   }));
 }
 
+function withWindowDefinitionDefaults(arr) {
+  if (!arr || !arr.length) return [];
+  const winDefnDefaults = factory.WindowDefn();
+  return arr.map(obj => ({
+    ...winDefnDefaults,
+    ...obj,
+  }));
+}
+
 function withStoryDefaults(stories) {
   const
     story_defaults = factory.Story(),
@@ -117,7 +126,7 @@ export default function importFloorplan(context, payload) {
         thermal_zones: withHandleProp(payload.data.thermal_zones),
         space_types: withHandleProp(payload.data.space_types),
         construction_sets: withHandleProp(payload.data.construction_sets),
-        window_definitions: payload.data.window_definitions || [],
+        window_definitions: withWindowDefinitionDefaults(payload.data.window_definitions),
         daylighting_control_definitions: payload.data.daylighting_control_definitions || [],
         pitched_roofs: (payload.data.pitched_roofs || []).map(pr => ({
           shed_direction: null,

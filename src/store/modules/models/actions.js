@@ -183,6 +183,47 @@ export default {
         context.commit('updateImageWithData', cleanedPayload);
     },
 
+  updateWindowDefinitionWithData({ state, dispatch }, payload) {
+    const { object: { id } } = payload;
+
+    // blank out the keys that don't make sense for that type.
+    if (payload.window_definition_type === 'Window to Wall Ratio') {
+      Object.assign(payload, {
+        height: null,
+        width: null,
+        spacing: null,
+      });
+    } else if (payload.window_definition_type === 'Repeating Windows') {
+      Object.assign(payload, {
+        wwr: null,
+      });
+    } else if (payload.window_definition_type === 'Single Window') {
+      Object.assign(payload, {
+        wwr: null,
+        spacing: null,
+      });
+    } else if (payload.window_definition_type) {
+      throw new Error(`unrecognized window_definition_type: ${payload.window_definition_type}`);
+    }
+
+    if (_.includes(['Window to Wall Ratio', 'Repeating Windows'], payload.window_definition_type)) {
+      // upon change of window_definition_type, we need to
+      // prevent multiple repeating/wwr from sharing the same edge
+      const windowsToDelete = _.flatMap(state.stories, story =>
+        _.chain(story.windows)
+          .filter({ window_definition_id: id })
+          .groupBy('edge_id')
+          .values()
+          .flatMap(_.tail)
+          .map(w => ({ story_id: story.id, object: { id: w.id } }))
+          .value());
+
+      windowsToDelete.forEach(pl => dispatch('destroyWindow', pl));
+    }
+
+    dispatch('updateObjectWithData', payload);
+  },
+
     updateObjectWithData (context, payload) {
         const object = helpers.libraryObjectWithId(context.state, payload.object.id);
         payload.object = object;
@@ -237,6 +278,28 @@ export default {
     } else if (alpha < 0 || alpha > 1) {
       throw new Error('Alpha must be between 0 and 1');
     }
+
+    const windowsOnEdge = _.filter(story.windows, { edge_id })
+      .map(w => ({
+        ...w,
+        window_definition_type: _.find(
+          context.state.library.window_definitions,
+          { id: w.window_definition_id },
+        ).window_definition_type,
+      }));
+    let windowsToDelete;
+    if (windowDefn.window_definition_type === 'Single Window') {
+      // single windows can coexist with other single windows
+      windowsToDelete = _.reject(windowsOnEdge, { window_definition_type: 'Single Window' });
+    } else {
+      // Repeating and WWR cannot share with single window, or with one another.
+      windowsToDelete = windowsOnEdge;
+    }
+    windowsToDelete.forEach(
+      w => context.commit(
+        'destroyWindow',
+        { story_id, object: { id: w.id } }));
+
     context.commit('createWindow', {
       ...payload,
       id: idFactory.generate(),
@@ -284,7 +347,7 @@ export default {
   modifyWindow({ commit }, payload) {
     commit('modifyWindow', payload);
   },
-  destroyAllComponents({ state, rootState, commit }, { story_id }) {
+  destroyAllComponents({ commit }, { story_id }) {
     commit('dropDaylightingControls', { story_id });
     commit('dropWindows', { story_id });
   },

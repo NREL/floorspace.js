@@ -107,6 +107,11 @@ export default {
       height: opts.height || 4,
       width: opts.width || 2,
       sill_height: opts.sill_height || 3,
+      window_definition_type: 'Single Window',
+      wwr: null,
+      window_spacing: null,
+      overhang_projection_factor: null,
+      fin_projection_factor: null,
     };
   },
   DaylightingControlDefn(opts = {}) {

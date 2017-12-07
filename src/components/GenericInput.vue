@@ -15,6 +15,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     @keydown="blurOnEnter"
     @blur="onChange($event.target.value)"
     :value="row[col.name]"
+    :disabled="disabled"
     :class="{ numeric: col.numeric }"
   />
   <div
@@ -26,12 +27,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       class="input-color"
       :object-id="row.id"
       :value="row[col.name]"
+      :disabled="disabled"
     />
   </div>
   <pretty-select v-else-if="col.input_type === 'select'"
     @change="val => onChange(val)"
     :options="selectData"
     :value="row[col.name]"
+    :disabled="disabled"
   />
 </template>
 
@@ -75,6 +78,14 @@ export default {
         .map(([k, v]) => ({ val: v, display: k }));
     },
     rootState() { return this.$store.state; },
+    disabled() {
+      if (!this.col.enabled) {
+        // columns are enabled by default, so any column that doesn't provide
+        // an `enabled` callback is always enabled.
+        return true;
+      }
+      return !this.col.enabled(this.row)
+    },
   },
 }
 
@@ -90,5 +101,18 @@ input {
   border-width: 2px;
   border-style: inset;
   border-color: $gray-lightest;
+}
+:disabled {
+  background-image: linear-gradient(
+    -45deg,
+    gray 25%,
+    transparent 25%,
+    transparent 50%,
+    gray 50%,
+    gray 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 4px 4px;
 }
 </style>

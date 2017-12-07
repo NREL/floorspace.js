@@ -82,7 +82,9 @@ export default {
       gridCoords = d3.mouse(this.$refs.grid),
       gridPoint = { x: gridCoords[0], y: gridCoords[1] },
       rwuPoint = this.gridPointToRWU(gridPoint),
-      component = _.minBy(this.currentComponentTypeLocs, ci => distanceBetweenPoints(ci, rwuPoint)),
+      component = _.minBy(
+        this.currentComponentTypeLocs(rwuPoint),
+        ci => distanceBetweenPoints(ci, rwuPoint)),
       distToComp = component && distanceBetweenPoints(component, rwuPoint);
     if (!component || distToComp > this.spacing / 2) {
       return null;
@@ -156,7 +158,7 @@ export default {
       loc = snapWindowToEdge(
         this.snapMode,
         this.spaceEdges, rwuPoint,
-        this.currentComponentDefinition.width, this.spacing * 2, this.spacing,
+        this.currentComponentDefinition, this.spacing * 2, this.spacing,
       );
 
     if (!loc) { return; }
@@ -341,7 +343,7 @@ export default {
       loc = snapWindowToEdge(
         this.snapMode,
         this.spaceEdges, rwuPoint,
-        this.currentComponentDefinition.width, this.spacing * 2, this.spacing,
+        this.currentComponentDefinition, this.spacing * 2, this.spacing,
       );
 
     if (!loc) { return; }
@@ -349,8 +351,13 @@ export default {
       .append('g')
       .classed('highlight', true)
       .selectAll('.window')
-      .data([loc])
-      .call(this.drawWindow.highlight(true));
+      .data([{
+        ...loc,
+        window_definition_type: this.currentComponentDefinition.window_definition_type,
+        width: this.currentComponentDefinition.width,
+        spacing: this.currentComponentDefinition.window_spacing,
+      }])
+      .call(this.drawWindow);
     this.highlightWindowGuideline(loc);
   },
   highlightWindowGuideline(loc) {
@@ -757,7 +764,7 @@ export default {
     poly.select('.windows')
       .selectAll('.window')
       .data(d => d.windows)
-      .call(this.drawWindow.highlight(false));
+      .call(this.drawWindow);
 
     poly.select('.daylighting-controls')
       .selectAll('.daylighting-control')
