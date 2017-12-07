@@ -470,6 +470,7 @@ export function drawImage() {
       .attr('y', d => -1 * pxPerRWU * d.height / 2)
       .attr('width', d => pxPerRWU * d.width)
       .attr('height', d => pxPerRWU * d.height)
+      .attr('opacity', d => d.opacity)
       .attr('xlink:href', d => d.src);
 
     imageGroup.select('.moveable-wrapper')
