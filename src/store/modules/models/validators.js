@@ -49,4 +49,12 @@ export default {
   gt0(object, story, value, type) {
     return value > 0 ? { success: true } : { success: false, error: 'Expected value to be greater than zero' };
   },
+  closedInterval(start, end) {
+    return (object, store, value, type) => {
+      if (value < start || value > end) {
+        return { success: false, error: `Must be between ${start} and ${end}` };
+      }
+      return { success: true };
+    };
+  },
 };

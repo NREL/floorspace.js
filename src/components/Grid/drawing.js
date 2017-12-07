@@ -470,16 +470,18 @@ export function drawImage() {
       .attr('y', d => -1 * pxPerRWU * d.height / 2)
       .attr('width', d => pxPerRWU * d.width)
       .attr('height', d => pxPerRWU * d.height)
+      .attr('opacity', d => d.opacity)
       .attr('xlink:href', d => d.src);
 
     imageGroup.select('.moveable-wrapper')
       .attr('transform', 'translate(0,0)')
-      .style('cursor', d => d.current ? 'move' : d.clickable ? 'pointer' : null);
+      .style('cursor', d => (d.current ? 'move' : d.clickable ? 'pointer' : null))
+      .style('pointer-events', d => (d.current ? 'auto' : 'none'));
 
     imageGroup.select('.controls')
-      .attr('display', d => d.current ? '' : 'none');
+      .attr('display', d => (d.current ? '' : 'none'));
 
-    imageGroup.each(function(d) {
+    imageGroup.each(function (d) {
       const ig = d3.select(this);
       if (!d.clickable) {
         ig

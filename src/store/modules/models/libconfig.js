@@ -524,12 +524,13 @@ const map = {
         displayName: 'z',
         input_type: 'text',
         validator: validators.number,
+        private: true,
       },
       {
         name: 'opacity',
         displayName: 'opacity',
         input_type: 'text',
-        validator: validators.number,
+        validator: validators.closedInterval(0, 1),
       },
 
       {

@@ -65,7 +65,7 @@ export default {
       y: 0,
       z: 0,
       r: 0,
-      opacity: 1,
+      opacity: 0.6,
     };
   },
   BuildingUnit(opts = {}) {
