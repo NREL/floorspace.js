@@ -1,4 +1,4 @@
-# geometry-editor
+# FloorspaceJS
 
 > a widget for creating 2d building energy models in svg and visualizing them in 3d
 
@@ -35,4 +35,4 @@ For detailed explanation on how things work, checkout the [guide](http://vuejs-t
 
 Tests are run on each pull request.
 
-Try out the [latest development version](https://nrel.github.io/openstudio-geometry-editor/) in your browser.
+Try out the [latest development version](https://nrel.github.io/floorspace.js/) in your browser.

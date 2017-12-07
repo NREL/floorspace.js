@@ -7,7 +7,7 @@
   <xml_checksum>0AD1E2E2</xml_checksum>
   <class_name>ImportFloorplan</class_name>
   <display_name>Import Floorplan</display_name>
-  <description>Imports a floorplan JSON file written by the OpenStudio Geometry Editor.</description>
+  <description>Imports a floorplan JSON file written by the FloorspaceJS.</description>
   <modeler_description>Currently this measure deletes the existing geometry and replaces it.  In the future, a more advanced merge technique will be employed.</modeler_description>
   <arguments>
     <argument>

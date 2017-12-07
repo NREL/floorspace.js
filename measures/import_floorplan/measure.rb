@@ -11,7 +11,7 @@ class ImportFloorplan < OpenStudio::Ruleset::ModelUserScript
 
   # human readable description
   def description
-    return "Imports a floorplan JSON file written by the OpenStudio Geometry Editor."
+    return "Imports a floorplan JSON file written by FloorspaceJS."
   end
 
   # human readable description of modeling approach
@@ -49,15 +49,15 @@ class ImportFloorplan < OpenStudio::Ruleset::ModelUserScript
       runner.registerError("Empty floorplan path was entered.")
       return false
     end
-    
+
     path = runner.workflow.findFile(floorplan_path)
     if path.empty?
       runner.registerError("Cannot find floorplan path '#{floorplan_path}'.")
       return false
     end
-    
+
     runner.registerInfo("path = #{path.get.to_s}")
-    
+
     json = nil
     File.open(path.get.to_s, 'r') do |file|
       json = file.read
@@ -70,31 +70,31 @@ class ImportFloorplan < OpenStudio::Ruleset::ModelUserScript
     end
 
     scene = floorplan.get.toThreeScene(true)
-    
+
     new_model = OpenStudio::Model::modelFromThreeJS(scene)
-    
+
     if new_model.empty?
       runner.registerError("Cannot convert floorplan to model.")
       return false
     end
-    
+
     runner.registerInitialCondition("Initial model has #{model.getPlanarSurfaceGroups.size} planar surface groups")
-    
+
     # mega lame merge
     model.getPlanarSurfaceGroups.each do |g|
       g.remove
     end
-    
-    new_model.get.getPlanarSurfaceGroups.each do |g| 
+
+    new_model.get.getPlanarSurfaceGroups.each do |g|
       g.clone(model)
     end
-    
+
     runner.registerFinalCondition("Final model has #{model.getPlanarSurfaceGroups.size} planar surface groups")
 
     return true
 
   end
-  
+
 end
 
 # register the measure to be used by the application
