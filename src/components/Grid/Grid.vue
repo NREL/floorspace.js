@@ -382,7 +382,6 @@ export default {
               })),
             ...extraPolygonAttrs,
           };
-          console.log('model', model);
 
         if (!points.length) {
           return null; // don't render point-less polygons
