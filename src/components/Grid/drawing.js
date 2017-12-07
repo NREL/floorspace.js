@@ -474,12 +474,13 @@ export function drawImage() {
 
     imageGroup.select('.moveable-wrapper')
       .attr('transform', 'translate(0,0)')
-      .style('cursor', d => d.current ? 'move' : d.clickable ? 'pointer' : null);
+      .style('cursor', d => (d.current ? 'move' : d.clickable ? 'pointer' : null))
+      .style('pointer-events', d => (d.current ? 'auto' : 'none'));
 
     imageGroup.select('.controls')
-      .attr('display', d => d.current ? '' : 'none');
+      .attr('display', d => (d.current ? '' : 'none'));
 
-    imageGroup.each(function(d) {
+    imageGroup.each(function (d) {
       const ig = d3.select(this);
       if (!d.clickable) {
         ig
