@@ -443,6 +443,7 @@
 					]
 				},
 				"image_visible": {
+					"default": true,
 					"type": [
 						"boolean",
 						"null"
@@ -453,6 +454,7 @@
 						"number",
 						"null"
 					],
+					"default": 0,
 					"minimum": 0
 				},
 				"floor_to_ceiling_height": {
@@ -460,6 +462,7 @@
 						"number",
 						"null"
 					],
+					"default": 8,
 					"minimum": 0
 				},
 				"above_ceiling_plenum_height": {
@@ -467,6 +470,7 @@
 						"number",
 						"null"
 					],
+					"default": 0,
 					"minimum": 0
 				},
 				"multiplier": {
@@ -854,7 +858,8 @@
 						"Single Window",
 						"Repeating Windows",
 						"Window to Wall Ratio"
-					]
+					],
+					"default": "Single Window"
 				},
 				"wwr": {
 					"description": "Target window to wall ratio, only used if window_definition_type is \"Window to Wall Ratio\"",
@@ -872,6 +877,7 @@
 						"number",
 						"null"
 					],
+					"default": 3,
 					"minimum": 0,
 					"exclusiveMinimum": true
 				},
@@ -890,6 +896,7 @@
 						"number",
 						"null"
 					],
+					"default": 4,
 					"minimum": 0,
 					"exclusiveMinimum": true
 				},
@@ -899,6 +906,7 @@
 						"number",
 						"null"
 					],
+					"default": 2,
 					"minimum": 0,
 					"exclusiveMinimum": true
 				},
@@ -950,11 +958,13 @@
 				},
 				"illuminance_setpoint": {
 					"description": "Setpoint for daylighting control (lux).",
-					"type": "number"
+					"type": "number",
+					"default": 300
 				},
 				"height": {
 					"description": "Vertical distance of sensor above floor.  In drawing units.",
-					"type": "number"
+					"type": "number",
+					"default": 3
 				}
 			},
 			"required": [
@@ -982,19 +992,22 @@
 						"Gable",
 						"Hip",
 						"Shed"
-					]
+					],
+					"default": "Gable"
 				},
 				"pitch": {
 					"description": "Pitch of roof. A value of 6, for example, implies a 6 in 12 pitch (or 26.57 degrees).",
 					"type": "number",
-					"minimum": 0
+					"minimum": 0,
+					"default": 6
 				},
 				"shed_direction": {
 					"description": "Direction of shed roof, from low edge to high edge, in clockwise degrees from the positive y-axis when viewed from above.",
 					"type": [
 						"number",
 						"null"
-					]
+					],
+					"default": 0
 				},
 				"color": {
 					"type": [

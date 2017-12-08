@@ -1,56 +1,55 @@
+import _ from 'lodash';
 import idFactory from './../../utilities/generateId';
 import generateColor from './../../utilities/generateColor';
 import appconfig from './../application/appconfig';
+import schema from '../../../../schema/geometry_schema.json';
+
+const readDefaults = (definition) => {
+  if (_.has(definition, 'default')) return definition.default;
+  if (definition.type === 'null') return null;
+  if (definition.type === 'array') return [];
+  if (definition.type === 'object') {
+    return _.mapValues(definition.properties, readDefaults);
+  }
+  return null;
+};
+
+const rawDefaults = _.mapValues(schema.definitions, readDefaults);
+// We don't want the defaults to ever change, and we want to make sure
+// that different uses of defaults produce different objects.
+export const defaults = new Proxy(rawDefaults, {
+  get(target, key) {
+    return _.cloneDeep(target[key]);
+  },
+  set() {
+    throw new Error('Please do not change the defaults.');
+  },
+});
 
 export default {
   Story(name) {
     return {
+      ...defaults.Story,
       id: idFactory.generate(),
       name,
       color: generateColor('story'),
-      handle: null,
-      geometry_id: null,
-      below_floor_plenum_height: 0,
-      floor_to_ceiling_height: 8,
-      above_floor_plenum_height: 0,
-      above_ceiling_plenum_height: 0,
-      multiplier: 1,
-      spaces: [],
-      daylighting_controls: [],
-      windows: [],
-      shading: [],
-      images: [],
-      image_visible: true,
     };
   },
   Space(name) {
     return {
+      ...defaults.Space,
       id: idFactory.generate(),
       name,
       color: generateColor('space'),
-      handle: null,
-      face_id: null,
-      daylighting_controls: [],
-      building_unit_id: null,
-      thermal_zone_id: null,
-      space_type_id: null,
-      construction_set_id: null,
-      pitched_roof_id: null,
-      below_floor_plenum_height: null,
-      floor_to_ceiling_height: null,
-      above_ceiling_plenum_height: null,
-      floor_offset: null,
-      open_to_below: false,
       type: 'space',
     };
   },
   Shading(name) {
     return {
+      ...defaults.Shading,
       id: idFactory.generate(),
       name,
       color: appconfig.palette.shading,
-      handle: null,
-      face_id: null,
     };
   },
   Image(name, src) {
@@ -78,57 +77,47 @@ export default {
   },
   ThermalZone(opts = {}) {
     return {
+      ...defaults.ThermalZone,
       id: idFactory.generate(),
       color: generateColor('thermal_zone'),
       name: opts.name,
-      handle: opts.handle || null,
     };
   },
   SpaceType(opts = {}) {
     return {
+      ...defaults.SpaceType,
       id: idFactory.generate(),
       color: generateColor('space_type'),
       name: opts.name,
-      handle: opts.handle || null,
     };
   },
   ConstructionSet(opts = {}) {
     return {
+      ...defaults.ConstructionSet,
       id: idFactory.generate(),
       name: opts.name,
       color: generateColor('construction_set'),
-      handle: opts.handle || null,
     };
   },
   WindowDefn(opts = {}) {
     return {
+      ...defaults.WindowDefinition,
       id: idFactory.generate(),
       name: opts.name,
-      height: opts.height || 4,
-      width: opts.width || 2,
-      sill_height: opts.sill_height || 3,
-      window_definition_type: 'Single Window',
-      wwr: null,
-      window_spacing: null,
-      overhang_projection_factor: null,
-      fin_projection_factor: null,
     };
   },
   DaylightingControlDefn(opts = {}) {
     return {
+      ...defaults.DaylightingControlDefinition,
       id: idFactory.generate(),
       name: opts.name,
-      height: opts.height || 3,
-      illuminance_setpoint: opts.illuminance_setpoint || 300,
     };
   },
   PitchedRoof(opts = {}) {
     return {
+      ...defaults.PitchedRoof,
       id: idFactory.generate(),
       name: opts.name,
-      pitched_roof_type: opts.type || 'Gable',
-      pitch: opts.pitch || 6,
-      shed_direction: opts.shed_direction || 0,
       color: generateColor('pitched_roof'),
     };
   },
