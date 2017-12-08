@@ -372,7 +372,7 @@ export default {
             current: (
               (this.currentTool !== 'Apply Property' && this.currentSpace && face.id === this.currentSpace.face_id) ||
               (this.currentTool !== 'Apply Property' && this.currentShading && face.id === this.currentShading.face_id) ||
-              (this.currentTool === 'Apply Property' && model[this.spacePropertyKey] === this.currentSpaceProperty.id)
+              (this.currentTool === 'Apply Property' && this.currentSpaceProperty && model[this.spacePropertyKey] === this.currentSpaceProperty.id)
             ),
             daylighting_controls: (model.daylighting_controls || [])
               .map(dc => ({
