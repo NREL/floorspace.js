@@ -2,10 +2,18 @@ import _ from 'lodash';
 import { check, property, gen } from 'testcheck';
 import helpers from '../../src/store/modules/geometry/helpers';
 
-
 export function assert(condition, message) {
   if (!condition) {
     throw new Error(message || 'Assertion failed');
+  }
+}
+
+export function assertThrows(func, message) {
+  try {
+    func();
+    assert(false, message);
+  } catch (e) {
+    assert(true, message);
   }
 }
 

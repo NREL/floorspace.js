@@ -1,11 +1,22 @@
 import _ from 'lodash';
 import idFactory from './generateId';
+import { assignableProperties, componentTypes } from '../modules/application/appconfig';
+
+const feetPerMeter = 3.28084;
+const metersPerFoot = 0.3048;
 
 export default function importLibrary(context, payload) {
   let count = 0;
-  const types = Object.keys(payload.data);
+  const types = [...assignableProperties, ...componentTypes];
+  const
+    libraryUnits = payload.data.project.config.units,
+    projectUnits = context.state.project.config.units;
   types.forEach((type) => {
-    if (type === 'project' || !context.state.models.library[type]) { return; }
+    if (!payload.data[type] || !payload.data[type].length) {
+      // library was created before this type existed, or
+      // has no entries of this type.
+      return;
+    }
     const existingNames = context.state.models.library[type].map((o) => {
       // /_\d+[\w\s]?$/
       // if object name contains duplicate suffix, remove suffix
