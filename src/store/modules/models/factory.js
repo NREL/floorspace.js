@@ -4,17 +4,27 @@ import generateColor from './../../utilities/generateColor';
 import appconfig from './../application/appconfig';
 import schema from '../../../../schema/geometry_schema.json';
 
-const createDefaults = (definition) => {
+const readDefaults = (definition) => {
   if (_.has(definition, 'default')) return definition.default;
   if (definition.type === 'null') return null;
   if (definition.type === 'array') return [];
   if (definition.type === 'object') {
-    return _.mapValues(definition.properties, createDefaults);
+    return _.mapValues(definition.properties, readDefaults);
   }
   return null;
 };
 
-export const defaults = _.mapValues(schema.definitions, createDefaults);
+const rawDefaults = _.mapValues(schema.definitions, readDefaults);
+// We don't want the defaults to ever change, and we want to make sure
+// that different uses of defaults produce different objects.
+export const defaults = new Proxy(rawDefaults, {
+  get(target, key) {
+    return _.cloneDeep(target[key]);
+  },
+  set() {
+    throw new Error('Please do not change the defaults.');
+  },
+});
 
 export default {
   Story(name) {
