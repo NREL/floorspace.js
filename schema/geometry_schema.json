@@ -964,7 +964,7 @@
 				"height": {
 					"description": "Vertical distance of sensor above floor.  In drawing units.",
 					"type": "number",
-					"default": 3,
+					"default": 3
 				}
 			},
 			"required": [
@@ -998,14 +998,16 @@
 				"pitch": {
 					"description": "Pitch of roof. A value of 6, for example, implies a 6 in 12 pitch (or 26.57 degrees).",
 					"type": "number",
-					"minimum": 0
+					"minimum": 0,
+					"default": 6
 				},
 				"shed_direction": {
 					"description": "Direction of shed roof, from low edge to high edge, in clockwise degrees from the positive y-axis when viewed from above.",
 					"type": [
 						"number",
 						"null"
-					]
+					],
+					"default": 0
 				},
 				"color": {
 					"type": [

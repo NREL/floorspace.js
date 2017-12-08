@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import idFactory from './generateId';
-import factory from '../modules/models/factory';
+import { defaults } from '../modules/models/factory';
 
 function maybeUpdateProject(project) {
   // backwards compatibility changes:
@@ -25,27 +25,23 @@ function withHandleProp(arr) {
 
 function withWindowDefinitionDefaults(arr) {
   if (!arr || !arr.length) return [];
-  const winDefnDefaults = factory.WindowDefn();
   return arr.map(obj => ({
-    ...winDefnDefaults,
+    ...defaults.WindowDefinition,
     ...obj,
   }));
 }
 
 function withStoryDefaults(stories) {
-  const
-    story_defaults = factory.Story(),
-    space_defaults = factory.Space();
   return stories.map((story) => {
     const multiplier = story.multiplier >= 1 ?
-      story.multiplier : story_defaults.multiplier;
+      story.multiplier : defaults.Story.multiplier;
 
     return {
-      ...story_defaults,
+      ...defaults.Story,
       ...story,
       spaces: story.spaces
         .map(space => ({
-          ...space_defaults,
+          ...defaults.Space,
           ...space,
         })),
       shading: withHandleProp(story.shading),
