@@ -118,7 +118,9 @@
 						"number",
 						"null"
 					],
-					"default": 0
+					"default": 0,
+					"si_units": "deg",
+					"ip_units": "deg"
 				},
 				"ground": {
 					"type": "object",
@@ -129,7 +131,9 @@
 								"number",
 								"null"
 							],
-							"default": 0
+							"default": 0,
+							"si_units": "m",
+							"ip_units": "ft"
 						},
 						"azimuth_angle": {
 							"description": "Direction of the ground plane, in clockwise degrees from the positive y-axis when viewed from above.",
@@ -137,7 +141,9 @@
 								"number",
 								"null"
 							],
-							"default": 0
+							"default": 0,
+							"si_units": "deg",
+							"ip_units": "deg"
 						},
 						"tilt_slope": {
 							"description": "Slope of the ground plane from horizontal. For example, a value of 1 implies a 45-deg angle.",
@@ -182,25 +188,33 @@
 							"type": [
 								"number",
 								"null"
-							]
+							],
+							"si_units": "m",
+							"ip_units": "ft"
 						},
 						"min_y": {
 							"type": [
 								"number",
 								"null"
-							]
+							],
+							"si_units": "m",
+							"ip_units": "ft"
 						},
 						"max_x": {
 							"type": [
 								"number",
 								"null"
-							]
+							],
+							"si_units": "m",
+							"ip_units": "ft"
 						},
 						"max_y": {
 							"type": [
 								"number",
 								"null"
-							]
+							],
+							"si_units": "m",
+							"ip_units": "ft"
 						}
 					},
 					"required": [
@@ -241,7 +255,9 @@
 							"type": [
 								"number",
 								"null"
-							]
+							],
+							"si_units": "m",
+							"ip_units": "ft"
 						},
 						"enabled": {
 							"type": [
@@ -259,7 +275,9 @@
 							"type": [
 								"number",
 								"null"
-							]
+							],
+							"si_units": "deg",
+							"ip_units": "deg"
 						}
 					},
 					"required": [
@@ -344,10 +362,14 @@
 					"type": "string"
 				},
 				"x": {
-					"type": "number"
+					"type": "number",
+					"si_units": "m",
+					"ip_units": "ft"
 				},
 				"y": {
-					"type": "number"
+					"type": "number",
+					"si_units": "m",
+					"ip_units": "ft"
 				},
 				"edge_ids": {
 					"type": "array",
@@ -455,7 +477,9 @@
 						"null"
 					],
 					"default": 0,
-					"minimum": 0
+					"minimum": 0,
+					"si_units": "m",
+					"ip_units": "ft"
 				},
 				"floor_to_ceiling_height": {
 					"type": [
@@ -463,7 +487,9 @@
 						"null"
 					],
 					"default": 8,
-					"minimum": 0
+					"minimum": 0,
+					"si_units": "m",
+					"ip_units": "ft"
 				},
 				"above_ceiling_plenum_height": {
 					"type": [
@@ -471,7 +497,9 @@
 						"null"
 					],
 					"default": 0,
-					"minimum": 0
+					"minimum": 0,
+					"si_units": "m",
+					"ip_units": "ft"
 				},
 				"multiplier": {
 					"type": [
@@ -636,7 +664,9 @@
 						"number",
 						"null"
 					],
-					"minimum": 0
+					"minimum": 0,
+					"si_units": "m",
+					"ip_units": "ft"
 				},
 				"floor_to_ceiling_height": {
 					"description": "If provided, overrides the story floor_to_ceiling_height.",
@@ -644,7 +674,9 @@
 						"number",
 						"null"
 					],
-					"minimum": 0
+					"minimum": 0,
+					"si_units": "m",
+					"ip_units": "ft"
 				},
 				"above_ceiling_plenum_height": {
 					"description": "If provided, overrides the story above_ceiling_plenum_height.",
@@ -652,14 +684,18 @@
 						"number",
 						"null"
 					],
-					"minimum": 0
+					"minimum": 0,
+					"si_units": "m",
+					"ip_units": "ft"
 				},
 				"floor_offset": {
 					"description": "If provided, specifies the vertical offset between the space floor and the story floor.",
 					"type": [
 						"number",
 						"null"
-					]
+					],
+					"si_units": "m",
+					"ip_units": "ft"
 				},
 				"open_to_below": {
 					"description": "If true, defines a space that is open to below (has no floor).",
@@ -879,7 +915,9 @@
 					],
 					"default": 3,
 					"minimum": 0,
-					"exclusiveMinimum": true
+					"exclusiveMinimum": true,
+					"si_units": "m",
+					"ip_units": "ft"
 				},
 				"window_spacing": {
 					"description": "Spacing between windows.  Only used if window_definition_type is  \"Repeating Windows\".",
@@ -888,7 +926,9 @@
 						"null"
 					],
 					"minimum": 0,
-					"exclusiveMinimum": true
+					"exclusiveMinimum": true,
+					"si_units": "m",
+					"ip_units": "ft"
 				},
 				"height": {
 					"description": "Vertical height of each window. In drawing units. Used if window_definition_type is \"Single Window\" or \"Repeating Windows\".",
@@ -898,7 +938,9 @@
 					],
 					"default": 4,
 					"minimum": 0,
-					"exclusiveMinimum": true
+					"exclusiveMinimum": true,
+					"si_units": "m",
+					"ip_units": "ft"
 				},
 				"width": {
 					"description": "Horizontal width of each window. In drawing units. Used if window_definition_type is \"Single Window\" or \"Repeating Windows\".",
@@ -908,7 +950,9 @@
 					],
 					"default": 2,
 					"minimum": 0,
-					"exclusiveMinimum": true
+					"exclusiveMinimum": true,
+					"si_units": "m",
+					"ip_units": "ft"
 				},
 				"overhang_projection_factor": {
 					"description": "Projection factor for overhangs, set to null for no overhang.  Overhang depth = overhang_projection_factor*height.",
@@ -957,14 +1001,18 @@
 					]
 				},
 				"illuminance_setpoint": {
-					"description": "Setpoint for daylighting control (lux).",
+					"description": "Setpoint for daylighting control.",
 					"type": "number",
-					"default": 300
+					"default": 300,
+					"si_units": "lux",
+					"ip_units": "fc"
 				},
 				"height": {
 					"description": "Vertical distance of sensor above floor.  In drawing units.",
 					"type": "number",
-					"default": 3
+					"default": 3,
+					"si_units": "m",
+					"ip_units": "ft"
 				}
 			},
 			"required": [
@@ -1007,7 +1055,9 @@
 						"number",
 						"null"
 					],
-					"default": 0
+					"default": 0,
+					"si_units": "deg",
+					"ip_units": "deg"
 				},
 				"color": {
 					"type": [
