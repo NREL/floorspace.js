@@ -404,7 +404,7 @@ export default {
           } else if (this.currentMode === 'construction_sets') {
             const constructionSet = modelHelpers.libraryObjectWithId(this.$store.state.models, model.construction_set_id);
             polygon.color = constructionSet ? constructionSet.color : applicationHelpers.config.palette.neutral;
-          } else if (this.currentMode) {
+          } else if (this.currentMode !== 'spaces') {
             throw new Error(`unknown assignable property: ${this.currentMode}`);
           }
 
