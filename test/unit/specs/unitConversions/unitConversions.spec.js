@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { gen } from 'testcheck';
-import { conversionFactor, getConverter } from '../../../../src/store/utilities/unitConversion';
+import { conversionFactor, getConverter, units } from '../../../../src/store/utilities/unitConversion';
 import { assertProperty, assertEqual, assert, assertThrows, genPoint, refute, nearlyEqual, isNearlyEqual } from '../../test_helpers';
 import { simpleGeometry } from './../geometry/examples';
 
@@ -57,6 +57,12 @@ describe('getConverter', () => {
       siProject.view,
       _.mapValues(ipProject.view, v => v * 0.3048),
     ));
+  });
+
+  it('provides the identity func when converting unknown objects', () => {
+    assertEqual(
+      getConverter('User', 'si_units', 'ip_units'),
+      _.identity);
   });
 
   it('leaves alone unitless properties', () => {

@@ -15,6 +15,11 @@ const readUnits = (definition) => {
     }
     return res;
   }
+  if (definition.type === 'array' && _.get(definition, 'items.$ref')) {
+    return {
+      $ref: definition.items.$ref.replace('#/definitions/', ''),
+    };
+  }
   return null;
 };
 
@@ -57,6 +62,10 @@ export const getConverter = (path, fromSystem, toSystem) => {
   if (_.has(pathUnits, 'si_units')) {
     const factor = conversionFactor(pathUnits[fromSystem], pathUnits[toSystem]);
     return val => val * factor;
+  }
+  if (pathUnits.$ref) {
+    const converter = getConverter(pathUnits.$ref, fromSystem, toSystem);
+    return arr => arr.map(converter);
   }
   if (_.isObject(pathUnits)) {
     const converters = _.mapValues(
