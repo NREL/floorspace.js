@@ -731,16 +731,12 @@ export default {
     // draw polygons
     poly = polyEnter
       .merge(poly)
-    .attr('class', (d) => {
-      if ((this.currentSpace && d.face_id === this.currentSpace.face_id) ||
-      (this.currentShading && d.face_id === this.currentShading.face_id)) { return 'current'; }
-      if (d.previous_story) { return 'previousStory'; }
-      return null;
-    })
-    .classed('poly', true)
-    .attr('data-model-type', d => d.modelType)
-    .attr('id', p => `poly-${p.face_id}`)
-    .attr('transform', null);
+      .classed('current', d => d.current)
+      .classed('previousStory', d => d.previous_story)
+      .classed('poly', true)
+      .attr('data-model-type', d => d.modelType)
+      .attr('id', p => `poly-${p.face_id}`)
+      .attr('transform', null);
 
     poly.select('polygon')
       .attr('id', d => `face-${d.face_id}`)
@@ -774,7 +770,7 @@ export default {
     this.registerDrag();
 
     // render the selected model's face above the other polygons so that the border is not obscured
-    d3.select('.current').raise();
+    poly.order();
   },
   drawImages() {
     d3.select('#grid svg .images').selectAll('.image-group')

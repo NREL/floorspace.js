@@ -369,6 +369,11 @@ export default {
             points,
             labelPosition: this.polygonLabelPosition(points),
             windows: this.windowsOnFace(face),
+            current: (
+              (this.currentTool !== 'Apply Property' && this.currentSpace && face.id === this.currentSpace.face_id) ||
+              (this.currentTool !== 'Apply Property' && this.currentShading && face.id === this.currentShading.face_id) ||
+              (this.currentTool === 'Apply Property' && this.currentSpaceProperty && model[this.spacePropertyKey] === this.currentSpaceProperty.id)
+            ),
             daylighting_controls: (model.daylighting_controls || [])
               .map(dc => ({
                 ...geometryHelpers.vertexForId(dc.vertex_id, geometry),
@@ -377,6 +382,7 @@ export default {
               })),
             ...extraPolygonAttrs,
           };
+
         if (!points.length) {
           return null; // don't render point-less polygons
         }
@@ -398,13 +404,15 @@ export default {
           } else if (this.currentMode === 'construction_sets') {
             const constructionSet = modelHelpers.libraryObjectWithId(this.$store.state.models, model.construction_set_id);
             polygon.color = constructionSet ? constructionSet.color : applicationHelpers.config.palette.neutral;
+          } else if (this.currentMode !== 'spaces') {
+            throw new Error(`unknown assignable property: ${this.currentMode}`);
           }
 
         }
         return polygon;
       });
 
-      return _.compact(polygons);
+      return _.sortBy(_.compact(polygons), 'current');
     }
   },
 };
