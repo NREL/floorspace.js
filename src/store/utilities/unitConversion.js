@@ -50,7 +50,7 @@ rawUnits.$state = _.pickBy({
 export const units = deepFreeze(rawUnits);
 
 const factorTable = {
-  'm -> ft': 3.28084,
+  'm -> ft': 3.280839895,
   'ft -> m': 0.3048,
   'fc -> lux': 10.7639,
   'lux -> fc': 0.092903,

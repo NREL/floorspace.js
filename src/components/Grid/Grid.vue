@@ -268,7 +268,7 @@ export default {
     // TODO: method for when new view dimensions are imported or the px dimensions change
     gridVisible() { this.showOrHideAxes(); },
     spacing() { this.updateGrid(); },
-
+    units() { this.reloadGridAndScales(); },
     currentMode() { this.draw(); },
     polygons() { this.draw(); },
     images() { this.draw(); },
