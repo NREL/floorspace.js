@@ -37,6 +37,7 @@ const store = new Vuex.Store({
           context.state,
           context.state.project.config.units === 'm' ? 'si_units' : 'ip_units',
           newUnits === 'm' ? 'si_units' : 'ip_units'));
+      context.dispatch('project/setUnits', { units: newUnits });
     },
   },
   mutations,

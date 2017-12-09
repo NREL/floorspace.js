@@ -250,7 +250,6 @@ export default {
     redo() { this.$store.timetravel.redo(); },
     updateUnits(val) {
       this.$store.dispatch('changeUnits', { newUnits: val });
-      this.rwUnits = val;
     },
     displayNameForMode(mode) { return applicationHelpers.displayNameForMode(mode); },
   },
