@@ -173,7 +173,9 @@
 							"type": [
 								"number",
 								"null"
-							]
+							],
+							"si_units": "m",
+							"ip_units": "ft"
 						}
 					},
 					"required": [

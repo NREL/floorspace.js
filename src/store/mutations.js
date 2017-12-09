@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import project from './modules/project';
 
 export default {
@@ -11,5 +12,10 @@ export default {
   },
   importLibrary(state, payload) {
     state.models.library = payload;
+  },
+  changeUnits(state, newState) {
+    _.keys(state).forEach((k) => {
+      state[k] = newState[k];
+    });
   },
 };
