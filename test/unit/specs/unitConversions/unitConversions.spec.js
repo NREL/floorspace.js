@@ -5,9 +5,9 @@ import { simpleGeometry } from './../geometry/examples';
 import ipFloorplan from '../../../e2e/fixtures/floorplan_two_story_2017_11_28.json';
 
 describe('conversionFactor', () => {
-  it('knows that 10m is about 32.8084ft', () => {
+  it('knows that 10m is about 32.80839895ft', () => {
     const factor = conversionFactor('m', 'ft');
-    assert(nearlyEqual(factor * 10, 32.8084));
+    assert(nearlyEqual(factor * 10, 10 * 3.280839895));
   });
 
   it('throws on unknown conversions', () => {
@@ -23,7 +23,7 @@ describe('getConverter', () => {
       toIP = getConverter('Vertex', 'si_units', 'ip_units'),
       toSI = getConverter('Vertex', 'ip_units', 'si_units'),
       siVert = { x: 12, y: -5 },
-      ipVert = { x: 39.37008, y: -16.4042 };
+      ipVert = { x: 12 * 3.280839895, y: -5 * 3.280839895 };
 
     assert(isNearlyEqual(toSI(ipVert), siVert));
     assert(isNearlyEqual(toIP(siVert), ipVert));
