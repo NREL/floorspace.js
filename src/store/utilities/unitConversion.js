@@ -107,3 +107,6 @@ export const convertSchema = (data, fromSystem, toSystem) =>
 
 export const convertState = (data, fromSystem, toSystem) =>
   getConverter('$state', fromSystem, toSystem)(data);
+
+// a library is just a version of schema with fewer keys.
+export const convertLibrary = convertSchema;

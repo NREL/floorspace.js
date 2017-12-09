@@ -1,16 +1,11 @@
 import _ from 'lodash';
 import idFactory from './generateId';
 import { libraryTypes } from '../modules/application/appconfig';
-
-const feetPerMeter = 3.28084;
-const metersPerFoot = 0.3048;
+import { convertLibrary } from './unitConversion';
 
 export default function importLibrary(context, payload) {
   let count = 0;
-  const
-    libraryUnits = payload.data.project.config.units,
-    projectUnits = context.state.project.config.units;
-  types.forEach((type) => {
+  libraryTypes.forEach((type) => {
     if (!payload.data[type] || !payload.data[type].length) {
       // library was created before this type existed, or
       // has no entries of this type.
@@ -35,6 +30,10 @@ export default function importLibrary(context, payload) {
     });
   });
 
+  const
+    librarySystem = payload.data.project.config.units === 'ft' ? 'ip_units' : 'si_units',
+    projectSystem = context.state.project.config.units === 'ft' ? 'ip_units' : 'si_units',
+    localUnitsPayload = convertLibrary(payload.data, librarySystem, projectSystem);
 
   window.eventBus.$emit('success', `Imported ${count} object${count !== 1 ? 's' : ''}`);
   // merge the import data with the existing library objects
@@ -44,7 +43,7 @@ export default function importLibrary(context, payload) {
       'building_units', 'thermal_zones', 'space_types', 'construction_sets',
       'window_definitions', 'daylighting_control_definitions', 'pitched_roofs',
     ].map(k => (
-      [k, context.state.models.library[k].concat(payload.data[k] || [])]
+      [k, context.state.models.library[k].concat(localUnitsPayload[k] || [])]
     ))),
   );
 }
