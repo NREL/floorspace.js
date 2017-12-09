@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import schema from '../../../schema/geometry_schema.json';
+import { libraryTypes } from '../modules/application/appconfig';
 import deepFreeze from '../../utilities/deepFreeze';
 
 const readUnits = (definition) => {
@@ -17,20 +18,42 @@ const readUnits = (definition) => {
   }
   if (definition.type === 'array' && _.get(definition, 'items.$ref')) {
     return {
-      $ref: definition.items.$ref.replace('#/definitions/', ''),
+      arrayOf: definition.items.$ref.replace('#/definitions/', ''),
+    };
+  }
+  if (definition.$ref) {
+    return {
+      $ref: definition.$ref.replace('#/definitions/', ''),
     };
   }
   return null;
 };
 
-export const units = deepFreeze(
-  _.pickBy(
+const rawUnits = {
+  $schema: _.pickBy(_.mapValues(schema.properties, readUnits), _.identity),
+  ..._.pickBy(
     _.mapValues(schema.definitions, readUnits),
-    _.identity));
+    _.identity),
+};
+
+rawUnits.$state = _.pickBy({
+  application: rawUnits.Application,
+  project: rawUnits.Project,
+  geometry: { arrayOf: 'Geometry' },
+  models: {
+    stories: { arrayOf: 'Story' },
+    library: _.fromPairs(
+      libraryTypes.map(lt => [lt, rawUnits.$schema[lt]])),
+  },
+}, _.identity);
+
+export const units = deepFreeze(rawUnits);
 
 const factorTable = {
   'm -> ft': 3.28084,
   'ft -> m': 0.3048,
+  'fc -> lux': 10.7639,
+  'lux -> fc': 0.092903,
 };
 export const conversionFactor = (fromUnits, toUnits) => {
   const factor = factorTable[`${fromUnits} -> ${toUnits}`];
@@ -64,7 +87,10 @@ export const getConverter = (path, fromSystem, toSystem) => {
     return val => val * factor;
   }
   if (pathUnits.$ref) {
-    const converter = getConverter(pathUnits.$ref, fromSystem, toSystem);
+    return getConverter(pathUnits.$ref, fromSystem, toSystem);
+  }
+  if (pathUnits.arrayOf) {
+    const converter = getConverter(pathUnits.arrayOf, fromSystem, toSystem);
     return arr => arr.map(converter);
   }
   if (_.isObject(pathUnits)) {
@@ -75,3 +101,9 @@ export const getConverter = (path, fromSystem, toSystem) => {
   }
   throw new Error(`Path ${path} did not lead to a useful spot in 'units'`);
 };
+
+export const convertSchema = (data, fromSystem, toSystem) =>
+  getConverter('$schema', fromSystem, toSystem)(data);
+
+export const convertState = (data, fromSystem, toSystem) =>
+  getConverter('$state', fromSystem, toSystem)(data);

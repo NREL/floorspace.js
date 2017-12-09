@@ -1,13 +1,12 @@
 import _ from 'lodash';
 import idFactory from './generateId';
-import { assignableProperties, componentTypes } from '../modules/application/appconfig';
+import { libraryTypes } from '../modules/application/appconfig';
 
 const feetPerMeter = 3.28084;
 const metersPerFoot = 0.3048;
 
 export default function importLibrary(context, payload) {
   let count = 0;
-  const types = [...assignableProperties, ...componentTypes];
   const
     libraryUnits = payload.data.project.config.units,
     projectUnits = context.state.project.config.units;
