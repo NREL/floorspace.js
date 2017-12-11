@@ -54,6 +54,7 @@ export default {
       if (value < start || value > end) {
         return { success: false, error: `Must be between ${start} and ${end}` };
       }
+      return { success: true };
     };
   },
   halfOpenInterval(start, end) {
