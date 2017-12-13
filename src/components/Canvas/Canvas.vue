@@ -18,7 +18,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 // this import order is important, if the grid is loaded before the other elements or after the toolbar, it ends up warped
 
-import Map from './Map'
+import MapView from './Map'
 
 import { mapState } from 'vuex'
 
@@ -33,7 +33,7 @@ export default {
         })
     },
     components: {
-        'map-view': Map,
+        'map-view': MapView,
     }
 }
 </script>

@@ -36,7 +36,7 @@ const ol = require('openlayers');
 const d3 = require('d3');
 
 export default {
-  name: 'map',
+  name: 'map-view',
   data() {
     return {
       view: null,
