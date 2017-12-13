@@ -104,6 +104,8 @@ export default {
       ...defaults.WindowDefinition,
       id: idFactory.generate(),
       name: opts.name,
+      wwr: null,
+      window_spacing: null,
     };
   },
   DaylightingControlDefn(opts = {}) {
