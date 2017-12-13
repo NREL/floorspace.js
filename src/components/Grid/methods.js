@@ -356,6 +356,7 @@ export default {
         window_definition_type: this.currentComponentDefinition.window_definition_type,
         width: this.currentComponentDefinition.width,
         spacing: this.currentComponentDefinition.window_spacing,
+        texture: this.currentComponentDefinition.texture,
       }])
       .call(this.drawWindow);
     this.highlightWindowGuideline(loc);

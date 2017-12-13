@@ -2,6 +2,7 @@ import _ from 'lodash';
 import factory from './factory';
 import validators from './validators';
 import * as converters from './converters';
+import { textures } from '../application/appconfig';
 
 /*
 * each library object type has
@@ -152,6 +153,15 @@ const map = {
         validator: validators.gt0orNull,
         converter: converters.gt0orNull,
         numeric: true,
+      },
+      {
+        name: 'texture',
+        displayName: 'Texture',
+        input_type: 'texture',
+        validator: validators.oneOf(textures),
+        enabled(row) {
+          return row.window_definition_type === 'Window to Wall Ratio';
+        },
       },
       {
         name: 'total_count',

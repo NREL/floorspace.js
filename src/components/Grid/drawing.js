@@ -51,7 +51,8 @@ function drawWindowToWallRatio(xScale, yScale, el, datum) {
   wwr.select('.hatch')
     .attr('d', line(
       boxAroundWindow({ edge: datum, xScale, yScale, offset: 6 }),
-    ));
+    ))
+    .attr('data-texture', (datum.texture || 'diagonal-stripes-4'));
 }
 
 

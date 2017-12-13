@@ -2,6 +2,10 @@
 export const assignableProperties = ['building_units', 'thermal_zones', 'space_types', 'construction_sets', 'pitched_roofs'];
 export const componentTypes = ['window_definitions', 'daylighting_control_definitions'];
 export const libraryTypes = [...assignableProperties, ...componentTypes];
+export const textures = [
+  'circles-2', 'circles-5', 'circles-8', 'diagonal-stripe-1',
+  'diagonal-stripe-4', 'diagonal-stripe-6', 'dots-5', 'dots-8',
+];
 
 const config = {
   // map modes to displaynames

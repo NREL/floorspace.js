@@ -977,6 +977,14 @@
 					"minimum": 0,
 					"exclusiveMinimum": true,
 					"default": null
+				},
+				"texture": {
+					"description": "Internal attribute representing how this window group is displayed. Applies only if window_definition_type is \"Window to Wall Ratio\".",
+					"type": [
+						"string",
+						"null"
+					],
+					"default": null
 				}
 			},
 			"required": [

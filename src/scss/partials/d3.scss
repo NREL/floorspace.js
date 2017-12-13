@@ -108,7 +108,11 @@
         stroke: black;
         .hatch {
           stroke-width: 2;
-          fill: url(#crosshatch);
+          @each $texture in $textures {
+            &[data-texture="#{$texture}"] {
+              fill: url(##{$texture});
+            }
+          }
         }
         .box {
           stroke-width: 2;
@@ -122,13 +126,21 @@
       .window .facing-selection {
         stroke: blue;
         .hatch {
-          fill: url(#crosshatch-facing-selection);
+          @each $texture in $textures {
+            &[data-texture="#{$texture}"] {
+              fill: url(##{$texture}-facing-selection);
+            }
+          }
         }
       }
       .window .selected {
         stroke: green;
         .hatch {
-          fill: url(#crosshatch-selected);
+          @each $texture in $textures {
+            &[data-texture="#{$texture}"] {
+              fill: url(##{$texture}-selected);
+            }
+          }
         }
       }
     }
