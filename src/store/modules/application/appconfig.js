@@ -1,6 +1,7 @@
 
 export const assignableProperties = ['building_units', 'thermal_zones', 'space_types', 'construction_sets', 'pitched_roofs'];
 export const componentTypes = ['window_definitions', 'daylighting_control_definitions'];
+export const libraryTypes = [...assignableProperties, ...componentTypes];
 
 const config = {
   // map modes to displaynames

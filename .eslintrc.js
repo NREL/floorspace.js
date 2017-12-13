@@ -27,5 +27,6 @@ module.exports = {
     'no-mixed-operators': 0, // many 5th graders know PEMDAS.
     'no-console': 0, // logging is healthy. logging is good.
     'no-cond-assign': [2, 'except-parens'],
+    'import/prefer-default-export': 0, // no, sometimes I want to export by name.
   }
 };

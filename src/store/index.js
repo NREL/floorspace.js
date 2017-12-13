@@ -10,6 +10,7 @@ import models from './modules/models/index';
 import exportData from './utilities/export';
 import importFloorplan from './utilities/importFloorplan';
 import importLibrary from './utilities/importLibrary';
+import { convertState } from './utilities/unitConversion';
 import mutations from './mutations';
 
 Vue.use(Vuex);
@@ -28,6 +29,16 @@ const store = new Vuex.Store({
   actions: {
     importFloorplan,
     importLibrary,
+    changeUnits(context, { newUnits }) {
+      console.log(`moving from ${context.state.project.config.units} to ${newUnits}`);
+      context.commit(
+        'changeUnits',
+        convertState(
+          context.state,
+          context.state.project.config.units === 'm' ? 'si_units' : 'ip_units',
+          newUnits === 'm' ? 'si_units' : 'ip_units'));
+      context.dispatch('project/setUnits', { units: newUnits });
+    },
   },
   mutations,
 });
