@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>import_floorplan</name>
   <uid>79d7fbb8-e001-4c65-9444-c7dcb975290f</uid>
-  <version_id>53daf941-255a-4d44-8b9a-fde421209f90</version_id>
-  <version_modified>20171207T204556Z</version_modified>
+  <version_id>22e82361-56c2-4edd-b094-6286959779ae</version_id>
+  <version_modified>20171211T232622Z</version_modified>
   <xml_checksum>0AD1E2E2</xml_checksum>
   <class_name>ImportFloorplan</class_name>
   <display_name>Import Floorplan</display_name>
@@ -73,7 +73,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>2D33A096</checksum>
+      <checksum>5451C3B2</checksum>
     </file>
   </files>
 </measure>
