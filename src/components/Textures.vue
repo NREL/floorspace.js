@@ -7,6 +7,9 @@
           If you add a pattern here, it will not display unless
           you also add its name in appconfig.js
 
+          A warning will show in the console, and this situation will be
+          caught by our e2e tests.
+
           Sorry for the duplication...
         -->
         <pattern
@@ -80,6 +83,7 @@
 
 <script>
 import _ from 'lodash';
+import { textures } from '../store/modules/application/appconfig';
 
 export default {
   name: 'Textures',
@@ -95,6 +99,7 @@ export default {
   },
   mounted() {
     this.loadCssStyles();
+    this.checkTexturesList();
   },
   methods: {
     loadCssStyles() {
@@ -106,6 +111,21 @@ export default {
         css.appendChild(document.createTextNode(this.styles));
       }
       document.head.appendChild(css);
+    },
+    checkTexturesList() {
+      const
+        missingTextures = _.difference(textures, _.map(this.patterns, 'id')),
+        extraTextures = _.difference(_.map(this.patterns, 'id'), textures);
+      if (missingTextures.length) {
+        console.error(`[warning]: Textures were added to Textures.vue, but not to appconfig.js.
+  This will cause those textures not to be used. The following are missing from appconfig:
+  ${missingTextures}`);
+      }
+      if (extraTextures.length) {
+        console.error(`[warning]: Textures were added to appconfig.js, but not to Textures.vue.
+  Those textures will not be visible. The following are missing from Textures.vue:
+  ${extraTextures}`);
+      }
     },
   },
   computed: {
