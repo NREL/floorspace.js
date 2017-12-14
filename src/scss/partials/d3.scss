@@ -182,7 +182,11 @@
 
         .window-wall-ratio .hatch {
           stroke-width: 2;
-          fill: url(#crosshatch-highlight);
+          @each $texture in $textures {
+            &[data-texture="#{$texture}"] {
+              fill: url(##{$texture}-highlight);
+            }
+          }
         }
         .repeating-windows .box {
           stroke-dasharray: 4 3;

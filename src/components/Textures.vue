@@ -5,19 +5,21 @@
         <!-- ATTENCION!
 
           If you add a pattern here, it will not display unless
-          you also add its name in config.scss.
+          you also add its name in config.scss and appconfig.js
+
+          Sorry for the duplication...
         -->
         <pattern
           :id="`circles-2${modifier}`"
           patternUnits="userSpaceOnUse"
-          width="10" height="10"
+          width="5" height="5"
         >
           <circle cx='1.5' cy='1.5' r='1.5' :fill="color"/>
         </pattern>
         <pattern
           :id="`circles-5${modifier}`"
           patternUnits="userSpaceOnUse"
-          width="10" height="10"
+          width="9" height="9"
         >
           <circle cx='3' cy='3' r='3' :fill="color"/>
         </pattern>
