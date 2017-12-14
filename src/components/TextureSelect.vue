@@ -11,21 +11,21 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     <button
       :class="`texture-${value}`"
       @click="open = !open"
-      @blur="closeSoon"
+      @blur="open = false"
     >
       <span class="svg-background" />
       <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
           <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
       </svg>
     </button>
-    <ul v-if="open">
+    <ul v-show="open">
       <li
         v-for="texture in textures"
         :class="{
           [`texture-${texture}`]: true,
           selected: texture === value,
         }"
-        @click="choose(texture)"
+        @mousedown="choose(texture)"
       />
     </ul>
   </div>
@@ -49,12 +49,8 @@ export default {
   },
   methods: {
     choose(texture) {
-      console.log('trying to change to', texture);
       this.$emit('change', texture);
       this.open = false;
-    },
-    closeSoon() {
-      // Vue.nextTick().then(() => { this.open = false; });
     },
   },
 }
@@ -94,7 +90,7 @@ ul {
   width: 100%;
 }
 li {
-  margin-top: 3px;
+  border-top: 3px solid white;
   width: 100%;
   height: 20px;
   &:hover {

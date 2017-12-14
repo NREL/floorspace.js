@@ -50,7 +50,7 @@ function drawWindowToWallRatio(xScale, yScale, el, datum) {
   wwr.classed('facing-selection', d => d.facingSelection);
   wwr.select('.hatch')
     .attr('d', line(
-      boxAroundWindow({ edge: datum, xScale, yScale, offset: 6 }),
+      boxAroundWindow({ edge: datum, xScale, yScale, offset: 8 }),
     ))
     .attr('data-texture', (datum.texture || 'diagonal-stripes-4'));
 }
