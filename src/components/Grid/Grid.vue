@@ -14,18 +14,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     :class="{ 'reduce-ticks': reduceTicks }"
   >
     <svg ref="grid" id="svg-grid">
-      <defs>
-        <pattern
-          v-for="(color, modifier) in crosshatchModifiers"
-          :id="`crosshatch${modifier}`"
-          patternUnits="userSpaceOnUse"
-          width="10" height="10"
-        >
-          <path d='M-1,1 l2,-2
-                   M0,10 l10,-10
-                   M9,11 l2,-2' :stroke="color" stroke-width='2'/>
-        </pattern>
-      </defs>
       <g class="axis axis--x"></g>
       <g class="axis axis--y"></g>
       <g class="images" data-transform-plz></g>

@@ -17,6 +17,7 @@
           patternUnits="userSpaceOnUse"
           width="5" height="5"
         >
+          <rect width="5" height="5" fill="#fff" fill-opacity="0.7" />
           <circle cx='1.5' cy='1.5' r='1.5' :fill="color"/>
         </pattern>
         <pattern
@@ -24,6 +25,7 @@
           patternUnits="userSpaceOnUse"
           width="9" height="9"
         >
+          <rect width="9" height="9" fill="#fff" fill-opacity="0.7" />
           <circle cx='3' cy='3' r='3' :fill="color"/>
         </pattern>
         <pattern
@@ -31,6 +33,7 @@
           patternUnits="userSpaceOnUse"
           width="10" height="10"
         >
+          <rect width="10" height="10" fill="#fff" fill-opacity="0.7" />
           <circle cx='4.5' cy='4.5' r='4.5' :fill="color"/>
         </pattern>
         <pattern
@@ -38,6 +41,7 @@
           patternUnits="userSpaceOnUse"
           width="10" height="10"
         >
+          <rect width="10" height="10" fill="#fff" fill-opacity="0.7" />
           <path d='M-1,1 l2,-2
                    M0,10 l10,-10
                    M9,11 l2,-2' :stroke="color" stroke-width='1'/>
@@ -47,6 +51,7 @@
           patternUnits="userSpaceOnUse"
           width="10" height="10"
         >
+          <rect width="10" height="10" fill="#fff" fill-opacity="0.7" />
           <path d='M-1,1 l2,-2
                    M0,10 l10,-10
                    M9,11 l2,-2' :stroke="color" stroke-width='3'/>
@@ -66,6 +71,7 @@
           patternUnits="userSpaceOnUse"
           width="10" height="10"
         >
+          <rect width="10" height="10" fill="#fff" fill-opacity="0.7" />
           <rect x='0' y='0' width='5' height='5' :fill='color' />
         </pattern>
         <pattern
@@ -73,6 +79,7 @@
           patternUnits="userSpaceOnUse"
           width="10" height="10"
         >
+          <rect width="10" height="10" fill="#fff" fill-opacity="0.7" />
           <rect x='0' y='0' width='8' height='8' :fill='color' />
         </pattern>
         <pattern
@@ -80,15 +87,17 @@
           patternUnits="userSpaceOnUse"
           width="8" height="8"
         >
+          <rect width="8" height="8" fill="#fff" fill-opacity="0.7" />
           <path d='M0 0L8 8ZM8 0L0 8Z' stroke-width='0.5' :stroke='color' stroke-opacity="0.8" />
         </pattern>
         <pattern
           :id="`vertical-line${modifier}`"
           patternUnits="userSpaceOnUse"
-          width="6" height="49"
+          width="4" height="49"
         >
-          <rect width='3' height='50' fill='#fff' fill-opacity="0.5" />
-          <rect x='3' width='1' height='50' :fill='color' fill-opacity="0.5" />
+          <rect width='4' height='50' fill='#fff' fill-opacity="0.8" />
+          <rect width='2' height='50' fill='#fff' fill-opacity="0.5" />
+          <rect x='2' width='1' height='50' :fill='color' fill-opacity="0.5" />
         </pattern>
       </template>
     </defs>

@@ -158,7 +158,7 @@ const map = {
         name: 'texture',
         displayName: 'Texture',
         input_type: 'texture',
-        validator: validators.oneOf(textures),
+        validator: validators.oneOf(...textures),
         enabled(row) {
           return row.window_definition_type === 'Window to Wall Ratio';
         },

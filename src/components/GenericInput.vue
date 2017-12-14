@@ -36,11 +36,18 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     :value="row[col.name]"
     :disabled="disabled"
   />
+  <TextureSelect
+    v-else-if="col.input_type === 'texture'"
+    @change="val => onChange(val)"
+    :value="row[col.name]"
+    :disabled="disabled"
+  />
 </template>
 
 <script>
 import _ from 'lodash';
 import Huebee from 'huebee';
+import TextureSelect from './TextureSelect.vue';
 
 export default {
   name: 'GenericInput',
@@ -86,6 +93,9 @@ export default {
       }
       return !this.col.enabled(this.row)
     },
+  },
+  components: {
+    TextureSelect,
   },
 }
 
