@@ -5,7 +5,7 @@
         <!-- ATTENCION!
 
           If you add a pattern here, it will not display unless
-          you also add its name in config.scss and appconfig.js
+          you also add its name in appconfig.js
 
           Sorry for the duplication...
         -->
@@ -79,6 +79,8 @@
 </template>
 
 <script>
+import _ from 'lodash';
+
 export default {
   name: 'Textures',
   data() {
@@ -90,6 +92,67 @@ export default {
         '': '#222'
       },
     };
+  },
+  mounted() {
+    this.loadCssStyles();
+  },
+  methods: {
+    loadCssStyles() {
+      const css = document.createElement('style');
+      css.type = 'text/css';
+      if (css.styleSheet) {
+        css.styleSheet.cssText = this.styles;
+      } else {
+        css.appendChild(document.createTextNode(this.styles));
+      }
+      document.head.appendChild(css);
+    },
+  },
+  computed: {
+    modSuffixes() { return _.filter(Object.keys(this.modifiers), _.identity) },
+    patterns() {
+      return _.reject(
+        Array.from(this.$el.querySelectorAll('pattern')),
+        // don't make css classes for modified textures
+        p => this.modSuffixes.some(ms => _.endsWith(p.getAttribute('id'), ms)),
+      );
+    },
+    cssStyles() {
+      return this.patterns
+        .map((pattern) => {
+          const
+            id = pattern.getAttribute('id'),
+            width = pattern.getAttribute('width'),
+            height = pattern.getAttribute('height'),
+            contents = pattern.innerHTML,
+            wrapped = `<svg xmlns='http://www.w3.org/2000/svg' width='${width}' height='${height}'>${contents}</svg>`;
+          return `
+            .texture-${id} {
+              background-image: url("data:image/svg+xml;base64,${btoa(wrapped)}");
+              background-repeat: repeat;
+            }`;
+        });
+    },
+    windowStyles() {
+      return _.map(this.patterns, p => p.getAttribute('id'))
+        .map((id) => `
+            #grid svg .polygons .windows .window .hatch[data-texture="${id}"] {
+              fill: url(#${id});
+            }
+            #grid svg .polygons .windows .window .facing-selection .hatch[data-texture="${id}"] {
+              fill: url(#${id}-facing-selection);
+            }
+            #grid svg .polygons .windows .window .selected .hatch[data-texture="${id}"] {
+              fill: url(#${id}-selected);
+            }
+            #grid svg .highlight .window .window-wall-ratio .hatch[data-texture="${id}"] {
+              fill: url(#${id}-highlight);
+            }
+          `);
+    },
+    styles() {
+      return [...this.cssStyles, ...this.windowStyles].join('\n');
+    },
   },
 }
 </script>

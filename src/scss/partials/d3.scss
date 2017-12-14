@@ -108,11 +108,6 @@
         stroke: black;
         .hatch {
           stroke-width: 2;
-          @each $texture in $textures {
-            &[data-texture="#{$texture}"] {
-              fill: url(##{$texture});
-            }
-          }
         }
         .box {
           stroke-width: 2;
@@ -125,23 +120,9 @@
       }
       .window .facing-selection {
         stroke: blue;
-        .hatch {
-          @each $texture in $textures {
-            &[data-texture="#{$texture}"] {
-              fill: url(##{$texture}-facing-selection);
-            }
-          }
-        }
       }
       .window .selected {
         stroke: green;
-        .hatch {
-          @each $texture in $textures {
-            &[data-texture="#{$texture}"] {
-              fill: url(##{$texture}-selected);
-            }
-          }
-        }
       }
     }
     .daylighting-control {
@@ -182,11 +163,6 @@
 
         .window-wall-ratio .hatch {
           stroke-width: 2;
-          @each $texture in $textures {
-            &[data-texture="#{$texture}"] {
-              fill: url(##{$texture}-highlight);
-            }
-          }
         }
         .repeating-windows .box {
           stroke-dasharray: 4 3;
