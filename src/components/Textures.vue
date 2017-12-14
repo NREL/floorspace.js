@@ -75,7 +75,21 @@
         >
           <rect x='0' y='0' width='8' height='8' :fill='color' />
         </pattern>
-
+        <pattern
+          :id="`crosshatch${modifier}`"
+          patternUnits="userSpaceOnUse"
+          width="8" height="8"
+        >
+          <path d='M0 0L8 8ZM8 0L0 8Z' stroke-width='0.5' :stroke='color' stroke-opacity="0.8" />
+        </pattern>
+        <pattern
+          :id="`vertical-line${modifier}`"
+          patternUnits="userSpaceOnUse"
+          width="6" height="49"
+        >
+          <rect width='3' height='50' fill='#fff' fill-opacity="0.5" />
+          <rect x='3' width='1' height='50' :fill='color' fill-opacity="0.5" />
+        </pattern>
       </template>
     </defs>
   </svg>

@@ -5,6 +5,7 @@ export const libraryTypes = [...assignableProperties, ...componentTypes];
 export const textures = [
   'circles-2', 'circles-5', 'circles-8', 'diagonal-stripe-1',
   'diagonal-stripe-4', 'diagonal-stripe-6', 'dots-5', 'dots-8',
+  'vertical-line', 'crosshatch',
 ];
 
 const config = {
