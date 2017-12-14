@@ -347,6 +347,18 @@ export default {
       );
 
     if (!loc) { return; }
+
+    if (
+      this.currentComponentDefinition.window_definition_type !== 'Single Window' &&
+      _.filter(this.windowCenterLocs(rwuPoint), { edge_id: loc.edge_id })
+        .filter(w => w.window_definition_type !== 'Single Window')
+        .length
+    ) {
+      // We only want to allow selecting edge-long windows, not replacing with
+      // other edge-long windows, since that could be confusing:
+      // "Am I selecting or replacing that one?"
+      return;
+    }
     d3.select('#grid svg')
       .append('g')
       .classed('highlight', true)
