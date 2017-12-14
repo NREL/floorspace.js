@@ -9,6 +9,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
   <div class='input-select'>
     <button
+      v-if='!disabled'
       :class="`texture-${value}`"
       @click="open = !open"
       @blur="open = false"
