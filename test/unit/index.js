@@ -3,7 +3,6 @@
 Function.prototype.bind = require('function-bind')
 // Polyfill ES6
 require('babel-polyfill');
-require('proxy-polyfill/proxy.min.js');
 
 // require all test files (files that ends with .spec.js)
 const testsContext = require.context('./specs', true, /\.spec$/)
