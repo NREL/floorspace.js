@@ -89,6 +89,9 @@ ul {
   background-color: white;
   padding-left: 0;
   width: 100%;
+  z-index: 2;
+  overflow-y: scroll;
+  max-height: 120px;
 }
 li {
   border-top: 3px solid white;
