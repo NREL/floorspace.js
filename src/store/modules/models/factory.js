@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import 'proxy-polyfill';
 import idFactory from './../../utilities/generateId';
 import generateColor from './../../utilities/generateColor';
 import appconfig from './../application/appconfig';
