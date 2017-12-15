@@ -81,8 +81,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <div class="input-number">
           <label>spacing</label>
           <input v-model.number.lazy="spacing">
+          <label v-if="!allowSettingUnits">{{ rwUnits}}</label>
         </div>
         <PrettySelect
+          v-if="allowSettingUnits"
           ref="unitsSelect"
           :options="['ft', 'm']"
           :value="rwUnits"
@@ -249,7 +251,13 @@ export default {
     undo() { this.$store.timetravel.undo(); },
     redo() { this.$store.timetravel.redo(); },
     updateUnits(val) {
-      this.$store.dispatch('changeUnits', { newUnits: val });
+      if (this.allowSettingUnits) {
+        this.rwUnits = val;
+      } else {
+        window.eventBus.$emit('error', 'Units must be set before any geometry is drawn.');
+      }
+      // not today, friend...
+      // this.$store.dispatch('changeUnits', { newUnits: val });
     },
     displayNameForMode(mode) { return applicationHelpers.displayNameForMode(mode); },
   },
