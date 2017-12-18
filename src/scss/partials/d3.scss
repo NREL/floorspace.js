@@ -106,12 +106,11 @@
         stroke-width: 3;
         stroke: black;
         .hatch {
-          stroke-width: 2;
-          fill: url(#crosshatch);
+          stroke-width: 1;
         }
         .box {
-          stroke-width: 2;
-          stroke-dasharray: 4 3;
+          stroke-width: 1;
+          stroke-dasharray: 4 7;
           fill: none;
         }
         .sub-window {
@@ -120,15 +119,9 @@
       }
       .window .facing-selection {
         stroke: blue;
-        .hatch {
-          fill: url(#crosshatch-facing-selection);
-        }
       }
       .window .selected {
         stroke: green;
-        .hatch {
-          fill: url(#crosshatch-selected);
-        }
       }
     }
     .daylighting-control {
@@ -168,12 +161,11 @@
         stroke-width: 3;
 
         .window-wall-ratio .hatch {
-          stroke-width: 2;
-          fill: url(#crosshatch-highlight);
+          stroke-width: 1;
         }
         .repeating-windows .box {
-          stroke-dasharray: 4 3;
-          stroke-width: 2;
+          stroke-dasharray: 4 7;
+          stroke-width: 1;
           fill: none;
         }
         .sub-window {

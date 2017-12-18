@@ -907,7 +907,8 @@
 					],
 					"minimum": 0,
 					"maximum": 1,
-					"exclusiveMaximum": true
+					"exclusiveMaximum": true,
+					"default": 0.2
 				},
 				"sill_height": {
 					"description": "Vertical distance from the floor to the window sill. In drawing units.",
@@ -930,7 +931,8 @@
 					"minimum": 0,
 					"exclusiveMinimum": true,
 					"si_units": "m",
-					"ip_units": "ft"
+					"ip_units": "ft",
+					"default": 4
 				},
 				"height": {
 					"description": "Vertical height of each window. In drawing units. Used if window_definition_type is \"Single Window\" or \"Repeating Windows\".",
@@ -974,6 +976,14 @@
 					],
 					"minimum": 0,
 					"exclusiveMinimum": true,
+					"default": null
+				},
+				"texture": {
+					"description": "Internal attribute representing how this window group is displayed. Applies only if window_definition_type is \"Window to Wall Ratio\".",
+					"type": [
+						"string",
+						"null"
+					],
 					"default": null
 				}
 			},

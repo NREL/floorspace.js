@@ -2,6 +2,7 @@ import _ from 'lodash';
 import 'proxy-polyfill/proxy.min';
 import idFactory from './../../utilities/generateId';
 import generateColor from './../../utilities/generateColor';
+import generateTexture from './../../utilities/generateTexture';
 import appconfig from './../application/appconfig';
 import schema from '../../../../schema/geometry_schema.json';
 
@@ -105,6 +106,9 @@ export default {
       ...defaults.WindowDefinition,
       id: idFactory.generate(),
       name: opts.name,
+      wwr: null,
+      window_spacing: null,
+      texture: generateTexture('window_definition'),
     };
   },
   DaylightingControlDefn(opts = {}) {

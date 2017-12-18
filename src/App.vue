@@ -25,6 +25,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <!-- <inspector-view></inspector-view> -->
         </div>
         <ImageUpload />
+        <Textures />
     </div>
 </template>
 
@@ -39,6 +40,7 @@ import Canvas from './components/Canvas/Canvas.vue';
 import Toolbar from './components/Toolbar.vue';
 import ImageUpload from './components/ImageUpload.vue';
 import Inspector from './components/Inspector.vue';
+import Textures from './components/Textures.vue';
 import { Resize } from './components/Resize';
 
 
@@ -94,6 +96,7 @@ export default {
     navigation: Navigation,
     toolbar: Toolbar,
     ImageUpload,
+    Textures,
   },
 };
 </script>

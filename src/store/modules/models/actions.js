@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import libconfig from './libconfig';
-import factory from './factory';
+import factory, { defaults } from './factory';
 import idFactory, { genName } from './../../utilities/generateId';
 import geometryFactory from '../geometry/factory';
 import helpers from './helpers';
@@ -186,21 +186,24 @@ export default {
   updateWindowDefinitionWithData({ state, dispatch }, payload) {
     const { object: { id } } = payload;
 
+    const windowDefnDefaults = _.pick(
+      defaults.WindowDefinition,
+      ['height', 'width', 'window_spacing', 'wwr']);
     // blank out the keys that don't make sense for that type.
     if (payload.window_definition_type === 'Window to Wall Ratio') {
-      Object.assign(payload, {
+      Object.assign(payload, windowDefnDefaults, {
         height: null,
         width: null,
-        spacing: null,
+        window_spacing: null,
       });
     } else if (payload.window_definition_type === 'Repeating Windows') {
-      Object.assign(payload, {
+      Object.assign(payload, windowDefnDefaults, {
         wwr: null,
       });
     } else if (payload.window_definition_type === 'Single Window') {
-      Object.assign(payload, {
+      Object.assign(payload, windowDefnDefaults, {
         wwr: null,
-        spacing: null,
+        window_spacing: null,
       });
     } else if (payload.window_definition_type) {
       throw new Error(`unrecognized window_definition_type: ${payload.window_definition_type}`);

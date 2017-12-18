@@ -31,7 +31,7 @@ export function snapTargets(vertices, gridSpacing, cursor) {
   return _.orderBy(targets, ['dist', 'origin', 'type'], ['asc', 'asc', 'desc']);
 }
 
-export function expandWindowAlongEdge(edge, center, { width, spacing, window_definition_type }) {
+export function expandWindowAlongEdge(edge, center, { width, spacing, window_definition_type, texture }) {
   if (window_definition_type === 'Window to Wall Ratio' ||
       window_definition_type === 'Repeating Windows'
   ) {
@@ -48,6 +48,7 @@ export function expandWindowAlongEdge(edge, center, { width, spacing, window_def
       window_definition_type,
       width,
       spacing,
+      texture,
     };
   }
   const
