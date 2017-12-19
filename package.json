@@ -1,6 +1,6 @@
 {
   "name": "floorspace.js",
-  "version": "0.4.0",
+  "version": "0.7.0",
   "description": "a widget for creating 2d building energy models in svg",
   "author": "Katie Noland <katie@devetry.com>",
   "private": true,

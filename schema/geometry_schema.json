@@ -1,6 +1,6 @@
 {
 	"$schema": "http://json-schema.org/draft-04/schema#",
-	"version": "0.4.0",
+	"version": "0.7.0",
 	"description": "Comment describing your JSON Schema",
 	"type": "object",
 	"properties": {
