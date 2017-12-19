@@ -21,6 +21,50 @@
     <p>
       The easiest way to embed the app is to include it in an iframe.
     </p>
-    <iframe src="index.html"></iframe>
+    <p>
+      <button id="download-floorplan">Download Floorplan</button>
+    </p>
+    <p>
+      Import Floorplan
+      <input type="file" accept=".json" id="import-floorplan">
+    </p>
+    <iframe src="embeddable_geometry_editor.html"></iframe>
+    <script>
+    var iframe, frameWindow;
+      window.addEventListener('load', function() {
+        console.log('document onload');
+        iframe = document.querySelector('iframe');
+        frameWindow = iframe.contentWindow;
+
+        frameWindow.api.setConfig({
+          onChange: function() {
+            // console.log('change occurred in embedded app');
+          },
+        });
+        frameWindow.api.init();
+      });
+
+      document.querySelector('#download-floorplan')
+        .addEventListener('click', function() {
+          var a = document.createElement('a');
+          a.setAttribute(
+            'href',
+            ('data:text/json;charset=utf-8,' +
+             encodeURIComponent(JSON.stringify(frameWindow.api.exportFloorplan()))));
+          a.setAttribute('download', 'floorplan.json');
+          a.click();
+        });
+
+      document.querySelector('#import-floorplan')
+        .addEventListener('change', function(e) {
+          var reader = new FileReader();
+
+          reader.onload = (function(theFile) {
+            frameWindow.api.openFloorplan(theFile.currentTarget.result);
+          });
+
+          reader.readAsText(e.target.files[0]);
+        });
+    </script>
   </body>
 </html>
