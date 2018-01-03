@@ -288,6 +288,7 @@
       "window_spacing": null,
       "height": 4,
       "width": 2,
+      "window_type": "Fixed",
       "overhang_projection_factor": null,
       "fin_projection_factor": null
     },
@@ -300,6 +301,7 @@
       "window_spacing": null,
       "height": 4,
       "width": 3,
+      "window_type": "Fixed",
       "overhang_projection_factor": null,
       "fin_projection_factor": null
     },
@@ -312,6 +314,7 @@
       "window_spacing": null,
       "height": 4,
       "width": 4,
+      "window_type": "Fixed",
       "overhang_projection_factor": null,
       "fin_projection_factor": null
     },
@@ -324,6 +327,7 @@
       "window_spacing": 6,
       "height": 4,
       "width": 2,
+      "window_type": "Fixed",
       "overhang_projection_factor": null,
       "fin_projection_factor": null
     },
@@ -336,6 +340,7 @@
       "window_spacing": 6,
       "height": 4,
       "width": 3,
+      "window_type": "Fixed",
       "overhang_projection_factor": null,
       "fin_projection_factor": null
     },
@@ -348,6 +353,7 @@
       "window_spacing": 6,
       "height": 4,
       "width": 4,
+      "window_type": "Fixed",
       "overhang_projection_factor": null,
       "fin_projection_factor": null
     },
@@ -360,6 +366,7 @@
       "window_spacing": 6,
       "height": null,
       "width": null,
+      "window_type": "Fixed",
       "overhang_projection_factor": null,
       "fin_projection_factor": null
     },
@@ -372,8 +379,67 @@
       "window_spacing": 6,
       "height": null,
       "width": null,
+      "window_type": "Fixed",
       "overhang_projection_factor": null,
       "fin_projection_factor": null
+    }
+  ],
+  "door_definitions": [
+    {
+      "id": "",
+      "name": "Entry Door A",
+      "height": 6.67,
+      "width": 3,
+      "door_type": "Door"
+    },
+    {
+      "id": "",
+      "name": "Entry Door B",
+      "height": 6.67,
+      "width": 2.67,
+      "door_type": "Door"
+    },
+    {
+      "id": "",
+      "name": "Entry Door C",
+      "height": 6.67,
+      "width": 5.33,
+      "door_type": "Door"
+    },
+    {
+      "id": "",
+      "name": "Patio Door A",
+      "height": 6.67,
+      "width": 5.92,
+      "door_type": "Glass Door"
+    },
+    {
+      "id": "",
+      "name": "Patio Door B",
+      "height": 6.67,
+      "width": 4.92,
+      "door_type": "Glass Door"
+    },
+    {
+      "id": "",
+      "name": "Patio Door C",
+      "height": 8,
+      "width": 5.92,
+      "door_type": "Glass Door"
+    },
+    {
+      "id": "",
+      "name": "Garage Door - Single",
+      "height": 7,
+      "width": 8,
+      "door_type": "Overhead Door"
+    },
+    {
+      "id": "",
+      "name": "Garage Door - Double",
+      "height": 7,
+      "width": 16,
+      "door_type": "Overhead Door"
     }
   ],
   "daylighting_control_definitions": [
