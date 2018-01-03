@@ -50,6 +50,12 @@
 				"$ref": "#/definitions/WindowDefinition"
 			}
 		},
+		"door_definitions": {
+			"type": "array",
+			"items": {
+				"$ref": "#/definitions/DoorDefinition"
+			}
+		},
 		"daylighting_control_definitions": {
 			"type": "array",
 			"items": {
@@ -73,6 +79,7 @@
 		"space_types",
 		"construction_sets",
 		"window_definitions",
+		"door_definitions",
 		"daylighting_control_definitions",
 		"pitched_roofs"
 	],
@@ -569,6 +576,31 @@
 							"alpha"
 						]
 					}
+				},
+				"doors": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"door_definition_id": {
+								"type": "string"
+							},
+							"edge_id": {
+								"type": "string"
+							},
+							"alpha": {
+								"description": "Distance along edge to center point of door, starting from first vertex of edge at a = 0 and ending at second vertex of edge at a =1.  v = v1 + a*(v2-v1). ",
+								"type": "number",
+								"minimum": 0,
+								"maximum": 1
+							}
+						},
+						"required": [
+							"door_definition_id",
+							"edge_id",
+							"alpha"
+						]
+					}
 				}
 			},
 			"required": [
@@ -585,7 +617,8 @@
 				"images",
 				"spaces",
 				"shading",
-				"windows"
+				"windows",
+				"doors"
 			]
 		},
 		"Space": {
@@ -958,6 +991,14 @@
 					"si_units": "m",
 					"ip_units": "ft"
 				},
+				"window_type": {
+					"type": "string",
+					"enum": [
+						"Fixed",
+						"Operable"
+					],
+					"default": "Fixed"
+				},
 				"overhang_projection_factor": {
 					"description": "Projection factor for overhangs, set to null for no overhang.  Overhang depth = overhang_projection_factor*height.",
 					"type": [
@@ -996,8 +1037,57 @@
 				"window_spacing",
 				"height",
 				"width",
+				"window_type",
 				"overhang_projection_factor",
 				"fin_projection_factor"
+			]
+		},
+		"DoorDefinition": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "string"
+				},
+				"name": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"height": {
+					"description": "Vertical height of each door. In drawing units.",
+					"type": "number",
+					"minimum": 0,
+					"exclusiveMinimum": true,
+					"default": 4,
+					"si_units": "m",
+					"ip_units": "ft"
+				},
+				"width": {
+					"description": "Horizontal width of each door. In drawing units.",
+					"type": "number",
+					"minimum": 0,
+					"exclusiveMinimum": true,
+					"default": 2,
+					"si_units": "m",
+					"ip_units": "ft"
+				},
+				"door_type": {
+					"type": "string",
+					"enum": [
+						"Door",
+						"Glass Door",
+						"Overhead Door"
+					],
+					"default": "Door"
+				}
+			},
+			"required": [
+				"id",
+				"name",
+				"height",
+				"width",
+				"door_type"
 			]
 		},
 		"DaylightingControlDefinition": {

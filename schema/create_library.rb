@@ -64,15 +64,27 @@ library[:construction_sets] = construction_sets
 
 window_definitions = []
 #DLM: these distances are in feet, what happens if user changes app to m?
-window_definitions << {:id => "", :name => "Window A", :window_definition_type => "Single Window", :wwr => nil, :sill_height => 3, :window_spacing => nil, :height => 4, :width => 2, :overhang_projection_factor => nil, :fin_projection_factor => nil}
-window_definitions << {:id => "", :name => "Window B", :window_definition_type => "Single Window", :wwr => nil, :sill_height => 3, :window_spacing => nil, :height => 4, :width => 3, :overhang_projection_factor => nil, :fin_projection_factor => nil}
-window_definitions << {:id => "", :name => "Window C", :window_definition_type => "Single Window", :wwr => nil, :sill_height => 3, :window_spacing => nil, :height => 4, :width => 4, :overhang_projection_factor => nil, :fin_projection_factor => nil}
-window_definitions << {:id => "", :name => "Repeating Window A", :window_definition_type => "Repeating Windows", :wwr => nil, :sill_height => 3, :window_spacing => 6, :height => 4, :width => 2, :overhang_projection_factor => nil, :fin_projection_factor => nil}
-window_definitions << {:id => "", :name => "Repeating Window B", :window_definition_type => "Repeating Windows", :wwr => nil, :sill_height => 3, :window_spacing => 6, :height => 4, :width => 3, :overhang_projection_factor => nil, :fin_projection_factor => nil}
-window_definitions << {:id => "", :name => "Repeating Window C", :window_definition_type => "Repeating Windows", :wwr => nil, :sill_height => 3, :window_spacing => 6, :height => 4, :width => 4, :overhang_projection_factor => nil, :fin_projection_factor => nil}
-window_definitions << {:id => "", :name => "30% WWR", :window_definition_type => "Window to Wall Ratio", :wwr => 0.3, :sill_height => 3, :window_spacing => 6, :height => nil, :width => nil, :overhang_projection_factor => nil, :fin_projection_factor => nil}
-window_definitions << {:id => "", :name => "40% WWR", :window_definition_type => "Window to Wall Ratio", :wwr => 0.4, :sill_height => 3, :window_spacing => 6, :height => nil, :width => nil, :overhang_projection_factor => nil, :fin_projection_factor => nil}
+window_definitions << {:id => "", :name => "Window A", :window_definition_type => "Single Window", :wwr => nil, :sill_height => 3, :window_spacing => nil, :height => 4, :width => 2, :window_type => "Fixed", :overhang_projection_factor => nil, :fin_projection_factor => nil}
+window_definitions << {:id => "", :name => "Window B", :window_definition_type => "Single Window", :wwr => nil, :sill_height => 3, :window_spacing => nil, :height => 4, :width => 3, :window_type => "Fixed", :overhang_projection_factor => nil, :fin_projection_factor => nil}
+window_definitions << {:id => "", :name => "Window C", :window_definition_type => "Single Window", :wwr => nil, :sill_height => 3, :window_spacing => nil, :height => 4, :width => 4, :window_type => "Fixed", :overhang_projection_factor => nil, :fin_projection_factor => nil}
+window_definitions << {:id => "", :name => "Repeating Window A", :window_definition_type => "Repeating Windows", :wwr => nil, :sill_height => 3, :window_spacing => 6, :height => 4, :width => 2, :window_type => "Fixed", :overhang_projection_factor => nil, :fin_projection_factor => nil}
+window_definitions << {:id => "", :name => "Repeating Window B", :window_definition_type => "Repeating Windows", :wwr => nil, :sill_height => 3, :window_spacing => 6, :height => 4, :width => 3, :window_type => "Fixed", :overhang_projection_factor => nil, :fin_projection_factor => nil}
+window_definitions << {:id => "", :name => "Repeating Window C", :window_definition_type => "Repeating Windows", :wwr => nil, :sill_height => 3, :window_spacing => 6, :height => 4, :width => 4, :window_type => "Fixed", :overhang_projection_factor => nil, :fin_projection_factor => nil}
+window_definitions << {:id => "", :name => "30% WWR", :window_definition_type => "Window to Wall Ratio", :wwr => 0.3, :sill_height => 3, :window_spacing => 6, :height => nil, :width => nil, :window_type => "Fixed", :overhang_projection_factor => nil, :fin_projection_factor => nil}
+window_definitions << {:id => "", :name => "40% WWR", :window_definition_type => "Window to Wall Ratio", :wwr => 0.4, :sill_height => 3, :window_spacing => 6, :height => nil, :width => nil, :window_type => "Fixed", :overhang_projection_factor => nil, :fin_projection_factor => nil}
 library[:window_definitions] = window_definitions
+
+door_definitions = []
+#DLM: these distances are in feet, what happens if user changes app to m?
+door_definitions << {:id => "", :name => "Entry Door A", :height => 6.67, :width => 3, :door_type => "Door"}
+door_definitions << {:id => "", :name => "Entry Door B", :height => 6.67, :width => 2.67, :door_type => "Door"}
+door_definitions << {:id => "", :name => "Entry Door C", :height => 6.67, :width => 5.33, :door_type => "Door"}
+door_definitions << {:id => "", :name => "Patio Door A", :height => 6.67, :width => 5.92, :door_type => "Glass Door"}
+door_definitions << {:id => "", :name => "Patio Door B", :height => 6.67, :width => 4.92, :door_type => "Glass Door"}
+door_definitions << {:id => "", :name => "Patio Door C", :height => 8, :width => 5.92, :door_type => "Glass Door"}
+door_definitions << {:id => "", :name => "Garage Door - Single", :height => 7, :width => 8, :door_type => "Overhead Door"}
+door_definitions << {:id => "", :name => "Garage Door - Double", :height => 7, :width => 16, :door_type => "Overhead Door"}
+library[:door_definitions] = door_definitions
 
 daylighting_control_definitions = []
 daylighting_control_definitions << {:id => "", :name => "Daylighting Control A", :illuminance_setpoint => 300, :height => 3}
