@@ -1059,7 +1059,7 @@
 					"type": "number",
 					"minimum": 0,
 					"exclusiveMinimum": true,
-					"default": 4,
+					"default": 6.67,
 					"si_units": "m",
 					"ip_units": "ft"
 				},
@@ -1068,7 +1068,7 @@
 					"type": "number",
 					"minimum": 0,
 					"exclusiveMinimum": true,
-					"default": 2,
+					"default": 3,
 					"si_units": "m",
 					"ip_units": "ft"
 				},
