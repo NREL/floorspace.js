@@ -139,6 +139,16 @@ const map = {
         },
       },
       {
+        name: 'window_type',
+        displayName: 'Window Type',
+        input_type: 'select',
+        select_data() {
+          const options = ['Fixed', 'Operable'];
+          return _.zipObject(options, options);
+        },
+        validator: validators.oneOf('Fixed', 'Operable'),
+      },
+      {
         name: 'overhang_projection_factor',
         displayName: 'Overhang Projection Factor',
         input_type: 'text',
