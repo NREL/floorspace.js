@@ -555,7 +555,7 @@
 								"type": "string"
 							},
 							"alpha": {
-								"description": "Distance along edge to center point of window, starting from first vertex of edge at a = 0 and ending at second vertex of edge at a =1.  v = v1 + a*(v2-v1).  Does not apply if window_definition_type is \"Window to Wall Ratio\". Will be an array of such values if window_definition_type is \"Repeating Windows\".",
+								"description": "Distance along edge to center point of window, starting from first vertex of edge at a = 0 and ending at second vertex of edge at a =1.  v = v1 + a*(v2-v1).  Does not apply if window_definition_mode is \"Window to Wall Ratio\". Will be an array of such values if window_definition_mode is \"Repeating Windows\".",
 								"type": [
 									"number",
 									"null",
@@ -923,7 +923,7 @@
 						"null"
 					]
 				},
-				"window_definition_type": {
+				"window_definition_mode": {
 					"type": "string",
 					"enum": [
 						"Single Window",
@@ -933,7 +933,7 @@
 					"default": "Single Window"
 				},
 				"wwr": {
-					"description": "Target window to wall ratio, only used if window_definition_type is \"Window to Wall Ratio\"",
+					"description": "Target window to wall ratio, only used if window_definition_mode is \"Window to Wall Ratio\"",
 					"type": [
 						"number",
 						"null"
@@ -956,7 +956,7 @@
 					"ip_units": "ft"
 				},
 				"window_spacing": {
-					"description": "Spacing between windows.  Only used if window_definition_type is  \"Repeating Windows\".",
+					"description": "Spacing between windows.  Only used if window_definition_mode is  \"Repeating Windows\".",
 					"type": [
 						"number",
 						"null"
@@ -968,7 +968,7 @@
 					"default": 4
 				},
 				"height": {
-					"description": "Vertical height of each window. In drawing units. Used if window_definition_type is \"Single Window\" or \"Repeating Windows\".",
+					"description": "Vertical height of each window. In drawing units. Used if window_definition_mode is \"Single Window\" or \"Repeating Windows\".",
 					"type": [
 						"number",
 						"null"
@@ -980,7 +980,7 @@
 					"ip_units": "ft"
 				},
 				"width": {
-					"description": "Horizontal width of each window. In drawing units. Used if window_definition_type is \"Single Window\" or \"Repeating Windows\".",
+					"description": "Horizontal width of each window. In drawing units. Used if window_definition_mode is \"Single Window\" or \"Repeating Windows\".",
 					"type": [
 						"number",
 						"null"
@@ -1020,7 +1020,7 @@
 					"default": null
 				},
 				"texture": {
-					"description": "Internal attribute representing how this window group is displayed. Applies only if window_definition_type is \"Window to Wall Ratio\".",
+					"description": "Internal attribute representing how this window group is displayed. Applies only if window_definition_mode is \"Window to Wall Ratio\".",
 					"type": [
 						"string",
 						"null"
@@ -1031,7 +1031,7 @@
 			"required": [
 				"id",
 				"name",
-				"window_definition_type",
+				"window_definition_mode",
 				"wwr",
 				"sill_height",
 				"window_spacing",

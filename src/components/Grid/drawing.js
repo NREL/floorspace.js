@@ -160,14 +160,14 @@ export function drawWindow() {
     selection
       .merge(selection.enter().append('g').attr('class', 'window'))
       .each(function (d) {
-        if (d.window_definition_type === 'Single Window') {
+        if (d.window_definition_mode === 'Single Window') {
           drawSingleWindow(xScale, yScale, this, d);
-        } else if (d.window_definition_type === 'Window to Wall Ratio') {
+        } else if (d.window_definition_mode === 'Window to Wall Ratio') {
           drawWindowToWallRatio(xScale, yScale, this, d);
-        } else if (d.window_definition_type === 'Repeating Windows') {
+        } else if (d.window_definition_mode === 'Repeating Windows') {
           drawRepeatingWindows(xScale, yScale, this, d);
         } else {
-          throw new Error(`unexpected window_definition_type: ${d.window_definition_type}`);
+          throw new Error(`unexpected window_definition_mode: ${d.window_definition_mode}`);
         }
       });
   }
@@ -308,7 +308,7 @@ export function drawWindowGuideline() {
         selection.merge(selection.enter()).data()
           .map(d => ({ start: d.edge_start, end: d.center })),
       )
-      .filter(d => d.window_definition_type === 'Single Window')
+      .filter(d => d.window_definition_mode === 'Single Window')
       .call(drawMeasure);
   }
 

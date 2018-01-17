@@ -88,7 +88,7 @@ describe('getConverter', () => {
       siWindow = {
         id: 'originallySi',
         name: 'my si window',
-        window_definition_type: 'Single Window',
+        window_definition_mode: 'Single Window',
         wwr: 0.3,
         sill_height: 1,
         window_spacing: 2,
@@ -100,7 +100,7 @@ describe('getConverter', () => {
       ipWindow = {
         id: 'originallyIP',
         name: 'my ip window',
-        window_definition_type: 'Single Window',
+        window_definition_mode: 'Single Window',
         wwr: 0.3,
         sill_height: 3.28084,
         window_spacing: 2 * 3.28084,
@@ -419,7 +419,7 @@ describe('convertState', () => {
         {
           "id": "14",
           "name": "Window 1",
-          "window_definition_type": "Single Window",
+          "window_definition_mode": "Single Window",
           "wwr": null,
           "sill_height": 3,
           "window_spacing": null,

@@ -59,6 +59,7 @@ export default {
             window_definitions: [],
             daylighting_control_definitions: [],
             pitched_roofs: [],
+            door_definitions: [],
         }
     },
     actions: actions,

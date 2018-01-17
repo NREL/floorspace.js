@@ -190,27 +190,27 @@ export default {
       defaults.WindowDefinition,
       ['height', 'width', 'window_spacing', 'wwr']);
     // blank out the keys that don't make sense for that type.
-    if (payload.window_definition_type === 'Window to Wall Ratio') {
+    if (payload.window_definition_mode === 'Window to Wall Ratio') {
       Object.assign(payload, windowDefnDefaults, {
         height: null,
         width: null,
         window_spacing: null,
       });
-    } else if (payload.window_definition_type === 'Repeating Windows') {
+    } else if (payload.window_definition_mode === 'Repeating Windows') {
       Object.assign(payload, windowDefnDefaults, {
         wwr: null,
       });
-    } else if (payload.window_definition_type === 'Single Window') {
+    } else if (payload.window_definition_mode === 'Single Window') {
       Object.assign(payload, windowDefnDefaults, {
         wwr: null,
         window_spacing: null,
       });
-    } else if (payload.window_definition_type) {
-      throw new Error(`unrecognized window_definition_type: ${payload.window_definition_type}`);
+    } else if (payload.window_definition_mode) {
+      throw new Error(`unrecognized window_definition_mode: ${payload.window_definition_mode}`);
     }
 
-    if (_.includes(['Window to Wall Ratio', 'Repeating Windows'], payload.window_definition_type)) {
-      // upon change of window_definition_type, we need to
+    if (_.includes(['Window to Wall Ratio', 'Repeating Windows'], payload.window_definition_mode)) {
+      // upon change of window_definition_mode, we need to
       // prevent multiple repeating/wwr from sharing the same edge
       const windowsToDelete = _.flatMap(state.stories, story =>
         _.chain(story.windows)
@@ -285,15 +285,15 @@ export default {
     const windowsOnEdge = _.filter(story.windows, { edge_id })
       .map(w => ({
         ...w,
-        window_definition_type: _.find(
+        window_definition_mode: _.find(
           context.state.library.window_definitions,
           { id: w.window_definition_id },
-        ).window_definition_type,
+        ).window_definition_mode,
       }));
     let windowsToDelete;
-    if (windowDefn.window_definition_type === 'Single Window') {
+    if (windowDefn.window_definition_mode === 'Single Window') {
       // single windows can coexist with other single windows
-      windowsToDelete = _.reject(windowsOnEdge, { window_definition_type: 'Single Window' });
+      windowsToDelete = _.reject(windowsOnEdge, { window_definition_mode: 'Single Window' });
     } else {
       // Repeating and WWR cannot share with single window, or with one another.
       windowsToDelete = windowsOnEdge;

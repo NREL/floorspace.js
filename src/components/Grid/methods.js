@@ -348,9 +348,9 @@ export default {
     if (!loc) { return; }
 
     if (
-      this.currentComponentDefinition.window_definition_type !== 'Single Window' &&
+      this.currentComponentDefinition.window_definition_mode !== 'Single Window' &&
       _.filter(this.windowCenterLocs(rwuPoint), { edge_id: loc.edge_id })
-        .filter(w => w.window_definition_type !== 'Single Window')
+        .filter(w => w.window_definition_mode !== 'Single Window')
         .length
     ) {
       // We only want to allow selecting edge-long windows, not replacing with
@@ -364,7 +364,7 @@ export default {
       .selectAll('.window')
       .data([{
         ...loc,
-        window_definition_type: this.currentComponentDefinition.window_definition_type,
+        window_definition_mode: this.currentComponentDefinition.window_definition_mode,
         width: this.currentComponentDefinition.width,
         spacing: this.currentComponentDefinition.window_spacing,
         texture: this.currentComponentDefinition.texture,

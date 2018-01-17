@@ -282,7 +282,7 @@
     {
       "id": "",
       "name": "Window A",
-      "window_definition_type": "Single Window",
+      "window_definition_mode": "Single Window",
       "wwr": null,
       "sill_height": 3,
       "window_spacing": null,
@@ -295,7 +295,7 @@
     {
       "id": "",
       "name": "Window B",
-      "window_definition_type": "Single Window",
+      "window_definition_mode": "Single Window",
       "wwr": null,
       "sill_height": 3,
       "window_spacing": null,
@@ -308,7 +308,7 @@
     {
       "id": "",
       "name": "Window C",
-      "window_definition_type": "Single Window",
+      "window_definition_mode": "Single Window",
       "wwr": null,
       "sill_height": 3,
       "window_spacing": null,
@@ -321,7 +321,7 @@
     {
       "id": "",
       "name": "Repeating Window A",
-      "window_definition_type": "Repeating Windows",
+      "window_definition_mode": "Repeating Windows",
       "wwr": null,
       "sill_height": 3,
       "window_spacing": 6,
@@ -334,7 +334,7 @@
     {
       "id": "",
       "name": "Repeating Window B",
-      "window_definition_type": "Repeating Windows",
+      "window_definition_mode": "Repeating Windows",
       "wwr": null,
       "sill_height": 3,
       "window_spacing": 6,
@@ -347,7 +347,7 @@
     {
       "id": "",
       "name": "Repeating Window C",
-      "window_definition_type": "Repeating Windows",
+      "window_definition_mode": "Repeating Windows",
       "wwr": null,
       "sill_height": 3,
       "window_spacing": 6,
@@ -360,7 +360,7 @@
     {
       "id": "",
       "name": "30% WWR",
-      "window_definition_type": "Window to Wall Ratio",
+      "window_definition_mode": "Window to Wall Ratio",
       "wwr": 0.3,
       "sill_height": 3,
       "window_spacing": 6,
@@ -373,7 +373,7 @@
     {
       "id": "",
       "name": "40% WWR",
-      "window_definition_type": "Window to Wall Ratio",
+      "window_definition_mode": "Window to Wall Ratio",
       "wwr": 0.4,
       "sill_height": 3,
       "window_spacing": 6,

@@ -324,7 +324,7 @@ export default {
         center = windowLocation(edge, { alpha });
       return {
         ...expandWindowAlongEdge(edge, center, windowDefn),
-        window_definition_type: windowDefn.window_definition_type,
+        window_definition_mode: windowDefn.window_definition_mode,
         width: windowDefn.width,
         spacing: windowDefn.window_spacing,
         texture: windowDefn.texture,

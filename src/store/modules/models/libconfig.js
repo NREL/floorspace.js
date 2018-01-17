@@ -75,8 +75,8 @@ const map = {
         validator: validators.name,
       },
       {
-        name: 'window_definition_type',
-        displayName: 'Type',
+        name: 'window_definition_mode',
+        displayName: 'Mode',
         input_type: 'select',
         select_data() {
           const options = ['Single Window', 'Repeating Windows', 'Window to Wall Ratio'];
@@ -92,7 +92,7 @@ const map = {
         converter: converters.number,
         numeric: true,
         enabled(row) {
-          return row.window_definition_type === 'Window to Wall Ratio';
+          return row.window_definition_mode === 'Window to Wall Ratio';
         },
       },
       {
@@ -103,8 +103,8 @@ const map = {
         converter: converters.number,
         numeric: true,
         enabled(row) {
-          return row.window_definition_type === 'Single Window' ||
-                 row.window_definition_type === 'Repeating Windows';
+          return row.window_definition_mode === 'Single Window' ||
+                 row.window_definition_mode === 'Repeating Windows';
         },
       },
       {
@@ -115,8 +115,8 @@ const map = {
         converter: converters.number,
         numeric: true,
         enabled(row) {
-          return row.window_definition_type === 'Single Window' ||
-                 row.window_definition_type === 'Repeating Windows';
+          return row.window_definition_mode === 'Single Window' ||
+                 row.window_definition_mode === 'Repeating Windows';
         },
       },
       {
@@ -135,7 +135,7 @@ const map = {
         converter: converters.number,
         numeric: true,
         enabled(row) {
-          return row.window_definition_type === 'Repeating Windows';
+          return row.window_definition_mode === 'Repeating Windows';
         },
       },
       {
@@ -170,7 +170,7 @@ const map = {
         input_type: 'texture',
         validator: validators.oneOf(...textures),
         enabled(row) {
-          return row.window_definition_type === 'Window to Wall Ratio';
+          return row.window_definition_mode === 'Window to Wall Ratio';
         },
       },
       {

@@ -27,7 +27,10 @@ function withWindowDefinitionDefaults(arr) {
   if (!arr || !arr.length) return [];
   return arr.map(obj => ({
     ...defaults.WindowDefinition,
+    // backwards compatibility: we used to call window_definition_mode "window_definition_type"
+    window_definition_mode: obj.window_definition_type || defaults.WindowDefinition.window_definition_mode,
     ...obj,
+    window_definition_type: undefined,
   }));
 }
 
@@ -128,6 +131,7 @@ export default function importFloorplan(context, payload) {
           shed_direction: null,
           ...pr,
         })),
+        door_definitions: withHandleProp(payload.data.door_definitions),
       },
     },
     geometry,
