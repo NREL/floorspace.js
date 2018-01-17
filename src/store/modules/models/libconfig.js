@@ -59,6 +59,56 @@ const map = {
     ],
     init: factory.ThermalZone,
   },
+  door_definitions: {
+    displayName: 'Door',
+    columns: [
+      {
+        name: 'id',
+        displayName: 'ID',
+        readonly: true,
+        private: true,
+      },
+      {
+        name: 'name',
+        displayName: 'Name',
+        input_type: 'text',
+        validator: validators.name,
+      },
+      {
+        name: 'height',
+        displayName: 'Height',
+        input_type: 'text',
+        validator: validators.gt0,
+        converter: converters.number,
+        numeric: true,
+      },
+      {
+        name: 'width',
+        displayName: 'Width',
+        input_type: 'text',
+        validator: validators.gt0,
+        converter: converters.number,
+        numeric: true,
+      },
+      {
+        name: 'door_type',
+        displayName: 'Type',
+        input_type: 'select',
+        select_data() {
+          const options = ['Door', 'Glass Door', 'Overhead Door'];
+          return _.zipObject(options, options);
+        },
+        validator: validators.oneOf('Door', 'Glass Door', 'Overhead Door'),
+      },
+      {
+        name: 'texture',
+        displayName: 'Texture',
+        input_type: 'texture',
+        validator: validators.oneOf(...textures),
+      },
+    ],
+    init: factory.DoorDefinition,
+  },
   window_definitions: {
     displayName: 'Window',
     columns: [
@@ -669,6 +719,28 @@ const map = {
         input_type: 'select',
         select_data(space, state) {
           return _.fromPairs(state.models.library.daylighting_control_definitions.map(b => [b.name, b.id]));
+        },
+      },
+    ],
+  },
+  doors: {
+    displayName: 'Door',
+    columns: [
+      {
+        name: 'id',
+        private: true,
+      },
+      {
+        name: 'name',
+        displayName: 'Name',
+        input_type: 'text',
+      },
+      {
+        name: 'door_definition_id',
+        displayName: 'Definition',
+        input_type: 'select',
+        select_data(space, state) {
+          return _.fromPairs(state.models.library.door_definitions.map(b => [b.name, b.id]));
         },
       },
     ],

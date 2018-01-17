@@ -179,16 +179,16 @@ export default {
     windowStyles() {
       return _.map(this.patterns, p => p.getAttribute('id'))
         .map((id) => `
-            #grid svg .polygons .windows .window .hatch[data-texture="${id}"] {
+            #grid svg .polygons .window .hatch[data-texture="${id}"] {
               fill: url(#${id});
             }
-            #grid svg .polygons .windows .window .facing-selection .hatch[data-texture="${id}"] {
+            #grid svg .polygons .window .facing-selection .hatch[data-texture="${id}"] {
               fill: url(#${id}-facing-selection);
             }
-            #grid svg .polygons .windows .window .selected .hatch[data-texture="${id}"] {
+            #grid svg .polygons .window .selected .hatch[data-texture="${id}"] {
               fill: url(#${id}-selected);
             }
-            #grid svg .highlight .window .window-wall-ratio .hatch[data-texture="${id}"] {
+            #grid svg .highlight .window .hatch[data-texture="${id}"] {
               fill: url(#${id}-highlight);
             }
           `);
