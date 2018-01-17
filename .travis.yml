@@ -10,7 +10,7 @@ before_install:
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
   - sudo apt-get update
-  - sudo apt-get install -y libappindicator1 fonts-liberation
+  - sudo apt-get install -y libappindicator1 fonts-liberation ruby-full
   - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
   - sudo dpkg -i google-chrome*.deb
   - eval "$(ssh-agent -s)"
@@ -27,7 +27,7 @@ notifications:
   email: false
 script:
   - npm run test && node check_version.js
-  - npm run build && sed -i 's/\/static/static/g' dist/index.html && cp favicon.ico dist/
+  - npm run openstudio-build && sed -i 's/\/static/static/g' dist/index.html && cp favicon.ico dist/
 deploy:
   skip_cleanup: true
   provider: script
