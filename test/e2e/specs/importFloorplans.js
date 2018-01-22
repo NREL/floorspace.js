@@ -40,6 +40,7 @@ function deleteFloorplan() {
 const oldFloorplans = [
   '../fixtures/floorplan-2017-08-31.json',
   '../fixtures/floorplan_two_story_2017_11_28.json',
+  '../fixtures/floorplan_two_story_2018_01_17.json',
 ];
 
 module.exports = {

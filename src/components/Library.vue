@@ -225,6 +225,9 @@ export default {
         case 'daylighting_control_definitions':
           this.$store.dispatch('models/destroyDaylightingControlDef', { object });
           break;
+        case 'door_definitions':
+          this.$store.dispatch('models/destroyDoorDef', { object });
+          break;
         case 'windows':
           this.$store.dispatch('models/destroyWindow', { story_id: this.currentStory.id, object });
           break;

@@ -111,6 +111,8 @@ export default {
       this.$store.dispatch('models/destroyWindow', payload);
     } else if (component.type === 'daylighting_controls') {
       this.$store.dispatch('models/destroyDaylightingControl', payload);
+    } else if (component.type === 'doors') {
+      this.$store.dispatch('models/destroyDoor', payload);
     } else {
       console.error(`unrecognized component to remove: ${component}`);
     }
@@ -124,10 +126,13 @@ export default {
     }
     // user is holding shift, or we didn't find a component to select
     // => we're placing
-    if (this.currentComponentType === 'window_definitions') {
-      this.placeWindow();
-    } else if (this.currentComponentType === 'daylighting_control_definitions') {
+    if (this.currentComponentType === 'daylighting_control_definitions') {
       this.placeDaylightingControl();
+    } else if (
+        this.currentComponentType === 'window_definitions' ||
+        this.currentComponentType === 'door_definitions'
+    ) {
+      this.placeWindowOrDoor();
     } else {
       throw new Error(`unrecognized componentType: ${this.currentComponentType}`);
     }
@@ -140,7 +145,7 @@ export default {
     this.componentFacingSelection = component && component.id;
     if (!component) {
       // do no highlighting
-    } else if (component.type === 'windows') {
+    } else if (component.type === 'windows' || component.type === 'doors') {
       this.highlightWindowGuideline(component);
     } else if (component.type === 'daylighting_controls') {
       this.highlightDaylightingControlGuideline(component);
@@ -149,7 +154,7 @@ export default {
     }
     return component;
   },
-  placeWindow() {
+  placeWindowOrDoor() {
     const
       gridCoords = d3.mouse(this.$refs.grid),
       gridPoint = { x: gridCoords[0], y: gridCoords[1] },
@@ -158,17 +163,18 @@ export default {
         this.snapMode,
         this.spaceEdges, rwuPoint,
         this.currentComponentDefinition, this.spacing * 2, this.spacing,
-      );
+      ),
+      windowOrDoor = this.currentComponentType === 'window_definitions' ? 'Window' : 'Door';
 
     if (!loc) { return; }
 
     const payload = {
       story_id: this.currentStory.id,
       edge_id: loc.edge_id,
-      window_definition_id: this.currentComponentDefinition.id,
+      [`${windowOrDoor.toLowerCase()}_definition_id`]: this.currentComponentDefinition.id,
       alpha: loc.alpha,
     };
-    this.$store.dispatch('models/createWindow', payload);
+    this.$store.dispatch(`models/create${windowOrDoor}`, payload);
   },
   raiseOrLowerImages() {
     if (this.currentTool === 'Image') {
@@ -331,8 +337,12 @@ export default {
   highlightComponentToPlace(gridPoint) {
     if (this.currentComponentType === 'window_definitions') {
       this.highlightWindow(gridPoint);
-    } else {
+    } else if (this.currentComponentType === 'daylighting_control_definitions') {
       this.highlightDaylightingControl(gridPoint);
+    } else if (this.currentComponentType === 'door_definitions') {
+      this.highlightDoor(gridPoint);
+    } else {
+      throw new Error(`unrecognized componentType: ${this.currentComponentType}`);
     }
   },
 
@@ -348,9 +358,9 @@ export default {
     if (!loc) { return; }
 
     if (
-      this.currentComponentDefinition.window_definition_type !== 'Single Window' &&
+      this.currentComponentDefinition.window_definition_mode !== 'Single Window' &&
       _.filter(this.windowCenterLocs(rwuPoint), { edge_id: loc.edge_id })
-        .filter(w => w.window_definition_type !== 'Single Window')
+        .filter(w => w.window_definition_mode !== 'Single Window')
         .length
     ) {
       // We only want to allow selecting edge-long windows, not replacing with
@@ -364,9 +374,34 @@ export default {
       .selectAll('.window')
       .data([{
         ...loc,
-        window_definition_type: this.currentComponentDefinition.window_definition_type,
+        window_definition_mode: this.currentComponentDefinition.window_definition_mode,
         width: this.currentComponentDefinition.width,
         spacing: this.currentComponentDefinition.window_spacing,
+        texture: this.currentComponentDefinition.texture,
+      }])
+      .call(this.drawWindow);
+    this.highlightWindowGuideline(loc);
+  },
+  highlightDoor(gridPoint) {
+    const
+      rwuPoint = this.gridPointToRWU(gridPoint),
+      loc = snapWindowToEdge(
+        this.snapMode,
+        this.spaceEdges, rwuPoint,
+        this.currentComponentDefinition, this.spacing * 2, this.spacing,
+      );
+
+    if (!loc) { return; }
+
+    d3.select('#grid svg')
+      .append('g')
+      .classed('highlight', true)
+      .selectAll('.window')
+      .data([{
+        ...loc,
+        window_definition_mode: null,
+        windowOrDoor: 'door',
+        width: this.currentComponentDefinition.width,
         texture: this.currentComponentDefinition.texture,
       }])
       .call(this.drawWindow);
@@ -738,6 +773,7 @@ export default {
     polyEnter.append('polygon');
     polyEnter.append('text').attr('class', 'polygon-text');
     polyEnter.append('g').attr('class', 'windows');
+    polyEnter.append('g').attr('class', 'doors');
     polyEnter.append('g').attr('class', 'daylighting-controls');
 
     // draw polygons
@@ -772,6 +808,11 @@ export default {
     poly.select('.windows')
       .selectAll('.window')
       .data(d => d.windows)
+      .call(this.drawWindow);
+
+    poly.select('.doors')
+      .selectAll('.window')
+      .data(d => d.doors)
       .call(this.drawWindow);
 
     poly.select('.daylighting-controls')

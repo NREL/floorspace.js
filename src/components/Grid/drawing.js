@@ -55,6 +55,24 @@ function drawWindowToWallRatio(xScale, yScale, el, datum) {
     .attr('data-texture', (datum.texture || 'diagonal-stripes-4'));
 }
 
+function drawDoor(xScale, yScale, el, datum) {
+  const selection = d3.select(el)
+    .selectAll('.door')
+    .data([datum]);
+  const doorE = selection.enter().append('g').attr('class', 'door');
+  doorE.append('path').attr('class', 'hatch');
+
+  const line = d3.line();
+  const door = selection.merge(doorE);
+  door.exit().remove();
+  door.classed('selected', d => d.selected);
+  door.classed('facing-selection', d => d.facingSelection);
+  door.select('.hatch')
+    .attr('d', line(
+      boxAroundWindow({ edge: datum, xScale, yScale, offset: 8 }),
+    ))
+    .attr('data-texture', datum.texture);
+}
 
 function drawSingleWindow(xScale, yScale, el, datum) {
   d3.select(el)
@@ -160,14 +178,17 @@ export function drawWindow() {
     selection
       .merge(selection.enter().append('g').attr('class', 'window'))
       .each(function (d) {
-        if (d.window_definition_type === 'Single Window') {
+        if (d.windowOrDoor === 'door') {
+          drawDoor(xScale, yScale, this, d);
+        } else if (d.window_definition_mode === 'Single Window') {
           drawSingleWindow(xScale, yScale, this, d);
-        } else if (d.window_definition_type === 'Window to Wall Ratio') {
+        } else if (d.window_definition_mode === 'Window to Wall Ratio') {
           drawWindowToWallRatio(xScale, yScale, this, d);
-        } else if (d.window_definition_type === 'Repeating Windows') {
+        } else if (d.window_definition_mode === 'Repeating Windows') {
           drawRepeatingWindows(xScale, yScale, this, d);
         } else {
-          throw new Error(`unexpected window_definition_type: ${d.window_definition_type}`);
+          debugger;
+          throw new Error(`unexpected window_definition_mode: ${d.window_definition_mode}`);
         }
       });
   }
@@ -308,7 +329,7 @@ export function drawWindowGuideline() {
         selection.merge(selection.enter()).data()
           .map(d => ({ start: d.edge_start, end: d.center })),
       )
-      .filter(d => d.window_definition_type === 'Single Window')
+      .filter(d => d.window_definition_mode === 'Single Window')
       .call(drawMeasure);
   }
 

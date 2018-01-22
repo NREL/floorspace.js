@@ -109,12 +109,12 @@ describe('snapWindowToEdge', () => {
     narrowMaxSnapDist = 5;
 
   it('returns null on empty window list', () => {
-    refute(snapWindowToEdge('nonstrict', [], { x: 12, y: 12 }, { width: 10, window_definition_type: 'Single Window' }, inclusiveMaxSnapDist));
+    refute(snapWindowToEdge('nonstrict', [], { x: 12, y: 12 }, { width: 10, window_definition_mode: 'Single Window' }, inclusiveMaxSnapDist));
   });
 
   it('returns null when no windows nearby', () => {
-    refute(snapWindowToEdge('nonstrict', edges, { x: 100, y: 70 }, { width: 10, window_definition_type: 'Single Window' }, narrowMaxSnapDist));
-    refute(snapWindowToEdge('nonstrict', edges, { x: -50, y: -50 }, { width: 10, window_definition_type: 'Single Window' }, narrowMaxSnapDist));
+    refute(snapWindowToEdge('nonstrict', edges, { x: 100, y: 70 }, { width: 10, window_definition_mode: 'Single Window' }, narrowMaxSnapDist));
+    refute(snapWindowToEdge('nonstrict', edges, { x: -50, y: -50 }, { width: 10, window_definition_mode: 'Single Window' }, narrowMaxSnapDist));
   });
 
   it('returns a segment centered on an edge', () => {
@@ -122,7 +122,7 @@ describe('snapWindowToEdge', () => {
       genPointInNeighborhood,
       (cursor) => {
         const
-          windowLoc = snapWindowToEdge('nonstrict', edges, cursor, { width: 10, window_definition_type: 'Single Window' }, inclusiveMaxSnapDist),
+          windowLoc = snapWindowToEdge('nonstrict', edges, cursor, { width: 10, window_definition_mode: 'Single Window' }, inclusiveMaxSnapDist),
           edge = _.find(edges, { id: windowLoc.edge_id });
         assert(
           ptsAreCollinear(edge.v1, windowLoc.center, edge.v2),
@@ -139,7 +139,7 @@ describe('snapWindowToEdge', () => {
       genPointInNeighborhood,
       (cursor) => {
         const
-          windowLoc = snapWindowToEdge('nonstrict', edges, cursor, { width: 10, window_definition_type: 'Single Window' }, inclusiveMaxSnapDist),
+          windowLoc = snapWindowToEdge('nonstrict', edges, cursor, { width: 10, window_definition_mode: 'Single Window' }, inclusiveMaxSnapDist),
           edge = _.find(edges, { id: windowLoc.edge_id }),
           alphaAlongEdge = windowLocation(edge, windowLoc);
         assert(isNearlyEqual(
@@ -155,7 +155,7 @@ describe('snapWindowToEdge', () => {
       genPointInNeighborhood,
       (cursor) => {
         const
-          windowLoc = snapWindowToEdge('nonstrict', edges, cursor, { width: 10, window_definition_type: 'Single Window' }, inclusiveMaxSnapDist),
+          windowLoc = snapWindowToEdge('nonstrict', edges, cursor, { width: 10, window_definition_mode: 'Single Window' }, inclusiveMaxSnapDist),
           edge = _.find(edges, { id: windowLoc.edge_id });
         assert(
           haveSimilarAngles({ start: edge.v1, end: edge.v2 }, windowLoc),
@@ -176,7 +176,7 @@ describe('snapWindowToEdge', () => {
       genPointInNeighborhood,
       gen.intWithin(1, 20),
       (cursor, windowWidth) => {
-        const windowLoc = snapWindowToEdge('nonstrict', edges, cursor, { width: windowWidth, window_definition_type: 'Single Window' }, inclusiveMaxSnapDist);
+        const windowLoc = snapWindowToEdge('nonstrict', edges, cursor, { width: windowWidth, window_definition_mode: 'Single Window' }, inclusiveMaxSnapDist);
         assert(
           nearlyEqual(
             distanceBetweenPoints(windowLoc.center, windowLoc.start),

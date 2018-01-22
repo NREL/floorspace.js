@@ -40,6 +40,8 @@ export default {
         this.$store.dispatch('models/destroyWindow', { story_id: this.currentStory.id,  object: this.componentInstance });
       } else if (this.instanceType === 'daylighting_controls') {
         this.$store.dispatch('models/destroyDaylightingControl', { story_id: this.currentStory.id, object: this.componentInstance });
+      } else if (this.instanceType === 'doors') {
+        this.$store.dispatch('models/destroyDoor', { story_id: this.currentStory.id, object: this.componentInstance });
       } else {
         throw new Error(`Unrecognized component type ${this.instanceType}`);
       }
@@ -49,6 +51,8 @@ export default {
         this.$store.dispatch('models/modifyWindow', { id, key, value, story_id: this.currentStory.id });
       } else if (this.instanceType === 'daylighting_controls') {
         this.$store.dispatch('models/modifyDaylightingControl', { id, key, value, story_id: this.currentStory.id });
+      } else if (this.instanceType === 'doors') {
+        this.$store.dispatch('models/modifyDoor', { id, key, value, story_id: this.currentStory.id });
       } else {
         throw new Error(`unrecognized component mode "${this.mode}"`);
       }

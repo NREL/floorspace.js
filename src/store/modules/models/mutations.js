@@ -79,9 +79,23 @@ export default {
       name,
     });
   },
+  createDoor(state, { story_id, edge_id, door_definition_id, alpha, id }) {
+    const story = _.find(state.stories, { id: story_id });
+    story.doors.push({
+      door_definition_id,
+      edge_id,
+      alpha,
+      id,
+      name,
+    });
+  },
   dropWindows(state, { story_id }) {
     const story = _.find(state.stories, { id: story_id });
     story.windows = [];
+  },
+  dropDoors(state, { story_id }) {
+    const story = _.find(state.stories, { id: story_id });
+    story.doors = [];
   },
   createDaylightingControl(state, { story_id, face_id, daylighting_control_definition_id, vertex_id, name, id }) {
     const
@@ -113,6 +127,11 @@ export default {
       });
     });
   },
+  destroyDoorsByDefinition(state, { id }) {
+    state.stories.forEach((story) => {
+      story.doors = _.reject(story.doors, { door_definition_id: id });
+    });
+  },
   destroyDaylightingControl(state, { story_id, object: { id } }) {
     const story = _.find(state.stories, { id: story_id });
     story.spaces.forEach((space) => {
@@ -135,10 +154,20 @@ export default {
     const story = _.find(state.stories, { id: story_id });
     story.windows = _.reject(story.windows, { id });
   },
+  destroyDoor(state, { story_id, object: { id } }) {
+    const story = _.find(state.stories, { id: story_id });
+    story.doors = _.reject(story.doors, { id });
+  },
   modifyWindow(state, { story_id, id, key, value }) {
     const
       story = _.find(state.stories, { id: story_id }),
       windew = _.find(story.windows, { id });
     windew[key] = value;
   },
-}
+  modifyDoor(state, { story_id, id, key, value }) {
+    const
+      story = _.find(state.stories, { id: story_id }),
+      door = _.find(story.doors, { id });
+    door[key] = value;
+  },
+};

@@ -44,6 +44,8 @@ export default {
       type = 'window_definitions';
     } else if ((definition = rootState.models.library.daylighting_control_definitions.find(i => i.id === componentDefinitionId))) {
       type = 'daylighting_control_definitions';
+    } else if ((definition = _.find(rootState.models.library.door_definitions, { id: componentDefinitionId }))) {
+      type = 'door_definitions';
     }
     return { type, definition };
   },

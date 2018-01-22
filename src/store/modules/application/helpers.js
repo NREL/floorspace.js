@@ -21,6 +21,9 @@ export function componentInstanceById(currStory, compInstId) {
   const dc = _.find(_.flatMap(currStory.spaces, s => s.daylighting_controls), { id: compInstId });
   if (dc) { return { ...dc, type: 'daylighting_controls' }; }
 
+  const door = _.find(currStory.doors, { id: compInstId });
+  if (door) { return { ...door, type: 'doors' }; }
+
   return null;
 }
 

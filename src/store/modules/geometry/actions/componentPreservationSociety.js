@@ -36,6 +36,17 @@ function componentsOnStory(state, geometry_id) {
           originalFaceIds: _.map(faces, 'id'),
         };
       }),
+    doors: story.doors
+      .map((d) => {
+        const
+          edge = _.find(geom.edges, { id: d.edge_id }),
+          faces = facesContainingEdge(geom.faces, d.edge_id);
+        return {
+          ...d,
+          originalLoc: windowLocation(edge, d),
+          originalFaceIds: _.map(faces, 'id'),
+        };
+      }),
     perFaceComponents,
   };
 }
@@ -46,7 +57,7 @@ function replaceComponents(
   movementsByFaceId = {},
 ) {
   const
-    { geometry_id, story_id, windows, perFaceComponents } = components,
+    { geometry_id, story_id, windows, doors, perFaceComponents } = components,
     geometry = geometryHelpers.denormalize(_.find(context.rootState.geometry, { id: geometry_id })),
     story = _.find(context.rootState.models.stories, { id: story_id }),
     spaceFaces = geometry.faces.filter(f => _.find(story.spaces, { face_id: f.id })),
@@ -55,7 +66,7 @@ function replaceComponents(
   context.dispatch('models/destroyAllComponents', { story_id }, { root: true });
 
   const edgesPresentOnFaces = _.flatMap(spaceFaces, 'edges');
-  windows.forEach((w) => {
+  const replaceWindowOrDoor = (w, windowOrDoor) => {
     const
       { dx, dy } = movementsByFaceId[w.originalFaceIds[0]] || { dx: 0, dy: 0 },
       newLoc = { x: w.originalLoc.x + dx, y: w.originalLoc.y + dy },
@@ -76,13 +87,15 @@ function replaceComponents(
       return;
     }
 
-    context.dispatch('models/createWindow', {
+    context.dispatch(`models/create${windowOrDoor}`, {
       story_id,
       edge_id: loc.edge_id,
       alpha: loc.alpha,
-      window_definition_id: w.window_definition_id,
+      [`${windowOrDoor.toLowerCase()}_definition_id`]: w.window_definition_id || w.door_definition_id,
     }, { root: true });
-  });
+  };
+  windows.forEach(w => replaceWindowOrDoor(w, 'Window'));
+  doors.forEach(d => replaceWindowOrDoor(d, 'Door'));
 
   perFaceComponents.forEach(({ face_id, daylighting_controls }) => {
     daylighting_controls.forEach((d) => {

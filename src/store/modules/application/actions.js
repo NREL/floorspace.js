@@ -33,9 +33,14 @@ export default {
 
   setCurrentComponentDefinitionId(context, payload) {
     const { id } = payload;
-    if (context.rootState.models.library.daylighting_control_definitions.find(i => i.id === id) ||
-      context.rootState.models.library.window_definitions.find(i => i.id === id)) {
+    if (
+      context.rootState.models.library.daylighting_control_definitions.find(i => i.id === id) ||
+      context.rootState.models.library.window_definitions.find(i => i.id === id) ||
+      context.rootState.models.library.door_definitions.find(i => i.id === id)
+    ) {
       context.commit('setCurrentComponentDefinitionId', { id });
+    } else if (id !== 'undefined') {
+      throw new Error(`unable to set component definition -- couldn't find one with id ${id}`);
     }
   },
 
