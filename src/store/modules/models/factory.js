@@ -6,27 +6,36 @@ import generateTexture from './../../utilities/generateTexture';
 import appconfig from './../application/appconfig';
 import schema from '../../../../schema/geometry_schema.json';
 
-const readDefaults = (definition) => {
-  if (_.has(definition, 'default')) return definition.default;
-  if (definition.type === 'null') return null;
-  if (definition.type === 'array') return [];
-  if (definition.type === 'object') {
-    return _.mapValues(definition.properties, readDefaults);
-  }
-  return null;
+const makeReadPropertyAttr = (attribute) => {
+  const readPropertyAttr = (definition) => {
+    if (_.has(definition, 'default')) return definition[attribute];
+    if (definition.type === 'null') return null;
+    if (definition.type === 'array') return [];
+    if (definition.type === 'object') {
+      return _.mapValues(definition.properties, readPropertyAttr);
+    }
+    if (_.has(definition, attribute)) return definition[attribute];
+    return null;
+  };
+  return readPropertyAttr;
 };
 
-const rawDefaults = _.mapValues(schema.definitions, readDefaults);
-// We don't want the defaults to ever change, and we want to make sure
-// that different uses of defaults produce different objects.
-export const defaults = new Proxy(rawDefaults, {
-  get(target, key) {
-    return _.cloneDeep(target[key]);
-  },
-  set() {
-    throw new Error('Please do not change the defaults.');
-  },
-});
+const readPropertyAttrs = (attr) => {
+  const rawValues = _.mapValues(schema.definitions, makeReadPropertyAttr(attr));
+  // We don't want the defaults to ever change, and we want to make sure
+  // that different uses of defaults produce different objects.
+  return new Proxy(rawValues, {
+    get(target, key) {
+      return _.cloneDeep(target[key]);
+    },
+    set() {
+      throw new Error('Please do not change the defaults.');
+    },
+  });
+};
+
+export const defaults = readPropertyAttrs('default');
+export const allowableTypes = readPropertyAttrs('type');
 
 export default {
   Story(name) {

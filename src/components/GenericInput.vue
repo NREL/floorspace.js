@@ -12,9 +12,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
   <input
     v-else-if="col.input_type === 'text'"
     @keydown="blurOnEnter"
-    @blur="onChange($event.target.value)"
+    @blur="onChange($event.target.value); $forceUpdate()"
     :value="row[col.name]"
     :disabled="disabled"
+    :placeholder="col.nullable && row[col.name] === null ? '(none)' : null"
     :class="{ numeric: col.numeric }"
   />
   <div
