@@ -108,6 +108,11 @@ export default {
     context.commit('destroyObject', payload);
   },
 
+  destroyDoorDef(context, payload) {
+    context.commit('destroyDoorsByDefinition', payload.object);
+    context.commit('destroyObject', payload);
+  },
+
     // this is ONLY for library objects and does not include shading, spaces, or stories
     destroyObject (context, payload) {
         context.commit('destroyObject', {
@@ -190,27 +195,27 @@ export default {
       defaults.WindowDefinition,
       ['height', 'width', 'window_spacing', 'wwr']);
     // blank out the keys that don't make sense for that type.
-    if (payload.window_definition_type === 'Window to Wall Ratio') {
+    if (payload.window_definition_mode === 'Window to Wall Ratio') {
       Object.assign(payload, windowDefnDefaults, {
         height: null,
         width: null,
         window_spacing: null,
       });
-    } else if (payload.window_definition_type === 'Repeating Windows') {
+    } else if (payload.window_definition_mode === 'Repeating Windows') {
       Object.assign(payload, windowDefnDefaults, {
         wwr: null,
       });
-    } else if (payload.window_definition_type === 'Single Window') {
+    } else if (payload.window_definition_mode === 'Single Window') {
       Object.assign(payload, windowDefnDefaults, {
         wwr: null,
         window_spacing: null,
       });
-    } else if (payload.window_definition_type) {
-      throw new Error(`unrecognized window_definition_type: ${payload.window_definition_type}`);
+    } else if (payload.window_definition_mode) {
+      throw new Error(`unrecognized window_definition_mode: ${payload.window_definition_mode}`);
     }
 
-    if (_.includes(['Window to Wall Ratio', 'Repeating Windows'], payload.window_definition_type)) {
-      // upon change of window_definition_type, we need to
+    if (_.includes(['Window to Wall Ratio', 'Repeating Windows'], payload.window_definition_mode)) {
+      // upon change of window_definition_mode, we need to
       // prevent multiple repeating/wwr from sharing the same edge
       const windowsToDelete = _.flatMap(state.stories, story =>
         _.chain(story.windows)
@@ -285,15 +290,15 @@ export default {
     const windowsOnEdge = _.filter(story.windows, { edge_id })
       .map(w => ({
         ...w,
-        window_definition_type: _.find(
+        window_definition_mode: _.find(
           context.state.library.window_definitions,
           { id: w.window_definition_id },
-        ).window_definition_type,
+        ).window_definition_mode,
       }));
     let windowsToDelete;
-    if (windowDefn.window_definition_type === 'Single Window') {
+    if (windowDefn.window_definition_mode === 'Single Window') {
       // single windows can coexist with other single windows
-      windowsToDelete = _.reject(windowsOnEdge, { window_definition_type: 'Single Window' });
+      windowsToDelete = _.reject(windowsOnEdge, { window_definition_mode: 'Single Window' });
     } else {
       // Repeating and WWR cannot share with single window, or with one another.
       windowsToDelete = windowsOnEdge;
@@ -309,6 +314,33 @@ export default {
       name: genName(windowDefn.name),
     });
   },
+
+  createDoor(context, payload) {
+    const
+      { story_id, edge_id, door_definition_id, alpha } = payload,
+      story = _.find(context.state.stories, { id: story_id }),
+      doorDefn = _.find(context.state.library.door_definitions, { id: door_definition_id }),
+      geometry = story && _.find(context.rootState.geometry, { id: story.geometry_id }),
+      edge = geometry && _.find(geometry.edges, { id: edge_id });
+    if (!story) {
+      throw new Error('Story not found');
+    } else if (!doorDefn) {
+      throw new Error('Door Definition not found');
+    } else if (!geometry) {
+      throw new Error('Geometry not found');
+    } else if (!edge) {
+      throw new Error('Edge not found');
+    } else if (alpha < 0 || alpha > 1) {
+      throw new Error('Alpha must be between 0 and 1');
+    }
+
+    context.commit('createDoor', {
+      ...payload,
+      id: idFactory.generate(),
+      name: genName(doorDefn.name),
+    });
+  },
+
 
   createDaylightingControl(context, payload) {
     const
@@ -344,14 +376,21 @@ export default {
   destroyWindow({ commit }, payload) {
     commit('destroyWindow', payload);
   },
+  destroyDoor({ commit }, payload) {
+    commit('destroyDoor', payload);
+  },
   modifyDaylightingControl({ commit }, payload) {
     commit('modifyDaylightingControl', payload);
   },
   modifyWindow({ commit }, payload) {
     commit('modifyWindow', payload);
   },
+  modifyDoor({ commit }, payload) {
+    commit('modifyDoor', payload);
+  },
   destroyAllComponents({ commit }, { story_id }) {
     commit('dropDaylightingControls', { story_id });
     commit('dropWindows', { story_id });
+    commit('dropDoors', { story_id });
   },
 };

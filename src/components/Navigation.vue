@@ -83,7 +83,7 @@ export default {
         case 'shading':
           return ['shading'];
         case 'components':
-          return ['window_definitions', 'daylighting_control_definitions'];
+          return ['window_definitions', 'daylighting_control_definitions', 'door_definitions'];
         case 'assign':
           return ['building_units', 'thermal_zones', 'space_types', 'construction_sets', 'pitched_roofs'];
       }

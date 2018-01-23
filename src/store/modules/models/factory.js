@@ -118,6 +118,14 @@ export default {
       name: opts.name,
     };
   },
+  DoorDefinition(opts = {}) {
+    return {
+      ...defaults.DoorDefinition,
+      id: idFactory.generate(),
+      name: opts.name,
+      texture: generateTexture('door_definition'),
+    };
+  },
   PitchedRoof(opts = {}) {
     return {
       ...defaults.PitchedRoof,

@@ -101,7 +101,7 @@
       shape-rendering: crispEdges;
       stroke: $gray-medium;
     }
-    .polygons .windows {
+    .polygons .windows, .polygons .doors {
       .window {
         stroke-width: 3;
         stroke: black;

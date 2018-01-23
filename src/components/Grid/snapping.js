@@ -31,9 +31,9 @@ export function snapTargets(vertices, gridSpacing, cursor) {
   return _.orderBy(targets, ['dist', 'origin', 'type'], ['asc', 'asc', 'desc']);
 }
 
-export function expandWindowAlongEdge(edge, center, { width, spacing, window_definition_type, texture }) {
-  if (window_definition_type === 'Window to Wall Ratio' ||
-      window_definition_type === 'Repeating Windows'
+export function expandWindowAlongEdge(edge, center, { width, spacing, window_definition_mode, texture }) {
+  if (window_definition_mode === 'Window to Wall Ratio' ||
+      window_definition_mode === 'Repeating Windows'
   ) {
     return {
       edge_id: edge.id,
@@ -45,7 +45,7 @@ export function expandWindowAlongEdge(edge, center, { width, spacing, window_def
       alpha: 0.5,
       start: edge.v1,
       end: edge.v2,
-      window_definition_type,
+      window_definition_mode,
       width,
       spacing,
       texture,
@@ -71,7 +71,7 @@ export function expandWindowAlongEdge(edge, center, { width, spacing, window_def
       x: center.x + windowDeltaX,
       y: center.y + windowDeltaY,
     },
-    window_definition_type,
+    window_definition_mode,
   };
 }
 
@@ -89,7 +89,7 @@ export function findClosestWindow(windows, cursor) {
   const withDistance = windows.map((w) => {
     // single windows calculate distance to center,
     // repeating and wwr calculate distance to the edge they live on
-    const dist = w.window_definition_type === 'Single Window' ?
+    const dist = w.window_definition_mode === 'Single Window' ?
       { dist: distanceBetweenPoints(cursor, w.center), proj: w.center } :
       pointDistanceToSegment(cursor, w);
 

@@ -18,7 +18,7 @@ function formatObject(obj) {
 
 function mungeWindows(windows, geometry, windowDefs) {
   const repeatingWindowDefs = _.chain(windowDefs)
-    .filter({ window_definition_type: 'Repeating Windows' })
+    .filter({ window_definition_mode: 'Repeating Windows' })
     .map(wd => [wd.id, wd])
     .fromPairs()
     .value();

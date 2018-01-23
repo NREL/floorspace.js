@@ -121,6 +121,7 @@ export default {
       scaleX: state => state.application.scale.x,
       scaleY: state => state.application.scale.y,
       windowDefs: state => state.models.library.window_definitions,
+      doorDefs: state => state.models.library.door_definitions,
       windowWidths: state => _.sumBy(state.models.library.window_definitions, 'width'),
       allVertices: state => _.flatMap(state.geometry, 'vertices'),
     }),
@@ -143,6 +144,15 @@ export default {
         case 'construction_sets': return 'construction_set_id';
         default: throw new Error(`unrecognized space property type ${this.currentSpaceProperty.type}`);
       }
+    },
+    windowAndDoorDefs() {
+      return [
+        ...this.windowDefs,
+        ...this.doorDefs.map(d => ({
+          ...d,
+          window_definition_mode: 'Single Window',
+        })),
+      ];
     },
     currentImage: {
       get() { return this.$store.getters['application/currentImage']; },
@@ -260,6 +270,7 @@ export default {
     polygons() { this.draw(); },
     images() { this.draw(); },
     windowDefs() { this.draw(); },
+    doorDefs() { this.draw(); },
     currentTool() {
       this.points = [];
       this.draw();
@@ -299,7 +310,7 @@ export default {
       return this.currentStory.windows
         .map(w => ({ w, e: _.find(this.denormalizedGeometry.edges, { id: w.edge_id }) }))
         .map(({ w, e }) => {
-          const wind = this.denormalizeWindow(e, w);
+          const wind = this.denormalizeWindowOrDoor(e, w);
           const { proj } = pointDistanceToSegment(cursor, wind);
           return {
             ...wind,
@@ -309,25 +320,42 @@ export default {
           };
         });
     },
+    doorCenterLocs(cursor) {
+      return this.currentStory.doors
+        .map(w => ({ w, e: _.find(this.denormalizedGeometry.edges, { id: w.edge_id }) }))
+        .map(({ w, e }) => {
+          const wind = this.denormalizeWindowOrDoor(e, w);
+          const { proj } = pointDistanceToSegment(cursor, wind);
+          return {
+            ...wind,
+            id: w.id,
+            type: 'doors',
+            ...proj,
+          };
+        });
+    },
     currentComponentTypeLocs(cursor) {
       if (this.currentComponentType === 'window_definitions') {
         return this.windowCenterLocs(cursor);
       } else if (this.currentComponentType === 'daylighting_control_definitions') {
         return this.daylightingControlLocs;
+      } else if (this.currentComponentType === 'door_definitions') {
+        return this.doorCenterLocs(cursor);
       } else {
         throw new Error(`unrecognized componentType: ${this.currentComponentType}`);
       }
     },
-    denormalizeWindow(edge, { edge_id, alpha, window_definition_id }) {
+    denormalizeWindowOrDoor(edge, { edge_id, alpha, window_definition_id, door_definition_id }) {
       const
-        windowDefn = _.find(this.windowDefs, { id: window_definition_id }),
+        defn = _.find(this.windowAndDoorDefs, { id: window_definition_id || door_definition_id }),
         center = windowLocation(edge, { alpha });
       return {
-        ...expandWindowAlongEdge(edge, center, windowDefn),
-        window_definition_type: windowDefn.window_definition_type,
-        width: windowDefn.width,
-        spacing: windowDefn.window_spacing,
-        texture: windowDefn.texture,
+        ...expandWindowAlongEdge(edge, center, defn),
+        window_definition_mode: defn.window_definition_mode,
+        windowOrDoor: defn.window_definition_mode ? 'window' : 'door',
+        width: defn.width,
+        spacing: defn.window_spacing,
+        texture: defn.texture,
       };
     },
     windowsOnFace(face) {
@@ -335,9 +363,20 @@ export default {
         face.edges,
         e => _.filter(this.currentStory.windows , { edge_id: e.id })
               .map(w => ({
-                ...this.denormalizeWindow(e, w),
+                ...this.denormalizeWindowOrDoor(e, w),
                 selected: w.id === this.currentComponentInstanceId,
                 facingSelection: w.id === this.componentFacingSelection,
+              })));
+    },
+    doorsOnFace(face) {
+      return _.flatMap(
+        face.edges,
+        e => _.filter(this.currentStory.doors, { edge_id: e.id })
+              .map(d => ({
+                ...this.denormalizeWindowOrDoor(e, d),
+                windowOrDoor: 'door',
+                selected: d.id === this.currentComponentInstanceId,
+                facingSelection: d.id === this.componentFacingSelection,
               })));
     },
     polygonsFromGeometry(geometry, extraPolygonAttrs = {}) {
@@ -357,6 +396,7 @@ export default {
             points,
             labelPosition: this.polygonLabelPosition(points),
             windows: this.windowsOnFace(face),
+            doors: this.doorsOnFace(face),
             current: (
               (this.currentTool !== 'Apply Property' && this.currentSpace && face.id === this.currentSpace.face_id) ||
               (this.currentTool !== 'Apply Property' && this.currentShading && face.id === this.currentShading.face_id) ||

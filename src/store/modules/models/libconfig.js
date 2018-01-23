@@ -59,6 +59,56 @@ const map = {
     ],
     init: factory.ThermalZone,
   },
+  door_definitions: {
+    displayName: 'Door',
+    columns: [
+      {
+        name: 'id',
+        displayName: 'ID',
+        readonly: true,
+        private: true,
+      },
+      {
+        name: 'name',
+        displayName: 'Name',
+        input_type: 'text',
+        validator: validators.name,
+      },
+      {
+        name: 'height',
+        displayName: 'Height',
+        input_type: 'text',
+        validator: validators.gt0,
+        converter: converters.number,
+        numeric: true,
+      },
+      {
+        name: 'width',
+        displayName: 'Width',
+        input_type: 'text',
+        validator: validators.gt0,
+        converter: converters.number,
+        numeric: true,
+      },
+      {
+        name: 'door_type',
+        displayName: 'Type',
+        input_type: 'select',
+        select_data() {
+          const options = ['Door', 'Glass Door', 'Overhead Door'];
+          return _.zipObject(options, options);
+        },
+        validator: validators.oneOf('Door', 'Glass Door', 'Overhead Door'),
+      },
+      {
+        name: 'texture',
+        displayName: 'Texture',
+        input_type: 'texture',
+        validator: validators.oneOf(...textures),
+      },
+    ],
+    init: factory.DoorDefinition,
+  },
   window_definitions: {
     displayName: 'Window',
     columns: [
@@ -75,8 +125,8 @@ const map = {
         validator: validators.name,
       },
       {
-        name: 'window_definition_type',
-        displayName: 'Type',
+        name: 'window_definition_mode',
+        displayName: 'Mode',
         input_type: 'select',
         select_data() {
           const options = ['Single Window', 'Repeating Windows', 'Window to Wall Ratio'];
@@ -92,7 +142,7 @@ const map = {
         converter: converters.number,
         numeric: true,
         enabled(row) {
-          return row.window_definition_type === 'Window to Wall Ratio';
+          return row.window_definition_mode === 'Window to Wall Ratio';
         },
       },
       {
@@ -103,8 +153,8 @@ const map = {
         converter: converters.number,
         numeric: true,
         enabled(row) {
-          return row.window_definition_type === 'Single Window' ||
-                 row.window_definition_type === 'Repeating Windows';
+          return row.window_definition_mode === 'Single Window' ||
+                 row.window_definition_mode === 'Repeating Windows';
         },
       },
       {
@@ -115,8 +165,8 @@ const map = {
         converter: converters.number,
         numeric: true,
         enabled(row) {
-          return row.window_definition_type === 'Single Window' ||
-                 row.window_definition_type === 'Repeating Windows';
+          return row.window_definition_mode === 'Single Window' ||
+                 row.window_definition_mode === 'Repeating Windows';
         },
       },
       {
@@ -135,8 +185,18 @@ const map = {
         converter: converters.number,
         numeric: true,
         enabled(row) {
-          return row.window_definition_type === 'Repeating Windows';
+          return row.window_definition_mode === 'Repeating Windows';
         },
+      },
+      {
+        name: 'window_type',
+        displayName: 'Window Type',
+        input_type: 'select',
+        select_data() {
+          const options = ['Fixed', 'Operable'];
+          return _.zipObject(options, options);
+        },
+        validator: validators.oneOf('Fixed', 'Operable'),
       },
       {
         name: 'overhang_projection_factor',
@@ -160,7 +220,7 @@ const map = {
         input_type: 'texture',
         validator: validators.oneOf(...textures),
         enabled(row) {
-          return row.window_definition_type === 'Window to Wall Ratio';
+          return row.window_definition_mode === 'Window to Wall Ratio';
         },
       },
       {
@@ -659,6 +719,28 @@ const map = {
         input_type: 'select',
         select_data(space, state) {
           return _.fromPairs(state.models.library.daylighting_control_definitions.map(b => [b.name, b.id]));
+        },
+      },
+    ],
+  },
+  doors: {
+    displayName: 'Door',
+    columns: [
+      {
+        name: 'id',
+        private: true,
+      },
+      {
+        name: 'name',
+        displayName: 'Name',
+        input_type: 'text',
+      },
+      {
+        name: 'door_definition_id',
+        displayName: 'Definition',
+        input_type: 'select',
+        select_data(space, state) {
+          return _.fromPairs(state.models.library.door_definitions.map(b => [b.name, b.id]));
         },
       },
     ],
