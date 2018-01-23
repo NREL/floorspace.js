@@ -369,8 +369,8 @@ const map = {
         validator: validators.number,
       },
       {
-        name: 'above_floor_plenum_height',
-        displayName: 'Above Floor Plenum Height',
+        name: 'above_ceiling_plenum_height',
+        displayName: 'Above Ceiling Plenum Height',
         input_type: 'text',
         converter: converters.number,
         numeric: true,
