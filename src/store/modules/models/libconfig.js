@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import factory from './factory';
+import factory, { allowableTypes, defaults } from './factory';
 import validators from './validators';
 import * as converters from './converters';
 import { textures } from '../application/appconfig';
@@ -13,6 +13,7 @@ import { textures } from '../application/appconfig';
 const map = {
   building_units: {
     displayName: 'Building Unit',
+    definitionName: 'BuildingUnit',
     columns: [
       {
         name: 'id',
@@ -37,6 +38,7 @@ const map = {
   },
   thermal_zones: {
     displayName: 'Thermal Zone',
+    definitionName: 'ThermalZone',
     columns: [
       {
         name: 'id',
@@ -61,6 +63,7 @@ const map = {
   },
   door_definitions: {
     displayName: 'Door',
+    definitionName: 'DoorDefinition',
     columns: [
       {
         name: 'id',
@@ -111,6 +114,7 @@ const map = {
   },
   window_definitions: {
     displayName: 'Window',
+    definitionName: 'WindowDefinition',
     columns: [
       {
         name: 'id',
@@ -241,6 +245,7 @@ const map = {
   },
   space_types: {
     displayName: 'Space Type',
+    definitionName: 'SpaceType',
     columns: [
       {
         name: 'id',
@@ -265,6 +270,7 @@ const map = {
   },
   construction_sets: {
     displayName: 'Construction Set',
+    definitionName: 'ConstructionSet',
     columns: [
       {
         name: 'id',
@@ -289,6 +295,7 @@ const map = {
   },
   daylighting_control_definitions: {
     displayName: 'Daylighting Control',
+    definitionName: 'DaylightingControlDefinition',
     columns: [
       {
         name: 'id',
@@ -337,6 +344,7 @@ const map = {
   },
   stories: {
     displayName: 'Story',
+    definitionName: 'Story',
     columns: [
       {
         name: 'id',
@@ -369,8 +377,8 @@ const map = {
         validator: validators.number,
       },
       {
-        name: 'above_floor_plenum_height',
-        displayName: 'Above Floor Plenum Height',
+        name: 'above_ceiling_plenum_height',
+        displayName: 'Above Ceiling Plenum Height',
         input_type: 'text',
         converter: converters.number,
         numeric: true,
@@ -425,6 +433,7 @@ const map = {
   },
   spaces: {
     displayName: 'Space',
+    definitionName: 'Space',
     columns: [
       {
         name: 'id',
@@ -594,6 +603,7 @@ const map = {
   },
   shading: {
     displayName: 'Shading',
+    definitionName: 'Shading',
     columns: [
       {
         name: 'id',
@@ -798,6 +808,24 @@ Object.keys(map).forEach((k) => {
   map[k].keymap = _.zipObject(
     _.map(map[k].columns, 'name'),
     map[k].columns);
+
+  map[k].columns.forEach((col) => {
+    if (
+      _.has(map[k], 'definitionName') &&
+      _.get(allowableTypes, map[k].definitionName) &&
+      _.includes(allowableTypes[map[k].definitionName][col.name], 'null')
+    ) {
+      col.nullable = true;
+    }
+
+    if (
+      _.has(map[k], 'definitionName') &&
+      _.has(defaults, map[k].definitionName) &&
+      _.has(defaults[map[k].definitionName], col.name)
+    ) {
+      col.default = defaults[map[k].definitionName][col.name];
+    }
+  });
 });
 
 export default map;

@@ -42,6 +42,10 @@ const helpers = {
   setValueForKey(object, store, type, key, value) {
     const result = { success: true };
 
+    if (this.map[type].keymap[key] && this.map[type].keymap[key].converter) {
+      value = this.map[type].keymap[key].converter(value, this.map[type].keymap[key]);
+    }
+
     // if a validator is defined for the key, run it and store the result
     if (this.map[type].keymap[key] && this.map[type].keymap[key].validator) {
       const validationResult = this.map[type].keymap[key].validator(object, store, value, type);
@@ -50,9 +54,6 @@ const helpers = {
         result.error = validationResult.error;
         return result;
       }
-    }
-    if (this.map[type].keymap[key] && this.map[type].keymap[key].converter) {
-      value = this.map[type].keymap[key].converter(value);
     }
     // dispatch the correct action to update the specified type
     if (type === 'stories') {
