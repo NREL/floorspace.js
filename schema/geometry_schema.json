@@ -521,7 +521,7 @@
 				},
 				"color": {
 					"type": [
-						"string",
+						"HexColor",
 						"null"
 					]
 				},
@@ -810,7 +810,7 @@
 				},
 				"color": {
 					"type": [
-						"string",
+						"HexColor",
 						"null"
 					]
 				}
@@ -842,7 +842,7 @@
 				},
 				"color": {
 					"type": [
-						"string",
+						"HexColor",
 						"null"
 					]
 				}
@@ -874,7 +874,7 @@
 				},
 				"color": {
 					"type": [
-						"string",
+						"HexColor",
 						"null"
 					]
 				}
@@ -1163,7 +1163,7 @@
 				},
 				"color": {
 					"type": [
-						"string",
+						"HexColor",
 						"null"
 					]
 				}
@@ -1176,6 +1176,10 @@
 				"shed_direction",
 				"color"
 			]
+		},
+		"HexColor": {
+			"type": "string",
+			"pattern": "^#[a-fA-F0-9]{6}$"
 		}
 	}
 }
