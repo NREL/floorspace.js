@@ -520,10 +520,7 @@
 					"default": 1
 				},
 				"color": {
-					"type": [
-						"string",
-						"null"
-					]
+					"$ref": "#/definitions/HexColor"
 				},
 				"geometry": {
 					"$ref": "#/definitions/Geometry"
@@ -809,10 +806,7 @@
 					]
 				},
 				"color": {
-					"type": [
-						"string",
-						"null"
-					]
+					"$ref": "#/definitions/HexColor"
 				}
 			},
 			"required": [
@@ -841,10 +835,7 @@
 					]
 				},
 				"color": {
-					"type": [
-						"string",
-						"null"
-					]
+					"$ref": "#/definitions/HexColor"
 				}
 			},
 			"required": [
@@ -873,10 +864,7 @@
 					]
 				},
 				"color": {
-					"type": [
-						"string",
-						"null"
-					]
+					"$ref": "#/definitions/HexColor"
 				}
 			},
 			"required": [
@@ -1162,10 +1150,7 @@
 					"ip_units": "deg"
 				},
 				"color": {
-					"type": [
-						"string",
-						"null"
-					]
+					"$ref": "#/definitions/HexColor"
 				}
 			},
 			"required": [
@@ -1176,6 +1161,10 @@
 				"shed_direction",
 				"color"
 			]
+		},
+		"HexColor": {
+			"type": ["null", "string"],
+			"pattern": "^#[a-fA-F0-9]{6}$"
 		}
 	}
 }

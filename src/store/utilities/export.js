@@ -2,6 +2,14 @@ import _ from 'lodash';
 import version from '../../version';
 import { repeatingWindowCenters } from '../../store/modules/geometry/helpers';
 
+function formatHex(val) {
+  if (!val) { return null; }
+  if (val.length === 4) {
+    return `#${val[1]}${val[1]}${val[2]}${val[2]}${val[3]}${val[3]}`;
+  }
+  return val;
+}
+
 function formatObject(obj) {
   if (_.isArray(obj)) {
     return obj.map(formatObject);
@@ -9,6 +17,9 @@ function formatObject(obj) {
     return _.mapValues(obj, (val, key) => {
       if ((key === 'id' || key.indexOf('_id') >= 0) && _.isNumber(val)) {
         return String(val);
+      }
+      if (key === 'color') {
+        return formatHex(val);
       }
       return formatObject(val);
     });
