@@ -104,7 +104,7 @@
 								"ft",
 								"m"
 							],
-							"default": "m"
+							"default": "ft"
 						},
 						"language": {
 							"type": [
@@ -474,19 +474,19 @@
 					]
 				},
 				"image_visible": {
-					"default": true,
 					"type": [
 						"boolean",
 						"null"
-					]
+					],
+					"default": true
 				},
 				"below_floor_plenum_height": {
 					"type": [
 						"number",
 						"null"
 					],
-					"default": 0,
 					"minimum": 0,
+					"default": 0,
 					"si_units": "m",
 					"ip_units": "ft"
 				},
@@ -495,8 +495,8 @@
 						"number",
 						"null"
 					],
-					"default": 8,
 					"minimum": 0,
+					"default": 8,
 					"si_units": "m",
 					"ip_units": "ft"
 				},
@@ -505,8 +505,8 @@
 						"number",
 						"null"
 					],
-					"default": 0,
 					"minimum": 0,
+					"default": 0,
 					"si_units": "m",
 					"ip_units": "ft"
 				},
@@ -554,9 +554,9 @@
 							"alpha": {
 								"description": "Distance along edge to center point of window, starting from first vertex of edge at a = 0 and ending at second vertex of edge at a =1.  v = v1 + a*(v2-v1).  Does not apply if window_definition_mode is \"Window to Wall Ratio\". Will be an array of such values if window_definition_mode is \"Repeating Windows\".",
 								"type": [
+									"array",
 									"number",
-									"null",
-									"array"
+									"null"
 								],
 								"minimum": 0,
 								"maximum": 1,
@@ -937,9 +937,9 @@
 						"number",
 						"null"
 					],
-					"default": 3,
 					"minimum": 0,
 					"exclusiveMinimum": true,
+					"default": 3,
 					"si_units": "m",
 					"ip_units": "ft"
 				},
@@ -951,9 +951,9 @@
 					],
 					"minimum": 0,
 					"exclusiveMinimum": true,
+					"default": 4,
 					"si_units": "m",
-					"ip_units": "ft",
-					"default": 4
+					"ip_units": "ft"
 				},
 				"height": {
 					"description": "Vertical height of each window. In drawing units. Used if window_definition_mode is \"Single Window\" or \"Repeating Windows\".",
@@ -961,9 +961,9 @@
 						"number",
 						"null"
 					],
-					"default": 4,
 					"minimum": 0,
 					"exclusiveMinimum": true,
+					"default": 4,
 					"si_units": "m",
 					"ip_units": "ft"
 				},
@@ -973,9 +973,9 @@
 						"number",
 						"null"
 					],
-					"default": 2,
 					"minimum": 0,
 					"exclusiveMinimum": true,
+					"default": 2,
 					"si_units": "m",
 					"ip_units": "ft"
 				},
@@ -1163,7 +1163,10 @@
 			]
 		},
 		"HexColor": {
-			"type": ["null", "string"],
+			"type": [
+				"string",
+				"null"
+			],
 			"pattern": "^#[a-fA-F0-9]{6}$"
 		}
 	}
