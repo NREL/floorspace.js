@@ -56,6 +56,7 @@ function withStoryDefaults(stories) {
 export default function importFloorplan(context, payload) {
   // intialize a versionNumber if the app is running in embedded mode
   if (window.api) { window.versionNumber = 0; }
+  const options = payload.options || {};
 
   // GEOMETRY
   const geometry = payload.data.stories.map((story) => {
@@ -143,9 +144,12 @@ export default function importFloorplan(context, payload) {
       { root: true });
 
     stories.forEach(story => context.dispatch('geometry/trimGeometry', { geometry_id: story.geometry_id }));
-
-    _.defer(() => window.eventBus.$emit('zoomToFit'));
+    if (!options.noReloadGrid) {
+      _.defer(() => window.eventBus.$emit('zoomToFit'));
+    }
   });
 
-  document.getElementById('svg-grid').dispatchEvent(new Event('reloadGrid'));
+  if (!options.noReloadGrid) {
+    document.getElementById('svg-grid').dispatchEvent(new Event('reloadGrid'));
+  }
 }

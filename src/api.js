@@ -2,12 +2,13 @@
 window.api = {
   config: null,
   initAlreadyRun: false,
-  openFloorplan: (data) => {
+  openFloorplan: (data, options = { noReloadGrid: false }) => {
     try {
       window.application.$store.dispatch('importFloorplan', {
         clientWidth: document.getElementById('svg-grid').clientWidth,
         clientHeight: document.getElementById('svg-grid').clientHeight,
         data: JSON.parse(data),
+        options,
       });
     } catch (err) {
       console.error(err);
