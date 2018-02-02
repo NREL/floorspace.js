@@ -11,7 +11,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       <thead cellspacing="0">
         <tr>
           <th class="select"><!-- placeholder for select column --></th>
-          <th v-for="col in visibleColumns" @click="sortBy(col.name)">
+          <th v-for="col in visibleColumns" @click="sortBy(col.name)" :data-column="col.name">
             <span>{{col.displayName}}</span>
             <svg v-show="col.name === sortKey && sortDescending" viewBox="0 0 10 3" xmlns="http://www.w3.org/2000/svg">
                 <path d="M0 .5l5 5 5-5H0z"/>
