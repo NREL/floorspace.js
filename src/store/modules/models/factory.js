@@ -5,6 +5,7 @@ import generateColor from './../../utilities/generateColor';
 import generateTexture from './../../utilities/generateTexture';
 import appconfig from './../application/appconfig';
 import schema from '../../../../schema/geometry_schema.json';
+import { getConverter } from '../../utilities/unitConversion';
 
 const makeReadPropertyAttr = (attribute) => {
   const readPropertyAttr = (definition) => {
@@ -34,7 +35,26 @@ const readPropertyAttrs = (attr) => {
   });
 };
 
-export const defaults = readPropertyAttrs('default');
+export const ip_defaults = readPropertyAttrs('default');
+if (ip_defaults.Project.config.units !== 'ip') {
+  throw new Error(
+      'Expected default units to be ip. Code changes are required to change the default units');
+}
+export const si_defaults = _.mapValues(
+  ip_defaults,
+  (value, key) => getConverter(key, 'ip_units', 'si_units')(value));
+
+export const defaults = new Proxy(
+  { ip_defaults, si_defaults },
+  {
+    get(target, key) {
+      return _.cloneDeep(_.get(window, 'application.$store.state.project.config.units', 'ip') === 'ip' ?
+        ip_defaults[key] :
+        si_defaults[key]);
+    },
+  },
+);
+
 export const allowableTypes = readPropertyAttrs('type');
 
 export default {

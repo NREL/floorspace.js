@@ -23,6 +23,9 @@ export default {
       geometry_id: geometry.id,
     }, { root: true });
   },
+  destroyGeometry({ commit }, geometryId) {
+    commit('destroyGeometry', { id: geometryId });
+  },
 
   /*
   * Erase the selection defined by a set of points on all faces on the current story

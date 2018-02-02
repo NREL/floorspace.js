@@ -101,10 +101,10 @@
 								"null"
 							],
 							"enum": [
-								"ft",
-								"m"
+								"ip",
+								"si"
 							],
-							"default": "ft"
+							"default": "ip"
 						},
 						"language": {
 							"type": [

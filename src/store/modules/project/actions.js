@@ -3,9 +3,13 @@ import Validator from './../../utilities/validator';
 
 export default {
     // CONFIG
-  setUnits(context, payload) {
+  setUnits({ commit, dispatch, rootState }, payload) {
     if (payload.units === 'm' || payload.units === 'ft') {
-      context.commit('setUnits', payload);
+      throw new Error('units must be "ip" or "si"');
+    } else if (payload.units === 'ip' || payload.units === 'si') {
+      commit('setUnits', payload);
+      rootState.models.stories.forEach(
+        story => dispatch('models/destroyStory', { story }, { root: true }));
     }
   },
     setLanguage (context, payload) {

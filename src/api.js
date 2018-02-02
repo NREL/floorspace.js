@@ -37,7 +37,7 @@ window.api = {
     }
     window.api.config = Object.assign({
       showImportExport: true,
-      units: 'm',
+      units: 'si',
       unitsEditable: true,
       showMapDialogOnStart: false,
       online: true,
