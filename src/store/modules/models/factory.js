@@ -37,6 +37,10 @@ const readPropertyAttrs = (attr) => {
 
 export const ip_defaults = readPropertyAttrs('default');
 if (ip_defaults.Project.config.units !== 'ip') {
+  // We're assuming the defaults in the schema are all in ip units.
+  // if that is not the case, we need to swap around which of
+  // `ip_defaults` and `si_defaults` is read directly from the schema and
+  // which is converted using getConverter
   throw new Error(
       'Expected default units to be ip. Code changes are required to change the default units');
 }
