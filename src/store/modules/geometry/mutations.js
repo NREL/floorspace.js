@@ -30,6 +30,7 @@ export function initGeometry(state, payload) {
       const { geometry } = payload;
       state.push(geometry);
 }
+
 export function createVertex(state, payload) {
       const { geometry_id, vertex } = payload;
       state.find(g => g.id === geometry_id).vertices.push(vertex);

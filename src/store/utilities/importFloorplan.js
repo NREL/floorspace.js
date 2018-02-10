@@ -10,6 +10,11 @@ function maybeUpdateProject(project) {
     project.north_axis = project.north_axis || project.config.north_axis;
     delete project.config.north_axis;
   }
+  project.config.units = (
+      project.config.units === 'ft' ? 'ip' :
+      project.config.units === 'm' ? 'si' :
+      project.config.units);
+
   return project;
 }
 

@@ -7,7 +7,7 @@ export default {
   state: {
     // project
     config: {
-      units: 'ft',
+      units: 'ip',
       unitsEditable: true,
       language: 'EN-US',
     },

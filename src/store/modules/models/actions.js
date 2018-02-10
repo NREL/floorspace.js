@@ -43,7 +43,7 @@ export default {
       const story = stories[storyIndex];
 
       context.commit('destroyStory', { story });
-
+      context.dispatch('geometry/destroyGeometry', story.geometry_id, { root: true });
       if (stories.length === 0) {
         context.dispatch('initStory');
       } else {

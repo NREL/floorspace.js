@@ -291,7 +291,7 @@ export default {
       mapEnabled: state => state.project.map.enabled,
       timetravelInitialized: state => state.timetravelInitialized,
       showImportExport: state => state.project.show_import_export,
-      allowSettingUnits: state => state.project.config.unitsEditable && state.geometry.length === 1 && state.geometry[0].vertices.length === 0,
+      allowSettingUnits: state => false, //state.project.config.unitsEditable && state.geometry.length === 1 && state.geometry[0].vertices.length === 0,
     }),
     currentSubselectionType: {
       get() { return this.$store.state.application.currentSelections.subselectionType; },
@@ -358,8 +358,8 @@ export default {
       },
     },
     rwUnits: {
-      get() { return this.$store.state.project.config.units; },
-      set(units) { this.$store.dispatch('project/setUnits', { units }); },
+      get() { return this.$store.state.project.config.units === 'ip' ? 'ft' : 'm'; },
+      set(units) { this.$store.dispatch('project/setUnits', { units: units === 'ft' ? 'ip' : 'si' }); },
     },
     snapMode: {
       get() { return this.$store.state.application.currentSelections.snapMode; },
