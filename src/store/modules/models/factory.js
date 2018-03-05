@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import 'proxy-polyfill/proxy.min';
 import idFactory from './../../utilities/generateId';
 import generateColor from './../../utilities/generateColor';
 import generateTexture from './../../utilities/generateTexture';
@@ -21,21 +20,10 @@ const makeReadPropertyAttr = (attribute) => {
   return readPropertyAttr;
 };
 
-const readPropertyAttrs = (attr) => {
-  const rawValues = _.mapValues(schema.definitions, makeReadPropertyAttr(attr));
-  // We don't want the defaults to ever change, and we want to make sure
-  // that different uses of defaults produce different objects.
-  return new Proxy(rawValues, {
-    get(target, key) {
-      return _.cloneDeep(target[key]);
-    },
-    set() {
-      throw new Error('Please do not change the defaults.');
-    },
-  });
-};
+const readPropertyAttrs = attr =>
+  _.mapValues(schema.definitions, makeReadPropertyAttr(attr));
 
-export const ip_defaults = readPropertyAttrs('default');
+const ip_defaults = readPropertyAttrs('default');
 if (ip_defaults.Project.config.units !== 'ip') {
   // We're assuming the defaults in the schema are all in ip units.
   // if that is not the case, we need to swap around which of
@@ -44,27 +32,21 @@ if (ip_defaults.Project.config.units !== 'ip') {
   throw new Error(
       'Expected default units to be ip. Code changes are required to change the default units');
 }
-export const si_defaults = _.mapValues(
+const si_defaults = _.mapValues(
   ip_defaults,
   (value, key) => getConverter(key, 'ip_units', 'si_units')(value));
 
-export const defaults = new Proxy(
-  { ip_defaults, si_defaults },
-  {
-    get(target, key) {
-      return _.cloneDeep(_.get(window, 'application.$store.state.project.config.units', 'ip') === 'ip' ?
+export const getDefaults = key =>
+    _.cloneDeep(_.get(window, 'application.$store.state.project.config.units', 'ip') === 'ip' ?
         ip_defaults[key] :
         si_defaults[key]);
-    },
-  },
-);
 
 export const allowableTypes = readPropertyAttrs('type');
 
 export default {
   Story(name) {
     return {
-      ...defaults.Story,
+      ...getDefaults('Story'),
       id: idFactory.generate(),
       name,
       color: generateColor('story'),
@@ -72,7 +54,7 @@ export default {
   },
   Space(name) {
     return {
-      ...defaults.Space,
+      ...getDefaults('Space'),
       id: idFactory.generate(),
       name,
       color: generateColor('space'),
@@ -81,7 +63,7 @@ export default {
   },
   Shading(name) {
     return {
-      ...defaults.Shading,
+      ...getDefaults('Shading'),
       id: idFactory.generate(),
       name,
       color: appconfig.palette.shading,
@@ -112,7 +94,7 @@ export default {
   },
   ThermalZone(opts = {}) {
     return {
-      ...defaults.ThermalZone,
+      ...getDefaults('ThermalZone'),
       id: idFactory.generate(),
       color: generateColor('thermal_zone'),
       name: opts.name,
@@ -120,7 +102,7 @@ export default {
   },
   SpaceType(opts = {}) {
     return {
-      ...defaults.SpaceType,
+      ...getDefaults('SpaceType'),
       id: idFactory.generate(),
       color: generateColor('space_type'),
       name: opts.name,
@@ -128,7 +110,7 @@ export default {
   },
   ConstructionSet(opts = {}) {
     return {
-      ...defaults.ConstructionSet,
+      ...getDefaults('ConstructionSet'),
       id: idFactory.generate(),
       name: opts.name,
       color: generateColor('construction_set'),
@@ -136,7 +118,7 @@ export default {
   },
   WindowDefn(opts = {}) {
     return {
-      ...defaults.WindowDefinition,
+      ...getDefaults('WindowDefinition'),
       id: idFactory.generate(),
       name: opts.name,
       wwr: null,
@@ -146,14 +128,14 @@ export default {
   },
   DaylightingControlDefn(opts = {}) {
     return {
-      ...defaults.DaylightingControlDefinition,
+      ...getDefaults('DaylightingControlDefinition'),
       id: idFactory.generate(),
       name: opts.name,
     };
   },
   DoorDefinition(opts = {}) {
     return {
-      ...defaults.DoorDefinition,
+      ...getDefaults('DoorDefinition'),
       id: idFactory.generate(),
       name: opts.name,
       texture: generateTexture('door_definition'),
@@ -161,7 +143,7 @@ export default {
   },
   PitchedRoof(opts = {}) {
     return {
-      ...defaults.PitchedRoof,
+      ...getDefaults('PitchedRoof'),
       id: idFactory.generate(),
       name: opts.name,
       color: generateColor('pitched_roof'),

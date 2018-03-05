@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import libconfig from './libconfig';
-import factory, { defaults } from './factory';
+import factory, { getDefaults } from './factory';
 import idFactory, { genName } from './../../utilities/generateId';
 import geometryFactory from '../geometry/factory';
 import helpers from './helpers';
@@ -192,7 +192,7 @@ export default {
     const { object: { id } } = payload;
 
     const windowDefnDefaults = _.pick(
-      defaults.WindowDefinition,
+      getDefaults('WindowDefinition'),
       ['height', 'width', 'window_spacing', 'wwr']);
     // blank out the keys that don't make sense for that type.
     if (payload.window_definition_mode === 'Window to Wall Ratio') {

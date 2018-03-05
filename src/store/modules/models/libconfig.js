@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import factory, { allowableTypes, defaults } from './factory';
+import factory, { allowableTypes, getDefaults } from './factory';
 import validators from './validators';
 import * as converters from './converters';
 import { textures } from '../application/appconfig';
@@ -820,10 +820,10 @@ Object.keys(map).forEach((k) => {
 
     if (
       _.has(map[k], 'definitionName') &&
-      _.has(defaults, map[k].definitionName) &&
-      _.has(defaults[map[k].definitionName], col.name)
+      getDefaults(map[k].definitionName) &&
+      _.has(getDefaults(map[k].definitionName), col.name)
     ) {
-      col.default = defaults[map[k].definitionName][col.name];
+      col.default = getDefaults(map[k].definitionName)[col.name];
     }
   });
 });

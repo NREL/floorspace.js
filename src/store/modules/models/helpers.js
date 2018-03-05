@@ -171,10 +171,9 @@ const helpers = {
     let i = 1;
     while (!name) {
       name = prefix + i;
-      if (models.find(m => m.name === name)) { name = ''; }
+      if (models.find(m => { console.log(`querying ${m}.name: ${m.name}`); return m.name === name; })) { name = ''; }
       i += 1;
     }
-
     return name;
   },
 
