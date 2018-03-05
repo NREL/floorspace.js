@@ -44,9 +44,11 @@ output_file.close
 
 print "Loading floorspace.js API script from: #{src_path + '/api.js'}\n\n"
 api_scripts = File.open(src_path + '/api.js') {|file| file.read}
+lodash = File.open('./node_modules/lodash/lodash.js') {|file| file.read}
 
 # the newline after #{scripts} is important, removing it causes everything after #{scripts} to be interpreted as a comment
 embeddable_html = base_html + "
+    <script> #{lodash} </script>
     <script>
       window.startApp = function() {
         #{scripts}

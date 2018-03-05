@@ -2,7 +2,8 @@
 window.api = {
   config: null,
   initAlreadyRun: false,
-  openFloorplan: (data, options = { noReloadGrid: false }) => {
+  openFloorplan: (data, _options) => {
+    const options = _options || { noReloadGrid: false };
     try {
       window.application.$store.dispatch('importFloorplan', {
         clientWidth: document.getElementById('svg-grid').clientWidth,
