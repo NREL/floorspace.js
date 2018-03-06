@@ -22,6 +22,7 @@ window.api = {
     try {
       window.application.$store.dispatch('importLibrary', { data: JSON.parse(data) });
     } catch (err) {
+      console.error(err);
       return false;
     }
     return true;

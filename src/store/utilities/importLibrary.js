@@ -30,10 +30,19 @@ export default function importLibrary(context, payload) {
     });
   });
 
-  const
-    librarySystem = payload.data.project.config.units === 'ft' ? 'ip_units' : 'si_units',
-    projectSystem = context.state.project.config.units === 'ft' ? 'ip_units' : 'si_units',
-    localUnitsPayload = convertLibrary(payload.data, librarySystem, projectSystem);
+  const projectSystem = context.state.project.config.units;
+  const librarySystemRaw = _.get(payload, 'data.project.config.units');
+  let librarySystem = (
+        librarySystemRaw === 'ft' ? 'ip' :
+        librarySystemRaw === 'm' ? 'si' :
+        librarySystemRaw);
+
+  if (librarySystem !== 'ip' && librarySystem !== 'si') {
+    console.warn(`Expected data.project.config.units to be "ip" or "si", received "${librarySystemRaw}"`);
+    console.warn('unable to determine units of library -- using project units');
+    librarySystem = projectSystem;
+  }
+  const localUnitsPayload = convertLibrary(payload.data, librarySystem, projectSystem);
 
   window.eventBus.$emit('success', `Imported ${count} object${count !== 1 ? 's' : ''}`);
   // merge the import data with the existing library objects

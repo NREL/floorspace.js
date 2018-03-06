@@ -34,7 +34,7 @@ if (ip_defaults.Project.config.units !== 'ip') {
 }
 const si_defaults = _.mapValues(
   ip_defaults,
-  (value, key) => getConverter(key, 'ip_units', 'si_units')(value));
+  (value, key) => getConverter(key, 'ip', 'si')(value));
 
 export const getDefaults = key =>
     _.cloneDeep(_.get(window, 'application.$store.state.project.config.units', 'ip') === 'ip' ?

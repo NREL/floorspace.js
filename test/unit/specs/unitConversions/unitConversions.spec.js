@@ -20,8 +20,8 @@ describe('conversionFactor', () => {
 describe('getConverter', () => {
   it('produces an acceptable conversion for Vertices', () => {
     const
-      toIP = getConverter('Vertex', 'si_units', 'ip_units'),
-      toSI = getConverter('Vertex', 'ip_units', 'si_units'),
+      toIP = getConverter('Vertex', 'si', 'ip'),
+      toSI = getConverter('Vertex', 'ip', 'si'),
       siVert = { x: 12, y: -5 },
       ipVert = { x: 12 * 3.280839895, y: -5 * 3.280839895 };
 
@@ -50,7 +50,7 @@ describe('getConverter', () => {
       },
       show_import_export: false,
     },
-    siProject = getConverter('Project', 'ip_units', 'si_units')(ipProject);
+    siProject = getConverter('Project', 'ip', 'si')(ipProject);
 
   it('converts nested attributes', () => {
     assert(isNearlyEqual(
@@ -61,7 +61,7 @@ describe('getConverter', () => {
 
   it('provides the identity func when converting unknown objects', () => {
     assertEqual(
-      getConverter('User', 'si_units', 'ip_units'),
+      getConverter('User', 'si', 'ip'),
       _.identity);
   });
 
@@ -113,20 +113,20 @@ describe('getConverter', () => {
     assert(isNearlyEqual(
       _.omit(siWindow, ['name', 'id']),
       _.omit(
-        getConverter('WindowDefinition', 'ip_units', 'si_units')(ipWindow),
+        getConverter('WindowDefinition', 'ip', 'si')(ipWindow),
         ['name', 'id'])));
 
     assert(isNearlyEqual(
       _.omit(ipWindow, ['name', 'id']),
       _.omit(
-        getConverter('WindowDefinition', 'si_units', 'ip_units')(siWindow),
+        getConverter('WindowDefinition', 'si', 'ip')(siWindow),
         ['name', 'id'])));
   });
 
   it('applies recursive Vertex conversion to Geometry', () => {
     const
-      geomConvert = getConverter('Geometry', 'si_units', 'ip_units'),
-      vertConvert = getConverter('Vertex', 'si_units', 'ip_units'),
+      geomConvert = getConverter('Geometry', 'si', 'ip'),
+      vertConvert = getConverter('Vertex', 'si', 'ip'),
       ipGeometry = geomConvert(simpleGeometry);
     assertEqual(
       _.omit(simpleGeometry, 'vertices'),
@@ -138,20 +138,20 @@ describe('getConverter', () => {
 });
 
 describe('convertSchema', () => {
-  const siFloorplan = convertSchema(ipFloorplan, 'ip_units', 'si_units');
+  const siFloorplan = convertSchema(ipFloorplan, 'ip', 'si');
   it('has the same keys as original', () => {
     assertEqual(_.keys(siFloorplan), _.keys(ipFloorplan));
   });
 
   it('converted the project', () => {
-    const projectConvert = getConverter('Project', 'ip_units', 'si_units');
+    const projectConvert = getConverter('Project', 'ip', 'si');
     assertEqual(
       siFloorplan.project,
       projectConvert(ipFloorplan.project));
   });
 
   it('converted each vertex', () => {
-    const vertConvert = getConverter('Vertex', 'ip_units', 'si_units');
+    const vertConvert = getConverter('Vertex', 'ip', 'si');
 
     assertEqual(
       _.chain(siFloorplan.stories)
@@ -435,16 +435,16 @@ describe('convertState', () => {
   },
   "timetravelInitialized": true
 }`),
-    siState = convertState(ipState, 'ip_units', 'si_units');
+    siState = convertState(ipState, 'ip', 'si');
   it('converts nested library values', () => {
-    const convertWindowDefn = getConverter('WindowDefinition', 'ip_units', 'si_units');
+    const convertWindowDefn = getConverter('WindowDefinition', 'ip', 'si');
     assert(isNearlyEqual(
       siState.models.library.window_definitions[0],
       convertWindowDefn(ipState.models.library.window_definitions[0])));
   });
 
   it('converts nested geometry state', () => {
-    const convertGeom = getConverter('Geometry', 'ip_units', 'si_units');
+    const convertGeom = getConverter('Geometry', 'ip', 'si');
     assert(isNearlyEqual(
       siState.geometry[0],
       convertGeom(ipState.geometry[0])));
@@ -457,7 +457,7 @@ describe('convertState', () => {
   });
 
   it('converts space properties', () => {
-    const convertSpace = getConverter('Space', 'ip_units', 'si_units');
+    const convertSpace = getConverter('Space', 'ip', 'si');
 
     assertEqual(
       siState.models.stories[0].spaces[0],
