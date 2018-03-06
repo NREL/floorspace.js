@@ -30,13 +30,20 @@ const store = new Vuex.Store({
     importFloorplan,
     importLibrary,
     changeUnits(context, { newUnits }) {
-      console.log(`moving from ${context.state.project.config.units} to ${newUnits}`);
+      const oldUnits = context.state.project.config.units;
+      console.log(`moving from ${oldUnits} to ${newUnits}`);
+      if (oldUnits !== 'ip' && oldUnits !== 'si') {
+        console.error(`Expected data.project.config.units to be "ip" or "si", received "${oldUnits}"`);
+      }
+      if (newUnits !== 'ip' && newUnits !== 'si') {
+        console.error(`Expected oldUnits to be "ip" or "si", received "${newUnits}"`);
+      }
       context.commit(
         'changeUnits',
         convertState(
           context.state,
-          context.state.project.config.units === 'm' ? 'si_units' : 'ip_units',
-          newUnits === 'm' ? 'si_units' : 'ip_units'));
+          oldUnits,
+          newUnits));
       context.dispatch('project/setUnits', { units: newUnits });
     },
   },

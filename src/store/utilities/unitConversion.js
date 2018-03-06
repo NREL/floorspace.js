@@ -64,16 +64,19 @@ export const conversionFactor = (fromUnits, toUnits) => {
   return factor;
 };
 
-export const getConverter = (path, fromSystem, toSystem) => {
+export const getConverter = (path, _fromSystem, _toSystem) => {
   // this because we don't have a type system
-  if (!_.includes(['si_units', 'ip_units'], fromSystem)) {
-    throw new Error(`expected fromSystem to be 'si_units' or 'ip_units'. received ${fromSystem}`);
+  if (!_.includes(['si', 'ip'], _fromSystem)) {
+    throw new Error(`expected fromSystem to be 'si' or 'ip'. received ${_fromSystem}`);
   }
-  if (!_.includes(['si_units', 'ip_units'], toSystem)) {
-    throw new Error(`expected toSystem to be 'si_units' or 'ip_units'. received ${toSystem}`);
+  if (!_.includes(['si', 'ip'], _toSystem)) {
+    throw new Error(`expected toSystem to be 'si' or 'ip'. received ${_toSystem}`);
   }
 
-  if (fromSystem === toSystem) { return _.identity; }
+  if (_fromSystem === _toSystem) { return _.identity; }
+
+  const fromSystem = `${_fromSystem}_units`;
+  const toSystem = `${_toSystem}_units`;
 
   const pathUnits = _.get(units, path);
   if (
@@ -87,16 +90,16 @@ export const getConverter = (path, fromSystem, toSystem) => {
     return val => val * factor;
   }
   if (pathUnits.$ref) {
-    return getConverter(pathUnits.$ref, fromSystem, toSystem);
+    return getConverter(pathUnits.$ref, _fromSystem, _toSystem);
   }
   if (pathUnits.arrayOf) {
-    const converter = getConverter(pathUnits.arrayOf, fromSystem, toSystem);
+    const converter = getConverter(pathUnits.arrayOf, _fromSystem, _toSystem);
     return arr => arr.map(converter);
   }
   if (_.isObject(pathUnits)) {
     const converters = _.mapValues(
       pathUnits,
-      (val, key) => getConverter(`${path}.${key}`, fromSystem, toSystem));
+      (val, key) => getConverter(`${path}.${key}`, _fromSystem, _toSystem));
     return obj => _.mapValues(obj, (val, key) => (converters[key] || _.identity)(val));
   }
   throw new Error(`Path ${path} did not lead to a useful spot in 'units'`);
