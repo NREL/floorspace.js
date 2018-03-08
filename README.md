@@ -2,6 +2,8 @@
 
 > a widget for creating 2d building energy models in svg and visualizing them in 3d
 
+![](icons/android-chrome-512x512.png)
+
 ## Build Setup
 
 ``` bash

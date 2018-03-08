@@ -27,7 +27,8 @@ notifications:
   email: false
 script:
   - npm run test && node check_version.js
-  - npm run openstudio-build && sed -i 's/\/static/static/g' dist/index.html && cp favicon.ico dist/
+  - npm run openstudio-build && sed -i 's/\/static/static/g' dist/index.html
+  - cp -r icons/ dist/ && cp site.webmanifest dist/ && cp browserconfig.xml dist/
 deploy:
   skip_cleanup: true
   provider: script
