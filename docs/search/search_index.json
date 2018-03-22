@@ -1,0 +1,14 @@
+{
+    "docs": [
+        {
+            "location": "/", 
+            "text": "FloorspaceJS\n\n\nA \npaper\n about FloorspaceJS will be published in the proceedings of \nSimAUD 2018\n.\n\n\nBlah blah blah", 
+            "title": "Home"
+        }, 
+        {
+            "location": "/#floorspacejs", 
+            "text": "A  paper  about FloorspaceJS will be published in the proceedings of  SimAUD 2018 .  Blah blah blah", 
+            "title": "FloorspaceJS"
+        }
+    ]
+}
