@@ -5,7 +5,7 @@ FloorspaceJS is a 2D geometry editor. Users can define an explicit floor plan fo
 
 Explicit floor plans allow more building-specific information than parameterized shoe-boxes but less information than a full 3D BIM model. Sloped walls, complex roofs, detailed shading structures, and other complex 3D structures are out of FloorspaceJS’s scope. In general, if users have a 3D BIM model in a tool that can export a useful BEM representation then it is better to use that export than to recreate a new model using FloorspaceJS. 
 
-Re-usability and minimal dependencies were key design considerations for software developers. Web technologies can be used in both on-line and desktop applications. The editor was written in pure JavaScript for maximum portability and re-usability. A custom JavaScript Object Notation (JSON) file format was developed to ease integration with other applications. Custom JSON schema design was a key part of FloorspaceJS development.
+Re-usability and minimal dependencies were key design considerations for software developers. Web technologies can be used in both online and desktop applications. The editor was written in pure JavaScript for maximum portability and re-usability. A custom JavaScript Object Notation (JSON) file format was developed to ease integration with other applications. Custom JSON schema design was a key part of FloorspaceJS development.
 
 A [paper](https://www.nrel.gov/docs/fy18osti/70491.pdf) with more information about FloorspaceJS will be published in the proceedings of [SimAUD 2018](http://simaud.org/2018/).
 
