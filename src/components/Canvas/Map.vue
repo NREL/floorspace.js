@@ -128,7 +128,7 @@ export default {
       let resolution = (this.max_x - this.min_x) / this.$refs.map.clientWidth;
 
       // translate units from ft to meters
-      if (this.units === 'ft') {
+      if (this.units === 'ip') {
         // meters in a foot
         const mPerFt = ol.proj.METERS_PER_UNIT['us-ft'];
         resolution *= mPerFt;
