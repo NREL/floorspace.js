@@ -52,14 +52,60 @@
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
         <li class="main active"><a href="#floorspacejs">FloorspaceJS</a></li>
+            <li><a href="#getting-started">Getting Started</a></li>
+            <li><a href="#drawing-spaces">Drawing Spaces</a></li>
+            <li><a href="#assignments">Assignments</a></li>
+            <li><a href="#components">Components</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
 <h1 id="floorspacejs"><img alt="" src="./img/favicon-32x32.png" /> FloorspaceJS</h1>
-<p>A <a href="https://www.nrel.gov/docs/fy18osti/70491.pdf">paper</a> about FloorspaceJS will be published in the proceedings of <a href="http://simaud.org/2018/">SimAUD 2018</a>.</p>
-<p>Blah blah blah</p>
-<p><a href="./img/all_spaces.png"><img alt="Test Image" src="./img/all_spaces.png" title="Test Image" /></a></p></div>
+<p>FloorspaceJS is a 2D geometry editor. Users can define an explicit floor plan for each story of a building. A story-by-story interface makes it easy to develop space geometry and assign properties. Referencing satellite imagery or floor plan images, when available, speeds up geometry entry. Conversion of 2D to 3D geometry is currently out of scope for FloorspaceJS, a reference implementation is available in the <a href="https://www.openstudio.net/">OpenStudio SDK</a>.</p>
+<p>Explicit floor plans allow more building-specific information than parameterized shoe-boxes but less information than a full 3D BIM model. Sloped walls, complex roofs, detailed shading structures, and other complex 3D structures are out of FloorspaceJS’s scope. In general, if users have a 3D BIM model in a tool that can export a useful BEM representation then it is better to use that export than to recreate a new model using FloorspaceJS. </p>
+<p>Re-usability and minimal dependencies were key design considerations for software developers. Web technologies can be used in both on-line and desktop applications. The editor was written in pure JavaScript for maximum portability and re-usability. A custom JavaScript Object Notation (JSON) file format was developed to ease integration with other applications. Custom JSON schema design was a key part of FloorspaceJS development.</p>
+<p>A <a href="https://www.nrel.gov/docs/fy18osti/70491.pdf">paper</a> with more information about FloorspaceJS will be published in the proceedings of <a href="http://simaud.org/2018/">SimAUD 2018</a>.</p>
+<hr />
+<h2 id="getting-started">Getting Started</h2>
+<p>After loading FloorspaceJS, you will be prompted to create a new floorplan file, create a new floorplan file with a map background, or open an existing floorplan file. In this example we will choose to use the map background for reference.  </p>
+<p><a href="./img/initial_dialog.png"><img alt="Initial Dialog" src="./img/initial_dialog.png" title="Initial Dialog" /></a></p>
+<p>Navigate on the map to the place you want to locate your building using the "Search for a location" box and map navigation controls. Once you have selected where you want to place your building, use the cross hair tool to select your building's origin.  You may wish to rotate your view (press alt + shift) to align your building with the x, y axes in the editor.  Press the "Done" button to place your building and set the rotation.  Note that building placement is currently a one time operation that cannot be changed once the building is located.</p>
+<p><a href="./img/rotate1.png"><img alt="Rotate 1" src="./img/rotate1.png" title="Rotate 1" /></a></p>
+<p><a href="./img/rotate2.png"><img alt="Rotate 2" src="./img/rotate2.png" title="Rotate 2" /></a></p>
+<hr />
+<h2 id="drawing-spaces">Drawing Spaces</h2>
+<p>The Floorplan tab is used for developing geometry. The navigator on the left side of the editor is used to select the current story and space for the drawing area.  The geometry for the current story is shown, the geometry for the previous story can be toggled on and off using the "Story Below" check box in the upper right corner.  A grid can also be toggled on and off for reference when drawing.  The grid spacing may be customized as well.  Note that the units selected for drawing are set when FloorspaceJS is loaded.  Currently, the units selection may not be changed after the initial setting.  To add geometry to the currently selected space, select either the "Rectangle" or "Polygon" tool.</p>
+<p><a href="./img/space1.png"><img alt="Space 1" src="./img/space1.png" title="Space 1" /></a></p>
+<p>Once you have drawn geometry for a space, you can extend it by drawing an additional rectangle or polygon, which overlaps the existing space geometry.  This allows the creation of more complex space boundaries.  Use the "Eraser" tool to completely erase or to create cutouts within a space. Note that you cannot add new geometry for a space that does not intersect existing space geometry.  Additionally, you cannot use the eraser tool to divide a single space geometry into two or more separate pieces. </p>
+<p><a href="./img/space1-2.png"><img alt="Space 1-2" src="./img/space1-2.png" title="Space 1-2" /></a></p>
+<p>To create geometry for additional spaces, first create the new space by using the "+" button in the navigator.  Then, with the new space selected, draw the new space geometry.  If new space geometry overlaps existing geometry in another space, then the new geometry will be created and existing geometry in the other space will be reduced.  Geometry for multiple spaces cannot overlap.  Continue in this way to create all of the spaces for the current story.</p>
+<p><a href="./img/all_spaces.png"><img alt="All Spaces" src="./img/all_spaces.png" title="All Spaces" /></a></p>
+<p>Press the "+Story" button to create a new story.  This will automatically create a new space for the second story that you can begin to define geometry for.  </p>
+<p><a href="./img/story2.png"><img alt="Story 2" src="./img/story2.png" title="Story 2" /></a></p>
+<p>You can use the rectangle or geometry tool to create new space geometry or use the fill tool which will create geometry for the currently selected space on the current story based on geometry from the story below.</p>
+<p><a href="./img/story2-2.png"><img alt="Story 2" src="./img/story2-2.png" title="Story 2" /></a></p>
+<p>A floorplan image can be imported by selecting "Image" in the navigator and pressing the "+" button.  The image may be moved and scaled to correct dimension.</p>
+<p><a href="./img/floorplan_image.png"><img alt="Floorplan Image" src="./img/floorplan_image.png" title="Floorplan Image" /></a></p>
+<hr />
+<h2 id="assignments">Assignments</h2>
+<p>The Assignments tab provides access to specify and edit data associated with the floorplan such as space types, thermal zones, and constructions.  You can select the type of object to display in the navigator.  All objects of that type are displayed.  Press the "+" button to create new objects of that type, e.g. you can use this functionality to create a new thermal zone.  Clicking on space geometry will assign the currently selected object to that space, e.g. assigning the newly created thermal zone to an existing space.</p>
+<p><a href="./img/thermal_zone-1.png"><img alt="Thermal Zone 1" src="./img/thermal_zone-1.png" title="Thermal Zone 1" /></a></p>
+<p>Continuing making new thermal zones and assigning to spaces as needed.</p>
+<p><a href="./img/all_zones.png"><img alt="All Zones" src="./img/all_zones.png" title="All Zones" /></a></p>
+<p>You can also make bulk assignments to spaces on the floorplan tab by expanding the double arrow icon next to spaces in the navigator.  From here you can make bulk assignments to spaces in a tabular format.  You can also override default values for "Floor to Ceiling Height", "Below Floor Plenum Height", "Above Ceiling Plenum Height" for individual spaces.</p>
+<p><a href="./img/space_assignments.png"><img alt="Space Assignments" src="./img/space_assignments.png" title="Space Assignments" /></a></p>
+<p>Unless overridden at the space level, the default "Floor to Ceiling Height", "Below Floor Plenum Height", "Above Ceiling Plenum Height" values apply to all spaces on a given story.</p>
+<p><a href="./img/story_assignments.png"><img alt="Story Assignments" src="./img/story_assignments.png" title="Story Assignments" /></a></p>
+<hr />
+<h2 id="components">Components</h2>
+<p>The Components tab is used to define and place components such as windows and daylighting controls throughout the model. Select the type of components to edit in the navigator and press the "+" button to create new object definitions for that type.  For example, you can create three different types of window definitions: "Single Window" which represents a single window, "Repeating Window" which represents a pattern of repeating windows at a certain spacing, and "Window to Wall Ratio" which specifies a glazing ratio to apply.</p>
+<p><a href="./img/window_components.png"><img alt="Window Components" src="./img/window_components.png" title="Window Components" /></a></p>
+<p>Instances of single window definitions can be placed by selecting the window definition and then clicking on an edge.  Multiple instances of the same window definition may be placed throughout the model.</p>
+<p><a href="./img/single_window.png"><img alt="Single Window" src="./img/single_window.png" title="Single Window" /></a></p>
+<p>Repeating windows apply to an entire edge.</p>
+<p><a href="./img/repeating_window.png"><img alt="Repeating Window" src="./img/repeating_window.png" title="Repeating Window" /></a></p>
+<p>Window to wall ratio definitions also apply to an entire edge.</p>
+<p><a href="./img/wwr_window.png"><img alt="WWR Window" src="./img/wwr_window.png" title="WWR Window" /></a></p></div>
         </div>
 
         <footer class="col-md-12">
@@ -141,5 +187,5 @@
 
 <!--
 MkDocs version : 0.17.3
-Build Date UTC : 2018-03-22 02:52:32
+Build Date UTC : 2018-03-23 19:58:24
 -->
