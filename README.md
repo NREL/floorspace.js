@@ -1,6 +1,11 @@
 # <img src="icons/favicon-32x32.png" /> FloorspaceJS
 
-> a widget for creating 2d building energy models in svg and visualizing them in 3d
+> a widget for creating 2d geometry for building energy models
+
+
+## Getting Started
+
+Read [the docs](https://nrel.github.io/floorspace.js/docs) then try out the [latest development version](https://nrel.github.io/floorspace.js/) in your browser.
 
 ## Build Setup
 
@@ -35,4 +40,3 @@ For detailed explanation on how things work, checkout the [guide](http://vuejs-t
 
 Tests are run on each pull request.
 
-Try out the [latest development version](https://nrel.github.io/floorspace.js/) in your browser.
