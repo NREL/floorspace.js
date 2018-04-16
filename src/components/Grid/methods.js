@@ -543,7 +543,7 @@ export default {
         }),
         { x, y, area } = this.polygonLabelPosition(areaPoints),
         areaTextNoUnits = area ? area.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') : '',
-        areaText = `${areaTextNoUnits} ${this.units}²`;
+        areaText = `${areaTextNoUnits} ${this.units === 'ip' ? 'ft' : 'm'}²`;
 
       if (x === null || y === null) {
         // either polygon has 0 area or something went wrong --> don't draw area text
