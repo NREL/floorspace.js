@@ -125,4 +125,7 @@ input {
   );
   background-size: 4px 4px;
 }
+.color-wrapper input {
+    max-width: 100%;
+}
 </style>
