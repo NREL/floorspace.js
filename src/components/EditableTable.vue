@@ -7,49 +7,58 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
   <div class="editable-table">
-    <table class="table" cellspacing="0">
-      <thead cellspacing="0">
-        <tr>
-          <th class="select"><!-- placeholder for select column --></th>
-          <th v-for="col in visibleColumns" @click="sortBy(col.name)" :data-column="col.name">
-            <span>{{col.displayName}}</span>
-            <svg v-show="col.name === sortKey && sortDescending" viewBox="0 0 10 3" xmlns="http://www.w3.org/2000/svg">
-                <path d="M0 .5l5 5 5-5H0z"/>
-            </svg>
-            <svg v-show="col.name === sortKey && !sortDescending" viewBox="0 0 10 3" xmlns="http://www.w3.org/2000/svg">
-                <path d="M0 5.5l5-5 5 5H0z"/>
-            </svg>
-          </th>
-          <th class="destroy"><!-- placeholder for delete column --></th>
-        </tr>
-      </thead>
-      <tbody cellspacing="0">
-        <tr v-for="row in sortedRows" :key="row.id" :class="{ selected: selectedItemId === row.id }">
-          <td class="select" @click.stop="selectRow(row)">
-            <input type="radio" :checked="selectedItemId === row.id" />
-          </td>
-          <td
-              v-for="col in visibleColumns"
-              :data-column="col.name"
-              :key="col.name"
-          >
-            <generic-input
+    <el-table
+      :data="sortedRows"
+      height="calc(50vh - 105px)"
+    >
+      <TableColumn
+        prop="select"
+        label=""
+        class="select"
+        width="35"
+      >
+        <template slot-scope="scope">
+          <div class="select" @click.stop="selectRow(scope.row)">
+            <input type="radio" :checked="selectedItemId === scope.row.id" />
+          </div>
+        </template>
+      </TableColumn>
+      <TableColumn
+        v-for="col in visibleColumns"
+        :key="col.name"
+        :data-column="col.name"
+        :prop="col.name"
+        :label="col.displayName"
+        width="154"
+      >
+        <template slot-scope="scope">
+          <generic-input
               :col="col"
-              :row="row"
-              :onChange="updateRow.bind(null, row.id, col.name)"
-            />
-          </td>
-          <td class="destroy" @click.stop="deleteRow(row)" title="delete">
+              :row="scope.row"
+              :onChange="updateRow.bind(null, scope.row.id, col.name)"
+          />
+        </template>
+      </TableColumn>
+      <TableColumn
+        prop="destroy"
+        label=""
+        class="destroy"
+        width="35"
+      >
+        <template slot-scope="scope">
+          <div class="destroy" @click.stop="deleteRow(scope.row)" title="delete">
             <Delete class="button" />
-          </td>
-        </tr>
-      </tbody>
-    </table>
+          </div>
+        </template>
+      </TableColumn>
+    </el-table>
   </div>
 </template>
 
 <script>
 import _ from 'lodash';
+import { Table, TableColumn } from 'element-ui';
+import 'element-ui/lib/theme-chalk/index.css';
 import { mapState, mapGetters } from 'vuex';
 import Delete from './../assets/svg-icons/delete.svg';
 
@@ -85,68 +94,112 @@ export default {
   },
   components: {
     Delete,
+    'el-table': Table,
+    TableColumn,
   },
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 @import "./../scss/config";
 
-  .editable-table {
-    width: 100%;
-    overflow-x: auto;
-    table {
-      overflow-y: auto;
-      thead {
-        display: table-row;
-        svg {
-          margin-left: 1em;
-          height: 1rem;
-          width: 1rem;
-        }
+// .editable-table {
+//     width: 100%;
+//     overflow-x: auto;
+//     table {
+//       overflow-y: auto;
+//       thead {
+//         display: table-row;
+//         svg {
+//           margin-left: 1em;
+//           height: 1rem;
+//           width: 1rem;
+//         }
 
-      }
-      tbody {
-        overflow-x: auto;
-        display: block;
-        height: calc(100vh - 208px);
-      }
-      td, th {
-        width: 154px;
-        span {
-          display: block;
-        }
-        > * {
-          width: 154px;
-        }
-        input {
-          width: 137px;
-          margin-left: 5px;
-          margin-right: 6px;
-        }
-        &.destroy, &.select {
-          width: 35px;
-          > [type="radio"] {
-            width: 25px;
-          }
-          > svg {
-            width: 25px;
-            margin-top: 10px;
-            margin-left: 5px;
-          }
-          margin: 0 auto;
-          padding: 0;
-        }
-      }
-      th {
-        height: 3rem;
+//       }
+//       tbody {
+//         overflow-x: auto;
+//         display: block;
+//         height: calc(100vh - 208px);
+//       }
+    //   td, th {
+    //     width: 154px;
+    //     span {
+    //       display: block;
+    //     }
+    //     > cell > * {
+    //       width: 154px;
+    //     }
+    //     input {
+    //       width: 137px;
+    //       margin-left: 5px;
+    //       margin-right: 6px;
+    //     }
+    //     &.destroy, &.select {
+    //       width: 35px;
+    //       > [type="radio"] {
+    //         width: 25px;
+    //       }
+    //       > svg {
+    //         width: 25px;
+    //         margin-top: 10px;
+    //         margin-left: 5px;
+    //       }
+    //       margin: 0 auto;
+    //       padding: 0;
+    //     }
+    //   }
+    //   th {
+    //     height: 3rem;
+    //   }
+//     }
+// }
+
+
+  .editable-table {
+    .el-table {
+      :before, :after {
+          height: 0;
       }
     }
-  }
+    .el-table__body-wrapper {
+      background-color: $gray-medium;
+    }
+    .el-table table {
+      tbody, thead {
+        tr, tr:hover {
+          td, th {
+            background-color: $gray-medium;
+            padding: 0;
+            height: 3rem;
+            .cell {
+              text-align: center;
+              word-break: break-word;
+              color: $gray-lightest;
+              input {
+                  width: 100%;
+              }
+            }
+            .destroy, .select {
+                width: 35px;
+                > [type="radio"] {
+                    width: 25px;
+                }
+                > svg {
+                    margin-top: 12px;
+                    margin-left: -6px;
+                }
+                margin: 0 auto;
+                padding: 0;
+            }
 
-
-  .editable-table {
-    background-color: $gray-medium;
+          }
+        }
+      }
+      .el-table__body tbody {
+          padding-bottom: 1rem;
+      }
+    }
     table {
       thead {
         border-bottom: 2px solid $gray-medium-dark;
