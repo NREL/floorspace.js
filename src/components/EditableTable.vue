@@ -16,6 +16,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         label=""
         class="select"
         width="35"
+        :fixed="true"
       >
         <template slot-scope="scope">
           <div class="select" @click.stop="selectRow(scope.row)">
@@ -30,6 +31,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         :prop="col.name"
         :label="col.displayName"
         width="154"
+        :fixed="col.name == 'name'"
       >
         <template slot-scope="scope">
           <generic-input
@@ -157,13 +159,14 @@ export default {
 
 
   .editable-table {
-    .el-table {
-      :before, :after {
-          height: 0;
-      }
+    .el-table::before, .el-table__fixed-right::before, .el-table__fixed::before {
+      width: 0;
     }
     .el-table__body-wrapper {
       background-color: $gray-medium;
+    }
+    .el-table td, .el-table th.is-leaf {
+      border-bottom: none;
     }
     .el-table table {
       tbody, thead {
