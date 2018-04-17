@@ -25,6 +25,7 @@ module.exports = {
       browser.perform((client, done) => {
         client
           .click('[data-object-type="stories"] .add-new')
+          .assert.elementCount('.poly.previousStory', 4)
           .moveToElement('#grid svg', client.xScale(25), client.yScale(25))
           .mouseButtonClick()
           .click('[data-object-type="spaces"] .add-new')
@@ -41,7 +42,6 @@ module.exports = {
       });
     });
     browser
-      .pause()
       .checkForErrors()
       .end();
   },
