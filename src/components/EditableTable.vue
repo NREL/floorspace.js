@@ -31,6 +31,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         :data-column="col.name"
         :prop="col.name"
         :label="col.displayName"
+        :class-name="`column__${col.name}`"
         width="154"
         :fixed="col.name == 'name'"
         sortable="custom"

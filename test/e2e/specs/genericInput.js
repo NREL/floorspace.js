@@ -14,7 +14,7 @@ module.exports = {
       .setFlagOnError();
   },
   'clearing floor to ceiling replaces default, but good changes are preserved': (browser) => {
-    const floorToCeiling = '[data-column="floor_to_ceiling_height"] input';
+    const floorToCeiling = '.column__floor_to_ceiling_height input';
     browser
       .click('.modal .new-floorplan svg')
       .click('[data-object-type="stories"] [title="expand"]')
@@ -29,7 +29,7 @@ module.exports = {
       .end();
   },
   'clearing space floor to ceiling is allowed': (browser) => {
-    const floorToCeiling = '[data-column="floor_to_ceiling_height"] input';
+    const floorToCeiling = '.column__floor_to_ceiling_height input';
     browser
       .click('.modal .new-floorplan svg')
       .click('[data-object-type="spaces"] [title="expand"]')
