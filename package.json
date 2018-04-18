@@ -20,7 +20,6 @@
     "d3-selection-multi": "^1.0.1",
     "element-ui": "^2.3.4",
     "google-maps-api": "^2.0.1",
-    "huebee": "^1.0.1",
     "js-clipper": "^1.0.1",
     "lodash": "^4.17.4",
     "openlayers": "^4.6.0",
