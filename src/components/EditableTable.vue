@@ -111,59 +111,6 @@ export default {
 <style lang="scss">
 @import "./../scss/config";
 
-// .editable-table {
-//     width: 100%;
-//     overflow-x: auto;
-//     table {
-//       overflow-y: auto;
-//       thead {
-//         display: table-row;
-//         svg {
-//           margin-left: 1em;
-//           height: 1rem;
-//           width: 1rem;
-//         }
-
-//       }
-//       tbody {
-//         overflow-x: auto;
-//         display: block;
-//         height: calc(100vh - 208px);
-//       }
-    //   td, th {
-    //     width: 154px;
-    //     span {
-    //       display: block;
-    //     }
-    //     > cell > * {
-    //       width: 154px;
-    //     }
-    //     input {
-    //       width: 137px;
-    //       margin-left: 5px;
-    //       margin-right: 6px;
-    //     }
-    //     &.destroy, &.select {
-    //       width: 35px;
-    //       > [type="radio"] {
-    //         width: 25px;
-    //       }
-    //       > svg {
-    //         width: 25px;
-    //         margin-top: 10px;
-    //         margin-left: 5px;
-    //       }
-    //       margin: 0 auto;
-    //       padding: 0;
-    //     }
-    //   }
-    //   th {
-    //     height: 3rem;
-    //   }
-//     }
-// }
-
-
   .editable-table {
     .el-table::before, .el-table__fixed-right::before, .el-table__fixed::before {
       width: 0;
