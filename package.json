@@ -27,6 +27,7 @@
     "polylabel": "^1.0.2",
     "proxy-polyfill": "^0.1.7",
     "vue": "^2.4.4",
+    "vue-swatches": "^1.0.1",
     "vuex": "^2.1.1"
   },
   "devDependencies": {

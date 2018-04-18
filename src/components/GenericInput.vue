@@ -23,11 +23,18 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     class="color-wrapper"
   >
     <input
-      ref="color_input"
       class="input-color"
-      :object-id="row.id"
       :value="row[col.name]"
       :disabled="disabled"
+      @click="showColorModal = true"
+      readonly
+      :style="colorStyles"
+    />
+    <ColorPickerModal
+      v-if="showColorModal"
+      @close="showColorModal = false"
+      :value="row[col.name]"
+      @change="onChange"
     />
   </div>
   <pretty-select v-else-if="col.input_type === 'select'"
@@ -46,12 +53,18 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <script>
 import _ from 'lodash';
-import Huebee from 'huebee';
 import TextureSelect from './TextureSelect.vue';
+import ColorPickerModal from './Modals/ColorPickerModal.vue';
+import { brightness } from '../utilities/color';
 
 export default {
   name: 'GenericInput',
   props: ['col', 'row', 'onChange'],
+  data() {
+    return {
+      showColorModal: false,
+    };
+  },
   methods: {
     blurOnEnter(evt) {
       if (evt.keyCode === 13) {
@@ -65,19 +78,6 @@ export default {
       }
       return;
     },
-    configurePicker() {
-      if (!this.$refs.color_input) {
-        return;
-      }
-
-      new Huebee(this.$refs.color_input, { saturations: 1, notation: 'hex' })
-        .on('change', (color) => {
-          this.onChange(color);
-        });
-    },
-  },
-  mounted() {
-    this.configurePicker();
   },
   computed: {
     selectData() {
@@ -93,9 +93,21 @@ export default {
       }
       return !this.col.enabled(this.row)
     },
+    colorStyles() {
+      const
+        value = this.row[this.col.name],
+        r = parseInt(value.slice(1, 3), 16),
+        g = parseInt(value.slice(3, 5), 16),
+        b = parseInt(value.slice(5, 7), 16);
+      return {
+        color: brightness(r,g,b) < 123 ? '#fff' : '#000',
+        background: value,
+      };
+    },
   },
   components: {
     TextureSelect,
+    ColorPickerModal,
   },
 }
 
@@ -103,7 +115,6 @@ export default {
 
 <style lang="scss" scoped>
 @import "./../scss/config";
-@import './../../node_modules/huebee/dist/huebee.min.css';
 .numeric {
   text-align: right;
 }

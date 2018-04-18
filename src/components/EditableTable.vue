@@ -10,6 +10,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     <el-table
       :data="sortedRows"
       height="calc(50vh - 105px)"
+      @sort-change="sortChange"
     >
       <TableColumn
         prop="select"
@@ -32,6 +33,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         :label="col.displayName"
         width="154"
         :fixed="col.name == 'name'"
+        sortable="custom"
       >
         <template slot-scope="scope">
           <generic-input
@@ -89,6 +91,10 @@ export default {
     },
   },
   methods: {
+    sortChange({ prop, order }) {
+        this.sortKey = prop;
+        this.sortDescending = (order === 'descending');
+    },
     sortBy(colName) {
       this.sortDescending = this.sortKey === colName ? !this.sortDescending : true;
       this.sortKey = colName;
