@@ -1,3 +1,4 @@
+const { ringEquals } = require('../../../src/store/modules/geometry/helpers');
 const { failOnError, withScales, draw50By50Square, drawSquare } = require('../helpers');
 
 function start(browser) {

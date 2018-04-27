@@ -2,6 +2,26 @@ import _ from 'lodash';
 import ClipperLib from 'js-clipper';
 import { dropConsecutiveDups } from '../../../utilities';
 
+function ringEqualsWithSameWindingOrder(vs, ws) {
+  const pivotVert = vs[0];
+  const pivotIx = _.findIndex(ws, _.pick(pivotVert, ['x', 'y']));
+
+  if (pivotIx === -1) return false;
+  const wsp = _.map([...ws.slice(pivotIx), ...ws.slice(0, pivotIx)], w => _.pick(w, ['x', 'y']));
+  return _.isEqualWith(vs, wsp, (v, w) => _.isMatch(v, w));
+}
+
+export function ringEquals(vs, ws) {
+  if (vs.length !== ws.length) return false;
+  if (vs.length === 0) return true;
+
+  return (
+    ringEqualsWithSameWindingOrder(vs, ws) ||
+    ringEqualsWithSameWindingOrder(vs, [...ws].reverse())
+  );
+}
+
+
 export function distanceBetweenPoints(p1, p2) {
   const
     dx = Math.abs(p1.x - p2.x),
