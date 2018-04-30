@@ -826,8 +826,9 @@ export default {
     poly.order();
   },
   drawWalls() {
-    let wall = d3.select('#grid svg .polygons').selectAll('g.wall')
-      .data(this.walls, d => d.id);
+    d3.select('#grid svg .walls').selectAll('.wall')
+      .data(this.walls, d => d.id)
+      .call(this.drawWall);
   },
   drawImages() {
     d3.select('#grid svg .images').selectAll('.image-group')

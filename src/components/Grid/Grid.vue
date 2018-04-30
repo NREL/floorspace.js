@@ -17,6 +17,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       <g class="axis axis--y"></g>
       <g class="images" data-transform-plz></g>
       <g class="polygons" data-transform-plz></g>
+      <g class="walls" data-transform-plz></g>
     </svg>
   </div>
 </template>
@@ -252,7 +253,7 @@ export default {
             id: edgeId,
             start: vertsLookup[edge.v1],
             end: vertsLookup[edge.v2],
-            interior: numOccurences >= 1,
+            interior: numOccurences > 1,
           };
         })
         .value();
