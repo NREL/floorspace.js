@@ -187,7 +187,6 @@ export function drawWindow() {
         } else if (d.window_definition_mode === 'Repeating Windows') {
           drawRepeatingWindows(xScale, yScale, this, d);
         } else {
-          debugger;
           throw new Error(`unexpected window_definition_mode: ${d.window_definition_mode}`);
         }
       });
