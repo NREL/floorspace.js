@@ -56,16 +56,41 @@ describe('ringEquals', () => {
     );
   });
 
-  it('is independent of both winding order and rotation', () => {
+
+  it('permits closed rings (start == end)', () => {
     assertProperty(
-      genIrregularPolygon,
-      gen.posInt,
-      (pts, pivot) => {
+      gen.object({
+        pts: genIrregularPolygon,
+        pivot: gen.posInt,
+      })
+      .then(({ pts, pivot }) => {
+        const pivotIx = pivot % pts.length;
+        const ptsPivoted = [...pts.slice(pivotIx), ...pts.slice(0, pivotIx)];
+        return {
+          a: [...pts, pts[0]],
+          b: [...ptsPivoted, ptsPivoted[0]],
+        };
+      }),
+      ({ a, b }) => ringEquals(a, b),
+    );
+  });
+
+  it('is independent of both winding order and rotation and closed rings', () => {
+    assertProperty(
+      gen.object({
+        pts: genIrregularPolygon,
+        pivot: gen.posInt,
+      })
+      .then(({ pts, pivot }) => {
         const pivotIx = pivot % pts.length;
         const ptsReversed = [...pts].reverse();
         const ptsReversedAndRotated = [...ptsReversed.slice(pivotIx), ...ptsReversed.slice(0, pivotIx)];
-        return !_.isEqual(pts, ptsReversedAndRotated) && ringEquals(pts, ptsReversedAndRotated);
-      },
+        return {
+          a: [...pts, pts[0]],
+          b: [...ptsReversedAndRotated, ptsReversedAndRotated[0]],
+        };
+      }),
+      ({ a, b }) => !_.isEqual(a, b) && ringEquals(a, b),
     );
   });
 
