@@ -32,8 +32,11 @@ script:
   - mkdocs build -d dist/docs
   - cp -r icons/ dist/ && cp site.webmanifest dist/ && cp browserconfig.xml dist/
 deploy:
-  skip_cleanup: true
-  provider: script
-  script: npm run deploy
-  on:
-    branch: develop
+  - provider: script
+    skip_cleanup: true
+    script: ./deploy.sh
+  - provider: script
+    skip_cleanup: true
+    script: npm run deploy
+    on:
+      branch: develop
