@@ -825,6 +825,11 @@ export default {
     // render the selected model's face above the other polygons so that the border is not obscured
     poly.order();
   },
+  drawWalls() {
+    d3.select('#grid svg .walls').selectAll('.wall')
+      .data(this.walls, d => d.id)
+      .call(this.drawWall);
+  },
   drawImages() {
     d3.select('#grid svg .images').selectAll('.image-group')
       .data(this.images, d => d.id)
@@ -837,6 +842,7 @@ export default {
       .attr('transform', '');
 
     this.drawPolygons();
+    this.drawWalls();
     this.drawImages();
     this.raiseOrLowerImages();
 

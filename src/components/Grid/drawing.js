@@ -187,7 +187,6 @@ export function drawWindow() {
         } else if (d.window_definition_mode === 'Repeating Windows') {
           drawRepeatingWindows(xScale, yScale, this, d);
         } else {
-          debugger;
           throw new Error(`unexpected window_definition_mode: ${d.window_definition_mode}`);
         }
       });
@@ -693,6 +692,38 @@ export function drawImage() {
   return chart;
 }
 
+export function drawWall() {
+  let
+    xScale = _.identity,
+    yScale = _.identity;
+  const line = d3.line()
+    .x(d => xScale(d.x))
+    .y(d => yScale(d.y));
+  function chart(selection) {
+    selection.exit().remove();
+    const wallE = selection.enter().append('path').attr('class', 'wall');
+
+    const wall = selection.merge(wallE);
+
+    wall
+      .attr('d', d => line([d.start, d.end]))
+      .attr('class', d => `wall ${d.interior ? 'interior' : 'exterior'}`);
+  }
+
+  chart.xScale = function (_) {
+    if (!arguments.length) return xScale;
+    xScale = _;
+    return chart;
+  };
+  chart.yScale = function (_) {
+    if (!arguments.length) return yScale;
+    yScale = _;
+    return chart;
+  };
+  return chart;
+}
+
+
 export default function drawMethods({ xScale, yScale, updateImage, selectImage }) {
 
   return {
@@ -713,5 +744,8 @@ export default function drawMethods({ xScale, yScale, updateImage, selectImage }
       .yScale(yScale)
       .updateImage(updateImage)
       .selectImage(selectImage),
+    drawWall: drawWall()
+      .xScale(xScale)
+      .yScale(yScale),
   };
 }

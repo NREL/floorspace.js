@@ -17,6 +17,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       <g class="axis axis--y"></g>
       <g class="images" data-transform-plz></g>
       <g class="polygons" data-transform-plz></g>
+      <g class="walls" data-transform-plz></g>
     </svg>
   </div>
 </template>
@@ -231,6 +232,31 @@ export default {
     polygons() {
       const currentStoryPolygons = this.polygonsFromGeometry(this.currentStoryGeometry);
       return this.previousStoryPolygons ? this.previousStoryPolygons.concat(currentStoryPolygons) : currentStoryPolygons;
+    },
+    walls() {
+      const edgesLookup = _.keyBy(this.currentStoryGeometry.edges, 'id');
+      const vertsLookup = _.keyBy(this.currentStoryGeometry.vertices, 'id');
+
+      return _.chain(this.currentStoryGeometry.faces)
+        // Make a list of edge ids, with one appearance for each usage of that edge.
+        .flatMap(fc => _.map(fc.edgeRefs, 'edge_id'))
+        // Sort to bring same edge ids together
+        .sortBy(_.identity)
+        // group to make an object like { "edge_a": ["edge_a"], "edge_b": ["edge_b", "edge_b"] }
+        .groupBy(_.identity)
+        // change that to { edge_a: 1, edge_b: 2 }
+        .mapValues('length')
+        // Look up vertex values, mark as interior if more than one usage of this edge.
+        .map((numOccurences, edgeId) => {
+          const edge = edgesLookup[edgeId];
+          return {
+            id: edgeId,
+            start: vertsLookup[edge.v1],
+            end: vertsLookup[edge.v2],
+            interior: numOccurences > 1,
+          };
+        })
+        .value();
     },
     daylightingControlLocs() {
       return _.flatten(

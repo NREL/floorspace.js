@@ -157,6 +157,14 @@ export default {
       e.v2 = replacementVertIds[e.v2] || e.v2;
     });
 
+    edges.forEach((edge) => {
+      const gEdge = _.find(geom.edges, { v1: edge.v1, v2: edge.v2 }) || _.find(geom.edges, { v1: edge.v2, v2: edge.v1 });
+      if (!gEdge) return; // this edge doesn't match any existing ones
+      if (edge.id === gEdge.id) return; // this edge already exists
+      edge.id = gEdge.id;
+      edge.reverse = (gEdge.v1 !== edge.v1);
+    });
+
     context.commit('replaceFacePoints', {
       geometry_id,
       vertices,

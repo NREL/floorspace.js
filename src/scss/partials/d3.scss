@@ -72,12 +72,12 @@
       pointer-events: all;
     }
 
-    .poly.current {
-      > polygon, > rect, > path {
-        stroke: $black;
-        stroke-width: 2px;
-      }
-    }
+    // .poly.current {
+    //   > polygon, > rect, > path {
+    //     stroke: $black;
+    //     stroke-width: 2px;
+    //   }
+    // }
 
     .previousStory {
       polygon, rect, path {
@@ -241,5 +241,16 @@
 .reduce-ticks {
   .tick line {
     visibility: hidden;
+  }
+}
+
+.walls {
+  path.wall {
+    fill: none;
+    stroke: black;
+    stroke-width: 2px;
+    &.interior {
+        stroke-dasharray: 0 5 5;
+    }
   }
 }
