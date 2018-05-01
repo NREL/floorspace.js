@@ -650,10 +650,20 @@ const map = {
         validator: validators.name,
       },
       {
+        name: 'width',
+        displayName: 'Width',
+        input_type: 'text',
+        validator: validators.number,
+        converter: converters.number,
+        numeric: true,
+      },
+      {
         name: 'height',
         displayName: 'Height',
         input_type: 'text',
         validator: validators.number,
+        converter: converters.number,
+        numeric: true,
       },
       {
         name: 'z',
@@ -663,10 +673,23 @@ const map = {
         private: true,
       },
       {
+        name: 'scale',
+        displayName: 'Scale',
+        input_type: 'text',
+        validator: validators.number,
+        converter: converters.number,
+        numeric: true,
+        get(img) {
+          return img.width / img.naturalWidth;
+        },
+      },
+      {
         name: 'opacity',
         displayName: 'opacity',
         input_type: 'text',
         validator: validators.closedInterval(0, 1),
+        converter: converters.number,
+        numeric: true,
       },
 
       {
@@ -674,6 +697,8 @@ const map = {
         displayName: 'x',
         input_type: 'text',
         validator: validators.number,
+        converter: converters.number,
+        numeric: true,
       },
 
       {
@@ -681,6 +706,8 @@ const map = {
         displayName: 'y',
         input_type: 'text',
         validator: validators.number,
+        converter: converters.number,
+        numeric: true,
       },
       {
         name: 'src',
