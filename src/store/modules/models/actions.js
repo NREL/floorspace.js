@@ -172,20 +172,19 @@ export default {
     },
 
     updateImageWithData (context, payload) {
-        const image = context.getters.allImages.find(i => i.id === payload.image.id),
-            validProperties = Object.keys(image),
-            cleanedPayload = {};
+      const
+        image = context.getters.allImages.find(i => i.id === payload.image.id),
+        validProperties = _.difference(Object.keys(image), ['src', 'naturalWidth', 'naturalHeight']);
 
-        // remove extra properties from the payload
-        for (var key in payload) {
-            if (payload.hasOwnProperty(key) && ~validProperties.indexOf(key)) {
-                cleanedPayload[key] = payload[key];
-            }
-        }
-        cleanedPayload.image = image;
+      if (payload.scale) {
+        payload.height = payload.scale * image.naturalHeight;
+        payload.width = payload.scale * image.naturalWidth;
+      }
+      const cleanedPayload = _.pick(payload, validProperties);
+      cleanedPayload.image = image;
 
-        // TODO: validation
-        context.commit('updateImageWithData', cleanedPayload);
+      // TODO: validation
+      context.commit('updateImageWithData', cleanedPayload);
     },
 
   updateWindowDefinitionWithData({ state, dispatch }, payload) {
@@ -248,6 +247,8 @@ export default {
     image.width = payload.width;
     image.x = payload.x;
     image.y = payload.y;
+    image.naturalWidth = payload.naturalWidth;
+    image.naturalHeight = payload.naturalHeight;
 
     context.commit('createImageForStory', {
       story_id: story.id,

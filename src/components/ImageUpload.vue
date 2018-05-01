@@ -58,6 +58,8 @@ export default {
               width: rwuWidth,
               x: (that.min_x + that.max_x) / 2,
               y: (that.min_y + that.max_y) / 2,
+              naturalHeight: image.height,
+              naturalWidth: image.width,
             });
             that.$refs.imageInput.value = '';
           };

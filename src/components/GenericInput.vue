@@ -7,13 +7,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
   <span v-if="col.readonly || !col.input_type" :class="{ numeric: col.numeric }">
-    {{col.get ? col.get(row, rootState) : row[col.name]}}
+    {{value}}
   </span>
   <input
     v-else-if="col.input_type === 'text'"
     @keydown="blurOnEnter"
     @blur="onChange($event.target.value); $forceUpdate()"
-    :value="row[col.name]"
+    :value="value"
     :disabled="disabled"
     :placeholder="col.nullable && row[col.name] === null ? '(none)' : null"
     :class="{ numeric: col.numeric }"
@@ -103,6 +103,9 @@ export default {
         color: brightness(r,g,b) < 123 ? '#fff' : '#000',
         background: value,
       };
+    },
+    value() {
+      return this.col.get ? this.col.get(this.row, this.rootState) : this.row[this.col.name];
     },
   },
   components: {

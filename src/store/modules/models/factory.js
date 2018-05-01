@@ -82,6 +82,8 @@ export default {
       z: 0,
       r: 0,
       opacity: 0.6,
+      naturalWidth: 0,
+      naturalHeight: 0,
     };
   },
   BuildingUnit(opts = {}) {

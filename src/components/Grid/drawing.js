@@ -522,15 +522,36 @@ export function drawImage() {
       });
 
     const
-      scalingFactor = (d) => {
+      scaleTransform = (d) => {
         const
-          pxOrigin = { x: xScale(d.x), y: yScale(d.y) },
+          pxCenter = { x: xScale(d.x), y: yScale(d.y) },
+          // Using the opposite corner of the image as the origin
+          // simplifies some calculations.
+          pxOrigin = {
+            x: pxCenter.x + (pxCenter.x - startX),
+            y: pxCenter.y + (pxCenter.y - startY),
+          },
+          startVec = {
+            x: startX - pxOrigin.x,
+            y: startY - pxOrigin.y,
+          },
           distCurrToOrigin = distanceBetweenPoints(
             { x: currX, y: currY }, pxOrigin),
           distStartToOrigin = distanceBetweenPoints(
             { x: startX, y: startY }, pxOrigin),
-          scale = distCurrToOrigin / distStartToOrigin;
-        return scale;
+          currVec = {
+            x: distCurrToOrigin * startVec.x / distStartToOrigin,
+            y: distCurrToOrigin * startVec.y / distStartToOrigin,
+          },
+          scale = distCurrToOrigin / distStartToOrigin,
+          translate = {
+            x: (currVec.x - startVec.x) / 2,
+            y: (currVec.y - startVec.y) / 2,
+          },
+          transform = d3.zoomIdentity
+            .translate(translate.x, translate.y)
+            .scale(scale);
+        return transform;
       },
       resizeable = d3.drag()
         .on('start', function() {
@@ -541,18 +562,20 @@ export function drawImage() {
         .on('drag', function(d) {
           [currX, currY] = d3.mouse(document.querySelector('#grid svg'));
           d3.select(this.parentNode.parentNode)
-            .attr('transform', `scale(${scalingFactor(d)})`);
+            .attr('transform', scaleTransform(d));
         })
         .on('end', function(d) {
           if (typeof currX === 'undefined') {
             // no movement since start of resize.
             return;
           }
-          const scale = scalingFactor(d);
+          const trans = scaleTransform(d);
           updateImage({
             image: d,
-            width: d.width * scale,
-            height: d.height * scale,
+            width: d.width * trans.k,
+            height: d.height * trans.k,
+            x: d.x + trans.x / pxPerRWU,
+            y: d.y - trans.y / pxPerRWU,
           });
         });
 
