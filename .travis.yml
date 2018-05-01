@@ -31,12 +31,10 @@ script:
   - npm run openstudio-build && sed -i 's/\/static/static/g' dist/index.html
   - mkdocs build -d dist/docs
   - cp -r icons/ dist/ && cp site.webmanifest dist/ && cp browserconfig.xml dist/
+  - ./deploy.sh
 deploy:
-  - provider: script
-    skip_cleanup: true
-    script: ./deploy.sh
-  - provider: script
-    skip_cleanup: true
-    script: npm run deploy
-    on:
-      branch: develop
+  provider: script
+  skip_cleanup: true
+  script: npm run deploy
+  on:
+    branch: develop
