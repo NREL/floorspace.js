@@ -25,7 +25,9 @@ export default function checkGeometry(geom) {
   const
     errors = [],
     vertPos = v => `${v.x}:${v.y}`,
-    vertPosToId = _.fromPairs(geom.vertices.map(v => [vertPos(v), v.id]));
+    vertPosToId = _.fromPairs(geom.vertices.map(v => [vertPos(v), v.id])),
+    edgePos = e => `${Math.min(+e.v1.id, +e.v2.id)}:${Math.max(+e.v1.id, +e.v2.id)}`,
+    edgePosToId = _.fromPairs(geom.edges.map(e => [edgePos(e), e.id]));
 
   geom.vertices.forEach((vert) => {
     if (vert.id !== vertPosToId[vertPos(vert)]) {
@@ -39,6 +41,9 @@ export default function checkGeometry(geom) {
       vertPos(edge.v1) === vertPos(edge.v2)
     ) {
       errors.push(`edge ${edge.id} is of length zero`);
+    }
+    if (edge.id !== edgePosToId[edgePos(edge)]) {
+      errors.push(`edge ${edge.id} is a duplicate of ${edgePosToId[edgePos(edge)]}`);
     }
   });
 

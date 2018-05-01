@@ -25,18 +25,4 @@ module.exports = {
 
     finish(browser);
   },
-  'interior walls should be interior': (browser) => {
-    start(browser)
-      .perform(drawSquare(30, 25, 50, -50))
-      .assert.elementCount('.wall.interior', 0)
-      .click('[data-object-type="spaces"] .add-new')
-      .perform(drawSquare(30, 25, 50, 50))
-      .assert.elementCount('.wall.interior', 1)
-      .click('[data-object-type="spaces"] .add-new')
-      .perform(drawSquare(0, 0, 30, 50))
-      .assert.elementCount('.wall.interior', 3)
-      .assert.validGeometry();
-
-    finish(browser);
-  },
 };

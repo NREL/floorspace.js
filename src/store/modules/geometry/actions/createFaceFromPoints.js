@@ -384,6 +384,7 @@ function replacementEdgeRefs(geometry, dyingEdgeId, newEdges) {
 }
 
 export function edgesToSplit(geometry) {
+  const priorIterationEdges = [];
   return _.compact(geometry.edges.map((edge) => {
     let splittingVertices = geometryHelpers.splittingVerticesForEdgeId(edge.id, geometry);
     if (!splittingVertices.length) {
@@ -402,8 +403,12 @@ export function edgesToSplit(geometry) {
     // create new edges by connecting the original edge startpoint, ordered splitting vertices, and original edge endpoint
     // eg: startpoint -> SV1, SV1 -> SV2, SV2 -> SV3, SV3 -> endpoint
     const
-      newEdges = edgesFromVerts(splittingVertices, geometry.edges),
+      newEdges = edgesFromVerts(splittingVertices, [...geometry.edges, ...priorIterationEdges]),
       replaceEdgeRefs = replacementEdgeRefs(geometry, edge.id, newEdges);
+
+    // The edges we're recommending don't yet exist, but we'd like to re-use them for future iterations.
+    // Otherwise we end up creating two edges when one will do.
+    priorIterationEdges.push(...newEdges);
     return {
       edgeToDelete: edge.id,
       newEdges,

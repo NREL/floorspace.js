@@ -50,4 +50,17 @@ const store = new Vuex.Store({
   mutations,
 });
 
+const DEBUG = true;
+
+if (DEBUG) {
+  store.subscribe(
+  (state, getters) => getters['geometry/errors'],
+    (errs) => {
+      if (errs.length) {
+        console.error('FOUND GEOMETRY ERRORS', errs);
+      }
+    },
+  );
+}
+
 export default store;
