@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -e
 # credit to https://medium.com/onfido-tech/travis-surge-github-auto-deploy-every-pr-branch-and-tag-a6c8c790831f
 
 # Split on "/", ref: http://stackoverflow.com/a/5257398/689223
