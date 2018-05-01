@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { gen } from 'testcheck';
-import helpers, { fitToAspectRatio } from '../../../../src/store/modules/geometry/helpers';
+import helpers, { fitToAspectRatio, ringEquals } from '../../../../src/store/modules/geometry/helpers';
 import {
   assert, refute, nearlyEqual, assertProperty, isNearlyEqual,
   assertEqual,
@@ -10,8 +10,125 @@ import {
   createIrregularPolygon,
   genIrregularPolygonPieces,
   genRegularPolygonPieces,
+  genIrregularPolygon,
+  genRectangle,
 } from '../../test_helpers';
 import * as geometryExamples from './examples';
+
+describe('ringEquals', () => {
+  it('identifies truly equal vertex lists', () => {
+    assertProperty(
+      genIrregularPolygon,
+      pts => ringEquals(pts, pts),
+    );
+  });
+
+  it('ignores id property', () => {
+    assertProperty(
+      genIrregularPolygon
+        .then(pts => ({
+          a: pts.map(pt => ({ ...pt, id: _.uniqueId() })),
+          b: pts.map(pt => ({ ...pt, id: _.uniqueId() })),
+        })),
+      ({ a, b }) => ringEquals(a, b),
+    );
+  });
+
+  it('is independent of rotation', () => {
+    assertProperty(
+      genIrregularPolygon,
+      gen.posInt,
+      (pts, pivot) => {
+        const pivotIx = pivot % pts.length;
+        const ptsPivoted = [...pts.slice(pivotIx), ...pts.slice(0, pivotIx)];
+        return ringEquals(pts, ptsPivoted);
+      },
+    );
+  });
+
+  it('is independent of winding order', () => {
+    assertProperty(
+      genIrregularPolygon,
+      (pts) => {
+        const ptsReversed = [...pts].reverse();
+        return !_.isEqual(pts, ptsReversed) && ringEquals(pts, ptsReversed);
+      },
+    );
+  });
+
+
+  it('permits closed rings (start == end)', () => {
+    assertProperty(
+      gen.object({
+        pts: genIrregularPolygon,
+        pivot: gen.posInt,
+      })
+      .then(({ pts, pivot }) => {
+        const pivotIx = pivot % pts.length;
+        const ptsPivoted = [...pts.slice(pivotIx), ...pts.slice(0, pivotIx)];
+        return {
+          a: [...pts, pts[0]],
+          b: [...ptsPivoted, ptsPivoted[0]],
+        };
+      }),
+      ({ a, b }) => ringEquals(a, b),
+    );
+  });
+
+  it('is independent of both winding order and rotation and closed rings', () => {
+    assertProperty(
+      gen.object({
+        pts: genIrregularPolygon,
+        pivot: gen.posInt,
+      })
+      .then(({ pts, pivot }) => {
+        const pivotIx = pivot % pts.length;
+        const ptsReversed = [...pts].reverse();
+        const ptsReversedAndRotated = [...ptsReversed.slice(pivotIx), ...ptsReversed.slice(0, pivotIx)];
+        return {
+          a: [...pts, pts[0]],
+          b: [...ptsReversedAndRotated, ptsReversedAndRotated[0]],
+        };
+      }),
+      ({ a, b }) => !_.isEqual(a, b) && ringEquals(a, b),
+    );
+  });
+
+  it('identifies unequal rings', () => {
+    assertProperty(
+      gen.object({
+        a: genIrregularPolygon,
+        b: genIrregularPolygon,
+      }).suchThat(({ a, b }) => !_.isEqual(a, b)),
+      ({ a, b }) => !ringEquals(a, b),
+    );
+  });
+
+  it('identifies unequal rings with same vertex set', () => {
+    assertProperty(
+      genRectangle
+        .then(pts => ({
+          original: pts,
+          folded: [pts[0], pts[2], pts[1], pts[3]],
+        })),
+      ({ original, folded }) => !ringEquals(original, folded),
+    );
+  });
+
+  it('makes no changes to parameters', () => {
+    assertProperty(
+      genIrregularPolygon,
+      genIrregularPolygon,
+      (a, b) => {
+        const
+          origA = [...a],
+          origB = [...b];
+        ringEquals(a, b);
+        return _.isEqual(a, origA) && _.isEqual(b, origB);
+      },
+    );
+  });
+});
 
 describe('fitToAspectRatio', () => {
   it("doesn't mess with values when they already fit", () => {

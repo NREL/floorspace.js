@@ -1,20 +1,4 @@
-const { failOnError, withScales, draw50By50Square, drawSquare } = require('../helpers');
-
-function start(browser) {
-  return failOnError(withScales(browser))
-    .url(browser.globals.devServerURL)
-    .resizeWindow(1000, 800)
-    .waitForElementVisible('.modal .new-floorplan', 5000)
-    .setFlagOnError()
-    .click('.modal .new-floorplan svg')
-    .getScales();
-}
-
-function finish(browser) {
-  browser
-    .checkForErrors()
-    .end();
-}
+const { draw50By50Square, drawSquare, start, finish } = require('../helpers');
 
 module.exports = {
   tags: ['geometry'],

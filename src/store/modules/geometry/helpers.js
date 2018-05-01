@@ -2,6 +2,37 @@ import _ from 'lodash';
 import ClipperLib from 'js-clipper';
 import { dropConsecutiveDups } from '../../../utilities';
 
+function ringEqualsWithSameWindingOrder(vs, ws) {
+  const pivotVert = vs[0];
+  const pivotIx = _.findIndex(ws, _.pick(pivotVert, ['x', 'y']));
+
+  if (pivotIx === -1) return false;
+  const wsp = _.map([...ws.slice(pivotIx), ...ws.slice(0, pivotIx)], w => _.pick(w, ['x', 'y']));
+  return _.isEqualWith(vs, wsp, (v, w) => _.isMatch(v, w));
+}
+
+function dropClosingVertex(vs) {
+  // a ring is "self-closing" if it's final vertex is the same as it's initial one.
+  // This is the way most of our geometry is stored, but for this algorithm it's easier to
+  // work with non-self-closing rings.
+  if (vs.length <= 3) return vs; // a polygon must have at least 3 pts, not including a closing vert.
+  if (_.isEqual(vs[0], vs[vs.length - 1])) return vs.slice(0, -1);
+  return vs;
+}
+
+export function ringEquals(vs_, ws_) {
+  if (vs_.length !== ws_.length) return false;
+  if (vs_.length === 0) return true;
+
+  const vs = dropClosingVertex(vs_);
+  const ws = dropClosingVertex(ws_);
+  return (
+    ringEqualsWithSameWindingOrder(vs, ws) ||
+    ringEqualsWithSameWindingOrder(vs, [...ws].reverse())
+  );
+}
+
+
 export function distanceBetweenPoints(p1, p2) {
   const
     dx = Math.abs(p1.x - p2.x),

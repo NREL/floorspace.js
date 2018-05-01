@@ -82,9 +82,27 @@ function drawSquare(x0, y0, width, height) {
   return draw;
 }
 
+function start(browser) {
+  return failOnError(withScales(browser))
+    .url(browser.globals.devServerURL)
+    .resizeWindow(1000, 800)
+    .waitForElementVisible('.modal .new-floorplan', 5000)
+    .setFlagOnError()
+    .click('.modal .new-floorplan svg')
+    .getScales();
+}
+
+function finish(browser) {
+  browser
+    .checkForErrors()
+    .end();
+}
+
 module.exports = {
   failOnError: failOnError,
   withScales: withScales,
   draw50By50Square: drawSquare(-50, 0, 50, 50),
   drawSquare: drawSquare,
+  start: start,
+  finish: finish,
 };
