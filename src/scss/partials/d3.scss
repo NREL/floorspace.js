@@ -66,6 +66,9 @@
         &.domain {
           stroke: #fff;
         }
+        &.guideline-area {
+          fill-opacity: 0.6;
+        }
     }
 
     .poly polygon {
