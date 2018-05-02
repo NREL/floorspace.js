@@ -85,9 +85,9 @@ export default {
           // check that the selected place has associated lat/log data
           const place = autocomplete.getPlace();
           if (place.geometry) {
-            // changing component lat/long will trigger updateMapView, placing the map at the updated location
             this.latitude = place.geometry.location.lat();
             this.longitude = place.geometry.location.lng();
+            this.updateMapView();
           }
         });
       });
@@ -105,13 +105,11 @@ export default {
         target: 'map',
         view: this.view,
       });
-      this.view.on('propertychange', (e) => {
-        if (e.key === 'rotation') {
-          this.rotation = this.view.getRotation();
-        }
-      });
 
       this.updateMapView();
+      // this.view.getCenter() is not always available at first render.
+      // this seems to fix some problems with scale *shrug*
+      _.defer(() => this.updateMapView());
     },
 
     /*
@@ -120,37 +118,17 @@ export default {
     updateMapView() {
       console.log('updateMapView');
       this.map.updateSize();
-      // center of grid in RWU
-      let gridCenterX = (this.min_x + this.max_x) / 2;
-      let gridCenterY = (this.min_y + this.max_y) / 2;
-
-      // default map resolution RWU/px
-      let resolution = (this.max_x - this.min_x) / this.$refs.map.clientWidth;
-
-      // translate units from ft to meters
-      if (this.units === 'ip') {
-        // meters in a foot
-        const mPerFt = ol.proj.METERS_PER_UNIT['us-ft'];
-        resolution *= mPerFt;
-        gridCenterX *= mPerFt;
-        gridCenterY *= mPerFt;
-      }
 
       // current long/lat map position in meters
       const mapCenter = ol.proj.fromLonLat([this.longitude, this.latitude]);
 
-      // openlayers places the center in the bottom left of the screen, so add the grid center (m) to the openlayers center
-      // adjust for rotation
-      // subtract the vertical grid center from the y adjustment because the y axis is inverted
-      let deltaY = ((gridCenterX * Math.cos(this.rotation)) - (gridCenterY * Math.sin(this.rotation)));
-      let deltaX = ((gridCenterY * Math.cos(this.rotation)) + (gridCenterX * Math.sin(this.rotation)));
-
-
+      let resolution = this.unAdjustedResolution;
+      let deltaY = this.unAdjustedDelta.y;
+      let deltaX = this.unAdjustedDelta.x;
       // Web Mercator projections use different resolutions at different latitudes
       // if the map has been placed, adjust the values for the current latitude
       if (this.view.getCenter()) {
         this.startResolution = this.startResolution || ol.proj.getPointResolution(this.view.getProjection(), this.view.getResolution(), this.view.getCenter());
-        console.log("start resolution", this.startResolution);
         const resolutionAdjustment = 1 / ol.proj.getPointResolution(this.view.getProjection(), 1, this.view.getCenter());
 
         resolution *= resolutionAdjustment;
@@ -162,7 +140,6 @@ export default {
       mapCenter[0] += deltaY;
       mapCenter[1] += deltaX;
 
-      console.log('setting view resolution', resolution);
       this.view.setResolution(resolution);
       this.view.setCenter(mapCenter);
       this.view.setRotation(this.rotation);
@@ -178,6 +155,7 @@ export default {
 
       const resolution = ol.proj.getPointResolution(this.view.getProjection(), this.view.getResolution(), this.view.getCenter());
       const scale = this.startResolution / resolution;
+      console.log(`scaling to ${this.startResolution} / ${resolution} == ${scale}`);
       window.eventBus.$emit('scaleTo', scale);
 
       this.rotation = this.view.getRotation();
@@ -228,6 +206,33 @@ export default {
       units: state => state.project.config.units,
       mapInitialized: state => state.project.map.initialized,
     }),
+    mPerFt() { return ol.proj.METERS_PER_UNIT['us-ft']; },
+    unAdjustedResolutionMeters() {
+      // default map resolution RWU/px
+      return (this.max_x - this.min_x) / this.$refs.map.clientWidth;
+    },
+    unAdjustedResolution() {
+      return this.units === 'ip' ? this.mPerFt * this.unAdjustedResolutionMeters : this.unAdjustedResolutionMeters;
+    },
+    gridCenterMeters() {
+      // center of grid in RWU
+      return {
+        x: (this.min_x + this.max_x) / 2,
+        y: (this.min_y + this.max_y) / 2,
+      };
+    },
+    gridCenter() {
+      return this.units === 'ip' ? _.mapValues(this.gridCenterMeters, v => v * this.mPerFt) : this.gridCenterMeters;
+    },
+    unAdjustedDelta() {
+      // openlayers places the center in the bottom left of the screen, so add the grid center (m) to the openlayers center
+      // adjust for rotation
+      // subtract the vertical grid center from the y adjustment because the y axis is inverted
+      const deltaY = ((this.gridCenter.x * Math.cos(this.rotation)) - (this.gridCenter.y * Math.sin(this.rotation)));
+      const deltaX = ((this.gridCenter.y * Math.cos(this.rotation)) + (this.gridCenter.x * Math.sin(this.rotation)));
+      return { x: deltaX, y: deltaY };
+    },
+
     gridVisible: {
       get() { return this.$store.state.project.grid.visible; },
       set(val) { this.$store.dispatch('project/setGridVisible', { visible: val }); },
@@ -251,9 +256,6 @@ export default {
   },
   watch: {
     units() { this.updateMapView(); },
-    latitude() { this.updateMapView(); },
-    longitude() { this.updateMapView(); },
-    rotation() { this.updateMapView(); },
     projectView: {
       handler() { this.updateMapView(); },
       deep: true,
