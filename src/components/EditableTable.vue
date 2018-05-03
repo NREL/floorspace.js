@@ -11,6 +11,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       :data="sortedRows"
       height="calc(50vh - 105px)"
       @sort-change="sortChange"
+      empty-text="No data"
     >
       <TableColumn
         prop="select"
@@ -121,6 +122,9 @@ export default {
     }
     .el-table td, .el-table th.is-leaf {
       border-bottom: none;
+    }
+    .el-table__header-wrapper {
+      background-color: $gray-medium;
     }
     .el-table table {
       tbody, thead {
