@@ -16,6 +16,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
     :addRow="addRowPermitted && createObject"
     :editRow="modifyObject"
     :destroyRow="destroyObject"
+    :duplicateRow="duplicateRow"
     :searchAvailable="searchAvailable"
     :compact="compact"
     @toggleCompact="c => $emit('toggleCompact', c)"
@@ -188,8 +189,11 @@ export default {
       this.selectLatest();
     },
     async duplicateRow(row) {
+      console.log('top of duplicate row. selected is', this.selectedObject.name);
       this.createObject();
+      console.log('immediately after createObject. selected is', this.selectedObject.name);
       await this.$nextTick();
+      console.log('one tick later. selected is', this.selectedObject.name);
       const copyNum = row.name.match(/Copy (\d+)/);
       const newName = copyNum ? `${row.name.slice(0, copyNum.index)} Copy ${+copyNum[1] + 1}` : `${row.name} Copy 1`;
       this.modifyObject(this.selectedObject.id, 'name', newName);
@@ -197,7 +201,9 @@ export default {
         if (key === 'id' || key === 'name' || key === 'color') return;
         if (readonly || privateKey) return;
         if (this.selectedObject[key] === row[key]) return;
+        console.log('about to modify', key, 'to', row[key]);
         this.modifyObject(this.selectedObject.id, key, row[key]);
+        console.log('success!');
       });
     },
     selectLatest() {
