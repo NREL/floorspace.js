@@ -57,7 +57,7 @@ function mungeWindows(windows, geometry, windowDefs) {
 function mungeStories(stories, geometries, windowDefs) {
   return stories.map((story) => {
     const geometry = JSON.parse(JSON.stringify(
-      _.find(geometries, { id: story.geometry_id }),
+      _.find(geometries, { id: story.geometry_id }) || { edges: [], vertices: [], faces: [] },
     ));
     return {
       ...story,

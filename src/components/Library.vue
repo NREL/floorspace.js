@@ -189,21 +189,20 @@ export default {
       this.selectLatest();
     },
     async duplicateRow(row) {
-      console.log('top of duplicate row. selected is', this.selectedObject.name);
       this.createObject();
-      console.log('immediately after createObject. selected is', this.selectedObject.name);
       await this.$nextTick();
-      console.log('one tick later. selected is', this.selectedObject.name);
-      const copyNum = row.name.match(/Copy (\d+)/);
-      const newName = copyNum ? `${row.name.slice(0, copyNum.index)} Copy ${+copyNum[1] + 1}` : `${row.name} Copy 1`;
+      let newName = row.name;
+      // increment Copy # until no name conflict.
+      while (_.find(this.rows, { name: newName })) {
+        let copyNum = newName.match(/Copy (\d+)/);
+        newName = copyNum ? `${newName.slice(0, copyNum.index)} Copy ${+copyNum[1] + 1}` : `${newName} Copy 1`;
+      }
       this.modifyObject(this.selectedObject.id, 'name', newName);
       this.columns.forEach(({ name: key, readonly, private: privateKey }) => {
         if (key === 'id' || key === 'name' || key === 'color') return;
         if (readonly || privateKey) return;
         if (this.selectedObject[key] === row[key]) return;
-        console.log('about to modify', key, 'to', row[key]);
         this.modifyObject(this.selectedObject.id, key, row[key]);
-        console.log('success!');
       });
     },
     selectLatest() {
