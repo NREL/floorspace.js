@@ -38,6 +38,7 @@
       :selectItem="selectRow"
       :destroyItem="destroyRow"
       :selectedItemId="selectedRowId"
+      :duplicateRow="duplicateRow"
     />
     <EditableTable
       v-else
@@ -47,6 +48,7 @@
       :rows="searchedRows"
       :deleteRow="destroyRow"
       :updateRow="editRow"
+      :duplicateRow="duplicateRow"
     />
   </div>
 </template>
@@ -61,7 +63,7 @@ export default {
   name: 'EditableSelectList',
   props: [
     'columns', 'rows', 'addRow', 'editRow', 'destroyRow', 'selectRow', 'selectedRowId',
-    'objectTypes', 'selectedObjectType', 'searchAvailable', 'compact',
+    'objectTypes', 'selectedObjectType', 'searchAvailable', 'compact', 'duplicateRow',
   ],
   data() {
     return {

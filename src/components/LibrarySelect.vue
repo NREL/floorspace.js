@@ -16,9 +16,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
       >
           <span :style="{ 'background-color': item.color }"></span>
           {{item.name}}
-          <a @click.stop="destroyItem(item)" class="destroy" title="delete">
-            <Delete class="button" />
-          </a>
+          <div class="buttons">
+            <a @click.stop="duplicateRow(item)" class="duplicate" title="duplicate">
+              <Copy class="button" />
+            </a>
+            <a @click.stop="destroyItem(item)" class="destroy" title="delete">
+              <Delete class="button" />
+            </a>
+          </div>
       </div>
     </div>
   </div>
@@ -26,12 +31,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
 
 <script>
 import Delete from './../assets/svg-icons/delete.svg';
+import Copy from './../assets/svg-icons/copy_icon.svg';
 
 export default {
   name: 'LibrarySelect',
-  props: ['rows', 'selectedItemId', 'selectItem', 'destroyItem'],
+  props: ['rows', 'selectedItemId', 'selectItem', 'destroyItem', 'duplicateRow'],
   components: {
     Delete,
+    Copy,
   },
 }
 </script>
@@ -69,7 +76,7 @@ export default {
         height: 1rem;
         width: 1rem;
         margin-top: -5px;
-        margin-left: 10px;
+        margin-left: 1px;
         fill: $gray-lightest;
 
         &:hover {

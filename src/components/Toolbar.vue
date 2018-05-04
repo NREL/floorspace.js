@@ -490,7 +490,7 @@ svg.icon, svg.button {
       line-height: 2.5rem;
       margin-right: 0;
       margin-left: 10px;
-      min-width: 19.5rem;
+      min-width: calc(21.5rem - 10px);
     }
 
     #grid-tools {

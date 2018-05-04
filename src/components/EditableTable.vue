@@ -46,6 +46,19 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </template>
       </TableColumn>
       <TableColumn
+        prop="duplicate"
+        label=""
+        class="duplicate"
+        width="35"
+      >
+        <template slot-scope="scope">
+          <div class="duplicate" @click.stop="duplicateRow(scope.row)" title="duplicate">
+            <Copy class="button" />
+          </div>
+        </template>
+      </TableColumn>
+
+      <TableColumn
         prop="destroy"
         label=""
         class="destroy"
@@ -67,12 +80,13 @@ import { Table, TableColumn } from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 import { mapState, mapGetters } from 'vuex';
 import Delete from './../assets/svg-icons/delete.svg';
+import Copy from './../assets/svg-icons/copy_icon.svg';
 
 export default {
   name: 'EditableTable',
   props: [
     'columns', 'rows', 'deleteRow', 'updateRow',
-    'selectRow', 'selectedItemId',
+    'selectRow', 'selectedItemId', 'duplicateRow',
   ],
   data() {
     return {
@@ -104,6 +118,7 @@ export default {
   },
   components: {
     Delete,
+    Copy,
     'el-table': Table,
     TableColumn,
   },
@@ -141,7 +156,7 @@ export default {
                   width: 100%;
               }
             }
-            .destroy, .select {
+            .destroy, .select, .duplicate {
                 width: 35px;
                 > [type="radio"] {
                     width: 25px;
@@ -152,6 +167,10 @@ export default {
                 }
                 margin: 0 auto;
                 padding: 0;
+            }
+            .duplicate svg {
+              margin-top: 2px;
+              width: 20px;
             }
 
           }

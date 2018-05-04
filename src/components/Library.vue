@@ -16,6 +16,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
     :addRow="addRowPermitted && createObject"
     :editRow="modifyObject"
     :destroyRow="destroyObject"
+    :duplicateRow="duplicateRow"
     :searchAvailable="searchAvailable"
     :compact="compact"
     @toggleCompact="c => $emit('toggleCompact', c)"
@@ -186,6 +187,23 @@ export default {
           break;
       }
       this.selectLatest();
+    },
+    async duplicateRow(row) {
+      this.createObject();
+      await this.$nextTick();
+      let newName = row.name;
+      // increment Copy # until no name conflict.
+      while (_.find(this.rows, { name: newName })) {
+        let copyNum = newName.match(/Copy (\d+)/);
+        newName = copyNum ? `${newName.slice(0, copyNum.index)} Copy ${+copyNum[1] + 1}` : `${newName} Copy 1`;
+      }
+      this.modifyObject(this.selectedObject.id, 'name', newName);
+      this.columns.forEach(({ name: key, readonly, private: privateKey }) => {
+        if (key === 'id' || key === 'name' || key === 'color') return;
+        if (readonly || privateKey) return;
+        if (this.selectedObject[key] === row[key]) return;
+        this.modifyObject(this.selectedObject.id, key, row[key]);
+      });
     },
     selectLatest() {
       const newestRow = _.maxBy(this.rows, r => +r.id);
