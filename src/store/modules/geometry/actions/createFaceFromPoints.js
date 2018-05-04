@@ -372,13 +372,34 @@ function replacementEdgeRefs(geometry, dyingEdgeId, newEdges) {
   const affectedFaces = geometryHelpers.facesForEdgeId(dyingEdgeId, geometry);
 
   // remove reference to old edge and add references to the new edges
-  const replaceEdgeRefs = affectedFaces.map(affectedFace => ({
+  const replaceEdgeRefs = affectedFaces.map((affectedFace) => {
+    const dyingEdgeReversed = _.find(affectedFace.edgeRefs, { edge_id: dyingEdgeId }).reverse;
+
+    const replacementEdges = newEdges.map(({ id, reverse }) => ({
+      id,
+      // new edge reference should be reversed if exactly one of
+      // - the suggested replacement edge ref
+      // - the dying edge ref
+      // is reversed.
+      // if *both* are reversed, they cancel out.
+      // if neither is reversed, the edge keeps original direction.
+      reverse: ((!reverse) !== (!dyingEdgeReversed)),
+    }));
+
+    if (dyingEdgeReversed) {
+      // not enough to reverse each individual component -- the whole thing
+      // must also be reversed!
+      replacementEdges.reverse();
+    }
+
+    return {
     type: 'replaceEdgeRef',
     geometry_id: geometry.id,
     edge_id: dyingEdgeId,
     face_id: affectedFace.id,
-    newEdges: _.map(newEdges, _.partialRight(_.pick, ['id', 'reverse'])),
-  }));
+      newEdges: replacementEdges,
+    };
+  });
 
   return replaceEdgeRefs;
 }

@@ -99,15 +99,14 @@ export function replaceEdgeRef(state, payload) {
     { geometry_id, face_id, edge_id, newEdges } = payload,
     geometry = state.find(g => g.id === geometry_id),
     face = geometry.faces.find(f => f.id === face_id),
-    edgeRefIx = _.findIndex(face.edgeRefs, { edge_id }),
-    edgeRef = face.edgeRefs[edgeRefIx];
+    edgeRefIx = _.findIndex(face.edgeRefs, { edge_id });
 
   face.edgeRefs.splice(
     edgeRefIx, 1, // remove existing edge
     // replacing it with these ones, in the same direction.
-    ...newEdges.map(({ id: newEdgeId, reverse: edgeReverse }) => ({
+    ...newEdges.map(({ id: newEdgeId, reverse }) => ({
       edge_id: newEdgeId,
-      reverse: edgeRef.reverse ^ edgeReverse,
+      reverse,
     })),
   );
 }
