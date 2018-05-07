@@ -2,6 +2,22 @@ const { draw50By50Square, drawSquare, start, finish } = require('../helpers');
 
 module.exports = {
   tags: ['geometry'],
+  'deformity that scott found (issue #301)': (browser) => {
+    start(browser)
+      .perform(draw50By50Square)
+      .click('[data-object-type="spaces"] .add-new')
+      .perform(drawSquare(-40, 55, 30, -30))
+      .perform(drawSquare(-30, 25, 20, -10))
+      .perform(drawSquare(-30, 15, -10, 10))
+      .execute(
+        "return application.$store.getters['geometry/errors']",
+        [],
+        ({ value }) => {
+          browser.assert.ok(value.length === 0);
+        },
+      );
+    finish(browser);
+  },
   'interior walls should be interior': (browser) => {
     start(browser)
       .perform(drawSquare(30, 25, 50, -50))

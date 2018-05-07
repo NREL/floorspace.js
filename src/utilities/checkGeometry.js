@@ -1,10 +1,9 @@
 import _ from 'lodash';
 import { ptsAreCollinear, distanceBetweenPoints } from '../store/modules/geometry/helpers';
 
-export function checkFace(face) {
+export function checkVertexList(vertices, name = 'list of vertices') {
   const errors = [];
-
-  face.vertices
+  vertices
     .map((v, ix, a) => [
       a[ix === 0 ? a.length - 1 : ix - 1],
       a[ix],
@@ -15,10 +14,14 @@ export function checkFace(face) {
         ptsAreCollinear(fst, snd, thd) &&
         distanceBetweenPoints(fst, snd) > distanceBetweenPoints(fst, thd)
       ) {
-        errors.push(`face ${face.id} has a backwards section (${JSON.stringify(fst)} -> ${JSON.stringify(snd)} -> ${JSON.stringify(thd)})`);
+        errors.push(`${name} has a backwards section (${JSON.stringify(fst)} -> ${JSON.stringify(snd)} -> ${JSON.stringify(thd)})`);
       }
     });
   return errors;
+}
+
+export function checkFace(face) {
+  return checkVertexList(face.vertices, `face ${face.id}`);
 }
 
 export default function checkGeometry(geom) {
