@@ -18,21 +18,25 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
       </svg>
     </button>
-    <ul v-show="open">
-      <li
-        v-for="texture in textures"
-        :class="{
-          [`texture-${texture}`]: true,
-          selected: texture === value,
-        }"
-        @mousedown="choose(texture)"
-      />
-    </ul>
+    <Portal to="texture-options">
+      <ul v-show="open" :style="ulStyle()">
+        <li
+          v-for="texture in textures"
+          :key="texture"
+          :class="{
+            [`texture-${texture}`]: true,
+            selected: texture === value,
+          }"
+          @mousedown="choose(texture)"
+        />
+      </ul>
+    </Portal>
   </div>
 </template>
 
 <script>
 import Vue from 'vue';
+import { Portal } from 'portal-vue';
 import { textures } from '../store/modules/application/appconfig';
 import _ from 'lodash';
 
@@ -52,6 +56,18 @@ export default {
       this.$emit('change', texture);
       this.open = false;
     },
+    ulStyle() {
+      const bb = this.$el && this.$el.getBoundingClientRect();
+      if (!bb) return {};
+      return {
+        left: `${bb.left}px`,
+        top: `${bb.top + bb.height - 17}px`,
+        width: `${bb.width}px`,
+      };
+    },
+  },
+  components: {
+    Portal,
   },
 }
 
@@ -82,13 +98,11 @@ button {
 ul {
   pointer-events: all;
   position: absolute;
-  top: 8px;
-  left: 0;
   list-style-type: none;
   background-color: white;
   padding-left: 0;
   width: 100%;
-  z-index: 2;
+  z-index: 4;
   overflow-y: scroll;
   max-height: 120px;
 }
