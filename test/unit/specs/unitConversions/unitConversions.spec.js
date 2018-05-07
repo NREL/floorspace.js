@@ -464,4 +464,11 @@ describe('convertState', () => {
       convertSpace(ipState.models.stories[0].spaces[0]),
     );
   });
+
+  it('leaves null alone', () => {
+    assertEqual(
+      siState.models.stories[0].spaces[0].floor_to_ceiling_height,
+      null,
+    );
+  });
 });

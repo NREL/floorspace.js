@@ -87,7 +87,7 @@ export const getConverter = (path, _fromSystem, _toSystem) => {
   }
   if (_.has(pathUnits, 'si_units')) {
     const factor = conversionFactor(pathUnits[fromSystem], pathUnits[toSystem]);
-    return val => val * factor;
+    return val => (typeof val === typeof 0 ? val * factor : val);
   }
   if (pathUnits.$ref) {
     return getConverter(pathUnits.$ref, _fromSystem, _toSystem);
