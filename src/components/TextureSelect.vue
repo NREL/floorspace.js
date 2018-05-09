@@ -18,8 +18,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
       </svg>
     </button>
-    <Portal to="texture-options">
-      <ul v-show="open" :style="ulStyle()">
+    <Portal v-if="open" to="texture-options">
+      <ul :style="ulStyle()">
         <li
           v-for="texture in textures"
           :key="texture"
