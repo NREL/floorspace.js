@@ -194,8 +194,8 @@ export default {
       let newName = row.name;
       // increment Copy # until no name conflict.
       while (_.find(this.rows, { name: newName })) {
-        let copyNum = newName.match(/Copy (\d+)/);
-        newName = copyNum ? `${newName.slice(0, copyNum.index)} Copy ${+copyNum[1] + 1}` : `${newName} Copy 1`;
+        let copyNum = newName.match(/\((\d+)\)/);
+        newName = copyNum ? `${newName.slice(0, copyNum.index)}(${+copyNum[1] + 1})` : `${newName} (2)`;
       }
       this.modifyObject(this.selectedObject.id, 'name', newName);
       this.columns.forEach(({ name: key, readonly, private: privateKey }) => {
