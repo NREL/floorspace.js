@@ -84,7 +84,8 @@
 
     .previousStory {
       polygon, rect, path {
-        stroke-dasharray: 10;
+        stroke-dasharray: 1 4;
+        stroke-linecap: round;
         stroke: #888;
         stroke-width: 2;
       }
