@@ -19,6 +19,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             @toggleCompact="libraryExpanded = (libraryExpanded === 'stories' ? false : 'stories')"
           />
           <Library
+            addNewOnHotkey="true"
             :objectTypes="objectTypesForTab"
             :mode="subselectionType"
             @changeMode="newMode => { subselectionType = newMode; }"
@@ -108,7 +109,6 @@ export default {
       this.$emit('expanded', !!this.libraryExpanded);
       ResizeEvents.$emit('resize');
     },
-
   },
   watch: {
     libraryExpanded() {

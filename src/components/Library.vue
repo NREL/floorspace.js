@@ -44,7 +44,13 @@ function keyForMode(mode) {
 
 export default {
   name: 'Library',
-  props: ['objectTypes', 'mode', 'searchAvailable', 'compact'],
+  props: ['objectTypes', 'mode', 'searchAvailable', 'compact', 'addNewOnHotkey'],
+  mounted() {
+    document.body.addEventListener('keyup', this.hotkeyAddNew);
+  },
+  beforeDestroy() {
+    document.body.removeEventListener('keyup', this.hotkeyAddNew);
+  },
   computed: {
     objectTypesDisplay() {
       return this.objectTypes.map(ot => ({
@@ -135,6 +141,11 @@ export default {
     }
   },
   methods: {
+    hotkeyAddNew(evt) {
+      if (this.addNewOnHotkey && this.addRowPermitted && evt.ctrlKey && evt.key === 'a') {
+        this.createObject();
+      }
+    },
     changeMode(newMode) {
       if (!_.includes(this.objectTypes, newMode)) {
         throw new Error(`Unable to find ${newMode} in options ${JSON.stringify(this.objectTypes)}`);
