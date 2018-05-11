@@ -29,7 +29,7 @@ module.exports = {
       .click('[data-object-type="stories"] .add-new')
       .perform((client, done) => {
         client.expect.element('.previousStory polygon')
-          .to.have.css('stroke-dasharray').which.contains('10');
+          .to.have.css('stroke-dasharray').which.contains('1px, 4px');
         client.expect.element('.previousStory polygon')
           .to.have.css('fill-opacity').which.equals('0.3');
         done();
