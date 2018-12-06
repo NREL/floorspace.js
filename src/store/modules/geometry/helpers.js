@@ -216,16 +216,16 @@ const helpers = {
       f1PathsOffsetted = new ClipperLib.Paths(),
       f2PathsOffsetted = new ClipperLib.Paths();
 
+    // scale paths up before performing operation
+    ClipperLib.JS.ScaleUpPaths(f1PathsOffsetted, this.clipScale);
+    ClipperLib.JS.ScaleUpPaths(f2PathsOffsetted, this.clipScale);
+
     offset.AddPaths([f1Path], ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
     offset.Execute(f1PathsOffsetted, this.offset);
     offset.Clear();
     offset.AddPaths([f2Path], ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
     offset.Execute(f2PathsOffsetted, this.offset);
     offset.Clear();
-
-    // scale paths up before performing operation
-    ClipperLib.JS.ScaleUpPaths(f1PathsOffsetted, this.clipScale);
-    ClipperLib.JS.ScaleUpPaths(f2PathsOffsetted, this.clipScale);
 
     const
       cpr = new ClipperLib.Clipper(),
