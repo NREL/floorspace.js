@@ -216,9 +216,16 @@ const helpers = {
       f1PathsOffsetted = new ClipperLib.Paths(),
       f2PathsOffsetted = new ClipperLib.Paths();
 
+    function scaleUpPathWithoutRound(paths, scale) {
+      paths.forEach((points) => {
+        for (const key in points) {
+          points[key] *= scale;
+        }
+      });
+    }
     // scale paths up before performing operation
-    ClipperLib.JS.ScaleUpPaths(f1PathsOffsetted, this.clipScale);
-    ClipperLib.JS.ScaleUpPaths(f2PathsOffsetted, this.clipScale);
+    scaleUpPathWithoutRound(f1Path, this.clipScale);
+    scaleUpPathWithoutRound(f2Path, this.clipScale);
 
     offset.AddPaths([f1Path], ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
     offset.Execute(f1PathsOffsetted, this.offset);
@@ -245,14 +252,13 @@ const helpers = {
 
     cpr.Execute(operation, resultPathsOffsetted, ClipperLib.PolyFillType.pftEvenOdd, ClipperLib.PolyFillType.pftEvenOdd);
 
-    // scale down path
-    ClipperLib.JS.ScaleDownPaths(resultPathsOffsetted, this.clipScale);
-
     // undo offset on resulting path
     const resultPaths = new ClipperLib.Paths();
     offset.AddPaths(resultPathsOffsetted, ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
     offset.Execute(resultPaths, -this.offset);
 
+    // scale down path
+    ClipperLib.JS.ScaleDownPaths(resultPaths, this.clipScale);
     // if multiple paths were created, a face has been split and the operation should fail
     if (resultPaths.length === 1) {
       // translate into points
