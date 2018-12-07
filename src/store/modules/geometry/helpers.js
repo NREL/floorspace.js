@@ -254,7 +254,6 @@ const helpers = {
     const resultPaths = new ClipperLib.Paths();
     offset.AddPaths(resultPathsOffsetted, ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
     offset.Execute(resultPaths, -this.offset);
-
     // scale down path
     ClipperLib.JS.ScaleDownPaths(resultPaths, this.clipScale);
     // if multiple paths were created, a face has been split and the operation should fail
@@ -298,23 +297,29 @@ const helpers = {
     /*
      * return the set of saved vertices directly on an edge, not including edge endpoints
      */
-    splittingVerticesForEdgeId(edge_id, geometry) {
+    splittingVerticesForEdgeId(edge_id, geometry, spacing) {
         const edge = geometry.edges.find(e => e.id === edge_id),
             edgeV1 = this.vertexForId(edge.v1, geometry),
             edgeV2 = this.vertexForId(edge.v2, geometry);
 
         // look up all vertices touching the edge, ignoring the edge's endpoints
         return geometry.vertices.filter((vertex) => {
-            if ((edge.v1 !== vertex.id && edge.v2 !== vertex.id) &&
-				!(edgeV1.x === vertex.x && edgeV1.y === vertex.y) &&
-				!(edgeV2.x === vertex.x && edgeV2.y === vertex.y)
-			) {
-                const projection = this.projectionOfPointToLine(vertex, {
-                    p1: edgeV1,
-                    p2: edgeV2
-                });
-                return this.distanceBetweenPoints(vertex, projection) <= 1 / this.clipScale;
-            }
+          const
+            vertexIsEndpointById = edge.v1 === vertex.id || edge.v2 === vertex.id,
+            vertexIsLeftEndpointByValue = edgeV1.x === vertex.x && edgeV1.y === vertex.y,
+            vertexIsRightEndpointByValue = edgeV2.x === vertex.x && edgeV2.y === vertex.y,
+            vertexIsEndpoint = vertexIsEndpointById || vertexIsLeftEndpointByValue || vertexIsRightEndpointByValue;
+          if (vertexIsEndpoint) {
+            return false;
+          }
+          // vertex is not an endpoint, consider for splitting
+          const projection = this.projectionOfPointToLine(vertex, {
+              p1: edgeV1,
+              p2: edgeV2
+          });
+          console.log(this.distanceBetweenPoints(vertex, projection))
+          //HERE
+          return this.distanceBetweenPoints(vertex, projection) <= 1 / 100;
         });
     },
 

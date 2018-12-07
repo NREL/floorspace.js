@@ -95,7 +95,6 @@ export default {
         dy,
       });
     });
-
     context.dispatch('trimGeometry', { geometry_id: currentStoryGeometry.id });
   },
   /*

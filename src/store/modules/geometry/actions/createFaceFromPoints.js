@@ -56,6 +56,7 @@ export default function createFaceFromPoints(context, payload) {
   }
 
   withPreservedComponents(context, currentStoryGeometry.id, () => {
+
     newGeoms.forEach(newGeom => context.dispatch('replaceFacePoints', newGeom));
 
     // save the face and its descendent geometry
@@ -74,7 +75,6 @@ export function newGeometriesOfOverlappedFaces(points, geometry) {
   if (points.length < 3 || !geometryHelpers.areaOfSelection(points)) {
     return false;
   }
-
   const geom = geometryHelpers.denormalize(geometry);
   const intersectedFaces = geom.faces
     .filter((face) => {
@@ -333,6 +333,7 @@ export function validateFaceGeometry(points, currentStoryGeometry) {
 
   // first, we can just join together consecutive duplicates, since that doesn't change
   // the geometry at all.
+
   faceVertices = dropConsecutiveDups(faceVertices);
 
   // create edges connecting each vertex in order
@@ -404,10 +405,10 @@ function replacementEdgeRefs(geometry, dyingEdgeId, newEdges) {
   return replaceEdgeRefs;
 }
 
-export function edgesToSplit(geometry) {
+export function edgesToSplit(geometry, spacing) {
   const priorIterationEdges = [];
   return _.compact(geometry.edges.map((edge) => {
-    let splittingVertices = geometryHelpers.splittingVerticesForEdgeId(edge.id, geometry);
+    let splittingVertices = geometryHelpers.splittingVerticesForEdgeId(edge.id, geometry, spacing);
     if (!splittingVertices.length) {
       return false;
     }
@@ -448,8 +449,8 @@ export function edgesToSplit(geometry) {
 function splitEdges(context) {
   const
     currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'],
-    edgeChanges = edgesToSplit(currentStoryGeometry);
-
+    currentProjectSpacing = context.rootState.project.grid.spacing,
+    edgeChanges = edgesToSplit(currentStoryGeometry, currentProjectSpacing);
   edgeChanges.forEach(payload => context.commit({
     type: 'splitEdge',
     geometry_id: currentStoryGeometry.id,

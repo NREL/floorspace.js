@@ -14,16 +14,18 @@ export function trimGeometry(state, { geometry_id, vertsReferencedElsewhere }) {
       ...(vertsReferencedElsewhere || []),
       ...vertsOnEdges,
     ]);
-  geometry.edges = geometry.edges.filter(e => edgesInUse.has(e.id));
-  geometry.vertices = geometry.vertices.filter(v => verticesInUse.has(v.id));
-  const missingEdges = _.difference([...edgesInUse], _.map(geometry.edges, 'id'));
+  const newEdges = geometry.edges.filter(e => edgesInUse.has(e.id));
+  const newVerts = geometry.vertices.filter(v => verticesInUse.has(v.id));
+  const missingEdges = _.difference([...edgesInUse], _.map(newEdges, 'id'));
   if (missingEdges.length) {
     console.error('An edge is referenced by a face, but does not exist!', JSON.stringify(geometry));
   }
-  const missingVerts = _.difference(vertsOnEdges, _.map(geometry.vertices, 'id'));
+  const missingVerts = _.difference(vertsOnEdges, _.map(newVerts, 'id'));
   if (missingVerts.length) {
     console.error('A vertex is referenced by a face, but does not exist!', JSON.stringify(geometry));
   }
+  geometry.vertices = newVerts;
+  geometry.edges = newEdges;
 }
 
 export function initGeometry(state, payload) {
@@ -137,7 +139,7 @@ export function replaceFacePoints(state, { geometry_id, vertices, edges, face_id
   const geometry = _.find(state, { id: geometry_id });
   ensureVertsExist(state, { geometry_id, vertices });
   ensureEdgesExist(state, { geometry_id, edges });
-
+  
   let face = _.find(geometry.faces, { id: face_id });
   if (!face) {
     face = { id: face_id, edgeRefs: [] };
