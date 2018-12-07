@@ -56,7 +56,6 @@ describe('ringEquals', () => {
     );
   });
 
-
   it('permits closed rings (start == end)', () => {
     assertProperty(
       gen.object({
@@ -430,6 +429,22 @@ describe('setOperation', () => {
         assert(intersection);
         assert(intersection.length === 0);
       });
+  });
+
+  it('calculates correctly when spacing is a decimal', () => {
+    const polygon = [{ x: -209.60000000000002, y: 21.8 },
+      { x: -187.8, y: 21.8 },
+      { x: -187.8, y: 13 }, { x: -209.60000000000002, y: 13 },
+      { x: -209.60000000000002, y: 21.8 }];
+
+    const newPolygon = [{ x: -202.4, y: 21.8 },
+      { x: -194, y: 21.8 }, { x: -194, y: 18.2 },
+      { x: -202.4, y: 18.2 }];
+
+    const points = helpers.setOperation('intersection', polygon, newPolygon);
+    assert(points);
+    const solution = [{ x: -194, y: 21.8 }, { x: -202.4, y: 21.8 }, { x: -202.4, y: 18.2 }, { x: -194, y: 18.2 }];
+    assertEqual(points, solution);
   });
 
   it('does not allow holes', () => {
