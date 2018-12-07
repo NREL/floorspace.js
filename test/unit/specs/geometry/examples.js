@@ -46,6 +46,42 @@ export const simpleGeometry = {
   /* eslint-enable */
 };
 
+export const smallGeometry = {
+  /* eslint-disable */
+  id: 1,
+  vertices: [
+    { id: 'f', x: 0, y: 0 },
+    { id: 'g', x: 0.001, y: 0 },
+    { id: 'c', x: 0, y: 0.001 },
+    { id: 'd', x: 0.0004, y: 0.001 },
+    { id: 'e', x: 0.001, y: 0.001 },
+    { id: 'a', x: 0, y: 0.0016 },
+    { id: 'b', x: 0.0004, y: 0.0016 },
+  ],
+  edges: [
+    'ab', 'ac', 'bd', 'cd', 'eg', 'gf', 'fc', 'ce',
+  ].map(id => ({ id, v1: id[0], v2: id[1] })),
+  faces: [
+    {
+      id: 'top', edgeRefs: [
+        { edge_id: 'ab', reverse: false },
+        { edge_id: 'bd', reverse: false },
+        { edge_id: 'cd', reverse: true },
+        { edge_id: 'ac', reverse: true },
+      ]
+    },
+    {
+      id: 'bottom', edgeRefs: [
+        { edge_id: 'ce', reverse: false },
+        { edge_id: 'eg', reverse: false },
+        { edge_id: 'gf', reverse: false },
+        { edge_id: 'fc', reverse: false },
+      ]
+    },
+  ],
+  /* eslint-enable */
+};
+
 // https://trello-attachments.s3.amazonaws.com/58d428743111af1d0a20cf28/598b63629862dc7224f4df8c/1bc285908438ddc20e64c55752191727/capture.png
 export const preserveRectangularityGeometry = {
   /* eslint-disable */

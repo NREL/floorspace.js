@@ -12,7 +12,7 @@ import helpers from '../../../../src/store/modules/geometry/helpers';
 
 import { splitEdge } from '../../../../src/store/modules/geometry/mutations';
 import {
-  preserveRectangularityGeometry, simpleGeometry, emptyGeometry, neg5by5Rect,
+  preserveRectangularityGeometry, simpleGeometry, smallGeometry, emptyGeometry, neg5by5Rect,
 } from './examples';
 
 describe('validateFaceGeometry', () => {
@@ -251,6 +251,110 @@ describe('edgesToSplit:simpleGeometry', () => {
             { edge_id: rer.edge_id }),
           newEdgeRefs = _.filter(
             _.find(newSimpleGeometry.faces, { id: rer.face_id }).edgeRefs,
+            er => _.includes(edge.newEdgeRefs, er.edge_id));
+        newEdgeRefs.forEach((ner) => {
+          // expect that the newly created edge refs are in the same direction
+          // as the replaced edge ref.
+          assertEqual(
+            ner.reverse,
+            originalEdgeRef.reverse,
+          );
+        });
+      });
+    });
+  });
+
+  it('produces closed faces', () => {
+    newGeom.faces.forEach((face) => {
+      const verts = vertsIdsFromFace(face);
+      assertEqual(verts[0], verts[verts.length - 1]);
+      _.chunk(verts.slice(1, -1), 2).forEach(
+        ([v2OfPrev, v1OfNext]) => assertEqual(v2OfPrev, v1OfNext),
+      );
+    });
+  });
+});
+
+describe('edgesToSplit:smallGeometry', () => {
+  /*
+
+      a +---+ b
+        |   |
+        |   |
+      c +---+-----+ e
+        |   d     |
+        |         |
+        |         |
+      f +---------+ g
+
+  */
+  const
+    edges = edgesToSplit(smallGeometry),
+    newSmallGeometry = _.cloneDeep(smallGeometry),
+    state = [newSmallGeometry];
+
+  // modify our copy of geometry to see what it will look like after mutations
+  edges.forEach(
+    payload => splitEdge(state, { geometry_id: smallGeometry.id, ...payload }));
+
+  const
+    oldGeom = helpers.denormalize(smallGeometry),
+    newGeom = helpers.denormalize(newSmallGeometry);
+
+  const vertsIdsFromFace = face => (
+    _.chain(face.edges)
+      .flatMap(e => (
+        e.reverse ? [e.v2, e.v1] : [e.v1, e.v2]
+      ))
+      .map('id')
+      .value()
+  );
+
+  it('splits an edge in a simple case', () => {
+    assert(edges.length === 1, 'only one edge should be split');
+
+    const [{ edgeToDelete, newEdges, replaceEdgeRefs }] = edges;
+    assert(edgeToDelete === 'ce', 'that edge should be "ce"');
+
+    const replaceCE = _.find(replaceEdgeRefs, { face_id: 'bottom', edge_id: 'ce' });
+    assert(replaceCE);
+
+    const edgeDE = (
+      _.find(newEdges, { v1: 'd', v2: 'e' }) ||
+      _.find(newEdges, { v1: 'e', v2: 'd' }));
+
+    assert(_.includes(_.map(replaceCE.newEdges, 'id'), edgeDE.id));
+  });
+
+  it('maintains order of existing vertices', () => {
+    _.zip(
+      _.uniq(newGeom.faces.map(vertsIdsFromFace)),
+      _.uniq(oldGeom.faces.map(vertsIdsFromFace)),
+    ).forEach(([newVerts, oldVerts]) => {
+      // check that any old verts still around are in the same order.
+      assertEqual(
+        // from lodash docs:
+        // The order and references of result values
+        //  are determined by the first array.
+        _.intersection(newVerts, oldVerts),
+        _.intersection(oldVerts, newVerts),
+      );
+    });
+  });
+
+  it('skips edges that are not nearby', () => {
+    refute(_.find(edges, { id: 'eg' }));
+  });
+
+  it('reverses new edges when the original was reversed', () => {
+    edges.forEach((edge) => {
+      edge.replaceEdgeRefs.forEach((rer) => {
+        const
+          originalEdgeRef = _.find(
+            _.find(smallGeometry.faces, { id: rer.face_id }).edgeRefs,
+            { edge_id: rer.edge_id }),
+          newEdgeRefs = _.filter(
+            _.find(newSmallGeometry.faces, { id: rer.face_id }).edgeRefs,
             er => _.includes(edge.newEdgeRefs, er.edge_id));
         newEdgeRefs.forEach((ner) => {
           // expect that the newly created edge refs are in the same direction
