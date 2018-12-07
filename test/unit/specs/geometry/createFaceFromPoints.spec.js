@@ -191,7 +191,7 @@ describe('edgesToSplit:simpleGeometry', () => {
 
   // modify our copy of geometry to see what it will look like after mutations
   edges.forEach(
-    payload => splitEdge(state, { geometry_id: simpleGeometry.id, ...payload }));
+    payload => splitEdge(state, { geometry_id: simpleGeometry.id, ...payload }), 5);
 
   const
     oldGeom = helpers.denormalize(simpleGeometry),
@@ -295,7 +295,7 @@ describe('edgesToSplit:smallGeometry', () => {
 
   // modify our copy of geometry to see what it will look like after mutations
   edges.forEach(
-    payload => splitEdge(state, { geometry_id: smallGeometry.id, ...payload }));
+    payload => splitEdge(state, { geometry_id: smallGeometry.id, ...payload }), 5.2);
 
   const
     oldGeom = helpers.denormalize(smallGeometry),
