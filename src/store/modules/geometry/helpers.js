@@ -218,9 +218,7 @@ const helpers = {
 
     function scaleUpPathWithoutRound(paths, scale) {
       paths.forEach((points) => {
-        for (const key in points) {
-          points[key] *= scale;
-        }
+        Object.keys(points).forEach(key => points[key] *= scale);
       });
     }
     // scale paths up before performing operation
