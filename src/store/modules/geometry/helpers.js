@@ -317,14 +317,17 @@ const helpers = {
               p1: edgeV1,
               p2: edgeV2
           });
-          console.log('distance between', this.distanceBetweenPoints(vertex, projection))
-          console.log('spacing', spacing)
-          console.log('distance between is less than or equal spacing', this.distanceBetweenPoints(vertex, projection) <= 1 / (spacing * 100000))
-          if (this.distanceBetweenPoints(vertex, projection).toFixed(10)) return false;
-          if (spacing > 0) {
-            return this.distanceBetweenPoints(vertex, projection).toFixed(10) <= 1 / 100;
+
+          // if (this.distanceBetweenPoints(vertex, projection) <= 1 / 100) {
+          //   console.log('distance between', this.distanceBetweenPoints(vertex, projection));
+          //   console.log('spacing', 1 / (spacing * 1000000));
+          // }
+          if (this.distanceBetweenPoints(vertex, projection) === 0) {
+            console.log('distance between', this.distanceBetweenPoints({ x: vertex.x * 100, y: vertex.y * 100 }, ({ x: projection.x * 100, y: projection.y * 100 })));
+            console.log('spacing', 1 / 100);
+            return this.distanceBetweenPoints((vertex * 100), (projection * 100)) <= (1 / 10000);
           }
-          return this.distanceBetweenPoints(vertex, projection).toFixed(10) <= 1 / (spacing * 1000000);
+          return this.distanceBetweenPoints(vertex, projection) <= 1 / 100;
         });
     },
 
