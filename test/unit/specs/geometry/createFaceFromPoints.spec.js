@@ -295,7 +295,7 @@ describe('edgesToSplit:smallGeometry', () => {
 
   // modify our copy of geometry to see what it will look like after mutations
   edges.forEach(
-    payload => splitEdge(state, { geometry_id: smallGeometry.id, ...payload }), 5.2);
+    payload => splitEdge(state, { geometry_id: smallGeometry.id, ...payload }), 0.2);
 
   const
     oldGeom = helpers.denormalize(smallGeometry),
@@ -312,6 +312,7 @@ describe('edgesToSplit:smallGeometry', () => {
 
   it('splits an edge in a simple case', () => {
     assert(edges.length === 1, 'only one edge should be split');
+    // why?
 
     const [{ edgeToDelete, newEdges, replaceEdgeRefs }] = edges;
     assert(edgeToDelete === 'ce', 'that edge should be "ce"');

@@ -65,11 +65,10 @@ export function destroyGeometry(state, payload) {
                 g.faces.forEach((face) => {
                   face.edgeRefs.forEach((edgeRef) => {
                     if (id === edgeRef.edge_id) {
-                      console.log(id)
                       face.edgeRefs.splice(face.edgeRefs.findIndex(r => r.edge_id === id), 1);
                     }
-                  })
-                })
+                  });
+                });
                 break;
             } else if (~g.vertices.map(v => v.id).indexOf(id)) {
                 g.vertices.splice(g.vertices.findIndex(v => v.id === id), 1);
@@ -77,7 +76,6 @@ export function destroyGeometry(state, payload) {
             }
         }
 
-        console.log('huh?', JSON.stringify(state[0].faces))
 }
 
     // set a reference to an edge on a face
@@ -141,15 +139,13 @@ export function splitEdge(state, { geometry_id, edgeToDelete, newEdges, replaceE
   ensureEdgesExist(state, { geometry_id, edges: newEdges });
   replaceEdgeRefs.forEach(replacement => replaceEdgeRef(state, replacement));
   destroyGeometry(state, { id: edgeToDelete });
-  console.log(JSON.stringify(state[0].faces))
 }
-
 
 export function replaceFacePoints(state, { geometry_id, vertices, edges, face_id }) {
   const geometry = _.find(state, { id: geometry_id });
   ensureVertsExist(state, { geometry_id, vertices });
   ensureEdgesExist(state, { geometry_id, edges });
-  
+
   let face = _.find(geometry.faces, { id: face_id });
   if (!face) {
     face = { id: face_id, edgeRefs: [] };

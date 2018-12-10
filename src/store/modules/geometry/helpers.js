@@ -317,7 +317,7 @@ const helpers = {
               p1: edgeV1,
               p2: edgeV2
           });
-          return this.distanceBetweenPoints(vertex, projection) <= 1 / this.clipScale;
+          return this.distanceBetweenPoints(vertex, projection) <= spacing / 1000;
         });
     },
 
