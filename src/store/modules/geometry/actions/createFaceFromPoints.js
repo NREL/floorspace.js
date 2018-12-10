@@ -371,7 +371,6 @@ function edgesFromVerts(verts, existingEdges) {
 function replacementEdgeRefs(geometry, dyingEdgeId, newEdges) {
   // look up all faces with a reference to the original edge being split
   const affectedFaces = geometryHelpers.facesForEdgeId(dyingEdgeId, geometry);
-
   // remove reference to old edge and add references to the new edges
   const replaceEdgeRefs = affectedFaces.map((affectedFace) => {
     const dyingEdgeReversed = _.find(affectedFace.edgeRefs, { edge_id: dyingEdgeId }).reverse;
@@ -401,7 +400,6 @@ function replacementEdgeRefs(geometry, dyingEdgeId, newEdges) {
       newEdges: replacementEdges,
     };
   });
-
   return replaceEdgeRefs;
 }
 
