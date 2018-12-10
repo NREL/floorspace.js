@@ -317,21 +317,11 @@ const helpers = {
               p1: edgeV1,
               p2: edgeV2
           });
-
-          // if (this.distanceBetweenPoints(vertex, projection) <= 1 / 100) {
-          //   console.log('distance between', this.distanceBetweenPoints(vertex, projection));
-          //   console.log('spacing', 1 / (spacing * 1000000));
-          // }
-          if (this.distanceBetweenPoints(vertex, projection) === 0) {
-            console.log('distance between', this.distanceBetweenPoints({ x: vertex.x * 100, y: vertex.y * 100 }, ({ x: projection.x * 100, y: projection.y * 100 })));
-            console.log('spacing', 1 / 100);
-            return this.distanceBetweenPoints((vertex * 100), (projection * 100)) <= (1 / 10000);
-          }
-          return this.distanceBetweenPoints(vertex, projection) <= 1 / 100;
+          return this.distanceBetweenPoints(vertex, projection) <= 1 / this.clipScale;
         });
     },
 
-    projectionOfPointToLine,
+  projectionOfPointToLine,
 
     /*
      * given two points return the distance between them

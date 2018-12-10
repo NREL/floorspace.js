@@ -19,6 +19,7 @@ export function trimGeometry(state, { geometry_id, vertsReferencedElsewhere }) {
   const missingEdges = _.difference([...edgesInUse], _.map(newEdges, 'id'));
   if (missingEdges.length) {
     console.error('An edge is referenced by a face, but does not exist!', JSON.stringify(geometry));
+    console.log(JSON.stringify(missingEdges));
   }
   const missingVerts = _.difference(vertsOnEdges, _.map(newVerts, 'id'));
   if (missingVerts.length) {
@@ -49,7 +50,6 @@ export function createFace(state, payload) {
 export function destroyGeometry(state, payload) {
         // id of the object to be destroyed
         const { id } = payload;
-
         // loop through all geometry sets in the store and check if they contain the object
         // break from the loop if the object is found
         for (var i = 0; i < state.length; i++) {
@@ -102,7 +102,6 @@ export function replaceEdgeRef(state, payload) {
     geometry = state.find(g => g.id === geometry_id),
     face = geometry.faces.find(f => f.id === face_id),
     edgeRefIx = _.findIndex(face.edgeRefs, { edge_id });
-
   face.edgeRefs.splice(
     edgeRefIx, 1, // remove existing edge
     // replacing it with these ones, in the same direction.
