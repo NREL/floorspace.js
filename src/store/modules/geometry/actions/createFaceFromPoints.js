@@ -56,9 +56,7 @@ export default function createFaceFromPoints(context, payload) {
   }
 
   withPreservedComponents(context, currentStoryGeometry.id, () => {
-    // here we have 8 edges
     newGeoms.forEach(newGeom => context.dispatch('replaceFacePoints', newGeom));
-    // now we have 8
     // save the face and its descendent geometry
     storeFace(faceGeometry, target, context, existingFace);
 
@@ -75,6 +73,7 @@ export function newGeometriesOfOverlappedFaces(points, geometry) {
   if (points.length < 3 || !geometryHelpers.areaOfSelection(points)) {
     return false;
   }
+
   const geom = geometryHelpers.denormalize(geometry);
   const intersectedFaces = geom.faces
     .filter((face) => {
@@ -149,7 +148,7 @@ export function eraseSelection(points, context) {
 function storeFace({ vertices, edges }, target, context, existingFace) {
   const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'];
   const face = existingFace || new factory.Face([]);
-  // HERE at dispatch
+
   context.dispatch('replaceFacePoints', {
     face_id: face.id,
     geometry_id: currentStoryGeometry.id,
@@ -331,7 +330,6 @@ export function validateFaceGeometry(points, currentStoryGeometry) {
 
   // first, we can just join together consecutive duplicates, since that doesn't change
   // the geometry at all.
-
   faceVertices = dropConsecutiveDups(faceVertices);
 
   // create edges connecting each vertex in order
@@ -398,6 +396,7 @@ function replacementEdgeRefs(geometry, dyingEdgeId, newEdges) {
       newEdges: replacementEdges,
     };
   });
+  
   return replaceEdgeRefs;
 }
 
