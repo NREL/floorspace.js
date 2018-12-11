@@ -56,9 +56,9 @@ export default function createFaceFromPoints(context, payload) {
   }
 
   withPreservedComponents(context, currentStoryGeometry.id, () => {
-
+    // here we have 8 edges
     newGeoms.forEach(newGeom => context.dispatch('replaceFacePoints', newGeom));
-
+    // now we have 8
     // save the face and its descendent geometry
     storeFace(faceGeometry, target, context, existingFace);
 
@@ -148,9 +148,8 @@ export function eraseSelection(points, context) {
 */
 function storeFace({ vertices, edges }, target, context, existingFace) {
   const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'];
-
   const face = existingFace || new factory.Face([]);
-
+  // HERE at dispatch
   context.dispatch('replaceFacePoints', {
     face_id: face.id,
     geometry_id: currentStoryGeometry.id,
@@ -170,7 +169,6 @@ export function findExistingEdge(v1, v2, edges) {
   const sharedEdge = edges.find(e => (
     (e.v1 === v1.id && e.v2 === v2.id) ||
     (e.v2 === v1.id && e.v1 === v2.id)));
-
   // if a shared edge exists, check if its direction matches the edge direction required for the face being created
   return sharedEdge && {
     ...sharedEdge,
@@ -425,7 +423,7 @@ export function edgesToSplit(geometry, spacing) {
     const
       newEdges = edgesFromVerts(splittingVertices, [...geometry.edges, ...priorIterationEdges]),
       replaceEdgeRefs = replacementEdgeRefs(geometry, edge.id, newEdges);
-
+    
     // The edges we're recommending don't yet exist, but we'd like to re-use them for future iterations.
     // Otherwise we end up creating two edges when one will do.
     priorIterationEdges.push(...newEdges);

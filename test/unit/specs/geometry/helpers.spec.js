@@ -470,6 +470,27 @@ describe('setOperation', () => {
   });
 });
 
+// HERE
+describe('splittingVerticesForEdgeId', () => {
+  it('respects the spacing option', () => {
+    /*
+    using small geometry, splitting vertices for edge ce
+    should include only 'd'.
+    a +---+ b
+      |   |
+      |   |
+    c +---+-----+ e
+      |   d     |
+      |         |
+      |         |
+    f +---------+ g
+*/
+    const splittingVertices = helpers.splittingVerticesForEdgeId('ce', geometryExamples.smallGeometry, 0.2);
+    assert(splittingVertices.length === 1, 'should find one splitting vertex');
+    assertEqual(splittingVertices[0], { id: 'd', x: 0.000004, y: 0.00001 });
+  });
+});
+
 describe('edgeDirection', () => {
   it('can handle a 45-deg angle', () => {
     const angle = helpers.edgeDirection({

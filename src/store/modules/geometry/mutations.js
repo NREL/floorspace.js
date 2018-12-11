@@ -19,7 +19,6 @@ export function trimGeometry(state, { geometry_id, vertsReferencedElsewhere }) {
   const missingEdges = _.difference([...edgesInUse], _.map(newEdges, 'id'));
   if (missingEdges.length) {
     console.error('An edge is referenced by a face, but does not exist!', JSON.stringify(geometry));
-    console.log(JSON.stringify(missingEdges));
   }
   const missingVerts = _.difference(vertsOnEdges, _.map(newVerts, 'id'));
   if (missingVerts.length) {

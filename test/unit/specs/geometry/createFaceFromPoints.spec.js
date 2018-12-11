@@ -185,7 +185,7 @@ describe('edgesToSplit:simpleGeometry', () => {
 
   */
   const
-    edges = edgesToSplit(simpleGeometry),
+    edges = edgesToSplit(simpleGeometry, 5),
     newSimpleGeometry = _.cloneDeep(simpleGeometry),
     state = [newSimpleGeometry];
 
@@ -275,6 +275,7 @@ describe('edgesToSplit:simpleGeometry', () => {
   });
 });
 
+
 describe('edgesToSplit:smallGeometry', () => {
   /*
 
@@ -289,7 +290,7 @@ describe('edgesToSplit:smallGeometry', () => {
 
   */
   const
-    edges = edgesToSplit(smallGeometry),
+    edges = edgesToSplit(smallGeometry, 0.2),
     newSmallGeometry = _.cloneDeep(smallGeometry),
     state = [newSmallGeometry];
 
@@ -312,7 +313,6 @@ describe('edgesToSplit:smallGeometry', () => {
 
   it('splits an edge in a simple case', () => {
     assert(edges.length === 1, 'only one edge should be split');
-    // why?
 
     const [{ edgeToDelete, newEdges, replaceEdgeRefs }] = edges;
     assert(edgeToDelete === 'ce', 'that edge should be "ce"');

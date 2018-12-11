@@ -163,7 +163,6 @@ export default {
       edge.id = gEdge.id;
       edge.reverse = (gEdge.v1 !== edge.v1);
     });
-
     context.commit('replaceFacePoints', {
       geometry_id,
       vertices,
