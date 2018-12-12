@@ -12,7 +12,7 @@ import helpers from '../../../../src/store/modules/geometry/helpers';
 
 import { splitEdge } from '../../../../src/store/modules/geometry/mutations';
 import {
-  preserveRectangularityGeometry, simpleGeometry, smallGeometry, emptyGeometry, neg5by5Rect,
+  preserveRectangularityGeometry, simpleGeometry, smallGeometry, emptyGeometry, neg5by5Rect, emptyEdgesProblem,
 } from './examples';
 
 describe('validateFaceGeometry', () => {
@@ -271,6 +271,24 @@ describe('edgesToSplit:simpleGeometry', () => {
       _.chunk(verts.slice(1, -1), 2).forEach(
         ([v2OfPrev, v1OfNext]) => assertEqual(v2OfPrev, v1OfNext),
       );
+    });
+  });
+});
+
+describe('edgesToSplit:emptyEdgesProblem', () => {
+  it('should not return edges that are empty', () => {
+    const edges = edgesToSplit(emptyEdgesProblem, 0.2);
+    edges.forEach((edge) => {
+      edge.newEdges.forEach((newEdge) => {
+        const vert1 = emptyEdgesProblem.vertices.find((vert) => {
+          return vert.id === newEdge.v1;
+        });
+        const vert2 = emptyEdgesProblem.vertices.find((vert) => {
+          return vert.id === newEdge.v2;
+        });
+        const distance = helpers.distanceBetweenPoints(vert1, vert2);
+        assert(distance.toFixed(10) > 0, 'distance must be greater than 0');
+      });
     });
   });
 });

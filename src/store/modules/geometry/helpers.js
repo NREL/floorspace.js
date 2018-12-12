@@ -318,11 +318,9 @@ const helpers = {
             p2: edgeV2,
         });
         // the setup below produces the fewest errors but i'm just not sure where to go from here. 
-        if (spacing % 1 !== 0) {
-          const thing = this.distanceBetweenPoints(vertex, projection) * Number.MAX_SAFE_INTEGER;
-          return thing <= spacing / 1000;
-        }
-        return this.distanceBetweenPoints(vertex, projection) <= spacing / 1000;
+        const distBetween = this.distanceBetweenPoints(vertex, projection);
+        const shouldSplit = distBetween <= spacing / 20;
+        return shouldSplit;
       });
     },
 

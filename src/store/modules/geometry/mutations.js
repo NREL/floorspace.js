@@ -61,7 +61,6 @@ export function destroyGeometry(state, payload) {
                 break;
             } else if (~g.edges.map(e => e.id).indexOf(id)) {
                 g.edges.splice(g.edges.findIndex(e => e.id === id), 1);
-                // may not be necessary... this was done before i really knew what was going on. 
                 g.faces.forEach((face) => {
                   face.edgeRefs.forEach((edgeRef) => {
                     if (id === edgeRef.edge_id) {
