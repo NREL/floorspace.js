@@ -5,6 +5,28 @@ import modelHelpers from './../../models/helpers';
 import { uniq, dropConsecutiveDups, allPairs } from './../../../../utilities';
 import { withPreservedComponents } from './componentPreservationSociety';
 
+
+function cartesianProductOf(...args) {
+  return _.reduce(args, function (a, b) {
+    return _.flatten(_.map(a, function (x) {
+      return _.map(b, function (y) {
+        return x.concat([y]);
+      });
+    }), true);
+  }, [[]]);
+}
+
+export function smallestPairwiseVertDist(verts) {
+  const smallest =  _.min(
+    cartesianProductOf(verts, verts)
+      .filter(([v1, v2]) => v1.id !== v2.id)
+      .map(([v1, v2]) => {
+        console.log(JSON.stringify(v1), JSON.stringify(v2))
+        return distanceBetweenPoints(v1, v2);
+      }));
+  console.log('smallest', smallest)
+  return smallest;
+}
 /*
  * create a face and associated edges and vertices from an array of points
  * associate the face with the space or shading included in the payload
@@ -56,7 +78,9 @@ export default function createFaceFromPoints(context, payload) {
   }
 
   withPreservedComponents(context, currentStoryGeometry.id, () => {
+
     newGeoms.forEach(newGeom => context.dispatch('replaceFacePoints', newGeom));
+
     // save the face and its descendent geometry
     storeFace(faceGeometry, target, context, existingFace);
 
@@ -148,14 +172,12 @@ export function eraseSelection(points, context) {
 function storeFace({ vertices, edges }, target, context, existingFace) {
   const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'];
   const face = existingFace || new factory.Face([]);
-
   context.dispatch('replaceFacePoints', {
     face_id: face.id,
     geometry_id: currentStoryGeometry.id,
     vertices,
     edges,
   });
-
   context.dispatch(target.type === 'space' ? 'models/updateSpaceWithData' : 'models/updateShadingWithData', {
     [target.type]: target,
     face_id: face.id,
@@ -360,6 +382,7 @@ export function validateFaceGeometry(points, currentStoryGeometry) {
 }
 
 function edgesFromVerts(verts, existingEdges) {
+
   return _.zip(verts.slice(0, -1), verts.slice(1))
     .map(matchOrCreateEdge(existingEdges));
 }
@@ -416,13 +439,12 @@ export function edgesToSplit(geometry, spacing) {
 
     // add startpoint and endpoint of original edge to splittingVertices array from which new edges will be created
     splittingVertices = [startpoint, ...splittingVertices, endpoint];
-
     // create new edges by connecting the original edge startpoint, ordered splitting vertices, and original edge endpoint
     // eg: startpoint -> SV1, SV1 -> SV2, SV2 -> SV3, SV3 -> endpoint
     const
       newEdges = edgesFromVerts(splittingVertices, [...geometry.edges, ...priorIterationEdges]),
       replaceEdgeRefs = replacementEdgeRefs(geometry, edge.id, newEdges);
-    
+
     // The edges we're recommending don't yet exist, but we'd like to re-use them for future iterations.
     // Otherwise we end up creating two edges when one will do.
     priorIterationEdges.push(...newEdges);
@@ -433,6 +455,8 @@ export function edgesToSplit(geometry, spacing) {
     };
   }));
 }
+
+
 
 /*
  * loop through all edges on the currentStoryGeometry, checking if there are any vertices touching (splitting) them
