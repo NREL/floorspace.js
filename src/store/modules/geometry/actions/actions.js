@@ -142,14 +142,9 @@ export default {
 
     const replacementVertIds = _.chain(vertices)
       .map((vert) => {
-        // i don't understand what gVert is doing... like... ???
-        // where shorthand... so it's find geom vertices where { x: blah, y: blah }
-        const gVert = geom.vertices.find((v) => {
-          const dist = distanceBetweenPoints(v, vert);
-          console.log('dist', dist)
-          if (dist > spacing / 20) return true;
-          return false;
-        }); // <-- this bad boy right here. Find by distance < epsilon(dependent on spacing)
+        // const gVert = _.find(geom.vertices, _.pick(vert, ['x', 'y']));// <-- this bad boy right here. Find by distance < epsilon(dependent on spacing)
+        const gVert = _.find(geom.vertices, v => distanceBetweenPoints(v, vert) < (spacing / 20));
+        console.log(gVert);
         if (!gVert) return null; // this vertex doesn't match any existing ones
         if (vert.id === gVert.id) return null; // this vertex already exists
         return [vert.id, gVert.id]; // this vertex *would* be a dup, so use the existing one
@@ -157,18 +152,20 @@ export default {
       .compact()
       .fromPairs()
       .value();
+      console.log(JSON.stringify(replacementVertIds))
+      console.log(JSON.stringify(vertices))
+    // changed below because it was upset about mutating state outside of mutations...
+    const updatedVertices = vertices.map(v => ({
+      ...v,
+      id: replacementVertIds[v.id] || v.id,
+    }));
+    const updatedEdges = edges.map(e => ({
+      ...e,
+      v1: replacementVertIds[e.v1] || e.v1,
+      v2: replacementVertIds[e.v2] || e.v2,
+    }));
 
-    console.log('replacement verts', replacementVertIds)
-
-    vertices.forEach((v) => {
-      v.id = replacementVertIds[v.id] || v.id;
-    });
-    edges.forEach((e) => {
-      e.v1 = replacementVertIds[e.v1] || e.v1;
-      e.v2 = replacementVertIds[e.v2] || e.v2;
-    });
-
-    edges.forEach((edge) => {
+    updatedEdges.forEach((edge) => {
       const gEdge = _.find(geom.edges, { v1: edge.v1, v2: edge.v2 }) || _.find(geom.edges, { v1: edge.v2, v2: edge.v1 });
       if (!gEdge) return; // this edge doesn't match any existing ones
       if (edge.id === gEdge.id) return; // this edge already exists
@@ -177,8 +174,8 @@ export default {
     });
     context.commit('replaceFacePoints', {
       geometry_id,
-      vertices,
-      edges,
+      vertices: updatedVertices,
+      edges: updatedEdges,
       face_id,
     });
   },

@@ -125,130 +125,130 @@ export const emptyEdgesProblem = {
     {
       id: '5',
       x: -109.2,
-      y: 79.2
+      y: 79.2,
     },
     {
       id: '6',
       x: -86.60000000000001,
-      y: 79.2
+      y: 79.2,
     },
     {
       id: '7',
       x: -86.60000000000001,
-      y: 69.2
+      y: 69.2,
     },
     {
       id: '8',
       x: -109.2,
-      y: 69.2
+      y: 69.2,
     },
     {
       id: '75',
       x: -94.6,
-      y: 79.2
+      y: 79.2,
     },
     {
       id: '76',
       x: -94.6,
-      y: 74.8
+      y: 74.8,
     },
     {
       id: '77',
       x: -102.6,
-      y: 74.8
+      y: 74.8,
     },
     {
       id: '78',
       x: -102.6,
-      y: 79.2
+      y: 79.2,
     },
     {
       id: '67',
       x: -102.60000000000001,
-      y: 79.2
+      y: 79.2,
     },
     {
       id: '68',
       x: -94.60000000000001,
-      y: 79.2
+      y: 79.2,
     },
     {
       id: '69',
       x: -94.60000000000001,
-      y: 74.8
+      y: 74.8,
     },
     {
       id: '70',
       x: -102.60000000000001,
-      y: 74.8
-    }
+      y: 74.8,
+    },
   ],
   edges: [
     {
       id: '9',
       v1: '5',
-      v2: '6'
+      v2: '6',
     },
     {
       id: '10',
       v1: '6',
-      v2: '7'
+      v2: '7',
     },
     {
       id: '11',
       v1: '7',
-      v2: '8'
+      v2: '8',
     },
     {
       id: '12',
       v1: '8',
-      v2: '5'
+      v2: '5',
     },
     {
       id: '79',
       v1: '6',
-      v2: '75'
+      v2: '75',
     },
     {
       id: '80',
       v1: '75',
-      v2: '76'
+      v2: '76',
     },
     {
       id: '81',
       v1: '76',
-      v2: '77'
+      v2: '77',
     },
     {
       id: '82',
       v1: '77',
-      v2: '78'
+      v2: '78',
     },
     {
       id: '83',
       v1: '78',
-      v2: '5'
+      v2: '5',
     },
     {
       id: '71',
       v1: '67',
-      v2: '68'
+      v2: '68',
     },
     {
       id: '72',
       v1: '68',
-      v2: '69'
+      v2: '69',
     },
     {
       id: '73',
       v1: '69',
-      v2: '70'
+      v2: '70',
     },
     {
       id: '74',
       v1: '70',
-      v2: '67'
-    }
+      v2: '67',
+    },
   ],
   faces: [
     {
@@ -256,56 +256,56 @@ export const emptyEdgesProblem = {
       edgeRefs: [
         {
           edge_id: '79',
-          reverse: false
+          reverse: false,
         },
         {
           edge_id: '80',
-          reverse: false
+          reverse: false,
         },
         {
           edge_id: '81',
-          reverse: false
+          reverse: false,
         },
         {
           edge_id: '82',
-          reverse: false
+          reverse: false,
         },
         {
           edge_id: '83',
-          reverse: false
+          reverse: false,
         },
         {
           edge_id: '12',
-          reverse: true
+          reverse: true,
         },
         {
           edge_id: '11',
-          reverse: true
+          reverse: true,
         },
         {
           edge_id: '10',
-          reverse: true
-        }
-      ]
+          reverse: true,
+        },
+      ],
     },
     {
       id: '84',
       edgeRefs: [
         {
           edge_id: '71',
-          reverse: false
+          reverse: false,
         },
         {
           edge_id: '72',
-          reverse: false
+          reverse: false,
         },
         {
           edge_id: '73',
-          reverse: false
+          reverse: false,
         },
         {
           edge_id: '74',
-          reverse: false
+          reverse: false,
         },
       ],
     },

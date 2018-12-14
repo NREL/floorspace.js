@@ -442,7 +442,6 @@ export function edgesToSplit(geometry, spacing) {
     const
       newEdges = edgesFromVerts(splittingVertices, [...geometry.edges, ...priorIterationEdges]),
       replaceEdgeRefs = replacementEdgeRefs(geometry, edge.id, newEdges);
-
     // The edges we're recommending don't yet exist, but we'd like to re-use them for future iterations.
     // Otherwise we end up creating two edges when one will do.
     priorIterationEdges.push(...newEdges);
@@ -453,8 +452,6 @@ export function edgesToSplit(geometry, spacing) {
     };
   }));
 }
-
-
 
 /*
  * loop through all edges on the currentStoryGeometry, checking if there are any vertices touching (splitting) them
