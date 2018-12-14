@@ -50,13 +50,49 @@ export const smallGeometry = {
   /* eslint-disable */
   id: 1,
   vertices: [
-    { id: 'f', x: 0.1006, y: 0.1006 },
-    { id: 'g', x: 10.1006, y: 0.1006 },
-    { id: 'c', x: 0.1006, y: 10.1006 },
-    { id: 'd', x: 4.1006, y: 10.1006 },
-    { id: 'e', x: 10.1006, y: 10.1006 },
-    { id: 'a', x: 0.1006, y: 16.1006 },
-    { id: 'b', x: 4.1006, y: 16.1006 },
+    { id: 'f', x: 0, y: 0 },
+    { id: 'g', x: 1.0, y: 0 },
+    { id: 'c', x: 0, y: 1.0 },
+    { id: 'd', x: .4, y: 1.0 },
+    { id: 'e', x: 1.0, y: 1.0 },
+    { id: 'a', x: 0, y: 1.6 },
+    { id: 'b', x: .4, y: 1.6 },
+  ],
+  edges: [
+    'ab', 'ac', 'bd', 'cd', 'eg', 'gf', 'fc', 'ce',
+  ].map(id => ({ id, v1: id[0], v2: id[1] })),
+  faces: [
+    {
+      id: 'top', edgeRefs: [
+        { edge_id: 'ab', reverse: false },
+        { edge_id: 'bd', reverse: false },
+        { edge_id: 'cd', reverse: true },
+        { edge_id: 'ac', reverse: true },
+      ]
+    },
+    {
+      id: 'bottom', edgeRefs: [
+        { edge_id: 'ce', reverse: false },
+        { edge_id: 'eg', reverse: false },
+        { edge_id: 'gf', reverse: false },
+        { edge_id: 'fc', reverse: false },
+      ]
+    },
+  ],
+  /* eslint-enable */
+};
+
+export const evenSmallerGeometry = {
+  /* eslint-disable */
+  id: 1,
+  vertices: [
+    { id: 'f', x: 0, y: 0 },
+    { id: 'g', x: .0010, y: 0 },
+    { id: 'c', x: 0, y: .0010 },
+    { id: 'd', x: .004, y: .0010 },
+    { id: 'e', x: .0010, y: .0010 },
+    { id: 'a', x: 0, y: .0016 },
+    { id: 'b', x: .004, y: .0016 },
   ],
   edges: [
     'ab', 'ac', 'bd', 'cd', 'eg', 'gf', 'fc', 'ce',

@@ -471,7 +471,7 @@ describe('setOperation', () => {
 });
 
 describe('splittingVerticesForEdgeId', () => {
-  it('respects the spacing option', () => {
+  it('respects the spacing option for small geometry', () => {
     /*
     using small geometry, splitting vertices for edge ce
     should include only 'd'.
@@ -484,9 +484,13 @@ describe('splittingVerticesForEdgeId', () => {
       |         |
     f +---------+ g
 */
-    const splittingVertices = helpers.splittingVerticesForEdgeId('ce', geometryExamples.smallGeometry, 0.2);
+    const splittingVertices = helpers.splittingVerticesForEdgeId('ce', geometryExamples.smallGeometry, 0.1);
     assert(splittingVertices.length === 1, `should find one splitting vertex, but found ${splittingVertices.length}`);
-    assertEqual(splittingVertices[0], { id: 'd', x: 4.1006, y: 10.1006 });
+    assertEqual(splittingVertices[0], { id: 'd', x: 0.4, y: 1 });
+
+    const splittingSmallerVertices = helpers.splittingVerticesForEdgeId('ce', geometryExamples.evenSmallerGeometry, 0.1);
+    assert(splittingSmallerVertices.length === 1, `should find one splitting vertex, but found ${splittingSmallerVertices.length}`);
+    assertEqual(splittingVertices[0], { id: 'd', x: 0.004, y: 0.001 });
   });
 });
 
