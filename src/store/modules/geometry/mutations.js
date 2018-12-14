@@ -1,6 +1,5 @@
 import _ from 'lodash';
-import { smallestPairwiseVertDist } from './actions/createFaceFromPoints';
-import { distanceBetweenPoints } from './helpers';
+import createFaceFromPoints, { eraseSelection, newGeometriesOfOverlappedFaces, validateFaceGeometry, smallestPairwiseVertDist } from './actions/createFaceFromPoints';
 
     /*
     * create a new geometry set, face, edge, or vertex in the data store
@@ -32,9 +31,8 @@ export function trimGeometry(state, { geometry_id, vertsReferencedElsewhere }) {
 }
 
 export function initGeometry(state, payload) {
-  console.log('me!')
-      const { geometry } = payload;
-      state.push(geometry);
+  const { geometry } = payload;
+  state.push(geometry);
 }
 
 export function createVertex(state, payload) {
@@ -122,30 +120,11 @@ export function replaceEdgeRef(state, payload) {
   );
 }
 
-
 export function ensureVertsExist(state, { geometry_id, vertices }) {
   const geometry = _.find(state, { id: geometry_id });
-  if (smallestPairwiseVertDist(vertices) < 0.2 / 100) {
-    debugger;
-  }
-  // vertices.forEach((v) => {
-  //   _.find(geometry.vertices, { id: v.id }) || geometry.vertices.push(v)
-  // });
-  vertices.forEach((v) => {
-    let lastVert;
-    if (!_.find(geometry.vertices, { id: v.id })) {
-      v.x = v.x.toFixed(1);
-      v.y = v.y.toFixed(1);
-      console.log(smallestPairwiseVertDist([v.x, v.y], lastVert) < 0.2);
-      if (!smallestPairwiseVertDist([v.x, v.y], lastVert) < 0.2) {
-        geometry.vertices.push(v);
-        lastVert = [v.x, v.y];
-      }
-    }
-  });
-  if (smallestPairwiseVertDist(geometry.vertices) < 0.2 / 100) {
-    debugger;
-  }
+  vertices.forEach(v =>
+    _.find(geometry.vertices, { id: v.id }) || geometry.vertices.push(v)
+  );
 }
 
 export function ensureEdgesExist(state, { geometry_id, edges }) {
@@ -164,7 +143,6 @@ export function splitEdge(state, { geometry_id, edgeToDelete, newEdges, replaceE
 export function replaceFacePoints(state, { geometry_id, vertices, edges, face_id }) {
   const geometry = _.find(state, { id: geometry_id });
 
-  // START HERE
   ensureVertsExist(state, { geometry_id, vertices });
 
   ensureEdgesExist(state, { geometry_id, edges, vertices });

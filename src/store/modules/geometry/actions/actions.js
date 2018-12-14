@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import factory from './../factory';
-import geometryHelpers from './../helpers';
+import geometryHelpers, { distanceBetweenPoints } from './../helpers';
 import createFaceFromPoints, { eraseSelection, newGeometriesOfOverlappedFaces, validateFaceGeometry } from './createFaceFromPoints';
 import { withPreservedComponents } from './componentPreservationSociety';
 
@@ -138,9 +138,18 @@ export default {
     // (eg: when a new polygon overlaps existing ones, we need to replace the
     //  existing polygon's face points with new ones)
     // it's possible for duplicate vertices to sneak in.
+    const spacing = context.rootState.project.grid.spacing;
+
     const replacementVertIds = _.chain(vertices)
       .map((vert) => {
-        const gVert = _.find(geom.vertices, _.pick(vert, ['x', 'y']));
+        // i don't understand what gVert is doing... like... ???
+        // where shorthand... so it's find geom vertices where { x: blah, y: blah }
+        const gVert = geom.vertices.find((v) => {
+          const dist = distanceBetweenPoints(v, vert);
+          console.log('dist', dist)
+          if (dist > spacing / 20) return true;
+          return false;
+        }); // <-- this bad boy right here. Find by distance < epsilon(dependent on spacing)
         if (!gVert) return null; // this vertex doesn't match any existing ones
         if (vert.id === gVert.id) return null; // this vertex already exists
         return [vert.id, gVert.id]; // this vertex *would* be a dup, so use the existing one
@@ -148,6 +157,8 @@ export default {
       .compact()
       .fromPairs()
       .value();
+
+    console.log('replacement verts', replacementVertIds)
 
     vertices.forEach((v) => {
       v.id = replacementVertIds[v.id] || v.id;

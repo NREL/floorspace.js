@@ -21,10 +21,8 @@ export function smallestPairwiseVertDist(verts) {
     cartesianProductOf(verts, verts)
       .filter(([v1, v2]) => v1.id !== v2.id)
       .map(([v1, v2]) => {
-        console.log(JSON.stringify(v1), JSON.stringify(v2))
         return distanceBetweenPoints(v1, v2);
       }));
-  console.log('smallest', smallest)
   return smallest;
 }
 /*
