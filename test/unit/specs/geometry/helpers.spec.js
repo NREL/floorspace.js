@@ -470,7 +470,6 @@ describe('setOperation', () => {
   });
 });
 
-// HERE
 describe('splittingVerticesForEdgeId', () => {
   it('respects the spacing option', () => {
     /*
@@ -486,8 +485,8 @@ describe('splittingVerticesForEdgeId', () => {
     f +---------+ g
 */
     const splittingVertices = helpers.splittingVerticesForEdgeId('ce', geometryExamples.smallGeometry, 0.2);
-    assert(splittingVertices.length === 1, 'should find one splitting vertex');
-    assertEqual(splittingVertices[0], { id: 'd', x: 0.000004, y: 0.00001 });
+    assert(splittingVertices.length === 1, `should find one splitting vertex, but found ${splittingVertices.length}`);
+    assertEqual(splittingVertices[0], { id: 'd', x: 4.1006, y: 10.1006 });
   });
 });
 

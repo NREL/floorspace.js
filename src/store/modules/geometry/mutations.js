@@ -1,6 +1,4 @@
 import _ from 'lodash';
-import createFaceFromPoints, { eraseSelection, newGeometriesOfOverlappedFaces, validateFaceGeometry, smallestPairwiseVertDist } from './actions/createFaceFromPoints';
-
     /*
     * create a new geometry set, face, edge, or vertex in the data store
     */
@@ -130,7 +128,7 @@ export function ensureVertsExist(state, { geometry_id, vertices }) {
 export function ensureEdgesExist(state, { geometry_id, edges }) {
   const geometry = _.find(state, { id: geometry_id });
   edges.forEach(e =>
-    _.find(geometry.edges, { id: e.id }) || geometry.edges.push(e)
+    _.find(geometry.edges, { id: e.id }) || geometry.edges.push(e),
   );
 }
 

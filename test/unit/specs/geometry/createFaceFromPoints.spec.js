@@ -15,7 +15,7 @@ import {
   preserveRectangularityGeometry, simpleGeometry, smallGeometry, emptyGeometry, neg5by5Rect, emptyEdgesProblem,
 } from './examples';
 
-describe('validateFaceGeometry', () => {
+xdescribe('validateFaceGeometry', () => {
   it('preserves rectangularity when possible (issue #72 )', () => {
     // https://trello-attachments.s3.amazonaws.com/58d428743111af1d0a20cf28/598b63629862dc7224f4df8c/1bc285908438ddc20e64c55752191727/capture.png
     const
@@ -171,7 +171,7 @@ describe('validateFaceGeometry', () => {
   });
 });
 
-describe('edgesToSplit:simpleGeometry', () => {
+xdescribe('edgesToSplit:simpleGeometry', () => {
   /*
 
       a +---+ b
@@ -210,7 +210,7 @@ describe('edgesToSplit:simpleGeometry', () => {
     assert(edges.length === 1, 'only one edge should be split');
 
     const [{ edgeToDelete, newEdges, replaceEdgeRefs }] = edges;
-    assert(edgeToDelete === 'ce', 'that edge should be "ce"');
+    assert(edgeToDelete === 'ce', `that edge should be "ce" but was ${edgeToDelete}`);
 
     const replaceCE = _.find(replaceEdgeRefs, { face_id: 'bottom', edge_id: 'ce' });
     assert(replaceCE);
@@ -326,10 +326,10 @@ describe('edgesToSplit:smallGeometry', () => {
   );
 
   it('splits an edge in a simple case', () => {
-    assert(edges.length === 1, 'only one edge should be split');
+    assert(edges.length === 1, `only one edge should be split but ${edges.length} were`);
 
     const [{ edgeToDelete, newEdges, replaceEdgeRefs }] = edges;
-    assert(edgeToDelete === 'ce', 'that edge should be "ce"');
+    assert(edgeToDelete === 'ce', `that edge should be "ce" but was ${edgeToDelete}`);
 
     const replaceCE = _.find(replaceEdgeRefs, { face_id: 'bottom', edge_id: 'ce' });
     assert(replaceCE);
@@ -395,7 +395,7 @@ describe('edgesToSplit:smallGeometry', () => {
 });
 
 
-describe('newGeometriesOfOverlappedFaces', () => {
+xdescribe('newGeometriesOfOverlappedFaces', () => {
 
   const
     geometry = helpers.normalize({

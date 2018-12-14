@@ -142,9 +142,7 @@ export default {
 
     const replacementVertIds = _.chain(vertices)
       .map((vert) => {
-        // const gVert = _.find(geom.vertices, _.pick(vert, ['x', 'y']));// <-- this bad boy right here. Find by distance < epsilon(dependent on spacing)
         const gVert = _.find(geom.vertices, v => distanceBetweenPoints(v, vert) < (spacing / 20));
-        console.log(gVert);
         if (!gVert) return null; // this vertex doesn't match any existing ones
         if (vert.id === gVert.id) return null; // this vertex already exists
         return [vert.id, gVert.id]; // this vertex *would* be a dup, so use the existing one
@@ -152,9 +150,7 @@ export default {
       .compact()
       .fromPairs()
       .value();
-      console.log(JSON.stringify(replacementVertIds))
-      console.log(JSON.stringify(vertices))
-    // changed below because it was upset about mutating state outside of mutations...
+
     const updatedVertices = vertices.map(v => ({
       ...v,
       id: replacementVertIds[v.id] || v.id,

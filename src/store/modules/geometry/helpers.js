@@ -120,6 +120,7 @@ export function unitVector(p1, p2) {
  * return the coordinates of the projection of the point onto the line
  */
 export function projectionOfPointToLine(point, line) {
+  debugger;
   const { p1: { x: x1, y: y1 }, p2: { x: x2, y: y2 } } = line;
   const
     A = point.x - x1,
@@ -301,27 +302,28 @@ const helpers = {
       const edge = geometry.edges.find(e => e.id === edge_id),
         edgeV1 = this.vertexForId(edge.v1, geometry),
         edgeV2 = this.vertexForId(edge.v2, geometry);
-
         // look up all vertices touching the edge, ignoring the edge's endpoints
-      return geometry.vertices.filter((vertex) => {
+      const verticesToSplit = geometry.vertices.filter((vertex) => {
         const
           vertexIsEndpointById = edge.v1 === vertex.id || edge.v2 === vertex.id,
           vertexIsLeftEndpointByValue = edgeV1.x === vertex.x && edgeV1.y === vertex.y,
           vertexIsRightEndpointByValue = edgeV2.x === vertex.x && edgeV2.y === vertex.y,
           vertexIsEndpoint = vertexIsEndpointById || vertexIsLeftEndpointByValue || vertexIsRightEndpointByValue;
+
         if (vertexIsEndpoint) {
           return false;
         }
+
         // vertex is not an endpoint, consider for splitting
         const projection = this.projectionOfPointToLine(vertex, {
             p1: edgeV1,
             p2: edgeV2,
         });
-        // the setup below produces the fewest errors but i'm just not sure where to go from here. 
         const distBetween = this.distanceBetweenPoints(vertex, projection);
         const shouldSplit = distBetween <= spacing / 20;
         return shouldSplit;
       });
+      return verticesToSplit;
     },
 
   projectionOfPointToLine,
