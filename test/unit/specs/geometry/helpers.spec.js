@@ -488,9 +488,9 @@ describe('splittingVerticesForEdgeId', () => {
     assert(splittingVertices.length === 1, `should find one splitting vertex, but found ${splittingVertices.length}`);
     assertEqual(splittingVertices[0], { id: 'd', x: 0.4, y: 1 });
 
-    const splittingSmallerVertices = helpers.splittingVerticesForEdgeId('ce', geometryExamples.evenSmallerGeometry, 0.1);
+    const splittingSmallerVertices = helpers.splittingVerticesForEdgeId('ce', geometryExamples.evenSmallerGeometry, 0.01);
     assert(splittingSmallerVertices.length === 1, `should find one splitting vertex, but found ${splittingSmallerVertices.length}`);
-    assertEqual(splittingVertices[0], { id: 'd', x: 0.004, y: 0.001 });
+    assertEqual(splittingSmallerVertices[0], { id: 'd', x: 0.04, y: 0.1 });
   });
 });
 

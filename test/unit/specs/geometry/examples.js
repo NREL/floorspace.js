@@ -87,12 +87,12 @@ export const evenSmallerGeometry = {
   id: 1,
   vertices: [
     { id: 'f', x: 0, y: 0 },
-    { id: 'g', x: .0010, y: 0 },
-    { id: 'c', x: 0, y: .0010 },
-    { id: 'd', x: .004, y: .0010 },
-    { id: 'e', x: .0010, y: .0010 },
-    { id: 'a', x: 0, y: .0016 },
-    { id: 'b', x: .004, y: .0016 },
+    { id: 'g', x: 0.1, y: 0 },
+    { id: 'c', x: 0, y: 0.1 },
+    { id: 'd', x: 0.04, y: 0.1 },
+    { id: 'e', x: 0.1, y: 0.1 },
+    { id: 'a', x: 0, y: 0.16 },
+    { id: 'b', x: 0.04, y: 0.16 },
   ],
   edges: [
     'ab', 'ac', 'bd', 'cd', 'eg', 'gf', 'fc', 'ce',

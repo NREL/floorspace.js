@@ -408,13 +408,13 @@ describe('edgesToSplit:evenSmallerGeometry', () => {
 
   */
   const
-    edges = edgesToSplit(evenSmallerGeometry, 0.1),
+    edges = edgesToSplit(evenSmallerGeometry, 0.01),
     newEvenSmallerGeometry = _.cloneDeep(evenSmallerGeometry),
     state = [newEvenSmallerGeometry];
 
   // modify our copy of geometry to see what it will look like after mutations
   edges.forEach(
-    payload => splitEdge(state, { geometry_id: evenSmallerGeometry.id, ...payload }), 0.001);
+    payload => splitEdge(state, { geometry_id: evenSmallerGeometry.id, ...payload }), 0.01);
 
   const
     oldGeom = helpers.denormalize(evenSmallerGeometry),
