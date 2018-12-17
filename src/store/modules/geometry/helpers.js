@@ -120,7 +120,6 @@ export function unitVector(p1, p2) {
  * return the coordinates of the projection of the point onto the line
  */
 export function projectionOfPointToLine(point, line) {
-  debugger;
   const { p1: { x: x1, y: y1 }, p2: { x: x2, y: y2 } } = line;
   const
     A = point.x - x1,
