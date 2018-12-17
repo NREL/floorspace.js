@@ -121,7 +121,7 @@ export function replaceEdgeRef(state, payload) {
 export function ensureVertsExist(state, { geometry_id, vertices }) {
   const geometry = _.find(state, { id: geometry_id });
   vertices.forEach(v =>
-    _.find(geometry.vertices, { id: v.id }) || geometry.vertices.push(v)
+    _.find(geometry.vertices, { id: v.id }) || geometry.vertices.push(v),
   );
 }
 

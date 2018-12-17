@@ -4,27 +4,6 @@ import geometryHelpers, { distanceBetweenPoints } from './../helpers';
 import modelHelpers from './../../models/helpers';
 import { uniq, dropConsecutiveDups, allPairs } from './../../../../utilities';
 import { withPreservedComponents } from './componentPreservationSociety';
-
-
-function cartesianProductOf(...args) {
-  return _.reduce(args, function (a, b) {
-    return _.flatten(_.map(a, function (x) {
-      return _.map(b, function (y) {
-        return x.concat([y]);
-      });
-    }), true);
-  }, [[]]);
-}
-
-export function smallestPairwiseVertDist(verts) {
-  const smallest =  _.min(
-    cartesianProductOf(verts, verts)
-      .filter(([v1, v2]) => v1.id !== v2.id)
-      .map(([v1, v2]) => {
-        return distanceBetweenPoints(v1, v2);
-      }));
-  return smallest;
-}
 /*
  * create a face and associated edges and vertices from an array of points
  * associate the face with the space or shading included in the payload
