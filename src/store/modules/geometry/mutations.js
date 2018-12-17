@@ -14,21 +14,23 @@ export function trimGeometry(state, { geometry_id, vertsReferencedElsewhere }) {
       ...(vertsReferencedElsewhere || []),
       ...vertsOnEdges,
     ]);
-  geometry.edges = geometry.edges.filter(e => edgesInUse.has(e.id));
-  geometry.vertices = geometry.vertices.filter(v => verticesInUse.has(v.id));
-  const missingEdges = _.difference([...edgesInUse], _.map(geometry.edges, 'id'));
+  const newEdges = geometry.edges.filter(e => edgesInUse.has(e.id));
+  const newVerts = geometry.vertices.filter(v => verticesInUse.has(v.id));
+  const missingEdges = _.difference([...edgesInUse], _.map(newEdges, 'id'));
   if (missingEdges.length) {
     console.error('An edge is referenced by a face, but does not exist!', JSON.stringify(geometry));
   }
-  const missingVerts = _.difference(vertsOnEdges, _.map(geometry.vertices, 'id'));
+  const missingVerts = _.difference(vertsOnEdges, _.map(newVerts, 'id'));
   if (missingVerts.length) {
     console.error('A vertex is referenced by a face, but does not exist!', JSON.stringify(geometry));
   }
+  geometry.vertices = newVerts;
+  geometry.edges = newEdges;
 }
 
 export function initGeometry(state, payload) {
-      const { geometry } = payload;
-      state.push(geometry);
+  const { geometry } = payload;
+  state.push(geometry);
 }
 
 export function createVertex(state, payload) {
@@ -47,7 +49,6 @@ export function createFace(state, payload) {
 export function destroyGeometry(state, payload) {
         // id of the object to be destroyed
         const { id } = payload;
-
         // loop through all geometry sets in the store and check if they contain the object
         // break from the loop if the object is found
         for (var i = 0; i < state.length; i++) {
@@ -60,6 +61,13 @@ export function destroyGeometry(state, payload) {
                 break;
             } else if (~g.edges.map(e => e.id).indexOf(id)) {
                 g.edges.splice(g.edges.findIndex(e => e.id === id), 1);
+                g.faces.forEach((face) => {
+                  face.edgeRefs.forEach((edgeRef) => {
+                    if (id === edgeRef.edge_id) {
+                      face.edgeRefs.splice(face.edgeRefs.findIndex(r => r.edge_id === id), 1);
+                    }
+                  });
+                });
                 break;
             } else if (~g.vertices.map(v => v.id).indexOf(id)) {
                 g.vertices.splice(g.vertices.findIndex(v => v.id === id), 1);
@@ -100,7 +108,6 @@ export function replaceEdgeRef(state, payload) {
     geometry = state.find(g => g.id === geometry_id),
     face = geometry.faces.find(f => f.id === face_id),
     edgeRefIx = _.findIndex(face.edgeRefs, { edge_id });
-
   face.edgeRefs.splice(
     edgeRefIx, 1, // remove existing edge
     // replacing it with these ones, in the same direction.
@@ -111,18 +118,17 @@ export function replaceEdgeRef(state, payload) {
   );
 }
 
-
 export function ensureVertsExist(state, { geometry_id, vertices }) {
   const geometry = _.find(state, { id: geometry_id });
   vertices.forEach(v =>
-    _.find(geometry.vertices, { id: v.id }) || geometry.vertices.push(v)
+    _.find(geometry.vertices, { id: v.id }) || geometry.vertices.push(v),
   );
 }
 
 export function ensureEdgesExist(state, { geometry_id, edges }) {
   const geometry = _.find(state, { id: geometry_id });
   edges.forEach(e =>
-    _.find(geometry.edges, { id: e.id }) || geometry.edges.push(e)
+    _.find(geometry.edges, { id: e.id }) || geometry.edges.push(e),
   );
 }
 
@@ -132,12 +138,12 @@ export function splitEdge(state, { geometry_id, edgeToDelete, newEdges, replaceE
   destroyGeometry(state, { id: edgeToDelete });
 }
 
-
 export function replaceFacePoints(state, { geometry_id, vertices, edges, face_id }) {
   const geometry = _.find(state, { id: geometry_id });
-  ensureVertsExist(state, { geometry_id, vertices });
-  ensureEdgesExist(state, { geometry_id, edges });
 
+  ensureVertsExist(state, { geometry_id, vertices });
+
+  ensureEdgesExist(state, { geometry_id, edges, vertices });
   let face = _.find(geometry.faces, { id: face_id });
   if (!face) {
     face = { id: face_id, edgeRefs: [] };

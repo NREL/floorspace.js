@@ -730,7 +730,8 @@ export function drawWall() {
 
     wall
       .attr('d', d => line([d.start, d.end]))
-      .attr('class', d => `wall ${d.interior ? 'interior' : 'exterior'}`);
+      .attr('class', d => `wall ${d.interior ? 'interior' : 'exterior'}`)
+      .attr('data-edge-id', d => d.id);
   }
 
   chart.xScale = function (_) {

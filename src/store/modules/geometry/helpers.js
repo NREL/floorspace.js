@@ -216,16 +216,21 @@ const helpers = {
       f1PathsOffsetted = new ClipperLib.Paths(),
       f2PathsOffsetted = new ClipperLib.Paths();
 
+    function scaleUpPathWithoutRound(paths, scale) {
+      paths.forEach((points) => {
+        Object.keys(points).forEach(key => points[key] *= scale);
+      });
+    }
+    // scale paths up before performing operation
+    scaleUpPathWithoutRound(f1Path, this.clipScale);
+    scaleUpPathWithoutRound(f2Path, this.clipScale);
+
     offset.AddPaths([f1Path], ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
     offset.Execute(f1PathsOffsetted, this.offset);
     offset.Clear();
     offset.AddPaths([f2Path], ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
     offset.Execute(f2PathsOffsetted, this.offset);
     offset.Clear();
-
-    // scale paths up before performing operation
-    ClipperLib.JS.ScaleUpPaths(f1PathsOffsetted, this.clipScale);
-    ClipperLib.JS.ScaleUpPaths(f2PathsOffsetted, this.clipScale);
 
     const
       cpr = new ClipperLib.Clipper(),
@@ -245,14 +250,12 @@ const helpers = {
 
     cpr.Execute(operation, resultPathsOffsetted, ClipperLib.PolyFillType.pftEvenOdd, ClipperLib.PolyFillType.pftEvenOdd);
 
-    // scale down path
-    ClipperLib.JS.ScaleDownPaths(resultPathsOffsetted, this.clipScale);
-
     // undo offset on resulting path
     const resultPaths = new ClipperLib.Paths();
     offset.AddPaths(resultPathsOffsetted, ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
     offset.Execute(resultPaths, -this.offset);
-
+    // scale down path
+    ClipperLib.JS.ScaleDownPaths(resultPaths, this.clipScale);
     // if multiple paths were created, a face has been split and the operation should fail
     if (resultPaths.length === 1) {
       // translate into points
@@ -294,27 +297,34 @@ const helpers = {
     /*
      * return the set of saved vertices directly on an edge, not including edge endpoints
      */
-    splittingVerticesForEdgeId(edge_id, geometry) {
-        const edge = geometry.edges.find(e => e.id === edge_id),
-            edgeV1 = this.vertexForId(edge.v1, geometry),
-            edgeV2 = this.vertexForId(edge.v2, geometry);
+  splittingVerticesForEdgeId(edge_id, geometry, spacing) {
+    const edge = geometry.edges.find(e => e.id === edge_id),
+      edgeV1 = this.vertexForId(edge.v1, geometry),
+      edgeV2 = this.vertexForId(edge.v2, geometry);
+      // look up all vertices touching the edge, ignoring the edge's endpoints
+    const verticesToSplit = geometry.vertices.filter((vertex) => {
+      const
+        vertexIsEndpointById = edge.v1 === vertex.id || edge.v2 === vertex.id,
+        vertexIsLeftEndpointByValue = edgeV1.x === vertex.x && edgeV1.y === vertex.y,
+        vertexIsRightEndpointByValue = edgeV2.x === vertex.x && edgeV2.y === vertex.y,
+        vertexIsEndpoint = vertexIsEndpointById || vertexIsLeftEndpointByValue || vertexIsRightEndpointByValue;
 
-        // look up all vertices touching the edge, ignoring the edge's endpoints
-        return geometry.vertices.filter((vertex) => {
-            if ((edge.v1 !== vertex.id && edge.v2 !== vertex.id) &&
-				!(edgeV1.x === vertex.x && edgeV1.y === vertex.y) &&
-				!(edgeV2.x === vertex.x && edgeV2.y === vertex.y)
-			) {
-                const projection = this.projectionOfPointToLine(vertex, {
-                    p1: edgeV1,
-                    p2: edgeV2
-                });
-                return this.distanceBetweenPoints(vertex, projection) <= 1 / this.clipScale;
-            }
-        });
-    },
+      if (vertexIsEndpoint) {
+        return false;
+      }
+      // vertex is not an endpoint, consider for splitting
+      const projection = this.projectionOfPointToLine(vertex, {
+        p1: edgeV1,
+        p2: edgeV2,
+      });
+      const distBetween = this.distanceBetweenPoints(vertex, projection);
+      const shouldSplit = distBetween <= spacing / 20;
+      return shouldSplit;
+    });
+    return verticesToSplit;
+  },
 
-    projectionOfPointToLine,
+  projectionOfPointToLine,
 
     /*
      * given two points return the distance between them

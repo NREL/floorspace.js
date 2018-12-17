@@ -56,7 +56,6 @@ describe('ringEquals', () => {
     );
   });
 
-
   it('permits closed rings (start == end)', () => {
     assertProperty(
       gen.object({
@@ -432,6 +431,22 @@ describe('setOperation', () => {
       });
   });
 
+  it('calculates correctly when spacing is a decimal', () => {
+    const polygon = [{ x: -209.60000000000002, y: 21.8 },
+      { x: -187.8, y: 21.8 },
+      { x: -187.8, y: 13 }, { x: -209.60000000000002, y: 13 },
+      { x: -209.60000000000002, y: 21.8 }];
+
+    const newPolygon = [{ x: -202.4, y: 21.8 },
+      { x: -194, y: 21.8 }, { x: -194, y: 18.2 },
+      { x: -202.4, y: 18.2 }];
+
+    const points = helpers.setOperation('intersection', polygon, newPolygon);
+    assert(points);
+    const solution = [{ x: -194, y: 21.8 }, { x: -202.4, y: 21.8 }, { x: -202.4, y: 18.2 }, { x: -194, y: 18.2 }];
+    assertEqual(points, solution);
+  });
+
   it('does not allow holes', () => {
     assertProperty(
       genRegularPolygonPieces,
@@ -452,6 +467,30 @@ describe('setOperation', () => {
         assertEqual(difference.error, 'no holes');
       },
     );
+  });
+});
+
+describe('splittingVerticesForEdgeId', () => {
+  it('respects the spacing option for small geometry', () => {
+    /*
+    using small geometry, splitting vertices for edge ce
+    should include only 'd'.
+    a +---+ b
+      |   |
+      |   |
+    c +---+-----+ e
+      |   d     |
+      |         |
+      |         |
+    f +---------+ g
+*/
+    const splittingVertices = helpers.splittingVerticesForEdgeId('ce', geometryExamples.smallGeometry, 0.1);
+    assert(splittingVertices.length === 1, `should find one splitting vertex, but found ${splittingVertices.length}`);
+    assertEqual(splittingVertices[0], { id: 'd', x: 0.4, y: 1 });
+
+    const splittingSmallerVertices = helpers.splittingVerticesForEdgeId('ce', geometryExamples.evenSmallerGeometry, 0.01);
+    assert(splittingSmallerVertices.length === 1, `should find one splitting vertex, but found ${splittingSmallerVertices.length}`);
+    assertEqual(splittingSmallerVertices[0], { id: 'd', x: 0.04, y: 0.1 });
   });
 });
 

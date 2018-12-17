@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import factory from './../factory';
-import geometryHelpers from './../helpers';
+import geometryHelpers, { distanceBetweenPoints } from './../helpers';
 import createFaceFromPoints, { eraseSelection, newGeometriesOfOverlappedFaces, validateFaceGeometry } from './createFaceFromPoints';
 import { withPreservedComponents } from './componentPreservationSociety';
 
@@ -138,9 +138,11 @@ export default {
     // (eg: when a new polygon overlaps existing ones, we need to replace the
     //  existing polygon's face points with new ones)
     // it's possible for duplicate vertices to sneak in.
+    const spacing = context.rootState.project.grid.spacing;
+
     const replacementVertIds = _.chain(vertices)
       .map((vert) => {
-        const gVert = _.find(geom.vertices, _.pick(vert, ['x', 'y']));
+        const gVert = _.find(geom.vertices, v => distanceBetweenPoints(v, vert) < (spacing / 20));
         if (!gVert) return null; // this vertex doesn't match any existing ones
         if (vert.id === gVert.id) return null; // this vertex already exists
         return [vert.id, gVert.id]; // this vertex *would* be a dup, so use the existing one
@@ -149,26 +151,27 @@ export default {
       .fromPairs()
       .value();
 
-    vertices.forEach((v) => {
-      v.id = replacementVertIds[v.id] || v.id;
-    });
-    edges.forEach((e) => {
-      e.v1 = replacementVertIds[e.v1] || e.v1;
-      e.v2 = replacementVertIds[e.v2] || e.v2;
-    });
+    const updatedVertices = vertices.map(v => ({
+      ...v,
+      id: replacementVertIds[v.id] || v.id,
+    }));
+    const updatedEdges = edges.map(e => ({
+      ...e,
+      v1: replacementVertIds[e.v1] || e.v1,
+      v2: replacementVertIds[e.v2] || e.v2,
+    }));
 
-    edges.forEach((edge) => {
+    updatedEdges.forEach((edge) => {
       const gEdge = _.find(geom.edges, { v1: edge.v1, v2: edge.v2 }) || _.find(geom.edges, { v1: edge.v2, v2: edge.v1 });
       if (!gEdge) return; // this edge doesn't match any existing ones
       if (edge.id === gEdge.id) return; // this edge already exists
       edge.id = gEdge.id;
       edge.reverse = (gEdge.v1 !== edge.v1);
     });
-
     context.commit('replaceFacePoints', {
       geometry_id,
-      vertices,
-      edges,
+      vertices: updatedVertices,
+      edges: updatedEdges,
       face_id,
     });
   },
