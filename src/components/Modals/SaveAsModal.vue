@@ -35,7 +35,13 @@ export default {
   methods: {
     downloadFile: function() {
       const a = document.createElement('a');
-      a.setAttribute('href', `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(this.dataToDownload))}`);
+      const blob = new Blob(
+        [JSON.stringify(this.dataToDownload)],
+        {
+          type: 'text/plain;charset=utf-8',
+        },
+      );
+      a.setAttribute('href', URL.createObjectURL(blob));
       a.setAttribute('download', this.$refs.downloadName.value + '.json');
       a.click();
 
