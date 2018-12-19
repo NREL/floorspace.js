@@ -102,6 +102,6 @@ export default {
   },
 
   modifyGround(state, { key, value }) {
-    state.config.ground[key] = value;
+    state.ground[key] = value;
   },
 };
