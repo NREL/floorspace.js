@@ -4,7 +4,6 @@ import geometryHelpers, { distanceBetweenPoints } from './../helpers';
 import modelHelpers from './../../models/helpers';
 import { uniq, dropConsecutiveDups, allPairs } from './../../../../utilities';
 import { withPreservedComponents } from './componentPreservationSociety';
-
 /*
  * create a face and associated edges and vertices from an array of points
  * associate the face with the space or shading included in the payload
@@ -56,6 +55,7 @@ export default function createFaceFromPoints(context, payload) {
   }
 
   withPreservedComponents(context, currentStoryGeometry.id, () => {
+
     newGeoms.forEach(newGeom => context.dispatch('replaceFacePoints', newGeom));
 
     // save the face and its descendent geometry
@@ -148,16 +148,13 @@ export function eraseSelection(points, context) {
 */
 function storeFace({ vertices, edges }, target, context, existingFace) {
   const currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'];
-
   const face = existingFace || new factory.Face([]);
-
   context.dispatch('replaceFacePoints', {
     face_id: face.id,
     geometry_id: currentStoryGeometry.id,
     vertices,
     edges,
   });
-
   context.dispatch(target.type === 'space' ? 'models/updateSpaceWithData' : 'models/updateShadingWithData', {
     [target.type]: target,
     face_id: face.id,
@@ -170,7 +167,6 @@ export function findExistingEdge(v1, v2, edges) {
   const sharedEdge = edges.find(e => (
     (e.v1 === v1.id && e.v2 === v2.id) ||
     (e.v2 === v1.id && e.v1 === v2.id)));
-
   // if a shared edge exists, check if its direction matches the edge direction required for the face being created
   return sharedEdge && {
     ...sharedEdge,
@@ -363,6 +359,7 @@ export function validateFaceGeometry(points, currentStoryGeometry) {
 }
 
 function edgesFromVerts(verts, existingEdges) {
+
   return _.zip(verts.slice(0, -1), verts.slice(1))
     .map(matchOrCreateEdge(existingEdges));
 }
@@ -370,7 +367,6 @@ function edgesFromVerts(verts, existingEdges) {
 function replacementEdgeRefs(geometry, dyingEdgeId, newEdges) {
   // look up all faces with a reference to the original edge being split
   const affectedFaces = geometryHelpers.facesForEdgeId(dyingEdgeId, geometry);
-
   // remove reference to old edge and add references to the new edges
   const replaceEdgeRefs = affectedFaces.map((affectedFace) => {
     const dyingEdgeReversed = _.find(affectedFace.edgeRefs, { edge_id: dyingEdgeId }).reverse;
@@ -400,14 +396,14 @@ function replacementEdgeRefs(geometry, dyingEdgeId, newEdges) {
       newEdges: replacementEdges,
     };
   });
-
+  
   return replaceEdgeRefs;
 }
 
-export function edgesToSplit(geometry) {
+export function edgesToSplit(geometry, spacing) {
   const priorIterationEdges = [];
   return _.compact(geometry.edges.map((edge) => {
-    let splittingVertices = geometryHelpers.splittingVerticesForEdgeId(edge.id, geometry);
+    let splittingVertices = geometryHelpers.splittingVerticesForEdgeId(edge.id, geometry, spacing);
     if (!splittingVertices.length) {
       return false;
     }
@@ -420,13 +416,11 @@ export function edgesToSplit(geometry) {
 
     // add startpoint and endpoint of original edge to splittingVertices array from which new edges will be created
     splittingVertices = [startpoint, ...splittingVertices, endpoint];
-
     // create new edges by connecting the original edge startpoint, ordered splitting vertices, and original edge endpoint
     // eg: startpoint -> SV1, SV1 -> SV2, SV2 -> SV3, SV3 -> endpoint
     const
       newEdges = edgesFromVerts(splittingVertices, [...geometry.edges, ...priorIterationEdges]),
       replaceEdgeRefs = replacementEdgeRefs(geometry, edge.id, newEdges);
-
     // The edges we're recommending don't yet exist, but we'd like to re-use them for future iterations.
     // Otherwise we end up creating two edges when one will do.
     priorIterationEdges.push(...newEdges);
@@ -448,8 +442,8 @@ export function edgesToSplit(geometry) {
 function splitEdges(context) {
   const
     currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'],
-    edgeChanges = edgesToSplit(currentStoryGeometry);
-
+    currentProjectSpacing = context.rootState.project.grid.spacing,
+    edgeChanges = edgesToSplit(currentStoryGeometry, currentProjectSpacing);
   edgeChanges.forEach(payload => context.commit({
     type: 'splitEdge',
     geometry_id: currentStoryGeometry.id,
