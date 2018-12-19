@@ -38,7 +38,7 @@ export default {
       const blob = new Blob(
         [JSON.stringify(this.dataToDownload)],
         {
-          type: 'text/plain;charset=utf-8',
+          type: 'text/json;charset=utf-8',
         },
       );
       a.setAttribute('href', URL.createObjectURL(blob));
