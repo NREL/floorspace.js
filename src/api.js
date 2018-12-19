@@ -38,7 +38,7 @@ window.api = {
     if (config === undefined) {
       config = {}; // eslint-disable-line
     }
-    if (config.snapMode && !_.includes(['grid-strict', 'grid-verts-edges'], config.snapMod)) {
+    if (config.snapMode && !_.includes(['grid-strict', 'grid-verts-edges'], config.snapMode)) {
       throw new Error('unrecognized value for snapMode: ' + config.snapMode + '. expected \'grid-strict\' or \'grid-verts-edges\'');
     }
     window.api.config = _.assign({
