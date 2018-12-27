@@ -9,7 +9,7 @@ import * as d3 from 'd3';
 import polylabel from 'polylabel';
 import _ from 'lodash';
 import { snapTargets, snapWindowToEdge, snapToVertexWithinFace, findClosestEdge, findClosestWindow, gridSnapTargets, vertexSnapTargets } from './snapping';
-import geometryHelpers, { distanceBetweenPoints, fitToAspectRatio } from './../../store/modules/geometry/helpers';
+import geometryHelpers, { distanceBetweenPoints, fitToAspectRatio, projectionOfPointToLine } from './../../store/modules/geometry/helpers';
 import modelHelpers from './../../store/modules/models/helpers';
 
 function ticksInRange(start, stop, spacing) {
@@ -216,6 +216,8 @@ export default {
       gridCoords = d3.mouse(this.$refs.grid),
       gridPoint = { x: gridCoords[0], y: gridCoords[1] },
       snapTarget = this.findSnapTarget(gridPoint);
+
+      console.log('snapTarget', snapTarget)
 
     // if the snapTarget is the origin of the face being drawn in Polygon mode, close the face and don't add a new point
     if (snapTarget.type === 'vertex' && snapTarget.origin && this.currentTool === 'Polygon') {
@@ -871,11 +873,13 @@ export default {
 
     if (this.snapMode === 'grid-verts-edges') {
       const realPoint = this.gridPointToRWU(gridPoint);
-      const gridSpacing = 0.5;
+      console.log('vertex', vertexSnapTargets(this.currentStoryGeometry.vertices, this.spacing, realPoint));
+      console.log('edge', this.snappingEdgeData(realPoint));
+      console.log('grid', gridSnapTargets(this.spacing, realPoint));
       const targets = [
-        ...vertexSnapTargets(this.currentStoryGeometry.vertices, gridSpacing, realPoint),
+        ...vertexSnapTargets(this.currentStoryGeometry.vertices, this.spacing, realPoint),
         ...this.snappingEdgeData(realPoint),
-        ...gridSnapTargets(gridSpacing, realPoint),
+        ...gridSnapTargets(this.spacing, realPoint),
       ].map(
         target => ({
           ...target,
@@ -885,6 +889,7 @@ export default {
         }));
 
       const orderedTargets = _.orderBy(targets, ['dist', 'origin', 'type'], ['asc', 'asc', 'desc']);
+      console.log('orderedTargets', orderedTargets)
       return orderedTargets[0] || {
         type: 'gridpoint',
         ...realPoint,
@@ -1050,95 +1055,90 @@ export default {
 
     // TODO: conditionally combine this list with edges from the next story down if it is visible
     if (this.previousStoryGeometry) {
-      snappableEdges = snappableEdges.concat(JSON.parse(JSON.stringify(this.previousStoryGeometry.edges.map(e => ({
+      snappableEdges = snappableEdges.concat(this.previousStoryGeometry.edges.map(e => ({
         ...e,
-        previous_story: true
-      })))));
+        previous_story: true,
+      })));
     }
 
     if (snappableEdges.length === 0) { return []; }
 
     // find the edge closest to the point being tested
-    const nearestEdge = snappableEdges.reduce((a, b) => {
-      const aStoryGeometry = a.previous_story ? this.previousStoryGeometry : this.currentStoryGeometry,
-      bStoryGeometry = b.previous_story ? this.previousStoryGeometry : this.currentStoryGeometry,
-      // look up vertices associated with edges
-      aV1 = geometryHelpers.vertexForId(a.v1, aStoryGeometry),
-      aV2 = geometryHelpers.vertexForId(a.v2, aStoryGeometry),
+    const distyEdges = _.map(
+      snappableEdges, (edge) => {
+        const
+          aStoryGeometry = edge.previous_story ? this.previousStoryGeometry : this.currentStoryGeometry,
+          // look up vertices associated with edges
+          aV1 = geometryHelpers.vertexForId(edge.v1, aStoryGeometry),
+          aV2 = geometryHelpers.vertexForId(edge.v2, aStoryGeometry),
+          // project point being tested to each edge
+          aProjection = projectionOfPointToLine(point, { p1: aV1, p2: aV2 }),
 
-      bV1 = geometryHelpers.vertexForId(b.v1, bStoryGeometry),
-      bV2 = geometryHelpers.vertexForId(b.v2, bStoryGeometry),
+          // look up distance between projection and point being tested
+          aDist = distanceBetweenPoints(aProjection, point);
+        return {
+          ...edge,
+          projection: aProjection,
+          dist: aDist,
+          v1Coords: aV1,
+          V2Coords: aV2,
+        };
+      });
+    const nearestEdge = _.minBy(distyEdges, 'dist');
 
-      // project point being tested to each edge
-      aProjection = geometryHelpers.projectionOfPointToLine(point, { p1: aV1, p2: aV2 }),
-      bProjection = geometryHelpers.projectionOfPointToLine(point, { p1: bV1, p2: bV2 }),
+    // // look up vertices associated with nearest edge
+    // const nearestEdgeStoryGeometry = nearestEdge.previous_story ? this.previousStoryGeometry : this.currentStoryGeometry;
+    // const nearestEdgeV1 = geometryHelpers.vertexForId(nearestEdge.v1, nearestEdgeStoryGeometry);
+    // const nearestEdgeV2 = geometryHelpers.vertexForId(nearestEdge.v2, nearestEdgeStoryGeometry);
+    // // take the projection of the cursor to the edge
+    // // check if the angle of the segment defined by the cursor and projection is < the angle snap tolerance
+    // const snappableAngles = [-180, -90, 0, 90, 180];
+    // // angle between projection and mouse (degrees)
+    // const thetaDeg = Math.atan2(point.y - nearestEdge.projection.y, point.x - nearestEdge.projection.x)
+    // * (180 / Math.PI);
 
-      // look up distance between projection and point being tested
-      aDist = geometryHelpers.distanceBetweenPoints(aProjection, point),
-      bDist = geometryHelpers.distanceBetweenPoints(bProjection, point);
-
-      // return data for the edge with the closest projection to the point being tested
-      return aDist < bDist ? a : b;
-    });
-
-    // look up vertices associated with nearest edge
-    const nearestEdgeStoryGeometry = nearestEdge.previous_story ? this.previousStoryGeometry : this.currentStoryGeometry;
-    const nearestEdgeV1 = geometryHelpers.vertexForId(nearestEdge.v1, nearestEdgeStoryGeometry);
-    const nearestEdgeV2 = geometryHelpers.vertexForId(nearestEdge.v2, nearestEdgeStoryGeometry);
-
-    // project point being tested to nearest edge
-    var projection = geometryHelpers.projectionOfPointToLine(point, { p1: nearestEdgeV1, p2: nearestEdgeV2 });
-
-    // look up distance between projection and point being tested
-    const dist = this.distanceBetweenPoints(projection, point);
-    // take the projection of the cursor to the edge
-    // check if the angle of the segment defined by the cursor and projection is < the angle snap tolerance
-    const snappableAngles = [-180, -90, 0, 90, 180];
-    // angle between projection and mouse (degrees)
-    const thetaDeg = Math.atan2(point.y - projection.y, point.x - projection.x)
-    * (180 / Math.PI);
-
-    // if the original projection is within the snap tolerance of one of the snapping angles
-    // adjust the projection so that it is exactly at the snap angle
-    // snap to -180, -90, 0, 90, 180
-    snappableAngles.some((angle) => {
-      // if the original projection is within the snap tolerance of one of the snapping angles
-      // adjust the projection so that it is exactly at the snap angle
-      if (Math.abs(thetaDeg - angle) < this.$store.getters['project/angleTolerance']) {
-        // infer a line defining the desired projection
-        var adjustedProjectionP1;
-        var adjustedProjectionP2;
-        if (angle === 180 || angle === 0 || angle === -180) {
-          adjustedProjectionP1 = { x: point.x - (2 * dist), y: point.y }
-          adjustedProjectionP2 = { x: point.x + (2 * dist), y: point.y }
-        } else if (angle === 90 || angle === -90) {
-          adjustedProjectionP1 = { x: point.x, y: point.y - (2 * dist) }
-          adjustedProjectionP2 = { x: point.x, y: point.y + (2 * dist) }
-        }
-        // adjust the projection to be the intersection of the desired projection line and the nearest edge
-        if (geometryHelpers.ptsAreCollinear(adjustedProjectionP1, nearestEdgeV1, adjustedProjectionP2)) {
-          projection = nearestEdgeV1;
-        } else if (geometryHelpers.ptsAreCollinear(adjustedProjectionP1, nearestEdgeV2, adjustedProjectionP2)) {
-          projection = nearestEdgeV2;
-        } else {
-          projection = geometryHelpers.intersectionOfLines(adjustedProjectionP1, adjustedProjectionP2, nearestEdgeV1, nearestEdgeV2);
-        }
-        return true;
-      }
-      return false;
-    });
+    // // if the original projection is within the snap tolerance of one of the snapping angles
+    // // adjust the projection so that it is exactly at the snap angle
+    // // snap to -180, -90, 0, 90, 180
+    // snappableAngles.some((angle) => {
+    //   // if the original projection is within the snap tolerance of one of the snapping angles
+    //   // adjust the projection so that it is exactly at the snap angle
+    //   if (Math.abs(thetaDeg - angle) < this.$store.getters['project/angleTolerance']) {
+    //     // infer a line defining the desired projection
+    //     var adjustedProjectionP1;
+    //     var adjustedProjectionP2;
+    //     if (angle === 180 || angle === 0 || angle === -180) {
+    //       adjustedProjectionP1 = { x: point.x - (2 * nearestEdge.dist), y: point.y }
+    //       adjustedProjectionP2 = { x: point.x + (2 * nearestEdge.dist), y: point.y }
+    //     } else if (angle === 90 || angle === -90) {
+    //       adjustedProjectionP1 = { x: point.x, y: point.y - (2 * nearestEdge.dist) }
+    //       adjustedProjectionP2 = { x: point.x, y: point.y + (2 * nearestEdge.dist) }
+    //     }
+    //     // adjust the projection to be the intersection of the desired projection line and the nearest edge
+    //     if (geometryHelpers.ptsAreCollinear(adjustedProjectionP1, nearestEdgeV1, adjustedProjectionP2)) {
+    //       projection = nearestEdgeV1;
+    //     } else if (geometryHelpers.ptsAreCollinear(adjustedProjectionP1, nearestEdgeV2, adjustedProjectionP2)) {
+    //       projection = nearestEdgeV2;
+    //     } else {
+    //       projection = geometryHelpers.intersectionOfLines(adjustedProjectionP1, adjustedProjectionP2, nearestEdgeV1, nearestEdgeV2);
+    //     }
+    //     return true;
+    //   }
+    //   return false;
+    // });
 
     // return data for the edge if the projection is within the snap tolerance of the point
-    if (dist < this.$store.getters['project/snapTolerance']) {
-      return {
+    if (nearestEdge.dist < this.$store.getters['project/snapTolerance']) {
+      console.log('dist in edge thing', nearestEdge.dist)
+      return [{
         snappingEdge: nearestEdge,
         dist: nearestEdge.dist,
         type: 'edge',
         // projection and snapping edge vertices translated into grid coordinates (to display snapping point and highlight edges)
-        projection,
-        v1GridCoords: nearestEdgeV1,
-        v2GridCoords: nearestEdgeV2,
-      }
+        projection: nearestEdge.projection,
+        v1GridCoords: nearestEdge.v1Coords,
+        v2GridCoords: nearestEdge.V2Coords,
+      }];
     }
     return [0];
   },
