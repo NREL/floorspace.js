@@ -217,8 +217,6 @@ export default {
       gridPoint = { x: gridCoords[0], y: gridCoords[1] },
       snapTarget = this.findSnapTarget(gridPoint);
 
-      console.log('snapTarget', snapTarget)
-
     // if the snapTarget is the origin of the face being drawn in Polygon mode, close the face and don't add a new point
     if (snapTarget.type === 'vertex' && snapTarget.origin && this.currentTool === 'Polygon') {
       this.savePolygonFace();
@@ -892,7 +890,6 @@ export default {
         });
 
       const orderedTargets = _.orderBy(targets, ['dist', 'origin', 'type'], ['asc', 'asc', 'desc']);
-      console.log('orderedTargets', orderedTargets);
       return orderedTargets[0] || {
         type: 'gridpoint',
         ...realPoint,
@@ -1137,7 +1134,6 @@ export default {
 
     // return data for the edge if the projection is within the snap tolerance of the point
     if (nearestEdge.dist < this.$store.getters['project/snapTolerance']) {
-      console.log('dist in edge thing', nearestEdge.dist)
       return [{
         snappingEdge: nearestEdge,
         dist: nearestEdge.dist,
