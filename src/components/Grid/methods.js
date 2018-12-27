@@ -8,7 +8,7 @@
 import * as d3 from 'd3';
 import polylabel from 'polylabel';
 import _ from 'lodash';
-import { snapTargets, snapWindowToEdge, snapToVertexWithinFace, findClosestEdge, findClosestWindow } from './snapping';
+import { snapTargets, snapWindowToEdge, snapToVertexWithinFace, findClosestEdge, findClosestWindow, gridSnapTargets, vertexSnapTargets } from './snapping';
 import geometryHelpers, { distanceBetweenPoints, fitToAspectRatio } from './../../store/modules/geometry/helpers';
 import modelHelpers from './../../store/modules/models/helpers';
 
@@ -869,18 +869,31 @@ export default {
       return this.strictSnapTargets(rwuPoint)[0];
     }
 
-    if (event.shiftKey) {
-      // disable snapping when shift is held down
-      return {
+    if (this.snapMode === 'grid-verts-edges') {
+      const realPoint = this.gridPointToRWU(gridPoint);
+      const gridSpacing = 0.5;
+      const targets = [
+        ...vertexSnapTargets(this.currentStoryGeometry.vertices, gridSpacing, realPoint),
+        ...this.snappingEdgeData(realPoint),
+        ...gridSnapTargets(gridSpacing, realPoint),
+      ].map(
+        target => ({
+          ...target,
+          dist: distanceBetweenPoints(target, realPoint),
+          dx: realPoint.x - target.x,
+          dy: realPoint.y - target.y,
+        }));
+
+      const orderedTargets = _.orderBy(targets, ['dist', 'origin', 'type'], ['asc', 'asc', 'desc']);
+      return orderedTargets[0] || {
         type: 'gridpoint',
-        ...rwuPoint,
+        ...realPoint,
       };
     }
-
     // if snapping only to edges (placing edge components, return either the snapping edge or original point)
     if (snapOnlyToEdges) {
       const snappingEdge = this.snappingEdgeData(rwuPoint);
-      return snappingEdge || {
+      return snappingEdge[0] || {
         type: 'gridpoint',
         ...rwuPoint,
       };
@@ -890,24 +903,20 @@ export default {
     if (snappingVertex) { return snappingVertex; }
 
     const snappingEdge = this.snappingEdgeData(rwuPoint);
-    if (snappingEdge) { return snappingEdge; }
+    if (snappingEdge.length > 0) { return snappingEdge[0]; }
 
     // grid is active and no vertices or edges are within snapping range, calculate the closest grid point to snap to
     if (this.gridVisible) {
-      // offset of the first gridline on each axis
-      const xOffset = +this.axis.x.select('.tick').attr('transform').replace('translate(', '').replace(')', '').split(',')[0],
-      yOffset = +this.axis.y.select('.tick').attr('transform').replace('translate(', '').replace(')', '').split(',')[1],
-
       // spacing between ticks in grid units
-      xTickSpacing = this.rwuToGrid(this.spacing + this.min_x, 'x'),
+      const xTickSpacing = this.rwuToGrid(this.spacing + this.min_x, 'x'),
       // yTickSpacing = this.rwuToGrid(this.spacing + this.min_y, 'y');
-      yTickSpacing = this.rwuToGrid(this.max_y - this.spacing, 'y'); // inverted y axis
+        yTickSpacing = this.rwuToGrid(this.max_y - this.spacing, 'y'); // inverted y axis
 
       // round point RWU coordinates to nearest gridline, adjust by grid offset, add 0.5 grid units to account for width of gridlines
       const snapTarget = {
         type: 'gridpoint',
-        x: this.round(gridPoint.x, this.rwuToGrid(this.spacing + this.min_x, 'x')) + xOffset - 0.5,
-        y: this.round(gridPoint.y, this.rwuToGrid(this.max_y - this.spacing, 'y')) + yOffset - 0.5
+        x: this.round(gridPoint.x, xTickSpacing) - 0.5,
+        y: this.round(gridPoint.y, yTickSpacing) - 0.5,
       };
 
       // pick closest point
@@ -1047,7 +1056,7 @@ export default {
       })))));
     }
 
-    if (!snappableEdges.length) { return null; }
+    if (snappableEdges.length === 0) { return []; }
 
     // find the edge closest to the point being tested
     const nearestEdge = snappableEdges.reduce((a, b) => {
@@ -1131,7 +1140,7 @@ export default {
         v2GridCoords: nearestEdgeV2,
       }
     }
-    return null;
+    return [0];
   },
 
   // ****************** SNAPPING HELPERS ****************** //
