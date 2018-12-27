@@ -280,7 +280,7 @@ export default {
 
 
     // if snapping to an edisting edge or radius, draw a larger point, if snapping to the grid or just displaying the location of the pointer, create a small point
-    if (snapTarget.type === 'edge' || snapTarget.type === 'vertex') {
+    if (snapTarget.type === 'vertex') {
       d3.select('#grid svg')
       .append('ellipse')
       .attr('cx', this.rwuToGrid(ellipsePoint.x, 'x'))
@@ -295,8 +295,8 @@ export default {
       .append('ellipse')
       .attr('cx', this.rwuToGrid(ellipsePoint.x, 'x'))
       .attr('cy', this.rwuToGrid(ellipsePoint.y, 'y'))
-      .attr('rx', 2)
-      .attr('ry', 2)
+      .attr('rx', 3)
+      .attr('ry', 3)
       .classed('gridpoint', true)
       .attr('data-transform-plz', '')
       .attr('vector-effect', 'non-scaling-stroke');
@@ -873,23 +873,26 @@ export default {
 
     if (this.snapMode === 'grid-verts-edges') {
       const realPoint = this.gridPointToRWU(gridPoint);
-      console.log('vertex', vertexSnapTargets(this.currentStoryGeometry.vertices, this.spacing, realPoint));
-      console.log('edge', this.snappingEdgeData(realPoint));
-      console.log('grid', gridSnapTargets(this.spacing, realPoint));
       const targets = [
         ...vertexSnapTargets(this.currentStoryGeometry.vertices, this.spacing, realPoint),
         ...this.snappingEdgeData(realPoint),
         ...gridSnapTargets(this.spacing, realPoint),
+        ...this.polygonOriginPoint(),
       ].map(
-        target => ({
-          ...target,
-          dist: distanceBetweenPoints(target, realPoint),
-          dx: realPoint.x - target.x,
-          dy: realPoint.y - target.y,
-        }));
+        (target) => {
+          const penaltyFactor = (
+            target.type === 'edge' ? 1.4 : 1.0
+          );
+          return ({
+            ...target,
+            dist: penaltyFactor * distanceBetweenPoints(target, realPoint),
+            dx: realPoint.x - target.x,
+            dy: realPoint.y - target.y,
+          });
+        });
 
       const orderedTargets = _.orderBy(targets, ['dist', 'origin', 'type'], ['asc', 'asc', 'desc']);
-      console.log('orderedTargets', orderedTargets)
+      console.log('orderedTargets', orderedTargets);
       return orderedTargets[0] || {
         type: 'gridpoint',
         ...realPoint,
@@ -976,19 +979,24 @@ export default {
     };
   },
 
+  polygonOriginPoint() {
+    if (this.points.length >= 3 && this.currentTool === 'Polygon') {
+      // convert the polygon origin from grid units to real world units before adding it as a snappable vertex
+      return [{
+        ...this.points[0],
+        origin: true, // set a flag to mark the origin
+        type: 'vertex',
+      }];
+    }
+    return [];
+  },
+
   strictSnapTargets(location) {
     const snappableVertices = [
       ...this.currentStoryGeometry.vertices,
       ...(this.previousStoryGeometry ? this.previousStoryGeometry.vertices : []),
+      ...this.polygonOriginPoint(),
     ];
-
-    if (this.points.length >= 3 && this.currentTool === 'Polygon') {
-      // convert the polygon origin from grid units to real world units before adding it as a snappable vertex
-      snappableVertices.push({
-        ...this.points[0],
-        origin: true, // set a flag to mark the origin
-      });
-    }
 
     return snapTargets(snappableVertices, this.spacing, location);
   },
@@ -1138,9 +1146,11 @@ export default {
         projection: nearestEdge.projection,
         v1GridCoords: nearestEdge.v1Coords,
         v2GridCoords: nearestEdge.V2Coords,
+        x: nearestEdge.projection.x,
+        y: nearestEdge.projection.y,
       }];
     }
-    return [0];
+    return [0]; // ????
   },
 
   // ****************** SNAPPING HELPERS ****************** //
