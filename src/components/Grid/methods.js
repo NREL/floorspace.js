@@ -1146,7 +1146,7 @@ export default {
         y: nearestEdge.projection.y,
       }];
     }
-    return [0]; // ????
+    return [];
   },
 
   // ****************** SNAPPING HELPERS ****************** //

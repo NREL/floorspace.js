@@ -11,7 +11,6 @@ export function gridSnapTargets(gridSpacing, { x, y }) {
 }
 
 export function vertexSnapTargets(vertices, gridSpacing, location) {
-  if (vertices.length === 0) return [];
   return vertices
     .filter(v => distanceBetweenPoints(location, v) <= gridSpacing)
     .map(v => ({ ...v, type: 'vertex' }));
