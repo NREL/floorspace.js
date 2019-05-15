@@ -7,6 +7,7 @@ function errorMessages(logs) {
     .map('message')
     .reject(log => /Failed to load resource:/.test(log))
     .reject(log => /has been blocked by CORS policy:/.test(log))
+    .reject(log => /site.webmanifest/.test(log))
     .value();
 }
 
