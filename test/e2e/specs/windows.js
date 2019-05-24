@@ -32,7 +32,6 @@ module.exports = {
       .click('[data-object-type="spaces"] .el-table__body-wrapper .destroy')
       .click('[data-object-type="spaces"] .add-new')
       .perform(draw50By50Square)
-      .pause(5000)
       .checkForErrors()
       .end();
   },

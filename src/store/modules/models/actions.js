@@ -59,12 +59,22 @@ export default {
             space: space,
             story: story
         });
-        const face = context.rootGetters['application/currentStoryGeometry'].faces.find(f => f.id === space.face_id);
+        const geom = context.rootGetters['application/currentStoryGeometry'];
+        const face = geom.faces.find(f => f.id === space.face_id);
         if (face) {
+            // delete all windows associated with an edge on that face
+            const edges = geom.edges.filter(edge => face.edgeRefs.map(er => er.edge_id).includes(edge.id));
+            edges.forEach(edge => {
+              const windows = story.windows.filter(w => w.edge_id === edge.id);
+              windows.forEach(window => context.dispatch('destroyWindow', {
+                  story_id: story.id,
+                  object: window,
+                }));
+            });
             // destroy face associated with the space
             context.dispatch('geometry/destroyFaceAndDescendents', {
                 face: face,
-                geometry_id: context.rootGetters['application/currentStoryGeometry'].id
+                geometry_id: geom.id
             }, { root: true });
         }
     },
