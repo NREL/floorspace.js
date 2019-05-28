@@ -5,6 +5,19 @@ const { failOnError, withScales, draw50By50Square, drawSquare } = require('../he
 
 module.exports = {
   tags: ['spaces'],
+  'space at bottom should not cause "No holes" error': (browser) => {
+    withScales(failOnError(browser))
+      .waitForElementVisible('.modal .new-floorplan', 5000)
+      .setFlagOnError()
+      .click('.modal .new-floorplan svg')
+      .getScales() // assigns to client.xScale, client.yScale.
+      // unfortunately, it does so asyncronously, so we have to use .perform()
+      // if we want to access them.
+      .perform(draw50By50Square)
+      .click('[data-object-type="spaces"] .add-new')
+      .perform(drawSquare(-30, 20, 20, -20))
+      .assert.elementCount('.poly:not(.previousStory)', 2);
+  },
   'failOnError causes failure': (browser) => {
     failOnError(browser)
       .url(browser.globals.devServerURL)
