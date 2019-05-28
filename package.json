@@ -15,6 +15,8 @@
     "deploy": "./node_modules/.bin/gh-pages -d dist/ -b gh-pages -r git@github.com:${TRAVIS_REPO_SLUG}.git"
   },
   "dependencies": {
+    "@turf/difference": "^6.0.2",
+    "@turf/helpers": "^6.1.4",
     "d3": "^4.4.0",
     "d3-selection": "^1.1.0",
     "d3-selection-multi": "^1.0.1",
@@ -80,7 +82,7 @@
     "lolex": "^1.4.0",
     "mocha": "^3.1.0",
     "nightwatch": "^0.9.8",
-    "node-sass": "^4.1.1",
+    "node-sass": "^4.12.0",
     "opn": "^4.0.2",
     "ora": "^0.3.0",
     "phantomjs-prebuilt": "^2.1.3",

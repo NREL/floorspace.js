@@ -1,5 +1,7 @@
 import _ from 'lodash';
 import ClipperLib from 'js-clipper';
+const turf = require('@turf/helpers');
+import difference from '@turf/difference';
 import { dropConsecutiveDups } from '../../../utilities';
 
 function ringEqualsWithSameWindingOrder(vs, ws) {
@@ -191,6 +193,27 @@ export function repeatingWindowCenters({ start, end, spacing, width }) {
   }));
 }
 
+function toTurfCoordinatePoints(polygon) {
+  const coords = polygon.map(p => ([p.x, p.y]));
+  if (!_.isEqual(coords[0], coords[coords.length - 1])) {
+    coords.push(coords[0]);
+  }
+  return coords;
+}
+
+function polyDifference(subject, subtracted) {
+  const subjectPoints = toTurfCoordinatePoints(subject);
+  const subtractedPoints = toTurfCoordinatePoints(subtracted);
+  debugger;
+  const subjectPoly = turf.polygon([subjectPoints]);
+  const subtractedPoly = turf.polygon([subtractedPoints]);
+  const result = difference(subjectPoly, subtractedPoly);
+  if (result.type !== 'Feature') {
+    // some error here
+  }
+  return result.geometry.coordinates.map(c => ({ x: c[0], y: c[1] }));
+}
+
 
 const helpers = {
   // ************************************ CLIPPER ************************************ //
@@ -206,6 +229,7 @@ const helpers = {
   * return false if the result contains multiple faces (a face was divided in two during the operation)
   */
   setOperation(type, f1Points, f2Points) {
+    if (type === 'difference') return polyDifference(f1Points, f2Points);
     // translate points for each face into a clipper path
     const
       f1Path = f1Points.map(p => ({ X: p.x, Y: p.y })),
@@ -256,6 +280,25 @@ const helpers = {
     offset.Execute(resultPaths, -this.offset);
     // scale down path
     ClipperLib.JS.ScaleDownPaths(resultPaths, this.clipScale);
+
+    // ClipperLib sometimes represents a no-hole, non-split face as a face with a hole.
+    // this has only been observed to happen during difference operations when the subtracted
+    // region is adjacent to the bottom edge of the subject face.
+    //
+    // a-------------b
+    // |             |
+    // |             |
+    // |   h----g    |
+    // |   |    |    |
+    // c---e----f----d
+    //
+    // To detect and fix this case, we will
+    // 1. notice when the bottom edge of the clip path (e-f) has the same y-value as the bottom edge
+    //  of the subject (c-d).
+    // 2. AND the bottom edge of the clip path is within the bottom edge of the subject.
+    // 3. Rewrite the result path to be a-b-d-f-g-h-e-c
+
+
     // if multiple paths were created, a face has been split and the operation should fail
     if (resultPaths.length === 1) {
       // translate into points

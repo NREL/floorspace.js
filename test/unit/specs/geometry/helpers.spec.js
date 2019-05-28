@@ -468,6 +468,24 @@ describe('setOperation', () => {
       },
     );
   });
+
+  it('does the right thing on difference with rectangle aligned with bottom', () => {
+    const poly1 = [
+      { x: -230, y: 135 },
+      { x: -150, y: 135 },
+      { x: -150, y: 50 },
+      { x: -230, y: 50 },
+      { x: -230, y: 135 }
+    ];
+    const poly2 = [
+      { x: -195, y: 75 },
+      { x: -170, y: 75 },
+      { x: -170, y: 50 },
+      { x: -195, y: 50 }
+    ];
+    const diff = helpers.difference(poly1, poly2);
+    assert(!diff.error);
+  });
 });
 
 describe('splittingVerticesForEdgeId', () => {
