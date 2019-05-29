@@ -69,7 +69,7 @@ module.exports = {
             .click('[title="save floorplan"]')
             .setValue('#download-name', '_nightwatch_exported')
             .click('.download-button')
-            .pause(10)
+            .pause(100)
             .checkForErrors();
 
           assertValidSchema(browser);
@@ -86,7 +86,7 @@ module.exports = {
       .click('[title="save floorplan"]')
       .setValue('#download-name', '_nightwatch_exported')
       .click('.download-button')
-      .pause(10)
+      .pause(100)
       .checkForErrors();
 
     browser
@@ -107,7 +107,7 @@ module.exports = {
       .click('[title="save floorplan"]')
       .setValue('#download-name', '_nightwatch_exported')
       .click('.download-button')
-      .pause(10)
+      .pause(100)
       .checkForErrors();
 
     assertValidSchema(browser);
