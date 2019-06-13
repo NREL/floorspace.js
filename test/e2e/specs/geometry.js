@@ -2,6 +2,20 @@ const { draw50By50Square, drawSquare, start, finish } = require('../helpers');
 
 module.exports = {
   tags: ['geometry'],
+  'interior wall must remain interior after erasing': (browser) => {
+    start(browser)
+      .perform(drawSquare(30, 25, 50, -50))
+      .assert.elementCount('.wall.interior', 0)
+      .click('[data-object-type="spaces"] .add-new')
+      .perform(drawSquare(30, 25, 50, 50))
+      .assert.elementCount('.wall.interior', 1)
+      .click('[data-tool="Eraser"]')
+      .perform(drawSquare(30, 25, 30, 10))
+      .assert.elementCount('.wall.interior', 1)
+      .assert.validGeometry();
+
+    finish(browser);
+  },
   'deformity that scott found (issue #301)': (browser) => {
     start(browser)
       .perform(draw50By50Square)

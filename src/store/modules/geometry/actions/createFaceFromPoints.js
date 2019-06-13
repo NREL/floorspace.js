@@ -138,6 +138,9 @@ export function eraseSelection(points, context) {
   }
 
   newGeoms.forEach(newGeom => context.dispatch('replaceFacePoints', newGeom));
+
+  splitEdges(context);
+
   return true;
 }
 
