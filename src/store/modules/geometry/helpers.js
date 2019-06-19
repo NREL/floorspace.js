@@ -1,6 +1,20 @@
 import _ from 'lodash';
-import ClipperLib from 'js-clipper';
+import * as turf from '@turf/helpers';
+import area from 'area-polygon'
+import { union, difference, intersection } from 'polygon-clipping';
+import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 import { dropConsecutiveDups } from '../../../utilities';
+
+function toTurfPoly(vertices) {
+  const coords = vertices.map(v => [v.x, v.y]);
+  if (
+    coords[0][0] !== coords[coords.length - 1][0] ||
+    coords[0][1] !== coords[coords.length - 1][1]
+  ) {
+      coords.push(coords[0]);
+  }
+  return turf.polygon([coords]);
+}
 
 function ringEqualsWithSameWindingOrder(vs, ws) {
   const pivotVert = vs[0];
@@ -191,89 +205,62 @@ export function repeatingWindowCenters({ start, end, spacing, width }) {
   }));
 }
 
+export function cleanInvalidPoly(vertices) {
+  for (let ix = 1; ix < vertices.length - 1; ix ++) {
+    const
+      a = vertices[ix - 1],
+      b = vertices[ix],
+      c = vertices[ix + 1];
+    if (!ptsAreCollinear(a, b, c)) continue;
+    // if the points *are* collinear, is a between b and c?
+    const positionAlongEdge = _.reject(
+      [
+        (a.x - b.x) / (c.x - b.x),
+        (a.y - b.y) / (c.y - b.y),
+      ],
+      isNaN)[0];
+    // positionAlongEdge = 0 implies v == v1
+    // positionAlongEdge = 1 implies v == v2
+    // positionAlongEdge > 1 or < 0 implies not on the line segment
+    if (positionAlongEdge > 1 || positionAlongEdge < 0) continue;
+    // Uh oh! we have a redundant vertex.
+    // going from a -> b -> c produces a zero-area region. Here's a picture:
+    //              b----------a--------c
+    // faster to just go a -> c.
+    return cleanInvalidPoly([
+      ...vertices.slice(0, ix),
+      ...vertices.slice(ix + 1),
+    ]);
+  }
+  // got to end of loop without returning, so no edits necessary
+  return vertices;
+}
 
 const helpers = {
-  // ************************************ CLIPPER ************************************ //
-  // scaling - see https://sourceforge.net/p/jsclipper/wiki/documentation/#clipperlibclipperoffsetexecute
-  clipScale: 100,
-  // prevent floating point inaccuracies by expanding faces by the offset before performing a clip operation, and then scaling the result back down
-  // https://sourceforge.net/p/jsclipper/wiki/documentation/#clipperoffset
-  offset: 0.01,
-
   /*
   * given two sets of points defining two faces
   * perform the specified operation (intersection, difference, union), return the resulting set of points
-  * return false if the result contains multiple faces (a face was divided in two during the operation)
+  * error if the result contains multiple faces (a face was divided in two during the operation), or holes
   */
   setOperation(type, f1Points, f2Points) {
-    // translate points for each face into a clipper path
     const
-      f1Path = f1Points.map(p => ({ X: p.x, Y: p.y })),
-      f2Path = f2Points.map(p => ({ X: p.x, Y: p.y }));
-
-    // offset both paths prior to executing clipper operation to acount for tiny floating point inaccuracies
-    const offset = new ClipperLib.ClipperOffset(),
-      f1PathsOffsetted = new ClipperLib.Paths(),
-      f2PathsOffsetted = new ClipperLib.Paths();
-
-    function scaleUpPathWithoutRound(paths, scale) {
-      paths.forEach((points) => {
-        Object.keys(points).forEach(key => points[key] *= scale);
-      });
-    }
-    // scale paths up before performing operation
-    scaleUpPathWithoutRound(f1Path, this.clipScale);
-    scaleUpPathWithoutRound(f2Path, this.clipScale);
-
-    offset.AddPaths([f1Path], ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
-    offset.Execute(f1PathsOffsetted, this.offset);
-    offset.Clear();
-    offset.AddPaths([f2Path], ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
-    offset.Execute(f2PathsOffsetted, this.offset);
-    offset.Clear();
-
-    const
-      cpr = new ClipperLib.Clipper(),
-      resultPathsOffsetted = new ClipperLib.Paths();
-
-    cpr.AddPaths(f1PathsOffsetted, ClipperLib.PolyType.ptSubject, true);
-    cpr.AddPaths(f2PathsOffsetted, ClipperLib.PolyType.ptClip, true);
-
+      f1Poly = toTurfPoly(f1Points).geometry.coordinates,
+      f2Poly = toTurfPoly(f2Points).geometry.coordinates;
     const operation =
-      type === 'union' ? ClipperLib.ClipType.ctUnion :
-      type === 'intersection' ? ClipperLib.ClipType.ctIntersection :
-      type === 'difference' ? ClipperLib.ClipType.ctDifference :
+      type === 'union' ? union :
+      type === 'intersection' ? intersection :
+      type === 'difference' ? difference :
       null;
     if (operation === null) {
       throw new Error(`invalid operation "${type}". expected union, intersection, or difference`);
     }
-
-    cpr.Execute(operation, resultPathsOffsetted, ClipperLib.PolyFillType.pftEvenOdd, ClipperLib.PolyFillType.pftEvenOdd);
-
-    // undo offset on resulting path
-    const resultPaths = new ClipperLib.Paths();
-    offset.AddPaths(resultPathsOffsetted, ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
-    offset.Execute(resultPaths, -this.offset);
-    // scale down path
-    ClipperLib.JS.ScaleDownPaths(resultPaths, this.clipScale);
-    // if multiple paths were created, a face has been split and the operation should fail
-    if (resultPaths.length === 1) {
-      // translate into points
-      return resultPaths[0].map(p => ({ x: p.X, y: p.Y }));
-    } else if (resultPaths.length === 0) {
+    const result = operation(f1Poly, f2Poly);
+    if (result === null || result.length === 0) {
       return [];
     }
-    return {
-      error: helpers.clipperPolygonHasHoles(resultPaths) ? 'no holes' : 'no split faces',
-    };
-  },
-
-  clipperPolygonHasHoles(poly) {
-    const
-      outerRing = poly[0].map(r => [r.X, r.Y]),
-      ptFromNextRing = [poly[1][0].X, poly[1][0].Y];
-    // nextRing is either entirely within, or entirely without outerRing.
-    return helpers.inRing(ptFromNextRing, outerRing);
+    if (result.length > 1) return { error: 'no split faces' };
+    if (result[0].length > 1) return { error: 'no holes' };
+    return dropClosingVertex(result[0][0].map(([x, y]) => ({ x, y })));
   },
   // convenience functions for setOperation
   intersection(f1, f2) {
@@ -286,11 +273,10 @@ const helpers = {
     return this.setOperation('difference', f1, f2);
   },
 
-    // given an array of points return the area of the space they enclose
-    areaOfSelection(points) {
-		const paths = points.map(p => ({ X: p.x, Y: p.y }))
-		// NOTE: clipper will sometimes return 0 area for self intersecting paths, this is fine because they'll fail validation regardless
-		return ClipperLib.JS.AreaOfPolygon(paths);
+  // given an array of points return the area of the space they enclose
+  areaOfSelection(points) {
+    if (points.length < 3) return 0;
+		return area(points);
 	},
 
     // ************************************ PROJECTIONS ************************************ //
@@ -457,9 +443,9 @@ const helpers = {
     },
 
     pointInFace(point, faceVertices) {
-      const facePoints = faceVertices.map(p => ({ X: p.x, Y: p.y }));
-      const testPoint = { X: point.x, Y: point.y };
-      return !!ClipperLib.Clipper.PointInPolygon(testPoint, facePoints);
+      const facePoly = toTurfPoly(faceVertices);
+      const testPoint = turf.point([point.x, point.y]);
+      return booleanPointInPolygon(testPoint, facePoly);
     },
 
   ptsAreCollinear,

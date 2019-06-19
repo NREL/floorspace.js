@@ -14,6 +14,7 @@ import {
   genRectangle,
 } from '../../test_helpers';
 import * as geometryExamples from './examples';
+import { validateFaceGeometry } from '../../../../src/store/modules/geometry/actions/createFaceFromPoints';
 
 describe('ringEquals', () => {
   it('identifies truly equal vertex lists', () => {
@@ -444,7 +445,7 @@ describe('setOperation', () => {
     const points = helpers.setOperation('intersection', polygon, newPolygon);
     assert(points);
     const solution = [{ x: -194, y: 21.8 }, { x: -202.4, y: 21.8 }, { x: -202.4, y: 18.2 }, { x: -194, y: 18.2 }];
-    assertEqual(points, solution);
+    assert(ringEquals(points, solution));
   });
 
   it('does not allow holes', () => {
@@ -467,6 +468,44 @@ describe('setOperation', () => {
         assertEqual(difference.error, 'no holes');
       },
     );
+  });
+
+  it('produces geometry that validateFaceGeometry accepts', () => {
+    const existingFaceVertices = [
+      {"id":"5","x":-140,"y":220},{"id":"6","x":-15,"y":220},
+      {"id":"7","x":-15,"y":70},{"id":"8","x":-140,"y":70}];
+    const points = [
+      {"x":-125,"y":305,"type":"grid","dist":2.511988458940511,"dx":-2.435064935059998,"dy":-0.6168831168799898}, {"x":-55,"y":305},
+      {"x":-55,"y":220,"type":"grid","dist":2.7476818300832977,"dx":2.240259740260001,"dy":1.590909090910003},{"x":-125,"y":220}];
+    const currentGeom = {
+      id: "2",
+      vertices: [
+        { id: "5", x: -140, y: 220 },
+        { id: "6", x: -15, y: 220 },
+        { id: "7", x: -15, y: 70 },
+        { id: "8", x: -140, y: 70 }
+      ],
+      edges: [
+        { id: "9", v1: "5", v2: "6" },
+        { id: "10", v1: "6", v2: "7" },
+        { id: "11", v1: "7", v2: "8" },
+        { id: "12", v1: "8", v2: "5" }
+      ],
+      faces: [
+        {
+          id: "13",
+          edgeRefs: [
+            { edge_id: "9", reverse: false },
+            { edge_id: "10", reverse: false },
+            { edge_id: "11", reverse: false },
+            { edge_id: "12", reverse: false }
+          ]
+        }
+      ]
+    };
+    const facePoints = helpers.union(existingFaceVertices, points);
+    const resp = validateFaceGeometry(facePoints, currentGeom);
+    assert(resp && resp.success);
   });
 });
 
