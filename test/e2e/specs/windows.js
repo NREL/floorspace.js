@@ -23,6 +23,18 @@ module.exports = {
       })
       .click('[data-modetab="floorplan"]');
   },
+  'deleting space should remove windows on its edges': (browser) => {
+    browser
+      .click('[data-modetab="components"]')
+      .click('[data-object-type="window_definitions"] [title="expand"]')
+      .click('.column__window_definition_mode:not(.is-hidden) option[value="Repeating Windows"]')
+      .click('[data-modetab="floorplan"]')
+      .click('[data-object-type="spaces"] .el-table__body-wrapper .destroy')
+      .click('[data-object-type="spaces"] .add-new')
+      .perform(draw50By50Square)
+      .checkForErrors()
+      .end();
+  },
   'deleting defn deletes all instances': (browser) => {
     browser
       .click('[data-modetab="components"]')
