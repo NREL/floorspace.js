@@ -78,6 +78,10 @@ export function newGeometriesOfOverlappedFaces(points, geometry) {
   const geom = geometryHelpers.denormalize(geometry);
   const intersectedFaces = geom.faces
     .filter((face) => {
+      // handle unusual cases where face has no vertices
+      if (face.vertices.length === 0) {
+        return false
+      }
       const inter = geometryHelpers.intersection(face.vertices, points);
       // We care about faces have an intersection with the new one, or that
       // cause errors (eg, split face) upon intersection
