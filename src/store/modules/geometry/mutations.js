@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import Vue from 'vue';
     /*
     * create a new geometry set, face, edge, or vertex in the data store
     */
@@ -26,6 +27,7 @@ export function trimGeometry(state, { geometry_id, vertsReferencedElsewhere }) {
   }
   geometry.vertices = newVerts;
   geometry.edges = newEdges;
+  geometry.edgesMap = _.keyBy(newEdges, 'id');
 }
 
 export function initGeometry(state, payload) {
@@ -59,8 +61,9 @@ export function destroyGeometry(state, payload) {
             } else if (~g.faces.map(f => f.id).indexOf(id)) {
                 g.faces.splice(g.faces.findIndex(f => f.id === id), 1);
                 break;
-            } else if (~g.edges.map(e => e.id).indexOf(id)) {
+            } else if (g.edgesMap[id]) {
                 g.edges.splice(g.edges.findIndex(e => e.id === id), 1);
+                Vue.delete(g.edgesMap, id);
                 g.faces.forEach((face) => {
                   face.edgeRefs.forEach((edgeRef) => {
                     if (id === edgeRef.edge_id) {
@@ -81,7 +84,7 @@ export function createEdgeRef(state, payload) {
         const { geometry_id, face_id, edgeRef } = payload,
             geometry = state.find(g => g.id === geometry_id),
             face = geometry.faces.find(f => f.id === face_id),
-            edge = geometry.edges.find(e => e.id === edgeRef.edge_id);
+            edge = geometry.edgesMap[edgeRef.edge_id];
 
         if (edge) { face.edgeRefs.push(edgeRef); }
 }
@@ -130,6 +133,7 @@ export function ensureEdgesExist(state, { geometry_id, edges }) {
   edges.forEach(e =>
     _.find(geometry.edges, { id: e.id }) || geometry.edges.push(e),
   );
+  geometry.edgesMap = {...geometry.edgesMap, ...(_.keyBy(edges, 'id'))}
 }
 
 export function splitEdge(state, { geometry_id, edgeToDelete, newEdges, replaceEdgeRefs }) {

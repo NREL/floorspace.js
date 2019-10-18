@@ -23,7 +23,14 @@ export default {
                 edge_id: null,
                 reverse: false
             }]
-        }]
+        }],
+        edgesMap: {
+            <edge_id>: {
+                id: null,
+                v1: null,
+                v2: null,
+            }
+        }
     }*/],
     actions: actions,
     mutations: mutations,
