@@ -1,4 +1,6 @@
 import _ from 'lodash';
+import Vue from 'vue';
+
     /*
     * create a new geometry set, face, edge, or vertex in the data store
     */
@@ -26,6 +28,7 @@ export function trimGeometry(state, { geometry_id, vertsReferencedElsewhere }) {
   }
   geometry.vertices = newVerts;
   geometry.edges = newEdges;
+  geometry.verticesMap = _.keyBy(newVerts, 'id');
 }
 
 export function initGeometry(state, payload) {
@@ -35,7 +38,9 @@ export function initGeometry(state, payload) {
 
 export function createVertex(state, payload) {
       const { geometry_id, vertex } = payload;
-      state.find(g => g.id === geometry_id).vertices.push(vertex);
+      const geometry = state.find(g => g.id === geometry_id);
+      geometry.vertices.push(vertex);
+      geometry.verticesMap[vertex.id] = vertex;
 }
 export function createFace(state, payload) {
       const { geometry_id, face } = payload;
@@ -69,8 +74,9 @@ export function destroyGeometry(state, payload) {
                   });
                 });
                 break;
-            } else if (~g.vertices.map(v => v.id).indexOf(id)) {
+            } else if (g.verticesMap[id]) {
                 g.vertices.splice(g.vertices.findIndex(v => v.id === id), 1);
+                Vue.delete(g.verticesMap, v.id);
                 break;
             }
         }
@@ -123,6 +129,7 @@ export function ensureVertsExist(state, { geometry_id, vertices }) {
   vertices.forEach(v =>
     _.find(geometry.vertices, { id: v.id }) || geometry.vertices.push(v),
   );
+  geometry.verticesMap = {...geometry.verticesMap, ...(_.keyBy(vertices, 'id'))}
 }
 
 export function ensureEdgesExist(state, { geometry_id, edges }) {

@@ -504,6 +504,7 @@ describe('newGeometriesOfOverlappedFaces', () => {
   const
     geometry = helpers.normalize({
       vertices: [],
+      verticesMap: {},
       edges: [],
       id: 1,
       faces: [
@@ -538,6 +539,7 @@ describe('newGeometriesOfOverlappedFaces', () => {
     const
       geometry = helpers.normalize({
         vertices: [],
+        verticesMap: {},
         edges: [],
         id: 1,
         faces: [
