@@ -27,7 +27,8 @@ export default {
             id: idFactory.generate(),
             vertices: [],
             edges: [],
-            faces: []
+            faces: [],
+            edgesMap: {},
         }
     }
 }

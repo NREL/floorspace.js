@@ -407,7 +407,7 @@ const helpers = {
 
     // given an edge id, find the edge on the geometry set with that id
     edgeForId(edge_id, geometry) {
-        return geometry.edges.find(e => e.id === edge_id);
+        return geometry.edgesMap[edge_id];
     },
 
     // given a vertex id returns edges referencing that vertex
@@ -529,6 +529,7 @@ const helpers = {
       ...geometry,
       edges,
       faces,
+      edgesMap: _.keyBy(edges, 'id'),
     };
   },
 
@@ -544,15 +545,17 @@ const helpers = {
         [
           ...geometry.vertices,
           ..._.flatMap(edges, e => [e.v1, e.v2]),
-        ], 'id');
-    return {
-      id: geometry.id,
-      vertices: vertices.map(v => _.pick(v, ['id', 'x', 'y'])),
-      edges: edges.map(e => ({
+        ], 'id'),
+      edgesPicked = edges.map(e => ({
         id: e.id,
         v1: e.v1.id,
         v2: e.v2.id,
-      })),
+      }));
+    return {
+      id: geometry.id,
+      vertices: vertices.map(v => _.pick(v, ['id', 'x', 'y'])),
+      edges: edgesPicked,
+      edgesMap: _.keyBy(edgesPicked, 'id'),
       faces: geometry.faces.map(f => ({
         id: f.id,
         edgeRefs: f.edges.map(er => ({ edge_id: er.id, reverse: er.reverse })),
