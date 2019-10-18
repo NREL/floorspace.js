@@ -385,7 +385,7 @@ const helpers = {
 
     // given a vertex id, find the vertex on the geometry set with that id
     vertexForId(vertex_id, geometry) {
-        return geometry.vertices.find(v => v.id === vertex_id);
+      return geometry.verticesMap[vertex_id];
     },
 
     // given a set of coordinates, find the vertex on the geometry set within their tolerance zone
@@ -529,6 +529,7 @@ const helpers = {
       ...geometry,
       edges,
       faces,
+      verticesMap: _.keyBy(geometry.vertices, 'id')
     };
   },
 
@@ -544,10 +545,12 @@ const helpers = {
         [
           ...geometry.vertices,
           ..._.flatMap(edges, e => [e.v1, e.v2]),
-        ], 'id');
+        ], 'id'),
+      verticesPicked = vertices.map(v => _.pick(v, ['id', 'x', 'y']));
     return {
       id: geometry.id,
-      vertices: vertices.map(v => _.pick(v, ['id', 'x', 'y'])),
+      vertices: verticesPicked,
+      verticesMap: _.keyBy(verticesPicked, 'id'),
       edges: edges.map(e => ({
         id: e.id,
         v1: e.v1.id,

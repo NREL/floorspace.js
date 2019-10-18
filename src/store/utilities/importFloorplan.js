@@ -86,6 +86,7 @@ export default function importFloorplan(context, payload) {
       faces,
       edges,
       vertices: story.geometry.vertices,
+      verticesMap: _.keyBy(story.geometry.vertices, 'id')
     };
   });
 
