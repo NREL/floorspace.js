@@ -113,7 +113,7 @@ export default function importFloorplan(context, payload) {
   let largestId = 0;
   forEachNestedProp(payload, (k, v) => {
     if (k && k === 'id' && (+v > largestId)) {
-      largestId = v;
+      largestId = +v;
     }
   });
 
