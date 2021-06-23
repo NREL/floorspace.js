@@ -31,7 +31,12 @@ var webpackConfig = merge(baseConfig, {
     new webpack.DefinePlugin({
       'process.env': require('../../config/test.env')
     })
-  ]
+  ],
+  resolve: {
+    alias: {
+      Src: path.resolve(__dirname, '../../src/'),
+    },
+  },
 })
 
 // no need for app entry during tests
@@ -48,7 +53,7 @@ webpackConfig.module.preLoaders.unshift({
 // only apply babel for test files when using isparta
 webpackConfig.module.loaders.some(function (loader, i) {
   if (loader.loader === 'babel') {
-    loader.include = path.resolve(projectRoot, 'test/unit')
+    loader.include = path.resolve(projectRoot, 'test/perf')
     return true
   }
 })
@@ -59,12 +64,17 @@ module.exports = function (config) {
     // 1. install corresponding karma launcher
     //    http://karma-runner.github.io/0.13/config/browsers.html
     // 2. add it to the `browsers` array below.
-    browsers: ['ChromeHeadless'],
+    browsers: ['FixedWindowChrome'],
     frameworks: ['mocha', 'sinon-chai'],
-    reporters: ['spec'],
+    reporters: ['log-reporter', 'spec'],
     files: ['./index.js'],
     preprocessors: {
       './index.js': ['webpack', 'sourcemap']
+    },
+    logReporter: {
+      outputPath: path.resolve(__dirname, 'output'),
+      outputName: 'perf.log',
+      filter_key: 'performance-test',
     },
     webpack: webpackConfig,
     webpackMiddleware: {
@@ -72,6 +82,15 @@ module.exports = function (config) {
       stats: {
         chunks: false,
       },
-    }
+    },
+    customLaunchers: {
+      FixedWindowChrome: {
+        base: 'Chrome',
+        flags: [
+            '--window-size=1600,900',
+        ]
+      }
+    },
+    singleRun: true,
   })
 }
