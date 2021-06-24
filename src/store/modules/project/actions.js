@@ -70,6 +70,19 @@ export default {
         validator.validateMin('max_y', context.state.view.min_y);
         context.commit('setViewMaxY', validator.validatedPayload);
     },
+    setDimensions (context, payload) {
+      const validator = new Validator(payload);
+
+      validator.validateInt('max_y');
+      // check that the proposed max_y is greater than the min_y
+      validator.validateMin('max_y', context.state.view.min_y);
+
+      validator.validateInt('max_x');
+      // check that the proposed max_x is greater than the min_x
+      validator.validateMin('max_x', context.state.view.min_x);
+
+      context.commit('setDimensions', payload);
+    },
     // setFov (context, payload) {
     //     context.commit('setFov', payload);
     // },
