@@ -1,17 +1,17 @@
 name: Deploy to Github Pages
-  on:
-    push:
-      branches:
-        - develop
-  jobs:
-    unit_test-lint:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v2
-        - run: |
-                npm ci
-                npm run build
-                npm run test
+on:
+  push:
+    branches:
+      - develop
+jobs:
+  unit_test-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+              npm ci
+              npm run build
+              npm run test
     # gh-pages-deploy:
     #   name: Deploying to Github Pages
     #   runs-on: ubuntu-latest
