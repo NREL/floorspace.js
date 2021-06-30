@@ -31,8 +31,11 @@ module.exports = {
       desiredCapabilities: {
         browserName: 'chrome',
         javascriptEnabled: true,
-        acceptSslCerts: true
-      }
+        acceptSslCerts: true,
+        chromeOptions: {
+          args: ['--no-sandbox'],
+        },
+      },
     },
 
     firefox: {
