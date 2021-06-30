@@ -100,7 +100,7 @@ function replaceComponents(
     context.dispatch(`models/create${windowOrDoor}s`, windowsOrDoors, { root: true });
   };
   replaceWindowOrDoor(windows, 'Window');
-  doors.forEach(d => replaceWindowOrDoor(d, 'Door'));
+  replaceWindowOrDoor(doors, 'Door');
 
   perFaceComponents.forEach(({ face_id, daylighting_controls }) => {
     daylighting_controls.forEach((d) => {
