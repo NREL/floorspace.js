@@ -18,7 +18,7 @@ jobs:
           node-version: 15
       # - name: Setup chrome
       #   uses: ./.github/actions/setup-chrome
-      - run: docker run -d -p 4444:4444 -v /dev/shm:/dev/shm selenium/standalone-chrome:4.0.0-rc-1-prerelease-20210618
+      # - run: docker run -d -p 4444:4444 -v /dev/shm:/dev/shm selenium/standalone-chrome:4.0.0-rc-1-prerelease-20210618
       - run: npm ci
       # - run: npm run build --if-present
       - run: npm test
