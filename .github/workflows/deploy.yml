@@ -9,6 +9,8 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    env: 
+      DISPLAY: 99.0
 
     strategy:
       matrix:
