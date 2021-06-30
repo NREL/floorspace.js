@@ -77,7 +77,17 @@ var webpackConfig = merge(baseWebpackConfig, {
     new webpack.optimize.CommonsChunkPlugin({
       name: 'manifest',
       chunks: ['vendor']
-    })
+    }),
+    {
+      apply: (compiler) => {
+        compiler.hooks.done.tap('DonePlugin', (stats) => {
+          console.log('Compile is done !');
+          setTimeout(() => {
+            process.exit(0);
+          });
+        });
+      }
+   }
   ]
 })
 

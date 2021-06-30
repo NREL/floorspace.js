@@ -20,7 +20,7 @@ jobs:
           node-version: 15
       - run: npm ci
       # - run: npm run build --if-present
-      - run: xvfb-run npm run test
+      # - run: xvfb-run npm run test
         env: 
           DISPLAY: 99.0
           DBUS_SESSION_BUS_ADDRESS: '/dev/null'
