@@ -25,6 +25,7 @@ jobs:
           DISPLAY: 99.0
           DBUS_SESSION_BUS_ADDRESS: '/dev/null'
       - run: npm run openstudio-build && sed -i 's/\/static/static/g' dist/index.html
+      - run: cp -r icons/ dist/ && cp site.webmanifest dist/ && cp browserconfig.xml dist/
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@4.1.4
         with:
