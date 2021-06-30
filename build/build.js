@@ -33,6 +33,5 @@ webpack(webpackConfig, function (err, stats) {
     chunks: false,
     chunkModules: false
   }) + '\n')
-  console.log('WE PROD AND WE OUT');
   process.exit(0);
 })
