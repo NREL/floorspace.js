@@ -14,6 +14,7 @@ var webpackConfig = merge(baseWebpackConfig, {
   module: {
     loaders: utils.styleLoaders({ sourceMap: config.build.productionSourceMap, extract: true })
   },
+  watch: false,
   devtool: config.build.productionSourceMap ? '#source-map' : false,
   output: {
     path: config.build.assetsRoot,
@@ -77,17 +78,7 @@ var webpackConfig = merge(baseWebpackConfig, {
     new webpack.optimize.CommonsChunkPlugin({
       name: 'manifest',
       chunks: ['vendor']
-    }),
-    {
-      apply: (compiler) => {
-        compiler.hooks.done.tap('DonePlugin', (stats) => {
-          console.log('Compile is done !');
-          setTimeout(() => {
-            process.exit(0);
-          });
-        });
-      }
-   }
+    })
   ]
 })
 
