@@ -33,8 +33,6 @@ webpack(webpackConfig, function (err, stats) {
     chunks: false,
     chunkModules: false
   }) + '\n')
-  if(process.env.NODE_ENV === 'PROD') {
-    console.log('WE PROD AND WE OUT');
-    process.exit(0);
-  }
+  console.log('WE PROD AND WE OUT');
+  process.exit(0);
 })
