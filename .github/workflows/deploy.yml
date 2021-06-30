@@ -19,23 +19,14 @@ jobs:
         with:
           node-version: 15
       - run: npm ci
-      # - run: npm run build --if-present
-      # - run: xvfb-run npm run test
+      - run: npm run build
+      - run: xvfb-run npm run test
         env: 
           DISPLAY: 99.0
           DBUS_SESSION_BUS_ADDRESS: '/dev/null'
       - run: npm run openstudio-build && sed -i 's/\/static/static/g' dist/index.html
-    # gh-pages-deploy:
-    #   name: Deploying to Github Pages
-    #   runs-on: ubuntu-latest
-    #   steps:
-    #       - uses: actions/checkout@v2
-    #       - uses: actions/setup-node@v2
-    #         with:
-    #           node-version: '12'
-    #       - name: Install packages
-    #         run: npm i
-    #       - name: Set Creds
-    #         run: git config user.name "<username>" && git config user.email "<email>"
-    #       - name: Deploy
-    #         run: npm run deploy
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@4.1.4
+        with:
+          branch: gh-pages # The branch the action should deploy to.
+          folder: dist # The folder the action should deploy.
