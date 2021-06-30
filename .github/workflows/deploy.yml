@@ -21,10 +21,10 @@ jobs:
       # - run: docker run -d -p 4444:4444 -v /dev/shm:/dev/shm selenium/standalone-chrome:4.0.0-rc-1-prerelease-20210618
       - run: npm ci
       # - run: npm run build --if-present
-      - run: npm test unit
-      - run: xvfb-run npm run e2e
+      - run: xvfb-run npm run test
         env: 
           DISPLAY: 99.0
+          DBUS_SESSION_BUS_ADDRESS: '/dev/null'
     # gh-pages-deploy:
     #   name: Deploying to Github Pages
     #   runs-on: ubuntu-latest
