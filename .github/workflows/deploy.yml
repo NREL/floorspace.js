@@ -23,6 +23,7 @@ jobs:
       - run: npm test
         env: 
           DISPLAY: 99.0
+          DBUS_SESSION_BUS_ADDRESS: /dev/null
     # gh-pages-deploy:
     #   name: Deploying to Github Pages
     #   runs-on: ubuntu-latest
