@@ -16,15 +16,13 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 15
-      # - name: Setup chrome
-      #   uses: ./.github/actions/setup-chrome
-      # - run: docker run -d -p 4444:4444 -v /dev/shm:/dev/shm selenium/standalone-chrome:4.0.0-rc-1-prerelease-20210618
       - run: npm ci
       # - run: npm run build --if-present
       - run: xvfb-run npm run test
         env: 
           DISPLAY: 99.0
           DBUS_SESSION_BUS_ADDRESS: '/dev/null'
+      - run: npm run openstudio-build && sed -i 's/\/static/static/g' dist/index.html
     # gh-pages-deploy:
     #   name: Deploying to Github Pages
     #   runs-on: ubuntu-latest
