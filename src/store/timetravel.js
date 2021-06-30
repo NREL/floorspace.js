@@ -107,7 +107,7 @@ export default {
       state: serializeState(this.store.state),
     });
     this.triggeringAction = action;
-    console.warn('saving state:', this.pastTimetravelStates[this.pastTimetravelStates.length - 1]);
+    console.warn('saving state');
     this.futureTimetravelStates = [];
     this.potentiallyRollbackCheckpoint(action);
   },
