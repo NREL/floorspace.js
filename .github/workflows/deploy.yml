@@ -9,6 +9,8 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    env:
+      NODE_ENV: 'PROD'
 
     steps:
       - uses: actions/checkout@v2
@@ -17,12 +19,12 @@ jobs:
         with:
           node-version: 15
       - run: npm ci
-      # - run: npm run build --if-present
+      - run: npm run build --if-present
       - run: xvfb-run npm run test
         env: 
           DISPLAY: 99.0
           DBUS_SESSION_BUS_ADDRESS: '/dev/null'
-      - run: CI=true npm run openstudio-build && sed -i 's/\/static/static/g' dist/index.html
+      # - run: npm run openstudio-build && sed -i 's/\/static/static/g' dist/index.html
     # gh-pages-deploy:
     #   name: Deploying to Github Pages
     #   runs-on: ubuntu-latest
