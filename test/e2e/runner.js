@@ -35,11 +35,11 @@ var spawn = require('cross-spawn')
 var runner = spawn('./node_modules/.bin/nightwatch', opts, { stdio: 'inherit' })
 
 runner.on('exit', function (code) {
-  server.close()
+  // server.close()
   process.exit(code)
 })
 
 runner.on('error', function (err) {
-  server.close()
+  // server.close()
   throw err
 })
