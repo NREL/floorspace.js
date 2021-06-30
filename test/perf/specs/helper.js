@@ -35,7 +35,7 @@ export function create() {
 
 }
 
-export function loadFloorPlan(data, type = 'floorplan') {
+export async function loadFloorPlan(data, type = 'floorplan') {
   const blob = new Blob([JSON.stringify(data)], { type: 'text/plain' });
 
   const eventObj = {
@@ -46,7 +46,16 @@ export function loadFloorPlan(data, type = 'floorplan') {
     },
   };
 
+  const oldEdges = application.$store.state.geometry[0].edges;
   document.getElementById('toolbar').__vue__.importDataAsFile(eventObj, type);
+
+  let appearsLoaded = false;
+  while (!appearsLoaded) {
+    appearsLoaded = application.$store.state.geometry[0].edges.length > 0 && application.$store.state.geometry[0].edges !== oldEdges;
+    await sleep(100);
+  }
+
+  await application.$nextTick();
 }
 
 export function tearDown() {

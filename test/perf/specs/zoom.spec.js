@@ -1,4 +1,4 @@
-import { create, loadFloorPlan, reportResult, sleep, tearDown } from './helper';
+import { create, loadFloorPlan, sleep, tearDown } from './helper';
 
 import * as smallPlan from '../datasets/smallPlan.json';
 import * as largePlan from '../datasets/largePlan.json';
@@ -36,7 +36,7 @@ describe('Zoom performance', () => {
   });
 
   it('large plan', async() => {
-    loadFloorPlan(largePlan);
+    await loadFloorPlan(largePlan);
 
     const svgGrid = document.getElementById('svg-grid');
     const t0 = performance.now();
@@ -50,7 +50,7 @@ describe('Zoom performance', () => {
   }).timeout(99999999);
 
   it('small plan', async() => {
-    loadFloorPlan(smallPlan);
+    await loadFloorPlan(smallPlan);
 
     const svgGrid = document.getElementById('svg-grid');
     const t0 = performance.now();
@@ -64,7 +64,7 @@ describe('Zoom performance', () => {
   }).timeout(99999999);
 
   it('large shattered plan', async() => {
-    loadFloorPlan(largeShatteredPlan);
+    await loadFloorPlan(largeShatteredPlan);
 
     const svgGrid = document.getElementById('svg-grid');
     const t0 = performance.now();

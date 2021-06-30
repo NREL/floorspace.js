@@ -438,17 +438,17 @@ export function edgesToSplit(geometry, spacing, edges, vertices) {
 
   if (edges && vertices) {
     const e1 = _.compact(geometry.edges.map((edge) => {
-      let splittingVertices = geometryHelpers.splittingVerticesForEdgeId(edge, geometry, spacing, vertices);
+      const splittingVertices = geometryHelpers.splittingVerticesForEdgeId(edge, geometry, spacing, vertices);
       return determineEdges(geometry, edge, splittingVertices);
     }));
     const e2 = _.compact(edges.map((edge) => {
-      let splittingVertices = geometryHelpers.splittingVerticesForEdgeId(edge, geometry, spacing);
+      const splittingVertices = geometryHelpers.splittingVerticesForEdgeId(edge, geometry, spacing);
       return determineEdges(geometry, edge, splittingVertices);
     }));
     return [...e1, ...e2];
   } else {
     return _.compact(geometry.edges.map((edge) => {
-      let splittingVertices = geometryHelpers.splittingVerticesForEdgeId(edge, geometry, spacing);
+      const splittingVertices = geometryHelpers.splittingVerticesForEdgeId(edge, geometry, spacing);
       return determineEdges(geometry, edge, splittingVertices);
     }));
   }
