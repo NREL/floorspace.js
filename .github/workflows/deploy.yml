@@ -1,9 +1,10 @@
 name: Deploy after testing
 on:
   workflow_run:
-    workflows: [ test ]
+    workflows: [ 'Test on branch push' ]
     branches: [ develop ]
-    types: [ completed ]
+    types: 
+      - completed
 
 jobs:
   build-and-deploy:
