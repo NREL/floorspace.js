@@ -1,7 +1,10 @@
-name: Deploy to Github Pages
+name: Deploy after testing
+uses: ahmadnassri/action-workflow-run-wait@v1.4.2
 on:
-  push:
+  workflow_run:
+    workflows: [ test ]
     branches: [ develop ]
+    types: [ completed ]
 
 jobs:
   build-and-deploy:
@@ -9,8 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NODE_ENV: 'PROD'
-
-    needs: test
 
     steps:
       - uses: actions/checkout@v2
