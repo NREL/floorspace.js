@@ -59,6 +59,7 @@ export default {
     this.$store.dispatch('models/initStory');
   },
   mounted() {
+    console.log('WE DID IT GOOD JOB!');
 
     window.eventBus.$on('error', (err) => {
       this.error = err;
