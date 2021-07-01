@@ -2,15 +2,15 @@ name: Deploy to Github Pages
 on:
   push:
     branches: [ develop ]
-  pull_request:
-    branches: [ develop ]
 
 jobs:
-  build:
+  build-and-deploy:
 
     runs-on: ubuntu-latest
     env:
       NODE_ENV: 'PROD'
+
+    needs: test
 
     steps:
       - uses: actions/checkout@v2
@@ -19,11 +19,6 @@ jobs:
         with:
           node-version: 15
       - run: npm ci
-      - run: npm run build
-      - run: xvfb-run npm run test
-        env: 
-          DISPLAY: 99.0
-          DBUS_SESSION_BUS_ADDRESS: '/dev/null'
       - run: npm run openstudio-build && sed -i 's/\/static/static/g' dist/index.html
       - run: cp -r icons/ dist/ && cp site.webmanifest dist/ && cp browserconfig.xml dist/
       - name: Deploy 🚀
