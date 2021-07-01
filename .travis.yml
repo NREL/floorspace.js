@@ -1,0 +1,40 @@
+language: node_js
+node_js:
+  - "10"
+sudo: required
+dist: trusty
+env:
+  - NODE_ENV=PROD
+before_install:
+  - export CHROME_BIN=/usr/bin/google-chrome
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  - sudo apt-get update
+  - sudo apt-get install -y libappindicator1 fonts-liberation ruby-full python-pip
+  - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+  - sudo dpkg -i google-chrome*.deb
+  - eval "$(ssh-agent -s)"
+  - openssl aes-256-cbc -K $encrypted_f2baaaee3923_key -iv $encrypted_f2baaaee3923_iv -in publish-key.enc -out publish-key -d
+  - chmod 600 publish-key
+  - ssh-add publish-key
+  - sudo pip install mkdocs
+install:
+  - npm install
+  - npm update
+# script:
+#   - jdk_switcher use oraclejdk8
+#   - npm run test
+notifications:
+  email: false
+script:
+  - npm run test && node check_version.js
+  - npm run openstudio-build && sed -i 's/\/static/static/g' dist/index.html
+  - mkdocs build -d dist/docs
+  - cp -r icons/ dist/ && cp site.webmanifest dist/ && cp browserconfig.xml dist/
+  - ./deploy.sh
+deploy:
+  provider: script
+  skip_cleanup: true
+  script: npm run deploy
+  on:
+    branch: develop
