@@ -20,7 +20,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 15
-      - run: sudo apt-get install -y libappindicator1 fonts-liberation ruby-full python-pip
+      - run: sudo apt-get install -y libappindicator1 fonts-liberation ruby-full python3-pip
       - run: sudo pip install mkdocs
       - run: npm ci
       - run: npm run openstudio-build && sed -i 's/\/static/static/g' dist/index.html
