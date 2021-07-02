@@ -33,4 +33,5 @@ webpack(webpackConfig, function (err, stats) {
     chunks: false,
     chunkModules: false
   }) + '\n')
+  process.exit(0);
 })

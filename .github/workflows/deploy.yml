@@ -1,0 +1,33 @@
+name: Deploy after testing
+on:
+  workflow_run:
+    workflows: [ 'Test on branch push' ]
+    branches: [ develop ]
+    types: 
+      - completed
+
+jobs:
+  build-and-deploy:
+
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    env:
+      NODE_ENV: 'PROD'
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 15
+      - run: sudo apt-get install -y libappindicator1 fonts-liberation ruby-full python3-pip
+      - run: sudo pip install mkdocs
+      - run: npm ci
+      - run: npm run openstudio-build && sed -i 's/\/static/static/g' dist/index.html
+      - run: mkdocs build -d dist/docs
+      - run: cp -r icons/ dist/ && cp site.webmanifest dist/ && cp browserconfig.xml dist/
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@4.1.4
+        with:
+          branch: gh-pages # The branch the action should deploy to.
+          folder: dist # The folder the action should deploy.
