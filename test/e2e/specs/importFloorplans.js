@@ -66,6 +66,7 @@ module.exports = {
             .setValue('#importInput', path.join(__dirname, floorplanPath))
             .waitForElementVisible('#grid svg polygon', 100)
             .perform(deleteFloorplan) // delete floorplan so download has correct name
+            .pause(100)
             .click('[title="save floorplan"]')
             .setValue('#download-name', '_nightwatch_exported')
             .click('.download-button')
@@ -123,6 +124,7 @@ module.exports = {
       .execute('return window.application.$store.state.project.config.north_axis', [], ({ value }) => {
         browser.assert.ok(!value); // should be deleted from project.config
       })
+      .perform(deleteFloorplan)
       .checkForErrors()
       .end();
   },
