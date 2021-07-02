@@ -9,38 +9,28 @@
         
         <link rel="shortcut icon" href="img/favicon.ico">
         <title>Floorspace.js</title>
-        <link href="css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="css/bootstrap.min.css" rel="stylesheet">
         <link href="css/font-awesome.min.css" rel="stylesheet">
         <link href="css/base.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
-        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-        <!--[if lt IE 9]>
-            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-        <![endif]-->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css">
 
         <script src="js/jquery-1.10.2.min.js" defer></script>
-        <script src="js/bootstrap-3.0.3.min.js" defer></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script src="js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
         <script>hljs.initHighlightingOnLoad();</script> 
     </head>
 
     <body class="homepage">
-
-        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
             <div class="container">
-
-                <!-- Collapsed navigation -->
-                <div class="navbar-header">
-                    <a class="navbar-brand" href=".">Floorspace.js</a>
-                </div>
+                <a class="navbar-brand" href="index.html">Floorspace.js</a>
 
                 <!-- Expanded navigation -->
-                <div class="navbar-collapse collapse">
+                <div id="navbar-collapse" class="navbar-collapse collapse">
 
-                    <ul class="nav navbar-nav navbar-right">
-                        <li>
-                            <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
                                 <i class="fa fa-search"></i> Search
                             </a>
                         </li>
@@ -50,16 +40,42 @@
         </div>
 
         <div class="container">
-                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
-    <ul class="nav bs-sidenav">
-        <li class="main active"><a href="#floorspacejs">FloorspaceJS</a></li>
-            <li><a href="#getting-started">Getting Started</a></li>
-            <li><a href="#drawing-spaces">Drawing Spaces</a></li>
-            <li><a href="#assignments">Assignments</a></li>
-            <li><a href="#components">Components</a></li>
-    </ul>
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#floorspacejs" class="nav-link">FloorspaceJS</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#getting-started" class="nav-link">Getting Started</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#drawing-spaces" class="nav-link">Drawing Spaces</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#assignments" class="nav-link">Assignments</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#components" class="nav-link">Components</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
 </div></div>
-                <div class="col-md-9" role="main">
+                    <div class="col-md-9" role="main">
 
 <h1 id="floorspacejs"><img alt="" src="img/favicon-32x32.png" /> FloorspaceJS</h1>
 <p>FloorspaceJS is a 2D geometry editor. Users can define an explicit floor plan for each story of a building. A story-by-story interface makes it easy to develop space geometry and assign properties. Referencing satellite imagery or floor plan images, when available, speeds up geometry entry. Conversion of 2D to 3D geometry is currently out of scope for FloorspaceJS, a reference implementation is available in the <a href="https://www.openstudio.net/">OpenStudio SDK</a>.</p>
@@ -107,6 +123,7 @@
 <p><a href="img/repeating_window.png"><img alt="Repeating Window" src="img/repeating_window.png" title="Repeating Window" /></a></p>
 <p>Window to wall ratio definitions also apply to an entire edge.</p>
 <p><a href="img/wwr_window.png"><img alt="WWR Window" src="img/wwr_window.png" title="WWR Window" /></a></p></div>
+            </div>
         </div>
 
         <footer class="col-md-12">
@@ -115,40 +132,37 @@
         </footer>
         <script>
             var base_url = ".",
-                shortcuts = {"search": 83, "next": 78, "help": 191, "previous": 80};
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
         </script>
         <script src="js/base.js" defer></script>
         <script src="search/main.js" defer></script>
 
-        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
-    <div class="modal-dialog">
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
                 <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
             </div>
             <div class="modal-body">
-                <p>
-                    From here you can search these documents. Enter
-                    your search terms below.
-                </p>
-                <form role="form">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
                     </div>
                 </form>
-                <div id="mkdocs-search-results"></div>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
             </div>
             <div class="modal-footer">
             </div>
         </div>
     </div>
-</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
                 <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                <h4 class="modal-title" id="exampleModalLabel">Keyboard Shortcuts</h4>
             </div>
             <div class="modal-body">
               <table class="table">
@@ -188,6 +202,6 @@
 </html>
 
 <!--
-MkDocs version : 1.0.4
-Build Date UTC : 2018-12-28 19:29:00
+MkDocs version : 1.2.1
+Build Date UTC : 2021-07-02 02:46:32.433642+00:00
 -->
