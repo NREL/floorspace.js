@@ -72,7 +72,7 @@ module.exports = {
             .pause(100)
             .checkForErrors();
 
-          // assertValidSchema(browser);
+          assertValidSchema(browser);
         });
     });
     browser.end();
