@@ -70,6 +70,13 @@ export default {
         validator.validateMin('max_y', context.state.view.min_y);
         context.commit('setViewMaxY', validator.validatedPayload);
     },
+
+    /**
+     * Set all four dimensions at once
+     * Combines the logic of the four methods immediately preceding this one
+     * @param {*} context 
+     * @param {*} payload 
+     */
     setDimensions (context, payload) {
       const validator = new Validator(payload);
 

@@ -66,6 +66,14 @@ function replaceComponents(
   context.dispatch('models/destroyAllComponents', { story_id }, { root: true });
 
   const edgesPresentOnFaces = _.flatMap(spaceFaces, 'edges');
+
+  /**
+   * Replaces all windows or doors.  Batches everything together.
+   * This is probably intended to verify that all windows and doors are in a good state after modifying the edges
+   *
+   * @param {*} arr Array of windows or doors to be replaced
+   * @param {'Window' | 'Door'} windowOrDoor 
+   */
   const replaceWindowOrDoor = (arr, windowOrDoor) => {
     const windowsOrDoors = [];
     arr.forEach((w) => {
@@ -99,6 +107,7 @@ function replaceComponents(
 
     context.dispatch(`models/create${windowOrDoor}s`, windowsOrDoors, { root: true });
   };
+
   replaceWindowOrDoor(windows, 'Window');
   replaceWindowOrDoor(doors, 'Door');
 

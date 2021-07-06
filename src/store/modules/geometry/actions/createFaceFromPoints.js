@@ -404,7 +404,16 @@ function replacementEdgeRefs(geometry, dyingEdgeId, newEdges) {
   return replaceEdgeRefs;
 }
 
-export function edgesToSplit(geometry, spacing, edges, vertices) {
+/**
+ * Returns a list of all the edges that need to be split (i.e. edges that are on top of one another)
+ *
+ * @param {*} geometry 
+ * @param {*} spacing 
+ * @param {*} newEdges Optional; if provided along with the new vertices, it will avoid checking all edges against all vertices
+ * @param {*} newVertices Optional; if provides along with the new edges, it will avoid checking all edges against all vertices
+ * @returns 
+ */
+export function edgesToSplit(geometry, spacing, newEdges, newVertices) {
   const priorIterationEdges = [];
 
   function determineEdges(geometry, edge, splittingVertices) {
@@ -436,12 +445,17 @@ export function edgesToSplit(geometry, spacing, edges, vertices) {
     };
   }
 
-  if (edges && vertices) {
+  // The geometry helper works by identifying every vertex that is between two other vertices
+  // If that happens, two edges are overlapping and need be split
+  // Ordinarily, determining this requires running through every edge to check if a vertex is inside of it
+  // If the list of new edges and new vertices are provided, this can be shortened to doing the check first
+  // with only the new edges and every vertex and then every edge and the new vertices
+  if (newEdges && newVertices) {
     const e1 = _.compact(geometry.edges.map((edge) => {
-      const splittingVertices = geometryHelpers.splittingVerticesForEdgeId(edge, geometry, spacing, vertices);
+      const splittingVertices = geometryHelpers.splittingVerticesForEdgeId(edge, geometry, spacing, newVertices);
       return determineEdges(geometry, edge, splittingVertices);
     }));
-    const e2 = _.compact(edges.map((edge) => {
+    const e2 = _.compact(newEdges.map((edge) => {
       const splittingVertices = geometryHelpers.splittingVerticesForEdgeId(edge, geometry, spacing);
       return determineEdges(geometry, edge, splittingVertices);
     }));

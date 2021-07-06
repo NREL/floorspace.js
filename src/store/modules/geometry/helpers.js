@@ -280,9 +280,15 @@ const helpers = {
 	},
 
     // ************************************ PROJECTIONS ************************************ //
-    /*
-     * return the set of saved vertices directly on an edge, not including edge endpoints
-     */
+  /**
+   * Return the set of saved vertices directly on an edge, not including edge endpoints
+   *
+   * @param {*} edge Edge to check against vertices for a collision
+   * @param {*} geometry 
+   * @param {*} spacing 
+   * @param {*} vertices Optional list of vertices to use.  If not provided, uses the vertices from the geometry object
+   * @returns 
+   */
   splittingVerticesForEdgeId(edge, geometry, spacing, vertices) {
     const edgeV1 = this.vertexForId(edge.v1, geometry),
       edgeV2 = this.vertexForId(edge.v2, geometry);

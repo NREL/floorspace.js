@@ -1217,7 +1217,7 @@ export default {
         'expand',
       );
 
-    this.dims = {
+    this.dimensions = {
       min_x: xExtent[0],
       max_x: xExtent[1],
       min_y: yExtent[0],
@@ -1342,7 +1342,7 @@ export default {
 
       const xDomain = newScaleX.domain();
       const yDomain = newScaleY.domain();
-      this.dims = {
+      this.dimensions = {
         min_x: xDomain[0],
         max_x: xDomain[1],
         min_y: yDomain[0],

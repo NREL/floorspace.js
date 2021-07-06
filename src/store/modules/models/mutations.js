@@ -79,6 +79,12 @@ export default {
       name,
     });
   },
+
+  /**
+   * Batched version of the `createWindow` mutation
+   * @param {*} state 
+   * @param {*} payload Array of windows to be created
+   */
   createWindows(state, payload) {
     const obj = {};
     payload.map(({ story_id, edge_id, window_definition_id, alpha, id, name }) => {
@@ -112,9 +118,14 @@ export default {
     });
   },
 
-  createDoors(state, { story_id, edge_id, door_definition_id, alpha, id }) {
+  /**
+   * Batched version of the `createDoor` mutation
+   * @param {*} state 
+   * @param {*} payload Array of doors to be created
+   */
+  createDoors(state, payload) {
     const obj = {};
-    payload.map(({ story_id, edge_id, window_definition_id, alpha, id, name }) => {
+    payload.map(({ story_id, edge_id, door_definition_id, alpha, id, name }) => {
       const door = {
         door_definition_id,
         edge_id,
@@ -158,7 +169,7 @@ export default {
   dropDaylightingControls(state, { story_id }) {
     const story = _.find(state.stories, { id: story_id });
     story.spaces = story.spaces.map((space) => {
-      if (space.daylighting_controls.length > 0) {
+      if (space.daylighting_controls.length === 0) {
         return space;
       } else {
         return Object.assign({}, space, { daylighting_controls: [] });

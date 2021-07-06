@@ -193,7 +193,10 @@ export default {
       get() { return this.$store.state.project.view.max_y; },
       set(val) { this.$store.dispatch('project/setViewMaxY', { max_y: val }); },
     },
-    dims: {
+
+    // Handles all four dimensions at once
+    // Intended to avoid spurious change detection if all of them are being changed
+    dimensions: {
       get() { 
         return {
           min_x: this.$store.state.project.view.min_x,

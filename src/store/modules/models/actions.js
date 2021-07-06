@@ -325,6 +325,13 @@ export default {
       name: genName(windowDefn.name),
     });
   },
+
+  /**
+   * A batched version of the `createWindow` action
+   *
+   * @param {*} context 
+   * @param {*} payload Array of windows to be created
+   */
   createWindows(context, payload) {
     const deletes = [];
     const creates = [];
@@ -404,6 +411,11 @@ export default {
     });
   },
 
+  /**
+   * Batched version of the `createDoor` action
+   * @param {*} context 
+   * @param {*} payload Array of doors to be created
+   */
   createDoors(context, payload) {
     const arr = [];
 
@@ -469,12 +481,24 @@ export default {
   destroyWindow({ commit }, payload) {
     commit('destroyWindow', payload);
   },
+
+  /**
+   * Batched version of the `destroyWindow` commit
+   * @param {*} context 
+   * @param {*} payload 
+   */
   destroyWindows({ commit }, payload) {
     commit('destroyWindows', payload);
   },
   destroyDoor({ commit }, payload) {
     commit('destroyDoor', payload);
   },
+
+  /**
+   * Batched version of the `destroyDoor` commit
+   * @param {*} context 
+   * @param {*} payload 
+   */
   destroyDoors({ commit }, payload) {
     commit('destroyDoors', payload);
   },
