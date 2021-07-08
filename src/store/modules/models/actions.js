@@ -417,9 +417,7 @@ export default {
    * @param {*} payload Array of doors to be created
    */
   createDoors(context, payload) {
-    const arr = [];
-
-    payload.forEach(({ story_id, edge_id, door_definition_id, alpha }) => {
+    const arr = payload.map(({ story_id, edge_id, door_definition_id, alpha }) => {
       const story = _.find(context.state.stories, { id: story_id }),
       doorDefn = _.find(context.state.library.door_definitions, { id: door_definition_id }),
       geometry = story && _.find(context.rootState.geometry, { id: story.geometry_id }),
@@ -436,11 +434,11 @@ export default {
         throw new Error('Alpha must be between 0 and 1');
       }
 
-      arr.push({
+      return {
         ...payload,
         id: idFactory.generate(),
         name: genName(doorDefn.name),
-      });
+      };
     });
 
     context.commit('createDoors', arr);

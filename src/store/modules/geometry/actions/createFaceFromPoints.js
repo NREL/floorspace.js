@@ -450,7 +450,7 @@ export function edgesToSplit(geometry, spacing, newEdges, newVertices) {
   // Ordinarily, determining this requires running through every edge to check if a vertex is inside of it
   // If the list of new edges and new vertices are provided, this can be shortened to doing the check first
   // with only the new edges and every vertex and then every edge and the new vertices
-  if (newEdges && newVertices) {
+  if (false && newEdges && newVertices) {
     const e1 = _.compact(geometry.edges.map((edge) => {
       const splittingVertices = geometryHelpers.splittingVerticesForEdgeId(edge, geometry, spacing, newVertices);
       return determineEdges(geometry, edge, splittingVertices);

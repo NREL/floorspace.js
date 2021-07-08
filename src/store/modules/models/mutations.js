@@ -87,7 +87,7 @@ export default {
    */
   createWindows(state, payload) {
     const obj = {};
-    payload.map(({ story_id, edge_id, window_definition_id, alpha, id, name }) => {
+    payload.forEach(({ story_id, edge_id, window_definition_id, alpha, id, name }) => {
       const window = {
         window_definition_id,
         edge_id,
@@ -104,7 +104,7 @@ export default {
 
     Object.entries(obj).forEach(([key, value]) => {
       const story = _.find(state.stories, { id: key });
-      story.windows.concat(value);
+      story.windows = story.windows.concat(value);
     });
   },
   createDoor(state, { story_id, edge_id, door_definition_id, alpha, id }) {
@@ -125,7 +125,7 @@ export default {
    */
   createDoors(state, payload) {
     const obj = {};
-    payload.map(({ story_id, edge_id, door_definition_id, alpha, id, name }) => {
+    payload.forEach(({ story_id, edge_id, door_definition_id, alpha, id, name }) => {
       const door = {
         door_definition_id,
         edge_id,
@@ -142,7 +142,7 @@ export default {
 
     Object.entries(obj).forEach(([key, value]) => {
       const story = _.find(state.stories, { id: key });
-      story.doors.concat(value);
+      story.doors = story.doors.concat(value);
     });
   },
 
