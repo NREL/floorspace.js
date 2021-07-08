@@ -125,7 +125,7 @@ export default {
    */
   createDoors(state, payload) {
     const obj = {};
-    payload.forEach(({ story_id, edge_id, door_definition_id, alpha, id, name }) => {
+    payload.forEach(({ story_id, edge_id, door_definition_id, alpha, id }) => {
       const door = {
         door_definition_id,
         edge_id,

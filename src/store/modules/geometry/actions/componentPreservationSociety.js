@@ -66,37 +66,49 @@ function replaceComponents(
   context.dispatch('models/destroyAllComponents', { story_id }, { root: true });
 
   const edgesPresentOnFaces = _.flatMap(spaceFaces, 'edges');
+  /**
+   * Replaces all windows or doors.  Batches everything together.
+   * This is probably intended to verify that all windows and doors are in a good state after modifying the edges
+   *
+   * @param {*} arr Array of windows or doors to be replaced
+   * @param {'Window' | 'Door'} windowOrDoor 
+   */
+    const replaceWindowOrDoor = (arr, windowOrDoor) => {
+    const windowsOrDoors = [];
+    arr.forEach((w) => {
+      const
+        { dx, dy } = movementsByFaceId[w.originalFaceIds[0]] || { dx: 0, dy: 0 },
+        newLoc = { x: w.originalLoc.x + dx, y: w.originalLoc.y + dy },
+        loc = snapWindowToEdge(/* snapMode */ 'nonstrict', edgesPresentOnFaces, newLoc, { width: 1 }, spacing / 4);
+      if (!loc) { return; }
 
-  const replaceWindowOrDoor = (w, windowOrDoor) => {
-    const
-      { dx, dy } = movementsByFaceId[w.originalFaceIds[0]] || { dx: 0, dy: 0 },
-      newLoc = { x: w.originalLoc.x + dx, y: w.originalLoc.y + dy },
-      loc = snapWindowToEdge(/* snapMode */ 'nonstrict', edgesPresentOnFaces, newLoc, { width: 1 }, spacing / 4);
-    if (!loc) { return; }
+      const facesWithEdge = _.map(facesContainingEdge(spaceFaces, loc.edge_id), 'id');
+      if (w.originalFaceIds.length !== facesWithEdge.length ||
+          (w.originalFaceIds.length > 1 && _.intersection(Object.keys(movementsByFaceId), w.originalFaceIds))) {
+        // Suppose we add some windows to an edge that's shared between two spaces.
+        // What happens when we move one of the spaces?
+        // Should we just duplicate the windows?
 
-    const facesWithEdge = _.map(facesContainingEdge(spaceFaces, loc.edge_id), 'id');
-    if (w.originalFaceIds.length !== facesWithEdge.length ||
-        (w.originalFaceIds.length > 1 && _.intersection(Object.keys(movementsByFaceId), w.originalFaceIds))) {
-      // Suppose we add some windows to an edge that's shared between two spaces.
-      // What happens when we move one of the spaces?
-      // Should we just duplicate the windows?
+        // dan's response:
+        // Remove that window.
+        // also, if you have a window on an exterior wall, then draw another space
+        // so it becomes interior, id delete the window too.
+        return;
+      }
 
-      // dan's response:
-      // Remove that window.
-      // also, if you have a window on an exterior wall, then draw another space
-      // so it becomes interior, id delete the window too.
-      return;
-    }
+      windowsOrDoors.push({
+        story_id,
+        edge_id: loc.edge_id,
+        alpha: loc.alpha,
+        [`${windowOrDoor.toLowerCase()}_definition_id`]: w.window_definition_id || w.door_definition_id,
+      });
+    });
 
-    context.dispatch(`models/create${windowOrDoor}`, {
-      story_id,
-      edge_id: loc.edge_id,
-      alpha: loc.alpha,
-      [`${windowOrDoor.toLowerCase()}_definition_id`]: w.window_definition_id || w.door_definition_id,
-    }, { root: true });
+    context.dispatch(`models/create${windowOrDoor}s`, windowsOrDoors, { root: true });
   };
-  windows.forEach(w => replaceWindowOrDoor(w, 'Window'));
-  doors.forEach(d => replaceWindowOrDoor(d, 'Door'));
+  
+  replaceWindowOrDoor(windows, 'Window');
+  replaceWindowOrDoor2(doors, 'Door');
 
   perFaceComponents.forEach(({ face_id, daylighting_controls }) => {
     daylighting_controls.forEach((d) => {
