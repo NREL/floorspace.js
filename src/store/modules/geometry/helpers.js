@@ -285,18 +285,13 @@ const helpers = {
    *
    * @param {*} edge Edge to check against vertices for a collision
    * @param {*} geometry 
-   * @param {*} spacing 
-   * @param {*} vertices Optional list of vertices to use.  If not provided, uses the vertices from the geometry object
+   * @param {*} spacing
    * @returns 
    */
-  splittingVerticesForEdgeId(edge, geometry, spacing, vertices) {
+  splittingVerticesForEdgeId(edge, geometry, spacing) {
     const edgeV1 = this.vertexForId(edge.v1, geometry),
       edgeV2 = this.vertexForId(edge.v2, geometry);
       // look up all vertices touching the edge, ignoring the edge's endpoints
-
-    if (!vertices) {
-      vertices = geometry.vertices;
-    }
     
     return vertices.filter((vertex) => {
       const

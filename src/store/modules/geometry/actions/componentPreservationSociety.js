@@ -73,7 +73,7 @@ function replaceComponents(
    * @param {*} arr Array of windows or doors to be replaced
    * @param {'Window' | 'Door'} windowOrDoor 
    */
-    const replaceWindowOrDoor = (arr, windowOrDoor) => {
+  const replaceWindowOrDoor = (arr, windowOrDoor) => {
     const windowsOrDoors = [];
     arr.forEach((w) => {
       const
@@ -108,7 +108,7 @@ function replaceComponents(
   };
   
   replaceWindowOrDoor(windows, 'Window');
-  replaceWindowOrDoor2(doors, 'Door');
+  replaceWindowOrDoor(doors, 'Door');
 
   perFaceComponents.forEach(({ face_id, daylighting_controls }) => {
     daylighting_controls.forEach((d) => {

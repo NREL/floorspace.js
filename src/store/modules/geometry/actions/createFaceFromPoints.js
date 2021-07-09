@@ -61,7 +61,7 @@ export default function createFaceFromPoints(context, payload) {
     storeFace(faceGeometry, target, context, existingFace);
 
     // split edges where vertices touch them
-    splitEdges(context, faceGeometry.edges, faceGeometry.vertices);
+    splitEdges(context);
   });
 
   context.dispatch('trimGeometry', { geometry_id: currentStoryGeometry.id });
@@ -409,11 +409,9 @@ function replacementEdgeRefs(geometry, dyingEdgeId, newEdges) {
  *
  * @param {*} geometry 
  * @param {*} spacing 
- * @param {*} newEdges Optional; if provided along with the new vertices, it will avoid checking all edges against all vertices
- * @param {*} newVertices Optional; if provides along with the new edges, it will avoid checking all edges against all vertices
  * @returns 
  */
-export function edgesToSplit(geometry, spacing, newEdges, newVertices) {
+export function edgesToSplit(geometry, spacing) {
   const priorIterationEdges = [];
 
   function determineEdges(geometry, edge, splittingVertices) {
@@ -445,27 +443,10 @@ export function edgesToSplit(geometry, spacing, newEdges, newVertices) {
     };
   }
 
-  // The geometry helper works by identifying every vertex that is between two other vertices
-  // If that happens, two edges are overlapping and need be split
-  // Ordinarily, determining this requires running through every edge to check if a vertex is inside of it
-  // If the list of new edges and new vertices are provided, this can be shortened to doing the check first
-  // with only the new edges and every vertex and then every edge and the new vertices
-  if (false && newEdges && newVertices) {
-    const e1 = _.compact(geometry.edges.map((edge) => {
-      const splittingVertices = geometryHelpers.splittingVerticesForEdgeId(edge, geometry, spacing, newVertices);
-      return determineEdges(geometry, edge, splittingVertices);
-    }));
-    const e2 = _.compact(newEdges.map((edge) => {
-      const splittingVertices = geometryHelpers.splittingVerticesForEdgeId(edge, geometry, spacing);
-      return determineEdges(geometry, edge, splittingVertices);
-    }));
-    return [...e1, ...e2];
-  } else {
-    return _.compact(geometry.edges.map((edge) => {
-      const splittingVertices = geometryHelpers.splittingVerticesForEdgeId(edge, geometry, spacing);
-      return determineEdges(geometry, edge, splittingVertices);
-    }));
-  }
+  return _.compact(geometry.edges.map((edge) => {
+    const splittingVertices = geometryHelpers.splittingVerticesForEdgeId(edge, geometry, spacing);
+    return determineEdges(geometry, edge, splittingVertices);
+  }));
 }
 
 /*
@@ -475,11 +456,11 @@ export function edgesToSplit(geometry, spacing, newEdges, newVertices) {
  * look up all faces referencing the original edge and replace those references with references to the new edges
  * destroy the original edge
  */
-function splitEdges(context, newEdges, newVertices) {
+function splitEdges(context) {
   const
     currentStoryGeometry = context.rootGetters['application/currentStoryGeometry'],
     currentProjectSpacing = context.rootState.project.grid.spacing,
-    edgeChanges = edgesToSplit(currentStoryGeometry, currentProjectSpacing, newEdges, newVertices);
+    edgeChanges = edgesToSplit(currentStoryGeometry, currentProjectSpacing);
 
   edgeChanges.forEach(payload => context.commit({
     type: 'splitEdge',
