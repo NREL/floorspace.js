@@ -293,7 +293,7 @@ const helpers = {
       edgeV2 = this.vertexForId(edge.v2, geometry);
       // look up all vertices touching the edge, ignoring the edge's endpoints
     
-    return vertices.filter((vertex) => {
+    return geometry.vertices.filter((vertex) => {
       const
         vertexIsEndpointById = edge.v1 === vertex.id || edge.v2 === vertex.id,
         vertexIsLeftEndpointByValue = edgeV1.x === vertex.x && edgeV1.y === vertex.y,
