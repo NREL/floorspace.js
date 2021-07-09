@@ -12,6 +12,7 @@ const filteredActions = [
   'project/setViewMinY',
   'project/setViewMaxX',
   'project/setViewMaxY',
+  'project/setDimensions',
   'application/clearSubSelections',
   'application/setCurrentStoryId',
   'application/setCurrentStory',
