@@ -283,27 +283,12 @@ const helpers = {
     /*
      * return the set of saved vertices directly on an edge, not including edge endpoints
      */
-  splittingVerticesForEdgeId(edge_id, geometry, spacing) {
-    let [_, edgeMap] = createEdgeMap(geometry, true);
-    let edge = edgeMap[edge_id];
-    let edgeV1, edgeV2;
-    if (!edge) {
-      // Fallback if the edge isn't in the map
-      // The geometry.edges array is being modified without the reference changing, so it's hard to detect
-      // When it isn't in the map, hop back to the standard iterative approach
-      edge = geometry.edges.find(e => e.id === edge_id),
-      edgeV1 = this.vertexForId(edge.v1, geometry),
-      edgeV2 = this.vertexForId(edge.v2, geometry);
-    } else {
-      edgeV1 = edge.v1;
-      edgeV2 = edge.v2;
-    }
-
+  splittingVerticesForEdgeId(edge, geometry, spacing) {
     const verticesToSplit = geometry.vertices.filter((vertex) => {
       const
         vertexIsEndpointById = edge.v1.id === vertex.id || edge.v2.id === vertex.id,
-        vertexIsLeftEndpointByValue = edgeV1.x === vertex.x && edgeV1.y === vertex.y,
-        vertexIsRightEndpointByValue = edgeV2.x === vertex.x && edgeV2.y === vertex.y,
+        vertexIsLeftEndpointByValue = edge.v1.x === vertex.x && edge.v1.y === vertex.y,
+        vertexIsRightEndpointByValue = edge.v2.x === vertex.x && edge.v2.y === vertex.y,
         vertexIsEndpoint = vertexIsEndpointById || vertexIsLeftEndpointByValue || vertexIsRightEndpointByValue;
 
       if (vertexIsEndpoint) {
@@ -311,13 +296,14 @@ const helpers = {
       }
       // vertex is not an endpoint, consider for splitting
       const projection = this.projectionOfPointToLine(vertex, {
-        p1: edgeV1,
-        p2: edgeV2,
+        p1: edge.v1,
+        p2: edge.v2,
       });
       const distBetween = this.distanceBetweenPoints(vertex, projection);
       const shouldSplit = distBetween <= spacing / 20;
       return shouldSplit;
     });
+    return verticesToSplit;
   },
 
   projectionOfPointToLine,
