@@ -6,6 +6,7 @@
   "private": true,
   "scripts": {
     "dev": "node build/dev-server.js",
+    "prod-dev": "NODE_ENV=production node build/dev-server.js",
     "build": "node build/build.js",
     "openstudio-build": "node build/build.js && node build/build-embeddable.js",
     "unit": "karma start test/unit/karma.conf.js",

@@ -49,8 +49,8 @@ export function ringEquals(vs_, ws_) {
 
 export function distanceBetweenPoints(p1, p2) {
   const
-    dx = Math.abs(p1.x - p2.x),
-    dy = Math.abs(p1.y - p2.y);
+    dx = p1.x - p2.x,
+    dy = p1.y - p2.y;
   return Math.sqrt((dx * dx) + (dy * dy));
 }
 
@@ -284,13 +284,24 @@ const helpers = {
      * return the set of saved vertices directly on an edge, not including edge endpoints
      */
   splittingVerticesForEdgeId(edge_id, geometry, spacing) {
-    const edge = geometry.edges.find(e => e.id === edge_id),
+    let [_, edgeMap] = createEdgeMap(geometry, true);
+    let edge = edgeMap[edge_id];
+    let edgeV1, edgeV2;
+    if (!edge) {
+      // Fallback if the edge isn't in the map
+      // The geometry.edges array is being modified without the reference changing, so it's hard to detect
+      // When it isn't in the map, hop back to the standard iterative approach
+      edge = geometry.edges.find(e => e.id === edge_id),
       edgeV1 = this.vertexForId(edge.v1, geometry),
       edgeV2 = this.vertexForId(edge.v2, geometry);
-      // look up all vertices touching the edge, ignoring the edge's endpoints
+    } else {
+      edgeV1 = edge.v1;
+      edgeV2 = edge.v2;
+    }
+
     const verticesToSplit = geometry.vertices.filter((vertex) => {
       const
-        vertexIsEndpointById = edge.v1 === vertex.id || edge.v2 === vertex.id,
+        vertexIsEndpointById = edge.v1.id === vertex.id || edge.v2.id === vertex.id,
         vertexIsLeftEndpointByValue = edgeV1.x === vertex.x && edgeV1.y === vertex.y,
         vertexIsRightEndpointByValue = edgeV2.x === vertex.x && edgeV2.y === vertex.y,
         vertexIsEndpoint = vertexIsEndpointById || vertexIsLeftEndpointByValue || vertexIsRightEndpointByValue;
@@ -503,19 +514,12 @@ const helpers = {
   },
 
   denormalize(geometry) {
+    const [edges, edgeMap] = createEdgeMap(geometry);
     const
-      edges = geometry.edges.map(edge => ({
-        ...edge,
-        v1: this.vertexForId(edge.v1, geometry),
-        v2: this.vertexForId(edge.v2, geometry),
-      })),
-      edgesById = _.zipObject(
-        _.map(edges, 'id'),
-        edges),
       faces = geometry.faces.map(face => ({
         id: face.id,
         edges: face.edgeRefs.map(({ edge_id, reverse }) => ({
-          ...edgesById[edge_id],
+          ...edgeMap[edge_id],
           edge_id,
           reverse,
         })),
@@ -560,6 +564,35 @@ const helpers = {
     };
   },
 };
+
+let lastEdges = null;
+let lastVertices = null;
+let lastMap = null;
+let lastArr = null;
+function createEdgeMap(geometry, memoize) {
+  if (!memoize || lastEdges !== geometry.edges || lastVertices !== geometry.vertices) {
+    const vertexMap = geometry.vertices.reduce((acc, cur) => {
+      acc[cur.id] = cur;
+      return acc;
+    }, {});
+
+    lastMap = {};
+    lastArr = geometry.edges.map((edge) => {
+      const newObj = {
+        ...edge,
+        v1: vertexMap[edge.v1],
+        v2: vertexMap[edge.v2],
+      };
+      lastMap[edge.id] = newObj;
+      return newObj;
+    });
+
+    lastEdges = geometry.edges;
+    lastVertices = geometry.vertices;
+  }
+
+  return [lastArr, lastMap];
+}
 
 function isPointCoord(coord) {
   return coord.length === 2 && _.isNumber(coord[0]) && _.isNumber(coord[1]);
