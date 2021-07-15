@@ -13,8 +13,8 @@ function facesContainingEdge(faces, edge_id) {
 
 function componentsOnStory(state, geometry_id) {
   const
-    geom = geometryHelpers.denormalize(_.find(state.geometry, { id: geometry_id })),
-    story = _.find(state.models.stories, { geometry_id });
+    geom = geometryHelpers.denormalize(state.geometry.find(g => g.id === geometry_id)),
+    story = state.models.stories.find(s => s.geometry_id === geometry_id);
 
   const perFaceComponents = story.spaces.map(space => ({
     daylighting_controls: space.daylighting_controls
@@ -82,7 +82,7 @@ function replaceComponents(
         loc = snapWindowToEdge(/* snapMode */ 'nonstrict', edgesPresentOnFaces, newLoc, { width: 1 }, spacing / 4);
       if (!loc) { return; }
 
-      const facesWithEdge = _.map(facesContainingEdge(spaceFaces, loc.edge_id), 'id');
+      const facesWithEdge = facesContainingEdge(spaceFaces, loc.edge_id).map(f => f.id);
       if (w.originalFaceIds.length !== facesWithEdge.length ||
           (w.originalFaceIds.length > 1 && _.intersection(Object.keys(movementsByFaceId), w.originalFaceIds))) {
         // Suppose we add some windows to an edge that's shared between two spaces.
@@ -106,7 +106,7 @@ function replaceComponents(
 
     context.dispatch(`models/create${windowOrDoor}s`, windowsOrDoors, { root: true });
   };
-  
+
   replaceWindowOrDoor(windows, 'Window');
   replaceWindowOrDoor(doors, 'Door');
 
@@ -127,6 +127,7 @@ function replaceComponents(
       }, { root: true });
     });
   });
+  console.log(performance.now() - t0);
 }
 
 export function withPreservedComponents(...args) {

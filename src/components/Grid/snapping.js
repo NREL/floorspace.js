@@ -80,9 +80,18 @@ export function findClosestEdge(edges, cursor) {
     withDistance = edges.map(e => ({
       ...e,
       ...pointDistanceToSegment(cursor, { start: e.v1, end: e.v2 }),
-    })),
-    closestEdge = _.minBy(withDistance, 'dist');
-  return closestEdge;
+    }));
+
+  let smallest = NaN;
+  withDistance.forEach((d) => {
+    // The conditional is intentionally convoluted - simplifying it to just '>' will have issues because it starts as NaN
+    // All comparisons to NaN return false, so for the first iteration it has to negate it
+    if (!(d.dist < smallest)) {
+      smallest = d;
+    }
+  });
+
+  return smallest;
 }
 
 export function findClosestWindow(windows, cursor) {
