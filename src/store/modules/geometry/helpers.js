@@ -284,6 +284,8 @@ const helpers = {
      * return the set of saved vertices directly on an edge, not including edge endpoints
      */
   splittingVerticesForEdgeId(edge, geometry, spacing, vertices) {
+    // Use a memoized cache of all the vertices to quickly find the necessary vertices
+    // If the vertex can't be found in the map, fall back to searching the entire array with find
     const vertexMap = createEdgeMap(geometry, true)[2];
     if (!vertices) {
       vertices = geometry.vertices;
@@ -580,6 +582,15 @@ let lastVertices = null;
 let lastMap = null;
 let lastArr = null;
 let lastVertexMap = null;
+
+/**
+ * Creates a map of all edges and vertices from the geometry
+ * Will attempt to memoize the results if the flag is passed in
+ *
+ * @param {*} geometry Geometry to create the map from
+ * @param {*} memoize Flag to use a memoized version or not
+ * @returns 
+ */
 function createEdgeMap(geometry, memoize) {
   if (!memoize || lastEdges !== geometry.edges || lastVertices !== geometry.vertices) {
     const vertexMap = geometry.vertices.reduce((acc, cur) => {
@@ -598,9 +609,11 @@ function createEdgeMap(geometry, memoize) {
       return newObj;
     });
 
-    lastEdges = geometry.edges;
-    lastVertices = geometry.vertices;
-    lastVertexMap = vertexMap;
+    if (memoize) {
+      lastEdges = geometry.edges;
+      lastVertices = geometry.vertices;
+      lastVertexMap = vertexMap;
+    }
   }
 
   return [lastArr, lastMap, lastVertexMap];
