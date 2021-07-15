@@ -127,7 +127,6 @@ function replaceComponents(
       }, { root: true });
     });
   });
-  console.log(performance.now() - t0);
 }
 
 export function withPreservedComponents(...args) {
