@@ -146,9 +146,15 @@ export function eraseSelection(points, context) {
     return false;
   }
 
+  const oldEdgeLength = currentStoryGeometry.edges.length,
+    oldVertexLength = currentStoryGeometry.vertices.length;
+
   newGeoms.forEach(newGeom => context.dispatch('replaceFacePoints', newGeom));
 
-  splitEdges(context);
+  const newEdges = currentStoryGeometry.edges.slice(oldEdgeLength),
+    newVertices = currentStoryGeometry.vertices.slice(oldVertexLength);
+
+  splitEdges(context, newEdges, newVertices);
 
   return true;
 }
