@@ -70,4 +70,12 @@ module.exports = {
       .assert.validGeometry();
     finish(browser);
   },
+  'combine edges when extending an existing space (issue #253': (browser) => {
+    // Assert we have 4 edges and not 6
+    start(browser)
+      .perform(draw50By50Square)
+      .perform(drawSquare(-50, 50, 50, 50))
+      .assert.elementCount('.wall.exterior', 4);
+    finish(browser);
+  },
 };

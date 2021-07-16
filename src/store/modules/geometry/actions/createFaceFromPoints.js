@@ -55,17 +55,20 @@ export default function createFaceFromPoints(context, payload) {
   }
 
   withPreservedComponents(context, currentStoryGeometry.id, () => {
-
     newGeoms.forEach(newGeom => context.dispatch('replaceFacePoints', newGeom));
 
     // save the face and its descendent geometry
     storeFace(faceGeometry, target, context, existingFace);
 
+    // if we trim geometry after splitting edges
+    // we get unwanted behavior whereby extending a face
+    // includes both the original face's vertices and the new ones
+    // by moving it before we split edges we avoid this scenario
+    context.dispatch('trimGeometry', { geometry_id: currentStoryGeometry.id });
+
     // split edges where vertices touch them
     splitEdges(context);
   });
-
-  context.dispatch('trimGeometry', { geometry_id: currentStoryGeometry.id });
 }
 
 // ////////////////////// HELPERS //////////////////////////// //
@@ -362,7 +365,6 @@ export function validateFaceGeometry(points, currentStoryGeometry) {
 }
 
 function edgesFromVerts(verts, existingEdges) {
-
   return _.zip(verts.slice(0, -1), verts.slice(1))
     .map(matchOrCreateEdge(existingEdges));
 }
@@ -392,14 +394,14 @@ function replacementEdgeRefs(geometry, dyingEdgeId, newEdges) {
     }
 
     return {
-    type: 'replaceEdgeRef',
-    geometry_id: geometry.id,
-    edge_id: dyingEdgeId,
-    face_id: affectedFace.id,
+      type: 'replaceEdgeRef',
+      geometry_id: geometry.id,
+      edge_id: dyingEdgeId,
+      face_id: affectedFace.id,
       newEdges: replacementEdges,
     };
   });
-  
+
   return replaceEdgeRefs;
 }
 
