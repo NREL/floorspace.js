@@ -31,6 +31,7 @@ import EditableSelectList from './EditableSelectList.vue';
 import helpers from '../store/modules/models/helpers';
 import { replaceIdsForCloning } from './../store/modules/geometry/helpers';
 import { assignableProperties, componentTypes } from '../store/modules/application/appconfig';
+import modelHelpers from '../store/modules/models/helpers';
 
 
 function keyForMode(mode) {
@@ -179,27 +180,35 @@ export default {
     * CREATE OBJECT
     * initializes an empty object
     */
-    createObject() {
-      switch (this.mode) {
-        case 'stories':
-          this.$store.dispatch('models/initStory');
-          return;
-        case 'spaces':
-          this.$store.dispatch('models/initSpace', { story: this.currentStory });
-          break;
-        case 'shading':
-          this.$store.dispatch('models/initShading', { story: this.currentStory });
-          break;
-        case 'images':
-          window.eventBus.$emit('uploadImage');
-          break;
-        case 'windows':
-        case 'daylighting_controls':
-          window.eventBus.$emit('error', 'Create components by clicking where you would like it to be');
-          break;
-        default:
-          this.$store.dispatch('models/createObjectWithType', { type: this.mode });
-          break;
+    createObject({ duplicate }) {
+      if (duplicate) {
+        const height = this.currentStory.floor_to_ceiling_height;
+        this.$store.dispatch('models/initStory');
+        this.$store.dispatch('models/updateStoryWithData', { story: this.currentStory, floor_to_ceiling_height: height });
+        this.$store.dispatch('application/setCurrentTool', { tool: 'Rectangle' });
+        return;
+      } else {
+        switch (this.mode) {
+          case 'stories':
+            this.$store.dispatch('models/initStory');
+            return;
+          case 'spaces':
+            this.$store.dispatch('models/initSpace', { story: this.currentStory });
+            break;
+          case 'shading':
+            this.$store.dispatch('models/initShading', { story: this.currentStory });
+            break;
+          case 'images':
+            window.eventBus.$emit('uploadImage');
+            break;
+          case 'windows':
+          case 'daylighting_controls':
+            window.eventBus.$emit('error', 'Create components by clicking where you would like it to be');
+            break;
+          default:
+            this.$store.dispatch('models/createObjectWithType', { type: this.mode });
+            break;
+        }
       }
       this.selectLatest();
     },
@@ -231,12 +240,10 @@ export default {
     },
     cloneStory(story) {
       this.$store.dispatch('application/setCurrentStoryId', { id: story.id });
-      console.log('this current story geom: ', this.currentStoryGeom);
       const { clonedGeometry, idMap } = replaceIdsForCloning(this.currentStoryGeom);
-      console.log('cloned geometry: ', clonedGeometry);
-      console.log('idMap: ', idMap);
-      // this.createObject('Clone');
-      // const { clonedStory } = modelHelpers.replaceIdsUpdateInfoForCloning(story, idMap, this.state, this.currentStory);
+      this.createObject({ duplicate: true });
+      const { clonedStory } = modelHelpers.replaceIdsUpdateInfoForCloning(story, idMap, this.state, this.currentStory);
+      console.log('cloned story: ', clonedStory);
       // this.destroyObject('spaces', this.currentStory.spaces[0]);
       // this.$store.dispatch('models/cloneStory', clonedStory);
       // this.$store.dispatch('geometry/cloneStoryGeometry', clonedGeometry);

@@ -1,4 +1,6 @@
 import map from './libconfig';
+import _ from 'lodash';
+import idFactory from './../../utilities/generateId';
 
 const helpers = {
 
@@ -194,6 +196,40 @@ const helpers = {
       default:
         return state.library[type];
     }
+  },
+  replaceIdsUpdateInfoForCloning(story, idMap) {
+    const clonedStory = _.cloneDeep(story);
+    clonedStory.doors.forEach((door) => {
+      const newID = idFactory.generate();
+      idMap[door.id] = newID;
+      door.id = newID;
+    });
+    clonedStory.windows.forEach((window) => {
+      const newID = idFactory.generate();
+      idMap[window.id] = newID;
+      window.id = newID;
+    });
+    clonedStory.spaces.forEach((space) => {
+      const newID = idFactory.generate();
+      idMap[space.id] = newID;
+      space.id = newID;
+      space.name = '';
+      space.face_id = idMap[space.face_id];
+    });
+    clonedStory.shading.forEach((shade) => {
+      const newID = idFactory.generate();
+      idMap[shade.id] = newID;
+      shade.id = newID;
+      shade.name = '';
+      shade.face_id = idMap[shade.face_id];
+    });
+    return { clonedStory };
+  },
+
+  replaceSpaceNamesForCloning(state, type, story) {
+    story.spaces.forEach((space) => {
+      space.name = this.generateName(state, type, story);
+    });
   },
 };
 export default helpers;
