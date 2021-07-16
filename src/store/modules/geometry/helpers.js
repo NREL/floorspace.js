@@ -4,6 +4,7 @@ import area from 'area-polygon'
 import { union, difference, intersection } from 'polygon-clipping';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 import { dropConsecutiveDups } from '../../../utilities';
+import idFactory from './../../utilities/generateId';
 
 function toTurfPoly(vertices) {
   const coords = vertices.map(v => [v.x, v.y]);
@@ -647,6 +648,38 @@ helpers.inRing = function (pt, ring, ignoreBoundary) {
 export function vertInRing(vert, ring) {
   const toLst = ({ x, y }) => [x, y];
   return helpers.inRing(toLst(vert), ring.map(toLst));
+}
+
+export function replaceIdsForCloning(newStory) {
+  const clonedGeometry = _.cloneDeep(newStory);
+  const idMap = {};
+  // these are so similar but just enough different. unsure...
+  const origVertexIDs = Object.keys(newStory.vertices);
+  origVertexIDs.forEach((origID) => {
+    const vertex = clonedGeometry.vertices[origID];
+    const newID = idFactory.generate();
+    idMap[origID] = newID;
+    vertex.id = newID;
+    clonedGeometry.vertices[newID] = vertex;
+    delete clonedGeometry.vertices[origID];
+  });
+  clonedGeometry.edges.forEach((edge) => {
+    const newID = idFactory.generate();
+    idMap[edge.id] = newID;
+    edge.id = newID;
+    edge.v1 = idMap[edge.v1];
+    edge.v2 = idMap[edge.v2];
+  });
+  clonedGeometry.faces.forEach((face) => {
+    face.edgeRefs.forEach((edge) => {
+      edge.edge_id = idMap[edge.edge_id];
+    });
+    const newID = idFactory.generate();
+    idMap[face.id] = newID;
+    face.id = newID;
+  });
+
+  return { clonedGeometry, idMap };
 }
 
 export default helpers;

@@ -25,10 +25,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import libconfig from '../store/modules/models/libconfig';
 import EditableSelectList from './EditableSelectList.vue';
 import helpers from '../store/modules/models/helpers';
+import { replaceIdsForCloning } from './../store/modules/geometry/helpers';
 import { assignableProperties, componentTypes } from '../store/modules/application/appconfig';
 
 
@@ -52,6 +53,9 @@ export default {
     document.body.removeEventListener('keyup', this.hotkeyAddNew);
   },
   computed: {
+    ...mapGetters({
+      currentStoryGeom: 'application/currentStoryGeometry',
+    }),
     objectTypesDisplay() {
       return this.objectTypes.map(ot => ({
         val: ot,
@@ -200,26 +204,48 @@ export default {
       this.selectLatest();
     },
     async duplicateRow(row) {
-      this.createObject();
-      await this.$nextTick();
-      let newName = row.name;
-      // increment Copy # until no name conflict.
-      while (_.find(this.rows, { name: newName })) {
-        let copyNum = newName.match(/\((\d+)\)/);
-        newName = copyNum ? `${newName.slice(0, copyNum.index)}(${+copyNum[1] + 1})` : `${newName} (2)`;
+      if(this.selectedObject.name.includes('Story')) {
+        this.cloneStory(this.selectedObject);
+      } else {
+        this.createObject();
+        await this.$nextTick();
+        let newName = row.name;
+        // increment Copy # until no name conflict.
+        while (_.find(this.rows, { name: newName })) {
+          let copyNum = newName.match(/\((\d+)\)/);
+          newName = copyNum ? `${newName.slice(0, copyNum.index)}(${+copyNum[1] + 1})` : `${newName} (2)`;
+        }
+        this.modifyObject(this.selectedObject.id, 'name', newName);
+        this.columns.forEach(({ name: key, readonly, private: privateKey }) => {
+          if (key === 'id' || key === 'name' || key === 'color') return;
+          if (readonly || privateKey) return;
+          if (this.selectedObject[key] === row[key]) return;
+          this.modifyObject(this.selectedObject.id, key, row[key]);
+        });
       }
-      this.modifyObject(this.selectedObject.id, 'name', newName);
-      this.columns.forEach(({ name: key, readonly, private: privateKey }) => {
-        if (key === 'id' || key === 'name' || key === 'color') return;
-        if (readonly || privateKey) return;
-        if (this.selectedObject[key] === row[key]) return;
-        this.modifyObject(this.selectedObject.id, key, row[key]);
-      });
     },
     selectLatest() {
       const newestRow = _.maxBy(this.rows, r => +r.id);
       if (!newestRow) { return; }
       this.selectedObject = newestRow;
+    },
+    cloneStory(story) {
+      this.$store.dispatch('application/setCurrentStoryId', { id: story.id });
+      console.log('this current story geom: ', this.currentStoryGeom);
+      const { clonedGeometry, idMap } = replaceIdsForCloning(this.currentStoryGeom);
+      console.log('cloned geometry: ', clonedGeometry);
+      console.log('idMap: ', idMap);
+      // this.createObject('Clone');
+      // const { clonedStory } = modelHelpers.replaceIdsUpdateInfoForCloning(story, idMap, this.state, this.currentStory);
+      // this.destroyObject('spaces', this.currentStory.spaces[0]);
+      // this.$store.dispatch('models/cloneStory', clonedStory);
+      // this.$store.dispatch('geometry/cloneStoryGeometry', clonedGeometry);
+      // for (let i = this.currentStory.shading.length - 1; i >= 0; i--) {
+      //   this.$store.dispatch('models/destroyShading', {
+      //     shading: this.currentStory.shading[i],
+      //     story: this.currentStory,
+      //   });
+      // }
     },
 
     /*
