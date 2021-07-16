@@ -139,6 +139,7 @@ export default {
     spacePropertyKey() {
       switch (this.currentSpaceProperty.type) {
         case 'building_units': return 'building_unit_id';
+        case 'building_types': return 'building_type_id';
         case 'thermal_zones': return 'thermal_zone_id';
         case 'space_types': return 'space_type_id';
         case 'pitched_roofs': return 'pitched_roof_id';
@@ -452,6 +453,9 @@ export default {
           } else if (this.currentMode === 'building_units') {
             const buildingUnit = modelHelpers.libraryObjectWithId(this.$store.state.models, model.building_unit_id);
             polygon.color = buildingUnit ? buildingUnit.color : applicationHelpers.config.palette.neutral;
+          } else if (this.currentMode === 'building_types') {
+            const buildingType = modelHelpers.libraryObjectWithId(this.$store.state.models, model.building_type_id);
+            polygon.color = buildingType ? buildingType.color : applicationHelpers.config.palette.neutral;
           } else if (this.currentMode === 'pitched_roofs') {
             const pitchedRoof = modelHelpers.libraryObjectWithId(this.$store.state.models, model.pitched_roof_id);
             polygon.color = pitchedRoof ? pitchedRoof.color : applicationHelpers.config.palette.neutral;

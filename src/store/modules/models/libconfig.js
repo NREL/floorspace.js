@@ -36,6 +36,31 @@ const map = {
     ],
     init: factory.BuildingUnit,
   },
+  building_types: {
+    displayName: 'Building Type',
+    definitionName: 'BuildingType',
+    columns: [
+      {
+        name: 'id',
+        displayName: 'ID',
+        readonly: true,
+        private: true,
+      },
+      {
+        name: 'name',
+        displayName: 'Name',
+        input_type: 'text',
+        validator: validators.name,
+      },
+      {
+        name: 'color',
+        displayName: 'Color',
+        input_type: 'color',
+        validator: validators.color,
+      },
+    ],
+    init: factory.BuildingType,
+  },
   thermal_zones: {
     displayName: 'Thermal Zone',
     definitionName: 'ThermalZone',
@@ -519,6 +544,20 @@ const map = {
         get(space, state) {
           const spaceType = state.models.library.space_types.find(s => s.id === space.space_type_id);
           return spaceType ? spaceType.name : null;
+        },
+      },
+      {
+        name: 'building_type_id',
+        displayName: 'Building Type',
+        input_type: 'select',
+        select_data(_space, state) {
+          const options = { '(none)': null };
+          state.models.library.building_types.forEach((b) => { options[b.name] = b.id; });
+          return options;
+        },
+        get(space, state) {
+          const buildingType = state.models.library.building_types.find(b => b.id === space.building_type_id);
+          return buildingType ? buildingType.name : null;
         },
       },
       {

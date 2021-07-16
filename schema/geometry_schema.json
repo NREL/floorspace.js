@@ -735,6 +735,13 @@
 						"boolean",
 						"null"
 					]
+				},
+				"building_type_id": {
+					"description": "Standard space type",
+					"type": [
+						"string",
+						"null"
+					]
 				}
 			},
 			"required": [
@@ -752,7 +759,8 @@
 				"floor_to_ceiling_height",
 				"above_ceiling_plenum_height",
 				"floor_offset",
-				"open_to_below"
+				"open_to_below",
+				"building_type"
 			]
 		},
 		"Shading": {

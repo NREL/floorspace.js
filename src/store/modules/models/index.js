@@ -55,6 +55,96 @@ export default {
             building_units: [],
             thermal_zones: [],
             space_types: [],
+            building_types: [
+                {
+                    id: 'secondarySchool',
+                    name: 'Secondary School',
+                },
+                {
+                    id: 'primarySchool',
+                    name: 'Primary School',
+                },
+                {
+                    id: 'smallOffice',
+                    name: 'Small Office',
+                },
+                {
+                    id: 'mediumOffice',
+                    name: 'Medium Office',
+                },
+                {
+                    id: 'largeOffice',
+                    name: 'Large Office',
+                },
+                {
+                    id: 'smallHotel',
+                    name: 'Small Hotel',
+                },
+                {
+                    id: 'largeHotel',
+                    name: 'Large Hotel',
+                },
+                {
+                    id: 'warehouse',
+                    name: 'Warehouse',
+                },
+                {
+                    id: 'retailStandalone',
+                    name: 'Retail Standalone',
+                },
+                {
+                    id: 'retailStripmall',
+                    name: 'Retail Stripmall',
+                },
+                {
+                    id: 'quickServiceRestaurant',
+                    name: 'Quick Service Restaurant',
+                },
+                {
+                    id: 'fullServiceRestaurant',
+                    name: 'Full Service Restaurant',
+                },
+                {
+                    id: 'midriseApartment',
+                    name: 'Midrise Apartment',
+                },
+                {
+                    id: 'highriseApartment',
+                    name: 'Highrise Apartment',
+                },
+                {
+                    id: 'hospital',
+                    name: 'Hospital',
+                },
+                {
+                    id: 'outpatient',
+                    name: 'Outpatient',
+                },
+                {
+                    id: 'superMarket',
+                    name: 'Super Market',
+                },
+                {
+                    id: 'laboratory',
+                    name: 'Laboratory',
+                },
+                {
+                    id: 'largeDataCenterLowITE',
+                    name: 'Large Data Center Low ITE',
+                },
+                {
+                    id: 'largeDataCenterHighITE',
+                    name: 'Large Data Center High ITE',
+                },
+                {
+                    id: 'smallDataCenterLowITE',
+                    name: 'Small Data Center Low ITE',
+                },
+                {
+                    id: 'smallDataCenterHighITE',
+                    name: 'Small Data Center High ITE',
+                },
+            ],
             construction_sets: [],
             window_definitions: [],
             daylighting_control_definitions: [],
