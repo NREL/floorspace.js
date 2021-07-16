@@ -246,12 +246,12 @@ export default {
       this.destroyDuplicateSpaces('spaces', this.currentStory.spaces[0]);
       this.$store.dispatch('models/cloneStory', clonedStory);
       this.$store.dispatch('geometry/cloneStoryGeometry', clonedGeometry);
-      // for (let i = this.currentStory.shading.length - 1; i >= 0; i--) {
-      //   this.$store.dispatch('models/destroyShading', {
-      //     shading: this.currentStory.shading[i],
-      //     story: this.currentStory,
-      //   });
-      // }
+      for (let i = this.currentStory.shading.length - 1; i >= 0; i--) {
+        this.$store.dispatch('models/destroyShading', {
+          shading: this.currentStory.shading[i],
+          story: this.currentStory,
+        });
+      }
     },
     destroyDuplicateSpaces(type, object) {
       this.$store.dispatch('models/destroySpace', {

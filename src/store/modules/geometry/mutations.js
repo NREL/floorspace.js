@@ -158,7 +158,7 @@ export function replaceFacePoints(state, { geometry_id, vertices, edges, face_id
 
 export function updateClonedGeometry(state, payload) {
   const newGeometry = state.find(story => story.id === payload.currentStoryId);
-  newGeometry.edges = payload.newGeom.edges;
-  newGeometry.faces = payload.newGeom.faces;
-  newGeometry.vertices = payload.newGeom.vertices;
+  // newGeometry.edges = payload.newGeom.edges;
+  // newGeometry.faces = payload.newGeom.faces;
+  // newGeometry.vertices = payload.newGeom.vertices;
 }
