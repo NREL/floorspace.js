@@ -652,23 +652,21 @@ export function vertInRing(vert, ring) {
 
 export function replaceIdsForCloning(newStory) {
   const clonedGeometry = _.cloneDeep(newStory);
+  console.log('clonedGeometry', clonedGeometry);
   const idMap = {};
-  // these are so similar but just enough different. unsure...
-  const origVertexIDs = Object.keys(newStory.vertices);
+  const origVertexIDs = Object.values(newStory.vertices).map(vertex => vertex.id);
   origVertexIDs.forEach((origID) => {
-    const vertex = clonedGeometry.vertices[origID];
+    const vertex = clonedGeometry.vertices.find(clonedVertex => clonedVertex.id === origID);
     const newID = idFactory.generate();
     idMap[origID] = newID;
     vertex.id = newID;
-    clonedGeometry.vertices[newID] = vertex;
-    delete clonedGeometry.vertices[origID];
+    const index = clonedGeometry.vertices.findIndex(vertexByIndex => vertexByIndex.id === newID);
+    clonedGeometry.vertices[index] = vertex;
   });
   clonedGeometry.edges.forEach((edge) => {
     const newID = idFactory.generate();
     idMap[edge.id] = newID;
     edge.id = newID;
-    edge.v1 = idMap[edge.v1];
-    edge.v2 = idMap[edge.v2];
   });
   clonedGeometry.faces.forEach((face) => {
     face.edgeRefs.forEach((edge) => {

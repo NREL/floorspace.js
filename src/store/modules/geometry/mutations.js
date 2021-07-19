@@ -162,7 +162,7 @@ export function updateClonedGeometry(state, payload) {
   console.log('new edges: ', payload.newGeom.edges);
   console.log('new faces: ', payload.newGeom.faces);
   console.log('new vertices: ', payload.newGeom.vertices);
-  // newGeometry.edges = payload.newGeom.edges;
-  // newGeometry.faces = payload.newGeom.faces;
-  // newGeometry.vertices = payload.newGeom.vertices;
+  newGeometry.edges = payload.newGeom.edges;
+  newGeometry.faces = payload.newGeom.faces;
+  newGeometry.vertices = payload.newGeom.vertices;
 }
