@@ -83,17 +83,16 @@ export function findClosestEdge(edges, cursor) {
     }));
 
   let ret = undefined;
-  let smallest = NaN;
+  let smallest = Infinity;
   withDistance.forEach((d) => {
-    // The conditional is intentionally convoluted - simplifying it to just '' will have issues because it starts as NaN
-    // All comparisons to NaN return false, so for the first iteration it has to negate it
-    if (!(d.dist >= smallest)) {
+    if (d.dist < smallest) {
       smallest = d.dist;
       ret = d;
     }
   });
 
   return ret;
+  // return _.minBy(withDistance, 'dist');
 }
 
 export function findClosestWindow(windows, cursor) {
