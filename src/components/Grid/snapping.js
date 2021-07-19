@@ -92,7 +92,6 @@ export function findClosestEdge(edges, cursor) {
   });
 
   return ret;
-  // return _.minBy(withDistance, 'dist');
 }
 
 export function findClosestWindow(windows, cursor) {
