@@ -12,7 +12,7 @@ module.exports = {
       .waitForElementVisible('.modal .new-floorplan', 5000)
       .setFlagOnError()
       .execute(() => {
-        window.application.$store.state.geometry[0].vertices.splice(1);
+        console.error(new Error('mock error'));
       })
       .assertErrorOccurred()
       .end();

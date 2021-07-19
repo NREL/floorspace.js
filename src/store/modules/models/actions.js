@@ -326,6 +326,65 @@ export default {
     });
   },
 
+  /**
+   * A batched version of the `createWindow` action
+   *
+   * @param {*} context 
+   * @param {*} payload Array of windows to be created
+   */
+  createWindows(context, payload) {
+    const deletes = [];
+    const creates = [];
+
+    payload.forEach((p) => {
+      const
+        { story_id, edge_id, window_definition_id, alpha } = p,
+        story = _.find(context.state.stories, { id: story_id }),
+        windowDefn = _.find(context.state.library.window_definitions, { id: window_definition_id }),
+        geometry = story && _.find(context.rootState.geometry, { id: story.geometry_id }),
+        edge = geometry && _.find(geometry.edges, { id: edge_id });
+      if (!story) {
+        throw new Error('Story not found');
+      } else if (!windowDefn) {
+        throw new Error('Window Definition not found');
+      } else if (!geometry) {
+        throw new Error('Geometry not found');
+      } else if (!edge) {
+        throw new Error('Edge not found');
+      } else if (alpha < 0 || alpha > 1) {
+        throw new Error('Alpha must be between 0 and 1');
+      }
+
+      const windowsOnEdge = _.filter(story.windows, { edge_id })
+        .map(w => ({
+          ...w,
+          window_definition_mode: _.find(
+            context.state.library.window_definitions,
+            { id: w.window_definition_id },
+          ).window_definition_mode,
+        }));
+      let windowsToDelete;
+      if (windowDefn.window_definition_mode === 'Single Window') {
+        // single windows can coexist with other single windows
+        windowsToDelete = _.reject(windowsOnEdge, { window_definition_mode: 'Single Window' });
+      } else {
+        // Repeating and WWR cannot share with single window, or with one another.
+        windowsToDelete = windowsOnEdge;
+      }
+      windowsToDelete.forEach(
+        w => deletes.push({ story_id, object: { id: w.id } }));
+
+      creates.push({
+        ...p,
+        id: idFactory.generate(),
+        name: genName(windowDefn.name),
+      });
+    });
+
+    context.commit('destroyWindows', deletes);
+    context.commit('createWindows', creates);
+  },
+
   createDoor(context, payload) {
     const
       { story_id, edge_id, door_definition_id, alpha } = payload,
@@ -350,6 +409,40 @@ export default {
       id: idFactory.generate(),
       name: genName(doorDefn.name),
     });
+  },
+
+  /**
+   * Batched version of the `createDoor` action
+   * @param {*} context 
+   * @param {*} payload Array of doors to be created
+   */
+  createDoors(context, payload) {
+    const arr = payload.map((p) => {
+      const { story_id, edge_id, door_definition_id, alpha } = p,
+      story = _.find(context.state.stories, { id: story_id }),
+      doorDefn = _.find(context.state.library.door_definitions, { id: door_definition_id }),
+      geometry = story && _.find(context.rootState.geometry, { id: story.geometry_id }),
+      edge = geometry && _.find(geometry.edges, { id: edge_id });
+      if (!story) {
+        throw new Error('Story not found');
+      } else if (!doorDefn) {
+        throw new Error('Door Definition not found');
+      } else if (!geometry) {
+        throw new Error('Geometry not found');
+      } else if (!edge) {
+        throw new Error('Edge not found');
+      } else if (alpha < 0 || alpha > 1) {
+        throw new Error('Alpha must be between 0 and 1');
+      }
+
+      return {
+        ...p,
+        id: idFactory.generate(),
+        name: genName(doorDefn.name),
+      };
+    });
+
+    context.commit('createDoors', arr);
   },
 
 
@@ -387,8 +480,26 @@ export default {
   destroyWindow({ commit }, payload) {
     commit('destroyWindow', payload);
   },
+
+  /**
+   * Batched version of the `destroyWindow` commit
+   * @param {*} context 
+   * @param {*} payload 
+   */
+  destroyWindows({ commit }, payload) {
+    commit('destroyWindows', payload);
+  },
   destroyDoor({ commit }, payload) {
     commit('destroyDoor', payload);
+  },
+
+  /**
+   * Batched version of the `destroyDoor` commit
+   * @param {*} context 
+   * @param {*} payload 
+   */
+  destroyDoors({ commit }, payload) {
+    commit('destroyDoors', payload);
   },
   modifyDaylightingControl({ commit }, payload) {
     commit('modifyDaylightingControl', payload);

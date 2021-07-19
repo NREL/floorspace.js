@@ -523,11 +523,12 @@ describe('splittingVerticesForEdgeId', () => {
       |         |
     f +---------+ g
 */
-    const splittingVertices = helpers.splittingVerticesForEdgeId('ce', geometryExamples.smallGeometry, 0.1);
+    const edge = geometryExamples.smallGeometry.edges.find(e => e.id === 'ce');
+    const splittingVertices = helpers.splittingVerticesForEdgeId(edge, geometryExamples.smallGeometry, 0.1);
     assert(splittingVertices.length === 1, `should find one splitting vertex, but found ${splittingVertices.length}`);
     assertEqual(splittingVertices[0], { id: 'd', x: 0.4, y: 1 });
 
-    const splittingSmallerVertices = helpers.splittingVerticesForEdgeId('ce', geometryExamples.evenSmallerGeometry, 0.01);
+    const splittingSmallerVertices = helpers.splittingVerticesForEdgeId(edge, geometryExamples.evenSmallerGeometry, 0.01);
     assert(splittingSmallerVertices.length === 1, `should find one splitting vertex, but found ${splittingSmallerVertices.length}`);
     assertEqual(splittingSmallerVertices[0], { id: 'd', x: 0.04, y: 0.1 });
   });

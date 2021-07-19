@@ -50,6 +50,9 @@ export default {
             state.view.max_y = payload.max_y;
         }
     },
+    setDimensions (state, payload) {
+        state.view = Object.assign({}, state.view, payload);
+    },
 
     // MAP
     setMapEnabled (state, payload) {
