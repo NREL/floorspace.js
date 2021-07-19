@@ -665,8 +665,14 @@ export function replaceIdsForCloning(newStory) {
   });
   clonedGeometry.edges.forEach((edge) => {
     const newID = idFactory.generate();
+    const newV1Id = idFactory.generate();
+    const newV2Id = idFactory.generate();
     idMap[edge.id] = newID;
+    idMap[edge.v1] = newV1Id;
+    idMap[edge.v2] = newV2Id;
     edge.id = newID;
+    edge.v1 = idMap[edge.v1];
+    edge.v2 = idMap[edge.v2];
   });
   clonedGeometry.faces.forEach((face) => {
     face.edgeRefs.forEach((edge) => {
