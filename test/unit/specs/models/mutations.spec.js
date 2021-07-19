@@ -1,7 +1,9 @@
 import _ from 'lodash';
 import { refute, assert, assertEqual } from '../../test_helpers';
 import mutations from 'src/store/modules/models/mutations';
-import { goodState } from './mockData';
+import { state } from './mockData';
+
+const goodState = JSON.parse(JSON.stringify(state));
 
 describe('model mutations', () => {
   it('destroyObject doesn\'t delete extra stuff (issue #131)', () => {

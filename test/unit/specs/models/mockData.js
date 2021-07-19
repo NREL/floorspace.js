@@ -1,4 +1,4 @@
-export const goodState = {
+export const state = {
     "stories": [
         {
             "id": "1",
@@ -167,6 +167,17 @@ export const goodState = {
                 "id": "500",
                 "color": "#007373",
                 "name": "Building Unit 1"
+            }
+        ],
+        "building_types": [
+            {
+                "id": "old_building_type",
+                "color": "#123456",
+                "name": "Old Building Type"
+            }, {
+                "id": "new_building_type",
+                "color": "#654321",
+                "name": "New Building Type"
             }
         ],
         "thermal_zones": [
