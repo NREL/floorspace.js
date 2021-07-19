@@ -1,10 +1,10 @@
 import _ from 'lodash';
 import { refute, assert, assertEqual } from '../../test_helpers';
-import mutations from '../../../../src/store/modules/models/mutations';
+import mutations from 'src/store/modules/models/mutations';
 import { goodState } from './mockData';
 
-describe('destroyObject', () => {
-  it("doesn't delete extra stuff (issue #131)", () => {
+describe('model mutations', () => {
+  it('destroyObject doesn\'t delete extra stuff (issue #131)', () => {
     const spaceTypeIds = _.map(goodState.library.space_types, 'id');
     refute(_.includes(spaceTypeIds, '23')); // the thing we're deleting is *not* a space type.
 
