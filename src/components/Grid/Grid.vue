@@ -193,6 +193,22 @@ export default {
       get() { return this.$store.state.project.view.max_y; },
       set(val) { this.$store.dispatch('project/setViewMaxY', { max_y: val }); },
     },
+
+    // Handles all four dimensions at once
+    // Intended to avoid spurious change detection if all of them are being changed
+    dimensions: {
+      get() { 
+        return {
+          min_x: this.$store.state.project.view.min_x,
+          max_x: this.$store.state.project.view.max_x,
+          min_y: this.$store.state.project.view.min_y,
+          max_y: this.$store.state.project.view.max_y,
+        };
+      },
+      set(val) {
+        this.$store.dispatch('project/setDimensions', val);
+      },
+    },
     // previous story
     previousStory() {
       const currentStoryNumber = this.$store.state.models.stories.findIndex(s => s === this.currentStory);

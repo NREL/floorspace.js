@@ -79,6 +79,34 @@ export default {
       name,
     });
   },
+
+  /**
+   * Batched version of the `createWindow` mutation
+   * @param {*} state 
+   * @param {*} payload Array of windows to be created
+   */
+  createWindows(state, payload) {
+    const obj = {};
+    payload.forEach(({ story_id, edge_id, window_definition_id, alpha, id, name }) => {
+      const window = {
+        window_definition_id,
+        edge_id,
+        alpha,
+        id,
+        name,
+      };
+      if (obj[story_id]) {
+        obj[story_id].push(window);
+      } else {
+        obj[story_id] = [window];
+      }
+    });
+
+    Object.entries(obj).forEach(([key, value]) => {
+      const story = _.find(state.stories, { id: key });
+      story.windows = story.windows.concat(value);
+    });
+  },
   createDoor(state, { story_id, edge_id, door_definition_id, alpha, id }) {
     const story = _.find(state.stories, { id: story_id });
     story.doors.push({
@@ -89,6 +117,35 @@ export default {
       name,
     });
   },
+
+  /**
+   * Batched version of the `createDoor` mutation
+   * @param {*} state 
+   * @param {*} payload Array of doors to be created
+   */
+  createDoors(state, payload) {
+    const obj = {};
+    payload.forEach(({ story_id, edge_id, door_definition_id, alpha, id }) => {
+      const door = {
+        door_definition_id,
+        edge_id,
+        alpha,
+        id,
+        name,
+      };
+      if (obj[story_id]) {
+        obj[story_id].push(door);
+      } else {
+        obj[story_id] = [door];
+      }
+    });
+
+    Object.entries(obj).forEach(([key, value]) => {
+      const story = _.find(state.stories, { id: key });
+      story.doors = story.doors.concat(value);
+    });
+  },
+
   dropWindows(state, { story_id }) {
     const story = _.find(state.stories, { id: story_id });
     story.windows = [];
@@ -111,8 +168,12 @@ export default {
   },
   dropDaylightingControls(state, { story_id }) {
     const story = _.find(state.stories, { id: story_id });
-    story.spaces.forEach((space) => {
-      space.daylighting_controls = [];
+    story.spaces = story.spaces.map((space) => {
+      if (space.daylighting_controls.length === 0) {
+        return space;
+      } else {
+        return Object.assign({}, space, { daylighting_controls: [] });
+      }
     });
   },
   destroyWindowsByDefinition(state, { id }) {
@@ -154,9 +215,45 @@ export default {
     const story = _.find(state.stories, { id: story_id });
     story.windows = _.reject(story.windows, { id });
   },
+  destroyWindows(state, payload) {
+    const obj = {};
+
+    payload.forEach(({ story_id, object: { id } }) => {
+      if (obj[story_id]) {
+        obj[story_id].push(id);
+      } else {
+        obj[story_id] = [id];
+      }
+    });
+
+    Object.entries(obj).forEach(([key, value]) => {
+      const story = _.find(state.stories, { id: key });
+      story.windows = story.windows.filter((window) => {
+        return value.indexOf(window.id) === -1;
+      });
+    });
+  },
   destroyDoor(state, { story_id, object: { id } }) {
     const story = _.find(state.stories, { id: story_id });
     story.doors = _.reject(story.doors, { id });
+  },
+  destroyDoors(state, payload) {
+    const obj = {};
+
+    payload.forEach(({ story_id, object: { id } }) => {
+      if (obj[story_id]) {
+        obj[story_id].push(id);
+      } else {
+        obj[story_id] = [id];
+      }
+    });
+
+    Object.entries(obj).forEach(([key, value]) => {
+      const story = _.find(state.stories, { id: key });
+      story.doors = story.doors.filter((window) => {
+        return value.indexOf(window.id) === -1;
+      });
+    });
   },
   modifyWindow(state, { story_id, id, key, value }) {
     const

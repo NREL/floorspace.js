@@ -1,10 +1,7 @@
 import _ from 'lodash';
 
 const serializeState = (state) => {
-  const clone = JSON.parse(JSON.stringify(state));
-
-
-  return clone;
+  return JSON.stringify(state);
 };
 const filteredActions = [
   'application/setScaleX',
@@ -15,6 +12,7 @@ const filteredActions = [
   'project/setViewMinY',
   'project/setViewMaxX',
   'project/setViewMaxY',
+  'project/setDimensions',
   'application/clearSubSelections',
   'application/setCurrentStoryId',
   'application/setCurrentStory',
@@ -110,7 +108,7 @@ export default {
       state: serializeState(this.store.state),
     });
     this.triggeringAction = action;
-    console.warn('saving state:', this.pastTimetravelStates[this.pastTimetravelStates.length - 1]);
+    console.warn('saving state');
     this.futureTimetravelStates = [];
     this.potentiallyRollbackCheckpoint(action);
   },
@@ -139,28 +137,30 @@ export default {
   undo() {
     if (!this.pastTimetravelStates.length) { return; }
     const { state: replacementState, triggeringAction } = this.pastTimetravelStates.pop();
+    const newState = JSON.parse(replacementState);
     const oldAction = this.triggeringAction;
     this.futureTimetravelStates.push({
       triggeringAction: this.triggeringAction,
       state: serializeState(this.store.state),
     });
     this.triggeringAction = triggeringAction;
-    this.store.replaceState(replacementState);
-    console.log('undo', replacementState);
+    this.store.replaceState(newState);
+    console.log('undo', newState);
     window.eventBus.$emit('success', `undo ${oldAction}`);
   },
 
   redo() {
     if (!this.futureTimetravelStates.length) { return; }
     const { state: replacementState, triggeringAction } = this.futureTimetravelStates.pop();
+    const newState = JSON.parse(replacementState);
     this.pastTimetravelStates.push({
       state: serializeState(this.store.state),
       triggeringAction: this.triggeringAction,
     });
     this.triggeringAction = triggeringAction;
-    this.store.replaceState(replacementState);
+    this.store.replaceState(newState);
     window.eventBus.$emit('success', `redo ${triggeringAction}`);
-    console.log('redo', replacementState);
+    console.log('redo', newState);
   },
   logTimetravel() {
     console.log('past:', this.pastTimetravelStates.map(s => logState(s)));

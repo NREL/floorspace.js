@@ -50,8 +50,8 @@ export function ringEquals(vs_, ws_) {
 
 export function distanceBetweenPoints(p1, p2) {
   const
-    dx = Math.abs(p1.x - p2.x),
-    dy = Math.abs(p1.y - p2.y);
+    dx = p1.x - p2.x,
+    dy = p1.y - p2.y;
   return Math.sqrt((dx * dx) + (dy * dy));
 }
 
@@ -284,16 +284,38 @@ const helpers = {
     /*
      * return the set of saved vertices directly on an edge, not including edge endpoints
      */
-  splittingVerticesForEdgeId(edge_id, geometry, spacing) {
-    const edge = geometry.edges.find(e => e.id === edge_id),
-      edgeV1 = this.vertexForId(edge.v1, geometry),
-      edgeV2 = this.vertexForId(edge.v2, geometry);
-      // look up all vertices touching the edge, ignoring the edge's endpoints
-    const verticesToSplit = geometry.vertices.filter((vertex) => {
+  splittingVerticesForEdgeId(edge, geometry, spacing, vertices) {
+    // Use a memoized cache of all the vertices to quickly find the necessary vertices
+    // If the vertex can't be found in the map, fall back to searching the entire array with find
+    const vertexMap = createEdgeMap(geometry, true)[2];
+    if (!vertices) {
+      vertices = geometry.vertices;
+    }
+
+    let v1 = vertexMap[edge.v1];
+    if (!v1) {
+      v1 = geometry.vertices.find(v => v.id === edge.v1);
+    }
+
+    let v2 = vertexMap[edge.v2];
+    if (!v2) {
+      v2 = geometry.vertices.find(v => v.id === edge.v2);
+    }
+    const denormalizedEdge = {
+      ...edge,
+      v1,
+      v2,
+    };
+
+    return vertices.filter((vertex) => {
+      if (!denormalizedEdge.v1 || !denormalizedEdge.v2) {
+        return false;
+      }
+
       const
-        vertexIsEndpointById = edge.v1 === vertex.id || edge.v2 === vertex.id,
-        vertexIsLeftEndpointByValue = edgeV1.x === vertex.x && edgeV1.y === vertex.y,
-        vertexIsRightEndpointByValue = edgeV2.x === vertex.x && edgeV2.y === vertex.y,
+        vertexIsEndpointById = denormalizedEdge.v1.id === vertex.id || denormalizedEdge.v2.id === vertex.id,
+        vertexIsLeftEndpointByValue = denormalizedEdge.v1.x === vertex.x && denormalizedEdge.v1.y === vertex.y,
+        vertexIsRightEndpointByValue = denormalizedEdge.v2.x === vertex.x && denormalizedEdge.v2.y === vertex.y,
         vertexIsEndpoint = vertexIsEndpointById || vertexIsLeftEndpointByValue || vertexIsRightEndpointByValue;
 
       if (vertexIsEndpoint) {
@@ -301,14 +323,13 @@ const helpers = {
       }
       // vertex is not an endpoint, consider for splitting
       const projection = this.projectionOfPointToLine(vertex, {
-        p1: edgeV1,
-        p2: edgeV2,
+        p1: denormalizedEdge.v1,
+        p2: denormalizedEdge.v2,
       });
       const distBetween = this.distanceBetweenPoints(vertex, projection);
       const shouldSplit = distBetween <= spacing / 20;
       return shouldSplit;
     });
-    return verticesToSplit;
   },
 
   projectionOfPointToLine,
@@ -504,25 +525,20 @@ const helpers = {
   },
 
   denormalize(geometry) {
+    const [edges, edgeMap] = createEdgeMap(geometry);
     const
-      edges = geometry.edges.map(edge => ({
-        ...edge,
-        v1: this.vertexForId(edge.v1, geometry),
-        v2: this.vertexForId(edge.v2, geometry),
-      })),
-      edgesById = _.zipObject(
-        _.map(edges, 'id'),
-        edges),
       faces = geometry.faces.map(face => ({
         id: face.id,
         edges: face.edgeRefs.map(({ edge_id, reverse }) => ({
-          ...edgesById[edge_id],
+          ...edgeMap[edge_id],
           edge_id,
           reverse,
         })),
         get vertices() {
           return dropConsecutiveDups(
-            _.flatMap(this.edges, e => (e.reverse ? [e.v2, e.v1] : [e.v1, e.v2])),
+            _.flatMap(this.edges, e => {
+              return e.reverse ? [e.v2, e.v1] : [e.v1, e.v2];
+            }),
             v => v.id);
         },
       }));
@@ -561,6 +577,48 @@ const helpers = {
     };
   },
 };
+
+let lastEdges = null;
+let lastVertices = null;
+let lastMap = null;
+let lastArr = null;
+let lastVertexMap = null;
+
+/**
+ * Creates a map of all edges and vertices from the geometry
+ * Will attempt to memoize the results if the flag is passed in
+ *
+ * @param {*} geometry Geometry to create the map from
+ * @param {*} memoize Flag to use a memoized version or not
+ * @returns 
+ */
+function createEdgeMap(geometry, memoize) {
+  if (!memoize || lastEdges !== geometry.edges || lastVertices !== geometry.vertices) {
+    const vertexMap = geometry.vertices.reduce((acc, cur) => {
+      acc[cur.id] = cur;
+      return acc;
+    }, {});
+
+    lastMap = {};
+    lastArr = geometry.edges.map((edge) => {
+      const newObj = {
+        ...edge,
+        v1: vertexMap[edge.v1],
+        v2: vertexMap[edge.v2],
+      };
+      lastMap[edge.id] = newObj;
+      return newObj;
+    });
+
+    if (memoize) {
+      lastEdges = geometry.edges;
+      lastVertices = geometry.vertices;
+      lastVertexMap = vertexMap;
+    }
+  }
+
+  return [lastArr, lastMap, lastVertexMap];
+}
 
 function isPointCoord(coord) {
   return coord.length === 2 && _.isNumber(coord[0]) && _.isNumber(coord[1]);

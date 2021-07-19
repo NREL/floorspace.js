@@ -1216,8 +1216,13 @@ export default {
         width / height,
         'expand',
       );
-    [this.min_x, this.max_x] = xExtent;
-    [this.min_y, this.max_y] = yExtent;
+
+    this.dimensions = {
+      min_x: xExtent[0],
+      max_x: xExtent[1],
+      min_y: yExtent[0],
+      max_y: yExtent[1],
+    };
     _.defer(() => {
       window.eventBus.$emit('boundsResolved');
     });
@@ -1335,8 +1340,14 @@ export default {
          newScaleX = transform.rescaleX(this.zoomXScale),
          newScaleY = transform.rescaleY(this.zoomYScale);
 
-       [this.min_x, this.max_x] = newScaleX.domain();
-       [this.min_y, this.max_y] = newScaleY.domain(); // inverted y axis
+      const xDomain = newScaleX.domain();
+      const yDomain = newScaleY.domain();
+      this.dimensions = {
+        min_x: xDomain[0],
+        max_x: xDomain[1],
+        min_y: yDomain[0],
+        max_y: yDomain[1],
+      };
 
        this.axis_generator.x.scale(newScaleX);
        this.axis_generator.y.scale(newScaleY);
