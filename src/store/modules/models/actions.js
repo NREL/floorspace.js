@@ -151,7 +151,6 @@ export default {
         const space = context.getters.allSpaces.find(s => s.id === payload.space.id),
             validProperties = Object.keys(space),
             cleanedPayload = {};
-        console.log(JSON.parse(JSON.stringify(payload)));
 
         // remove extra properties from the payload
         for (var key in payload) {

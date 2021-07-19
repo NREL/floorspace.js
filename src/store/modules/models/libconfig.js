@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import factory, { allowableTypes, getDefaults } from './factory';
+import helpers from './helpers';
 import validators from './validators';
 import * as converters from './converters';
 import { textures } from '../application/appconfig';
@@ -519,34 +520,6 @@ const map = {
         },
       },
       {
-        name: 'thermal_zone_id',
-        displayName: 'Thermal Zone',
-        input_type: 'select',
-        select_data(space, state) {
-          const options = { '(none)': null };
-          state.models.library.thermal_zones.forEach((t) => { options[t.name] = t.id; });
-          return options;
-        },
-        get(space, state) {
-          const thermalZone = state.models.library.thermal_zones.find(b => b.id === space.thermal_zone_id);
-          return thermalZone ? thermalZone.name : null;
-        },
-      },
-      {
-        name: 'space_type_id',
-        displayName: 'Space Type',
-        input_type: 'select',
-        select_data(space, state) {
-          const options = { '(none)': null };
-          state.models.library.space_types.forEach((s) => { options[s.name] = s.id; });
-          return options;
-        },
-        get(space, state) {
-          const spaceType = state.models.library.space_types.find(s => s.id === space.space_type_id);
-          return spaceType ? spaceType.name : null;
-        },
-      },
-      {
         name: 'building_type_id',
         displayName: 'Building Type',
         input_type: 'select',
@@ -558,6 +531,42 @@ const map = {
         get(space, state) {
           const buildingType = state.models.library.building_types.find(b => b.id === space.building_type_id);
           return buildingType ? buildingType.name : null;
+        },
+      },
+      {
+        name: 'space_type_id',
+        displayName: 'Space Type',
+        input_type: 'select',
+        select_data(space, state) {
+          const options = { '(none)': null };
+          state.models.library.space_types.forEach((s) => { options[s.name] = s.id; });
+          return {
+            ...options,
+            ...helpers.spaceTypesForBuilding(space.building_type_id, space.template),
+          };
+        },
+        get(space, state) {
+          const spaceType = state.models.library.space_types.find(s => s.id === space.space_type_id);
+          return spaceType ? spaceType.name : null;
+        },
+      },
+      {
+        name: 'template',
+        displayName: 'Template',
+        input_type: 'text',
+      },
+      {
+        name: 'thermal_zone_id',
+        displayName: 'Thermal Zone',
+        input_type: 'select',
+        select_data(_space, state) {
+          const options = { '(none)': null };
+          state.models.library.thermal_zones.forEach((t) => { options[t.name] = t.id; });
+          return options;
+        },
+        get(space, state) {
+          const thermalZone = state.models.library.thermal_zones.find(b => b.id === space.thermal_zone_id);
+          return thermalZone ? thermalZone.name : null;
         },
       },
       {

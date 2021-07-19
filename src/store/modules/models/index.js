@@ -57,91 +57,91 @@ export default {
             space_types: [],
             building_types: [
                 {
-                    id: 'secondarySchool',
+                    id: 'SecondarySchool',
                     name: 'Secondary School',
                 },
                 {
-                    id: 'primarySchool',
+                    id: 'PrimarySchool',
                     name: 'Primary School',
                 },
                 {
-                    id: 'smallOffice',
+                    id: 'SmallOffice',
                     name: 'Small Office',
                 },
                 {
-                    id: 'mediumOffice',
+                    id: 'MediumOffice',
                     name: 'Medium Office',
                 },
                 {
-                    id: 'largeOffice',
+                    id: 'LargeOffice',
                     name: 'Large Office',
                 },
                 {
-                    id: 'smallHotel',
+                    id: 'SmallHotel',
                     name: 'Small Hotel',
                 },
                 {
-                    id: 'largeHotel',
+                    id: 'LargeHotel',
                     name: 'Large Hotel',
                 },
                 {
-                    id: 'warehouse',
+                    id: 'Warehouse',
                     name: 'Warehouse',
                 },
                 {
-                    id: 'retailStandalone',
+                    id: 'RetailStandalone',
                     name: 'Retail Standalone',
                 },
                 {
-                    id: 'retailStripmall',
+                    id: 'RetailStripmall',
                     name: 'Retail Stripmall',
                 },
                 {
-                    id: 'quickServiceRestaurant',
+                    id: 'QuickServiceRestaurant',
                     name: 'Quick Service Restaurant',
                 },
                 {
-                    id: 'fullServiceRestaurant',
+                    id: 'FullServiceRestaurant',
                     name: 'Full Service Restaurant',
                 },
                 {
-                    id: 'midriseApartment',
+                    id: 'MidriseApartment',
                     name: 'Midrise Apartment',
                 },
                 {
-                    id: 'highriseApartment',
+                    id: 'HighriseApartment',
                     name: 'Highrise Apartment',
                 },
                 {
-                    id: 'hospital',
+                    id: 'Hospital',
                     name: 'Hospital',
                 },
                 {
-                    id: 'outpatient',
+                    id: 'Outpatient',
                     name: 'Outpatient',
                 },
                 {
-                    id: 'superMarket',
+                    id: 'SuperMarket',
                     name: 'Super Market',
                 },
                 {
-                    id: 'laboratory',
+                    id: 'Laboratory',
                     name: 'Laboratory',
                 },
                 {
-                    id: 'largeDataCenterLowITE',
+                    id: 'LargeDataCenterLowITE',
                     name: 'Large Data Center Low ITE',
                 },
                 {
-                    id: 'largeDataCenterHighITE',
+                    id: 'LargeDataCenterHighITE',
                     name: 'Large Data Center High ITE',
                 },
                 {
-                    id: 'smallDataCenterLowITE',
+                    id: 'SmallDataCenterLowITE',
                     name: 'Small Data Center Low ITE',
                 },
                 {
-                    id: 'smallDataCenterHighITE',
+                    id: 'SmallDataCenterHighITE',
                     name: 'Small Data Center High ITE',
                 },
             ],
