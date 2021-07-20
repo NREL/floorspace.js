@@ -301,6 +301,10 @@ export default {
          this.min_y <= d.y && d.y <= this.max_y),
       );
     },
+    /**
+     * Watches all properties that can trigger a redraw
+     * This ensures that changes multiple properties at the same time only causes a single redraw
+     */
     redraw() {
       const { currentMode, polygons, images, windowDefs, doorDefs, currentSpace, currentShading } = this;
       return {

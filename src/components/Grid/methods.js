@@ -1362,11 +1362,13 @@ export default {
        this.clearComponentHighlights();
      })
      .on('end', () => {
+        // If there's no change from the last transform, redrawing is unnecessary here
         if (this._lastTransform === d3.event.transform) {
           return; 
         }
-       this._lastTransform = d3.event.transform;
-       this.draw({ zoomEnd: true });
+
+        this._lastTransform = d3.event.transform;
+        this.draw({ zoomEnd: true });
      });
 
     svg.call(this.zoomBehavior);
