@@ -708,6 +708,14 @@ export function vertInRing(vert, ring) {
   return helpers.inRing(toLst(vert), ring.map(toLst));
 }
 
+/**
+ * Given a story we're duplicating this method deep clones the object
+ * Generates new ids for the vertices, edges and faces
+ * Assigns those ids to the clonedGeometry as well an idMap
+ * Returns the clonedGeometry and idMap
+ *
+ * @param {'Story'} newStory
+ */
 export function replaceIdsForCloning(newStory) {
   const clonedGeometry = _.cloneDeep(newStory);
   const idMap = {};

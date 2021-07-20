@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import map from './libconfig';
 import idFactory from './../../utilities/generateId';
 
@@ -196,6 +197,15 @@ const helpers = {
         return state.library[type];
     }
   },
+  /**
+   * Given a story
+   * Generates new ids for the doors, windows, spaces and shading
+   * Assigns those ids to the clonedStory based on the idMap
+   * Returns the clonedStory
+   *
+   * @param {'Story'} story
+   * @param {*} idMap
+   */
   replaceIdsUpdateInfoForCloning(story, idMap) {
     const clonedStory = _.cloneDeep(story);
     clonedStory.doors.forEach((door) => {

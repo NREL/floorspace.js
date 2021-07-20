@@ -240,8 +240,8 @@ export default {
     },
     /**
      * Clones a given story
-     * Given a story this method deep clones the story, creates new ids for the edges / vertices
-     * and replaces the cloned story with those ids. Cleans up any artifacts afterwards. 
+     * Given a story this method deep clones the story, creates new ids for the properties
+     * and replaces the cloned story with those ids. Cleans up any artifacts. 
      *
      * @param {'Story'} story 
      */
