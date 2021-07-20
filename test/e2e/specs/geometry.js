@@ -84,7 +84,12 @@ module.exports = {
       .click('[data-object-type="spaces"] .add-new')
       .perform(drawSquare(-50, 50, 150, 50))
       .click('.duplicate')
-      .pause(6000);
+      .assert.containsText('[data-object-type="stories"] .rows div:nth-child(1)', 'Story 1')
+      .assert.containsText('[data-object-type="stories"] .rows .active', 'Story 2')
+      .assert.containsText('[data-object-type="spaces"] .rows', 'Space 2 - 1')
+      .assert.containsText('[data-object-type="spaces"] .rows', 'Space 2 - 2')
+      .assert.containsText('.polygons', 'Space 2 - 1')
+      .assert.containsText('.polygons', 'Space 2 - 2');
     finish(browser);
   },
 };
