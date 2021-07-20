@@ -270,12 +270,17 @@ export function errOnVertexIntersectsEdge(vertices, edges) {
 }
 
 export function errOnEdgeIntersectsEdge(vertices, edges) {
+  const vertexMap = vertices.reduce((acc, cur) => {
+    acc[cur.id] = cur;
+    return acc;
+  }, {});
+
   allPairs(edges).forEach(([e1, e2]) => {
     const
-      e1v1 = _.find(vertices, { id: e1.v1 }),
-      e1v2 = _.find(vertices, { id: e1.v2 }),
-      e2v1 = _.find(vertices, { id: e2.v1 }),
-      e2v2 = _.find(vertices, { id: e2.v2 });
+      e1v1 = vertexMap[e1.v1],
+      e1v2 = vertexMap[e1.v2],
+      e2v1 = vertexMap[e2.v1],
+      e2v2 = vertexMap[e2.v2];
 
     const intersection = geometryHelpers.intersectionOfLines(e1v1, e1v2, e2v1, e2v2);
     if (intersection) {

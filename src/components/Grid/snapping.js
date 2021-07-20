@@ -76,24 +76,36 @@ export function expandWindowAlongEdge(edge, center, { width, spacing, window_def
 }
 
 export function findClosestEdge(edges, cursor) {
-  const
-    withDistance = edges.map(e => ({
-      ...e,
-      ...pointDistanceToSegment(cursor, { start: e.v1, end: e.v2 }),
-    }));
+  // Use two references to defer creation of the object until the final return
+  let edge = undefined;
+  let dist = undefined;
+  let smallest = Infinity;
+  for (let e of edges) {
+    const d = pointDistanceToSegment(cursor, { start: e.v1, end: e.v2 });
 
-  let ret = undefined;
-  let smallest = NaN;
-  withDistance.forEach((d) => {
-    // The conditional is intentionally convoluted - simplifying it to just '' will have issues because it starts as NaN
-    // All comparisons to NaN return false, so for the first iteration it has to negate it
-    if (!(d.dist >= smallest)) {
+    if (d.dist < smallest) {
+      // Negative distances aren't possible, so getting a 0 is assured to be the closest
+      if (d.dist === 0) {
+        return {
+          ...e,
+          ...d,
+        };
+      }
+
       smallest = d.dist;
-      ret = d;
+      edge = e;
+      dist = d;
     }
-  });
+  }
 
-  return ret;
+  if (edge) {
+    return {
+      ...edge,
+      ...dist,
+    };
+  } else {
+    return undefined;
+  }
 }
 
 export function findClosestWindow(windows, cursor) {
