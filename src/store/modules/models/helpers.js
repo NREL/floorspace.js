@@ -208,29 +208,33 @@ const helpers = {
    */
   replaceIdsUpdateInfoForCloning(story, idMap) {
     const clonedStory = _.cloneDeep(story);
-    clonedStory.doors.forEach((door) => {
+    clonedStory.doors = clonedStory.doors.map((door) => {
       const newID = idFactory.generate();
       idMap[door.id] = newID;
       door.id = newID;
+      return door;
     });
-    clonedStory.windows.forEach((window) => {
+    clonedStory.windows = clonedStory.windows.map((window) => {
       const newID = idFactory.generate();
       idMap[window.id] = newID;
       window.id = newID;
+      return window;
     });
-    clonedStory.spaces.forEach((space) => {
+    clonedStory.spaces = clonedStory.spaces.map((space) => {
       const newID = idFactory.generate();
       idMap[space.id] = newID;
       space.id = newID;
       space.name = '';
       space.face_id = idMap[space.face_id];
+      return space;
     });
-    clonedStory.shading.forEach((shade) => {
+    clonedStory.shading = clonedStory.shading.map((shade) => {
       const newID = idFactory.generate();
       idMap[shade.id] = newID;
       shade.id = newID;
       shade.name = '';
       shade.face_id = idMap[shade.face_id];
+      return shade;
     });
     return { clonedStory };
   },
