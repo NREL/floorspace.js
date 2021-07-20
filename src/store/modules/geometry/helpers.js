@@ -306,10 +306,11 @@ const helpers = {
       v2,
     };
 
+    if (!denormalizedEdge.v1 || !denormalizedEdge.v2) {
+      return [];
+    }
+
     return vertices.filter((vertex) => {
-      if (!denormalizedEdge.v1 || !denormalizedEdge.v2) {
-        return false;
-      }
 
       const
         vertexIsEndpointById = denormalizedEdge.v1.id === vertex.id || denormalizedEdge.v2.id === vertex.id,
