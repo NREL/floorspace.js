@@ -180,7 +180,7 @@ export default {
     * CREATE OBJECT
     * initializes an empty object
     */
-    createObject({ duplicate = false }) {
+    createObject(duplicate = false) {
       if (duplicate) {
         const height = this.currentStory.floor_to_ceiling_height;
         this.$store.dispatch('models/initStory');
@@ -248,7 +248,7 @@ export default {
     cloneStory(story) {
       this.$store.dispatch('application/setCurrentStoryId', { id: story.id });
       const { clonedGeometry, idMap } = replaceIdsForCloning(this.currentStoryGeom);
-      this.createObject({ duplicate: true });
+      this.createObject(duplicate = true);
       const { clonedStory } = modelHelpers.replaceIdsUpdateInfoForCloning(story, idMap, this.state, this.currentStory);
       this.destroyDuplicateSpaces();
       this.$store.dispatch('models/cloneStory', clonedStory);
