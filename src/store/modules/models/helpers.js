@@ -240,8 +240,9 @@ const helpers = {
   },
 
   replaceSpaceNamesForCloning(state, type, story) {
-    story.spaces.forEach((space) => {
+    story.spaces = story.spaces.map((space) => {
       space.name = this.generateName(state, type, story);
+      return space;
     });
   },
 };
