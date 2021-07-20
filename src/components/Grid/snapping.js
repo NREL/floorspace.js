@@ -76,20 +76,15 @@ export function expandWindowAlongEdge(edge, center, { width, spacing, window_def
 }
 
 export function findClosestEdge(edges, cursor) {
-  const
-    withDistance = edges.map(e => ({
-      ...e,
-      ...pointDistanceToSegment(cursor, { start: e.v1, end: e.v2 }),
-    }));
-
   let ret = undefined;
   let smallest = Infinity;
-  withDistance.forEach((d) => {
+  for (let e of edges) {
+    const d = pointDistanceToSegment(cursor, { start: e.v1, end: e.v2 });
     if (d.dist < smallest) {
       smallest = d.dist;
       ret = d;
     }
-  });
+  }
 
   return ret;
 }
