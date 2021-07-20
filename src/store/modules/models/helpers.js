@@ -1,5 +1,4 @@
 import map from './libconfig';
-import _ from 'lodash';
 import idFactory from './../../utilities/generateId';
 
 const helpers = {

@@ -78,7 +78,7 @@ module.exports = {
       .assert.elementCount('.wall.exterior', 4);
     finish(browser);
   },
-  'cloning a space correctly clones all properties including shading and name(issue #178)': (browser) => {
+  'cloning a space correctly clones all properties(issue #178)': (browser) => {
     start(browser)
       .perform(draw50By50Square)
       .click('[data-object-type="spaces"] .add-new')
