@@ -180,7 +180,7 @@ export default {
     * CREATE OBJECT
     * initializes an empty object
     */
-    createObject({ duplicate }) {
+    createObject({ duplicate = false }) {
       if (duplicate) {
         const height = this.currentStory.floor_to_ceiling_height;
         this.$store.dispatch('models/initStory');
@@ -238,6 +238,13 @@ export default {
       if (!newestRow) { return; }
       this.selectedObject = newestRow;
     },
+    /**
+     * Clones a given story
+     * Given a story this method deep clones the story, creates new ids for the edges / vertices
+     * and replaces the cloned story with those ids. Cleans up any artifacts afterwards. 
+     *
+     * @param {'Story'} story 
+     */
     cloneStory(story) {
       this.$store.dispatch('application/setCurrentStoryId', { id: story.id });
       const { clonedGeometry, idMap } = replaceIdsForCloning(this.currentStoryGeom);
