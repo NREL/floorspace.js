@@ -301,6 +301,18 @@ export default {
          this.min_y <= d.y && d.y <= this.max_y),
       );
     },
+    redraw() {
+      const { currentMode, polygons, images, windowDefs, doorDefs, currentSpace, currentShading } = this;
+      return {
+        currentMode,
+        polygons,
+        images,
+        windowDefs,
+        doorDefs,
+        currentSpace,
+        currentShading,
+      };
+    }
   },
   watch: {
     // showTicks() { this.showOrHideAxes(); },
@@ -308,11 +320,10 @@ export default {
     gridVisible() { this.showOrHideAxes(); },
     spacing() { this.updateGrid(); },
     units() { this.reloadGridAndScales(); },
-    currentMode() { this.draw(); },
-    polygons() { this.draw(); },
-    images() { this.draw(); },
-    windowDefs() { this.draw(); },
-    doorDefs() { this.draw(); },
+    redraw: {
+      handler() { this.draw(); },
+      deep: true,
+    },
     currentTool() {
       this.points = [];
       this.draw();
@@ -329,11 +340,9 @@ export default {
     },
     currentSpace() {
       this.points = [];
-      this.draw();
     },
     currentShading() {
       this.points = [];
-      this.draw();
     },
     transform(newTransform, lastTransform) {
       // hide polygon names if zoomed out enough

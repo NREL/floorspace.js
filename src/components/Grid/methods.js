@@ -1362,7 +1362,10 @@ export default {
        this.clearComponentHighlights();
      })
      .on('end', () => {
-       // redraw the saved geometry
+        if (this._lastTransform === d3.event.transform) {
+          return; 
+        }
+       this._lastTransform = d3.event.transform;
        this.draw({ zoomEnd: true });
      });
 
