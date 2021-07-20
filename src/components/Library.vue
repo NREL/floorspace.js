@@ -180,13 +180,12 @@ export default {
     * CREATE OBJECT
     * initializes an empty object
     */
-    createObject(duplicate = false) {
+    createObject({ duplicate }) {
       if (duplicate) {
         const height = this.currentStory.floor_to_ceiling_height;
         this.$store.dispatch('models/initStory');
         this.$store.dispatch('models/updateStoryWithData', { story: this.currentStory, floor_to_ceiling_height: height });
         this.$store.dispatch('application/setCurrentTool', { tool: 'Rectangle' });
-        return;
       } else {
         switch (this.mode) {
           case 'stories':
@@ -248,7 +247,7 @@ export default {
     cloneStory(story) {
       this.$store.dispatch('application/setCurrentStoryId', { id: story.id });
       const { clonedGeometry, idMap } = replaceIdsForCloning(this.currentStoryGeom);
-      this.createObject(duplicate = true);
+      this.createObject({ duplicate: true });
       const { clonedStory } = modelHelpers.replaceIdsUpdateInfoForCloning(story, idMap, this.state, this.currentStory);
       this.destroyDuplicateSpaces();
       this.$store.dispatch('models/cloneStory', clonedStory);
