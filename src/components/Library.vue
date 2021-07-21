@@ -180,7 +180,7 @@ export default {
     * CREATE OBJECT
     * initializes an empty object
     */
-    createObject({ duplicate }) {
+    createObject({ duplicate = false } = {}) {
       console.log('duplicate: ', duplicate);
       if (duplicate) {
         const height = this.currentStory.floor_to_ceiling_height;
