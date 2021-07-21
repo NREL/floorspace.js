@@ -266,13 +266,21 @@ export default {
     });
   },
 
-    createObjectWithType (context, payload) {
-        const type = payload.type,
-            name = helpers.generateName(context.state, type),
-            object = new helpers.map[type].init({ name });
+  createObjectWithType (context, payload) {
+    const type = payload.type,
+      name = helpers.generateName(context.state, type),
+      object = new helpers.map[type].init({ name });
 
-        context.commit('initObject', { type, object });
-    },
+    context.commit('initObject', { type, object });
+  },
+
+  createObjectWithTypeAndSelect (context, payload) {
+    const { space_id, type, type_id } = payload,
+      name = helpers.generateName(context.state, type),
+      object = new helpers.map[type].init({ name });
+
+    context.commit('initObjectWithSelection', { space_id, type, type_id, object });
+  },
 
   selectStory(context, payload) {
     const story = payload.story;

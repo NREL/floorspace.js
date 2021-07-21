@@ -8,7 +8,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
   <div class='input-select'>
       <label v-if="label">{{ label }}</label>
-      <select @change="$emit('change', $event.target.value)" :disabled="disabled">
+      <select @change="handleInput" :disabled="disabled">
           <option v-for='opt in normalizedOpts' :value="opt.val" :selected="opt.val === value">{{ opt.display }}</option>
       </select>
       <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
@@ -22,24 +22,51 @@ import _ from 'lodash';
 
 export default {
   name: 'PrettySelect',
-  props: ['options', 'value', 'label', 'disabled'],
+  props: ['options', 'value', 'label', 'disabled', 'editable', 'space_id', 'type', 'type_id'],
   computed: {
     normalizedOpts() {
+      const attachEditable = (arr) => {
+        if (this.editable) {
+          return [...arr, {
+            val: 'Create New',
+            display: 'Create New',
+          }];
+        } else {
+          return arr;
+        }
+      }
+
       if (_.isArray(this.options)) {
         if (!this.options.length) {
-          return [];
+          return attachEditable([]);
         }
         if (_.has(this.options[0], 'val') && _.has(this.options[0], 'display')) {
-          return this.options;
+          return attachEditable(this.options);
         }
         if (_.isString(this.options[0])) {
-          return this.options.map(o => ({ val: o, display: o }));
+          return attachEditable(this.options.map(o => ({ val: o, display: o })));
         }
       }
       console.warn('unrecognized options structure', this.options);
       return this.options;
     }
   },
+  methods: {
+    handleInput(event) {
+      if (event.target.value === 'Create New') {
+        event.stopPropagation();
+        event.preventDefault();
+
+        this.$store.dispatch('models/createObjectWithTypeAndSelect', {
+          type: this.type,
+          type_id: this.type_id,
+          space_id: this.space_id,
+        });
+      } else {
+        this.$emit('change', event.target.value);
+      }
+    },
+  }
 }
 
 </script>

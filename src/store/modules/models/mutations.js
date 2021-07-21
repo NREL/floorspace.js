@@ -10,6 +10,19 @@ export default {
     state.library[payload.type].push(payload.object);
   },
 
+  initObjectWithSelection(state, payload) {
+    state.library[payload.type].push(payload.object);
+
+    for (let story of state.stories) {
+      for (let space of story.spaces) {
+        if (space.id === payload.space_id) {
+          space[payload.type_id] = payload.object.id;
+          return;
+        }
+      }
+    }
+  },
+
   destroySpace(state, payload) {
     payload.story.spaces.splice(payload.story.spaces.findIndex((s) => {
       return s.id === payload.space.id;
