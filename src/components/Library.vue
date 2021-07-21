@@ -105,7 +105,7 @@ export default {
     },
     ...mapState({
       stories: state => state.models.stories,
-       modeTab: state => state.application.currentSelections.modeTab,
+      modeTab: state => state.application.currentSelections.modeTab,
     }),
     spaces() { return this.currentStory.spaces; },
     shading() { return this.currentStory.shading; },
@@ -213,7 +213,7 @@ export default {
       this.selectLatest();
     },
     async duplicateRow(row) {
-      if(this.selectedObject.name.includes('Story')) {
+      if(this.stories.find((story) => story.id === this.selectedObject.id)) {
         this.cloneStory(this.selectedObject);
       } else {
         this.createObject();
