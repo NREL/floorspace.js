@@ -25,11 +25,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import libconfig from '../store/modules/models/libconfig';
 import EditableSelectList from './EditableSelectList.vue';
 import helpers from '../store/modules/models/helpers';
+import { replaceIdsForCloning } from './../store/modules/geometry/helpers';
 import { assignableProperties, componentTypes } from '../store/modules/application/appconfig';
+import modelHelpers from '../store/modules/models/helpers';
 
 
 function keyForMode(mode) {
@@ -52,6 +54,9 @@ export default {
     document.body.removeEventListener('keyup', this.hotkeyAddNew);
   },
   computed: {
+    ...mapGetters({
+      currentStoryGeom: 'application/currentStoryGeometry',
+    }),
     objectTypesDisplay() {
       return this.objectTypes.map(ot => ({
         val: ot,
@@ -100,7 +105,7 @@ export default {
     },
     ...mapState({
       stories: state => state.models.stories,
-       modeTab: state => state.application.currentSelections.modeTab,
+      modeTab: state => state.application.currentSelections.modeTab,
     }),
     spaces() { return this.currentStory.spaces; },
     shading() { return this.currentStory.shading; },
@@ -175,51 +180,90 @@ export default {
     * CREATE OBJECT
     * initializes an empty object
     */
-    createObject() {
-      switch (this.mode) {
-        case 'stories':
-          this.$store.dispatch('models/initStory');
-          return;
-        case 'spaces':
-          this.$store.dispatch('models/initSpace', { story: this.currentStory });
-          break;
-        case 'shading':
-          this.$store.dispatch('models/initShading', { story: this.currentStory });
-          break;
-        case 'images':
-          window.eventBus.$emit('uploadImage');
-          break;
-        case 'windows':
-        case 'daylighting_controls':
-          window.eventBus.$emit('error', 'Create components by clicking where you would like it to be');
-          break;
-        default:
-          this.$store.dispatch('models/createObjectWithType', { type: this.mode });
-          break;
+    createObject({ duplicate = false } = {}) {
+      if (duplicate) {
+        const height = this.currentStory.floor_to_ceiling_height;
+        this.$store.dispatch('models/initStory');
+        this.$store.dispatch('models/updateStoryWithData', { story: this.currentStory, floor_to_ceiling_height: height });
+        this.$store.dispatch('application/setCurrentTool', { tool: 'Rectangle' });
+      } else {
+        switch (this.mode) {
+          case 'stories':
+            this.$store.dispatch('models/initStory');
+            return;
+          case 'spaces':
+            this.$store.dispatch('models/initSpace', { story: this.currentStory });
+            break;
+          case 'shading':
+            this.$store.dispatch('models/initShading', { story: this.currentStory });
+            break;
+          case 'images':
+            window.eventBus.$emit('uploadImage');
+            break;
+          case 'windows':
+          case 'daylighting_controls':
+            window.eventBus.$emit('error', 'Create components by clicking where you would like it to be');
+            break;
+          default:
+            this.$store.dispatch('models/createObjectWithType', { type: this.mode });
+            break;
+        }
       }
       this.selectLatest();
     },
     async duplicateRow(row) {
-      this.createObject();
-      await this.$nextTick();
-      let newName = row.name;
-      // increment Copy # until no name conflict.
-      while (_.find(this.rows, { name: newName })) {
-        let copyNum = newName.match(/\((\d+)\)/);
-        newName = copyNum ? `${newName.slice(0, copyNum.index)}(${+copyNum[1] + 1})` : `${newName} (2)`;
+      if(this.stories.find((story) => story.id === this.selectedObject.id)) {
+        this.cloneStory(this.selectedObject);
+      } else {
+        this.createObject();
+        await this.$nextTick();
+        let newName = row.name;
+        // increment Copy # until no name conflict.
+        while (_.find(this.rows, { name: newName })) {
+          let copyNum = newName.match(/\((\d+)\)/);
+          newName = copyNum ? `${newName.slice(0, copyNum.index)}(${+copyNum[1] + 1})` : `${newName} (2)`;
+        }
+        this.modifyObject(this.selectedObject.id, 'name', newName);
+        this.columns.forEach(({ name: key, readonly, private: privateKey }) => {
+          if (key === 'id' || key === 'name' || key === 'color') return;
+          if (readonly || privateKey) return;
+          if (this.selectedObject[key] === row[key]) return;
+          this.modifyObject(this.selectedObject.id, key, row[key]);
+        });
       }
-      this.modifyObject(this.selectedObject.id, 'name', newName);
-      this.columns.forEach(({ name: key, readonly, private: privateKey }) => {
-        if (key === 'id' || key === 'name' || key === 'color') return;
-        if (readonly || privateKey) return;
-        if (this.selectedObject[key] === row[key]) return;
-        this.modifyObject(this.selectedObject.id, key, row[key]);
-      });
     },
     selectLatest() {
       const newestRow = _.maxBy(this.rows, r => +r.id);
       if (!newestRow) { return; }
       this.selectedObject = newestRow;
+    },
+    /**
+     * Clones a given story
+     * Given a story this method deep clones the story, creates new ids for the properties
+     * and replaces the cloned story with those ids. Cleans up any artifacts. 
+     *
+     * @param {'Story'} story 
+     */
+    cloneStory(story) {
+      this.$store.dispatch('application/setCurrentStoryId', { id: story.id });
+      const { clonedGeometry, idMap } = replaceIdsForCloning(this.currentStoryGeom);
+      this.createObject({ duplicate: true });
+      const { clonedStory } = modelHelpers.replaceIdsUpdateInfoForCloning(story, idMap, this.state, this.currentStory);
+      this.destroyDuplicateSpaces();
+      this.$store.dispatch('models/cloneStory', clonedStory);
+      this.$store.dispatch('geometry/cloneStoryGeometry', clonedGeometry);
+      for (let i = this.currentStory.shading.length - 1; i >= 0; i--) {
+        this.$store.dispatch('models/destroyShading', {
+          shading: this.currentStory.shading[i],
+          story: this.currentStory,
+        });
+      }
+    },
+    destroyDuplicateSpaces() {
+      this.$store.dispatch('models/destroySpace', {
+        space: this.currentStory.spaces[0],
+        story: this.currentStory,
+      });
     },
 
     /*

@@ -70,12 +70,26 @@ module.exports = {
       .assert.validGeometry();
     finish(browser);
   },
-  'combine edges when extending an existing space (issue #253': (browser) => {
+  'combine edges when extending an existing space (issue #253)': (browser) => {
     // Assert we have 4 edges and not 6
     start(browser)
       .perform(draw50By50Square)
       .perform(drawSquare(-50, 50, 50, 50))
       .assert.elementCount('.wall.exterior', 4);
+    finish(browser);
+  },
+  'cloning a space correctly clones all properties(issue #178)': (browser) => {
+    start(browser)
+      .perform(draw50By50Square)
+      .click('[data-object-type="spaces"] .add-new')
+      .perform(drawSquare(-50, 50, 150, 50))
+      .click('.duplicate')
+      .assert.containsText('[data-object-type="stories"] .rows div:nth-child(1)', 'Story 1')
+      .assert.containsText('[data-object-type="stories"] .rows .active', 'Story 2')
+      .assert.containsText('[data-object-type="spaces"] .rows', 'Space 2 - 1')
+      .assert.containsText('[data-object-type="spaces"] .rows', 'Space 2 - 2')
+      .assert.containsText('.polygons', 'Space 2 - 1')
+      .assert.containsText('.polygons', 'Space 2 - 2');
     finish(browser);
   },
 };

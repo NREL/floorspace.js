@@ -1,4 +1,6 @@
+import _ from 'lodash';
 import map from './libconfig';
+import idFactory from './../../utilities/generateId';
 
 const helpers = {
 
@@ -194,6 +196,54 @@ const helpers = {
       default:
         return state.library[type];
     }
+  },
+  /**
+   * Given a story
+   * Generates new ids for the doors, windows, spaces and shading
+   * Assigns those ids to the clonedStory based on the idMap
+   * Returns the clonedStory
+   *
+   * @param {'Story'} story
+   * @param {*} idMap
+   */
+  replaceIdsUpdateInfoForCloning(story, idMap) {
+    const clonedStory = _.cloneDeep(story);
+    clonedStory.doors = clonedStory.doors.map((door) => {
+      const newID = idFactory.generate();
+      idMap[door.id] = newID;
+      door.id = newID;
+      return door;
+    });
+    clonedStory.windows = clonedStory.windows.map((window) => {
+      const newID = idFactory.generate();
+      idMap[window.id] = newID;
+      window.id = newID;
+      return window;
+    });
+    clonedStory.spaces = clonedStory.spaces.map((space) => {
+      const newID = idFactory.generate();
+      idMap[space.id] = newID;
+      space.id = newID;
+      space.name = '';
+      space.face_id = idMap[space.face_id];
+      return space;
+    });
+    clonedStory.shading = clonedStory.shading.map((shade) => {
+      const newID = idFactory.generate();
+      idMap[shade.id] = newID;
+      shade.id = newID;
+      shade.name = '';
+      shade.face_id = idMap[shade.face_id];
+      return shade;
+    });
+    return { clonedStory };
+  },
+
+  replaceSpaceNamesForCloning(state, type, story) {
+    story.spaces = story.spaces.map((space) => {
+      space.name = this.generateName(state, type, story);
+      return space;
+    });
   },
 };
 export default helpers;

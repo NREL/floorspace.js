@@ -183,4 +183,8 @@ export default {
 
     commit('trimGeometry', { geometry_id, vertsReferencedElsewhere: vertsReferencedByDCs });
   },
+  cloneStoryGeometry(context, payload) {
+    const currentStory = context.rootGetters['application/currentStoryGeometry'];
+    context.commit('updateClonedGeometry', { newGeom: payload, currentStoryId: currentStory.id });
+  },
 };

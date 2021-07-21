@@ -422,37 +422,34 @@ export default {
               })));
     },
     polygonsFromGeometry(geometry, extraPolygonAttrs = {}) {
-      const
-        geom = geometryHelpers.denormalize(geometry)
+      const geom = geometryHelpers.denormalize(geometry);
       const polygons = geom.faces.map((face) => {
         // look up the model (space or shading) associated with the face
-        const
-          model = modelHelpers.modelForFace(this.$store.state.models, face.id),
+        const model = modelHelpers.modelForFace(this.$store.state.models, face.id);
           // <polygon> are automatically closed, so no need to repeat start vertex
-          points = face.vertices.slice(0, -1),
-          polygon = {
-            face_id: face.id,
-            name: model.name,
-            modelType: model.type,
-            color: model.color,
-            points,
-            labelPosition: this.polygonLabelPosition(points),
-            windows: this.windowsOnFace(face),
-            doors: this.doorsOnFace(face),
-            current: (
-              (this.currentTool !== 'Apply Property' && this.currentSpace && face.id === this.currentSpace.face_id) ||
-              (this.currentTool !== 'Apply Property' && this.currentShading && face.id === this.currentShading.face_id) ||
-              (this.currentTool === 'Apply Property' && this.currentSpaceProperty && model[this.spacePropertyKey] === this.currentSpaceProperty.id)
-            ),
-            daylighting_controls: (model.daylighting_controls || [])
-              .map(dc => ({
-                ...geometryHelpers.vertexForId(dc.vertex_id, geometry),
-                selected: dc.id === this.currentComponentInstanceId,
-                facingSelection:  dc.id === this.componentFacingSelection,
-              })),
-            ...extraPolygonAttrs,
-          };
-
+        const points = face.vertices.slice(0, -1);
+        const polygon = {
+          face_id: face.id,
+          name: model.name,
+          modelType: model.type,
+          color: model.color,
+          points,
+          labelPosition: this.polygonLabelPosition(points),
+          windows: this.windowsOnFace(face),
+          doors: this.doorsOnFace(face),
+          current: (
+            (this.currentTool !== 'Apply Property' && this.currentSpace && face.id === this.currentSpace.face_id) ||
+            (this.currentTool !== 'Apply Property' && this.currentShading && face.id === this.currentShading.face_id) ||
+            (this.currentTool === 'Apply Property' && this.currentSpaceProperty && model[this.spacePropertyKey] === this.currentSpaceProperty.id)
+          ),
+          daylighting_controls: (model.daylighting_controls || [])
+            .map(dc => ({
+              ...geometryHelpers.vertexForId(dc.vertex_id, geometry),
+              selected: dc.id === this.currentComponentInstanceId,
+              facingSelection:  dc.id === this.componentFacingSelection,
+            })),
+          ...extraPolygonAttrs,
+        };
         if (!points.length) {
           return null; // don't render point-less polygons
         }
