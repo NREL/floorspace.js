@@ -181,7 +181,6 @@ export default {
     * initializes an empty object
     */
     createObject({ duplicate = false } = {}) {
-      console.log('duplicate: ', duplicate);
       if (duplicate) {
         const height = this.currentStory.floor_to_ceiling_height;
         this.$store.dispatch('models/initStory');
