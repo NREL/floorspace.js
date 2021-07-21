@@ -10,6 +10,12 @@ export default {
     state.library[payload.type].push(payload.object);
   },
 
+  /**
+   * Modifies the state to create a new object and select it on the provided space
+   * @param {*} state 
+   * @param {{ object: { space_id: number, type: string, type_id: string }}} payload 
+   * @returns 
+   */
   initObjectWithSelection(state, payload) {
     state.library[payload.type].push(payload.object);
 

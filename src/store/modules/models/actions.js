@@ -274,6 +274,13 @@ export default {
     context.commit('initObject', { type, object });
   },
 
+  /**
+   * Creates a new object in the library and selects it on the targeted space
+   *
+   * @param {{state: any}} context Context for the mutation; contains the current state
+   * @param {{ space_id: number, type: string, type_id: string }} payload Information about the object and space.
+   *  Contains the ID of the space to update along with the type of object to create
+   */
   createObjectWithTypeAndSelect (context, payload) {
     const { space_id, type, type_id } = payload,
       name = helpers.generateName(context.state, type),

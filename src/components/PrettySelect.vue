@@ -8,7 +8,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
   <div class='input-select'>
       <label v-if="label">{{ label }}</label>
-      <select @change="handleInput" :disabled="disabled">
+      <select ref="select" @change="handleChange" :disabled="disabled">
           <option v-for='opt in normalizedOpts' :value="opt.val" :selected="opt.val === value">{{ opt.display }}</option>
       </select>
       <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
@@ -52,10 +52,20 @@ export default {
     }
   },
   methods: {
-    handleInput(event) {
+    /**
+     * Handles a change in the selection
+     * If the target is 'Create New', it will dispatch an event to create a new option in the select
+     * 
+     * @param event
+     */
+    handleChange(event) {
       if (event.target.value === 'Create New') {
         event.stopPropagation();
         event.preventDefault();
+
+        // The select attempts to change to 'Create New' on select before the state updates
+        // Manually forcing it back to the old value temporarily prevents that
+        this.$refs.select.value = this.value;
 
         this.$store.dispatch('models/createObjectWithTypeAndSelect', {
           type: this.type,
