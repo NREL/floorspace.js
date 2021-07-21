@@ -25,6 +25,9 @@ export default {
   props: ['options', 'value', 'label', 'disabled', 'editable', 'space_id', 'type', 'type_id'],
   computed: {
     normalizedOpts() {
+      /**
+       * Appends an additional option for creating new options if the editable flag is enabled
+       */
       const attachEditable = (arr) => {
         if (this.editable) {
           return [...arr, {
