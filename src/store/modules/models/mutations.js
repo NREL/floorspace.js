@@ -48,6 +48,14 @@ export default {
     story.images.push(payload.image);
   },
 
+  /**
+   * Updates the basic data stored on the space
+   * If the building type is changed, it will affect all other spaces in the same building unit
+   * If the building unit is changed, it will change the type of the building to match all other spaces with that building unit
+   *
+   * @param {*} state State to update
+   * @param {*} payload Payload with data fields to update on the space
+   */
   updateSpaceWithData(state, payload) {
     const space = payload.space;
 
