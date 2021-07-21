@@ -735,6 +735,20 @@
 						"boolean",
 						"null"
 					]
+				},
+				"building_type_id": {
+					"description": "Standard space type",
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"template": {
+					"description": "Template for the space to follow",
+					"type": [
+						"string",
+						"null"
+					]
 				}
 			},
 			"required": [
@@ -752,7 +766,9 @@
 				"floor_to_ceiling_height",
 				"above_ceiling_plenum_height",
 				"floor_offset",
-				"open_to_below"
+				"open_to_below",
+				"building_type_id",
+				"template"
 			]
 		},
 		"Shading": {

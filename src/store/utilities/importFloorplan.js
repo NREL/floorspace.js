@@ -128,6 +128,7 @@ export default function importFloorplan(context, payload) {
       stories: withStoryDefaults(stories),
       library: {
         building_units: withHandleProp(payload.data.building_units),
+        building_types: withHandleProp(payload.data.building_types),
         thermal_zones: withHandleProp(payload.data.thermal_zones),
         space_types: withHandleProp(payload.data.space_types),
         construction_sets: withHandleProp(payload.data.construction_sets),

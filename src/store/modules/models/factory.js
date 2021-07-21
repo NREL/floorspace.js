@@ -151,4 +151,12 @@ export default {
       color: generateColor('pitched_roof'),
     };
   },
+  BuildingType({ name } = {}) {
+    return {
+      ...getDefaults('BuildingType'),
+      id: idFactory.generate(),
+      name,
+      color: generateColor('building_type'),
+    };
+  }
 };

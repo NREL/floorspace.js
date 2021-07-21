@@ -27,6 +27,9 @@ var webpackConfig = merge(baseConfig, {
       js: 'isparta'
     }
   },
+  resolve: {
+    src: path.resolve(__dirname, '../../src'),
+  },
   plugins: [
     new webpack.DefinePlugin({
       'process.env': require('../../config/test.env')
