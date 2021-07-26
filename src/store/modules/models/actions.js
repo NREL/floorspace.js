@@ -80,22 +80,22 @@ export default {
     },
 
     destroyShading (context, payload) {
-        const story = context.state.stories.find(s => s.id === payload.story.id),
-            shading = story.shading.find(s => s.id === payload.shading.id);
+      const story = context.state.stories.find(s => s.id === payload.story.id),
+        shading = story.shading.find(s => s.id === payload.shading.id);
 
-        context.commit('destroyShading', {
-            shading: shading,
-            story: story
-        });
+      context.commit('destroyShading', {
+        shading,
+        story,
+      });
 
-        const face = context.rootGetters['application/currentStoryGeometry'].faces.find(f => f.id === shading.face_id);
-        if (face) {
-            // destroy face associated with the space
-            context.dispatch('geometry/destroyFaceAndDescendents', {
-                face: face,
-                geometry_id: context.rootGetters['application/currentStoryGeometry'].id
-            }, { root: true });
-        }
+      const face = context.rootGetters['application/currentStoryGeometry'].faces.find(f => f.id === shading.face_id);
+      if (face) {
+        // destroy face associated with the space
+        context.dispatch('geometry/destroyFaceAndDescendents', {
+          face,
+          geometry_id: context.rootGetters['application/currentStoryGeometry'].id
+        }, { root: true });
+      }
     },
 
     destroyImage (context, payload) {
@@ -277,6 +277,10 @@ export default {
   selectStory(context, payload) {
     const story = payload.story;
     context.dispatch('application/setCurrentStoryId', { id: story.id }, { root: true });
+  },
+  cloneStory(context, payload) {
+    const currentStory = context.rootGetters['application/currentStory'];
+    context.commit('cloneObjectArray', { storyInfo: payload, currentStory });
   },
 
   createWindow(context, payload) {
