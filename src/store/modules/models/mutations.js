@@ -63,12 +63,15 @@ export default {
       state.stories = state.stories.map((story) => {
         return {
           ...story,
-          spaces: story.spaces.filter(s => s.building_unit_id === space.building_unit_id)
-            .map((s) => {
-              return {
-                ...s,
-                building_type_id: payload.building_type_id,
-              };
+          spaces: story.spaces.map((s) => {
+              if (s.building_unit_id === space.building_unit_id) {
+                return {
+                  ...s,
+                  building_type_id: payload.building_type_id,
+                };
+              } else {
+                return s;
+              }
             })
         };
       });
