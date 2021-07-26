@@ -60,9 +60,17 @@ export default {
     const space = payload.space;
 
     if (payload.building_type_id && space.building_unit_id) {
-      state.stories.forEach((story) => {
-        story.spaces.filter(s => s.building_unit_id === space.building_unit_id)
-          .forEach(s => s.building_type_id = payload.building_type_id);
+      state.stories = state.stories.map((story) => {
+        return {
+          ...story,
+          spaces: story.spaces.filter(s => s.building_unit_id === space.building_unit_id)
+            .map((s) => {
+              return {
+                ...s,
+                building_type_id: payload.building_type_id,
+              };
+            })
+        };
       });
     } else if (payload.building_unit_id) {
       let found = false;
