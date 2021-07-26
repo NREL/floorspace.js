@@ -577,7 +577,7 @@ const helpers = {
     }
 
     return hash;
-  }
+  },
 
   /**
    * Given a story
