@@ -26,6 +26,7 @@ export function trimGeometry(state, { geometry_id, vertsReferencedElsewhere }) {
   }
   geometry.vertices = newVerts;
   geometry.edges = newEdges;
+  geometry.faces = geometry.faces.filter(face => face.edgeRefs.length > 0);
 }
 
 export function initGeometry(state, payload) {

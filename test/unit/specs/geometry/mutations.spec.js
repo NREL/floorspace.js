@@ -92,4 +92,20 @@ describe('trimGeometry', () => {
     trimGeometry([geometry], { geometry_id: geometry.id, vertsReferencedElsewhere: ['used by daylighting control'] });
     assert(_.find(geometry.vertices, { id: 'used by daylighting control' }));
   });
+
+  it('removes faces that have no edges', () => {
+    const geometry = _.cloneDeep(simpleGeometry);
+    const length = geometry.faces.length;
+    // Verify that we start with two points
+    assertEqual(length, 2);
+    geometry.faces[length - 1].edgeRefs = [];
+
+    // Verify that only faces without edges are removed
+    trimGeometry([geometry], { geometry_id: geometry.id });
+    assertEqual(geometry.faces.length, length - 1);
+
+    geometry.faces[0].edgeRefs = [];
+    trimGeometry([geometry], { geometry_id: geometry.id });
+    assertEqual(geometry.faces.length, length - 2);
+  });
 });
