@@ -7,98 +7,139 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
   <div class="editable-table">
-    <el-table
-      :data="sortedRows"
-      height="calc(50vh - 105px)"
-      @sort-change="sortChange"
-      empty-text="No data"
+    <RecycleScroller
+      id="recycle-scroller"
+      class="scroller"
+      :items="sortedRows"
+      @scroll.native="wrapperScrollLeft = $event.target.scrollLeft"
+      container-tag="table"
+      content-tag="tbody"
+      :item-size="70"
     >
-      <TableColumn
-        prop="select"
-        label=""
-        class="select"
-        width="35"
-        :fixed="true"
-      >
-        <template slot-scope="scope">
-          <div class="select" @click.stop="selectRow(scope.row)">
-            <input type="radio" :checked="selectedItemId === scope.row.id" />
+      <template #before>
+        <div
+          id="fixedHeader"
+          class="flex-row"
+          v-bind:class="{ fixed: !isScenarioTab }"
+          :style="{
+            '-webkit-transform': 'translateX(' + -wrapperScrollLeft + 'px)',
+            transform: 'translateX(' + -wrapperScrollLeft + 'px)',
+            'clip-path': `polygon(${wrapperScrollLeft}px 0%, 100% 0%, 100% 100%, ${wrapperScrollLeft}px 100%)`,
+          }"
+        >
+          <div class="checkbox-header"></div>
+          <div
+            v-for="col in visibleColumns"
+            v-bind:class="{ active: sortKey === col.name }"
+            class="headers"
+            :fixed="col.fixed"
+            :id="col.displayName.replace(/\s/g, '')"
+            :key="col.name"
+            :data-column="col.name"
+            :prop="col.name"
+            :label="col.displayName"
+            :class-name="`column__${col.name}`"
+            @click="sortBy(col.name)"
+            :min-width="col.width || 165"
+          >
+            {{ col.displayName }}
+            <i
+              v-if="
+                sortKey !== col.name || (sortKey === col.name && sortDescending)
+              "
+              class="icon-chevron-down"
+            ></i>
+            <i
+              v-if="sortKey === col.name && !sortDescending"
+              class="icon-chevron-up"
+            ></i>
           </div>
-        </template>
-      </TableColumn>
-      <TableColumn
-        v-for="col in visibleColumns"
-        :key="col.name"
-        :data-column="col.name"
-        :prop="col.name"
-        :label="col.displayName"
-        :class-name="`column__${col.name}`"
-        width="154"
-        :fixed="col.name == 'name'"
-        sortable="custom"
-      >
-        <template slot-scope="scope">
+        </div>
+      </template>
+      <template v-slot="{ item }">
+        <div class="cell table-data flex-row table-first-column">
+          <div class="select" @click.stop="selectRow(item)">
+            <input type="radio" :checked="selectedItemId === item.id" />
+          </div>
           <generic-input
-              :col="col"
-              :row="scope.row"
-              :onChange="updateRow.bind(null, scope.row.id, col.name)"
+            :col="visibleColumns[0]"
+            :row="item"
+            :onChange="updateRow.bind(null, item.id, visibleColumns[0].name)"
           />
-        </template>
-      </TableColumn>
-      <TableColumn
-        prop="duplicate"
-        label=""
-        class="duplicate"
-        width="35"
-      >
-        <template slot-scope="scope">
-          <div class="duplicate" @click.stop="duplicateRow(scope.row)" title="duplicate">
-            <Copy class="button" />
+        </div>
+        <div
+          class="row-styles flex-row"
+          :fixed="item.fixed"
+          :key="item.id"
+          :data-column="item.name"
+          :prop="item.name"
+          :label="item.displayName"
+          :class-name="`column__${item.name}`"
+          :min-width="item.width || 154"
+        >
+          <div
+            v-for="col in visibleColumns.slice(1)"
+            :key="col.name"
+            :data-column="col.name"
+            :prop="col.name"
+            :label="col.displayName"
+            class="cell table-data"
+          >
+            <generic-input
+              :col="col"
+              :row="item"
+              :onChange="updateRow.bind(null, item.id, col.name)"
+            />
           </div>
-        </template>
-      </TableColumn>
 
-      <TableColumn
-        prop="destroy"
-        label=""
-        class="destroy"
-        width="35"
-      >
-        <template slot-scope="scope">
-          <div class="destroy" @click.stop="deleteRow(scope.row)" title="delete">
-            <Delete class="button" />
+          <div>
+            <div class="duplicate" @click.stop="duplicateRow(item)" title="duplicate">
+              <Copy class="button" />
+            </div>
           </div>
-        </template>
-      </TableColumn>
-    </el-table>
+
+          <div>
+            <div class="destroy" @click.stop="deleteRow(item)" title="destroy">
+              <Delete class="button" />
+            </div>
+          </div>
+
+        </div>
+      </template>
+    </RecycleScroller>
   </div>
 </template>
 
 <script>
-import _ from 'lodash';
-import { Table, TableColumn } from 'element-ui';
-import 'element-ui/lib/theme-chalk/index.css';
-import { mapState, mapGetters } from 'vuex';
-import Delete from './../assets/svg-icons/delete.svg';
-import Copy from './../assets/svg-icons/copy_icon.svg';
+import _ from "lodash";
+import { RecycleScroller } from "vue-virtual-scroller";
+import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
+import Delete from "./../assets/svg-icons/delete.svg";
+import Copy from "./../assets/svg-icons/copy_icon.svg";
 
 export default {
-  name: 'EditableTable',
+  name: "EditableTable",
   props: [
-    'columns', 'rows', 'deleteRow', 'updateRow',
-    'selectRow', 'selectedItemId', 'duplicateRow',
+    "columns",
+    "rows",
+    "deleteRow",
+    "updateRow",
+    "selectRow",
+    "selectedItemId",
+    "duplicateRow",
   ],
   data() {
     return {
-      sortKey: r => +r.id,
+      sortKey: (r) => +r.id,
       sortDescending: false,
     };
   },
   computed: {
     visibleColumns() {
-      return _.reject(this.columns, 'private');
+      return _.reject(this.columns, "private");
     },
     sortedRows() {
+      console.log(this.rows, this.columns, this.visibleColumns);
       const sRows = _.sortBy(this.rows, this.sortKey);
       if (this.sortDescending) {
         sRows.reverse();
@@ -108,19 +149,19 @@ export default {
   },
   methods: {
     sortChange({ prop, order }) {
-        this.sortKey = prop;
-        this.sortDescending = (order === 'descending');
+      this.sortKey = prop;
+      this.sortDescending = order === "descending";
     },
     sortBy(colName) {
-      this.sortDescending = this.sortKey === colName ? !this.sortDescending : true;
+      this.sortDescending =
+        this.sortKey === colName ? !this.sortDescending : true;
       this.sortKey = colName;
     },
   },
   components: {
     Delete,
     Copy,
-    'el-table': Table,
-    TableColumn,
+    RecycleScroller,
   },
 };
 </script>
@@ -128,84 +169,200 @@ export default {
 <style lang="scss">
 @import "./../scss/config";
 
-  .editable-table {
-    .el-table::before, .el-table__fixed-right::before, .el-table__fixed::before {
-      width: 0;
-    }
-    .el-table__body-wrapper {
-      background-color: $gray-medium;
-    }
-    .el-table td, .el-table th.is-leaf {
-      border-bottom: none;
-    }
-    .el-table__header-wrapper {
-      background-color: $gray-medium;
-    }
-    .el-table table {
-      tbody, thead {
-        tr, tr:hover {
-          td, th {
-            background-color: $gray-medium;
-            padding: 0;
-            height: 3rem;
-            .cell {
-              text-align: center;
-              word-break: break-word;
-              color: $gray-lightest;
-              input {
-                  width: 100%;
-              }
-            }
-            .destroy, .select, .duplicate {
-                width: 35px;
-                > [type="radio"] {
-                    width: 25px;
-                }
-                > svg {
-                    margin-top: 12px;
-                    margin-left: -6px;
-                }
-                margin: 0 auto;
-                padding: 0;
-            }
-            .duplicate svg {
-              margin-top: 2px;
-              width: 20px;
-            }
+.scroller {
+  height: calc(50vh - 151px);
+  margin-top: 46px;
+}
 
-          }
-        }
-      }
-      .el-table__body tbody {
-          padding-bottom: 1rem;
-      }
-    }
-    table {
-      thead {
-        border-bottom: 2px solid $gray-medium-dark;
-        svg {
-          fill: $gray-lightest;
-        }
-      }
-      tbody {
-        input {
-          background-color: $gray-medium;
-          color: $gray-lightest;
-          padding-top: 5px;
-          padding-bottom: 5px;
-          margin-top: 5px;
-          margin-bottom: 5px;
-          height: 16px;
-          font-size: 16px;
-        }
-        tr.selected {
-          background-color: $gray-medium-light;
-          input {
-            background-color: $gray-medium-light;
-          }
-        }
-      }
-    }
+.scroller > .vue-recycle-scroller__slot {
+  margin-top: -46px;
+}
+
+.row-styles {
+  font-size: 12px;
+  min-width: 154px;
+}
+
+.headers {
+  font-size: 14px;
+  margin-bottom: auto;
+  margin-top: auto;
+  min-width: 144px;
+  max-width: 144px;
+  font-weight: 700;
+  padding-left: 10px;
+
+  background-color: $gray-medium;
+  color: $gray-lightest;
+  text-align: center;
+  word-break: break-word;
+}
+
+.input-styles {
+  min-width: 165px;
+  max-width: 165px;
+  word-break: break-all;
+  padding-right: 10px;
+  padding-left: 10px;
+}
+
+.flex-row {
+  display: flex;
+}
+
+.vue-recycle-scroller.ready.direction-vertical
+  .vue-recycle-scroller__item-view {
+  display: flex;
+}
+
+.checkbox-header {
+  background-color: $gray-medium;
+  min-width: 50px;
+}
+
+.delete-header {
+  min-width: 40px;
+  background-color: white;
+}
+
+.checkbox-for-records {
+  min-width: 50px;
+}
+
+.vue-recycle-scroller__item-wrapper {
+  margin-top: 20px;
+  margin-bottom: 90px;
+  overflow: visible;
+}
+.fixed {
+  position: fixed;
+  height: 25px;
+}
+
+#fixedHeader {
+  position: fixed;
+  background-color: $gray-medium;
+  z-index: 100;
+  height: 46px;
+  width: 2192px;
+}
+
+#DistrictSystemName {
+  min-width: 175px;
+  max-width: 175px;
+}
+
+.vue-recycle-scroller__slot {
+  height: 10px;
+}
+
+.vue-recycle-scroller.ready.direction-vertical
+  .vue-recycle-scroller__item-view {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.vue-recycle-scroller__item-wrapper {
+  width: 2172px !important;
+}
+
+.row-bottom-border {
+  border-bottom: 1px solid #ebeef5;
+  padding-bottom: 10px;
+}
+
+.vue-recycle-scroller__slot {
+  padding-bottom: 15px;
+}
+
+.active {
+  color: #333;
+}
+
+.align-middle {
+  vertical-align: middle;
+}
+
+#fixed-header {
+  position: fixed;
+  background-color: white;
+  z-index: 100;
+  border-bottom: 1px solid #ebeef5;
+  height: 45px;
+}
+
+.input__id {
+  font-size: 14px;
+}
+
+.feature-color-row {
+  min-width: 75px;
+}
+
+#Color {
+  min-width: 75px;
+}
+
+.input__featureColor {
+  position: absolute;
+}
+
+.table-data {
+  margin-bottom: auto;
+  margin-top: auto;
+  max-width: 134px;
+  min-width: 134px;
+  padding-left: 10px;
+  padding-right: 10px;
+  text-align: center;
+}
+
+.table-first-column {
+  max-width: 204px;
+  min-width: 204px;
+  padding-right: 0;
+}
+
+.cell {
+  text-align: center;
+  word-break: break-word;
+  color: $gray-lightest;
+  input {
+    width: 100%;
+    background-color: $gray-medium;
+    color: $gray-lightest;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    height: 16px;
+    font-size: 16px;
   }
+}
 
+.select {
+  margin-bottom: auto;
+  margin-top: auto;
+  max-width: 50px;
+  min-width: 50px;
+}
+
+.destroy, .duplicate {
+  width: 35px;
+  > [type="radio"] {
+    width: 25px;
+  }
+  > svg {
+    margin-top: 12px;
+    margin-left: -6px;
+  }
+  margin: 0 auto;
+  padding: 0 10px 0 10px;
+  text-align: center;
+}
+
+.duplicate svg {
+  margin-top: 2px;
+  width: 20px;
+}
 </style>
