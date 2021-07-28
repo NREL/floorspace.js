@@ -146,10 +146,12 @@ export default {
     },
   },
   methods: {
-    sortChange({ prop, order }) {
-      this.sortKey = prop;
-      this.sortDescending = order === "descending";
-    },
+    /**
+     * Sets the flags to sort by a column.
+     * In order, it will sort descending, ascending, and then not at all if called with the same column
+     *
+     * @param colName - Name of the column to sort by
+     */
     sortBy(colName) {
       if (this.sortKey === colName) {
         if (this.sortDescending) {
@@ -180,6 +182,7 @@ export default {
 }
 
 .scroller > .vue-recycle-scroller__slot {
+  // In combination with above, places the title bar above the scroll bar
   margin-top: -46px;
 }
 
@@ -228,6 +231,7 @@ export default {
   background-color: $gray-medium;
   z-index: 100;
   height: 46px;
+  // Ensures that the title background fills up all available space
   padding-right: 100vw;
 }
 
@@ -237,16 +241,12 @@ export default {
 
 .vue-recycle-scroller.ready.direction-vertical
   .vue-recycle-scroller__item-view {
-  width: 100%;
+  width: auto !important;
   margin-top: 20px;
 }
 
 .vue-recycle-scroller__item-wrapper {
   position: static !important;
-}
-
-.vue-recycle-scroller.ready.direction-vertical .vue-recycle-scroller__item-view {
-  width: auto !important;
 }
 
 .vue-recycle-scroller__slot {
