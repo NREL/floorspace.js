@@ -12,8 +12,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       class="scroller"
       :items="sortedRows"
       @scroll.native="wrapperScrollLeft = $event.target.scrollLeft"
-      container-tag="table"
-      content-tag="tbody"
       :item-size="70"
     >
       <template #before>
@@ -68,7 +66,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           />
         </div>
         <div
-          class="row-styles flex-row"
+          class="flex-row"
           :fixed="item.fixed"
           :key="item.id"
           :data-column="item.name"
@@ -185,11 +183,6 @@ export default {
   margin-top: -46px;
 }
 
-.row-styles {
-  font-size: 12px;
-  min-width: 154px;
-}
-
 .headers {
   font-size: 14px;
   margin-bottom: auto;
@@ -203,14 +196,6 @@ export default {
   color: $gray-lightest;
   text-align: center;
   word-break: break-word;
-}
-
-.input-styles {
-  min-width: 165px;
-  max-width: 165px;
-  word-break: break-all;
-  padding-right: 10px;
-  padding-left: 10px;
 }
 
 .flex-row {
@@ -227,20 +212,12 @@ export default {
   min-width: 50px;
 }
 
-.delete-header {
-  min-width: 40px;
-  background-color: white;
-}
-
-.checkbox-for-records {
-  min-width: 50px;
-}
-
 .vue-recycle-scroller__item-wrapper {
   margin-top: 20px;
   margin-bottom: 90px;
   overflow: visible;
 }
+
 .fixed {
   position: fixed;
   height: 25px;
@@ -251,12 +228,7 @@ export default {
   background-color: $gray-medium;
   z-index: 100;
   height: 46px;
-  padding-right: 300px;
-}
-
-#DistrictSystemName {
-  min-width: 175px;
-  max-width: 175px;
+  padding-right: 100vw;
 }
 
 .vue-recycle-scroller__slot {
@@ -277,41 +249,12 @@ export default {
   width: auto !important;
 }
 
-.row-bottom-border {
-  border-bottom: 1px solid #ebeef5;
-  padding-bottom: 10px;
-}
-
 .vue-recycle-scroller__slot {
   padding-bottom: 15px;
 }
 
 .active {
   color: #409eff;
-}
-
-.align-middle {
-  vertical-align: middle;
-}
-
-#fixed-header {
-  position: fixed;
-  background-color: white;
-  z-index: 100;
-  border-bottom: 1px solid #ebeef5;
-  height: 45px;
-}
-
-.input__id {
-  font-size: 14px;
-}
-
-.feature-color-row {
-  min-width: 75px;
-}
-
-.input__featureColor {
-  position: absolute;
 }
 
 .table-data {
@@ -371,5 +314,9 @@ export default {
 .duplicate svg {
   margin-top: 2px;
   width: 20px;
+}
+
+.editable-table {
+  background-color: #3b4348;
 }
 </style>
