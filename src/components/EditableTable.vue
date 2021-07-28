@@ -153,9 +153,16 @@ export default {
       this.sortDescending = order === "descending";
     },
     sortBy(colName) {
-      this.sortDescending =
-        this.sortKey === colName ? !this.sortDescending : true;
-      this.sortKey = colName;
+      if (this.sortKey === colName) {
+        if (this.sortDescending) {
+          this.sortDescending = false;
+        } else {
+          this.sortKey = undefined;
+        }
+      } else {
+        this.sortKey = colName;
+        this.sortDescending = true;
+      }
     },
   },
   components: {
@@ -244,7 +251,7 @@ export default {
   background-color: $gray-medium;
   z-index: 100;
   height: 46px;
-  width: 2192px;
+  padding-right: 300px;
 }
 
 #DistrictSystemName {
@@ -263,7 +270,11 @@ export default {
 }
 
 .vue-recycle-scroller__item-wrapper {
-  width: 2172px !important;
+  position: static !important;
+}
+
+.vue-recycle-scroller.ready.direction-vertical .vue-recycle-scroller__item-view {
+  width: auto !important;
 }
 
 .row-bottom-border {
@@ -276,7 +287,7 @@ export default {
 }
 
 .active {
-  color: #333;
+  color: #409eff;
 }
 
 .align-middle {
@@ -296,10 +307,6 @@ export default {
 }
 
 .feature-color-row {
-  min-width: 75px;
-}
-
-#Color {
   min-width: 75px;
 }
 
