@@ -167,9 +167,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     <section class="modals">
       <SaveAsModal
         v-if="showSaveModal"
-        :saveWhat="thingWereSaving"
         :dataToDownload="dataToDownload"
-        @close="() => {showSaveModal = false; thingWereSaving = '';}"
+        @close="() => {showSaveModal = false;}"
       />
       <Settings
         v-else-if="showGroundPropsModal"
@@ -202,7 +201,6 @@ export default {
         window_definitions: 'Window Definitions',
       },
       showSaveModal: false,
-      thingWereSaving: '',
       visibleComponentType: null,
       showGroundPropsModal: false,
     };
@@ -218,7 +216,6 @@ export default {
       window.eventBus.$emit('zoomToFit');
     },
     exportData() {
-      this.thingWereSaving = 'Floorplan';
       this.showSaveModal = true;
       return this.$store.getters['exportData'];
     },

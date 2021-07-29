@@ -7,19 +7,29 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
   <ModalBase
-    :title="`Save ${saveWhat} as`"
+    class="save-as-modal"
+    :title="`Save Floorplan As`"
     @close="$emit('close')"
   >
-    <span class="input-text">
-      <input ref="downloadName" type="text"
-        id="download-name"
-        @keyup.enter="downloadFile"
-        :value="saveWhat.toLowerCase()"
-        spellcheck="false"
-      />
-      .json
+    <div class="grid-container">
+      <div class="export-label">Export Format:</div>
+      <div class="export-input">
+        <input type="radio" id="export-input-floorspace" value="floorspace"/>
+        <label for="export-input-floorspace">Floorspace</label>
+        <input type="radio" id="export-input-threejs" value="threejs"/>
+        <label for="export-input-threejs">ThreeJS</label>
+      </div>
+      <div class="filename-label">Filename:</div>
+      <div class="filename-input">
+        <input ref="downloadName" type="text"
+          id="download-name"
+          @keyup.enter="downloadFile"
+          :value="floorplan"
+          spellcheck="false"
+        />
+      </div>
       <button class="download-button" @click="downloadFile">Download</button>
-    </span>
+    </div>
   </ModalBase>
 </template>
 
@@ -28,7 +38,7 @@ import ModalBase from './ModalBase.vue';
 
 export default {
   name: 'SaveAsModal',
-  props: ['saveWhat', 'dataToDownload'],
+  props: ['dataToDownload'],
   mounted() {
     this.$refs.downloadName.focus();
   },
@@ -57,9 +67,63 @@ export default {
 
 <style lang="scss" scoped>
 @import "./../../scss/config";
-.download-button {
-  cursor: pointer;
-  text-transform: uppercase;
+
+.save-as-modal {
+  .grid-container {
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-template-rows: auto auto 100fr;
+    row-gap: 6px;
+  }
+
+  .export-label {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+  }
+
+  .export-input {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+  }
+
+  .filename-label {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: start;
+  }
+
+  .filename-input {
+    display: inline-block;
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: end;
+    position: relative;
+  }
+
+  .filename-input > input {
+    padding-right: 35px;
+    text-align: right;
+  }
+
+  .filename-input::after {
+    content: '.json';
+    font-size: 12px;
+    pointer-events: none;
+    position: absolute;
+    right: 5px;
+    top: 4px;
+  }
+
+  .download-button {
+    align-self: end;
+    cursor: pointer;
+    grid-row: 3;
+    grid-column: 2;
+    justify-self: end;
+    text-transform: uppercase;
+  }
 }
 
 </style>
