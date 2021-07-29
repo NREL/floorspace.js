@@ -4,7 +4,7 @@ const _ = require('lodash');
 const { failOnError, withScales, draw50By50Square, drawSquare } = require('../helpers');
 
 module.exports = {
-  tags: ['spaces'],
+  tags: ['spaces', 'test'],
   'failOnError causes failure': (browser) => {
     failOnError(browser)
       .url(browser.globals.devServerURL)

@@ -44,7 +44,7 @@ const oldFloorplans = [
 ];
 
 module.exports = {
-  tags: ['import-floorplan'],
+  tags: ['import-floorplans'],
   setUp: (browser) => {
     const devServer = browser.globals.devServerURL;
 

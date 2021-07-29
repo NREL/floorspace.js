@@ -3,7 +3,7 @@
 const { failOnError } = require('../helpers');
 
 module.exports = {
-  tags: ['input'],
+  tags: ['input', 'generic-input'],
   setUp: (browser) => {
     const devServer = browser.globals.devServerURL;
 
