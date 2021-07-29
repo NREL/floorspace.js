@@ -17,8 +17,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       <template #before>
         <div
           id="fixedHeader"
-          class="flex-row"
-          v-bind:class="{ fixed: !isScenarioTab }"
+          class="flex-row fixed"
           :style="{
             '-webkit-transform': 'translateX(' + -wrapperScrollLeft + 'px)',
             transform: 'translateX(' + -wrapperScrollLeft + 'px)',
@@ -130,6 +129,7 @@ export default {
     return {
       sortKey: (r) => +r.id,
       sortDescending: false,
+      wrapperScrollLeft: 0,
     };
   },
   computed: {
@@ -137,7 +137,6 @@ export default {
       return _.reject(this.columns, "private");
     },
     sortedRows() {
-      console.log(this.rows, this.columns, this.visibleColumns);
       const sRows = _.sortBy(this.rows, this.sortKey);
       if (this.sortDescending) {
         sRows.reverse();

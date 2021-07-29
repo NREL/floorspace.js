@@ -73,10 +73,9 @@ export default {
       }
       if (evt.keyCode == 27) {
         // reset then blur on esc
-        this.$el.value = row[col.name];
+        this.$el.value = this.row[this.col.name];
         this.$el.blur();
       }
-      return;
     },
   },
   computed: {
@@ -94,8 +93,16 @@ export default {
       return !this.col.enabled(this.row)
     },
     colorStyles() {
+      const value = this.row[this.col.name];
+
+      if (!value || !value.slice) {
+        return {
+          color: '#fff',
+          background: '#000',
+        };
+      }
+
       const
-        value = this.row[this.col.name],
         r = parseInt(value.slice(1, 3), 16),
         g = parseInt(value.slice(3, 5), 16),
         b = parseInt(value.slice(5, 7), 16);
@@ -105,7 +112,13 @@ export default {
       };
     },
     value() {
-      return this.col.get ? this.col.get(this.row, this.rootState) : this.row[this.col.name];
+      try {
+        // `get` could not exist on `this.col` or could throw an error
+        // Either way, catch the error and gracefully fall back
+        return this.col.get(this.row, this.rootState);
+      } catch (_) {
+        return this.row[this.col.name];
+      }
     },
   },
   components: {
