@@ -86,6 +86,10 @@ export default {
         e.preventDefault();
       }
     });
+
+    const threeJSModuleScript = document.createElement('script');
+    threeJSModuleScript.setAttribute('src', 'static/libtest_lib.js');
+    document.head.appendChild(threeJSModuleScript);
   },
 
   computed: {

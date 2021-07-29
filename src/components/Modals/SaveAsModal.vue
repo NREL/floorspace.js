@@ -14,9 +14,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     <div class="grid-container">
       <div class="export-label">Export Format:</div>
       <div class="export-input">
-        <input type="radio" id="export-input-floorspace" value="floorspace"/>
+        <input type="radio" id="export-input-floorspace" value="floorspace" v-model="exportType">
         <label for="export-input-floorspace">Floorspace</label>
-        <input type="radio" id="export-input-threejs" value="threejs"/>
+        <input type="radio" id="export-input-threejs" value="threejs" v-model="exportType">
         <label for="export-input-threejs">ThreeJS</label>
       </div>
       <div class="filename-label">Filename:</div>
@@ -38,15 +38,28 @@ import ModalBase from './ModalBase.vue';
 
 export default {
   name: 'SaveAsModal',
-  props: ['dataToDownload'],
+  props: [],
   mounted() {
     this.$refs.downloadName.focus();
+  },
+  data() {
+    return {
+      exportType: 'floorspace',
+    };
   },
   methods: {
     downloadFile: function() {
       const a = document.createElement('a');
+      const data = JSON.stringify(this.$store.getters['exportData']);
+      this.$emit('close');
+
+      let blobData = data;
+      if (this.exportType !== 'floorspace') {
+        blobData = Module.floorplanToThreeJS(data, false);
+      }
+
       const blob = new Blob(
-        [JSON.stringify(this.dataToDownload)],
+        [blobData],
         {
           type: 'text/json;charset=utf-8',
         },
@@ -55,8 +68,7 @@ export default {
       a.setAttribute('download', this.$refs.downloadName.value + '.json');
       a.click();
 
-      console.log(`exporting:\n${JSON.stringify(this.dataToDownload)}`); // eslint-disable-line
-      this.$emit('close');
+      console.log(`exported data for: ${this.exportType}`); // eslint-disable-line
     },
   },
   components: {

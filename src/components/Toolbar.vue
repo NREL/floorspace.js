@@ -167,7 +167,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     <section class="modals">
       <SaveAsModal
         v-if="showSaveModal"
-        :dataToDownload="dataToDownload"
         @close="() => {showSaveModal = false;}"
       />
       <Settings
@@ -361,9 +360,6 @@ export default {
     snapMode: {
       get() { return this.$store.state.application.currentSelections.snapMode; },
       set(snapMode) { this.$store.dispatch('application/setCurrentSnapMode', { snapMode }); },
-    },
-    dataToDownload() {
-      return this.$store.getters['exportData'];
     },
   },
   watch: {
