@@ -90,7 +90,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           </div>
 
           <div>
-            <div class="duplicate" @click.stop="duplicateRow(item)" title="duplicate">
+            <div
+              class="duplicate"
+              @click.stop="duplicateRow(item)"
+              title="duplicate"
+            >
               <Copy class="button" />
             </div>
           </div>
@@ -100,7 +104,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
               <Delete class="button" />
             </div>
           </div>
-
         </div>
       </template>
     </RecycleScroller>
@@ -175,147 +178,148 @@ export default {
 <style lang="scss">
 @import "./../scss/config";
 
-.scroller {
-  height: calc(50vh - 151px);
-  margin-top: 46px;
-}
+.editable-table {
+  .scroller {
+    height: calc(50vh - 151px);
+    margin-top: 46px;
+  }
 
-.scroller > .vue-recycle-scroller__slot {
-  // In combination with above, places the title bar above the scroll bar
-  margin-top: -46px;
-}
+  .scroller > .vue-recycle-scroller__slot {
+    // In combination with above, places the title bar above the scroll bar
+    margin-top: -46px;
+  }
 
-.headers {
-  font-size: 14px;
-  margin-bottom: auto;
-  margin-top: auto;
-  min-width: 144px;
-  max-width: 144px;
-  font-weight: 700;
-  padding-left: 10px;
+  .headers {
+    font-size: 14px;
+    margin-bottom: auto;
+    margin-top: auto;
+    min-width: 144px;
+    max-width: 144px;
+    font-weight: 700;
+    padding-left: 10px;
 
-  background-color: $gray-medium;
-  color: $gray-lightest;
-  text-align: center;
-  word-break: break-word;
-}
-
-.flex-row {
-  display: flex;
-}
-
-.vue-recycle-scroller.ready.direction-vertical
-  .vue-recycle-scroller__item-view {
-  display: flex;
-}
-
-.checkbox-header {
-  background-color: $gray-medium;
-  min-width: 50px;
-}
-
-.vue-recycle-scroller__item-wrapper {
-  margin-top: 20px;
-  margin-bottom: 90px;
-  overflow: visible;
-}
-
-.fixed {
-  position: fixed;
-  height: 25px;
-}
-
-#fixedHeader {
-  position: fixed;
-  background-color: $gray-medium;
-  z-index: 100;
-  height: 46px;
-  // Ensures that the title background fills up all available space
-  padding-right: 100vw;
-}
-
-.vue-recycle-scroller__slot {
-  height: 10px;
-}
-
-.vue-recycle-scroller.ready.direction-vertical
-  .vue-recycle-scroller__item-view {
-  width: auto !important;
-  margin-top: 20px;
-}
-
-.vue-recycle-scroller__item-wrapper {
-  position: static !important;
-}
-
-.vue-recycle-scroller__slot {
-  padding-bottom: 15px;
-}
-
-.active {
-  color: #409eff;
-}
-
-.table-data {
-  margin-bottom: auto;
-  margin-top: auto;
-  max-width: 134px;
-  min-width: 134px;
-  padding-left: 10px;
-  padding-right: 10px;
-  text-align: center;
-}
-
-.table-first-column {
-  max-width: 204px;
-  min-width: 204px;
-  padding-right: 0;
-}
-
-.cell {
-  text-align: center;
-  word-break: break-word;
-  color: $gray-lightest;
-  input {
-    width: 100%;
     background-color: $gray-medium;
     color: $gray-lightest;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    margin-top: 5px;
-    margin-bottom: 5px;
-    height: 16px;
-    font-size: 16px;
+    text-align: center;
+    word-break: break-word;
   }
-}
 
-.select {
-  margin-bottom: auto;
-  margin-top: auto;
-  max-width: 50px;
-  min-width: 50px;
-}
-
-.destroy, .duplicate {
-  width: 35px;
-  > [type="radio"] {
-    width: 25px;
+  .flex-row {
+    display: flex;
   }
-  > svg {
-    margin-top: 12px;
-    margin-left: -6px;
+
+  .vue-recycle-scroller.ready.direction-vertical
+    .vue-recycle-scroller__item-view {
+    display: flex;
   }
-  margin: 0 auto;
-  padding: 0 10px 0 10px;
-  text-align: center;
-}
 
-.duplicate svg {
-  margin-top: 2px;
-  width: 20px;
-}
+  .checkbox-header {
+    background-color: $gray-medium;
+    min-width: 50px;
+  }
 
-.editable-table {
+  .vue-recycle-scroller__item-wrapper {
+    margin-top: 20px;
+    margin-bottom: 90px;
+    overflow: visible;
+  }
+
+  .fixed {
+    position: fixed;
+    height: 25px;
+  }
+
+  #fixedHeader {
+    position: fixed;
+    background-color: $gray-medium;
+    z-index: 100;
+    height: 46px;
+    // Ensures that the title background fills up all available space
+    padding-right: 100vw;
+  }
+
+  .vue-recycle-scroller__slot {
+    height: 10px;
+  }
+
+  .vue-recycle-scroller.ready.direction-vertical
+    .vue-recycle-scroller__item-view {
+    width: auto !important;
+    margin-top: 20px;
+  }
+
+  .vue-recycle-scroller__item-wrapper {
+    position: static !important;
+  }
+
+  .vue-recycle-scroller__slot {
+    padding-bottom: 15px;
+  }
+
+  .active {
+    color: #409eff;
+  }
+
+  .table-data {
+    margin-bottom: auto;
+    margin-top: auto;
+    max-width: 134px;
+    min-width: 134px;
+    padding-left: 10px;
+    padding-right: 10px;
+    text-align: center;
+  }
+
+  .table-first-column {
+    max-width: 204px;
+    min-width: 204px;
+    padding-right: 0;
+  }
+
+  .cell {
+    text-align: center;
+    word-break: break-word;
+    color: $gray-lightest;
+    input {
+      width: 100%;
+      background-color: $gray-medium;
+      color: $gray-lightest;
+      padding-top: 5px;
+      padding-bottom: 5px;
+      margin-top: 5px;
+      margin-bottom: 5px;
+      height: 16px;
+      font-size: 16px;
+    }
+  }
+
+  .select {
+    margin-bottom: auto;
+    margin-top: auto;
+    max-width: 50px;
+    min-width: 50px;
+  }
+
+  .destroy,
+  .duplicate {
+    width: 35px;
+    > [type="radio"] {
+      width: 25px;
+    }
+    > svg {
+      margin-top: 12px;
+      margin-left: -6px;
+    }
+    margin: 0 auto;
+    padding: 0 10px 0 10px;
+    text-align: center;
+  }
+
+  .duplicate svg {
+    margin-top: 2px;
+    width: 20px;
+  }
+
   background-color: #3b4348;
 }
 </style>
