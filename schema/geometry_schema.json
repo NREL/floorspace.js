@@ -62,6 +62,12 @@
 				"$ref": "#/definitions/DaylightingControlDefinition"
 			}
 		},
+		"skylight_definitions": {
+			"type": "array",
+			"items": {
+				"$ref": "#/definitions/SkylightDefinition"
+			}
+		},
 		"pitched_roofs": {
 			"type": "array",
 			"items": {
@@ -81,6 +87,7 @@
 		"window_definitions",
 		"door_definitions",
 		"daylighting_control_definitions",
+		"skylight_definitions",
 		"pitched_roofs"
 	],
 	"definitions": {
@@ -574,6 +581,18 @@
 						]
 					}
 				},
+				"skylights": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"skylight_definition_id": {
+							"type": "string"
+						},
+						"vertex_id": {
+							"type": "string"
+						}
+					}
+				},
 				"doors": {
 					"type": "array",
 					"items": {
@@ -615,6 +634,7 @@
 				"spaces",
 				"shading",
 				"windows",
+				"skylights",
 				"doors"
 			]
 		},
@@ -1028,6 +1048,81 @@
 				"window_type",
 				"overhang_projection_factor",
 				"fin_projection_factor"
+			]
+		},
+		"SkylightDefinition": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "string"
+				},
+				"name": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"skylight_definition_mode": {
+					"type": "string",
+					"enum": [
+						"Single Window",
+						"Repeating Windows"
+					],
+					"default": "Single Window"
+				},
+				"window_spacing": {
+					"description": "Spacing between skylight windows. Only used if skylight_definition_mode is  \"Repeating Windows\".",
+					"type": [
+						"number",
+						"null"
+					],
+					"minimum": 0,
+					"exclusiveMinimum": true,
+					"default": 4,
+					"si_units": "m",
+					"ip_units": "ft"
+				},
+				"height": {
+					"description": "Vertical height of each window. In drawing units. Used if skylight_definition_mode is \"Single Window\" or \"Repeating Windows\".",
+					"type": [
+						"number",
+						"null"
+					],
+					"minimum": 0,
+					"exclusiveMinimum": true,
+					"default": 4,
+					"si_units": "m",
+					"ip_units": "ft"
+				},
+				"width": {
+					"description": "Horizontal width of each window. In drawing units. Used if skylight_definition_mode is \"Single Window\" or \"Repeating Windows\".",
+					"type": [
+						"number",
+						"null"
+					],
+					"minimum": 0,
+					"exclusiveMinimum": true,
+					"default": 2,
+					"si_units": "m",
+					"ip_units": "ft"
+				},
+				"window_type": {
+					"type": "string",
+					"enum": [
+						"Fixed",
+						"Operable"
+					],
+					"default": "Fixed"
+				}
+			},
+			"required": [
+				"id",
+				"name",
+				"skylight_definition_mode",
+				"window_spacing",
+				"height",
+				"width",
+				"window_type"
 			]
 		},
 		"DoorDefinition": {
