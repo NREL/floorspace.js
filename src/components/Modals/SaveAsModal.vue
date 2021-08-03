@@ -15,7 +15,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       <div class="export-label">Export Format:</div>
       <div class="export-input">
         <input type="radio" id="export-input-floorspace" value="floorspace" v-model="exportType">
-        <label for="export-input-floorspace">Floorspace</label>
+        <label for="export-input-floorspace">Floorspace.js</label>
         <input type="radio" id="export-input-threejs" value="threejs" v-model="exportType">
         <label for="export-input-threejs">ThreeJS</label>
       </div>
