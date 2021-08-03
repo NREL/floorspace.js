@@ -3,12 +3,17 @@ import geometryHelpers from './../helpers';
 import { snapWindowToEdge, snapToVertexWithinFace, windowLocation } from '../../../../components/Grid/snapping';
 
 function facesContainingEdge(faces, edge_id) {
-  return _.filter(
-    faces,
-    f => _.chain(f.edges)
-      .map('id')
-      .includes(edge_id)
-      .value());
+  const containingFaces = [];
+  for (let face of faces) {
+    for (let edge of face.edges) {
+      if (edge.id === edge_id) {
+        containingFaces.push(face);
+        break;
+      }
+    }
+  }
+
+  return containingFaces;
 }
 
 function componentsOnStory(state, geometry_id) {

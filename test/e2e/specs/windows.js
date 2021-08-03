@@ -27,9 +27,9 @@ module.exports = {
     browser
       .click('[data-modetab="components"]')
       .click('[data-object-type="window_definitions"] [title="expand"]')
-      .click('.column__window_definition_mode:not(.is-hidden) option[value="Repeating Windows"]')
+      .click('[data-column="window_definition_mode"] option[value="Repeating Windows"]')
       .click('[data-modetab="floorplan"]')
-      .click('[data-object-type="spaces"] .el-table__body-wrapper .destroy')
+      .click('[data-column="Window 1"] .destroy')
       .click('[data-object-type="spaces"] .add-new')
       .perform(draw50By50Square)
       .checkForErrors()
