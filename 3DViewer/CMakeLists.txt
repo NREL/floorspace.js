@@ -19,7 +19,7 @@ if(MSVC)
   add_definitions(/MP)
 endif(MSVC)
 
-include_directories(dependencies)
+include_directories(dependencies /)
 
 set(test_lib_src
   dependencies/jsoncpp/jsoncpp.cpp

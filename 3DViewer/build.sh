@@ -1,6 +1,5 @@
 #!/bin/bash
 
-mv /boost /src/dependencies
 source /emsdk/emsdk_env.sh
 mkdir -p /src/embuild
 cd /src/embuild
