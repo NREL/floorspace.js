@@ -19,10 +19,12 @@ var spinner = ora('building for production...')
 spinner.start()
 
 var assetsPath = path.join(config.build.assetsRoot, config.build.assetsSubDirectory)
+var viewerPath = path.join(config.build.assetsRoot, config.build.viewerSubDirectory)
 rm('-rf', assetsPath)
 mkdir('-p', assetsPath)
 cp('-R', 'static/*', assetsPath)
-cp('-R', '3DViewer', config.build.assetsRoot)
+cp('3DViewer/index.*', viewerPath)
+cp('3DViewer/libtest_*', viewerPath)
 
 webpack(webpackConfig, function (err, stats) {
   spinner.stop()

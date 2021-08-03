@@ -223,7 +223,7 @@ export default {
     },
     open3DPreviewer() {
       localStorage.setItem("floorplan3DExport", JSON.stringify(application.$store.getters['exportData']));
-      window.open('/3DViewer');
+      window.open('3DViewer');
     },
     importDataAsFile(event, type) {
       const file = event.target.files[0];
