@@ -19,6 +19,11 @@ var proxyTable = config.dev.proxyTable
 var app = express()
 var compiler = webpack(webpackConfig)
 
+// serve pure static assets
+var staticPath = path.posix.join(config.dev.assetsPublicPath, config.dev.assetsSubDirectory)
+app.use(staticPath, express.static('./static'))
+app.use(path.posix.join(config.dev.assetsPublicPath, '3DViewer'), express.static('./3DViewer'))
+
 var devMiddleware = require('webpack-dev-middleware')(compiler, {
   publicPath: webpackConfig.output.publicPath,
   stats: {
@@ -54,10 +59,6 @@ app.use(devMiddleware)
 // enable hot-reload and state-preserving
 // compilation error display
 app.use(hotMiddleware)
-
-// serve pure static assets
-var staticPath = path.posix.join(config.dev.assetsPublicPath, config.dev.assetsSubDirectory)
-app.use(staticPath, express.static('./static'))
 
 module.exports = app.listen(port, function (err) {
   if (err) {

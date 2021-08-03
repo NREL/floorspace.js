@@ -1,6 +1,7 @@
 import openFloorplanSvg from './../assets/svg-icons/open_floorplan.svg';
 import saveFloorplanSvg from './../assets/svg-icons/save_floorplan.svg';
 import importLibrarySvg from './../assets/svg-icons/import_library.svg';
+import globeIconSvg from './../assets/svg-icons/globe_icon.svg';
 
 import undoSvg from './../assets/svg-icons/undo.svg';
 import redoSvg from './../assets/svg-icons/redo.svg';
@@ -76,6 +77,7 @@ export default {
   'open-floorplan-svg': openFloorplanSvg,
   'save-floorplan-svg': saveFloorplanSvg,
   'import-library-svg': importLibrarySvg,
+  'globe-icon-svg': globeIconSvg,
   'undo-svg': undoSvg,
   'redo-svg': redoSvg,
   'tab-floorplan-svg': floorplanTabSvg,
