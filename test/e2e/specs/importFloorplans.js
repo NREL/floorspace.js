@@ -114,6 +114,19 @@ module.exports = {
     assertValidSchema(browser);
     browser.end();
   },
+  'floorplan can be exported to three.js': (browser) => {
+    withScales(browser)
+      .click('.modal .new-floorplan svg')
+      .getScales()
+      .perform(deleteFloorplan) // delete floorplan so download has correct name
+      .perform(draw50By50Square)
+      .click('[title="Save Floorplan"]')
+      .click('#export-input-threejs')
+      .setValue('#download-name', 'floorplan_nightwatch_exported')
+      .click('.download-button')
+      .pause(100)
+      .checkForErrors();
+  },
   'project.north_axis new location': (browser) => {
     browser
       .setValue('#importInput', path.join(__dirname, '../fixtures/floorplan-2017-08-31.json'))
