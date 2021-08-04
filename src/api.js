@@ -45,6 +45,7 @@ window.api = {
       showImportExport: true,
       units: 'si',
       unitsEditable: true,
+      enable3DPreview: false,
       showMapDialogOnStart: false,
       online: true,
       initialGridSize: 50,
@@ -73,6 +74,7 @@ window.api = {
     window.application.$store.dispatch('project/setSpacing', { spacing: window.api.config.initialGridSize });
     window.application.$store.dispatch('project/setNorthAxis', { north_axis: window.api.config.initialNorthAxis });
 
+    window.application.$store.dispatch('project/setPreview3DEnabled', { enabled: window.api.config.enable3DPreview });
     window.application.$store.dispatch('project/setMapEnabled', { enabled: window.api.config.showMapDialogOnStart });
     window.application.$store.dispatch('project/setMapVisible', { visible: window.api.config.showMapDialogOnStart });
 

@@ -23,7 +23,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           <div title="Import Library">
             <import-library-svg @click.native="$refs.importLibrary.click()" class="button"></import-library-svg>
           </div>
-          <div title="Open 3D Previewer">
+          <div v-if="enable3DPreview" title="Open 3D Previewer">
             <globe-icon-svg @click.native="open3DPreviewer" class="button" />
           </div>
         </div>
@@ -299,6 +299,11 @@ export default {
     currentSubselectionType: {
       get() { return this.$store.state.application.currentSelections.subselectionType; },
       set(sst) { this.$store.dispatch('application/setCurrentSubselectionType', { subselectionType: sst }); },
+    },
+    enable3DPreview: {
+      get() {
+        return this.$store.state.project.preview3D.enabled;
+      },
     },
     availableTools() {
       let tools = [];
