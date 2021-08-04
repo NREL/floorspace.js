@@ -13,3 +13,15 @@ testsContext.keys().forEach(testsContext)
 // you want coverage for.
 const srcContext = require.context('src', true, /^\.\/(?!main(\.js)?$)/)
 srcContext.keys().forEach(srcContext)
+
+const chai = require('chai'),
+  spies = require('chai-spies');
+
+chai.use(spies);
+
+const should = chai.should(),
+  expect = chai.expect;
+
+global.chai = chai;
+global.should = should;
+global.expect = expect;

@@ -43,11 +43,6 @@ export default {
     close() {
       colorPickerModalService.closeModal();
     },
-    closeOnEsc(e) {
-      if (e.keyCode === 27) {
-        colorPickerModalService.closeModal();
-      }
-    },
   },
   components: {
     Swatches,
