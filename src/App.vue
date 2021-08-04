@@ -45,7 +45,6 @@ import ImageUpload from './components/ImageUpload.vue';
 import ColorPickerModal from './components/Modals/ColorPickerModal.vue';
 import Inspector from './components/Inspector.vue';
 import Textures from './components/Textures.vue';
-import { Resize } from './components/Resize';
 
 
 export default {
