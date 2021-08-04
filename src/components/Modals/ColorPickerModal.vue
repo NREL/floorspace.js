@@ -1,10 +1,8 @@
 <template>
   <transition name="modal">
-    <div class="color-picker-modal">
+    <div class="color-picker-modal" v-show="visible">
       <div class="modal-mask">
-        <div class="modal-wrapper"
-          @click="$emit('close')"
-        >
+        <div class="modal-wrapper" @click="close()">
           <div class="modal-container" @click.stop>
             <div class="modal-body">
               <swatches v-model="color" inline show-fallback/>
@@ -17,36 +15,42 @@
 </template>
 
 <script>
+import { colorPickerModalService } from './colorPickerModalService';
 import Swatches from 'vue-swatches';
 
 export default {
   name: 'ColorPickerModal',
-  props: ['value'],
+  data() {
+    return {
+      value: '',
+      visible: false,
+    };
+  },
   computed: {
     color: {
       get() { return this.value; },
       set(newVal) {
-        this.$emit('change', newVal);
+        colorPickerModalService._change(newVal);
       },
     },
   },
   mounted() {
-    document.addEventListener('keydown', this.closeOnEsc);
-  },
-  beforeDestroy() {
-    document.removeEventListener('keydown', this.closeOnEsc);
+    colorPickerModalService._attach(this);
   },
   methods: {
+    close() {
+      colorPickerModalService.closeModal();
+    },
     closeOnEsc(e) {
       if (e.keyCode === 27) {
-        this.$emit('close');
+      colorPickerModalService.closeModal();
       }
     },
   },
   components: {
     Swatches,
   },
-}
+};
 </script>
 
 <style lang="scss">
