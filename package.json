@@ -45,7 +45,7 @@
     "babel-preset-es2015": "^6.0.0",
     "babel-preset-stage-2": "^6.0.0",
     "babel-register": "^6.0.0",
-    "chai": "^3.5.0",
+    "chai": "^4.3.4",
     "chalk": "^1.1.3",
     "chromedriver": "2.36",
     "connect-history-api-fallback": "^1.1.0",

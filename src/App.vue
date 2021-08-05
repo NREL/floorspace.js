@@ -27,6 +27,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <ImageUpload />
         <Textures />
         <PortalTarget name="texture-options" />
+        <PortalTarget name="color-picker" />
     </div>
 </template>
 
@@ -41,9 +42,9 @@ import Grid from './components/Grid/Grid.vue';
 import Canvas from './components/Canvas/Canvas.vue';
 import Toolbar from './components/Toolbar.vue';
 import ImageUpload from './components/ImageUpload.vue';
+import ColorPickerModal from './components/Modals/ColorPickerModal.vue';
 import Inspector from './components/Inspector.vue';
 import Textures from './components/Textures.vue';
-import { Resize } from './components/Resize';
 
 
 export default {
@@ -100,6 +101,7 @@ export default {
     ImageUpload,
     Textures,
     PortalTarget,
+    ColorPickerModal,
   },
 };
 </script>

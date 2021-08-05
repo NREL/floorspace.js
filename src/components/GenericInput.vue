@@ -77,6 +77,9 @@ export default {
         this.$el.blur();
       }
     },
+    openColorModal() {
+      colorPickerModalService.openModal(this.row[this.col.name], this.onChange);
+    }
   },
   computed: {
     selectData() {
