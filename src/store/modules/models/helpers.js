@@ -213,7 +213,7 @@ const helpers = {
       hash['Auditorium'] = 'Auditorium';
       hash['Cafeteria'] = 'Cafeteria';
       hash['Classroom'] = 'Classroom';
-      hash['ComputerRoom'] = 'ComputerRoom';
+      hash['Computer Room'] = 'ComputerRoom';
       hash['Corridor'] = 'Corridor';
       hash['Gym'] = 'Gym';
       hash['Kitchen'] = 'Kitchen';
@@ -231,7 +231,7 @@ const helpers = {
     } else if (building_type == 'PrimarySchool') {
       hash['Cafeteria'] = 'Cafeteria';
       hash['Classroom'] = 'Classroom';
-      hash['ComputerRoom'] = 'ComputerRoom';
+      hash['Computer Room'] = 'ComputerRoom';
       hash['Corridor'] = 'Corridor';
       hash['Gym'] = 'Gym';
       hash['Kitchen'] = 'Kitchen';
@@ -242,104 +242,104 @@ const helpers = {
       hash['Restroom'] = 'Restroom';
 
       if (['DOE Ref Pre-1980', 'DOE Ref 1980-2004', 'ComStock DOE Ref Pre-1980', 'ComStock DOE Ref 1980-2004'].indexOf(template) === -1) {
-        hash['ComputerRoom'] = 'ComputerRoom';
+        hash['Computer Room'] = 'ComputerRoom';
       }
 
     } else if (building_type == 'SmallOffice') {
       if (wholeBuilding) {
-        hash['WholeBuilding - Sm Office'] = 'WholeBuilding - Sm Office';
+        hash['Whole Building - Sm Office'] = 'WholeBuilding - Sm Office';
       } else {
-        hash['SmallOffice - Breakroom'] = 'SmallOffice - Breakroom';
-        hash['SmallOffice - ClosedOffice'] = 'SmallOffice - ClosedOffice';
-        hash['SmallOffice - Conference'] = 'SmallOffice - Conference';
-        hash['SmallOffice - Corridor'] = 'SmallOffice - Corridor';
-        hash['SmallOffice - Elec/MechRoom'] = 'SmallOffice - Elec/MechRoom';
-        hash['SmallOffice - Lobby'] = 'SmallOffice - Lobby';
-        hash['SmallOffice - OpenOffice'] = 'SmallOffice - OpenOffice';
-        hash['SmallOffice - Restroom'] = 'SmallOffice - Restroom';
-        hash['SmallOffice - Stair'] = 'SmallOffice - Stair';
-        hash['SmallOffice - Storage'] = 'SmallOffice - Storage';
-        hash['SmallOffice - Classroom'] = 'SmallOffice - Classroom';
-        hash['SmallOffice - Dining'] = 'SmallOffice - Dining';
-        hash['WholeBuilding - Sm Office'] = 'WholeBuilding - Sm Office';
+        hash['Small Office - Breakroom'] = 'SmallOffice - Breakroom';
+        hash['Small Office - ClosedOffice'] = 'SmallOffice - ClosedOffice';
+        hash['Small Office - Conference'] = 'SmallOffice - Conference';
+        hash['Small Office - Corridor'] = 'SmallOffice - Corridor';
+        hash['Small Office - Elec/Mech Room'] = 'SmallOffice - Elec/MechRoom';
+        hash['Small Office - Lobby'] = 'SmallOffice - Lobby';
+        hash['Small Office - OpenOffice'] = 'SmallOffice - OpenOffice';
+        hash['Small Office - Restroom'] = 'SmallOffice - Restroom';
+        hash['Small Office - Stair'] = 'SmallOffice - Stair';
+        hash['Small Office - Storage'] = 'SmallOffice - Storage';
+        hash['Small Office - Classroom'] = 'SmallOffice - Classroom';
+        hash['Small Office - Dining'] = 'SmallOffice - Dining';
+        hash['Whole Building - Sm Office'] = 'WholeBuilding - Sm Office';
       }
 
     } else if (building_type == 'MediumOffice') {
       if (wholeBuilding) {
-        hash['WholeBuilding - Md Office'] = 'WholeBuilding - Md Office';
+        hash['Whole Building - Md Office'] = 'WholeBuilding - Md Office';
       } else {
-        hash['MediumOffice - Breakroom'] = 'MediumOffice - Breakroom';
-        hash['MediumOffice - ClosedOffice'] = 'MediumOffice - ClosedOffice';
-        hash['MediumOffice - Conference'] = 'MediumOffice - Conference';
-        hash['MediumOffice - Corridor'] = 'MediumOffice - Corridor';
-        hash['MediumOffice - Elec/MechRoom'] = 'MediumOffice - Elec/MechRoom';
-        hash['MediumOffice - Lobby'] = 'MediumOffice - Lobby';
-        hash['MediumOffice - OpenOffice'] = 'MediumOffice - OpenOffice';
-        hash['MediumOffice - Restroom'] = 'MediumOffice - Restroom';
-        hash['MediumOffice - Stair'] = 'MediumOffice - Stair';
-        hash['MediumOffice - Storage'] = 'MediumOffice - Storage';
-        hash['MediumOffice - Classroom'] = 'MediumOffice - Classroom';
-        hash['MediumOffice - Dining'] = 'MediumOffice - Dining';
-        hash['WholeBuilding - Md Office'] = 'WholeBuilding - Md Office';
+        hash['Medium Office - Breakroom'] = 'MediumOffice - Breakroom';
+        hash['Medium Office - ClosedOffice'] = 'MediumOffice - ClosedOffice';
+        hash['Medium Office - Conference'] = 'MediumOffice - Conference';
+        hash['Medium Office - Corridor'] = 'MediumOffice - Corridor';
+        hash['Medium Office - Elec/Mech Room'] = 'MediumOffice - Elec/MechRoom';
+        hash['Medium Office - Lobby'] = 'MediumOffice - Lobby';
+        hash['Medium Office - OpenOffice'] = 'MediumOffice - OpenOffice';
+        hash['Medium Office - Restroom'] = 'MediumOffice - Restroom';
+        hash['Medium Office - Stair'] = 'MediumOffice - Stair';
+        hash['Medium Office - Storage'] = 'MediumOffice - Storage';
+        hash['Medium Office - Classroom'] = 'MediumOffice - Classroom';
+        hash['Medium Office - Dining'] = 'MediumOffice - Dining';
+        hash['Whole Building - Md Office'] = 'WholeBuilding - Md Office';
       }
 
     } else if (building_type == 'LargeOffice') {
       if (wholeBuilding) {
-        hash['WholeBuilding - Lg Office'] = 'WholeBuilding - Lg Office';
+        hash['Whole Building - Lg Office'] = 'WholeBuilding - Lg Office';
       }
 
-      hash['BreakRoom'] = 'BreakRoom';
-      hash['ClosedOffice'] = 'ClosedOffice';
+      hash['Break Room'] = 'BreakRoom';
+      hash['Closed Office'] = 'ClosedOffice';
       hash['Conference'] = 'Conference';
       hash['Corridor'] = 'Corridor';
-      hash['Elec/MechRoom'] = 'Elec/MechRoom';
-      hash['IT_Room'] = 'IT_Room';
+      hash['Elec/Mech Room'] = 'Elec/MechRoom';
+      hash['IT Room'] = 'IT_Room';
       hash['Lobby'] = 'Lobby';
-      hash['OpenOffice'] = 'OpenOffice';
-      hash['PrintRoom'] = 'PrintRoom';
+      hash['Open Office'] = 'OpenOffice';
+      hash['Print Room'] = 'PrintRoom';
       hash['Restroom'] = 'Restroom';
       hash['Stair'] = 'Stair';
       hash['Storage'] = 'Storage';
       hash['Vending'] = 'Vending';
-      hash['WholeBuilding - Lg Office'] = 'WholeBuilding - Lg Office';
+      hash['Whole Building - Lg Office'] = 'WholeBuilding - Lg Office';
 
       if (['DOE Ref Pre-1980', 'DOE Ref 1980-2004', 'ComStock DOE Ref Pre-1980', 'ComStock DOE Ref 1980-2004'].indexOf(template) === -1) {
         if (wholeBuilding) {
-          hash['OfficeLarge Data Center'] = 'OfficeLarge Data Center';
-          hash['OfficeLarge Main Data Center'] = 'OfficeLarge Main Data Center';
+          hash['Office - Large Data Center'] = 'OfficeLarge Data Center';
+          hash['Office - Large Main Data Center'] = 'OfficeLarge Main Data Center';
         } else {
-          hash['OfficeLarge Data Center'] = 'OfficeLarge Data Center';
-          hash['OfficeLarge Main Data Center'] = 'OfficeLarge Main Data Center';
+          hash['Office - Large Data Center'] = 'OfficeLarge Data Center';
+          hash['Office - Large Main Data Center'] = 'OfficeLarge Main Data Center';
         }
       }
 
     } else if (building_type == 'SmallHotel') {
       hash['Corridor'] = 'Corridor';
-      hash['Elec/MechRoom'] = 'Elec/MechRoom';
-      hash['ElevatorCore'] = 'ElevatorCore';
+      hash['Elec/Mech Room'] = 'Elec/MechRoom';
+      hash['Elevator Core'] = 'ElevatorCore';
       hash['Exercise'] = 'Exercise';
-      hash['GuestLounge'] = 'GuestLounge';
+      hash['Guest Lounge'] = 'GuestLounge';
       hash['Laundry'] = 'Laundry';
       hash['Mechanical'] = 'Mechanical';
       hash['Meeting'] = 'Meeting';
       hash['Office'] = 'Office';
-      hash['PublicRestroom'] = 'PublicRestroom';
-      hash['StaffLounge'] = 'StaffLounge';
+      hash['Public Restroom'] = 'PublicRestroom';
+      hash['Staff Lounge'] = 'StaffLounge';
       hash['Stair'] = 'Stair';
       hash['Storage'] = 'Storage';
 
       if (['DOE Ref Pre-1980', 'DOE Ref 1980-2004', 'ComStock DOE Ref Pre-1980', 'ComStock DOE Ref 1980-2004'].indexOf(template) !== -1) {
-        hash['GuestRoom'] = 'GuestRoom';
+        hash['Guest Room'] = 'GuestRoom';
       } else {
-        hash['GuestRoom123Occ'] = 'GuestRoom123Occ';
-        hash['GuestRoom123Vac'] = 'GuestRoom123Vac';
+        hash['Guest Room 123O cc'] = 'GuestRoom123Occ';
+        hash['Guest Room 123V ac'] = 'GuestRoom123Vac';
       }
     } else if (building_type == 'LargeHotel') {
       hash['Banquet'] = 'Banquet';
       hash['Basement'] = 'Basement';
       hash['Cafe'] = 'Cafe';
       hash['Corridor'] = 'Corridor';
-      hash['GuestRoom'] = 'GuestRoom';
+      hash['Guest Room'] = 'GuestRoom';
       hash['Kitchen'] = 'Kitchen';
       hash['Laundry'] = 'Laundry';
       hash['Lobby'] = 'Lobby';
@@ -351,9 +351,9 @@ const helpers = {
       hash['Fine'] = 'Fine';
       hash['Office'] = 'Office';
     } else if (building_type == 'RetailStandalone') {
-      hash['Back_Space'] = 'Back_Space';
+      hash['Back Space'] = 'Back_Space';
       hash['Entry'] = 'Entry';
-      hash['Point_of_Sale'] = 'Point_of_Sale';
+      hash['Point of Sale'] = 'Point_of_Sale';
       hash['Retail'] = 'Retail';
     } else if (building_type == 'RetailStripmall') {
       hash['Strip mall - type 1'] = 'Strip mall - type 1';
@@ -377,49 +377,49 @@ const helpers = {
       hash['Basement'] = 'Basement';
       hash['Corridor'] = 'Corridor';
       hash['Dining'] = 'Dining';
-      hash['ER_Exam'] = 'ER_Exam';
-      hash['ER_NurseStn'] = 'ER_NurseStn';
-      hash['ER_Trauma'] = 'ER_Trauma';
-      hash['ER_Triage'] = 'ER_Triage';
-      hash['ICU_NurseStn'] = 'ICU_NurseStn';
-      hash['ICU_Open'] = 'ICU_Open';
-      hash['ICU_PatRm'] = 'ICU_PatRm';
+      hash['ER Exam'] = 'ER_Exam';
+      hash['ER Nurse Station'] = 'ER_NurseStn';
+      hash['ER Trauma'] = 'ER_Trauma';
+      hash['ER Triage'] = 'ER_Triage';
+      hash['ICU Nurse Station'] = 'ICU_NurseStn';
+      hash['ICU Open'] = 'ICU_Open';
+      hash['ICU Patient Room'] = 'ICU_PatRm';
       hash['Kitchen'] = 'Kitchen';
       hash['Lab'] = 'Lab';
       hash['Lobby'] = 'Lobby';
-      hash['NurseStn'] = 'NurseStn';
+      hash['Nurse Station'] = 'NurseStn';
       hash['Office'] = 'Office';
       hash['OR'] = 'OR';
-      hash['PatCorridor'] = 'PatCorridor';
-      hash['PatRoom'] = 'PatRoom';
-      hash['PhysTherapy'] = 'PhysTherapy';
+      hash['Patient Corridor'] = 'PatCorridor';
+      hash['Patient Room'] = 'PatRoom';
+      hash['Physical Therapy'] = 'PhysTherapy';
       hash['Radiology'] = 'Radiology';
     } else if (building_type == 'Outpatient') {
       hash['Anesthesia'] = 'Anesthesia';
       hash['BioHazard'] = 'BioHazard';
       hash['Cafe'] = 'Cafe';
-      hash['CleanWork'] = 'CleanWork';
+      hash['Clean Work'] = 'CleanWork';
       hash['Conference'] = 'Conference';
-      hash['DresingRoom'] = 'DresingRoom';
-      hash['Elec/MechRoom'] = 'Elec/MechRoom';
-      hash['ElevatorPumpRoom'] = 'ElevatorPumpRoom';
+      hash['Dressing Room'] = 'DresingRoom';
+      hash['Elec/Mech Room'] = 'Elec/MechRoom';
+      hash['Elevator Pump Room'] = 'ElevatorPumpRoom';
       hash['Exam'] = 'Exam';
       hash['Hall'] = 'Hall';
-      hash['IT_Room'] = 'IT_Room';
+      hash['IT Room'] = 'IT_Room';
       hash['Janitor'] = 'Janitor';
       hash['Lobby'] = 'Lobby';
-      hash['LockerRoom'] = 'LockerRoom';
+      hash['Locker Room'] = 'LockerRoom';
       hash['Lounge'] = 'Lounge';
-      hash['MedGas'] = 'MedGas';
+      hash['Med Gas'] = 'MedGas';
       hash['MRI'] = 'MRI';
-      hash['MRI_Control'] = 'MRI_Control';
-      hash['NurseStation'] = 'NurseStation';
+      hash['MRI Control'] = 'MRI_Control';
+      hash['Nurse Station'] = 'NurseStation';
       hash['Office'] = 'Office';
       hash['OR'] = 'OR';
       hash['PACU'] = 'PACU';
-      hash['PhysicalTherapy'] = 'PhysicalTherapy';
+      hash['Physical Therapy'] = 'PhysicalTherapy';
       hash['PreOp'] = 'PreOp';
-      hash['ProcedureRoom'] = 'ProcedureRoom';
+      hash['Procedure Room'] = 'ProcedureRoom';
       hash['Reception'] = 'Reception';
       hash['Soil Work'] = 'Soil Work';
       hash['Stair'] = 'Stair';
@@ -429,42 +429,42 @@ const helpers = {
     } else if (building_type == 'SuperMarket') {
       hash['Bakery'] = 'Bakery';
       hash['Deli'] = 'Deli';
-      hash['DryStorage'] = 'DryStorage';
+      hash['Dry Storage'] = 'DryStorage';
       hash['Office'] = 'Office';
       hash['Produce'] = 'Produce';
       hash['Sales'] = 'Sales';
       hash['Corridor'] = 'Corridor';
       hash['Dining'] = 'Dining';
-      hash['Elec/MechRoom'] = 'Elec/MechRoom';
+      hash['Elec/Mech Room'] = 'Elec/MechRoom';
       hash['Meeting'] = 'Meeting';
       hash['Restroom'] = 'Restroom';
       hash['Vestibule'] = 'Vestibule';
     } else if (building_type == 'Laboratory') {
       hash['Office'] = 'Office';
-      hash['Open lab'] = 'Open lab';
-      hash['Equipment corridor'] = 'Equipment corridor';
-      hash['Lab with fume hood'] = 'Lab with fume hood';
+      hash['Open Lab'] = 'Open lab';
+      hash['Equipment Corridor'] = 'Equipment corridor';
+      hash['Lab with Fume Hood'] = 'Lab with fume hood';
     } else if (building_type == 'LargeDataCenterHighITE') {
-      hash['StandaloneDataCenter'] = 'StandaloneDataCenter';
+      hash['Standalone Data Center'] = 'StandaloneDataCenter';
     } else if (building_type == 'LargeDataCenterLowITE') {
-      hash['StandaloneDataCenter'] = 'StandaloneDataCenter';
+      hash['Standalone Data Center'] = 'StandaloneDataCenter';
     } else if (building_type == 'SmallDataCenterHighITE') {
-      hash['ComputerRoom'] = 'ComputerRoom';
+      hash['Computer Room'] = 'ComputerRoom';
     } else if (building_type == 'SmallDataCenterLowITE') {
-      hash['ComputerRoom'] = 'ComputerRoom';
+      hash['Computer Room'] = 'ComputerRoom';
     } else if (building_type == 'Asm') {
       hash['Auditorium'] = 'Auditorium';
-      hash['OfficeGeneral'] = 'OfficeGeneral';
+      hash['Office General'] = 'OfficeGeneral';
     } else if (building_type == 'ECC') {
       hash['Classroom'] = 'Classroom';
-      hash['CompRoomClassRm'] = 'CompRoomClassRm';
+      hash['Computer Room Classroom'] = 'CompRoomClassRm';
       hash['Shop'] = 'Shop';
       hash['Dining'] = 'Dining';
       hash['Kitchen'] = 'Kitchen';
-      hash['OfficeGeneral'] = 'OfficeGeneral';
+      hash['Office General'] = 'OfficeGeneral';
     } else if (building_type == 'EPr') {
       hash['Classroom'] = 'Classroom';
-      hash['CorridorStairway'] = 'CorridorStairway';
+      hash['Corridor Stairway'] = 'CorridorStairway';
       hash['Dining'] = 'Dining';
       hash['Gymnasium'] = 'Gymnasium';
       hash['Kitchen'] = 'Kitchen';
@@ -472,108 +472,108 @@ const helpers = {
       hash['Classroom'] = 'Classroom';
     } else if (building_type == 'ESe') {
       hash['Classroom'] = 'Classroom';
-      hash['CompRoomClassRm'] = 'CompRoomClassRm';
-      hash['CorridorStairway'] = 'CorridorStairway';
+      hash['Computer Room Classroom'] = 'CompRoomClassRm';
+      hash['Corridor Stairway'] = 'CorridorStairway';
       hash['Dining'] = 'Dining';
       hash['Gymnasium'] = 'Gymnasium';
       hash['Kitchen'] = 'Kitchen';
-      hash['OfficeGeneral'] = 'OfficeGeneral';
+      hash['Office General'] = 'OfficeGeneral';
     } else if (building_type == 'EUn') {
       hash['Dining'] = 'Dining';
       hash['Classroom'] = 'Classroom';
-      hash['OfficeGeneral'] = 'OfficeGeneral';
-      hash['CompRoomClassRm'] = 'CompRoomClassRm';
+      hash['Office General'] = 'OfficeGeneral';
+      hash['Computer Room Classroom'] = 'CompRoomClassRm';
       hash['Kitchen'] = 'Kitchen';
-      hash['CorridorStairway'] = 'CorridorStairway';
+      hash['Corridor Stairway'] = 'CorridorStairway';
       hash['FacMaint'] = 'FacMaint';
-      hash['DormitoryRoom'] = 'DormitoryRoom';
+      hash['Dormitory Room'] = 'DormitoryRoom';
     } else if (building_type == 'Gro') {
-      hash['GrocSales'] = 'GrocSales';
-      hash['RefWalkInCool'] = 'RefWalkInCool';
-      hash['OfficeGeneral'] = 'OfficeGeneral';
-      hash['RefFoodPrep'] = 'RefFoodPrep';
-      hash['RefWalkInFreeze'] = 'RefWalkInFreeze';
-      hash['IndLoadDock'] = 'IndLoadDock';
+      hash['Grocery Sales'] = 'GrocSales';
+      hash['Ref Walk In Cool'] = 'RefWalkInCool';
+      hash['Office General'] = 'OfficeGeneral';
+      hash['Ref Food Prep'] = 'RefFoodPrep';
+      hash['Ref Walk In Freeze'] = 'RefWalkInFreeze';
+      hash['Ind Load Dock'] = 'IndLoadDock';
     } else if (building_type == 'Hsp') {
-      hash['HspSurgOutptLab'] = 'HspSurgOutptLab';
+      hash['Hsp Surg Outpt Lab'] = 'HspSurgOutptLab';
       hash['Dining'] = 'Dining';
       hash['Kitchen'] = 'Kitchen';
-      hash['OfficeGeneral'] = 'OfficeGeneral';
-      hash['PatientRoom'] = 'PatientRoom';
+      hash['Office General'] = 'OfficeGeneral';
+      hash['Patient Room'] = 'PatientRoom';
     } else if (building_type == 'Htl') {
       hash['Dining'] = 'Dining';
-      hash['BarCasino'] = 'BarCasino';
-      hash['HotelLobby'] = 'HotelLobby';
-      hash['OfficeGeneral'] = 'OfficeGeneral';
-      hash['GuestRmCorrid'] = 'GuestRmCorrid';
+      hash['Bar Casino'] = 'BarCasino';
+      hash['Hotel Lobby'] = 'HotelLobby';
+      hash['Office General'] = 'OfficeGeneral';
+      hash['Guest Rm Corrid'] = 'GuestRmCorrid';
       hash['Laundry'] = 'Laundry';
-      hash['GuestRmOcc'] = 'GuestRmOcc';
-      hash['GuestRmUnOcc'] = 'GuestRmUnOcc';
+      hash['Guest Rm Occ'] = 'GuestRmOcc';
+      hash['Guest Rm Un Occ'] = 'GuestRmUnOcc';
       hash['Kitchen'] = 'Kitchen';
     } else if (building_type == 'MBT') {
-      hash['CompRoomData'] = 'CompRoomData';
+      hash['Computer Room Classroom'] = 'CompRoomData';
       hash['Laboratory'] = 'Laboratory';
-      hash['CorridorStairway'] = 'CorridorStairway';
+      hash['Corridor Stairway'] = 'CorridorStairway';
       hash['Conference'] = 'Conference';
       hash['Dining'] = 'Dining';
-      hash['OfficeOpen'] = 'OfficeOpen';
+      hash['Office Open'] = 'OfficeOpen';
       hash['Kitchen'] = 'Kitchen';
     } else if (building_type == 'MFm') {
-      hash['ResLiving'] = 'ResLiving';
-      hash['ResPublicArea'] = 'ResPublicArea';
+      hash['Res Living'] = 'ResLiving';
+      hash['Res Public Area'] = 'ResPublicArea';
     } else if (building_type == 'MLI') {
-      hash['StockRoom'] = 'StockRoom';
+      hash['Stock Room'] = 'StockRoom';
       hash['Work'] = 'Work';
     } else if (building_type == 'Mtl') {
-      hash['OfficeGeneral'] = 'OfficeGeneral';
-      hash['GuestRmCorrid'] = 'GuestRmCorrid';
+      hash['Office General'] = 'OfficeGeneral';
+      hash['Guest Rm Corrid'] = 'GuestRmCorrid';
       hash['Laundry'] = 'Laundry';
-      hash['GuestRmOcc'] = 'GuestRmOcc';
-      hash['GuestRmUnOcc'] = 'GuestRmUnOcc';
+      hash['Guest Rm Occ'] = 'GuestRmOcc';
+      hash['Guest Rm Un Occ'] = 'GuestRmUnOcc';
     } else if (building_type == 'Nrs') {
-      hash['CorridorStairway'] = 'CorridorStairway';
+      hash['Corridor Stairway'] = 'CorridorStairway';
       hash['Dining'] = 'Dining';
       hash['Kitchen'] = 'Kitchen';
-      hash['OfficeGeneral'] = 'OfficeGeneral';
-      hash['PatientRoom'] = 'PatientRoom';
+      hash['Office General'] = 'OfficeGeneral';
+      hash['Patient Room'] = 'PatientRoom';
     } else if (building_type == 'OfL') {
-      hash['LobbyWaiting'] = 'LobbyWaiting';
-      hash['OfficeSmall'] = 'OfficeSmall';
-      hash['OfficeOpen'] = 'OfficeOpen';
-      hash['MechElecRoom'] = 'MechElecRoom';
+      hash['Lobby Waiting'] = 'LobbyWaiting';
+      hash['Office Small'] = 'OfficeSmall';
+      hash['Office Open'] = 'OfficeOpen';
+      hash['Mech Elec Room'] = 'MechElecRoom';
     } else if (building_type == 'OfS') {
       hash['Hall'] = 'Hall';
-      hash['OfficeSmall'] = 'OfficeSmall';
+      hash['Office Small'] = 'OfficeSmall';
     } else if (building_type == 'RFF') {
       hash['Dining'] = 'Dining';
       hash['Kitchen'] = 'Kitchen';
-      hash['LobbyWaiting'] = 'LobbyWaiting';
+      hash['Lobby Waiting'] = 'LobbyWaiting';
       hash['Restroom'] = 'Restroom';
     } else if (building_type == 'RSD') {
       hash['Restroom'] = 'Restroom';
       hash['Dining'] = 'Dining';
-      hash['LobbyWaiting'] = 'LobbyWaiting';
+      hash['Lobby Waiting'] = 'LobbyWaiting';
       hash['Kitchen'] = 'Kitchen';
     } else if (building_type == 'Rt3') {
-      hash['RetailSales'] = 'RetailSales';
+      hash['Retail Sales'] = 'RetailSales';
     } else if (building_type == 'RtL') {
-      hash['OfficeGeneral'] = 'OfficeGeneral';
+      hash['Office General'] = 'OfficeGeneral';
       hash['Work'] = 'Work';
-      hash['StockRoom'] = 'StockRoom';
-      hash['RetailSales'] = 'RetailSales';
+      hash['Stock Room'] = 'StockRoom';
+      hash['Retail Sales'] = 'RetailSales';
       hash['Kitchen'] = 'Kitchen';
     } else if (building_type == 'RtS') {
-      hash['RetailSales'] = 'RetailSales';
-      hash['StockRoom'] = 'StockRoom';
+      hash['Retail Sales'] = 'RetailSales';
+      hash['Stock Room'] = 'StockRoom';
     } else if (building_type == 'SCn') {
-      hash['WarehouseCond'] = 'WarehouseCond';
+      hash['Warehouse Cond'] = 'WarehouseCond';
     } else if (building_type == 'SUn') {
-      hash['WarehouseUnCond'] = 'WarehouseUnCond';
+      hash['Warehouse Un Cond'] = 'WarehouseUnCond';
     } else if (building_type == 'WRf') {
-      hash['IndLoadDock'] = 'IndLoadDock';
-      hash['OfficeGeneral'] = 'OfficeGeneral';
-      hash['RefStorFreezer'] = 'RefStorFreezer';
-      hash['RefStorCooler'] = 'RefStorCooler';
+      hash['Ind Load Dock'] = 'IndLoadDock';
+      hash['Office General'] = 'OfficeGeneral';
+      hash['Ref Stor Freezer'] = 'RefStorFreezer';
+      hash['Ref Stor Cooler'] = 'RefStorCooler';
     }
 
     return hash;
