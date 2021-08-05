@@ -22,14 +22,14 @@ var compiler = webpack(webpackConfig)
 // serve pure static assets
 var staticPath = path.posix.join(config.dev.assetsPublicPath, config.dev.assetsSubDirectory)
 app.use(staticPath, express.static('./static'))
-app.use(path.posix.join(config.dev.assetsPublicPath, '3DViewer'), express.static('./3DViewer'))
+app.use(path.posix.join(config.dev.assetsPublicPath, '3DViewer/'), express.static('./3DViewer/build/'))
 
 var devMiddleware = require('webpack-dev-middleware')(compiler, {
   publicPath: webpackConfig.output.publicPath,
   stats: {
     colors: true,
     chunks: false
-  }
+  },
 })
 
 var hotMiddleware = require('webpack-hot-middleware')(compiler)
@@ -51,7 +51,11 @@ Object.keys(proxyTable).forEach(function (context) {
 })
 
 // handle fallback for HTML5 history API
-app.use(require('connect-history-api-fallback')())
+app.use(require('connect-history-api-fallback')({
+  rewrites: [
+    { from: /\/3DViewer/, to: '/3DViewer/index.html'}
+  ]
+}))
 
 // serve webpack bundle output
 app.use(devMiddleware)

@@ -7,6 +7,6 @@ basedir=$(dirname $0)
     docker build . -t emscripten-test:local
     docker run -it --rm -v "$(pwd):/src" emscripten-test:local
 
-    cp embuild/libtest_lib.js .
-    cp embuild/libtest_lib.wasm .
+    cp embuild/libtest_lib.js build
+    cp embuild/libtest_lib.wasm build
 )
