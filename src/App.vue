@@ -86,10 +86,6 @@ export default {
         e.preventDefault();
       }
     });
-
-    const threeJSModuleScript = document.createElement('script');
-    threeJSModuleScript.setAttribute('src', '3DViewer/libtest_lib.js');
-    document.head.appendChild(threeJSModuleScript);
   },
 
   computed: {
