@@ -12,8 +12,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     @close="$emit('close')"
   >
     <div class="grid-container">
-      <div class="export-label">Export Format:</div>
-      <div class="export-input">
+      <div v-if="enable3DPreview" class="export-label">Export Format:</div>
+      <div v-if="enable3DPreview" class="export-input">
         <input type="radio" id="export-input-floorspace" value="floorspace" v-model="exportType">
         <label for="export-input-floorspace">Floorspace.js</label>
         <input type="radio" id="export-input-threejs" value="threejs" v-model="exportType">
@@ -41,6 +41,13 @@ export default {
   props: [],
   mounted() {
     this.$refs.downloadName.focus();
+  },
+  computed: {
+    enable3DPreview: {
+      get() {
+        return this.$store.state.project.preview3D.enabled;
+      },
+    },
   },
   data() {
     return {
