@@ -27,7 +27,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <ImageUpload />
         <Textures />
         <PortalTarget name="texture-options" />
-        <ColorPickerModal></ColorPickerModal>
+        <PortalTarget name="color-picker" />
     </div>
 </template>
 

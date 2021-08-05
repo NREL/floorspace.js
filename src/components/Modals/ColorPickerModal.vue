@@ -1,50 +1,53 @@
 <template>
   <transition name="modal">
-    <div class="color-picker-modal" v-show="visible">
-      <div class="modal-mask">
-        <div class="modal-wrapper" @click="close()">
-          <div class="modal-container" @click.stop>
-            <div class="modal-body">
-              <swatches v-model="color" inline show-fallback />
+    <Portal to="color-picker">
+      <div class="color-picker-modal">
+        <div class="modal-mask">
+          <div class="modal-wrapper" @click="$emit('close')">
+            <div class="modal-container" @click.stop>
+              <div class="modal-body">
+                <swatches v-model="color" inline show-fallback />
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </Portal>
   </transition>
 </template>
 
 <script>
-import { colorPickerModalService } from './colorPickerModalService';
 import Swatches from 'vue-swatches';
+import { Portal } from 'portal-vue';
 
 export default {
   name: 'ColorPickerModal',
-  data() {
-    return {
-      value: '',
-      visible: false,
-    };
-  },
+  props: ['value'],
   computed: {
     color: {
       get() {
         return this.value;
       },
       set(newVal) {
-        colorPickerModalService._change(newVal);
+        this.$emit('change', newVal);
       },
     },
   },
   mounted() {
-    colorPickerModalService._attach(this);
+    document.addEventListener('keydown', this.closeOnEsc);
+  },
+  beforeDestroy() {
+    document.removeEventListener('keydown', this.closeOnEsc);
   },
   methods: {
-    close() {
-      colorPickerModalService.closeModal();
+    closeOnEsc(e) {
+      if (e.keyCode === 27) {
+        this.$emit('close');
+      }
     },
   },
   components: {
+    Portal,
     Swatches,
   },
 };

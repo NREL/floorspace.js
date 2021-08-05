@@ -26,9 +26,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       class="input-color"
       :value="row[col.name]"
       :disabled="disabled"
-      @click="openColorModal()"
+      @click="showColorModal = true"
       readonly
       :style="colorStyles"
+    />
+    <ColorPickerModal
+      v-if="showColorModal"
+      @close="showColorModal = false"
+      :value="row[col.name]"
+      @change="onChange"
     />
   </div>
   <pretty-select v-else-if="col.input_type === 'select'"
@@ -48,12 +54,17 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <script>
 import _ from 'lodash';
 import TextureSelect from './TextureSelect.vue';
-import { colorPickerModalService } from './Modals/colorPickerModalService';
+import ColorPickerModal from './Modals/ColorPickerModal.vue';
 import { brightness } from '../utilities/color';
 
 export default {
   name: 'GenericInput',
   props: ['col', 'row', 'onChange'],
+  data() {
+    return {
+      showColorModal: false,
+    };
+  },
   methods: {
     blurOnEnter(evt) {
       if (evt.keyCode === 13) {
@@ -115,6 +126,7 @@ export default {
   },
   components: {
     TextureSelect,
+    ColorPickerModal,
   },
 }
 
