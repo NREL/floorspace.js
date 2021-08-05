@@ -15,6 +15,7 @@ import timetravel from './store/timetravel';
 import App from './App.vue';
 import PrettySelect from './components/PrettySelect.vue';
 import GenericInput from './components/GenericInput.vue';
+import '../3DViewer/build/libtest_lib';
 
 Vue.component('pretty-select', PrettySelect);
 Vue.component('generic-input', GenericInput);
