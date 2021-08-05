@@ -36,15 +36,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <script>
 import _ from 'lodash';
 import { mapState, mapGetters } from 'vuex';
-import { getSiblings } from './../utilities';
-import applicationHelpers from './../store/modules/application/helpers';
-import modelHelpers from './../store/modules/models/helpers';
 import ResizeEvents from './Resize/ResizeEvents';
 import Library from './Library.vue';
-import LibrarySelect from './LibrarySelect.vue';
 
-let fullWidth;
-const collapsedWidth = 8;
 export default {
   name: 'navigation',
   data() {
@@ -86,7 +80,7 @@ export default {
         case 'components':
           return ['window_definitions', 'daylighting_control_definitions', 'door_definitions'];
         case 'assign':
-          return ['building_units', 'thermal_zones', 'space_types', 'construction_sets', 'pitched_roofs'];
+          return ['building_units', 'building_types', 'thermal_zones', 'space_types', 'construction_sets', 'pitched_roofs'];
       }
     },
     mode: {

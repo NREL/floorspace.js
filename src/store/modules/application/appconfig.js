@@ -1,5 +1,5 @@
 
-export const assignableProperties = ['building_units', 'thermal_zones', 'space_types', 'construction_sets', 'pitched_roofs'];
+export const assignableProperties = ['building_units', 'thermal_zones', 'space_types', 'construction_sets', 'pitched_roofs', 'building_types'];
 export const componentTypes = ['window_definitions', 'daylighting_control_definitions', 'door_definitions'];
 export const libraryTypes = [...assignableProperties, ...componentTypes];
 export const textures = [
@@ -16,6 +16,7 @@ const config = {
     spaces: 'Space',
     shading: 'Shading',
     building_units: 'Building Unit',
+    building_types: 'Building Type',
     thermal_zones: 'Thermal Zone',
     space_types: 'Space Type',
     pitched_roofs: 'Pitched Roof',
