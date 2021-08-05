@@ -14,10 +14,7 @@ testsContext.keys().forEach(testsContext)
 const srcContext = require.context('src', true, /^\.\/(?!main(\.js)?$)/)
 srcContext.keys().forEach(srcContext)
 
-const chai = require('chai'),
-  spies = require('chai-spies');
-
-chai.use(spies);
+const chai = require('chai');
 
 const should = chai.should(),
   expect = chai.expect;
