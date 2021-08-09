@@ -33,7 +33,6 @@ module.exports = {
     browser
       .click('.modal .new-floorplan svg')
       .click('[data-object-type="spaces"] [title="expand"]')
-      .pause(10000)
       .setValue(floorToCeiling, '12')
       .keys(browser.Keys.ENTER)
       .assert.value(floorToCeiling, '12')
@@ -47,7 +46,7 @@ module.exports = {
       .end();
   },
   'selecting "Create New" generates a new default option': (browser) => {
-    const buildingUnitSelector = '.column__building_unit_id select';
+    const buildingUnitSelector = '[data-column="building_unit_id"] select';
     browser
       .click('.modal .new-floorplan svg')
       .click('[data-object-type="spaces"] [title="expand"]')

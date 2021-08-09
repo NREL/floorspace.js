@@ -8,7 +8,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
   <div class='input-select'>
       <label v-if="label">{{ label }}</label>
-      <select ref="select" @change="handleChange" :disabled="disabled">
+      <select ref="select" @change="handleChange" :disabled="disabled" class="pretty-select">
           <option v-for='opt in normalizedOpts' :value="opt.val" :selected="opt.val === value">{{ opt.display }}</option>
       </select>
       <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
@@ -86,14 +86,19 @@ export default {
 
 <style lang="scss" scoped>
 @import "./../scss/config";
-select {
-  padding-top: 4px;
-  padding-bottom: 4px;
-  border-width: 1px;
-  font-size: 11px;
-  option {
-    padding-left: 2px;
-    padding-right: 2px;
+
+.input-select {
+  select {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    border-width: 1px;
+    font-size: 11px;
+    max-width: 134px;
+
+    option {
+      padding-left: 2px;
+      padding-right: 2px;
+    }
   }
 }
 </style>
