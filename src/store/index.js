@@ -10,6 +10,7 @@ import models from './modules/models/index';
 import exportData from './utilities/export';
 import importFloorplan from './utilities/importFloorplan';
 import importLibrary from './utilities/importLibrary';
+import mergeFloorplans from './utilities/mergeFloorplans';
 import { convertState } from './utilities/unitConversion';
 import mutations from './mutations';
 
@@ -29,6 +30,7 @@ const store = new Vuex.Store({
   actions: {
     importFloorplan,
     importLibrary,
+    mergeFloorplans,
     changeUnits(context, { newUnits }) {
       const oldUnits = context.state.project.config.units;
       console.log(`moving from ${oldUnits} to ${newUnits}`);

@@ -264,6 +264,7 @@ export default {
           window.eventBus.$emit('error', 'Invalid JSON');
           return;
         }
+        this.$store.dispatch('mergeFloorplans', { data });
       }, false);
 
       if (file) { reader.readAsText(file); }
