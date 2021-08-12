@@ -518,6 +518,8 @@ const map = {
           const buildingUnit = state.models.library.building_units.find(b => b.id === space.building_unit_id);
           return buildingUnit ? buildingUnit.name : null;
         },
+        editable: true,
+        type: 'building_units',
       },
       {
         name: 'building_type_id',
@@ -532,6 +534,8 @@ const map = {
           const buildingType = state.models.library.building_types.find(b => b.id === space.building_type_id);
           return buildingType ? buildingType.name : null;
         },
+        editable: true,
+        type: 'thermal_zones',
       },
       {
         name: 'space_type_id',
@@ -549,6 +553,8 @@ const map = {
           const spaceType = state.models.library.space_types.find(s => s.id === space.space_type_id);
           return spaceType ? spaceType.name : null;
         },
+        editable: true,
+        type: 'space_types',
       },
       {
         name: 'template',
@@ -582,6 +588,8 @@ const map = {
           const constructionSet = state.models.library.construction_sets.find(c => c.id === space.construction_set_id);
           return constructionSet ? constructionSet.name : null;
         },
+        editable: true,
+        type: 'construction_sets',
       },
       {
         name: 'pitched_roof_id',
@@ -599,6 +607,8 @@ const map = {
           const prt = _.find(state.models.library.pitched_roofs, { id: space.pitched_roof_id });
           return prt ? prt.name : null;
         },
+        editable: true,
+        type: 'pitched_roofs',
       },
       {
         name: 'below_floor_plenum_height',

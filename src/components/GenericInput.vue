@@ -42,6 +42,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     :options="selectData"
     :value="row[col.name]"
     :disabled="disabled"
+    :editable="col.editable"
+    :type="col.type"
+    :type_id="col.name"
+    :space_id="row.id"
   />
   <TextureSelect
     v-else-if="col.input_type === 'texture'"

@@ -45,4 +45,17 @@ module.exports = {
       .checkForErrors()
       .end();
   },
+  'selecting "Create New" generates a new default option': (browser) => {
+    const buildingUnitSelector = '[data-column="building_unit_id"] select';
+    browser
+      .click('.modal .new-floorplan svg')
+      .click('[data-object-type="spaces"] [title="expand"]')
+      .click(`${buildingUnitSelector} option[value="Create New"]`);
+
+    browser.assert.containsText(buildingUnitSelector, 'Building Unit 1');
+
+    browser
+      .checkForErrors()
+      .end();
+  },
 };
