@@ -14,14 +14,17 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           <input ref="importLibrary" @change="importDataAsFile($event, 'library')" type="file" />
           <input ref="importInput" @change="importDataAsFile($event, 'floorplan')" type="file" />
 
-          <div title="open floorplan">
+          <div title="Open Floorplan">
             <open-floorplan-svg @click.native="$refs.importInput.click()" id="import" class="button"></open-floorplan-svg>
           </div>
-          <div title="save floorplan">
+          <div title="Save Floorplan">
             <save-floorplan-svg @click.native="exportData" id="export" class="button"></save-floorplan-svg>
           </div>
-          <div title="import library">
+          <div title="Import Library">
             <import-library-svg @click.native="$refs.importLibrary.click()" class="button"></import-library-svg>
+          </div>
+          <div v-if="enable3DPreview" title="Open 3D Previewer">
+            <globe-icon-svg @click.native="open3DPreviewer" class="button" />
           </div>
         </div>
 
@@ -167,9 +170,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     <section class="modals">
       <SaveAsModal
         v-if="showSaveModal"
-        :saveWhat="thingWereSaving"
-        :dataToDownload="dataToDownload"
-        @close="() => {showSaveModal = false; thingWereSaving = '';}"
+        @close="() => {showSaveModal = false;}"
       />
       <Settings
         v-else-if="showGroundPropsModal"
@@ -202,7 +203,6 @@ export default {
         window_definitions: 'Window Definitions',
       },
       showSaveModal: false,
-      thingWereSaving: '',
       visibleComponentType: null,
       showGroundPropsModal: false,
     };
@@ -218,9 +218,12 @@ export default {
       window.eventBus.$emit('zoomToFit');
     },
     exportData() {
-      this.thingWereSaving = 'Floorplan';
       this.showSaveModal = true;
       return this.$store.getters['exportData'];
+    },
+    open3DPreviewer() {
+      localStorage.setItem("floorplan3DExport", JSON.stringify(application.$store.getters['exportData']));
+      window.open('3DViewer');
     },
     importDataAsFile(event, type) {
       const file = event.target.files[0];
@@ -297,6 +300,11 @@ export default {
       get() { return this.$store.state.application.currentSelections.subselectionType; },
       set(sst) { this.$store.dispatch('application/setCurrentSubselectionType', { subselectionType: sst }); },
     },
+    enable3DPreview: {
+      get() {
+        return this.$store.state.project.preview3D.enabled;
+      },
+    },
     availableTools() {
       let tools = [];
       switch (this.modeTab) {
@@ -364,9 +372,6 @@ export default {
     snapMode: {
       get() { return this.$store.state.application.currentSelections.snapMode; },
       set(snapMode) { this.$store.dispatch('application/setCurrentSnapMode', { snapMode }); },
-    },
-    dataToDownload() {
-      return this.$store.getters['exportData'];
     },
   },
   watch: {

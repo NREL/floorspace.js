@@ -67,8 +67,8 @@ module.exports = {
             .waitForElementVisible('#grid svg polygon', 100)
             .perform(deleteFloorplan) // delete floorplan so download has correct name
             .pause(100)
-            .click('[title="save floorplan"]')
-            .setValue('#download-name', '_nightwatch_exported')
+            .click('[title="Save Floorplan"]')
+            .setValue('#download-name', 'floorplan_nightwatch_exported')
             .click('.download-button')
             .pause(100)
             .checkForErrors();
@@ -84,8 +84,8 @@ module.exports = {
       .getScales()
       .perform(deleteFloorplan) // delete floorplan so download has correct name
       .perform(draw50By50Square)
-      .click('[title="save floorplan"]')
-      .setValue('#download-name', '_nightwatch_exported')
+      .click('[title="Save Floorplan"]')
+      .setValue('#download-name', 'floorplan_nightwatch_exported')
       .click('.download-button')
       .pause(100)
       .checkForErrors();
@@ -105,14 +105,27 @@ module.exports = {
       .getScales()
       .perform(deleteFloorplan) // delete floorplan so download has correct name
       .perform(draw50By50Square)
-      .click('[title="save floorplan"]')
-      .setValue('#download-name', '_nightwatch_exported')
+      .click('[title="Save Floorplan"]')
+      .setValue('#download-name', 'floorplan_nightwatch_exported')
       .click('.download-button')
       .pause(100)
       .checkForErrors();
 
     assertValidSchema(browser);
     browser.end();
+  },
+  'floorplan can be exported to three.js': (browser) => {
+    withScales(browser)
+      .click('.modal .new-floorplan svg')
+      .getScales()
+      .perform(deleteFloorplan) // delete floorplan so download has correct name
+      .perform(draw50By50Square)
+      .click('[title="Save Floorplan"]')
+      .click('#export-input-threejs')
+      .setValue('#download-name', 'floorplan_nightwatch_exported')
+      .click('.download-button')
+      .pause(100)
+      .checkForErrors();
   },
   'project.north_axis new location': (browser) => {
     browser

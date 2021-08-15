@@ -42,6 +42,9 @@ export default {
       visible: true
     },
     show_import_export: true,
+    preview3D: {
+      enabled: true,
+    },
   },
   actions: actions,
   mutations: mutations,

@@ -56,7 +56,23 @@ var webpackConfig = merge(baseWebpackConfig, {
         // https://github.com/kangax/html-minifier#options-quick-reference
       },
       // necessary to consistently work with multiple chunks via CommonsChunkPlugin
-      chunksSortMode: 'dependency'
+      chunksSortMode: 'dependency',
+      excludeChunks: [ 'viewer' ]
+    }),
+    new HtmlWebpackPlugin({
+      filename: path.join(config.build.assetsRoot, config.build.viewerSubDirectory, 'index.html'),
+      template: './3DViewer/viewer/index.html',
+      inject: true,
+      minify: {
+        removeComments: true,
+        collapseWhitespace: true,
+        removeAttributeQuotes: true
+        // more options:
+        // https://github.com/kangax/html-minifier#options-quick-reference
+      },
+      // necessary to consistently work with multiple chunks via CommonsChunkPlugin
+      chunksSortMode: 'dependency',
+      excludeChunks: [ 'app' ]
     }),
     // split vendor js into its own file
     new webpack.optimize.CommonsChunkPlugin({
