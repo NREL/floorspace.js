@@ -8,7 +8,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
   <div class='input-select'>
       <label v-if="label">{{ label }}</label>
-      <select @change="$emit('change', $event.target.value)" :disabled="disabled">
+      <select ref="select" @change="handleChange" :disabled="disabled" class="pretty-select">
           <option v-for='opt in normalizedOpts' :value="opt.val" :selected="opt.val === value">{{ opt.display }}</option>
       </select>
       <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
@@ -22,38 +22,83 @@ import _ from 'lodash';
 
 export default {
   name: 'PrettySelect',
-  props: ['options', 'value', 'label', 'disabled'],
+  props: ['options', 'value', 'label', 'disabled', 'editable', 'space_id', 'type', 'type_id'],
   computed: {
     normalizedOpts() {
+      /**
+       * Appends an additional option for creating new options if the editable flag is enabled
+       */
+      const attachEditable = (arr) => {
+        if (this.editable) {
+          return [...arr, {
+            val: 'Create New',
+            display: 'Create New',
+          }];
+        } else {
+          return arr;
+        }
+      }
+
       if (_.isArray(this.options)) {
         if (!this.options.length) {
-          return [];
+          return attachEditable([]);
         }
         if (_.has(this.options[0], 'val') && _.has(this.options[0], 'display')) {
-          return this.options;
+          return attachEditable(this.options);
         }
         if (_.isString(this.options[0])) {
-          return this.options.map(o => ({ val: o, display: o }));
+          return attachEditable(this.options.map(o => ({ val: o, display: o })));
         }
       }
       console.warn('unrecognized options structure', this.options);
       return this.options;
     }
   },
+  methods: {
+    /**
+     * Handles a change in the selection
+     * If the target is 'Create New', it will dispatch an event to create a new option in the select
+     * 
+     * @param event
+     */
+    handleChange(event) {
+      if (event.target.value === 'Create New') {
+        event.stopPropagation();
+        event.preventDefault();
+
+        // The select attempts to change to 'Create New' on select before the state updates
+        // Manually forcing it back to the old value temporarily prevents that
+        this.$refs.select.value = this.value;
+
+        this.$store.dispatch('models/createObjectWithTypeAndSelect', {
+          type: this.type,
+          type_id: this.type_id,
+          space_id: this.space_id,
+        });
+      } else {
+        this.$emit('change', event.target.value);
+      }
+    },
+  }
 }
 
 </script>
 
 <style lang="scss" scoped>
 @import "./../scss/config";
-select {
-  padding-top: 4px;
-  padding-bottom: 4px;
-  border-width: 1px;
-  font-size: 11px;
-  option {
-    padding-left: 2px;
-    padding-right: 2px;
+
+.input-select {
+  select {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    border-width: 1px;
+    font-size: 11px;
+    max-width: 134px;
+
+    option {
+      padding-left: 2px;
+      padding-right: 2px;
+    }
   }
 }
 </style>

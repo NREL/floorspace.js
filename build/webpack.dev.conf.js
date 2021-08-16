@@ -28,7 +28,14 @@ module.exports = merge(baseWebpackConfig, {
     new HtmlWebpackPlugin({
       filename: 'index.html',
       template: 'index.html',
-      inject: true
+      inject: true,
+      chunks: [ 'app' ]
+    }),
+    new HtmlWebpackPlugin({
+      filename: '3DViewer/index.html',
+      template: './3DViewer/viewer/index.html',
+      inject: true,
+      chunks: [ 'viewer' ]
     })
   ]
 })

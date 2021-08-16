@@ -30,3 +30,9 @@ window.application = new Vue({
 });
 
 timetravel.init(store);
+
+// Cannot be imported as an ordinary module since it grabs the wasm as well
+// Importing in the index.html causes strange build issues where the `src` is overwritten
+const threeJSModuleScript = document.createElement('script');
+threeJSModuleScript.setAttribute('src', '3DViewer/libtest_lib.js');
+document.head.appendChild(threeJSModuleScript);

@@ -7,19 +7,29 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
   <ModalBase
-    :title="`Save ${saveWhat} as`"
+    class="save-as-modal"
+    :title="`Save Floorplan As`"
     @close="$emit('close')"
   >
-    <span class="input-text">
-      <input ref="downloadName" type="text"
-        id="download-name"
-        @keyup.enter="downloadFile"
-        :value="saveWhat.toLowerCase()"
-        spellcheck="false"
-      />
-      .json
+    <div class="grid-container">
+      <div v-if="enable3DPreview" class="export-label">Export Format:</div>
+      <div v-if="enable3DPreview" class="export-input">
+        <input type="radio" id="export-input-floorspace" value="floorspace" v-model="exportType">
+        <label for="export-input-floorspace">Floorspace.js</label>
+        <input type="radio" id="export-input-threejs" value="threejs" v-model="exportType">
+        <label for="export-input-threejs">ThreeJS</label>
+      </div>
+      <div class="filename-label">Filename:</div>
+      <div class="filename-input">
+        <input ref="downloadName" type="text"
+          id="download-name"
+          @keyup.enter="downloadFile"
+          :value="floorplan"
+          spellcheck="false"
+        />
+      </div>
       <button class="download-button" @click="downloadFile">Download</button>
-    </span>
+    </div>
   </ModalBase>
 </template>
 
@@ -28,15 +38,35 @@ import ModalBase from './ModalBase.vue';
 
 export default {
   name: 'SaveAsModal',
-  props: ['saveWhat', 'dataToDownload'],
+  props: [],
   mounted() {
     this.$refs.downloadName.focus();
+  },
+  computed: {
+    enable3DPreview: {
+      get() {
+        return this.$store.state.project.preview3D.enabled;
+      },
+    },
+  },
+  data() {
+    return {
+      exportType: 'floorspace',
+    };
   },
   methods: {
     downloadFile: function() {
       const a = document.createElement('a');
+      const data = JSON.stringify(this.$store.getters['exportData']);
+      this.$emit('close');
+
+      let blobData = data;
+      if (this.exportType !== 'floorspace') {
+        blobData = Module.floorplanToThreeJS(data, false);
+      }
+
       const blob = new Blob(
-        [JSON.stringify(this.dataToDownload)],
+        [blobData],
         {
           type: 'text/json;charset=utf-8',
         },
@@ -45,8 +75,7 @@ export default {
       a.setAttribute('download', this.$refs.downloadName.value + '.json');
       a.click();
 
-      console.log(`exporting:\n${JSON.stringify(this.dataToDownload)}`); // eslint-disable-line
-      this.$emit('close');
+      console.log(`exported data for: ${this.exportType}`); // eslint-disable-line
     },
   },
   components: {
@@ -57,9 +86,63 @@ export default {
 
 <style lang="scss" scoped>
 @import "./../../scss/config";
-.download-button {
-  cursor: pointer;
-  text-transform: uppercase;
+
+.save-as-modal {
+  .grid-container {
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-template-rows: auto auto 100fr;
+    row-gap: 6px;
+  }
+
+  .export-label {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+  }
+
+  .export-input {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+  }
+
+  .filename-label {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: start;
+  }
+
+  .filename-input {
+    display: inline-block;
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: end;
+    position: relative;
+  }
+
+  .filename-input > input {
+    padding-right: 35px;
+    text-align: right;
+  }
+
+  .filename-input::after {
+    content: '.json';
+    font-size: 12px;
+    pointer-events: none;
+    position: absolute;
+    right: 5px;
+    top: 4px;
+  }
+
+  .download-button {
+    align-self: end;
+    cursor: pointer;
+    grid-row: 3;
+    grid-column: 2;
+    justify-self: end;
+    text-transform: uppercase;
+  }
 }
 
 </style>

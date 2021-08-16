@@ -12,7 +12,8 @@ var useCssSourceMap = cssSourceMapDev || cssSourceMapProd
 
 module.exports = {
   entry: {
-    app: './src/main.js'
+    app: './src/main.js',
+    viewer: './3DViewer/viewer/index.js',
   },
   output: {
     path: config.build.assetsRoot,
