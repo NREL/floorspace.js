@@ -113,6 +113,7 @@ export default function mergeFloorplans(context, payload) {
 
   // MERGE FLOORPLANS
   payload.data.stories = [...payload.data.stories, ...currentFloorplan.stories];
+  console.log('BEFORE IMPORTING: ', payload.data);
 
   // IMPORT MERGED FLOORPLAN
   importFloorplan(context, payload);

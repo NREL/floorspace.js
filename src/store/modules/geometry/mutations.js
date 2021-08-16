@@ -4,6 +4,8 @@ import _ from 'lodash';
     */
 
 export function trimGeometry(state, { geometry_id, vertsReferencedElsewhere }) {
+  console.log('geometry id? ', geometry_id);
+  console.log('finding the geometry: ', _.find(state, { id: geometry_id }));
   const
     geometry = _.find(state, { id: geometry_id }),
     edgesInUse = new Set(_.flatMap(geometry.faces, f => _.map(f.edgeRefs, 'edge_id'))),
