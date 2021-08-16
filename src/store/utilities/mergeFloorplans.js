@@ -11,29 +11,30 @@ export default function mergeFloorplans(context, payload) {
   // STORIES
   currentFloorplan.stories = currentFloorplan.stories.map((story) => {
     const faces = story.geometry.faces.map((face) => {
-      const edgeRefs = face.edge_ids.map((id, index) => ({
-        edge_id: `l${id}`,
-        reverse: !face.edge_order[index],
-      }));
+      const edge_ids = face.edge_ids.map(id => `l${id}`);
       return {
+        ...face,
         id: `l${face.id}`,
-        edgeRefs,
+        edge_ids,
       };
     });
 
-    const edges = story.geometry.edges.map(e => ({
-      id: `l${e.id}`,
-      v1: `l${e.vertex_ids[0]}`,
-      v2: `l${e.vertex_ids[1]}`,
-    }));
+    const edges = story.geometry.edges.map((edge) => {
+      const face_ids = edge.face_ids.map(id => `l${id}`);
+      const vertex_ids = edge.vertex_ids.map(id => `l${id}`);
+      return {
+        face_ids,
+        id: `l${edge.id}`,
+        vertex_ids,
+      };
+    });
 
     const vertices = story.geometry.vertices.map((vertex) => {
       const edge_ids = vertex.edge_ids.map(id => `l${id}`);
       return {
+        ...vertex,
         edge_ids,
         id: `l${vertex.id}`,
-        x: vertex.x,
-        y: vertex.y,
       };
     });
 
@@ -62,29 +63,30 @@ export default function mergeFloorplans(context, payload) {
   console.log('payload data: ', payload.data);
   payload.data.stories = payload.data.stories.map((story) => {
     const faces = story.geometry.faces.map((face) => {
-      const edgeRefs = face.edge_ids.map((id, index) => ({
-        edge_id: `r${id}`,
-        reverse: !face.edge_order[index],
-      }));
+      const edge_ids = face.edge_ids.map(id => `r${id}`);
       return {
+        ...face,
         id: `r${face.id}`,
-        edgeRefs,
+        edge_ids,
       };
     });
 
-    const edges = story.geometry.edges.map(e => ({
-      id: `r${e.id}`,
-      v1: `r${e.vertex_ids[0]}`,
-      v2: `r${e.vertex_ids[1]}`,
-    }));
+    const edges = story.geometry.edges.map((edge) => {
+      const face_ids = edge.face_ids.map(id => `r${id}`);
+      const vertex_ids = edge.vertex_ids.map(id => `r${id}`);
+      return {
+        face_ids,
+        id: `r${edge.id}`,
+        vertex_ids,
+      };
+    });
 
     const vertices = story.geometry.vertices.map((vertex) => {
       const edge_ids = vertex.edge_ids.map(id => `r${id}`);
       return {
+        ...vertex,
         edge_ids,
         id: `r${vertex.id}`,
-        x: vertex.x,
-        y: vertex.y,
       };
     });
 
