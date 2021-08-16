@@ -111,10 +111,25 @@ export default function mergeFloorplans(context, payload) {
     };
   });
 
-  // MERGE FLOORPLANS
-  payload.data.stories = [...payload.data.stories, ...currentFloorplan.stories];
-  console.log('BEFORE IMPORTING: ', payload.data);
+  // MERGE FLOORPLANS PROPERTIES
+  const zipUpStories = _.zip(payload.data.stories, currentFloorplan.stories);
+  const mergeStories = zipUpStories.map(pairOfStories => ({
+    ...pairOfStories[0],
+    geometry: {
+      id: pairOfStories[0].id,
+      edges: [...pairOfStories[0].geometry.edges, ...pairOfStories[1].geometry.edges],
+      faces: [...pairOfStories[0].geometry.faces, ...pairOfStories[1].geometry.faces],
+      vertices: [...pairOfStories[0].geometry.vertices, ...pairOfStories[1].geometry.vertices],
+    },
+    spaces: [...pairOfStories[0].spaces, ...pairOfStories[1].spaces],
+  }));
+  const mergedResult = {
+    data: {
+      ...payload.data,
+      stories: mergeStories,
+    },
+  };
 
   // IMPORT MERGED FLOORPLAN
-  importFloorplan(context, payload);
+  importFloorplan(context, mergedResult);
 }
