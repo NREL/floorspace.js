@@ -73,6 +73,12 @@ export default function mergeFloorplans(context, payload) {
       door_definition_id: `l${door.door_definition_id}`,
     }));
 
+    const shading = story.shading.map(shade => ({
+      ...shade,
+      id: `l${shade.id}`,
+      face_id: `l${shade.face_id}`,
+    }));
+
     return {
       ...story,
       id: `l${story.id}`,
@@ -80,6 +86,7 @@ export default function mergeFloorplans(context, payload) {
       spaces,
       windows,
       doors,
+      shading,
     };
   });
 
@@ -169,6 +176,12 @@ export default function mergeFloorplans(context, payload) {
       door_definition_id: `r${door.door_definition_id}`,
     }));
 
+    const shading = story.shading.map(shade => ({
+      ...shade,
+      id: `r${shade.id}`,
+      face_id: `r${shade.face_id}`,
+    }));
+
     return {
       ...story,
       id: `r${story.id}`,
@@ -176,6 +189,7 @@ export default function mergeFloorplans(context, payload) {
       spaces,
       windows,
       doors,
+      shading,
     };
   });
 
@@ -222,6 +236,7 @@ export default function mergeFloorplans(context, payload) {
       spaces: [...pairOfStories[0].spaces, ...pairOfStories[1].spaces],
       windows: [...pairOfStories[0].windows, ...pairOfStories[1].windows],
       doors: [...pairOfStories[0].doors, ...pairOfStories[1].doors],
+      shading: [...pairOfStories[0].shading, ...pairOfStories[1].shading],
     };
   });
 
