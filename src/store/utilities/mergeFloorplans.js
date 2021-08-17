@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import idFactory from './generateId';
 import exportData from './export';
 import importFloorplan from './importFloorplan';
 
@@ -58,12 +57,20 @@ export default function mergeFloorplans(context, payload) {
       window_definition_id: `l${window.window_definition_id}`,
     }));
 
+    const doors = story.doors.map(door => ({
+      ...door,
+      edge_id: `l${door.edge_id}`,
+      id: `l${door.id}`,
+      door_definition_id: `l${door.door_definition_id}`,
+    }));
+
     return {
       ...story,
       id: `l${story.id}`,
       geometry,
       spaces,
       windows,
+      doors,
     };
   });
 
@@ -73,6 +80,13 @@ export default function mergeFloorplans(context, payload) {
     id: `l${window_def.id}`,
   }));
 
+  // CURRENT DOOR DEFS
+  currentFloorplan.door_definitions = currentFloorplan.door_definitions.map(door_def => ({
+    ...door_def,
+    id: `l${door_def.id}`,
+  }));
+
+  // -------------------------------------------
   // PREP IMPORTED FLOORPLAN FOR MERGE
   console.log('payload data: ', payload.data);
   payload.data.stories = payload.data.stories.map((story) => {
@@ -124,12 +138,20 @@ export default function mergeFloorplans(context, payload) {
       window_definition_id: `r${window.window_definition_id}`,
     }));
 
+    const doors = story.doors.map(door => ({
+      ...door,
+      edge_id: `r${door.edge_id}`,
+      id: `r${door.id}`,
+      door_definition_id: `r${door.door_definition_id}`,
+    }));
+
     return {
       ...story,
       id: `r${story.id}`,
       geometry,
       spaces,
       windows,
+      doors,
     };
   });
 
@@ -139,9 +161,17 @@ export default function mergeFloorplans(context, payload) {
     id: `r${window_def.id}`,
   }));
 
+  // INCOMING DOOR DEFS
+  payload.data.door_definitions = payload.data.door_definitions.map(door_def => ({
+    ...door_def,
+    id: `l${door_def.id}`,
+  }));
+
+  // ---------------------------------
   // MERGE FLOORPLANS PROPERTIES
   const zipUpStories = _.zip(payload.data.stories, currentFloorplan.stories);
   const zipUpWindowDefs = _.zip(payload.data.window_definitions, currentFloorplan.window_definitions).filter(x => x !== undefined);
+  const zipUpDoorDefs = _.zip(payload.data.door_definitions, currentFloorplan.door_definitions).filter(x => x !== undefined);
   const mergeStories = zipUpStories.map((pairOfStories) => {
     if (!pairOfStories[0]) {
       return pairOfStories[1];
@@ -159,8 +189,10 @@ export default function mergeFloorplans(context, payload) {
       },
       spaces: [...pairOfStories[0].spaces, ...pairOfStories[1].spaces],
       windows: [...pairOfStories[0].windows, ...pairOfStories[1].windows],
+      doors: [...pairOfStories[0].doors, ...pairOfStories[1].doors],
     };
   });
+
   const mergeWindowDefs = zipUpWindowDefs.map((pairOfWindowDefs) => {
     if (!pairOfWindowDefs[0]) {
       return pairOfWindowDefs[1];
@@ -171,11 +203,22 @@ export default function mergeFloorplans(context, payload) {
     return [...pairOfWindowDefs[0].window_definitions, ...pairOfWindowDefs[1].window_definitions];
   });
 
+  const mergeDoorDefs = zipUpDoorDefs.map((pairOfDoorDefs) => {
+    if (!pairOfDoorDefs[0]) {
+      return pairOfDoorDefs[1];
+    }
+    if (!pairOfDoorDefs[1]) {
+      return pairOfDoorDefs[0];
+    }
+    return [...pairOfDoorDefs[0].door_definitions, ...pairOfDoorDefs[1].door_definitions];
+  });
+
   const mergedResult = {
     data: {
       ...payload.data,
       stories: mergeStories,
       window_definitions: mergeWindowDefs,
+      door_definitions: mergeDoorDefs,
     },
   };
 
