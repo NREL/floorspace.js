@@ -156,9 +156,9 @@ export default function mergeFloorplans(context, payload) {
         edges: [...pairOfStories[0].geometry.edges, ...pairOfStories[1].geometry.edges],
         faces: [...pairOfStories[0].geometry.faces, ...pairOfStories[1].geometry.faces],
         vertices: [...pairOfStories[0].geometry.vertices, ...pairOfStories[1].geometry.vertices],
-        windows: [...pairOfStories[0].windows, ...pairOfStories[1].windows],
       },
       spaces: [...pairOfStories[0].spaces, ...pairOfStories[1].spaces],
+      windows: [...pairOfStories[0].windows, ...pairOfStories[1].windows],
     };
   });
   const mergeWindowDefs = zipUpWindowDefs.map((pairOfWindowDefs) => {
@@ -178,6 +178,8 @@ export default function mergeFloorplans(context, payload) {
       window_definitions: mergeWindowDefs,
     },
   };
+
+  console.log('before importing the mergedResult: ', mergedResult);
 
   // IMPORT MERGED FLOORPLAN
   importFloorplan(context, mergedResult);
