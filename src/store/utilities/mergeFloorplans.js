@@ -79,6 +79,11 @@ export default function mergeFloorplans(context, payload) {
       face_id: `l${shade.face_id}`,
     }));
 
+    const images = story.images.map(image => ({
+      ...image,
+      id: `l${image.id}`,
+    }));
+
     return {
       ...story,
       id: `l${story.id}`,
@@ -87,6 +92,7 @@ export default function mergeFloorplans(context, payload) {
       windows,
       doors,
       shading,
+      images,
     };
   });
 
@@ -182,6 +188,11 @@ export default function mergeFloorplans(context, payload) {
       face_id: `r${shade.face_id}`,
     }));
 
+    const images = story.images.map(image => ({
+      ...image,
+      id: `r${image.id}`,
+    }));
+
     return {
       ...story,
       id: `r${story.id}`,
@@ -190,6 +201,7 @@ export default function mergeFloorplans(context, payload) {
       windows,
       doors,
       shading,
+      images,
     };
   });
 
@@ -237,6 +249,7 @@ export default function mergeFloorplans(context, payload) {
       windows: [...pairOfStories[0].windows, ...pairOfStories[1].windows],
       doors: [...pairOfStories[0].doors, ...pairOfStories[1].doors],
       shading: [...pairOfStories[0].shading, ...pairOfStories[1].shading],
+      images: [...pairOfStories[0].images, ...pairOfStories[1].images],
     };
   });
 
