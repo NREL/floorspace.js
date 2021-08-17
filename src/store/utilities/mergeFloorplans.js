@@ -225,11 +225,7 @@ export default function mergeFloorplans(context, payload) {
 
   // ---------------------------------
   // MERGE FLOORPLANS PROPERTIES
-  // TODO: dont need to zip up anything outside of stories I think
   const zipUpStories = _.zip(payload.data.stories, currentFloorplan.stories);
-  const zipUpWindowDefs = _.zip(payload.data.window_definitions, currentFloorplan.window_definitions).filter(x => x !== undefined);
-  const zipUpDoorDefs = _.zip(payload.data.door_definitions, currentFloorplan.door_definitions).filter(x => x !== undefined);
-  const zipUpDaylightingDefs = _.zip(payload.data.daylighting_control_definitions, currentFloorplan.daylighting_control_definitions).filter(x => x !== undefined);
   const mergeStories = zipUpStories.map((pairOfStories) => {
     if (!pairOfStories[0]) {
       return pairOfStories[1];
@@ -253,43 +249,13 @@ export default function mergeFloorplans(context, payload) {
     };
   });
 
-  const mergeWindowDefs = zipUpWindowDefs.map((pairOfWindowDefs) => {
-    if (!pairOfWindowDefs[0]) {
-      return pairOfWindowDefs[1];
-    }
-    if (!pairOfWindowDefs[1]) {
-      return pairOfWindowDefs[0];
-    }
-    return [...pairOfWindowDefs[0].window_definitions, ...pairOfWindowDefs[1].window_definitions];
-  });
-
-  const mergeDoorDefs = zipUpDoorDefs.map((pairOfDoorDefs) => {
-    if (!pairOfDoorDefs[0]) {
-      return pairOfDoorDefs[1];
-    }
-    if (!pairOfDoorDefs[1]) {
-      return pairOfDoorDefs[0];
-    }
-    return [...pairOfDoorDefs[0].door_definitions, ...pairOfDoorDefs[1].door_definitions];
-  });
-
-  const mergeDaylightingDefs = zipUpDaylightingDefs.map((pairOfDaylightingDefs) => {
-    if (!pairOfDaylightingDefs[0]) {
-      return pairOfDaylightingDefs[1];
-    }
-    if (!pairOfDaylightingDefs[1]) {
-      return pairOfDaylightingDefs[0];
-    }
-    return [...pairOfDaylightingDefs[0].daylighting_control_definitions, ...pairOfDaylightingDefs[1].daylighting_control_definitions];
-  });
-
   const mergedResult = {
     data: {
       ...payload.data,
       stories: mergeStories,
-      window_definitions: mergeWindowDefs,
-      door_definitions: mergeDoorDefs,
-      daylighting_control_definitions: mergeDaylightingDefs,
+      window_definitions: [...payload.data.window_definitions, ...currentFloorplan.window_definitions],
+      door_definitions: [...payload.data.door_definitions, ...currentFloorplan.door_definitions],
+      daylighting_control_definitions: [...payload.data.daylighting_control_definitions, ...currentFloorplan.daylighting_control_definitions],
     },
   };
 
