@@ -44,11 +44,20 @@ export default function mergeFloorplans(context, payload) {
       vertices,
     };
 
-    const spaces = story.spaces.map(space => ({
-      ...space,
-      id: `l${space.id}`,
-      face_id: `l${space.face_id}`,
-    }));
+    const spaces = story.spaces.map((space) => {
+      const daylighting_controls = space.daylighting_controls.map(control => ({
+        daylighting_control_definition_id: `l${control.daylighting_control_definition_id}`,
+        id: `l${control.id}`,
+        vertex_id: `l${control.vertex_id}`,
+      }));
+
+      return {
+        ...space,
+        id: `l${space.id}`,
+        face_id: `l${space.face_id}`,
+        daylighting_controls,
+      };
+    });
 
     const windows = story.windows.map(window => ({
       ...window,
@@ -84,6 +93,12 @@ export default function mergeFloorplans(context, payload) {
   currentFloorplan.door_definitions = currentFloorplan.door_definitions.map(door_def => ({
     ...door_def,
     id: `l${door_def.id}`,
+  }));
+
+  // CURRENT DAYLIGHTING DEFS
+  currentFloorplan.daylighting_control_definitions = currentFloorplan.daylighting_control_definitions.map(control => ({
+    ...control,
+    id: `l${control.id}`,
   }));
 
   // -------------------------------------------
@@ -125,11 +140,20 @@ export default function mergeFloorplans(context, payload) {
       vertices,
     };
 
-    const spaces = story.spaces.map(space => ({
-      ...space,
-      id: `r${space.id}`,
-      face_id: `r${space.face_id}`,
-    }));
+    const spaces = story.spaces.map((space) => {
+      const daylighting_controls = space.daylighting_controls.map(control => ({
+        daylighting_control_definition_id: `r${control.daylighting_control_definition_id}`,
+        id: `r${control.id}`,
+        vertex_id: `r${control.vertex_id}`,
+      }));
+
+      return {
+        ...space,
+        id: `r${space.id}`,
+        face_id: `r${space.face_id}`,
+        daylighting_controls,
+      };
+    });
 
     const windows = story.windows.map(window => ({
       ...window,
@@ -164,14 +188,22 @@ export default function mergeFloorplans(context, payload) {
   // INCOMING DOOR DEFS
   payload.data.door_definitions = payload.data.door_definitions.map(door_def => ({
     ...door_def,
-    id: `l${door_def.id}`,
+    id: `r${door_def.id}`,
+  }));
+
+  // INCOMING DAYLIGHTING DEFS
+  payload.data.daylighting_control_definitions = payload.data.daylighting_control_definitions.map(control => ({
+    ...control,
+    id: `r${control.id}`,
   }));
 
   // ---------------------------------
   // MERGE FLOORPLANS PROPERTIES
+  // TODO: dont need to zip up anything outside of stories I think
   const zipUpStories = _.zip(payload.data.stories, currentFloorplan.stories);
   const zipUpWindowDefs = _.zip(payload.data.window_definitions, currentFloorplan.window_definitions).filter(x => x !== undefined);
   const zipUpDoorDefs = _.zip(payload.data.door_definitions, currentFloorplan.door_definitions).filter(x => x !== undefined);
+  const zipUpDaylightingDefs = _.zip(payload.data.daylighting_control_definitions, currentFloorplan.daylighting_control_definitions).filter(x => x !== undefined);
   const mergeStories = zipUpStories.map((pairOfStories) => {
     if (!pairOfStories[0]) {
       return pairOfStories[1];
@@ -213,12 +245,23 @@ export default function mergeFloorplans(context, payload) {
     return [...pairOfDoorDefs[0].door_definitions, ...pairOfDoorDefs[1].door_definitions];
   });
 
+  const mergeDaylightingDefs = zipUpDaylightingDefs.map((pairOfDaylightingDefs) => {
+    if (!pairOfDaylightingDefs[0]) {
+      return pairOfDaylightingDefs[1];
+    }
+    if (!pairOfDaylightingDefs[1]) {
+      return pairOfDaylightingDefs[0];
+    }
+    return [...pairOfDaylightingDefs[0].daylighting_control_definitions, ...pairOfDaylightingDefs[1].daylighting_control_definitions];
+  });
+
   const mergedResult = {
     data: {
       ...payload.data,
       stories: mergeStories,
       window_definitions: mergeWindowDefs,
       door_definitions: mergeDoorDefs,
+      daylighting_control_definitions: mergeDaylightingDefs,
     },
   };
 
