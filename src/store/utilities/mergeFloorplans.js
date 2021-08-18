@@ -58,6 +58,7 @@ export default function mergeFloorplans(context, payload) {
         daylighting_controls,
         thermal_zone_id: `l${space.thermal_zone_id}`,
         building_unit_id: `l${space.building_unit_id}`,
+        space_type_id: `l${space.space_type_id}`,
       };
     });
 
@@ -128,6 +129,12 @@ export default function mergeFloorplans(context, payload) {
     id: `l${unit.id}`,
   }));
 
+  // CURRENT SPACE TYPES
+  currentFloorplan.space_types = currentFloorplan.space_types.map(space => ({
+    ...space,
+    id: `l${space.id}`,
+  }));
+
   // -------------------------------------------
   // PREP IMPORTED FLOORPLAN FOR MERGE
   console.log('payload data: ', payload.data);
@@ -181,6 +188,7 @@ export default function mergeFloorplans(context, payload) {
         daylighting_controls,
         thermal_zone_id: `r${space.thermal_zone_id}`,
         building_unit_id: `r${space.building_unit_id}`,
+        space_type_id: `r${space.space_type_id}`,
       };
     });
 
@@ -248,7 +256,13 @@ export default function mergeFloorplans(context, payload) {
   // INCOMING BUILDING UNITS
   payload.data.building_units = payload.data.building_units.map(unit => ({
     ...unit,
-    id: `l${unit.id}`,
+    id: `r${unit.id}`,
+  }));
+
+  // INCOMING SPACE TYPES
+  payload.data.space_types = payload.data.space_types.map(space => ({
+    ...space,
+    id: `r${space.id}`,
   }));
 
   // ---------------------------------
@@ -286,6 +300,7 @@ export default function mergeFloorplans(context, payload) {
       daylighting_control_definitions: [...payload.data.daylighting_control_definitions, ...currentFloorplan.daylighting_control_definitions],
       thermal_zones: [...payload.data.thermal_zones, ...currentFloorplan.thermal_zones],
       building_units: [...payload.data.building_units, ...currentFloorplan.building_units],
+      space_types: [...payload.data.space_types, ...currentFloorplan.space_types],
     },
   };
 
