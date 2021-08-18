@@ -59,6 +59,7 @@ export default function mergeFloorplans(context, payload) {
         thermal_zone_id: `l${space.thermal_zone_id}`,
         building_unit_id: `l${space.building_unit_id}`,
         space_type_id: `l${space.space_type_id}`,
+        pitched_roof_id: `l${space.pitched_roof_id}`,
       };
     });
 
@@ -135,6 +136,12 @@ export default function mergeFloorplans(context, payload) {
     id: `l${space.id}`,
   }));
 
+  // CURRENT PITCHED ROOFS
+  currentFloorplan.pitched_roofs = currentFloorplan.pitched_roofs.map(roof => ({
+    ...roof,
+    id: `l${roof.id}`,
+  }));
+
   // -------------------------------------------
   // PREP IMPORTED FLOORPLAN FOR MERGE
   console.log('payload data: ', payload.data);
@@ -189,6 +196,7 @@ export default function mergeFloorplans(context, payload) {
         thermal_zone_id: `r${space.thermal_zone_id}`,
         building_unit_id: `r${space.building_unit_id}`,
         space_type_id: `r${space.space_type_id}`,
+        pitched_roof_id: `r${space.pitched_roof_id}`,
       };
     });
 
@@ -265,6 +273,12 @@ export default function mergeFloorplans(context, payload) {
     id: `r${space.id}`,
   }));
 
+  // INCOMING PITCHED ROOFS
+  payload.data.pitched_roofs = payload.data.pitched_roofs.map(roof => ({
+    ...roof,
+    id: `r${roof.id}`,
+  }));
+
   // ---------------------------------
   // MERGE FLOORPLANS PROPERTIES
   const zipUpStories = _.zip(payload.data.stories, currentFloorplan.stories);
@@ -301,6 +315,7 @@ export default function mergeFloorplans(context, payload) {
       thermal_zones: [...payload.data.thermal_zones, ...currentFloorplan.thermal_zones],
       building_units: [...payload.data.building_units, ...currentFloorplan.building_units],
       space_types: [...payload.data.space_types, ...currentFloorplan.space_types],
+      pitched_roofs: [...payload.data.pitched_roofs, ...currentFloorplan.pitched_roofs],
     },
   };
 
