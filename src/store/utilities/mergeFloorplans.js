@@ -57,6 +57,7 @@ export default function mergeFloorplans(context, payload) {
         face_id: `l${space.face_id}`,
         daylighting_controls,
         thermal_zone_id: `l${space.thermal_zone_id}`,
+        building_unit_id: `l${space.building_unit_id}`,
       };
     });
 
@@ -121,6 +122,12 @@ export default function mergeFloorplans(context, payload) {
     id: `l${zone.id}`,
   }));
 
+  // CURRENT BUILDING UNITS
+  currentFloorplan.building_units = currentFloorplan.building_units.map(unit => ({
+    ...unit,
+    id: `l${unit.id}`,
+  }));
+
   // -------------------------------------------
   // PREP IMPORTED FLOORPLAN FOR MERGE
   console.log('payload data: ', payload.data);
@@ -172,7 +179,8 @@ export default function mergeFloorplans(context, payload) {
         id: `r${space.id}`,
         face_id: `r${space.face_id}`,
         daylighting_controls,
-        thermal_zone_id: `l${space.thermal_zone_id}`,
+        thermal_zone_id: `r${space.thermal_zone_id}`,
+        building_unit_id: `r${space.building_unit_id}`,
       };
     });
 
@@ -237,6 +245,12 @@ export default function mergeFloorplans(context, payload) {
     id: `r${zone.id}`,
   }));
 
+  // CURRENT BUILDING UNITS
+  payload.data.building_units = payload.data.building_units.map(unit => ({
+    ...unit,
+    id: `l${unit.id}`,
+  }));
+
   // ---------------------------------
   // MERGE FLOORPLANS PROPERTIES
   const zipUpStories = _.zip(payload.data.stories, currentFloorplan.stories);
@@ -271,6 +285,7 @@ export default function mergeFloorplans(context, payload) {
       door_definitions: [...payload.data.door_definitions, ...currentFloorplan.door_definitions],
       daylighting_control_definitions: [...payload.data.daylighting_control_definitions, ...currentFloorplan.daylighting_control_definitions],
       thermal_zones: [...payload.data.thermal_zones, ...currentFloorplan.thermal_zones],
+      building_units: [...payload.data.building_units, ...currentFloorplan.building_units],
     },
   };
 
