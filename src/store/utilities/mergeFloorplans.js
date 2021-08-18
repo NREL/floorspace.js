@@ -239,13 +239,13 @@ export default function mergeFloorplans(context, payload) {
     id: `r${control.id}`,
   }));
 
-  // CURRENT THERMAL ZONES
+  // INCOMING THERMAL ZONES
   payload.data.thermal_zones = payload.data.thermal_zones.map(zone => ({
     ...zone,
     id: `r${zone.id}`,
   }));
 
-  // CURRENT BUILDING UNITS
+  // INCOMING BUILDING UNITS
   payload.data.building_units = payload.data.building_units.map(unit => ({
     ...unit,
     id: `l${unit.id}`,
