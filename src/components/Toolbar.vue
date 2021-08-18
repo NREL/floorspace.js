@@ -25,7 +25,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             <import-library-svg @click.native="$refs.importLibrary.click()" class="button"></import-library-svg>
           </div>
           <div title="merge files">
-            <import-library-svg @click.native="$refs.mergeFiles.click()" class="button"></import-library-svg>
+            <merge-icon-svg @click.native="$refs.mergeFiles.click()" class="button"></merge-icon-svg>
           </div>
           <div v-if="enable3DPreview" title="Open 3D Previewer">
             <globe-icon-svg @click.native="open3DPreviewer" class="button" />

@@ -5,7 +5,7 @@ import importFloorplan from './importFloorplan';
 /**
  * When merging 2 floorplans we need to prep each floor plan
  * by giving each property (usually ids) a unique identifier
- * which is the side (left or right)
+ * which is represented by a side (left or right)
  * We pass in the floorplan data and receive a floorplan with
  * unique data that can then be merged
  *
