@@ -13,8 +13,6 @@ import importFloorplan from './importFloorplan';
  * @param {Data} data
  */
 function prepareDataForMerge(side, data) {
-  console.log('incoming side: ', side);
-  console.log('data: ', data);
   data.stories = data.stories.map((story) => {
     const faces = story.geometry.faces.map((face) => {
       const edge_ids = face.edge_ids.map(id => `${side}${id}`);
