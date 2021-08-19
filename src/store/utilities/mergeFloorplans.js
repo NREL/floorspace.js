@@ -60,7 +60,7 @@ function prepareDataForMerge(side, data) {
 
       return {
         ...space,
-        name: side === 'l' ? `${space.name} (Original)` : `${space.name} (Merged)`,
+        name: side === 'l' ? `${space.name} (Original)` : `${space.name} (Imported)`,
         id: `${side}${space.id}`,
         face_id: `${side}${space.face_id}`,
         daylighting_controls,
