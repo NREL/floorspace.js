@@ -53,6 +53,7 @@ module.exports = {
       .assert.containsText('[data-object-type="window_definitions"] .rows', 'Window 1')
       .click('#navigation .pretty-select option[value="daylighting_control_definitions"]')
       .assert.containsText('[data-object-type="daylighting_control_definitions"] .rows', 'Daylighting Control 1')
+      .assert.containsText('[data-object-type="daylighting_control_definitions"] .rows', 'Daylighting Control 2')
       .click('#navigation .pretty-select option[value="door_definitions"]')
       .assert.containsText('[data-object-type="daylighting_control_definitions"] .rows', 'Door 1');
 
