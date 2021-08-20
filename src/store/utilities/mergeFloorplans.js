@@ -162,7 +162,6 @@ function prepareDataForMerge(side, data) {
 export default function mergeFloorplans(context, payload) {
   // PREP FLOORPLANS FOR MERGE
   const currentFloorplan = exportData(context.state, context.getters);
-  console.log('current floorplan: ', currentFloorplan);
 
   const prepedCurrentFloorplan = prepareDataForMerge('l', currentFloorplan);
   const prepedIncomingFloorplan = prepareDataForMerge('r', payload.data);
