@@ -255,7 +255,6 @@ export default {
       if (file) { reader.readAsText(file); }
     },
     mergeFiles(event) {
-      console.log('merging files');
       const file = event.target.files[0];
       const reader = new FileReader();
       

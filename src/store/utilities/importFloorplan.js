@@ -149,7 +149,6 @@ export default function importFloorplan(context, payload) {
       { id: stories[0].id },
       { root: true });
 
-    console.log('About to try to get geometry', stories);
     stories.forEach(story => context.dispatch('geometry/trimGeometry', { geometry_id: story.geometry_id }));
     if (!options.noReloadGrid) {
       _.defer(() => window.eventBus.$emit('zoomToFit'));
