@@ -1,7 +1,8 @@
 const path = require('path');
-const { draw50By50Square, drawSquare, start, finish } = require('../helpers');
+const { start, finish } = require('../helpers');
 
 const testFloorplanSidesPath = '../fixtures/test-floorplan-sides.json';
+const testFloorplanDownPath = '../fixtures/test-floorplan-down.json';
 
 module.exports = {
   tags: ['merge-floorplans'],
@@ -11,7 +12,13 @@ module.exports = {
       .waitForElementVisible('[title="Open Floorplan"]', 100)
       .setValue('#toolbarImportInput', path.join(__dirname, testFloorplanSidesPath))
       .waitForElementVisible('#grid svg polygon', 100)
-      .pause(6000);
+      .setValue('#toolbarMergeInput', path.join(__dirname, testFloorplanDownPath))
+      .waitForElementVisible('#grid svg polygon', 100)
+      .assert.containsText('[data-object-type="spaces"] .rows', 'Space 1 - 1 (Imported)')
+      .assert.containsText('[data-object-type="spaces"] .rows', 'Space 1 - 2 (Imported)')
+      .assert.containsText('[data-object-type="spaces"] .rows', 'Space 1 - 1 (Original)')
+      .assert.containsText('[data-object-type="spaces"] .rows', 'Space 1 - 2 (Original)')
+      .assert.containsText('[data-object-type="spaces"] .rows', 'Space 1 - 3 (Original)');
 
     finish(browser);
   },

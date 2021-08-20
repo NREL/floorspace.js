@@ -13,7 +13,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <div v-if="showImportExport" class="import-export-buttons">
           <input ref="importLibrary" @change="importDataAsFile($event, 'library')" type="file" />
           <input id="toolbarImportInput" ref="importInput" @change="importDataAsFile($event, 'floorplan')" type="file" />
-          <input ref="mergeFiles" @change="mergeFiles($event)" type="file" />
+          <input id="toolbarMergeInput" ref="mergeFiles" @change="mergeFiles($event)" type="file" />
 
           <div title="Open Floorplan">
             <open-floorplan-svg @click.native="$refs.importInput.click()" id="import" class="button"></open-floorplan-svg>
