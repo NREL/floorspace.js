@@ -50,7 +50,11 @@ module.exports = {
       .click('#navigation .pretty-select option[value="pitched_roofs"]')
       .assert.containsText('[data-object-type="pitched_roofs"] .rows', 'Pitched Roof 1')
       .click('[data-modetab="components"]')
-      .assert.containsText('[data-object-type="window_definitions"] .rows', 'Window 1');
+      .assert.containsText('[data-object-type="window_definitions"] .rows', 'Window 1')
+      .click('#navigation .pretty-select option[value="daylighting_control_definitions"]')
+      .assert.containsText('[data-object-type="daylighting_control_definitions"] .rows', 'Daylighting Control 1')
+      .click('#navigation .pretty-select option[value="door_definitions"]')
+      .assert.containsText('[data-object-type="daylighting_control_definitions"] .rows', 'Door 1');
 
     finish(browser);
   },
