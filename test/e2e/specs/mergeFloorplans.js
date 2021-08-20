@@ -36,13 +36,21 @@ module.exports = {
       .assert.containsText('[data-object-type="spaces"] .rows', 'Space 1 - 1 (Original)')
       .assert.containsText('[data-object-type="spaces"] .rows', 'Space 1 - 2 (Original)')
       .assert.containsText('[data-object-type="spaces"] .rows', 'Space 1 - 3 (Original)')
-      .click('.pretty-select option[value="shading"]')
+      .click('#navigation .pretty-select option[value="shading"]')
       .assert.containsText('[data-object-type="shading"] .rows', 'Shading 1 - 1')
       .assert.containsText('[data-object-type="shading"] .rows', 'Shading 1 - 2')
-      .click('.pretty-select option[value="images"]')
+      .click('#navigation .pretty-select option[value="images"]')
       .assert.containsText('[data-object-type="images"] .rows', 'Image 1 - 1')
       .click('[data-modetab="assignments"]')
-      .assert.containsText('[data-object-type="thermal_zones"] .rows', 'Thermal Zone 1');
+      .assert.containsText('[data-object-type="thermal_zones"] .rows', 'Thermal Zone 1')
+      .click('#navigation .pretty-select option[value="building_units"]')
+      .assert.containsText('[data-object-type="building_units"] .rows', 'Building Unit 1')
+      .click('#navigation .pretty-select option[value="space_types"]')
+      .assert.containsText('[data-object-type="space_types"] .rows', 'Space Type 1')
+      .click('#navigation .pretty-select option[value="pitched_roofs"]')
+      .assert.containsText('[data-object-type="pitched_roofs"] .rows', 'Pitched Roof 1')
+      .click('[data-modetab="components"]')
+      .assert.containsText('[data-object-type="window_definitions"] .rows', 'Window 1');
 
     finish(browser);
   },
