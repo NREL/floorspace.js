@@ -29,30 +29,33 @@ import { mapGetters } from 'vuex';
 export default {
   name: 'MoveSpaceModal',
   props: [],
+  data() {
+    return {
+      updateXTo: 0,
+      updateYTo: 0,
+    };
+  },
   mounted() {
     console.log('current space: ', this.currentSpace);
-    console.log('current story geo: ', this.currentStoryGeometry);
+    console.log('current story geo: ', this.currentStoryDenormalizedGeom);
+    if (this.currentStoryDenormalizedGeom.vertices.length > 0) { 
+      const currentFace = this.currentStoryDenormalizedGeom.faces.find(face => face.id === this.currentSpace.face_id);
+      this.updateXTo = currentFace.edges[0].v1.x;
+      this.updateYTo = currentFace.edges[0].v1.y;
+    }
   },
   computed: {
     ...mapGetters({
       currentSpace: 'application/currentSpace',
-      currentStoryGeometry: 'application/currentStoryGeometry',
+      currentStoryDenormalizedGeom: 'application/currentStoryDenormalizedGeom',
     }),
     x_offset: {
-      get() {
-        if (this.currentStoryGeometry.vertices.length > 0) {
-          return this.currentStoryGeometry.vertices[0].x;
-        }
-      },
-      set(val) { console.log('Y val: ', val) },
+      get() { return this.updateXTo },
+      set(val) { this.updateXTo = val; },
     },
     y_offset: {
-      get() {
-        if (this.currentStoryGeometry.vertices.length > 0) {
-          return this.currentStoryGeometry.vertices[0].y;
-        }
-      },
-      set(val) { console.log('Y val: ', val) },
+      get() { return this.updateYTo },
+      set(val) { this.updateYTo = val; },
     },
   },
   components: {
