@@ -14,9 +14,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       <div>
         <p v-if="this.currentSpace" >{{this.currentSpace.name}}</p>
         <label>X: </label>
-        <input type="text" v-model="x_offset" />
+        <input type="number" v-model="x_offset" />
         <label>Y: </label>
-        <input type="text" v-model="y_offset" />
+        <input type="number" v-model="y_offset" />
         <button>Save</button>
       </div>
     </ModalBase>
@@ -44,7 +44,7 @@ export default {
           return this.currentStoryGeometry.vertices[0].x;
         }
       },
-      // set(val) { this.$store.dispatch('project/modifyGround', { key: 'floor_offset', val }); },
+      set(val) { console.log('Y val: ', val) },
     },
     y_offset: {
       get() {
@@ -52,7 +52,7 @@ export default {
           return this.currentStoryGeometry.vertices[0].y;
         }
       },
-      // set(val) { this.$store.dispatch('project/modifyGround', { key: 'floor_offset', val }); },
+      set(val) { console.log('Y val: ', val) },
     },
   },
   components: {
