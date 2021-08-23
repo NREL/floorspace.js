@@ -26,6 +26,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           <div v-if="enable3DPreview" title="Open 3D Previewer">
             <globe-icon-svg @click.native="open3DPreviewer" class="button" />
           </div>
+          <div title="Move Selected Space">
+            <globe-icon-svg @click.native="moveSelectedSpace" class="button" />
+          </div>
         </div>
 
         <div id="undo-redo">
@@ -172,6 +175,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         v-if="showSaveModal"
         @close="() => {showSaveModal = false;}"
       />
+      <MoveSpaceModal
+        v-if="showMoveSelectedSpaceModal"
+        @close="() => {showMoveSelectedSpaceModal = false;}"
+      />
       <Settings
         v-else-if="showGroundPropsModal"
         @close="showGroundPropsModal = false"
@@ -183,6 +190,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <script>
 import { mapState, mapGetters } from 'vuex';
 import SaveAsModal from './Modals/SaveAsModal.vue';
+import MoveSpaceModal from './Modals/MoveSpaceModal.vue';
 import Settings from './Modals/Settings.vue';
 import PrettySelect from './PrettySelect.vue';
 import applicationHelpers from './../store/modules/application/helpers';
@@ -203,6 +211,7 @@ export default {
         window_definitions: 'Window Definitions',
       },
       showSaveModal: false,
+      showMoveSelectedSpaceModal: false,
       visibleComponentType: null,
       showGroundPropsModal: false,
     };
@@ -224,6 +233,9 @@ export default {
     open3DPreviewer() {
       localStorage.setItem("floorplan3DExport", JSON.stringify(application.$store.getters['exportData']));
       window.open('3DViewer');
+    },
+    moveSelectedSpace() {
+      this.showMoveSelectedSpaceModal = true;
     },
     importDataAsFile(event, type) {
       const file = event.target.files[0];
@@ -409,6 +421,7 @@ export default {
   components: {
     PrettySelect,
     SaveAsModal,
+    MoveSpaceModal,
     Settings,
     RenderByDropdown,
     ComponentInstanceEditBar,
