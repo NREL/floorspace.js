@@ -11,15 +11,50 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       :title="`Move Selected Space`"
       @close="$emit('close')"
     >
+      <div>
+        <p v-if="this.currentSpace" >{{this.currentSpace.name}}</p>
+        <label>X: </label>
+        <input type="text" v-model="x_offset" />
+        <label>Y: </label>
+        <input type="text" v-model="y_offset" />
+        <button>Save</button>
+      </div>
     </ModalBase>
 </template>
 
 <script>
 import ModalBase from './ModalBase.vue';
+import { mapGetters } from 'vuex';
 
 export default {
   name: 'MoveSpaceModal',
   props: [],
+  mounted() {
+    console.log('current space: ', this.currentSpace);
+    console.log('current story geo: ', this.currentStoryGeometry);
+  },
+  computed: {
+    ...mapGetters({
+      currentSpace: 'application/currentSpace',
+      currentStoryGeometry: 'application/currentStoryGeometry',
+    }),
+    x_offset: {
+      get() {
+        if (this.currentStoryGeometry.vertices.length > 0) {
+          return this.currentStoryGeometry.vertices[0].x;
+        }
+      },
+      // set(val) { this.$store.dispatch('project/modifyGround', { key: 'floor_offset', val }); },
+    },
+    y_offset: {
+      get() {
+        if (this.currentStoryGeometry.vertices.length > 0) {
+          return this.currentStoryGeometry.vertices[0].y;
+        }
+      },
+      // set(val) { this.$store.dispatch('project/modifyGround', { key: 'floor_offset', val }); },
+    },
+  },
   components: {
     ModalBase,
   },
