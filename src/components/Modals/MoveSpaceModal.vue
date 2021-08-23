@@ -17,7 +17,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <input type="number" v-model="x_offset" />
         <label>Y: </label>
         <input type="number" v-model="y_offset" />
-        <button>Save</button>
+        <button @click="save">Save</button>
       </div>
     </ModalBase>
 </template>
@@ -56,6 +56,11 @@ export default {
     y_offset: {
       get() { return this.updateYTo },
       set(val) { this.updateYTo = val; },
+    },
+  },
+  methods: {
+    save() {
+      console.log('saving coords: X - ', this.updateXTo, ' Y - ', this.updateYTo);
     },
   },
   components: {
