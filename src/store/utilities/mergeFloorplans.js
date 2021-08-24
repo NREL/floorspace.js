@@ -85,12 +85,14 @@ function prepareDataForMerge(side, data) {
 
     const shading = story.shading.map(shade => ({
       ...shade,
+      name: side === 'l' ? `${shade.name} (Original)` : `${shade.name} (Imported)`,
       id: `${side}${shade.id}`,
       face_id: `${side}${shade.face_id}`,
     }));
 
     const images = story.images.map(image => ({
       ...image,
+      name: side === 'l' ? `${image.name} (Original)` : `${image.name} (Imported)`,
       id: `${side}${image.id}`,
     }));
 
@@ -109,42 +111,49 @@ function prepareDataForMerge(side, data) {
   // CURRENT WINDOW DEFS
   data.window_definitions = data.window_definitions.map(window_def => ({
     ...window_def,
+    name: side === 'l' ? `${window_def.name} (Original)` : `${window_def.name} (Imported)`,
     id: `${side}${window_def.id}`,
   }));
 
   // CURRENT DOOR DEFS
   data.door_definitions = data.door_definitions.map(door_def => ({
     ...door_def,
+    name: side === 'l' ? `${door_def.name} (Original)` : `${door_def.name} (Imported)`,
     id: `${side}${door_def.id}`,
   }));
 
   // CURRENT DAYLIGHTING DEFS
   data.daylighting_control_definitions = data.daylighting_control_definitions.map(control => ({
     ...control,
+    name: side === 'l' ? `${control.name} (Original)` : `${control.name} (Imported)`,
     id: `${side}${control.id}`,
   }));
 
   // CURRENT THERMAL ZONES
   data.thermal_zones = data.thermal_zones.map(zone => ({
     ...zone,
+    name: side === 'l' ? `${zone.name} (Original)` : `${zone.name} (Imported)`,
     id: `${side}${zone.id}`,
   }));
 
   // CURRENT BUILDING UNITS
   data.building_units = data.building_units.map(unit => ({
     ...unit,
+    name: side === 'l' ? `${unit.name} (Original)` : `${unit.name} (Imported)`,
     id: `${side}${unit.id}`,
   }));
 
   // CURRENT SPACE TYPES
   data.space_types = data.space_types.map(space => ({
     ...space,
+    name: side === 'l' ? `${space.name} (Original)` : `${space.name} (Imported)`,
     id: `${side}${space.id}`,
   }));
 
   // CURRENT PITCHED ROOFS
   data.pitched_roofs = data.pitched_roofs.map(roof => ({
     ...roof,
+    name: side === 'l' ? `${roof.name} (Original)` : `${roof.name} (Imported)`,
     id: `${side}${roof.id}`,
   }));
 
