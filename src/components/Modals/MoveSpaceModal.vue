@@ -13,11 +13,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     >
       <div>
         <p v-if="this.currentSpace" >{{this.currentSpace.name}}</p>
-        <label>X: </label>
-        <input type="number" v-model="x_offset" />
-        <label>Y: </label>
-        <input type="number" v-model="y_offset" />
-        <button @click="save">Save</button>
+        <i>Adjust from the upperleft X/Y</i>
+        <div>
+          <label>X: </label>
+          <input type="number" v-model="x_offset" />
+          <label>Y: </label>
+          <input type="number" v-model="y_offset" />
+          <button @click="save">Save</button>
+        </div>
       </div>
     </ModalBase>
 </template>
@@ -33,6 +36,7 @@ export default {
     return {
       updateXTo: 0,
       updateYTo: 0,
+      currentFace: undefined,
     };
   },
   mounted() {
@@ -40,6 +44,7 @@ export default {
     console.log('current story geo: ', this.currentStoryDenormalizedGeom);
     if (this.currentStoryDenormalizedGeom.vertices.length > 0) { 
       const currentFace = this.currentStoryDenormalizedGeom.faces.find(face => face.id === this.currentSpace.face_id);
+      this.currentFace = currentFace;
       this.updateXTo = currentFace.edges[0].v1.x;
       this.updateYTo = currentFace.edges[0].v1.y;
     }
@@ -60,7 +65,12 @@ export default {
   },
   methods: {
     save() {
-      console.log('saving coords: X - ', this.updateXTo, ' Y - ', this.updateYTo);
+      console.log('saving coords: X ', this.updateXTo, ' Y ', this.updateYTo);
+      this.$store.dispatch('geometry/updateFacePoints', {
+        face: this.currentFace,
+        updateXTo: this.updateXTo,
+        updateYTo: this.updateYTo,
+      });
     },
   },
   components: {

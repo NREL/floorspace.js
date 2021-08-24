@@ -183,8 +183,17 @@ export default {
 
     commit('trimGeometry', { geometry_id, vertsReferencedElsewhere: vertsReferencedByDCs });
   },
+
   cloneStoryGeometry(context, payload) {
     const currentStory = context.rootGetters['application/currentStoryGeometry'];
     context.commit('updateClonedGeometry', { newGeom: payload, currentStoryId: currentStory.id });
+  },
+
+  updateFacePoints(context, payload) {
+    console.log('payload coming in for update face points', payload);
+    // swap existing face with updated face (mutation)
+    context.commit('updateFacePoints', {
+      ...payload,
+    });
   },
 };

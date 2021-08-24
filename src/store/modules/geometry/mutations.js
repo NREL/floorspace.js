@@ -163,3 +163,19 @@ export function updateClonedGeometry(state, payload) {
   newGeometry.faces = payload.newGeom.faces;
   newGeometry.vertices = payload.newGeom.vertices;
 }
+
+export function updateFacePoints(state, payload) {
+  console.log('mutation payload: ', payload);
+  // determine diff of movement
+  const xOffset = parseInt(payload.updateXTo, 10) - payload.face.edges[0].v1.x;
+  console.log('detected an xoffset of :', xOffset);
+  const yOffset = parseInt(payload.updateYTo, 10) - payload.face.edges[0].v1.y;
+  console.log('detected an yoffset of :', yOffset);
+
+  for (const edge of Object.values(payload.face.edges)) {
+    edge.v1.x += xOffset;
+    edge.v1.y += yOffset;
+    edge.v2.x += xOffset;
+    edge.v2.y += yOffset;
+  }
+}
