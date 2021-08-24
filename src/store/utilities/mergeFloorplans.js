@@ -168,26 +168,26 @@ export default function mergeFloorplans(context, payload) {
 
   // MERGE FLOORPLANS PROPERTIES
   const zipUpStories = _.zip(prepedIncomingFloorplan.stories, prepedCurrentFloorplan.stories);
-  const mergeStories = zipUpStories.map((pairOfStories) => {
-    if (!pairOfStories[0]) {
-      return pairOfStories[1];
+  const mergeStories = zipUpStories.map(([leftStory, rightStory]) => {
+    if (!leftStory) {
+      return rightStory;
     }
-    if (!pairOfStories[1]) {
-      return pairOfStories[0];
+    if (!rightStory) {
+      return leftStory;
     }
     return {
-      ...pairOfStories[0],
+      ...leftStory,
       geometry: {
-        id: pairOfStories[0].id,
-        edges: [...pairOfStories[0].geometry.edges, ...pairOfStories[1].geometry.edges],
-        faces: [...pairOfStories[0].geometry.faces, ...pairOfStories[1].geometry.faces],
-        vertices: [...pairOfStories[0].geometry.vertices, ...pairOfStories[1].geometry.vertices],
+        id: leftStory.id,
+        edges: [...leftStory.geometry.edges, ...rightStory.geometry.edges],
+        faces: [...leftStory.geometry.faces, ...rightStory.geometry.faces],
+        vertices: [...leftStory.geometry.vertices, ...rightStory.geometry.vertices],
       },
-      spaces: [...pairOfStories[0].spaces, ...pairOfStories[1].spaces],
-      windows: [...pairOfStories[0].windows, ...pairOfStories[1].windows],
-      doors: [...pairOfStories[0].doors, ...pairOfStories[1].doors],
-      shading: [...pairOfStories[0].shading, ...pairOfStories[1].shading],
-      images: [...pairOfStories[0].images, ...pairOfStories[1].images],
+      spaces: [...leftStory.spaces, ...rightStory.spaces],
+      windows: [...leftStory.windows, ...rightStory.windows],
+      doors: [...leftStory.doors, ...rightStory.doors],
+      shading: [...leftStory.shading, ...rightStory.shading],
+      images: [...leftStory.images, ...rightStory.images],
     };
   });
 
