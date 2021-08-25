@@ -17,6 +17,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
           <span :style="{ 'background-color': item.color }"></span>
           {{item.name}}
           <div class="buttons">
+            <div v-if="item.type === 'space'" title="Move Selected Space">
+              <Move @click.native="moveSelectedSpace" class="button" />
+            </div>
             <a @click.stop="duplicateRow(item)" class="duplicate" title="duplicate">
               <Copy class="button" />
             </a>
@@ -26,12 +29,20 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
           </div>
       </div>
     </div>
+    <section class="modals">
+      <MoveSpaceModal
+        v-if="showMoveSelectedSpaceModal"
+        @close="() => {showMoveSelectedSpaceModal = false;}"
+      />
+    </section>
   </div>
 </template>
 
 <script>
 import Delete from './../assets/svg-icons/delete.svg';
 import Copy from './../assets/svg-icons/copy_icon.svg';
+import Move from './../assets/svg-icons/arrows-alt-solid.svg';
+import MoveSpaceModal from './Modals/MoveSpaceModal.vue';
 
 export default {
   name: 'LibrarySelect',
@@ -39,6 +50,21 @@ export default {
   components: {
     Delete,
     Copy,
+    Move,
+    MoveSpaceModal,
+  },
+  mounted() {
+    console.log('rows coming in: ', this.rows);
+  },
+  data() {
+    return {
+      showMoveSelectedSpaceModal: false,
+    };
+  },
+  methods: {
+    moveSelectedSpace() {
+      this.showMoveSelectedSpaceModal = true;
+    },
   },
 }
 </script>
@@ -83,6 +109,9 @@ export default {
           fill: $secondary;
         }
       }
+    }
+    .buttons {
+      display: flex;
     }
   }
   // overflow: auto;
