@@ -12,7 +12,6 @@ export default function createFaceFromPoints(context, payload) {
   const {
     model_id,
     points,
-    onAlreadyExists = 'union',
   } = payload;
 
   if (uniq(points).length < 3) { return; }
@@ -24,7 +23,7 @@ export default function createFaceFromPoints(context, payload) {
   const existingFace = target.face_id ? geometryHelpers.faceForId(target.face_id, currentStoryGeometry) : null;
   let facePoints;
 
-  if (existingFace && onAlreadyExists === 'union') {
+  if (existingFace) {
     const existingFaceVertices = geometryHelpers.verticesForFaceId(existingFace.id, currentStoryGeometry);
     facePoints = geometryHelpers.setOperation('union', existingFaceVertices, points);
     if (facePoints.error) {
