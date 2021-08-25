@@ -92,4 +92,19 @@ module.exports = {
       .assert.containsText('.polygons', 'Space 2 - 2');
     finish(browser);
   },
+  'able to move a selected space (issue #376)': (browser) => {
+    start(browser)
+      .perform(draw50By50Square)
+      .click('.move-selected-space')
+      .clearValue('#move-space-x')
+      .setValue('#move-space-x', -100)
+      .clearValue('#move-space-y')
+      .setValue('#move-space-y', -160)
+      .click('#save-move-space')
+      .execute('return window.application.$store.state.geometry[0].vertices', [], ({ value }) => {
+        browser.assert.equal(value[0].x, -100);
+        browser.assert.equal(value[0].y, -160);
+      });
+    finish(browser);
+  },
 };

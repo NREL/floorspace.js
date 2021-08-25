@@ -16,10 +16,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <i>Adjust from the upperleft X/Y</i>
         <div>
           <label>X: </label>
-          <input type="number" v-model="x_offset" />
+          <input type="number" id="move-space-x" v-model="x_offset" />
           <label>Y: </label>
-          <input type="number" v-model="y_offset" />
-          <button @click="save">Save</button>
+          <input type="number" id="move-space-y" v-model="y_offset" />
+          <button id="save-move-space" @click="save">Save</button>
         </div>
       </div>
     </ModalBase>

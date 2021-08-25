@@ -17,7 +17,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
           <span :style="{ 'background-color': item.color }"></span>
           {{item.name}}
           <div class="buttons">
-            <div v-if="item.type === 'space'" title="Move Selected Space">
+            <div v-if="item.type === 'space'" title="Move Selected Space" class="move-selected-space">
               <Move @click.native="moveSelectedSpace" class="button" />
             </div>
             <a @click.stop="duplicateRow(item)" class="duplicate" title="duplicate">
@@ -52,9 +52,6 @@ export default {
     Copy,
     Move,
     MoveSpaceModal,
-  },
-  mounted() {
-    console.log('rows coming in: ', this.rows);
   },
   data() {
     return {
