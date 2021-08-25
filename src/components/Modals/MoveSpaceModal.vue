@@ -66,11 +66,16 @@ export default {
   methods: {
     save() {
       console.log('saving coords: X ', this.updateXTo, ' Y ', this.updateYTo);
-      this.$store.dispatch('geometry/updateFacePoints', {
-        face: this.currentFace,
-        updateXTo: this.updateXTo,
-        updateYTo: this.updateYTo,
-      });
+      // determine diff of movement
+      const xOffset = parseInt(this.updateXTo, 10) - this.currentFace.edges[0].v1.x;
+      console.log('detected an xoffset of :', xOffset);
+      const yOffset = parseInt(payload.updateYTo, 10) - payload.face.edges[0].v1.y;
+      console.log('detected an yoffset of :', yOffset);
+      // this.$store.dispatch('geometry/moveFaceByOffset', {
+      //   face: this.currentFace,
+      //   updateXTo: this.updateXTo,
+      //   updateYTo: this.updateYTo,
+      // });
     },
   },
   components: {

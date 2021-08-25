@@ -189,11 +189,11 @@ export default {
     context.commit('updateClonedGeometry', { newGeom: payload, currentStoryId: currentStory.id });
   },
 
-  updateFacePoints(context, payload) {
-    console.log('payload coming in for update face points', payload);
-    // swap existing face with updated face (mutation)
-    context.commit('updateFacePoints', {
-      ...payload,
-    });
+  moveFaceByOffset(context, { space_id, xOffset, yOffset }) {
+    console.log('space_id: ', space_id);
+    console.log('received offset X of: ', xOffset);
+    console.log('recived offset Y of: ', yOffset);
+    // send in points, model_id and onAlreadyExists = 'replace'
+    // points will just be vertices
   },
 };

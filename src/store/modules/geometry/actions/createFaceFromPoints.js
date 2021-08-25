@@ -12,6 +12,7 @@ export default function createFaceFromPoints(context, payload) {
   const {
     model_id,
     points,
+    onAlreadyExists = 'union',
   } = payload;
 
   if (uniq(points).length < 3) { return; }
@@ -23,7 +24,7 @@ export default function createFaceFromPoints(context, payload) {
   const existingFace = target.face_id ? geometryHelpers.faceForId(target.face_id, currentStoryGeometry) : null;
   let facePoints;
 
-  if (existingFace) {
+  if (existingFace && onAlreadyExists === 'union') {
     const existingFaceVertices = geometryHelpers.verticesForFaceId(existingFace.id, currentStoryGeometry);
     facePoints = geometryHelpers.setOperation('union', existingFaceVertices, points);
     if (facePoints.error) {
@@ -79,7 +80,6 @@ export default function createFaceFromPoints(context, payload) {
     // split edges where vertices touch them
     splitEdges(context, newEdges, newVertices);
   });
-
 }
 
 // ////////////////////// HELPERS //////////////////////////// //
@@ -432,11 +432,11 @@ function replacementEdgeRefs(geometry, dyingEdgeId, newEdges) {
 /**
  * Returns a list of all the edges that need to be split (i.e. edges that are on top of one another)
  *
- * @param {*} geometry 
- * @param {*} spacing 
+ * @param {*} geometry
+ * @param {*} spacing
  * @param {*} newEdges List of new edges added, optional
  * @param {*} newVertices List of new vertices added, optional
- * @returns 
+ * @returns
  */
 export function edgesToSplit(geometry, spacing, newEdges, newVertices) {
   const priorIterationEdges = [];
