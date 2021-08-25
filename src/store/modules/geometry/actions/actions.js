@@ -188,12 +188,4 @@ export default {
     const currentStory = context.rootGetters['application/currentStoryGeometry'];
     context.commit('updateClonedGeometry', { newGeom: payload, currentStoryId: currentStory.id });
   },
-
-  moveFaceByOffset(context, { space_id, xOffset, yOffset }) {
-    console.log('space_id: ', space_id);
-    console.log('received offset X of: ', xOffset);
-    console.log('recived offset Y of: ', yOffset);
-    // send in points, model_id and onAlreadyExists = 'replace'
-    // points will just be vertices
-  },
 };
