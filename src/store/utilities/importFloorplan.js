@@ -92,8 +92,8 @@ export default function importFloorplan(context, payload) {
   // MODELS
   const stories = payload.data.stories.map((s) => {
     const story = {
-      geometry_id: s.geometry.id,
       ...s,
+      geometry_id: s.geometry.id,
     };
     delete story.geometry;
     return story;

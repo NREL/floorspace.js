@@ -12,7 +12,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       <div id="navigation-head">
         <div v-if="showImportExport" class="import-export-buttons">
           <input ref="importLibrary" @change="importDataAsFile($event, 'library')" type="file" />
-          <input ref="importInput" @change="importDataAsFile($event, 'floorplan')" type="file" />
+          <input id="toolbarImportInput" ref="importInput" @change="importDataAsFile($event, 'floorplan')" type="file" />
+          <input id="toolbarMergeInput" ref="mergeFiles" @change="mergeFiles($event)" type="file" />
 
           <div title="Open Floorplan">
             <open-floorplan-svg @click.native="$refs.importInput.click()" id="import" class="button"></open-floorplan-svg>
@@ -22,6 +23,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           </div>
           <div title="Import Library">
             <import-library-svg @click.native="$refs.importLibrary.click()" class="button"></import-library-svg>
+          </div>
+          <div title="merge files">
+            <merge-icon-svg @click.native="$refs.mergeFiles.click()" class="button"></merge-icon-svg>
           </div>
           <div v-if="enable3DPreview" title="Open 3D Previewer">
             <globe-icon-svg @click.native="open3DPreviewer" class="button" />
@@ -45,7 +49,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           </span>
         </li>
 
-        <li @click="modeTab='assign'" class="tab" :class="{ active: modeTab === 'assign' }">
+        <li @click="modeTab='assign'" class="tab" data-modetab="assignments" :class="{ active: modeTab === 'assign' }">
           <span>
             Assignments
             <tab-assign-svg  class="icon"></tab-assign-svg>
@@ -246,6 +250,23 @@ export default {
             data,
           });
         }
+      }, false);
+
+      if (file) { reader.readAsText(file); }
+    },
+    mergeFiles(event) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+      
+      reader.addEventListener('load', () => {
+        let data;
+        try {
+          data = JSON.parse(reader.result);
+        } catch (e) {
+          window.eventBus.$emit('error', 'Invalid JSON');
+          return;
+        }
+        this.$store.dispatch('mergeFloorplans', { data });
       }, false);
 
       if (file) { reader.readAsText(file); }
