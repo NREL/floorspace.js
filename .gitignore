@@ -7,3 +7,8 @@ test/e2e/reports
 selenium-debug.log
 output
 .vscode
+.bundle/install
+Gemfile.lock
+**/run/
+**/reports
+**/out.osw

@@ -1,0 +1,70 @@
+{
+   "file_paths" : 
+   [
+      "../weather",
+      "../seeds",
+      "../files"
+   ],
+   "hash" : "13E5018C",
+   "measure_paths" : 
+   [
+      "../../../.bundle/install/ruby/2.7.0/bundler/gems/openstudio-common-measures-gem-99f87fcdfbdb/lib/measures",
+      "../../../.bundle/install/ruby/2.7.0/gems/openstudio-calibration-0.4.0/lib/measures",
+      "../../../.bundle/install/ruby/2.7.0/gems/openstudio-ee-0.4.0/lib/measures",
+      "../../../.bundle/install/ruby/2.7.0/gems/openstudio-model-articulation-0.4.0/lib/measures",
+      "../../../measures"
+   ],
+   "seed_file" : "SDDC Office template.osm",
+   "steps" : 
+   [
+      {
+         "arguments" : 
+         {
+            "floorplan_path" : "../files/office_floorplan.json"
+         },
+         "measure_dir_name" : "merge_floorspace_js_with_model"
+      },
+      {
+         "arguments" : 
+         {
+            "set_year" : "2019",
+            "weather_file_name" : "USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw"
+         },
+         "measure_dir_name" : "ChangeBuildingLocation"
+      },
+      {
+         "arguments" : 
+         {
+            "__SKIP__" : false,
+            "template" : "90.1-2013"
+         },
+         "measure_dir_name" : "create_typical_doe_building_from_model"
+      },
+      {
+         "arguments" : 
+         {
+            "__SKIP__" : false
+         },
+         "measure_dir_name" : "view_model"
+      },
+      {
+         "arguments" : 
+         {
+            "__SKIP__" : false,
+            "cell_efficiency" : "0.1976",
+            "fraction_of_surface" : "0.75",
+            "inverter_efficiency" : "0.96"
+         },
+         "measure_dir_name" : "add_rooftop_pv"
+      },
+      {
+         "arguments" : 
+         {
+            "zone_condition_section" : false
+         },
+         "measure_dir_name" : "openstudio_results"
+      }
+   ],
+   "updated_at" : "20210824T171709Z",
+   "weather_file" : "USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw"
+}
