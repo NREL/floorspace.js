@@ -11,11 +11,11 @@ jobs:
     - name: Enviroment info
       shell: bash 
       run: |
-      openstudio --version 
-      ruby -v
-      bundle -v
+          openstudio --version
+          ruby -v
+          bundle -v
     - name: Test OSW
       shell: bash 
       run: |
-        bundle install
-        openstudio run -w test/openstudio/example_test/in.osw 
+          bundle install
+          openstudio run -w test/openstudio/example_test/in.osw 
