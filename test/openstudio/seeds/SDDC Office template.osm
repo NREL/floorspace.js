@@ -440,7 +440,7 @@ OS:Building,
   ,                                       !- Building Sector Type
   ,                                       !- North Axis {deg}
   ,                                       !- Nominal Floor to Floor Height {m}
-  ,                                       !- Space Type Name
+  {002f38f2-6a08-4937-831a-82ecb76a4a25}, !- Space Type Name
   {5a6452f4-670c-4e2a-8dee-88f584e46bc9}, !- Default Construction Set Name
   ,                                       !- Default Schedule Set Name
   ,                                       !- Standards Number of Stories
