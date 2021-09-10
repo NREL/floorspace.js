@@ -19,3 +19,8 @@ jobs:
         env: 
           DISPLAY: 99.0
           DBUS_SESSION_BUS_ADDRESS: '/dev/null'
+      - name: Upload exported floorplan json files to artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: exported-floorplan 
+          path: $HOME/Downloads/*.json
