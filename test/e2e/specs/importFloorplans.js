@@ -5,8 +5,9 @@ const jsonSchemaDraft4 = require('ajv/lib/refs/json-schema-draft-04.json');
 const schema = require('../../../schema/geometry_schema.json');
 const downloads = path.join(require('os').homedir(), 'Downloads');
 const failOnError = require('../helpers').failOnError;
-const draw50By50Square = require('../helpers').draw50By50Square;
+//const draw50By50Square = require('../helpers').draw50By50Square;
 const withScales = require('../helpers').withScales;
+const { draw50By50Square, drawSquare, start, finish } = require('../helpers');
 
 const ajv = new Ajv({ allErrors: true });
 ajv.addMetaSchema(jsonSchemaDraft4);
@@ -123,6 +124,27 @@ module.exports = {
       .click('[title="Save Floorplan"]')
       .click('#export-input-threejs')
       .setValue('#download-name', 'floorplan_nightwatch_exported')
+      .click('.download-button')
+      .pause(100)
+      .checkForErrors();
+  },
+  'floorplan with spaces can be exported to three.js': (browser) => {
+    withScales(browser)
+      .click('.modal .new-floorplan svg')
+      .getScales()
+      .perform(deleteFloorplan) // delete floorplan so download has correct name
+      .perform(drawSquare(30, 25, 50, -50))
+      .assert.elementCount('.wall.interior', 0)
+      .click('[data-object-type="spaces"] .add-new')
+      .perform(drawSquare(30, 25, 50, 50))
+      .assert.elementCount('.wall.interior', 1)
+      .click('[data-tool="Eraser"]')
+      .perform(drawSquare(30, 25, 30, 10))
+      .assert.elementCount('.wall.interior', 1)
+      .assert.validGeometry()
+      .click('[title="Save Floorplan"]')
+      .click('#export-input-threejs')
+      .setValue('#download-name', 'floorplan_nightwatch_exported_threejs')
       .click('.download-button')
       .pause(100)
       .checkForErrors();
