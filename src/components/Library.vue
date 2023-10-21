@@ -240,9 +240,9 @@ export default {
     /**
      * Clones a given story
      * Given a story this method deep clones the story, creates new ids for the properties
-     * and replaces the cloned story with those ids. Cleans up any artifacts. 
+     * and replaces the cloned story with those ids. Cleans up any artifacts.
      *
-     * @param {'Story'} story 
+     * @param {'Story'} story
      */
     cloneStory(story) {
       this.$store.dispatch('application/setCurrentStoryId', { id: story.id });
@@ -255,6 +255,12 @@ export default {
       for (let i = this.currentStory.shading.length - 1; i >= 0; i--) {
         this.$store.dispatch('models/destroyShading', {
           shading: this.currentStory.shading[i],
+          story: this.currentStory,
+        });
+      }
+      for (let i = this.currentStory.images.length - 1; i >= 0; i--) {
+        this.$store.dispatch('models/destroyImage', {
+          image: this.currentStory.images[i],
           story: this.currentStory,
         });
       }
