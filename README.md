@@ -10,6 +10,14 @@ Read [the docs](https://nrel.github.io/floorspace.js/docs) then try out the [lat
 ## Build Setup
 
 ``` bash
+# install node using nvm
+$ nvm install 8.17.0
+$ nvm use 8.17.0
+$ node -v
+v8.17.0
+$ npm -v
+6.13.4
+
 # install dependencies
 npm install
 
