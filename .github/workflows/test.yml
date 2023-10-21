@@ -9,13 +9,17 @@ jobs:
       NODE_ENV: 'PROD'
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '2.7'
       - name: Setup Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
           node-version: 15
       - run: npm ci
       - run: xvfb-run npm run test
-        env: 
+        env:
           DISPLAY: 99.0
           DBUS_SESSION_BUS_ADDRESS: '/dev/null'
