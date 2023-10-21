@@ -31,11 +31,14 @@ var webpackConfig = merge(baseWebpackConfig, {
     new webpack.DefinePlugin({
       'process.env': env
     }),
-    new webpack.optimize.UglifyJsPlugin({
-      compress: {
-        warnings: false
-      }
-    }),
+    // DLM: this was failing on es6 style javascript
+    // ERROR in static/js/vendor.2b40fc880d1ec2261117.js from UglifyJs
+    // SyntaxError: Unexpected token: name (hook) [./~/vue-virtual-scroller/dist/vue-virtual-scroller.umd.js:1201,0]
+    //new webpack.optimize.UglifyJsPlugin({
+    //  compress: {
+    //    warnings: false
+    //  }
+    //}),
     new webpack.optimize.OccurrenceOrderPlugin(),
     // extract css into its own file
     new ExtractTextPlugin(utils.assetsPath('css/[name].[contenthash].css')),
