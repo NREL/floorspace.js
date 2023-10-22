@@ -58,7 +58,7 @@ module.exports = {
     oldFloorplans.forEach((floorplanPath) => {
       browser
         .perform(() => {
-          console.log(`testing import, update of ${floorplanPath}`);
+          console.log(`testing import, update of ${floorplanPath} from ${__dirname}`);
           browser
             .refresh()
             .waitForElementVisible('.modal .open-floorplan', 100)
@@ -68,9 +68,11 @@ module.exports = {
             .perform(deleteFloorplan) // delete floorplan so download has correct name
             .pause(100)
             .click('[title="Save Floorplan"]')
+            .waitForElementVisible('#download-name', 100)
+            .clearValue('#download-name')
             .setValue('#download-name', 'floorplan_nightwatch_exported')
             .click('.download-button')
-            .pause(100)
+            .pause(1000)
             .checkForErrors();
 
           assertValidSchema(browser);
@@ -85,9 +87,11 @@ module.exports = {
       .perform(deleteFloorplan) // delete floorplan so download has correct name
       .perform(draw50By50Square)
       .click('[title="Save Floorplan"]')
+      .waitForElementVisible('#download-name', 100)
+      .clearValue('#download-name')
       .setValue('#download-name', 'floorplan_nightwatch_exported')
       .click('.download-button')
-      .pause(100)
+      .pause(1000)
       .checkForErrors();
 
     browser
@@ -106,9 +110,11 @@ module.exports = {
       .perform(deleteFloorplan) // delete floorplan so download has correct name
       .perform(draw50By50Square)
       .click('[title="Save Floorplan"]')
+      .waitForElementVisible('#download-name', 100)
+      .clearValue('#download-name')
       .setValue('#download-name', 'floorplan_nightwatch_exported')
       .click('.download-button')
-      .pause(100)
+      .pause(1000)
       .checkForErrors();
 
     assertValidSchema(browser);
@@ -121,10 +127,12 @@ module.exports = {
       .perform(deleteFloorplan) // delete floorplan so download has correct name
       .perform(draw50By50Square)
       .click('[title="Save Floorplan"]')
+      .waitForElementVisible('#export-input-threejs', 100)
       .click('#export-input-threejs')
+      .clearValue('#download-name')
       .setValue('#download-name', 'floorplan_nightwatch_exported')
       .click('.download-button')
-      .pause(100)
+      .pause(1000)
       .checkForErrors();
   },
   'project.north_axis new location': (browser) => {
