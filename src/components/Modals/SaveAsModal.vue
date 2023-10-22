@@ -24,7 +24,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <input ref="downloadName" type="text"
           id="download-name"
           @keyup.enter="downloadFile"
-          :value="floorplan"
+          value="floorplan"
           spellcheck="false"
         />
       </div>

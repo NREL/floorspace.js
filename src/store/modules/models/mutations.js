@@ -12,9 +12,9 @@ export default {
 
   /**
    * Modifies the state to create a new object and select it on the provided space
-   * @param {*} state 
-   * @param {{ object: { space_id: number, type: string, type_id: string }}} payload 
-   * @returns 
+   * @param {*} state
+   * @param {{ object: { space_id: number, type: string, type_id: string }}} payload
+   * @returns
    */
   initObjectWithSelection(state, payload) {
     state.library[payload.type].push(payload.object);
@@ -147,7 +147,7 @@ export default {
 
   /**
    * Batched version of the `createWindow` mutation
-   * @param {*} state 
+   * @param {*} state
    * @param {*} payload Array of windows to be created
    */
   createWindows(state, payload) {
@@ -185,7 +185,7 @@ export default {
 
   /**
    * Batched version of the `createDoor` mutation
-   * @param {*} state 
+   * @param {*} state
    * @param {*} payload Array of doors to be created
    */
   createDoors(state, payload) {

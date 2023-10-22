@@ -4,18 +4,18 @@ on: push
 jobs:
   test:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
       NODE_ENV: 'PROD'
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Setup Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
           node-version: 15
       - run: npm ci
       - run: xvfb-run npm run test
-        env: 
+        env:
           DISPLAY: 99.0
           DBUS_SESSION_BUS_ADDRESS: '/dev/null'
