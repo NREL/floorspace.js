@@ -1,5 +1,5 @@
-var merge = require('webpack-merge')
-var prodEnv = require('./prod.env')
+const { merge } = require('webpack-merge')
+const prodEnv = require('./prod.env')
 
 // Allows setting the NODE_ENV flag to 'production' when running the dev server
 // This is useful for disabling strict mode in Vue, which has a considerable impact on performance

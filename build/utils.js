@@ -30,9 +30,19 @@ exports.cssLoaders = function (options) {
     if (options.extract) {
       return ExtractTextPlugin.extract('vue-style-loader', sourceLoader)
     } else {
-      return ['vue-style-loader', sourceLoader].join('!')
+      return ['vue-style-loader']
     }
   }
+
+  console.log({
+    css: generateLoaders(['css']),
+    postcss: generateLoaders(['css']),
+    less: generateLoaders(['css', 'less']),
+    sass: generateLoaders(['css', 'sass?indentedSyntax']),
+    scss: generateLoaders(['css', 'sass']),
+    stylus: generateLoaders(['css', 'stylus']),
+    styl: generateLoaders(['css', 'stylus']),
+  });
 
   // http://vuejs.github.io/vue-loader/en/configurations/extract-css.html
   return {

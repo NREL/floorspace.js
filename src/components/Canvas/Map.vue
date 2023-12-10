@@ -31,7 +31,7 @@ import { ResizeEvents } from 'src/components/Resize'
 import MapModal from 'src/components/Modals/MapModal'
 
 const googleMaps = require('google-maps-api')('AIzaSyDIja3lnhq63SxukBm9_mA-jn5R0Bj9RN8', ['places']);
-const ol = require('openlayers');
+const ol = require('ol');
 const d3 = require('d3');
 
 export default {
