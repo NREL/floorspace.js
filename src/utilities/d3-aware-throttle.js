@@ -114,11 +114,12 @@ function d3Debounce(func, wait, options) {
         thisArg = lastThis,
         saveD3Event = d3.event;
 
-    d3Selection.event = lastD3Event;
+    // TypeError: Cannot set property x of #<Object> which has only a getter (V8-based)
+    // d3Selection.event = lastD3Event;
     lastD3Event = lastArgs = lastThis = undefined;
     lastInvokeTime = time;
     result = func.apply(thisArg, args);
-    d3Selection.event = saveD3Event;
+    // d3Selection.event = saveD3Event;
     return result;
   }
 
