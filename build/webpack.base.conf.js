@@ -37,12 +37,12 @@ module.exports = {
         loader: "babel-loader",
       },
       {
-        test: /\.(jpe?g|png|gif|svg|mp3|pdf|csv|xlsx|ttf|woff(2)?)$/i,
-        type: "asset/resource",
-      },
-      {
         test: /\.svg$/,
         loader: "vue-svg-loader",
+      },
+      {
+        test: /\.(jpe?g|png|gif|mp3|pdf|csv|xlsx|ttf|woff(2)?)$/i,
+        type: "asset/resource",
       },
       {
         test: /\.(sa|sc|c)ss$/,
