@@ -71,7 +71,6 @@
     "eslint-plugin-standard": "^5.0.0",
     "eventsource-polyfill": "^0.9.6",
     "express": "^4.13.3",
-    "extract-text-webpack-plugin": "^3.0.2",
     "file-loader": "^6.2.0",
     "function-bind": "^1.0.2",
     "gh-pages": "^6.1.0",
