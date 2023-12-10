@@ -1,4 +1,5 @@
 const path = require("path");
+const { VueLoaderPlugin } = require('vue-loader')
 
 const cwd = process.cwd();
 
@@ -21,11 +22,14 @@ module.exports = {
       components: path.resolve(cwd, "src/components"),
     },
   },
+  plugins: [
+    new VueLoaderPlugin(),
+  ],
   module: {
     rules: [
       {
         test: /\.vue$/,
-        loader: "vue",
+        loader: "vue-loader",
       },
       {
         test: /\.(js|jsx|ts|tsx)?$/,
@@ -41,20 +45,9 @@ module.exports = {
         loader: "vue-svg-loader",
       },
       {
-        test: /\.css$/,
+        test: /\.(sa|sc|c)ss$/,
         use: [
-          'vue-style-loader',
-          {
-            loader: 'css-loader',
-            options: { importLoaders: 1 }
-          },
-          'postcss-loader'
-        ]
-      },
-      {
-        test: /\.scss$/,
-        use: [
-          'vue-style-loader',
+          'style-loader',
           'css-loader',
           'sass-loader'
         ]
