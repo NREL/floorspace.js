@@ -3,7 +3,7 @@ on:
   workflow_run:
     workflows: [ 'Test on branch push' ]
     branches: [ develop ]
-    types: 
+    types:
       - completed
 
 jobs:
@@ -15,14 +15,16 @@ jobs:
       NODE_ENV: 'PROD'
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Setup Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
-          node-version: 15
+          node-version: 20
       - run: sudo apt-get install -y libappindicator1 fonts-liberation ruby-full python3-pip
       - run: sudo pip install mkdocs
-      - run: npm ci
+      - run: |
+          yarn config set unsafe-disable-integrity-migration true -g
+          yarn install --ignore-engines --frozen-lockfile --non-interactive
       - run: npm run openstudio-build && sed -i 's/\/static/static/g' dist/index.html && sed -i 's/\/static/..\/static/g' dist/3DViewer/index.html
       - run: mkdocs build -d dist/docs
       - run: cp -r icons/ dist/ && cp site.webmanifest dist/ && cp browserconfig.xml dist/
