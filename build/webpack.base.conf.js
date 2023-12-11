@@ -5,8 +5,9 @@ const cwd = process.cwd();
 
 module.exports = {
   entry: {
-    app: "./src/main.js",
-    viewer: "./3DViewer/viewer/index.js",
+    app: "./src/main.js"
+    //DLM: comment 3DViewer out for now
+    //viewer: "./3DViewer/viewer/index.js",
   },
   output: {
     path: path.resolve(cwd, 'dist'),

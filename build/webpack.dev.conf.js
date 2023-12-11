@@ -22,12 +22,13 @@ module.exports = merge(baseWebpackConfig, {
       inject: true,
       chunks: ["app"],
     }),
-    new HtmlWebpackPlugin({
-      filename: "3DViewer/index.html",
-      template: "./3DViewer/viewer/index.html",
-      inject: true,
-      chunks: ["viewer"],
-    }),
+    //DLM: comment 3DViewer out for now
+    //new HtmlWebpackPlugin({
+    //  filename: "3DViewer/index.html",
+    //  template: "./3DViewer/viewer/index.html",
+    //  inject: true,
+    //  chunks: ["viewer"],
+    //}),
   ],
   devServer: {
     static: {

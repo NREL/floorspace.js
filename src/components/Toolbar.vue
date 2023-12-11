@@ -27,9 +27,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           <div title="merge files">
             <merge-icon-svg @click.native="$refs.mergeFiles.click()" class="button"></merge-icon-svg>
           </div>
-          <div v-if="enable3DPreview" title="Open 3D Previewer">
-            <globe-icon-svg @click.native="open3DPreviewer" class="button" />
-          </div>
+          <!--
+          //<div v-if="enable3DPreview" title="Open 3D Previewer">
+          //  <globe-icon-svg @click.native="open3DPreviewer" class="button" />
+          //</div>
+          //-->
         </div>
 
         <div id="undo-redo">
@@ -225,10 +227,11 @@ export default {
       this.showSaveModal = true;
       return this.$store.getters['exportData'];
     },
-    open3DPreviewer() {
-      localStorage.setItem("floorplan3DExport", JSON.stringify(application.$store.getters['exportData']));
-      window.open('3DViewer');
-    },
+    //DLM: comment 3DViewer out for now
+    //open3DPreviewer() {
+    //  localStorage.setItem("floorplan3DExport", JSON.stringify(application.$store.getters['exportData']));
+    //  window.open('3DViewer');
+    //},
     importDataAsFile(event, type) {
       const file = event.target.files[0];
       const reader = new FileReader();
@@ -257,7 +260,7 @@ export default {
     mergeFiles(event) {
       const file = event.target.files[0];
       const reader = new FileReader();
-      
+
       reader.addEventListener('load', () => {
         let data;
         try {

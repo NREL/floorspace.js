@@ -52,19 +52,20 @@ const webpackConfig = merge(baseWebpackConfig, {
       },
       excludeChunks: [ 'viewer' ]
     }),
-    new HtmlWebpackPlugin({
-      filename: path.join(config.build.assetsRoot, config.build.viewerSubDirectory, 'index.html'),
-      template: './3DViewer/viewer/index.html',
-      inject: true,
-      minify: {
-        removeComments: true,
-        collapseWhitespace: true,
-        removeAttributeQuotes: true
-        // more options:
-        // https://github.com/kangax/html-minifier#options-quick-reference
-      },
-      excludeChunks: [ 'app' ]
-    }),
+    //DLM: comment 3DViewer out for now
+    //new HtmlWebpackPlugin({
+    //  filename: path.join(config.build.assetsRoot, config.build.viewerSubDirectory, 'index.html'),
+    //  template: './3DViewer/viewer/index.html',
+    //  inject: true,
+    //  minify: {
+    //    removeComments: true,
+    //    collapseWhitespace: true,
+    //    removeAttributeQuotes: true
+    //    // more options:
+    //    // https://github.com/kangax/html-minifier#options-quick-reference
+    //  },
+    //  excludeChunks: [ 'app' ]
+    //}),
   ]
 })
 
