@@ -1,23 +1,8 @@
 {
   "name": "floorspace.js",
-  "version": "0.7.0",
   "description": "a widget for creating 2d building energy models in svg",
+  "version": "0.7.0",
   "author": "Katie Noland <katie@devetry.com>",
-  "private": true,
-  "scripts": {
-    "wp:dev": "webpack serve --hot --config ./build/webpack.dev.conf.js --progress",
-    "wp:build": "cross-env NODE_ENV=production webpack --config ./build/webpack.prod.conf.js --progress",
-    "dev": "node build/dev-server.js",
-    "prod-dev": "NODE_ENV=production node build/dev-server.js",
-    "build": "node build/build.js",
-    "openstudio-build": "node build/build.js && node build/build-embeddable.js",
-    "unit": "karma start test/unit/karma.conf.js",
-    "perf": "karma start test/perf/karma.conf.js",
-    "e2e": "node test/e2e/runner.js",
-    "test": "karma start test/unit/karma.conf.js --single-run && node test/e2e/runner.js",
-    "lint": "eslint --ext .js,.vue src test/unit/specs test/e2e/specs",
-    "deploy": "./node_modules/.bin/gh-pages -d dist/ -b gh-pages -r git@github.com:${TRAVIS_REPO_SLUG}.git"
-  },
   "dependencies": {
     "@turf/boolean-point-in-polygon": "^6.0.1",
     "area-polygon": "^1.0.1",
@@ -127,5 +112,20 @@
   "engines": {
     "node": ">= 4.0.0",
     "npm": ">= 3.0.0"
+  },
+  "private": true,
+  "scripts": {
+    "build": "node build/build.js",
+    "deploy": "./node_modules/.bin/gh-pages -d dist/ -b gh-pages -r git@github.com:${TRAVIS_REPO_SLUG}.git",
+    "dev": "node build/dev-server.js",
+    "e2e": "node test/e2e/runner.js",
+    "lint": "eslint --ext .js,.vue src test/unit/specs test/e2e/specs",
+    "openstudio-build": "node build/build.js && node build/build-embeddable.js",
+    "perf": "karma start test/perf/karma.conf.js",
+    "prod-dev": "NODE_ENV=production node build/dev-server.js",
+    "test": "karma start test/unit/karma.conf.js --single-run && node test/e2e/runner.js",
+    "unit": "karma start test/unit/karma.conf.js",
+    "wp:build": "cross-env NODE_ENV=production webpack --config ./build/webpack.prod.conf.js --progress",
+    "wp:dev": "webpack serve --hot --config ./build/webpack.dev.conf.js --progress"
   }
 }
