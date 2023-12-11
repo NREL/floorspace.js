@@ -7,26 +7,26 @@
 
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
-import 'core-js/stable';
-import 'regenerator-runtime/runtime';
-import Vue from 'vue';
-import store from './store/index';
+import "core-js/stable";
+import "regenerator-runtime/runtime";
+import Vue from "vue";
+import store from "./store/index";
 
-import timetravel from './store/timetravel';
-import App from './App.vue';
-import PrettySelect from './components/PrettySelect.vue';
-import GenericInput from './components/GenericInput.vue';
+import timetravel from "./store/timetravel";
+import App from "./App.vue";
+import PrettySelect from "./components/PrettySelect.vue";
+import GenericInput from "./components/GenericInput.vue";
 
-Vue.component('pretty-select', PrettySelect);
-Vue.component('generic-input', GenericInput);
+Vue.component("pretty-select", PrettySelect);
+Vue.component("generic-input", GenericInput);
 
 window.eventBus = new Vue();
 
 // mount the root vue instance
 window.application = new Vue({
   store,
-  el: '#app',
-  template: '<App/>',
+  el: "#app",
+  template: "<App/>",
   components: { App },
 });
 

@@ -1,8 +1,7 @@
 <template>
-  <p v-if="!isChrome"
-    class="non-chrome-warning"
-  >
-    Warning. This web-app is currently only tested against recent versions of Chrome. 
+  <p v-if="!isChrome" class="non-chrome-warning">
+    Warning. This web-app is currently only tested against recent versions of
+    Chrome.
   </p>
 </template>
 
@@ -10,7 +9,7 @@
 export default {
   computed: {
     isChrome() {
-      var isChromium = (window.chrome || window.qt),
+      var isChromium = window.chrome || window.qt,
         winNav = window.navigator,
         vendorName = winNav.vendor,
         isOpera = winNav.userAgent.indexOf("OPR") > -1,
@@ -32,13 +31,12 @@ export default {
       }
     },
   },
-}
+};
 </script>
 <style>
-  .non-chrome-warning {
-    background: tomato;
-    padding: 20px;
-    color: white;
-
-  }
+.non-chrome-warning {
+  background: tomato;
+  padding: 20px;
+  color: white;
+}
 </style>

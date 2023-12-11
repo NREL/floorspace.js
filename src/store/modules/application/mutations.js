@@ -1,10 +1,14 @@
 export default {
   // current selections
-  setCurrentStoryId(state, payload) { state.currentSelections.story_id = payload.id; },
+  setCurrentStoryId(state, payload) {
+    state.currentSelections.story_id = payload.id;
+  },
   setCurrentSubSelectionId(state, payload) {
     const storyId = state.currentSelections.story_id;
     if (!storyId) {
-      console.error('expected a story to be selected, in order to set a subselection');
+      console.error(
+        "expected a story to be selected, in order to set a subselection"
+      );
       return;
     }
     state.currentSelections.subselection_ids = {
@@ -13,21 +17,43 @@ export default {
     };
   },
 
-  setCurrentComponentId(state, payload) { state.currentSelections.component_id = payload.id; },
-  setCurrentComponentDefinitionId(state, payload) { state.currentSelections.component_definition_id = payload.id; },
-  setCurrentComponentInstanceId(state, payload) { state.currentSelections.component_instance_id = payload.id; },
+  setCurrentComponentId(state, payload) {
+    state.currentSelections.component_id = payload.id;
+  },
+  setCurrentComponentDefinitionId(state, payload) {
+    state.currentSelections.component_definition_id = payload.id;
+  },
+  setCurrentComponentInstanceId(state, payload) {
+    state.currentSelections.component_instance_id = payload.id;
+  },
 
-  setCurrentSpacePropertyId(state, payload) { state.currentSelections.space_property_id = payload.id; },
+  setCurrentSpacePropertyId(state, payload) {
+    state.currentSelections.space_property_id = payload.id;
+  },
 
-  setCurrentSnapMode(state, payload) { state.currentSelections.snapMode = payload.snapMode; },
-  setCurrentModeTab(state, payload) { state.currentSelections.modeTab = payload.modeTab; },
-  setCurrentSubselectionType(state, payload) { state.currentSelections.subselectionType = payload.subselectionType; },
+  setCurrentSnapMode(state, payload) {
+    state.currentSelections.snapMode = payload.snapMode;
+  },
+  setCurrentModeTab(state, payload) {
+    state.currentSelections.modeTab = payload.modeTab;
+  },
+  setCurrentSubselectionType(state, payload) {
+    state.currentSelections.subselectionType = payload.subselectionType;
+  },
 
   // editor rendering/drawing tool
-  setCurrentTool(state, payload) { state.currentSelections.tool = payload.tool; },
-  setCurrentMode(state, payload) { state.currentSelections.mode = payload.mode; },
+  setCurrentTool(state, payload) {
+    state.currentSelections.tool = payload.tool;
+  },
+  setCurrentMode(state, payload) {
+    state.currentSelections.mode = payload.mode;
+  },
 
   // d3 scaling functions
-  setScaleX(state, payload) { state.scale.x = payload.scaleX; },
-  setScaleY(state, payload) { state.scale.y = payload.scaleY; },
+  setScaleX(state, payload) {
+    state.scale.x = payload.scaleX;
+  },
+  setScaleY(state, payload) {
+    state.scale.y = payload.scaleY;
+  },
 };

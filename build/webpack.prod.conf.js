@@ -1,6 +1,5 @@
 const path = require('path')
 const config = require('../config')
-const utils = require('./utils')
 const webpack = require('webpack')
 const { merge } = require('webpack-merge');
 const baseWebpackConfig = require('./webpack.base.conf')
@@ -23,8 +22,8 @@ const webpackConfig = merge(baseWebpackConfig, {
     ],
   },
   output: {
-    filename: utils.assetsPath('js/[name].[chunkhash].js'),
-    chunkFilename: utils.assetsPath('js/[id].[chunkhash].js')
+    filename: path.posix.join('static', 'js/[name].[chunkhash].js'),
+    chunkFilename: path.posix.join('static', 'js/[id].[chunkhash].js')
   },
   plugins: [
     new webpack.DefinePlugin({
@@ -32,7 +31,7 @@ const webpackConfig = merge(baseWebpackConfig, {
     }),
     // extract css into its own file
     new MiniCssExtractPlugin({
-      filename: utils.assetsPath('css/[name].[contenthash].css'),
+      filename: path.posix.join('static', 'css/[name].[contenthash].css'),
     }),
     // generate dist index.html with correct asset hash for caching.
     // you can customize output by editing /index.html

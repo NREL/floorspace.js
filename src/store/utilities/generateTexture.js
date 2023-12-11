@@ -1,4 +1,4 @@
-import { textures } from './../modules/application/appconfig';
+import { textures } from "./../modules/application/appconfig";
 
 const typeIndices = {};
 

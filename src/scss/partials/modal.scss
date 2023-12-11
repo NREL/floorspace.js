@@ -1,70 +1,70 @@
-@import '../config.scss';
+@import "../config.scss";
 
 .overlay {
-    background-color: $gray-darkest;
-    height: 100%;
-    left: 0;
-    opacity: .5;
-    position: fixed;
-    top: 0;
-    width: 100%;
-    z-index: 4;
+  background-color: $gray-darkest;
+  height: 100%;
+  left: 0;
+  opacity: 0.5;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 4;
 }
 .modal {
-    background-color: $gray-medium;
-    border: 1px solid $gray-medium-light;
-    border-radius: 1rem;
-    left: 50%;
-    min-height: 10rem;
-    position: fixed;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: 25rem;
-    z-index: 4;
-    header {
-        padding: .5rem;
-        text-align: center;
-        background-color: $gray-dark;
-        border-radius: .9rem .9rem 0 0;
-        h2 {
-            display: inline;
-            font-size: .7rem;
-            text-transform: uppercase;
-        }
-        svg.close {
-            cursor: pointer;
-            height: 1.25rem;
-            position: absolute;
-            top: .5rem;
-            right: .5rem;
-            width: 1.5rem;
-            path {
-                fill: $gray-lightest;
-            }
-            &:hover {
-                path {
-                    fill: $primary;
-                }
-            }
-        }
+  background-color: $gray-medium;
+  border: 1px solid $gray-medium-light;
+  border-radius: 1rem;
+  left: 50%;
+  min-height: 10rem;
+  position: fixed;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 25rem;
+  z-index: 4;
+  header {
+    padding: 0.5rem;
+    text-align: center;
+    background-color: $gray-dark;
+    border-radius: 0.9rem 0.9rem 0 0;
+    h2 {
+      display: inline;
+      font-size: 0.7rem;
+      text-transform: uppercase;
     }
+    svg.close {
+      cursor: pointer;
+      height: 1.25rem;
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      width: 1.5rem;
+      path {
+        fill: $gray-lightest;
+      }
+      &:hover {
+        path {
+          fill: $primary;
+        }
+      }
+    }
+  }
 
-    form {
-        padding: 1rem;
-        label {
-            color: $gray-light;
-        }
+  form {
+    padding: 1rem;
+    label {
+      color: $gray-light;
     }
+  }
 
-    footer {
-        background-color: $gray-dark;
-        border-radius: 0 0 .9rem .9rem;
-        padding: .5rem;
-        text-align: right;
-        button {
-            &:last-child {
-                border-color: $primary;
-            }
-        }
+  footer {
+    background-color: $gray-dark;
+    border-radius: 0 0 0.9rem 0.9rem;
+    padding: 0.5rem;
+    text-align: right;
+    button {
+      &:last-child {
+        border-color: $primary;
+      }
     }
+  }
 }

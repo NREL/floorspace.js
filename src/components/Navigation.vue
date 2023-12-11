@@ -8,39 +8,46 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
   <div id="layout-navigation">
     <nav id="navigation">
-        <section id="selections">
-        </section>
+      <section id="selections"></section>
 
-        <div id="list">
-          <Library
-            :objectTypes="['stories']"
-            :mode="'stories'"
-            :compact="libraryExpanded !== 'stories'"
-            @toggleCompact="libraryExpanded = (libraryExpanded === 'stories' ? false : 'stories')"
-          />
-          <Library
-            addNewOnHotkey="true"
-            :objectTypes="objectTypesForTab"
-            :mode="subselectionType"
-            @changeMode="newMode => { subselectionType = newMode; }"
-            :searchAvailable="true"
-            :compact="libraryExpanded !== 'subselection'"
-            @toggleCompact="libraryExpanded = (libraryExpanded === 'subselection' ? false : 'subselection')"
-          />
-        </div>
+      <div id="list">
+        <Library
+          :objectTypes="['stories']"
+          :mode="'stories'"
+          :compact="libraryExpanded !== 'stories'"
+          @toggleCompact="
+            libraryExpanded = libraryExpanded === 'stories' ? false : 'stories'
+          "
+        />
+        <Library
+          addNewOnHotkey="true"
+          :objectTypes="objectTypesForTab"
+          :mode="subselectionType"
+          @changeMode="
+            (newMode) => {
+              subselectionType = newMode;
+            }
+          "
+          :searchAvailable="true"
+          :compact="libraryExpanded !== 'subselection'"
+          @toggleCompact="
+            libraryExpanded =
+              libraryExpanded === 'subselection' ? false : 'subselection'
+          "
+        />
+      </div>
     </nav>
-
   </div>
 </template>
 
 <script>
-import _ from 'lodash';
-import { mapState, mapGetters } from 'vuex';
-import ResizeEvents from './Resize/ResizeEvents';
-import Library from './Library.vue';
+import _ from "lodash";
+import { mapState, mapGetters } from "vuex";
+import ResizeEvents from "./Resize/ResizeEvents";
+import Library from "./Library.vue";
 
 export default {
-  name: 'navigation',
+  name: "navigation",
   data() {
     return {
       libraryExpanded: false,
@@ -48,48 +55,85 @@ export default {
   },
   computed: {
     ...mapGetters({
-      currentComponent: 'application/currentComponent',
+      currentComponent: "application/currentComponent",
     }),
     ...mapState({
-      modeTab: state => state.application.currentSelections.modeTab,
+      modeTab: (state) => state.application.currentSelections.modeTab,
     }),
 
     /*
-    * current selection getters and setters
-    * these dispatch actions to update the data store when a new item is selected
-    */
+     * current selection getters and setters
+     * these dispatch actions to update the data store when a new item is selected
+     */
     currentStory: {
-      get() { return this.$store.getters['application/currentStory']; },
-      set(story) { this.$store.dispatch('application/setCurrentStoryId', { id: story.id }); },
+      get() {
+        return this.$store.getters["application/currentStory"];
+      },
+      set(story) {
+        this.$store.dispatch("application/setCurrentStoryId", { id: story.id });
+      },
     },
     currentSubSelection: {
-      get() { return this.$store.getters['application/currentSubSelection']; },
-      set(item) { this.$store.dispatch('application/setCurrentSubSelectionId', { id: (item ? item.id : null) }); },
+      get() {
+        return this.$store.getters["application/currentSubSelection"];
+      },
+      set(item) {
+        this.$store.dispatch("application/setCurrentSubSelectionId", {
+          id: item ? item.id : null,
+        });
+      },
     },
 
     // currentStory's child spaces, shading, and images
-    spaces() { return this.currentStory.spaces; },
-    shading() { return this.currentStory.shading; },
-    images() { return this.currentStory.images; },
+    spaces() {
+      return this.currentStory.spaces;
+    },
+    shading() {
+      return this.currentStory.shading;
+    },
+    images() {
+      return this.currentStory.images;
+    },
     objectTypesForTab() {
       switch (this.modeTab) {
-        case 'floorplan':
-          return ['spaces', 'shading', 'images'];
-        case 'shading':
-          return ['shading'];
-        case 'components':
-          return ['window_definitions', 'daylighting_control_definitions', 'door_definitions'];
-        case 'assign':
-          return ['building_units', 'building_types', 'thermal_zones', 'space_types', 'construction_sets', 'pitched_roofs'];
+        case "floorplan":
+          return ["spaces", "shading", "images"];
+        case "shading":
+          return ["shading"];
+        case "components":
+          return [
+            "window_definitions",
+            "daylighting_control_definitions",
+            "door_definitions",
+          ];
+        case "assign":
+          return [
+            "building_units",
+            "building_types",
+            "thermal_zones",
+            "space_types",
+            "construction_sets",
+            "pitched_roofs",
+          ];
       }
     },
     mode: {
-      get() { return this.$store.state.application.currentSelections.mode; },
-      set(mode) { this.$store.dispatch('application/setCurrentMode', { mode }); },
+      get() {
+        return this.$store.state.application.currentSelections.mode;
+      },
+      set(mode) {
+        this.$store.dispatch("application/setCurrentMode", { mode });
+      },
     },
     subselectionType: {
-      get() { return this.$store.state.application.currentSelections.subselectionType; },
-      set(sst) { this.$store.dispatch('application/setCurrentSubselectionType', { subselectionType: sst }); },
+      get() {
+        return this.$store.state.application.currentSelections.subselectionType;
+      },
+      set(sst) {
+        this.$store.dispatch("application/setCurrentSubselectionType", {
+          subselectionType: sst,
+        });
+      },
     },
   },
   methods: {
@@ -100,8 +144,8 @@ export default {
       }
     },
     setWidthForOpenLibrary() {
-      this.$emit('expanded', !!this.libraryExpanded);
-      ResizeEvents.$emit('resize');
+      this.$emit("expanded", !!this.libraryExpanded);
+      ResizeEvents.$emit("resize");
     },
   },
   watch: {
@@ -109,9 +153,9 @@ export default {
       this.setWidthForOpenLibrary();
     },
     objectTypesForTab(val) {
-      if (!_.includes(val, this.subselectionType)){
-        if (this.modeTab === 'assign') {
-          this.subselectionType = 'thermal_zones';
+      if (!_.includes(val, this.subselectionType)) {
+        if (this.modeTab === "assign") {
+          this.subselectionType = "thermal_zones";
         } else {
           this.subselectionType = val[0];
         }
@@ -120,7 +164,7 @@ export default {
   },
   components: {
     Library,
-  }
+  },
 };
 </script>
 

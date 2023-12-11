@@ -1,10 +1,16 @@
-import _ from 'lodash';
-import helpers from './helpers.js'
+import _ from "lodash";
+import helpers from "./helpers.js";
 
 export default {
-  initStory(state, payload) { state.stories.push(payload.story); },
-  initSpace(state, payload) { payload.story.spaces.push(payload.space); },
-  initShading(state, payload) { payload.story.shading.push(payload.shading); },
+  initStory(state, payload) {
+    state.stories.push(payload.story);
+  },
+  initSpace(state, payload) {
+    payload.story.spaces.push(payload.space);
+  },
+  initShading(state, payload) {
+    payload.story.shading.push(payload.shading);
+  },
 
   initObject(state, payload) {
     state.library[payload.type].push(payload.object);
@@ -30,31 +36,40 @@ export default {
   },
 
   destroySpace(state, payload) {
-    payload.story.spaces.splice(payload.story.spaces.findIndex((s) => {
-      return s.id === payload.space.id;
-    }), 1);
+    payload.story.spaces.splice(
+      payload.story.spaces.findIndex((s) => {
+        return s.id === payload.space.id;
+      }),
+      1
+    );
   },
   destroyShading(state, payload) {
-    payload.story.shading.splice(payload.story.shading.findIndex((s) => {
-      return s.id === payload.shading.id;
-    }), 1);
+    payload.story.shading.splice(
+      payload.story.shading.findIndex((s) => {
+        return s.id === payload.shading.id;
+      }),
+      1
+    );
   },
   destroyImage(state, payload) {
-    payload.story.images.splice(payload.story.images.findIndex((i) => {
-      return i.id === payload.image.id;
-    }), 1);
+    payload.story.images.splice(
+      payload.story.images.findIndex((i) => {
+        return i.id === payload.image.id;
+      }),
+      1
+    );
   },
   destroyStory(state, payload) {
-    state.stories.splice(state.stories.findIndex((s) => {
-      return s.id === payload.story.id;
-    }), 1);
+    state.stories.splice(
+      state.stories.findIndex((s) => {
+        return s.id === payload.story.id;
+      }),
+      1
+    );
   },
   destroyObject(state, { object: { id } }) {
     // search the library
-    state.library = _.mapValues(
-      state.library,
-      lst => _.reject(lst, { id }),
-    );
+    state.library = _.mapValues(state.library, (lst) => _.reject(lst, { id }));
   },
 
   updateStoryWithData(state, payload) {
@@ -63,7 +78,7 @@ export default {
     Object.assign(story, payload);
   },
   createImageForStory(state, payload) {
-    const story = state.stories.find(s => s.id === payload.story_id);
+    const story = state.stories.find((s) => s.id === payload.story_id);
     story.images.push(payload.image);
   },
 
@@ -83,15 +98,15 @@ export default {
         return {
           ...story,
           spaces: story.spaces.map((s) => {
-              if (s.building_unit_id === space.building_unit_id) {
-                return {
-                  ...s,
-                  building_type_id: payload.building_type_id,
-                };
-              } else {
-                return s;
-              }
-            })
+            if (s.building_unit_id === space.building_unit_id) {
+              return {
+                ...s,
+                building_type_id: payload.building_type_id,
+              };
+            } else {
+              return s;
+            }
+          }),
         };
       });
     } else if (payload.building_unit_id) {
@@ -134,7 +149,10 @@ export default {
     Object.assign(object, payload);
     delete object.object;
   },
-  createWindow(state, { story_id, edge_id, window_definition_id, alpha, id, name }) {
+  createWindow(
+    state,
+    { story_id, edge_id, window_definition_id, alpha, id, name }
+  ) {
     const story = _.find(state.stories, { id: story_id });
     story.windows.push({
       window_definition_id,
@@ -152,20 +170,22 @@ export default {
    */
   createWindows(state, payload) {
     const obj = {};
-    payload.forEach(({ story_id, edge_id, window_definition_id, alpha, id, name }) => {
-      const window = {
-        window_definition_id,
-        edge_id,
-        alpha,
-        id,
-        name,
-      };
-      if (obj[story_id]) {
-        obj[story_id].push(window);
-      } else {
-        obj[story_id] = [window];
+    payload.forEach(
+      ({ story_id, edge_id, window_definition_id, alpha, id, name }) => {
+        const window = {
+          window_definition_id,
+          edge_id,
+          alpha,
+          id,
+          name,
+        };
+        if (obj[story_id]) {
+          obj[story_id].push(window);
+        } else {
+          obj[story_id] = [window];
+        }
       }
-    });
+    );
 
     Object.entries(obj).forEach(([key, value]) => {
       const story = _.find(state.stories, { id: key });
@@ -219,9 +239,18 @@ export default {
     const story = _.find(state.stories, { id: story_id });
     story.doors = [];
   },
-  createDaylightingControl(state, { story_id, face_id, daylighting_control_definition_id, vertex_id, name, id }) {
-    const
-      story = _.find(state.stories, { id: story_id }),
+  createDaylightingControl(
+    state,
+    {
+      story_id,
+      face_id,
+      daylighting_control_definition_id,
+      vertex_id,
+      name,
+      id,
+    }
+  ) {
+    const story = _.find(state.stories, { id: story_id }),
       space = _.find(story.spaces, { face_id });
 
     space.daylighting_controls.push({
@@ -249,7 +278,9 @@ export default {
   destroyDaylightingControlsByDefinition(state, { id }) {
     state.stories.forEach((story) => {
       story.spaces.forEach((space) => {
-        space.daylighting_controls = _.reject(space.daylighting_controls, { daylighting_control_definition_id: id });
+        space.daylighting_controls = _.reject(space.daylighting_controls, {
+          daylighting_control_definition_id: id,
+        });
       });
     });
   },
@@ -321,24 +352,24 @@ export default {
     });
   },
   modifyWindow(state, { story_id, id, key, value }) {
-    const
-      story = _.find(state.stories, { id: story_id }),
+    const story = _.find(state.stories, { id: story_id }),
       windew = _.find(story.windows, { id });
     windew[key] = value;
   },
   modifyDoor(state, { story_id, id, key, value }) {
-    const
-      story = _.find(state.stories, { id: story_id }),
+    const story = _.find(state.stories, { id: story_id }),
       door = _.find(story.doors, { id });
     door[key] = value;
   },
   cloneObjectArray(state, payload) {
-    const newStory = state.stories.find(story => story.id === payload.currentStory.id);
-    newStory['spaces'] = payload.storyInfo['spaces'];
-    helpers.replaceSpaceNamesForCloning(state, 'spaces', payload.currentStory);
-    newStory['shading'] = payload.storyInfo['shading'];
-    newStory['doors'] = payload.storyInfo['doors'];
-    newStory['images'] = payload.storyInfo['images'];
-    newStory['windows'] = payload.storyInfo['windows'];
+    const newStory = state.stories.find(
+      (story) => story.id === payload.currentStory.id
+    );
+    newStory["spaces"] = payload.storyInfo["spaces"];
+    helpers.replaceSpaceNamesForCloning(state, "spaces", payload.currentStory);
+    newStory["shading"] = payload.storyInfo["shading"];
+    newStory["doors"] = payload.storyInfo["doors"];
+    newStory["images"] = payload.storyInfo["images"];
+    newStory["windows"] = payload.storyInfo["windows"];
   },
 };

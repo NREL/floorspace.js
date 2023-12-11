@@ -6,16 +6,16 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 
 <template>
-  <ModalBase
-    class="settings-modal"
-    title="Settings"
-    @close="$emit('close')"
-  >
+  <ModalBase class="settings-modal" title="Settings" @close="$emit('close')">
     <div class="settings">
       <p>
         <label class="input-text">
           North Axis
-          <input type="text" v-model.number.lazy="northAxis" :disabled="mapEnabled" />
+          <input
+            type="text"
+            v-model.number.lazy="northAxis"
+            :disabled="mapEnabled"
+          />
         </label>
       </p>
       <ExpandableDrawer title="Ground Properties" class="ground-props-drawer">
@@ -23,9 +23,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           <label class="input-text">
             Floor Offset
             <Info>
-              Specifies the vertical offset between the building floor and the ground plane.
-              Use a value &lt; 0 for buildings with below-grade spaces, or a value &gt; 0 for,
-              e.g., buildings on piers.
+              Specifies the vertical offset between the building floor and the
+              ground plane. Use a value &lt; 0 for buildings with below-grade
+              spaces, or a value &gt; 0 for, e.g., buildings on piers.
             </Info>
             <input type="text" v-model="floor_offset" />
           </label>
@@ -44,7 +44,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
           <label class="input-text">
             Tilt Slope
             <Info>
-              Slope of the ground plane from horizontal. For example, a value of 1 implies a 45&deg; angle.
+              Slope of the ground plane from horizontal. For example, a value of
+              1 implies a 45&deg; angle.
             </Info>
             <input type="text" v-model="tilt_slope" />
           </label>
@@ -55,33 +56,58 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
   </ModalBase>
 </template>
 <script>
-import { mapState } from 'vuex';
-import ModalBase from './ModalBase.vue';
-import Info from '../Info.vue';
-import ExpandableDrawer from '../ExpandableDrawer.vue';
+import { mapState } from "vuex";
+import ModalBase from "./ModalBase.vue";
+import Info from "../Info.vue";
+import ExpandableDrawer from "../ExpandableDrawer.vue";
 
 export default {
-  name: 'Settings',
+  name: "Settings",
   computed: {
     ...mapState({
-        ground: state => state.project.ground,
-        mapEnabled: state => state.project.map.enabled,
+      ground: (state) => state.project.ground,
+      mapEnabled: (state) => state.project.map.enabled,
     }),
     floor_offset: {
-      get() { return this.ground.floor_offset; },
-      set(val) { this.$store.dispatch('project/modifyGround', { key: 'floor_offset', val }); },
+      get() {
+        return this.ground.floor_offset;
+      },
+      set(val) {
+        this.$store.dispatch("project/modifyGround", {
+          key: "floor_offset",
+          val,
+        });
+      },
     },
     azimuth_angle: {
-      get() { return this.ground.azimuth_angle; },
-      set(val) { this.$store.dispatch('project/modifyGround', { key: 'azimuth_angle', val }); },
+      get() {
+        return this.ground.azimuth_angle;
+      },
+      set(val) {
+        this.$store.dispatch("project/modifyGround", {
+          key: "azimuth_angle",
+          val,
+        });
+      },
     },
     tilt_slope: {
-      get() { return this.ground.tilt_slope; },
-      set(val) { this.$store.dispatch('project/modifyGround', { key: 'tilt_slope', val }); },
+      get() {
+        return this.ground.tilt_slope;
+      },
+      set(val) {
+        this.$store.dispatch("project/modifyGround", {
+          key: "tilt_slope",
+          val,
+        });
+      },
     },
     northAxis: {
-      get() { return `${this.$store.state.project.north_axis}°`; },
-      set(northAxis) { this.$store.dispatch('project/setNorthAxis', { north_axis: northAxis }); },
+      get() {
+        return `${this.$store.state.project.north_axis}°`;
+      },
+      set(northAxis) {
+        this.$store.dispatch("project/setNorthAxis", { north_axis: northAxis });
+      },
     },
   },
   components: {
@@ -89,7 +115,7 @@ export default {
     Info,
     ExpandableDrawer,
   },
-}
+};
 </script>
 <style lang="scss">
 @import "./../../scss/config";
@@ -118,7 +144,5 @@ export default {
     width: 210px;
     margin-left: -12px;
   }
-
 }
-
 </style>

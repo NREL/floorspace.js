@@ -6,16 +6,19 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 
 <template>
-  <div class='input-select'>
+  <div class="input-select">
     <button
-      v-if='!disabled'
+      v-if="!disabled"
       :class="`texture-${value}`"
       @click="open = !open"
       @blur="open = false"
     >
       <span class="svg-background" />
-      <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 14' height='10px'>
-          <path d='M.5 0v14l11-7-11-7z' transform='translate(13) rotate(90)'></path>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14" height="10px">
+        <path
+          d="M.5 0v14l11-7-11-7z"
+          transform="translate(13) rotate(90)"
+        ></path>
       </svg>
     </button>
     <Portal v-if="open" to="texture-options">
@@ -35,25 +38,27 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 </template>
 
 <script>
-import Vue from 'vue';
-import { Portal } from 'portal-vue';
-import { textures } from '../store/modules/application/appconfig';
-import _ from 'lodash';
+import Vue from "vue";
+import { Portal } from "portal-vue";
+import { textures } from "../store/modules/application/appconfig";
+import _ from "lodash";
 
 export default {
-  name: 'TextureSelect',
-  props: ['value', 'label', 'disabled'],
+  name: "TextureSelect",
+  props: ["value", "label", "disabled"],
   data() {
     return {
       open: false,
     };
   },
   computed: {
-    textures() { return textures; },
+    textures() {
+      return textures;
+    },
   },
   methods: {
     choose(texture) {
-      this.$emit('change', texture);
+      this.$emit("change", texture);
       this.open = false;
     },
     ulStyle() {
@@ -69,8 +74,7 @@ export default {
   components: {
     Portal,
   },
-}
-
+};
 </script>
 
 <style lang="scss" scoped>
