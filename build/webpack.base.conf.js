@@ -39,7 +39,10 @@ module.exports = {
       },
       {
         test: /\.svg$/,
-        loader: "vue-svg-loader",
+        use: [
+          // 'vue-loader',
+          'vue-svg-loader',
+        ],
       },
       {
         test: /\.(jpe?g|png|gif|mp3|pdf|csv|xlsx|ttf|woff(2)?)$/i,

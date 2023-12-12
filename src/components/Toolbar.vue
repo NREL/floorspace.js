@@ -30,27 +30,26 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
           <div title="Open Floorplan">
             <open-floorplan-svg
-              @click.native="$refs.importInput.click()"
+              v-on:click="$refs.importInput.click()"
               id="import"
               class="button"
             ></open-floorplan-svg>
           </div>
           <div title="Save Floorplan">
             <save-floorplan-svg
-              @click.native="exportData"
+                v-on:click="exportData"
               id="export"
               class="button"
             ></save-floorplan-svg>
           </div>
           <div title="Import Library">
             <import-library-svg
-              @click.native="$refs.importLibrary.click()"
               class="button"
             ></import-library-svg>
           </div>
           <div title="merge files">
             <merge-icon-svg
-              @click.native="$refs.mergeFiles.click()"
+                v-on:click="$refs.mergeFiles.click()"
               class="button"
             ></merge-icon-svg>
           </div>
@@ -64,14 +63,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         <div id="undo-redo">
           <div title="undo">
             <undo-svg
-              @click.native="undo"
+                v-on:click="undo"
               class="button"
               :class="{ disabled: !timetravelInitialized }"
             ></undo-svg>
           </div>
           <div title="redo">
             <redo-svg
-              @click.native="redo"
+                v-on:click="redo"
               class="button"
               :disabled="!timetravelInitialized"
               :class="{ disabled: !timetravelInitialized }"
@@ -239,7 +238,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       <div id="grid-tools">
         <RenderByDropdown />
         <div title="zoom to fit">
-          <ZoomToFitSvg class="button" @click.native="zoomToFit"></ZoomToFitSvg>
+          <ZoomToFitSvg class="button" @click="zoomToFit" v-on:click="zoomToFit"></ZoomToFitSvg>
         </div>
       </div>
 
