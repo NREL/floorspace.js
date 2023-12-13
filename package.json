@@ -25,14 +25,18 @@
     "vuex": "^2.1.1"
   },
   "devDependencies": {
+    "@babel/core": "^7.23.6",
+    "@babel/plugin-transform-arrow-functions": "^7.23.3",
     "@babel/preset-env": "^7.23.5",
     "@babel/preset-typescript": "^7.23.3",
+    "@babel/register": "^7.22.15",
     "@koa/cors": "^4.0.0",
     "ajv": "^5.5.0",
     "autoprefixer": "^10.4.16",
     "babel-core": "^6.0.0",
     "babel-eslint": "^10.1.0",
     "babel-loader": "^9.1.3",
+    "babel-plugin-add-module-exports": "^1.0.4",
     "babel-plugin-transform-runtime": "^6.0.0",
     "babel-polyfill": "^6.20.0",
     "babel-preset-es2015": "^6.0.0",
@@ -45,6 +49,8 @@
     "cross-env": "^7.0.3",
     "cross-spawn": "^4.0.2",
     "css-loader": "^6.8.1",
+    "esbuild": "^0.19.9",
+    "esbuild-register": "^3.5.0",
     "eslint": "^8.55.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-standard": "^17.1.0",
@@ -83,6 +89,7 @@
     "node-sass": "^9.0.0",
     "opn": "^4.0.2",
     "ora": "^0.3.0",
+    "patch-package": "^8.0.0",
     "postcss-loader": "^7.3.3",
     "puppeteer": "^21.6.0",
     "sass-loader": "^13.3.2",
@@ -126,6 +133,7 @@
     "test": "karma start test/unit/karma.conf.js --single-run && node test/e2e/runner.js",
     "unit": "karma start test/unit/karma.conf.js",
     "wp:build": "cross-env NODE_ENV=production webpack --config ./build/webpack.prod.conf.js --progress",
-    "wp:dev": "webpack serve --hot --config ./build/webpack.dev.conf.js --progress"
+    "wp:dev": "webpack serve --hot --config ./build/webpack.dev.conf.js --progress",
+    "postinstall": "patch-package"
   }
 }

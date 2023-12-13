@@ -1,4 +1,17 @@
-require('babel-register');
+require('@babel/register')({
+  presets: [
+    [
+      '@babel/preset-env',
+      {
+        modules: 'commonjs',
+        targets: {
+          node: 'current',
+        },
+      },
+    ],
+  ],
+  plugins: ['add-module-exports', '@babel/plugin-transform-arrow-functions'],
+});
 const config = require('../../config');
 
 // http://nightwatchjs.org/guide#settings-file
@@ -9,7 +22,8 @@ module.exports = {
 
   selenium: {
     start_process: true,
-    server_path: 'node_modules/selenium-server/lib/runner/selenium-server-standalone-3.141.59.jar',
+    server_path:
+      'node_modules/selenium-server/lib/runner/selenium-server-standalone-3.141.59.jar',
     host: '127.0.0.1',
     port: 4444,
     cli_args: {
