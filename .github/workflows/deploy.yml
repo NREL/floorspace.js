@@ -25,7 +25,7 @@ jobs:
       - run: |
           yarn config set unsafe-disable-integrity-migration true -g
           yarn install --ignore-engines --frozen-lockfile --non-interactive
-      - run: npm run openstudio-build && sed -i 's/\/static/static/g' dist/index.html && sed -i 's/\/static/..\/static/g' dist/3DViewer/index.html
+      - run: yarn run wp:build && yarn run openstudio-build && sed -i 's/\/static/static/g' dist/index.html && sed -i 's/\/static/..\/static/g' dist/3DViewer/index.html
       - run: mkdocs build -d dist/docs
       - run: cp -r icons/ dist/ && cp site.webmanifest dist/ && cp browserconfig.xml dist/
       - name: Deploy 🚀
