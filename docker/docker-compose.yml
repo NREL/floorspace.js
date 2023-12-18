@@ -1,0 +1,13 @@
+version: "3.9"
+
+services:
+  dev-server:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: floorspacejs-dev
+    container_name: floorspacejs-dev
+    ports:
+      - "898:80"
+    volumes:
+      - ../dist/:/usr/local/apache2/htdocs/
