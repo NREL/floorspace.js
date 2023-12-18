@@ -8,7 +8,7 @@ RUN apt-get update && \
 ADD . /app
 WORKDIR /app
 
-RUN npm install --global yarn && yarn install --frozen-lockfile && yarn wp:build
+RUN npm install --global yarn && yarn install --frozen-lockfile && yarn openstudio-build
 
 # Cleanup
 RUN apt-get clean && \
