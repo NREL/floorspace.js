@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset=utf-8>
-      <title>Embedded Floorspace.js</title>
-    </meta>
-    <style type="text/css">
+    <title>Embedded Floorspace.js</title>
+    <meta charset=utf-8 />
+    <style>
       iframe {
         width: 99vw;
         margin: 0 auto;
@@ -17,10 +16,7 @@
     </style>
   </head>
   <body>
-    <h3>Embedding the app in your own project</h3>
-    <p>
-      The easiest way to embed the app is to include it in an iframe.
-    </p>
+    <h3>Look, Ma, I embedded Floorspace.js!</h3>
     <p>
       <button id="download-floorplan">Download Floorplan</button>
     </p>
@@ -30,12 +26,9 @@
     </p>
     <iframe src="embeddable_geometry_editor.html"></iframe>
     <script>
-    var iframe, frameWindow;
-      window.addEventListener('load', function() {
-        console.log('document onload');
-        iframe = document.querySelector('iframe');
-        frameWindow = iframe.contentWindow;
+      const frameWindow = document.querySelector('iframe').contentWindow;
 
+      window.addEventListener('load', function() {
         frameWindow.api.setConfig({
           onChange: function() {
             // console.log('change occurred in embedded app');
@@ -44,27 +37,22 @@
         frameWindow.api.init();
       });
 
-      document.querySelector('#download-floorplan')
-        .addEventListener('click', function() {
-          var a = document.createElement('a');
-          a.setAttribute(
-            'href',
-            ('data:text/json;charset=utf-8,' +
-             encodeURIComponent(JSON.stringify(frameWindow.api.exportFloorplan()))));
-          a.setAttribute('download', 'floorplan.json');
-          a.click();
-        });
+      const floorplanDownloadLink = document.createElement('a');
+      floorplanDownloadLink.setAttribute('download', 'floorplan.json');
+      document.querySelector('#download-floorplan').addEventListener('click', function() {
+        const floorplanJson = JSON.stringify(frameWindow.api.exportFloorplan());
+        floorplanDownloadLink.setAttribute(
+          'href',
+          'data:text/json;charset=utf-8,' + encodeURIComponent(floorplanJson)
+        );
+        floorplanDownloadLink.click();
+      });
 
-      document.querySelector('#import-floorplan')
-        .addEventListener('change', function(e) {
-          var reader = new FileReader();
-
-          reader.onload = (function(theFile) {
-            frameWindow.api.openFloorplan(theFile.currentTarget.result);
-          });
-
-          reader.readAsText(e.target.files[0]);
-        });
+      document.querySelector('#import-floorplan').addEventListener('change', function(e) {
+        const reader = new FileReader();
+        reader.onload = theFile => frameWindow.api.openFloorplan(theFile.currentTarget.result);
+        reader.readAsText(e.target.files[0]);
+      });
     </script>
   </body>
 </html>
