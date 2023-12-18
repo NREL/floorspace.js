@@ -14,17 +14,29 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     <div class="grid-container">
       <div v-if="enable3DPreview" class="export-label">Export Format:</div>
       <div v-if="enable3DPreview" class="export-input">
-        <input type="radio" id="export-input-floorspace" value="floorspace" v-model="exportType">
+        <input
+          type="radio"
+          id="export-input-floorspace"
+          value="floorspace"
+          v-model="exportType"
+        />
         <label for="export-input-floorspace">Floorspace.js</label>
-        <input type="radio" id="export-input-threejs" value="threejs" v-model="exportType">
+        <input
+          type="radio"
+          id="export-input-threejs"
+          value="threejs"
+          v-model="exportType"
+        />
         <label for="export-input-threejs">ThreeJS</label>
       </div>
       <div class="filename-label">Filename:</div>
       <div class="filename-input">
-        <input ref="downloadName" type="text"
+        <input
+          ref="downloadName"
+          type="text"
           id="download-name"
           @keyup.enter="downloadFile"
-          :value="floorplan"
+          value="floorplan"
           spellcheck="false"
         />
       </div>
@@ -34,10 +46,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 </template>
 
 <script>
-import ModalBase from './ModalBase.vue';
+import ModalBase from "./ModalBase.vue";
 
 export default {
-  name: 'SaveAsModal',
+  name: "SaveAsModal",
   props: [],
   mounted() {
     this.$refs.downloadName.focus();
@@ -51,28 +63,25 @@ export default {
   },
   data() {
     return {
-      exportType: 'floorspace',
+      exportType: "floorspace",
     };
   },
   methods: {
-    downloadFile: function() {
-      const a = document.createElement('a');
-      const data = JSON.stringify(this.$store.getters['exportData']);
-      this.$emit('close');
+    downloadFile: function () {
+      const a = document.createElement("a");
+      const data = JSON.stringify(this.$store.getters["exportData"]);
+      this.$emit("close");
 
       let blobData = data;
-      if (this.exportType !== 'floorspace') {
+      if (this.exportType !== "floorspace") {
         blobData = Module.floorplanToThreeJS(data, false);
       }
 
-      const blob = new Blob(
-        [blobData],
-        {
-          type: 'text/json;charset=utf-8',
-        },
-      );
-      a.setAttribute('href', URL.createObjectURL(blob));
-      a.setAttribute('download', this.$refs.downloadName.value + '.json');
+      const blob = new Blob([blobData], {
+        type: "text/json;charset=utf-8",
+      });
+      a.setAttribute("href", URL.createObjectURL(blob));
+      a.setAttribute("download", this.$refs.downloadName.value + ".json");
       a.click();
 
       console.log(`exported data for: ${this.exportType}`); // eslint-disable-line
@@ -127,7 +136,7 @@ export default {
   }
 
   .filename-input::after {
-    content: '.json';
+    content: ".json";
     font-size: 12px;
     pointer-events: none;
     position: absolute;
@@ -144,5 +153,4 @@ export default {
     text-transform: uppercase;
   }
 }
-
 </style>

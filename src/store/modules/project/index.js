@@ -1,15 +1,15 @@
-import actions from './actions'
-import mutations from './mutations'
-import getters from './getters'
+import actions from "./actions";
+import mutations from "./mutations";
+import getters from "./getters";
 
 export default {
   namespaced: true,
   state: {
     // project
     config: {
-      units: 'ip',
+      units: "ip",
       unitsEditable: true,
-      language: 'EN-US',
+      language: "EN-US",
     },
     north_axis: 0,
     ground: {
@@ -36,10 +36,10 @@ export default {
       longitude: -104.9863,
       zoom: 4.5, // 18,
       rotation: 0, //.791,
-      elevation: 0
+      elevation: 0,
     },
     previous_story: {
-      visible: true
+      visible: true,
     },
     show_import_export: true,
     preview3D: {
@@ -48,5 +48,5 @@ export default {
   },
   actions: actions,
   mutations: mutations,
-  getters: getters
-}
+  getters: getters,
+};

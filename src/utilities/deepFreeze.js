@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from "lodash";
 
 export default function deepFreeze(obj) {
   _.forOwn(obj, (value) => {

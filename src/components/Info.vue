@@ -7,14 +7,14 @@
   </div>
 </template>
 <script>
-import InfoIcon from './../assets/svg-icons/info_icon.svg';
+import InfoIcon from "./../assets/svg-icons/info_icon.svg";
 
 export default {
-  name: 'Info',
+  name: "Info",
   components: {
     InfoIcon,
   },
-}
+};
 </script>
 <style lang="scss" scoped>
 @import "./../scss/config";
@@ -52,6 +52,5 @@ export default {
     border-style: solid;
     border-color: black transparent transparent transparent;
   }
-
 }
 </style>

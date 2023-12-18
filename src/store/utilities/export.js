@@ -1,9 +1,11 @@
-import _ from 'lodash';
-import version from '../../version';
-import { repeatingWindowCenters } from '../../store/modules/geometry/helpers';
+import _ from "lodash";
+import version from "../../version";
+import { repeatingWindowCenters } from "../../store/modules/geometry/helpers";
 
 function formatHex(val) {
-  if (!val) { return null; }
+  if (!val) {
+    return null;
+  }
   if (val.length === 4) {
     return `#${val[1]}${val[1]}${val[2]}${val[2]}${val[3]}${val[3]}`;
   }
@@ -15,10 +17,10 @@ function formatObject(obj) {
     return obj.map(formatObject);
   } else if (_.isObject(obj)) {
     return _.mapValues(obj, (val, key) => {
-      if ((key === 'id' || key.indexOf('_id') >= 0) && _.isNumber(val)) {
+      if ((key === "id" || key.indexOf("_id") >= 0) && _.isNumber(val)) {
         return String(val);
       }
-      if (key === 'color') {
+      if (key === "color") {
         return formatHex(val);
       }
       return formatObject(val);
@@ -29,8 +31,8 @@ function formatObject(obj) {
 
 function mungeWindows(windows, geometry, windowDefs) {
   const repeatingWindowDefs = _.chain(windowDefs)
-    .filter({ window_definition_mode: 'Repeating Windows' })
-    .map(wd => [wd.id, wd])
+    .filter({ window_definition_mode: "Repeating Windows" })
+    .map((wd) => [wd.id, wd])
     .fromPairs()
     .value();
 
@@ -46,19 +48,24 @@ function mungeWindows(windows, geometry, windowDefs) {
       });
       return {
         ...w,
-        alpha: _.map(centers, 'alpha'),
+        alpha: _.map(centers, "alpha"),
       };
     }
     return w;
   });
 }
 
-
 function mungeStories(stories, geometries, windowDefs) {
   return stories.map((story) => {
-    const geometry = JSON.parse(JSON.stringify(
-      _.find(geometries, { id: story.geometry_id }) || { edges: [], vertices: [], faces: [] },
-    ));
+    const geometry = JSON.parse(
+      JSON.stringify(
+        _.find(geometries, { id: story.geometry_id }) || {
+          edges: [],
+          vertices: [],
+          faces: [],
+        }
+      )
+    );
     return {
       ...story,
       spaces: story.spaces,
@@ -75,8 +82,8 @@ export default function exportData(state, getters) {
     project: state.project,
     stories: mungeStories(
       state.models.stories,
-      getters['geometry/exportData'],
-      state.models.library.window_definitions,
+      getters["geometry/exportData"],
+      state.models.library.window_definitions
     ),
     ...state.models.library,
     version,

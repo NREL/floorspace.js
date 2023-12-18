@@ -1,19 +1,22 @@
 <template>
   <div
     class="editable-select-list"
-    :class="{ 'expanded': !compact }"
+    :class="{ expanded: !compact }"
     :data-object-type="selectedObjectType"
   >
     <div class="controls">
       <div class="control-group">
-        <PrettySelect v-if="objectTypes.length > 1"
-          @change="val => $emit('selectObjectType', val)"
+        <PrettySelect
+          v-if="objectTypes.length > 1"
+          @change="(val) => $emit('selectObjectType', val)"
           :options="objectTypes"
           :value="selectedObjectType"
         />
-        <span v-else>{{ objectTypes[0].display || objectTypes[0].displayName }}</span>
+        <span v-else>{{
+          objectTypes[0].display || objectTypes[0].displayName
+        }}</span>
         <a @click="addRow" v-if="addRow" class="add-new" title="Create new">
-          <AddNew class="button"/>
+          <AddNew class="button" />
         </a>
       </div>
       <div class="control-group">
@@ -26,7 +29,8 @@
       </div>
     </div>
     <div class="input-text search-spot">
-      <input v-if="searchAvailable"
+      <input
+        v-if="searchAvailable"
         v-model="search"
         class="search-bar"
         placeholder="search"
@@ -53,41 +57,55 @@
   </div>
 </template>
 <script>
-import EditableTable from './EditableTable.vue';
-import LibrarySelect from './LibrarySelect.vue';
-import PrettySelect from './PrettySelect.vue';
-import DoubleArrows from './../assets/svg-icons/double_arrows.svg';
-import AddNew from './../assets/svg-icons/add_new.svg';
+import EditableTable from "./EditableTable.vue";
+import LibrarySelect from "./LibrarySelect.vue";
+import PrettySelect from "./PrettySelect.vue";
+import DoubleArrows from "./../assets/svg-icons/double_arrows.svg";
+import AddNew from "./../assets/svg-icons/add_new.svg";
 
 export default {
-  name: 'EditableSelectList',
+  name: "EditableSelectList",
   props: [
-    'columns', 'rows', 'addRow', 'editRow', 'destroyRow', 'selectRow', 'selectedRowId',
-    'objectTypes', 'selectedObjectType', 'searchAvailable', 'compact', 'duplicateRow',
+    "columns",
+    "rows",
+    "addRow",
+    "editRow",
+    "destroyRow",
+    "selectRow",
+    "selectedRowId",
+    "objectTypes",
+    "selectedObjectType",
+    "searchAvailable",
+    "compact",
+    "duplicateRow",
   ],
   data() {
     return {
-      search: '',
+      search: "",
     };
   },
   computed: {
     visibleColumns() {
-      return _.reject(this.columns, 'private');
+      return _.reject(this.columns, "private");
     },
     searchedRows() {
-      return this.rows.filter(
-        row => _.chain(row)
-          .omit(['color'])
+      return this.rows.filter((row) =>
+        _.chain(row)
+          .omit(["color"])
           .values()
           .compact()
-          .some(val => val.toLowerCase && val.toLowerCase().includes(this.search.toLowerCase()))
+          .some(
+            (val) =>
+              val.toLowerCase &&
+              val.toLowerCase().includes(this.search.toLowerCase())
+          )
           .value()
       );
     },
   },
   methods: {
     toggleCompact() {
-      this.$emit('toggleCompact', !this.compact)
+      this.$emit("toggleCompact", !this.compact);
     },
   },
   watch: {
@@ -97,7 +115,7 @@ export default {
         return;
       }
       if (newRows.length > oldRows.length) {
-        this.selectRow(_.maxBy(this.rows, r => +r.id));
+        this.selectRow(_.maxBy(this.rows, (r) => +r.id));
       }
     },
   },
@@ -108,7 +126,7 @@ export default {
     DoubleArrows,
     AddNew,
   },
-}
+};
 </script>
 <style lang="scss" scoped>
 @import "./../scss/config";

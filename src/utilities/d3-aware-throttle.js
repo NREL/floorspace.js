@@ -5,10 +5,10 @@
 // (3) Neither the name of the copyright holder nor the names of any contributors may be used to endorse or promote products derived from this software without specific prior written permission from the respective party.
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import _ from 'lodash';
+import _ from "lodash";
 
-const d3 = require('d3');
-const d3Selection = require('d3-selection');
+const d3 = require("d3");
+const d3Selection = require("d3-selection");
 
 /*
 You might ask: Why do we need a copy-pasta version of lodash.throttle?
@@ -87,38 +87,41 @@ https://github.com/d3/d3/blob/17fbf8d4b16ed19303d71dee4881d871bddbc037/test/d3-t
  */
 function d3Debounce(func, wait, options) {
   var lastArgs,
-      lastThis,
-      lastD3Event,
-      maxWait,
-      result,
-      timerId,
-      lastCallTime,
-      lastInvokeTime = 0,
-      leading = false,
-      maxing = false,
-      trailing = true;
+    lastThis,
+    lastD3Event,
+    maxWait,
+    result,
+    timerId,
+    lastCallTime,
+    lastInvokeTime = 0,
+    leading = false,
+    maxing = false,
+    trailing = true;
 
-  if (typeof func != 'function') {
-    throw new TypeError('Expected a function');
+  if (typeof func != "function") {
+    throw new TypeError("Expected a function");
   }
   wait = _.toNumber(wait) || 0;
   if (_.isObject(options)) {
     leading = !!options.leading;
-    maxing = 'maxWait' in options;
-    maxWait = maxing ? Math.max(_.toNumber(options.maxWait) || 0, wait) : maxWait;
-    trailing = 'trailing' in options ? !!options.trailing : trailing;
+    maxing = "maxWait" in options;
+    maxWait = maxing
+      ? Math.max(_.toNumber(options.maxWait) || 0, wait)
+      : maxWait;
+    trailing = "trailing" in options ? !!options.trailing : trailing;
   }
 
   function invokeFunc(time) {
     var args = lastArgs,
-        thisArg = lastThis,
-        saveD3Event = d3.event;
+      thisArg = lastThis,
+      saveD3Event = d3.event;
 
-    d3Selection.event = lastD3Event;
+    // TypeError: Cannot set property x of #<Object> which has only a getter (V8-based)
+    // d3Selection.event = lastD3Event;
     lastD3Event = lastArgs = lastThis = undefined;
     lastInvokeTime = time;
     result = func.apply(thisArg, args);
-    d3Selection.event = saveD3Event;
+    // d3Selection.event = saveD3Event;
     return result;
   }
 
@@ -133,21 +136,25 @@ function d3Debounce(func, wait, options) {
 
   function remainingWait(time) {
     var timeSinceLastCall = time - lastCallTime,
-        timeSinceLastInvoke = time - lastInvokeTime,
-        result = wait - timeSinceLastCall;
+      timeSinceLastInvoke = time - lastInvokeTime,
+      result = wait - timeSinceLastCall;
 
     return maxing ? Math.min(result, maxWait - timeSinceLastInvoke) : result;
   }
 
   function shouldInvoke(time) {
     var timeSinceLastCall = time - lastCallTime,
-        timeSinceLastInvoke = time - lastInvokeTime;
+      timeSinceLastInvoke = time - lastInvokeTime;
 
     // Either this is the first call, activity has stopped and we're at the
     // trailing edge, the system time has gone backwards and we're treating
     // it as the trailing edge, or we've hit the `maxWait` limit.
-    return (lastCallTime === undefined || (timeSinceLastCall >= wait) ||
-      (timeSinceLastCall < 0) || (maxing && timeSinceLastInvoke >= maxWait));
+    return (
+      lastCallTime === undefined ||
+      timeSinceLastCall >= wait ||
+      timeSinceLastCall < 0 ||
+      (maxing && timeSinceLastInvoke >= maxWait)
+    );
   }
 
   function timerExpired() {
@@ -185,7 +192,7 @@ function d3Debounce(func, wait, options) {
 
   function debounced() {
     var time = _.now(),
-        isInvoking = shouldInvoke(time);
+      isInvoking = shouldInvoke(time);
 
     lastArgs = arguments;
     lastThis = this;

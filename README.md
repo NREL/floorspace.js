@@ -10,33 +10,35 @@ Read [the docs](https://nrel.github.io/floorspace.js/docs) then try out the [lat
 ## Build Setup
 
 ``` bash
-# install dependencies
-npm install
+# install node using nvm
+$ nvm install 20
+$ nvm use 20
+$ npm install --global yarn
+
+# install locked dependencies
+yarn install --frozen-lockfile
+
+# install and update dependencies (optional)
+yarn install
 
 # serve with hot reload at localhost:8080
-npm run dev
+yarn wp:dev
 
 # build for production with minification
-npm run build
+yarn wp:build
 
 # build single page output for openstudio
-npm run openstudio-build
-
-# alternative if `npm run openstudio-build` does not work, build single page output for openstudio
-npm run build
-ruby build/build.rb
+yarn openstudio-build
 
 # run unit tests
-npm run unit
+yarn run unit
 
 # run e2e tests
-npm run e2e
+yarn run e2e
 
-# run all tests
-npm test
+# run performance tests (optional)
+yarn perf
 ```
 
 For detailed explanation on how things work, checkout the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
-
-[Tests](https://travis-ci.org/NREL/floorspace.js) are run on each pull request. Current status: [![Build Status](https://travis-ci.org/NREL/floorspace.js.svg?branch=develop)](https://travis-ci.org/NREL/floorspace.js)
 

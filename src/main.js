@@ -7,25 +7,26 @@
 
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
-import 'babel-polyfill';
-import Vue from 'vue';
-import store from './store/index';
+import "core-js/stable";
+import "regenerator-runtime/runtime";
+import Vue from "vue";
+import store from "./store/index";
 
-import timetravel from './store/timetravel';
-import App from './App.vue';
-import PrettySelect from './components/PrettySelect.vue';
-import GenericInput from './components/GenericInput.vue';
+import timetravel from "./store/timetravel";
+import App from "./App.vue";
+import PrettySelect from "./components/PrettySelect.vue";
+import GenericInput from "./components/GenericInput.vue";
 
-Vue.component('pretty-select', PrettySelect);
-Vue.component('generic-input', GenericInput);
+Vue.component("pretty-select", PrettySelect);
+Vue.component("generic-input", GenericInput);
 
 window.eventBus = new Vue();
 
 // mount the root vue instance
 window.application = new Vue({
   store,
-  el: '#app',
-  template: '<App/>',
+  el: "#app",
+  template: "<App/>",
   components: { App },
 });
 
@@ -33,6 +34,7 @@ timetravel.init(store);
 
 // Cannot be imported as an ordinary module since it grabs the wasm as well
 // Importing in the index.html causes strange build issues where the `src` is overwritten
-const threeJSModuleScript = document.createElement('script');
-threeJSModuleScript.setAttribute('src', '3DViewer/libtest_lib.js');
-document.head.appendChild(threeJSModuleScript);
+//DLM: comment 3DViewer out for now
+//const threeJSModuleScript = document.createElement('script');
+//threeJSModuleScript.setAttribute('src', '3DViewer/libtest_lib.js');
+//document.head.appendChild(threeJSModuleScript);

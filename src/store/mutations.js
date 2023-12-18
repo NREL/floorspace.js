@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import project from './modules/project';
+import _ from "lodash";
+import project from "./modules/project";
 
 export default {
   importState(state, payload) {

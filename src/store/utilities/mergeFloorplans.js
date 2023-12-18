@@ -1,6 +1,6 @@
-import _ from 'lodash';
-import exportData from './export';
-import importFloorplan from './importFloorplan';
+import _ from "lodash";
+import exportData from "./export";
+import importFloorplan from "./importFloorplan";
 
 /**
  * When merging 2 floorplans we need to prep each floor plan
@@ -15,7 +15,7 @@ import importFloorplan from './importFloorplan';
 function prepareDataForMerge(side, data) {
   data.stories = data.stories.map((story) => {
     const faces = story.geometry.faces.map((face) => {
-      const edge_ids = face.edge_ids.map(id => `${side}${id}`);
+      const edge_ids = face.edge_ids.map((id) => `${side}${id}`);
       return {
         ...face,
         id: `${side}${face.id}`,
@@ -24,8 +24,8 @@ function prepareDataForMerge(side, data) {
     });
 
     const edges = story.geometry.edges.map((edge) => {
-      const face_ids = edge.face_ids.map(id => `${side}${id}`);
-      const vertex_ids = edge.vertex_ids.map(id => `${side}${id}`);
+      const face_ids = edge.face_ids.map((id) => `${side}${id}`);
+      const vertex_ids = edge.vertex_ids.map((id) => `${side}${id}`);
       return {
         face_ids,
         id: `${side}${edge.id}`,
@@ -34,7 +34,7 @@ function prepareDataForMerge(side, data) {
     });
 
     const vertices = story.geometry.vertices.map((vertex) => {
-      const edge_ids = vertex.edge_ids.map(id => `${side}${id}`);
+      const edge_ids = vertex.edge_ids.map((id) => `${side}${id}`);
       return {
         ...vertex,
         edge_ids,
@@ -50,15 +50,20 @@ function prepareDataForMerge(side, data) {
     };
 
     const spaces = story.spaces.map((space) => {
-      const daylighting_controls = space.daylighting_controls.map(control => ({
-        daylighting_control_definition_id: `${side}${control.daylighting_control_definition_id}`,
-        id: `${side}${control.id}`,
-        vertex_id: `${side}${control.vertex_id}`,
-      }));
+      const daylighting_controls = space.daylighting_controls.map(
+        (control) => ({
+          daylighting_control_definition_id: `${side}${control.daylighting_control_definition_id}`,
+          id: `${side}${control.id}`,
+          vertex_id: `${side}${control.vertex_id}`,
+        })
+      );
 
       return {
         ...space,
-        name: side === 'l' ? `${space.name} (Original)` : `${space.name} (Imported)`,
+        name:
+          side === "l"
+            ? `${space.name} (Original)`
+            : `${space.name} (Imported)`,
         id: `${side}${space.id}`,
         face_id: `${side}${space.face_id}`,
         daylighting_controls,
@@ -69,30 +74,32 @@ function prepareDataForMerge(side, data) {
       };
     });
 
-    const windows = story.windows.map(window => ({
+    const windows = story.windows.map((window) => ({
       ...window,
       edge_id: `${side}${window.edge_id}`,
       id: `${side}${window.id}`,
       window_definition_id: `${side}${window.window_definition_id}`,
     }));
 
-    const doors = story.doors.map(door => ({
+    const doors = story.doors.map((door) => ({
       ...door,
       edge_id: `${side}${door.edge_id}`,
       id: `${side}${door.id}`,
       door_definition_id: `${side}${door.door_definition_id}`,
     }));
 
-    const shading = story.shading.map(shade => ({
+    const shading = story.shading.map((shade) => ({
       ...shade,
-      name: side === 'l' ? `${shade.name} (Original)` : `${shade.name} (Imported)`,
+      name:
+        side === "l" ? `${shade.name} (Original)` : `${shade.name} (Imported)`,
       id: `${side}${shade.id}`,
       face_id: `${side}${shade.face_id}`,
     }));
 
-    const images = story.images.map(image => ({
+    const images = story.images.map((image) => ({
       ...image,
-      name: side === 'l' ? `${image.name} (Original)` : `${image.name} (Imported)`,
+      name:
+        side === "l" ? `${image.name} (Original)` : `${image.name} (Imported)`,
       id: `${side}${image.id}`,
     }));
 
@@ -109,51 +116,62 @@ function prepareDataForMerge(side, data) {
   });
 
   // CURRENT WINDOW DEFS
-  data.window_definitions = data.window_definitions.map(window_def => ({
+  data.window_definitions = data.window_definitions.map((window_def) => ({
     ...window_def,
-    name: side === 'l' ? `${window_def.name} (Original)` : `${window_def.name} (Imported)`,
+    name:
+      side === "l"
+        ? `${window_def.name} (Original)`
+        : `${window_def.name} (Imported)`,
     id: `${side}${window_def.id}`,
   }));
 
   // CURRENT DOOR DEFS
-  data.door_definitions = data.door_definitions.map(door_def => ({
+  data.door_definitions = data.door_definitions.map((door_def) => ({
     ...door_def,
-    name: side === 'l' ? `${door_def.name} (Original)` : `${door_def.name} (Imported)`,
+    name:
+      side === "l"
+        ? `${door_def.name} (Original)`
+        : `${door_def.name} (Imported)`,
     id: `${side}${door_def.id}`,
   }));
 
   // CURRENT DAYLIGHTING DEFS
-  data.daylighting_control_definitions = data.daylighting_control_definitions.map(control => ({
-    ...control,
-    name: side === 'l' ? `${control.name} (Original)` : `${control.name} (Imported)`,
-    id: `${side}${control.id}`,
-  }));
+  data.daylighting_control_definitions =
+    data.daylighting_control_definitions.map((control) => ({
+      ...control,
+      name:
+        side === "l"
+          ? `${control.name} (Original)`
+          : `${control.name} (Imported)`,
+      id: `${side}${control.id}`,
+    }));
 
   // CURRENT THERMAL ZONES
-  data.thermal_zones = data.thermal_zones.map(zone => ({
+  data.thermal_zones = data.thermal_zones.map((zone) => ({
     ...zone,
-    name: side === 'l' ? `${zone.name} (Original)` : `${zone.name} (Imported)`,
+    name: side === "l" ? `${zone.name} (Original)` : `${zone.name} (Imported)`,
     id: `${side}${zone.id}`,
   }));
 
   // CURRENT BUILDING UNITS
-  data.building_units = data.building_units.map(unit => ({
+  data.building_units = data.building_units.map((unit) => ({
     ...unit,
-    name: side === 'l' ? `${unit.name} (Original)` : `${unit.name} (Imported)`,
+    name: side === "l" ? `${unit.name} (Original)` : `${unit.name} (Imported)`,
     id: `${side}${unit.id}`,
   }));
 
   // CURRENT SPACE TYPES
-  data.space_types = data.space_types.map(space => ({
+  data.space_types = data.space_types.map((space) => ({
     ...space,
-    name: side === 'l' ? `${space.name} (Original)` : `${space.name} (Imported)`,
+    name:
+      side === "l" ? `${space.name} (Original)` : `${space.name} (Imported)`,
     id: `${side}${space.id}`,
   }));
 
   // CURRENT PITCHED ROOFS
-  data.pitched_roofs = data.pitched_roofs.map(roof => ({
+  data.pitched_roofs = data.pitched_roofs.map((roof) => ({
     ...roof,
-    name: side === 'l' ? `${roof.name} (Original)` : `${roof.name} (Imported)`,
+    name: side === "l" ? `${roof.name} (Original)` : `${roof.name} (Imported)`,
     id: `${side}${roof.id}`,
   }));
 
@@ -172,11 +190,14 @@ export default function mergeFloorplans(context, payload) {
   // PREP FLOORPLANS FOR MERGE
   const currentFloorplan = exportData(context.state, context.getters);
 
-  const prepedCurrentFloorplan = prepareDataForMerge('l', currentFloorplan);
-  const prepedIncomingFloorplan = prepareDataForMerge('r', payload.data);
+  const prepedCurrentFloorplan = prepareDataForMerge("l", currentFloorplan);
+  const prepedIncomingFloorplan = prepareDataForMerge("r", payload.data);
 
   // MERGE FLOORPLANS PROPERTIES
-  const zipUpStories = _.zip(prepedIncomingFloorplan.stories, prepedCurrentFloorplan.stories);
+  const zipUpStories = _.zip(
+    prepedIncomingFloorplan.stories,
+    prepedCurrentFloorplan.stories
+  );
   const mergeStories = zipUpStories.map(([leftStory, rightStory]) => {
     if (!leftStory) {
       return rightStory;
@@ -190,7 +211,10 @@ export default function mergeFloorplans(context, payload) {
         id: leftStory.id,
         edges: [...leftStory.geometry.edges, ...rightStory.geometry.edges],
         faces: [...leftStory.geometry.faces, ...rightStory.geometry.faces],
-        vertices: [...leftStory.geometry.vertices, ...rightStory.geometry.vertices],
+        vertices: [
+          ...leftStory.geometry.vertices,
+          ...rightStory.geometry.vertices,
+        ],
       },
       spaces: [...leftStory.spaces, ...rightStory.spaces],
       windows: [...leftStory.windows, ...rightStory.windows],
@@ -204,13 +228,34 @@ export default function mergeFloorplans(context, payload) {
     data: {
       ...prepedIncomingFloorplan,
       stories: mergeStories,
-      window_definitions: [...prepedIncomingFloorplan.window_definitions, ...prepedCurrentFloorplan.window_definitions],
-      door_definitions: [...prepedIncomingFloorplan.door_definitions, ...prepedCurrentFloorplan.door_definitions],
-      daylighting_control_definitions: [...prepedIncomingFloorplan.daylighting_control_definitions, ...prepedCurrentFloorplan.daylighting_control_definitions],
-      thermal_zones: [...prepedIncomingFloorplan.thermal_zones, ...prepedCurrentFloorplan.thermal_zones],
-      building_units: [...prepedIncomingFloorplan.building_units, ...prepedCurrentFloorplan.building_units],
-      space_types: [...prepedIncomingFloorplan.space_types, ...prepedCurrentFloorplan.space_types],
-      pitched_roofs: [...prepedIncomingFloorplan.pitched_roofs, ...prepedCurrentFloorplan.pitched_roofs],
+      window_definitions: [
+        ...prepedIncomingFloorplan.window_definitions,
+        ...prepedCurrentFloorplan.window_definitions,
+      ],
+      door_definitions: [
+        ...prepedIncomingFloorplan.door_definitions,
+        ...prepedCurrentFloorplan.door_definitions,
+      ],
+      daylighting_control_definitions: [
+        ...prepedIncomingFloorplan.daylighting_control_definitions,
+        ...prepedCurrentFloorplan.daylighting_control_definitions,
+      ],
+      thermal_zones: [
+        ...prepedIncomingFloorplan.thermal_zones,
+        ...prepedCurrentFloorplan.thermal_zones,
+      ],
+      building_units: [
+        ...prepedIncomingFloorplan.building_units,
+        ...prepedCurrentFloorplan.building_units,
+      ],
+      space_types: [
+        ...prepedIncomingFloorplan.space_types,
+        ...prepedCurrentFloorplan.space_types,
+      ],
+      pitched_roofs: [
+        ...prepedIncomingFloorplan.pitched_roofs,
+        ...prepedCurrentFloorplan.pitched_roofs,
+      ],
     },
   };
 

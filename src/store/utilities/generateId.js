@@ -1,13 +1,13 @@
 var id = 1;
 export default {
-    setId (newVal) {
-        id = newVal;
-    },
+  setId(newVal) {
+    id = newVal;
+  },
 
-    generate: (function () {
-        return () => String(id++)
-    })()
-}
+  generate: (function () {
+    return () => String(id++);
+  })(),
+};
 
 const nameCounts = {};
 export function genName(prefix) {

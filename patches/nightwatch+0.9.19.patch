@@ -1,0 +1,17 @@
+diff --git a/node_modules/nightwatch/lib/runner/selenium.js b/node_modules/nightwatch/lib/runner/selenium.js
+index 8adc933..a6ead1a 100644
+--- a/node_modules/nightwatch/lib/runner/selenium.js
++++ b/node_modules/nightwatch/lib/runner/selenium.js
+@@ -7,7 +7,11 @@ var child_process = require('child_process');
+ var util = require('util');
+ var Logger = require('../util/logger.js');
+ 
+-var SENTINEL = ['Started org.openqa.jetty.jetty.Server', 'INFO - Selenium Server is up and running'];
++var SENTINEL = [
++  'Started org.openqa.jetty.jetty.Server', 
++  'INFO - Selenium Server is up and running',
++  'INFO [SeleniumServer.boot] - Selenium Server is up and running on port',
++];
+ var DEFAULT_PORT = 4444;
+ var DEFAULT_HOST = '127.0.0.1';
+ var DEFAULT_LOG_FILE = 'selenium-debug.log';

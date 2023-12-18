@@ -17,32 +17,32 @@
 </template>
 
 <script>
-import Swatches from 'vue-swatches';
-import { Portal } from 'portal-vue';
+import Swatches from "vue-swatches";
+import { Portal } from "portal-vue";
 
 export default {
-  name: 'ColorPickerModal',
-  props: ['value'],
+  name: "ColorPickerModal",
+  props: ["value"],
   computed: {
     color: {
       get() {
         return this.value;
       },
       set(newVal) {
-        this.$emit('change', newVal);
+        this.$emit("change", newVal);
       },
     },
   },
   mounted() {
-    document.addEventListener('keydown', this.closeOnEsc);
+    document.addEventListener("keydown", this.closeOnEsc);
   },
   beforeDestroy() {
-    document.removeEventListener('keydown', this.closeOnEsc);
+    document.removeEventListener("keydown", this.closeOnEsc);
   },
   methods: {
     closeOnEsc(e) {
       if (e.keyCode === 27) {
-        this.$emit('close');
+        this.$emit("close");
       }
     },
   },

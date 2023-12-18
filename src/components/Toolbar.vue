@@ -7,59 +7,111 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <template>
   <nav id="toolbar">
-
     <section id="top">
       <div id="navigation-head">
         <div v-if="showImportExport" class="import-export-buttons">
-          <input ref="importLibrary" @change="importDataAsFile($event, 'library')" type="file" />
-          <input id="toolbarImportInput" ref="importInput" @change="importDataAsFile($event, 'floorplan')" type="file" />
-          <input id="toolbarMergeInput" ref="mergeFiles" @change="mergeFiles($event)" type="file" />
+          <input
+            ref="importLibrary"
+            @change="importDataAsFile($event, 'library')"
+            type="file"
+          />
+          <input
+            id="toolbarImportInput"
+            ref="importInput"
+            @change="importDataAsFile($event, 'floorplan')"
+            type="file"
+          />
+          <input
+            id="toolbarMergeInput"
+            ref="mergeFiles"
+            @change="mergeFiles($event)"
+            type="file"
+          />
 
           <div title="Open Floorplan">
-            <open-floorplan-svg @click.native="$refs.importInput.click()" id="import" class="button"></open-floorplan-svg>
+            <open-floorplan-svg
+              v-on:click="$refs.importInput.click()"
+              id="import"
+              class="button"
+            ></open-floorplan-svg>
           </div>
           <div title="Save Floorplan">
-            <save-floorplan-svg @click.native="exportData" id="export" class="button"></save-floorplan-svg>
+            <save-floorplan-svg
+                v-on:click="exportData"
+              id="export"
+              class="button"
+            ></save-floorplan-svg>
           </div>
           <div title="Import Library">
-            <import-library-svg @click.native="$refs.importLibrary.click()" class="button"></import-library-svg>
+            <import-library-svg
+              class="button"
+            ></import-library-svg>
           </div>
           <div title="merge files">
-            <merge-icon-svg @click.native="$refs.mergeFiles.click()" class="button"></merge-icon-svg>
+            <merge-icon-svg
+                v-on:click="$refs.mergeFiles.click()"
+              class="button"
+            ></merge-icon-svg>
           </div>
-          <div v-if="enable3DPreview" title="Open 3D Previewer">
-            <globe-icon-svg @click.native="open3DPreviewer" class="button" />
-          </div>
+          <!--
+          //<div v-if="enable3DPreview" title="Open 3D Previewer">
+          //  <globe-icon-svg @click.native="open3DPreviewer" class="button" />
+          //</div>
+          //-->
         </div>
 
         <div id="undo-redo">
           <div title="undo">
-            <undo-svg @click.native="undo" class="button" :class="{ 'disabled' : !timetravelInitialized }"></undo-svg>
+            <undo-svg
+                v-on:click="undo"
+              class="button"
+              :class="{ disabled: !timetravelInitialized }"
+            ></undo-svg>
           </div>
           <div title="redo">
-            <redo-svg @click.native="redo" class="button" :disabled="!timetravelInitialized" :class="{ 'disabled' : !timetravelInitialized }"></redo-svg>
+            <redo-svg
+                v-on:click="redo"
+              class="button"
+              :disabled="!timetravelInitialized"
+              :class="{ disabled: !timetravelInitialized }"
+            ></redo-svg>
           </div>
         </div>
       </div>
       <ul id="mode-tabs">
-        <li @click="modeTab='floorplan'" class="tab" data-modetab="floorplan" :class="{ active: modeTab === 'floorplan' }">
+        <li
+          @click="modeTab = 'floorplan'"
+          class="tab"
+          data-modetab="floorplan"
+          :class="{ active: modeTab === 'floorplan' }"
+        >
           <span>
             Floorplan
             <tab-floorplan-svg class="icon"></tab-floorplan-svg>
           </span>
         </li>
 
-        <li @click="modeTab='assign'" class="tab" data-modetab="assignments" :class="{ active: modeTab === 'assign' }">
+        <li
+          @click="modeTab = 'assign'"
+          class="tab"
+          data-modetab="assignments"
+          :class="{ active: modeTab === 'assign' }"
+        >
           <span>
             Assignments
-            <tab-assign-svg  class="icon"></tab-assign-svg>
+            <tab-assign-svg class="icon"></tab-assign-svg>
           </span>
         </li>
 
-        <li @click="modeTab='components'" class="tab" data-modetab="components" :class="{ active: modeTab === 'components' }">
+        <li
+          @click="modeTab = 'components'"
+          class="tab"
+          data-modetab="components"
+          :class="{ active: modeTab === 'components' }"
+        >
           <span>
             Components
-            <tool-component-svg  class="icon"></tool-component-svg>
+            <tool-component-svg class="icon"></tool-component-svg>
           </span>
         </li>
 
@@ -71,23 +123,23 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       <div id="grid-settings">
         <div class="input-checkbox">
           <label>Story Below</label>
-          <input type="checkbox" v-model="previousStoryVisible">
+          <input type="checkbox" v-model="previousStoryVisible" />
         </div>
 
         <div v-if="mapEnabled" class="input-checkbox">
           <label>map</label>
-          <input type="checkbox" v-model="mapVisible">
+          <input type="checkbox" v-model="mapVisible" />
         </div>
 
         <div class="input-checkbox">
           <label>grid</label>
-          <input type="checkbox" v-model="gridVisible">
+          <input type="checkbox" v-model="gridVisible" />
         </div>
 
         <div class="input-number">
           <label>spacing</label>
-          <input v-model.number.lazy="spacing">
-          <label v-if="!allowSettingUnits">{{ rwUnits}}</label>
+          <input v-model.number.lazy="spacing" />
+          <label v-if="!allowSettingUnits">{{ rwUnits }}</label>
         </div>
         <PrettySelect
           v-if="allowSettingUnits"
@@ -104,37 +156,65 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     </section>
 
     <section id="bottom" :class="modeTab">
-      <template  v-if="modeTab ==='floorplan'">
+      <template v-if="modeTab === 'floorplan'">
         <div id="instructions">Draw a floorplan and import images</div>
 
         <div id="drawing-tools" class="tools-list tools">
-          <div @click="tool = 'Rectangle'" data-tool="Rectangle" title="Rectangle" :class="{ active: tool === 'Rectangle' }">
+          <div
+            @click="tool = 'Rectangle'"
+            data-tool="Rectangle"
+            title="Rectangle"
+            :class="{ active: tool === 'Rectangle' }"
+          >
             <tool-draw-rectangle-svg class="button"></tool-draw-rectangle-svg>
           </div>
-          <div @click="tool = 'Polygon'" data-tool="Polygon" title="Polygon" :class="{ active: tool === 'Polygon' }">
+          <div
+            @click="tool = 'Polygon'"
+            data-tool="Polygon"
+            title="Polygon"
+            :class="{ active: tool === 'Polygon' }"
+          >
             <tool-draw-polygon-svg class="button"></tool-draw-polygon-svg>
           </div>
-          <div @click="tool = 'Fill'" data-tool="Fill" title="Fill" :class="{ active: tool === 'Fill' }">
+          <div
+            @click="tool = 'Fill'"
+            data-tool="Fill"
+            title="Fill"
+            :class="{ active: tool === 'Fill' }"
+          >
             <tool-fill-svg class="button"></tool-fill-svg>
           </div>
-          <div @click="tool = 'Eraser'" data-tool="Eraser" title="Eraser" :class="{ active: tool === 'Eraser' }">
+          <div
+            @click="tool = 'Eraser'"
+            data-tool="Eraser"
+            title="Eraser"
+            :class="{ active: tool === 'Eraser' }"
+          >
             <tool-erase-svg class="button"></tool-erase-svg>
           </div>
           <!-- remove Select/Move tool -->
           <!-- <div @click="tool = 'Select'" data-tool="Select" title="Select" :class="{ active: tool === 'Select' }">
             <tool-move-size-svg class="button"></tool-move-size-svg>
           </div> -->
-          <div @click="setImageTool" data-tool="Image" title="Image" :class="{ active: tool === 'Image' }">
+          <div
+            @click="setImageTool"
+            data-tool="Image"
+            title="Image"
+            :class="{ active: tool === 'Image' }"
+          >
             <tool-image-svg class="button"></tool-image-svg>
           </div>
         </div>
-
       </template>
 
       <template v-if="modeTab === 'components'">
         <div id="instructions">
-          <span v-if="!currentComponentDefinition">Add fenestration, daylighting, and PV</span>
-          <span v-else>Click to place a {{currentComponentDefinition.name}}</span>
+          <span v-if="!currentComponentDefinition"
+            >Add fenestration, daylighting, and PV</span
+          >
+          <span v-else
+            >Click to place a {{ currentComponentDefinition.name }}</span
+          >
         </div>
         <ComponentInstanceEditBar />
         <!-- No need to show tool options if there's only the one choice. -->
@@ -145,7 +225,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         </div> -->
       </template>
 
-      <template v-if="modeTab==='assign'">
+      <template v-if="modeTab === 'assign'">
         <div id="instructions">Assign thermal zones, etc, to spaces</div>
         <!-- No need to show tool options if there's only the one choice. -->
         <!-- <div id="drawing-tools" class="tools-list tools">
@@ -158,23 +238,24 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       <div id="grid-tools">
         <RenderByDropdown />
         <div title="zoom to fit">
-          <ZoomToFitSvg class="button" @click.native="zoomToFit"></ZoomToFitSvg>
+          <ZoomToFitSvg class="button" @click="zoomToFit" v-on:click="zoomToFit"></ZoomToFitSvg>
         </div>
       </div>
-
 
       <!-- <div id="snapping-options">
         <button @click="snapMode = 'grid-strict'" :class="{ active: snapMode === 'grid-strict' }">Strict Grid</button>
         <button @click="snapMode = 'grid-verts-edges'" :class="{ active: snapMode === 'grid-verts-edges' }">Edges too</button>
       </div> -->
-
-
     </section>
 
     <section class="modals">
       <SaveAsModal
         v-if="showSaveModal"
-        @close="() => {showSaveModal = false;}"
+        @close="
+          () => {
+            showSaveModal = false;
+          }
+        "
       />
       <Settings
         v-else-if="showGroundPropsModal"
@@ -185,26 +266,27 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex';
-import SaveAsModal from './Modals/SaveAsModal.vue';
-import Settings from './Modals/Settings.vue';
-import PrettySelect from './PrettySelect.vue';
-import applicationHelpers from './../store/modules/application/helpers';
-import svgs from './svgs';
-import RenderByDropdown from './RenderByDropdown.vue';
-import ComponentInstanceEditBar from './ComponentInstanceEditBar.vue';
-import appconfig, { componentTypes } from '../store/modules/application/appconfig';
-
+import { mapState, mapGetters } from "vuex";
+import SaveAsModal from "./Modals/SaveAsModal.vue";
+import Settings from "./Modals/Settings.vue";
+import PrettySelect from "./PrettySelect.vue";
+import applicationHelpers from "./../store/modules/application/helpers";
+import svgs from "./svgs";
+import RenderByDropdown from "./RenderByDropdown.vue";
+import ComponentInstanceEditBar from "./ComponentInstanceEditBar.vue";
+import appconfig, {
+  componentTypes,
+} from "../store/modules/application/appconfig";
 
 // svgs
 
 export default {
-  name: 'toolbar',
+  name: "toolbar",
   data() {
     return {
       componentTypes: {
-        daylighting_control_definitions: 'Daylighting Control Definitions',
-        window_definitions: 'Window Definitions',
+        daylighting_control_definitions: "Daylighting Control Definitions",
+        window_definitions: "Window Definitions",
       },
       showSaveModal: false,
       visibleComponentType: null,
@@ -213,89 +295,113 @@ export default {
   },
   methods: {
     setImageTool() {
-      this.tool = 'Image';
+      this.tool = "Image";
       if (this.currentStory.images.length === 0) {
-        window.eventBus.$emit('uploadImage');
+        window.eventBus.$emit("uploadImage");
       }
     },
     zoomToFit() {
-      window.eventBus.$emit('zoomToFit');
+      window.eventBus.$emit("zoomToFit");
     },
     exportData() {
       this.showSaveModal = true;
-      return this.$store.getters['exportData'];
+      return this.$store.getters["exportData"];
     },
-    open3DPreviewer() {
-      localStorage.setItem("floorplan3DExport", JSON.stringify(application.$store.getters['exportData']));
-      window.open('3DViewer');
-    },
+    //DLM: comment 3DViewer out for now
+    //open3DPreviewer() {
+    //  localStorage.setItem("floorplan3DExport", JSON.stringify(application.$store.getters['exportData']));
+    //  window.open('3DViewer');
+    //},
     importDataAsFile(event, type) {
       const file = event.target.files[0];
       const reader = new FileReader();
 
-      reader.addEventListener('load', () => {
-        let data;
-        try {
-          data = JSON.parse(reader.result);
-        } catch (e) {
-          window.eventBus.$emit('error', 'Invalid JSON');
-          return;
-        }
-        if (type === 'library') {
-          this.$store.dispatch('importLibrary', { data });
-        } else if (type === 'floorplan') {
-          this.$store.dispatch('importFloorplan', {
-            clientWidth: document.getElementById('svg-grid').clientWidth,
-            clientHeight: document.getElementById('svg-grid').clientHeight,
-            data,
-          });
-        }
-      }, false);
+      reader.addEventListener(
+        "load",
+        () => {
+          let data;
+          try {
+            data = JSON.parse(reader.result);
+          } catch (e) {
+            window.eventBus.$emit("error", "Invalid JSON");
+            return;
+          }
+          if (type === "library") {
+            this.$store.dispatch("importLibrary", { data });
+          } else if (type === "floorplan") {
+            this.$store.dispatch("importFloorplan", {
+              clientWidth: document.getElementById("svg-grid").clientWidth,
+              clientHeight: document.getElementById("svg-grid").clientHeight,
+              data,
+            });
+          }
+        },
+        false
+      );
 
-      if (file) { reader.readAsText(file); }
+      if (file) {
+        reader.readAsText(file);
+      }
     },
     mergeFiles(event) {
       const file = event.target.files[0];
       const reader = new FileReader();
-      
-      reader.addEventListener('load', () => {
-        let data;
-        try {
-          data = JSON.parse(reader.result);
-        } catch (e) {
-          window.eventBus.$emit('error', 'Invalid JSON');
-          return;
-        }
-        this.$store.dispatch('mergeFloorplans', { data });
-      }, false);
 
-      if (file) { reader.readAsText(file); }
+      reader.addEventListener(
+        "load",
+        () => {
+          let data;
+          try {
+            data = JSON.parse(reader.result);
+          } catch (e) {
+            window.eventBus.$emit("error", "Invalid JSON");
+            return;
+          }
+          this.$store.dispatch("mergeFloorplans", { data });
+        },
+        false
+      );
+
+      if (file) {
+        reader.readAsText(file);
+      }
     },
-    undo() { this.$store.timetravel.undo(); },
-    redo() { this.$store.timetravel.redo(); },
+    undo() {
+      this.$store.timetravel.undo();
+    },
+    redo() {
+      this.$store.timetravel.redo();
+    },
     updateUnits(val) {
       if (this.allowSettingUnits) {
         this.rwUnits = val;
       } else {
-        window.eventBus.$emit('error', 'Units must be set before any geometry is drawn.');
+        window.eventBus.$emit(
+          "error",
+          "Units must be set before any geometry is drawn."
+        );
       }
       // not today, friend...
       // this.$store.dispatch('changeUnits', { newUnits: val });
     },
-    displayNameForMode(mode) { return applicationHelpers.displayNameForMode(mode); },
+    displayNameForMode(mode) {
+      return applicationHelpers.displayNameForMode(mode);
+    },
   },
   computed: {
     latestCreatedCompId() {
-      return _.chain(this.allComponents)
-        .map('defs')
-        .flatten()
-        .map('id')
-        .map(Number)
-        .max()
-        .value() + '';
+      return (
+        _.chain(this.allComponents)
+          .map("defs")
+          .flatten()
+          .map("id")
+          .map(Number)
+          .max()
+          .value() + ""
+      );
     },
     allComponents() {
-      return componentTypes.map(ct => ({
+      return componentTypes.map((ct) => ({
         defs: this.$store.state.models.library[ct],
         name: appconfig.modes[ct],
         type: ct,
@@ -308,18 +414,24 @@ export default {
       return this.currentComponent.definition;
     },
     ...mapGetters({
-      currentSpaceProperty: 'application/currentSpaceProperty',
-      currentStory: 'application/currentStory',
+      currentSpaceProperty: "application/currentSpaceProperty",
+      currentStory: "application/currentStory",
     }),
     ...mapState({
-      mapEnabled: state => state.project.map.enabled,
-      timetravelInitialized: state => state.timetravelInitialized,
-      showImportExport: state => state.project.show_import_export,
-      allowSettingUnits: state => false, //state.project.config.unitsEditable && state.geometry.length === 1 && state.geometry[0].vertices.length === 0,
+      mapEnabled: (state) => state.project.map.enabled,
+      timetravelInitialized: (state) => state.timetravelInitialized,
+      showImportExport: (state) => state.project.show_import_export,
+      allowSettingUnits: (state) => false, //state.project.config.unitsEditable && state.geometry.length === 1 && state.geometry[0].vertices.length === 0,
     }),
     currentSubselectionType: {
-      get() { return this.$store.state.application.currentSelections.subselectionType; },
-      set(sst) { this.$store.dispatch('application/setCurrentSubselectionType', { subselectionType: sst }); },
+      get() {
+        return this.$store.state.application.currentSelections.subselectionType;
+      },
+      set(sst) {
+        this.$store.dispatch("application/setCurrentSubselectionType", {
+          subselectionType: sst,
+        });
+      },
     },
     enable3DPreview: {
       get() {
@@ -329,86 +441,138 @@ export default {
     availableTools() {
       let tools = [];
       switch (this.modeTab) {
-        case 'floorplan':
-          tools = ['Rectangle', 'Polygon', 'Eraser', 'Select', 'Image'];
+        case "floorplan":
+          tools = ["Rectangle", "Polygon", "Eraser", "Select", "Image"];
           break;
-        case 'shading':
-          tools = ['Rectangle', 'Polygon', 'Eraser', 'Select'];
+        case "shading":
+          tools = ["Rectangle", "Polygon", "Eraser", "Select"];
           break;
-        case 'components':
-          tools = ['Place Component'];
+        case "components":
+          tools = ["Place Component"];
           break;
-        case 'assign':
-          tools = ['Apply Property'];
+        case "assign":
+          tools = ["Apply Property"];
           break;
         default:
           break;
       }
-      if (this.previousStoryVisible && (this.modeTab === 'floorplan' || this.currentMode === 'shading')) {
-        tools.push('Fill');
+      if (
+        this.previousStoryVisible &&
+        (this.modeTab === "floorplan" || this.currentMode === "shading")
+      ) {
+        tools.push("Fill");
       }
       return tools;
     },
     currentMode: {
-      get() { return this.$store.state.application.currentSelections.mode; },
-      set(mode) { this.$store.dispatch('application/setCurrentMode', { mode }); },
+      get() {
+        return this.$store.state.application.currentSelections.mode;
+      },
+      set(mode) {
+        this.$store.dispatch("application/setCurrentMode", { mode });
+      },
     },
     modeTab: {
-      get() { return this.$store.state.application.currentSelections.modeTab; },
-      set(mt) { this.$store.dispatch('application/setCurrentModeTab', { modeTab: mt }); },
+      get() {
+        return this.$store.state.application.currentSelections.modeTab;
+      },
+      set(mt) {
+        this.$store.dispatch("application/setCurrentModeTab", { modeTab: mt });
+      },
     },
     gridVisible: {
-      get() { return this.$store.state.project.grid.visible; },
-      set(visible) { this.$store.dispatch('project/setGridVisible', { visible }); },
+      get() {
+        return this.$store.state.project.grid.visible;
+      },
+      set(visible) {
+        this.$store.dispatch("project/setGridVisible", { visible });
+      },
     },
     mapVisible: {
-      get() { return this.$store.state.project.map.visible; },
-      set(visible) { this.$store.dispatch('project/setMapVisible', { visible }); },
+      get() {
+        return this.$store.state.project.map.visible;
+      },
+      set(visible) {
+        this.$store.dispatch("project/setMapVisible", { visible });
+      },
     },
     previousStoryVisible: {
-      get() { return this.$store.state.project.previous_story.visible; },
-      set(visible) { this.$store.dispatch('project/setPreviousStoryVisible', { visible }); },
+      get() {
+        return this.$store.state.project.previous_story.visible;
+      },
+      set(visible) {
+        this.$store.dispatch("project/setPreviousStoryVisible", { visible });
+      },
     },
     tool: {
-      get() { return this.$store.state.application.currentSelections.tool; },
-      set(tool) { this.$store.dispatch('application/setCurrentTool', { tool }); },
+      get() {
+        return this.$store.state.application.currentSelections.tool;
+      },
+      set(tool) {
+        this.$store.dispatch("application/setCurrentTool", { tool });
+      },
     },
     // spacing between gridlines, measured in RWU
     spacing: {
-      get() { return this.$store.state.project.grid.spacing; },
-      set(spacing) { this.$store.dispatch('project/setSpacing', { spacing }); },
+      get() {
+        return this.$store.state.project.grid.spacing;
+      },
+      set(spacing) {
+        this.$store.dispatch("project/setSpacing", { spacing });
+      },
     },
 
     currentComponent: {
-      get() { return this.$store.getters['application/currentComponent']; },
+      get() {
+        return this.$store.getters["application/currentComponent"];
+      },
       set(item) {
-        if (!item || !item.definition || !item.definition.id) { return; }
-        this.$store.dispatch('application/setCurrentComponentDefinitionId', { id: item.definition.id });
+        if (!item || !item.definition || !item.definition.id) {
+          return;
+        }
+        this.$store.dispatch("application/setCurrentComponentDefinitionId", {
+          id: item.definition.id,
+        });
       },
     },
     rwUnits: {
-      get() { return this.$store.state.project.config.units === 'ip' ? 'ft' : 'm'; },
-      set(units) { this.$store.dispatch('project/setUnits', { units: units === 'ft' ? 'ip' : 'si' }); },
+      get() {
+        return this.$store.state.project.config.units === "ip" ? "ft" : "m";
+      },
+      set(units) {
+        this.$store.dispatch("project/setUnits", {
+          units: units === "ft" ? "ip" : "si",
+        });
+      },
     },
     snapMode: {
-      get() { return this.$store.state.application.currentSelections.snapMode; },
-      set(snapMode) { this.$store.dispatch('application/setCurrentSnapMode', { snapMode }); },
+      get() {
+        return this.$store.state.application.currentSelections.snapMode;
+      },
+      set(snapMode) {
+        this.$store.dispatch("application/setCurrentSnapMode", { snapMode });
+      },
     },
   },
   watch: {
     modeTab() {
-      if (this.modeTab === 'assign' && this.currentSpaceProperty) {
+      if (this.modeTab === "assign" && this.currentSpaceProperty) {
         this.currentMode = this.currentSpaceProperty.type;
       } else {
-        this.currentMode = 'spaces';
+        this.currentMode = "spaces";
       }
     },
     tool(val) {
-      if (this.availableTools.indexOf(val) === -1 && val !== 'Map') { this.tool = this.availableTools[0]; }
-      if (this.tool === 'Image' && this.currentSubselectionType !== 'images') {
-        this.currentSubselectionType = 'images';
-      } else if (this.tool !== 'Image' && this.currentSubselectionType === 'images') {
-        this.currentSubselectionType = 'spaces';
+      if (this.availableTools.indexOf(val) === -1 && val !== "Map") {
+        this.tool = this.availableTools[0];
+      }
+      if (this.tool === "Image" && this.currentSubselectionType !== "images") {
+        this.currentSubselectionType = "images";
+      } else if (
+        this.tool !== "Image" &&
+        this.currentSubselectionType === "images"
+      ) {
+        this.currentSubselectionType = "spaces";
       }
     },
     availableTools() {
@@ -417,14 +581,16 @@ export default {
       }
     },
     currentSubselectionType(val) {
-      if (val === 'images' && this.tool !== 'Image') {
-        this.tool = 'Image';
-      } else if (val !== 'images' && this.tool === 'Image') {
+      if (val === "images" && this.tool !== "Image") {
+        this.tool = "Image";
+      } else if (val !== "images" && this.tool === "Image") {
         this.tool = this.availableTools[0];
       }
     },
     latestCreatedCompId() {
-      this.$store.dispatch('application/setCurrentComponentDefinitionId', { id: this.latestCreatedCompId });
+      this.$store.dispatch("application/setCurrentComponentDefinitionId", {
+        id: this.latestCreatedCompId,
+      });
     },
   },
   components: {
@@ -445,8 +611,9 @@ $gray-dark: #333333;
 $black: #000000;
 $gray-medium-light: #5b5b5b;
 
-svg.icon, svg.button {
-  margin-top: .5rem;
+svg.icon,
+svg.button {
+  margin-top: 0.5rem;
   vertical-align: middle;
   height: 2rem;
   width: 2rem;
@@ -480,8 +647,8 @@ svg.icon, svg.button {
     #grid-settings {
       display: flex;
       margin-left: auto;
-      >div {
-        margin-right: .5rem;
+      > div {
+        margin-right: 0.5rem;
       }
     }
   }
@@ -530,13 +697,12 @@ svg.icon, svg.button {
   }
 }
 
-
 #mode-tabs {
   list-style: none;
   overflow: hidden;
   padding-left: 0;
   margin-top: 0;
-  margin-bottom:0;
+  margin-bottom: 0;
   display: flex;
   font-size: 13px;
 
@@ -560,7 +726,6 @@ svg.icon, svg.button {
         margin-bottom: -10px;
         margin-top: 0px;
       }
-
     }
 
     span::after {
@@ -618,7 +783,4 @@ svg.icon, svg.button {
     }
   }
 }
-
-
-
 </style>

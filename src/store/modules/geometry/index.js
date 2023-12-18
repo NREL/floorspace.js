@@ -1,11 +1,12 @@
-import actions from './actions/actions'
-import * as mutations from './mutations'
-import getters from './getters'
+import actions from "./actions/actions";
+import * as mutations from "./mutations";
+import getters from "./getters";
 
 export default {
-    namespaced: true,
-    // each story references a geometry object in this state array
-    state: [/*{
+  namespaced: true,
+  // each story references a geometry object in this state array
+  state: [
+    /*{
         id: null,
         vertices: [{
             id: null,
@@ -24,8 +25,9 @@ export default {
                 reverse: false
             }]
         }]
-    }*/],
-    actions: actions,
-    mutations: mutations,
-    getters: getters
-}
+    }*/
+  ],
+  actions: actions,
+  mutations: mutations,
+  getters: getters,
+};
