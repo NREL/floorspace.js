@@ -17,7 +17,7 @@ jobs:
       - run: |
           yarn config set unsafe-disable-integrity-migration true -g
           yarn install --ignore-engines --frozen-lockfile --non-interactive
-      - run: xvfb-run yarn test
+      - run: xvfb-run yarn run unit
         env:
           DISPLAY: 99.0
           DBUS_SESSION_BUS_ADDRESS: '/dev/null'
