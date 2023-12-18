@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 httpd:latest AS floorspacejs-dev
+FROM --platform=linux/amd64 httpd:2.4.58 AS floorspacejs-dev
 
 ENV DEBIAN_FRONTEND=noninteractive
 
