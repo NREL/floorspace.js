@@ -5,7 +5,7 @@ const srcPath = './src';
 const webpack_output = readFileSync(distPath + '/index.html', { encoding: 'utf-8' });
 
 const scripts = webpack_output.split('src=').slice(1).map(scriptChunk => {
-  const jsPath = scriptChunk.split('></script>')[0];
+  const jsPath = scriptChunk.split('></script>')[0].replace(/['"]+/g, '');
   console.log(`Loading scripts from: ${jsPath}\n\n`);
   return readFileSync(distPath + jsPath, { encoding: 'utf-8' });
 }).join('\n\t');
@@ -36,8 +36,8 @@ const standaloneHtml = baseHtml + `
 </html>`
 
 writeFileSync(distPath + '/standalone_geometry_editor.html', standaloneHtml);
-console.log(`Loading floorspace.js API script from: ${srcPath + '/api.js'}\n\n`);
-const apiScripts = readFileSync(srcPath + '/api.js', { encoding: 'utf-8' });
+console.log(`Loading floorspace.js API script from: ${srcPath + '/api.ts'}\n\n`);
+const apiScripts = readFileSync(srcPath + '/api.ts', { encoding: 'utf-8' });
 const lodash = readFileSync('./node_modules/lodash/lodash.min.js', { encoding: 'utf-8' });
 
 const embeddableHtml = baseHtml + `

@@ -9,13 +9,28 @@ jobs:
       NODE_ENV: 'PROD'
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Setup Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
-          node-version: 15
-      - run: npm ci
-      - run: xvfb-run npm run test
-        env: 
+          node-version: 20
+      - run: |
+          yarn config set unsafe-disable-integrity-migration true -g
+          yarn install --ignore-engines --frozen-lockfile --non-interactive
+      - run: xvfb-run yarn unit
+        if: always()
+        env:
           DISPLAY: 99.0
           DBUS_SESSION_BUS_ADDRESS: '/dev/null'
+      - name: Install Playwright Browsers
+        if: always()
+        run: npx playwright install --with-deps
+      - name: Run Playwright tests
+        if: always()
+        run: npx playwright test
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 1

@@ -18,9 +18,11 @@ describe('getOrCreateVertex', () => {
   });
 });
 
-
 describe('matchOrCreateEdges', () => {
-  const existingEdges = [{ id: 1, v1: 2, v2: 3 }, { id: 4, v1: 5, v2: 6 }];
+  const existingEdges = [
+    { id: 1, v1: 2, v2: 3 },
+    { id: 4, v1: 5, v2: 6 },
+  ];
   it('can handle an empty list', () => {
     const edges = matchOrCreateEdges([], existingEdges);
     assertEqual(edges, []);

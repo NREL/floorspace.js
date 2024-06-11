@@ -6,7 +6,7 @@
           <div class="modal-wrapper" @click="$emit('close')">
             <div class="modal-container" @click.stop>
               <div class="modal-body">
-                <swatches v-model="color" inline show-fallback />
+                <VSwatches v-model="color" inline show-fallback />
               </div>
             </div>
           </div>
@@ -17,38 +17,39 @@
 </template>
 
 <script>
-import Swatches from 'vue-swatches';
-import { Portal } from 'portal-vue';
+import { VSwatches } from 'vue3-swatches'
+import { Portal } from "portal-vue";
 
 export default {
-  name: 'ColorPickerModal',
-  props: ['value'],
+  name: "ColorPickerModal",
+  props: ["value"],
+  emits: ["change", "close"],
   computed: {
     color: {
       get() {
         return this.value;
       },
       set(newVal) {
-        this.$emit('change', newVal);
+        this.$emit("change", newVal);
       },
     },
   },
   mounted() {
-    document.addEventListener('keydown', this.closeOnEsc);
+    document.addEventListener("keydown", this.closeOnEsc);
   },
-  beforeDestroy() {
-    document.removeEventListener('keydown', this.closeOnEsc);
+  beforeUnmount() {
+    document.removeEventListener("keydown", this.closeOnEsc);
   },
   methods: {
     closeOnEsc(e) {
       if (e.keyCode === 27) {
-        this.$emit('close');
+        this.$emit("close");
       }
     },
   },
   components: {
     Portal,
-    Swatches,
+    VSwatches,
   },
 };
 </script>

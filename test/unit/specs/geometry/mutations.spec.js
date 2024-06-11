@@ -1,7 +1,10 @@
 import _ from 'lodash';
 import { assert, assertEqual } from '../../test_helpers';
 import { emptyGeometry, neg5by5Rect, simpleGeometry } from './examples';
-import { replaceFacePoints, trimGeometry } from '../../../../src/store/modules/geometry/mutations';
+import {
+  replaceFacePoints,
+  trimGeometry,
+} from '../../../../src/store/modules/geometry/mutations';
 
 describe('replaceFacePoints', () => {
   const triangle = {
@@ -41,10 +44,7 @@ describe('replaceFacePoints', () => {
       face_id: '12',
     });
 
-    assertEqual(
-      _.filter(geometry.vertices, { id: 'origin' }).length,
-      1,
-    );
+    assertEqual(_.filter(geometry.vertices, { id: 'origin' }).length, 1);
   });
 
   it('will use an existing face if possible', () => {
@@ -89,7 +89,10 @@ describe('trimGeometry', () => {
     const geometry = _.cloneDeep(simpleGeometry);
     geometry.vertices.push({ id: 'used by daylighting control', x: 12, y: 18 });
 
-    trimGeometry([geometry], { geometry_id: geometry.id, vertsReferencedElsewhere: ['used by daylighting control'] });
+    trimGeometry([geometry], {
+      geometry_id: geometry.id,
+      vertsReferencedElsewhere: ['used by daylighting control'],
+    });
     assert(_.find(geometry.vertices, { id: 'used by daylighting control' }));
   });
 

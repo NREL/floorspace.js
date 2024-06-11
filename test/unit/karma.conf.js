@@ -3,58 +3,17 @@
 // we are also using it with karma-webpack
 //   https://github.com/webpack/karma-webpack
 
-process.env.CHROME_BIN = require('puppeteer').executablePath()
+process.env.CHROME_BIN = require('puppeteer').executablePath();
 
-var path = require('path')
-var merge = require('webpack-merge')
-var baseConfig = require('../../build/webpack.base.conf')
-var utils = require('../../build/utils')
-var webpack = require('webpack')
-var projectRoot = path.resolve(__dirname, '../../')
+const { merge } = require('webpack-merge');
+const baseConfig = require('../../build/webpack.base.conf');
 
-var webpackConfig = merge(baseConfig, {
-  // use inline sourcemap for karma-sourcemap-loader
-  browser: {
-    child_process: 'empty',
-    fs: 'empty',
-  },
-  module: {
-    loaders: utils.styleLoaders()
-  },
-  devtool: '#inline-source-map',
-  vue: {
-    loaders: {
-      js: 'isparta'
-    }
-  },
-  resolve: {
-    src: path.resolve(__dirname, '../../src'),
-  },
-  plugins: [
-    new webpack.DefinePlugin({
-      'process.env': require('../../config/test.env')
-    })
-  ]
-})
+const webpackConfig = merge(baseConfig, {
+  devtool: 'cheap-module-source-map',
+});
 
 // no need for app entry during tests
-delete webpackConfig.entry
-
-// make sure isparta loader is applied before eslint
-webpackConfig.module.preLoaders = webpackConfig.module.preLoaders || []
-webpackConfig.module.preLoaders.unshift({
-  test: /\.js$/,
-  loader: 'isparta',
-  include: path.resolve(projectRoot, 'src')
-})
-
-// only apply babel for test files when using isparta
-webpackConfig.module.loaders.some(function (loader, i) {
-  if (loader.loader === 'babel') {
-    loader.include = path.resolve(projectRoot, 'test/unit')
-    return true
-  }
-})
+delete webpackConfig.entry;
 
 module.exports = function (config) {
   config.set({
@@ -64,10 +23,10 @@ module.exports = function (config) {
     // 2. add it to the `browsers` array below.
     browsers: ['ChromeHeadless'],
     frameworks: ['mocha', 'sinon-chai'],
-    reporters: ['spec'],
+    reporters: ['spec', 'html', 'coverage'],
     files: ['./index.js'],
     preprocessors: {
-      './index.js': ['webpack', 'sourcemap']
+      './index.js': ['webpack', 'sourcemap', 'coverage'],
     },
     webpack: webpackConfig,
     webpackMiddleware: {
@@ -75,6 +34,14 @@ module.exports = function (config) {
       stats: {
         chunks: false,
       },
-    }
-  })
-}
+    },
+    coverageReporter: {
+      dir: 'coverage/',
+      reporters: [
+        // reporters not supporting the `file` property
+        { type: 'html', subdir: 'report-html' },
+        { type: 'lcov', subdir: 'report-lcov' },
+      ],
+    },
+  });
+};

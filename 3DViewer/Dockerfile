@@ -1,4 +1,4 @@
-FROM emscripten/emsdk:2.0.26
+FROM emscripten/emsdk:3.1.61
 
 RUN echo "## Start building" \
     \
@@ -21,9 +21,9 @@ RUN echo "## Start building" \
             openjdk-8-jre-headless \
     \
 &&	echo "## Installing CMake" \
-    &&	wget https://cmake.org/files/v3.18/cmake-3.18.3-Linux-x86_64.sh -q \
+    &&	wget https://cmake.org/files/v3.29/cmake-3.29.5-linux-x86_64.sh -q \
     &&	mkdir /opt/cmake \
-    &&	printf "y\nn\n" | sh cmake-3.18.3-Linux-x86_64.sh --prefix=/opt/cmake > /dev/null \
+    &&	printf "y\nn\n" | sh cmake-3.29.5-linux-x86_64.sh --prefix=/opt/cmake > /dev/null \
     &&		rm -fr cmake*.sh /opt/cmake/doc \
     &&		rm -fr /opt/cmake/bin/cmake-gui \
     &&		rm -fr /opt/cmake/bin/ccmake \

@@ -4,8 +4,7 @@ import { assert, refute, assertProperty } from '../../test_helpers';
 import mergeEdges from '../../../../src/store/modules/geometry/mergeEdges';
 
 describe('endpointsNearby', () => {
-  const
-    a = { x: 0, y: 12 },
+  const a = { x: 0, y: 12 },
     b = { x: 100, y: 15 },
     c = { x: 1, y: 11 },
     d = { x: 101, y: 15 };
@@ -16,7 +15,8 @@ describe('endpointsNearby', () => {
     const res = mergeEdges.endpointsNearby(edge1, edge2);
     assert(
       res && res.mergeType === 'sameEndpoints',
-      'expected edges to be merged');
+      'expected edges to be merged',
+    );
   });
 
   it('finds edges who should be reversed, but endpoints are close', () => {
@@ -26,13 +26,15 @@ describe('endpointsNearby', () => {
     const res = mergeEdges.endpointsNearby(edge1, edge2);
     assert(
       res && res.mergeType === 'reverseEndpoints',
-      'expected edges to be merged');
+      'expected edges to be merged',
+    );
   });
 
   it("doesn't say endpoints are nearby when they're not", () => {
     const res = mergeEdges.endpointsNearby(
       { start: a, end: c },
-      { start: b, end: d });
+      { start: b, end: d },
+    );
 
     assert(!res, "those edges aren't nearby");
   });
@@ -40,63 +42,71 @@ describe('endpointsNearby', () => {
   it('is sensitive to the length of an edge', () => {
     const res = mergeEdges.endpointsNearby(
       { start: { x: 0, y: 0 }, end: { x: 10, y: 0 } },
-      { start: { x: 0, y: 1 }, end: { x: 10, y: 1 } });
+      { start: { x: 0, y: 1 }, end: { x: 10, y: 1 } },
+    );
     assert(!res, "Those edges aren't nearby relative to the edge length");
 
     const res2 = mergeEdges.endpointsNearby(
       { start: { x: 0, y: 0 }, end: { x: 100, y: 0 } },
-      { start: { x: 0, y: 1 }, end: { x: 100, y: 1 } });
+      { start: { x: 0, y: 1 }, end: { x: 100, y: 1 } },
+    );
     assert(
       res2 && res2.mergeType === 'sameEndpoints',
-      'Those edges *are* nearby relative to the edge length');
+      'Those edges *are* nearby relative to the edge length',
+    );
   });
 });
-
 
 describe('consolidateVertices', () => {
   // A tool for making generic arguments for the consolidateVertices
   // function. (generative testing saves me from having to come up with
   // my own examples).
-  const genVertices = gen.object({
-    startX: gen.numberWithin(-10000, 10000),
-    startY: gen.numberWithin(-10000, 10000),
-    endX: gen.numberWithin(-10000, 10000),
-    endY: gen.numberWithin(-10000, 10000),
-    pointsAlong: gen.array(gen.numberWithin(0, 1), { minSize: 0, maxSize: 10 }),
-  })
-  .suchThat(({ startX, startY, endX, endY }) => startX !== endX || startY !== endY)
-  .then(({ startX, startY, endX, endY, pointsAlong }) => {
-    const toPointOnLine = t => ({
-      x: startX + (t * (endX - startX)),
-      y: startY + (t * (endY - startY)),
-    });
+  const genVertices = gen
+    .object({
+      startX: gen.numberWithin(-10000, 10000),
+      startY: gen.numberWithin(-10000, 10000),
+      endX: gen.numberWithin(-10000, 10000),
+      endY: gen.numberWithin(-10000, 10000),
+      pointsAlong: gen.array(gen.numberWithin(0, 1), {
+        minSize: 0,
+        maxSize: 10,
+      }),
+    })
+    .suchThat(
+      ({ startX, startY, endX, endY }) => startX !== endX || startY !== endY,
+    )
+    .then(({ startX, startY, endX, endY, pointsAlong }) => {
+      const toPointOnLine = (t) => ({
+        x: startX + t * (endX - startX),
+        y: startY + t * (endY - startY),
+      });
 
-    const arr = [
-      /* start */{ x: startX, y: startY, identity: 'start' },
-      /* end */{ x: endX, y: endY, identity: 'end' },
-      /* verts */
-      ...pointsAlong.map(toPointOnLine),
-    ];
-    if (pointsAlong.length) {
-      /* and a duplicate out of order for good measure */
-      arr.push(toPointOnLine(pointsAlong[0]));
-    }
-    return arr;
-  });
+      const arr = [
+        /* start */ { x: startX, y: startY, identity: 'start' },
+        /* end */ { x: endX, y: endY, identity: 'end' },
+        /* verts */
+        ...pointsAlong.map(toPointOnLine),
+      ];
+      if (pointsAlong.length) {
+        /* and a duplicate out of order for good measure */
+        arr.push(toPointOnLine(pointsAlong[0]));
+      }
+      return arr;
+    });
 
   it('puts the end point in the last position', () => {
     assertProperty(genVertices, (verts) => {
       const consolidated = mergeEdges.consolidateVertices(...verts);
       return (
         verts[1].identity === 'end' &&
-        consolidated[consolidated.length - 1].identity === 'end');
+        consolidated[consolidated.length - 1].identity === 'end'
+      );
     });
   });
 
   it('drops duplicate points', () => {
     assertProperty(genVertices, (verts) => {
-      const
-        consolidated = mergeEdges.consolidateVertices(...verts),
+      const consolidated = mergeEdges.consolidateVertices(...verts),
         uniqVerts = _.uniqBy(verts, _.isEqual);
       assert(consolidated.length >= uniqVerts.length);
     });
@@ -110,8 +120,7 @@ describe('consolidateVertices', () => {
   });
 
   it('drops points that are close relative to the size of the edge', () => {
-    const
-      verts = [
+    const verts = [
         { x: 0, y: 200, id: 'start' },
         { x: 200, y: 0, id: 'end' },
         { x: 2, y: 198, id: 'expect_gone' },
@@ -124,14 +133,17 @@ describe('consolidateVertices', () => {
 
     refute(
       _.find(consolidated, { id: 'expect_gone' }),
-      'Expected those verts to be omitted (too close to start or to one another)');
+      'Expected those verts to be omitted (too close to start or to one another)',
+    );
 
     assert(
       _.filter(consolidated, { id: 'expect_here' }).length === 2,
-      'Expected those two to still be present');
+      'Expected those two to still be present',
+    );
     assert(
       consolidated.length === 4,
-      'Expected to keep start, end, two intermediary verts');
+      'Expected to keep start, end, two intermediary verts',
+    );
   });
 });
 
@@ -143,11 +155,13 @@ describe('oneEdgeCouldEatAnother', () => {
     );
     assert(
       couldEat && couldEat.mergeType === 'oneEdgeEatsAnother',
-      'expected these edges to combine');
+      'expected these edges to combine',
+    );
     assert(
       couldEat.newVertexOrder[0].id === 'a' &&
-      couldEat.newVertexOrder[couldEat.newVertexOrder.length - 1].id === 'b',
-      'Expected larger edge to have the outer vertices.');
+        couldEat.newVertexOrder[couldEat.newVertexOrder.length - 1].id === 'b',
+      'Expected larger edge to have the outer vertices.',
+    );
   });
 
   it('wont eat edges that are far apart, even if the angle is close', () => {
@@ -167,35 +181,44 @@ describe('oneEdgeCouldEatAnother', () => {
     // compared with the average edge length. But the angle is different enough
     // that we won't try and merge them. Angle is about 18 deg, vs 0 deg flat.
     // The cutoff is 9 deg
-    refute(couldEat, 'expected angle difference to be too large to merge edges');
+    refute(
+      couldEat,
+      'expected angle difference to be too large to merge edges',
+    );
   });
 
   // A tool for making generic arguments for the oneEdgeCouldEatAnother
   // function. (generative testing saves me from having to come up with
   // my own examples).
-  const genEdgePairSmallNearEndpoint = gen.object({
-    startX: gen.intWithin(-10000, 10000),
-    startY: gen.intWithin(-10000, 10000),
-    endX: gen.intWithin(-10000, 10000),
-    endY: gen.intWithin(-10000, 10000),
-    smallEdgeStart: gen.numberWithin(0, 0.02),
-    smallEdgeEnd: gen.numberWithin(0.08, 1),
-  })
-  .suchThat(({ startX, startY, endX, endY }) => startX !== endX || startY !== endY)
-  .then(({ startX, startY, endX, endY, smallEdgeStart, smallEdgeEnd }) => {
-    const toPointOnLine = t => ({
-      x: startX + (t * (endX - startX)),
-      y: startY + (t * (endY - startY)),
+  const genEdgePairSmallNearEndpoint = gen
+    .object({
+      startX: gen.intWithin(-10000, 10000),
+      startY: gen.intWithin(-10000, 10000),
+      endX: gen.intWithin(-10000, 10000),
+      endY: gen.intWithin(-10000, 10000),
+      smallEdgeStart: gen.numberWithin(0, 0.02),
+      smallEdgeEnd: gen.numberWithin(0.08, 1),
+    })
+    .suchThat(
+      ({ startX, startY, endX, endY }) => startX !== endX || startY !== endY,
+    )
+    .then(({ startX, startY, endX, endY, smallEdgeStart, smallEdgeEnd }) => {
+      const toPointOnLine = (t) => ({
+        x: startX + t * (endX - startX),
+        y: startY + t * (endY - startY),
+      });
+
+      const arr = [
+        { start: { x: startX, y: startY }, end: { x: endX, y: endY } },
+        {
+          start: toPointOnLine(smallEdgeStart),
+          end: toPointOnLine(smallEdgeEnd),
+        },
+      ];
+
+      // sometimes (deterministically) reverse the array
+      return startX > startY ? arr : arr.reverse();
     });
-
-    const arr = [
-      { start: { x: startX, y: startY }, end: { x: endX, y: endY } },
-      { start: toPointOnLine(smallEdgeStart), end: toPointOnLine(smallEdgeEnd) },
-    ];
-
-    // sometimes (deterministically) reverse the array
-    return startX > startY ? arr : arr.reverse();
-  });
 
   it('eats edges when the small one starts near an endpoint', () => {
     assertProperty(genEdgePairSmallNearEndpoint, (edgePair) => {
@@ -221,7 +244,6 @@ describe('edgesCombine', () => {
     assert(merge);
   });
 
-
   it("won't combine edges that have too different angles", () => {
     const merge = mergeEdges.edgesCombine(
       { start: { x: -30, y: -30 }, end: { x: 0, y: 0 } },
@@ -244,7 +266,9 @@ describe('edgesCombine', () => {
       { start: { x: 30, y: 2, id: 'latest' }, end: { x: -16, y: 0.5 } },
     );
     assert(merge.newVertexOrder[0].id === 'earliest');
-    assert(merge.newVertexOrder[merge.newVertexOrder.length - 1].id === 'latest');
+    assert(
+      merge.newVertexOrder[merge.newVertexOrder.length - 1].id === 'latest',
+    );
   });
 });
 
@@ -283,7 +307,5 @@ describe('edgesExtend', () => {
 });
 
 describe('findMergeableEdges', () => {
-  it('preserves the edge that has more popular vertices', () => {
-
-  });
+  it('preserves the edge that has more popular vertices', () => {});
 });

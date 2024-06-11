@@ -1,8 +1,20 @@
 import _ from 'lodash';
-import { conversionFactor, getConverter, convertSchema, convertState, units } from '../../../../src/store/utilities/unitConversion';
-import { assertEqual, assert, assertThrows, nearlyEqual, isNearlyEqual } from '../../test_helpers';
+import {
+  conversionFactor,
+  getConverter,
+  convertSchema,
+  convertState,
+  units,
+} from '../../../../src/store/utilities/unitConversion';
+import {
+  assertEqual,
+  assert,
+  assertThrows,
+  nearlyEqual,
+  isNearlyEqual,
+} from '../../test_helpers';
 import { simpleGeometry } from './../geometry/examples';
-import ipFloorplan from '../../../e2e/fixtures/floorplan_two_story_2017_11_28.json';
+import ipFloorplan from '../../../playwright/e2e/fixtures/floorplan_two_story_2017_11_28.json';
 
 describe('conversionFactor', () => {
   it('knows that 10m is about 32.80839895ft', () => {
@@ -13,14 +25,14 @@ describe('conversionFactor', () => {
   it('throws on unknown conversions', () => {
     assertThrows(
       () => conversionFactor('zots', 'krambles'),
-      'expected not to find a conversion between zots and krambles');
+      'expected not to find a conversion between zots and krambles',
+    );
   });
 });
 
 describe('getConverter', () => {
   it('produces an acceptable conversion for Vertices', () => {
-    const
-      toIP = getConverter('Vertex', 'si', 'ip'),
+    const toIP = getConverter('Vertex', 'si', 'ip'),
       toSI = getConverter('Vertex', 'ip', 'si'),
       siVert = { x: 12, y: -5 },
       ipVert = { x: 12 * 3.280839895, y: -5 * 3.280839895 };
@@ -29,8 +41,7 @@ describe('getConverter', () => {
     assert(isNearlyEqual(toIP(siVert), ipVert));
   });
 
-  const
-    ipProject = {
+  const ipProject = {
       north_axis: 12,
       ground: {
         floor_offset: 5,
@@ -53,28 +64,22 @@ describe('getConverter', () => {
     siProject = getConverter('Project', 'ip', 'si')(ipProject);
 
   it('converts nested attributes', () => {
-    assert(isNearlyEqual(
-      siProject.view,
-      _.mapValues(ipProject.view, v => v * 0.3048),
-    ));
+    assert(
+      isNearlyEqual(
+        siProject.view,
+        _.mapValues(ipProject.view, (v) => v * 0.3048),
+      ),
+    );
   });
 
   it('provides the identity func when converting unknown objects', () => {
-    assertEqual(
-      getConverter('User', 'si', 'ip'),
-      _.identity);
+    assertEqual(getConverter('User', 'si', 'ip'), _.identity);
   });
 
   it('leaves alone unitless properties', () => {
-    assertEqual(
-      ipProject.ground.tilt_slope,
-      siProject.ground.tilt_slope);
-    assertEqual(
-      ipProject.map.zoom,
-      siProject.map.zoom);
-    assertEqual(
-      ipProject.show_import_export,
-      siProject.show_import_export);
+    assertEqual(ipProject.ground.tilt_slope, siProject.ground.tilt_slope);
+    assertEqual(ipProject.map.zoom, siProject.map.zoom);
+    assertEqual(ipProject.show_import_export, siProject.show_import_export);
   });
 
   it('leaves alone properties with same units in both systems', () => {
@@ -84,8 +89,7 @@ describe('getConverter', () => {
   });
 
   it('succeeds on a window definition', () => {
-    const
-      siWindow = {
+    const siWindow = {
         id: 'originallySi',
         name: 'my si window',
         window_definition_mode: 'Single Window',
@@ -110,30 +114,38 @@ describe('getConverter', () => {
         fin_projection_factor: 0.3,
       };
 
-    assert(isNearlyEqual(
-      _.omit(siWindow, ['name', 'id']),
-      _.omit(
-        getConverter('WindowDefinition', 'ip', 'si')(ipWindow),
-        ['name', 'id'])));
+    assert(
+      isNearlyEqual(
+        _.omit(siWindow, ['name', 'id']),
+        _.omit(getConverter('WindowDefinition', 'ip', 'si')(ipWindow), [
+          'name',
+          'id',
+        ]),
+      ),
+    );
 
-    assert(isNearlyEqual(
-      _.omit(ipWindow, ['name', 'id']),
-      _.omit(
-        getConverter('WindowDefinition', 'si', 'ip')(siWindow),
-        ['name', 'id'])));
+    assert(
+      isNearlyEqual(
+        _.omit(ipWindow, ['name', 'id']),
+        _.omit(getConverter('WindowDefinition', 'si', 'ip')(siWindow), [
+          'name',
+          'id',
+        ]),
+      ),
+    );
   });
 
   it('applies recursive Vertex conversion to Geometry', () => {
-    const
-      geomConvert = getConverter('Geometry', 'si', 'ip'),
+    const geomConvert = getConverter('Geometry', 'si', 'ip'),
       vertConvert = getConverter('Vertex', 'si', 'ip'),
       ipGeometry = geomConvert(simpleGeometry);
     assertEqual(
       _.omit(simpleGeometry, 'vertices'),
-      _.omit(ipGeometry, 'vertices'));
-    _.zip(simpleGeometry.vertices, ipGeometry.vertices)
-      .forEach(
-        ([siVert, ipVert]) => assertEqual(vertConvert(siVert), ipVert));
+      _.omit(ipGeometry, 'vertices'),
+    );
+    _.zip(simpleGeometry.vertices, ipGeometry.vertices).forEach(
+      ([siVert, ipVert]) => assertEqual(vertConvert(siVert), ipVert),
+    );
   });
 });
 
@@ -145,9 +157,7 @@ describe('convertSchema', () => {
 
   it('converted the project', () => {
     const projectConvert = getConverter('Project', 'ip', 'si');
-    assertEqual(
-      siFloorplan.project,
-      projectConvert(ipFloorplan.project));
+    assertEqual(siFloorplan.project, projectConvert(ipFloorplan.project));
   });
 
   it('converted each vertex', () => {
@@ -162,7 +172,8 @@ describe('convertSchema', () => {
         .flatMap('geometry')
         .flatMap('vertices')
         .map(vertConvert)
-        .value());
+        .value(),
+    );
   });
 });
 
@@ -438,22 +449,26 @@ describe('convertState', () => {
     siState = convertState(ipState, 'ip', 'si');
   it('converts nested library values', () => {
     const convertWindowDefn = getConverter('WindowDefinition', 'ip', 'si');
-    assert(isNearlyEqual(
-      siState.models.library.window_definitions[0],
-      convertWindowDefn(ipState.models.library.window_definitions[0])));
+    assert(
+      isNearlyEqual(
+        siState.models.library.window_definitions[0],
+        convertWindowDefn(ipState.models.library.window_definitions[0]),
+      ),
+    );
   });
 
   it('converts nested geometry state', () => {
     const convertGeom = getConverter('Geometry', 'ip', 'si');
-    assert(isNearlyEqual(
-      siState.geometry[0],
-      convertGeom(ipState.geometry[0])));
+    assert(
+      isNearlyEqual(siState.geometry[0], convertGeom(ipState.geometry[0])),
+    );
   });
 
   it("doesn't add extra geometry key to stories", () => {
     assertEqual(
       _.keys(siState.models.stories[0]),
-      _.keys(ipState.models.stories[0]));
+      _.keys(ipState.models.stories[0]),
+    );
   });
 
   it('converts space properties', () => {

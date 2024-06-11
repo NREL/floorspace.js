@@ -6,66 +6,70 @@
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 @import "./../config";
 
-.input-select, .input-number, .input-text, .input-checkbox {
-    align-items: center;
-    display: flex;
+.input-select,
+.input-number,
+.input-text,
+.input-checkbox {
+  align-items: center;
+  display: flex;
 
-    label {
-        font-size: 0.625rem;
-        margin: 0 .25rem 0 0;
-        text-transform: uppercase;
-    }
+  label {
+    font-size: 0.625rem;
+    margin: 0 0.25rem 0 0;
+    text-transform: uppercase;
+  }
 }
 
-.input-number, .input-text {
-    input {
-        background-color: $gray-dark;
-        border: 0;
-        color: $gray-lightest;
-        padding: 0 .75rem;
-        appearance: none;
-    }
+.input-number,
+.input-text {
+  input {
+    background-color: $gray-dark;
+    border: 0;
+    color: $gray-lightest;
+    padding: 0 0.75rem;
+    appearance: none;
+  }
 }
 .input-text input {
-    width: 15rem;
+  width: 15rem;
 }
 // reusable number inputs
 .input-number input {
-    width: 1rem;
+  width: 1rem;
 }
 
 // reusable select inputs
 .input-select {
-    position: relative;
+  position: relative;
 
-    select {
-        background-color: $gray-dark;
-        border-radius: 0;
-        color: $gray-lightest;
-        flex-grow: 2;
-        padding: 0 1.75rem 0 .75rem;
-        appearance: none;
-    }
+  select {
+    background-color: $gray-dark;
+    border-radius: 0;
+    color: $gray-lightest;
+    flex-grow: 2;
+    padding: 0 1.75rem 0 0.75rem;
+    appearance: none;
+  }
 
-    svg {
-      height: .5rem;
-      pointer-events: none;
-      position: absolute;
-      right: .25rem;
-      fill: white;
-      top: calc(50% - 0.25rem);
-        path {
-            fill: $white;
-        }
+  svg {
+    height: 0.5rem;
+    pointer-events: none;
+    position: absolute;
+    right: 0.25rem;
+    fill: white;
+    top: calc(50% - 0.25rem);
+    path {
+      fill: $white;
     }
+  }
 }
 
 svg.button {
-    cursor: pointer;
-    height: 2rem;
-    width: 2rem;
-    vertical-align: middle;
-    &.disabled {
-      cursor: not-allowed;
-    }
+  cursor: pointer;
+  height: 2rem;
+  width: 2rem;
+  vertical-align: middle;
+  &.disabled {
+    cursor: not-allowed;
+  }
 }

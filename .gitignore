@@ -7,3 +7,10 @@ test/e2e/reports
 selenium-debug.log
 output
 .vscode
+logs
+karma_html
+distTs/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

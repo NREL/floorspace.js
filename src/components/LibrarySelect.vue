@@ -14,33 +14,43 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND 
         @click="selectItem(item)"
         :data-id="item.id"
       >
-          <span :style="{ 'background-color': item.color }"></span>
-          {{item.name}}
-          <div class="buttons">
-            <a @click.stop="duplicateRow(item)" class="duplicate" title="duplicate">
-              <Copy class="button" />
-            </a>
-            <a @click.stop="destroyItem(item)" class="destroy" title="delete">
-              <Delete class="button" />
-            </a>
-          </div>
+        <span :style="{ 'background-color': item.color }"></span>
+        {{ item.name }}
+        <div class="buttons">
+          <a
+            @click.stop="duplicateRow(item)"
+            class="duplicate"
+            title="duplicate"
+          >
+            <Copy class="button" />
+          </a>
+          <a @click.stop="destroyItem(item)" class="destroy" title="delete">
+            <Delete class="button" />
+          </a>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import Delete from './../assets/svg-icons/delete.svg';
-import Copy from './../assets/svg-icons/copy_icon.svg';
+import Delete from "./../assets/svg-icons/delete.svg";
+import Copy from "./../assets/svg-icons/copy_icon.svg";
 
 export default {
-  name: 'LibrarySelect',
-  props: ['rows', 'selectedItemId', 'selectItem', 'destroyItem', 'duplicateRow'],
+  name: "LibrarySelect",
+  props: [
+    "rows",
+    "selectedItemId",
+    "selectItem",
+    "destroyItem",
+    "duplicateRow",
+  ],
   components: {
     Delete,
     Copy,
   },
-}
+};
 </script>
 
 <style lang="scss" scoped>
@@ -54,9 +64,9 @@ export default {
     > div {
       border-bottom: 1px solid $gray-darkest;
       cursor: pointer;
-      width: calc(100% - 1rem);;
+      width: calc(100% - 1rem);
       height: 2rem;
-      padding: 0 .5rem;
+      padding: 0 0.5rem;
 
       align-items: center;
       display: flex;
@@ -114,5 +124,4 @@ export default {
   //     }
   // }
 }
-
 </style>

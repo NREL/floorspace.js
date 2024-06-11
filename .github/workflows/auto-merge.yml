@@ -1,0 +1,17 @@
+name: auto-merge
+
+on:
+  pull_request_target:
+    branches:
+      - develop
+
+jobs:
+  auto-merge:
+    runs-on: self-hosted
+    if: github.actor == 'dependabot[bot]' || github.actor == 'renovate[bot]'
+    steps:
+      - uses: ahmadnassri/action-dependabot-auto-merge@v2.6
+        with:
+          github-token: ${{ secrets.AUTOMERGE_TOKEN }}
+          command: 'squash and merge'
+          target: minor

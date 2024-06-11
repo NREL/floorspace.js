@@ -8,25 +8,34 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <template>
   <section id="inspector">
     <section id="geometry-list" class="list">
-      <template v-if="!currentSpace && !currentShading" v-for="face in currentStoryGeometry.faces">
+      <template
+        v-if="!currentSpace && !currentShading"
+        v-for="face in currentStoryGeometry.faces"
+      >
         <header>
-          <h3>Face {{face.id}}</h3>
+          <h3>Face {{ face.id }}</h3>
         </header>
         <div v-for="edgeRef in face.edgeRefs" class="list-item">
-          edge {{ edgeRef.edge_id }} {{ edgeRef.reverse ? 'reversed ' : '' }}
-          <br>startpoint {{ startpoint(edgeRef) }}
-          <br>endpoint {{ endpoint(edgeRef) }}
+          edge {{ edgeRef.edge_id }} {{ edgeRef.reverse ? "reversed " : "" }}
+          <br />startpoint {{ startpoint(edgeRef) }} <br />endpoint
+          {{ endpoint(edgeRef) }}
         </div>
       </template>
 
       <template v-if="currentSubSelectionFace">
         <header>
-          <h3>Face {{currentSubSelectionFace.id}} on {{ currentSpace ? currentSpace.name : currentShading.name }}</h3>
+          <h3>
+            Face {{ currentSubSelectionFace.id }} on
+            {{ currentSpace ? currentSpace.name : currentShading.name }}
+          </h3>
         </header>
-        <div v-for="edgeRef in currentSubSelectionFace.edgeRefs" class="list-item">
-          edge {{ edgeRef.edge_id }} {{ edgeRef.reverse ? 'reversed ' : '' }}
-          <br>startpoint {{ startpoint(edgeRef) }}
-          <br>endpoint {{ endpoint(edgeRef) }}
+        <div
+          v-for="edgeRef in currentSubSelectionFace.edgeRefs"
+          class="list-item"
+        >
+          edge {{ edgeRef.edge_id }} {{ edgeRef.reverse ? "reversed " : "" }}
+          <br />startpoint {{ startpoint(edgeRef) }} <br />endpoint
+          {{ endpoint(edgeRef) }}
         </div>
       </template>
     </section>
@@ -34,12 +43,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 </template>
 
 <script>
-
-import { mapGetters } from 'vuex';
-import geometryHelpers from './../store/modules/geometry/helpers';
+import { mapGetters } from "vuex";
+import geometryHelpers from "./../store/modules/geometry/helpers";
 
 export default {
-  name: 'inspector',
+  name: "inspector",
   data() {
     return {
       geometryInspector: true,
@@ -65,16 +73,20 @@ export default {
       const v = this.vertexForId(edge.v1);
       return `${v.id} (v1) (${v.x}, ${v.y})`;
     },
-    edgeForId(id) { return geometryHelpers.edgeForId(id, this.currentStoryGeometry); },
-    vertexForId(id) { return geometryHelpers.vertexForId(id, this.currentStoryGeometry); },
+    edgeForId(id) {
+      return geometryHelpers.edgeForId(id, this.currentStoryGeometry);
+    },
+    vertexForId(id) {
+      return geometryHelpers.vertexForId(id, this.currentStoryGeometry);
+    },
   },
   computed: {
     ...mapGetters({
-      currentStory: 'application/currentStory',
-      currentSubSelectionFace: 'application/currentSubSelectionFace',
-      currentStoryGeometry: 'application/currentStoryGeometry',
-      currentSpace: 'application/currentSpace',
-      currentShading: 'application/currentShading',
+      currentStory: "application/currentStory",
+      currentSubSelectionFace: "application/currentSubSelectionFace",
+      currentStoryGeometry: "application/currentStoryGeometry",
+      currentSpace: "application/currentSpace",
+      currentShading: "application/currentShading",
     }),
   },
 };
@@ -86,7 +98,7 @@ export default {
   // background-color: $gray-medium-dark;
   background-color: $gray-medium;
   border-left: 1px solid $gray-darkest;
-  font-size: .85rem;
+  font-size: 0.85rem;
   width: 18rem;
   position: absolute;
   right: 0;
@@ -106,16 +118,16 @@ export default {
     }
     .list-item {
       border-top: 1px solid $gray-medium-light;
-      padding: .5rem 1rem;
+      padding: 0.5rem 1rem;
       h4 {
-        margin: .5rem 0;
+        margin: 0.5rem 0;
       }
       span {
         display: block;
-        margin-bottom: .25rem;
+        margin-bottom: 0.25rem;
       }
       button {
-        margin-top: .5rem;
+        margin-top: 0.5rem;
       }
     }
   }

@@ -1,44 +1,50 @@
-var path = require('path')
-var config = require('../config')
-var utils = require('./utils')
-var webpack = require('webpack')
-var merge = require('webpack-merge')
-var baseWebpackConfig = require('./webpack.base.conf')
-var ExtractTextPlugin = require('extract-text-webpack-plugin')
-var HtmlWebpackPlugin = require('html-webpack-plugin')
-var env = process.env.NODE_ENV === 'testing'
+const path = require('path')
+const config = require('../config')
+const webpack = require('webpack')
+const { merge } = require('webpack-merge');
+const baseWebpackConfig = require('./webpack.base.conf')
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const TerserPlugin = require('terser-webpack-plugin');
+const getBundleAnalyzer = require('./getBundleAnalyzer');
+const FaviconsWebpackPlugin = require('favicons-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+
+const env = process.env.NODE_ENV === 'testing'
   ? require('../config/test.env')
   : config.build.env
 
-var webpackConfig = merge(baseWebpackConfig, {
-  module: {
-    loaders: utils.styleLoaders({ sourceMap: config.build.productionSourceMap, extract: true })
+const webpackConfig = merge(baseWebpackConfig, {
+  mode: 'production',
+  devtool: 'source-map',
+  optimization: {
+    minimizer: [
+      new TerserPlugin({
+        parallel: 4,
+      }),
+    ],
   },
-  devtool: config.build.productionSourceMap ? '#source-map' : false,
   output: {
-    path: config.build.assetsRoot,
-    filename: utils.assetsPath('js/[name].[chunkhash].js'),
-    chunkFilename: utils.assetsPath('js/[id].[chunkhash].js')
-  },
-  vue: {
-    loaders: utils.cssLoaders({
-      sourceMap: config.build.productionSourceMap,
-      extract: true
-    })
+    filename: path.posix.join('static', 'js/[name].[chunkhash].js'),
+    chunkFilename: path.posix.join('static', 'js/[id].[chunkhash].js')
   },
   plugins: [
-    // http://vuejs.github.io/vue-loader/en/workflow/production.html
+    ...getBundleAnalyzer(),
     new webpack.DefinePlugin({
-      'process.env': env
+      'process.env': env,
+      __VUE_OPTIONS_API__: 'true',
+      __VUE_PROD_DEVTOOLS__: 'false',
+      __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: 'false'
     }),
-    new webpack.optimize.UglifyJsPlugin({
-      compress: {
-        warnings: false
-      }
-    }),
-    new webpack.optimize.OccurrenceOrderPlugin(),
     // extract css into its own file
-    new ExtractTextPlugin(utils.assetsPath('css/[name].[contenthash].css')),
+    new MiniCssExtractPlugin({
+      filename: path.posix.join('static', 'css/[name].[contenthash].css'),
+    }),
+    new FaviconsWebpackPlugin({
+      logo: './icons/android-chrome-512x512.png',
+      prefix: 'icons/',
+      manifest: './src/manifest.json',
+    }),
     // generate dist index.html with correct asset hash for caching.
     // you can customize output by editing /index.html
     // see https://github.com/ampedandwired/html-webpack-plugin
@@ -55,50 +61,34 @@ var webpackConfig = merge(baseWebpackConfig, {
         // more options:
         // https://github.com/kangax/html-minifier#options-quick-reference
       },
-      // necessary to consistently work with multiple chunks via CommonsChunkPlugin
-      chunksSortMode: 'dependency',
       excludeChunks: [ 'viewer' ]
     }),
     new HtmlWebpackPlugin({
-      filename: path.join(config.build.assetsRoot, config.build.viewerSubDirectory, 'index.html'),
-      template: './3DViewer/viewer/index.html',
-      inject: true,
-      minify: {
-        removeComments: true,
-        collapseWhitespace: true,
-        removeAttributeQuotes: true
-        // more options:
-        // https://github.com/kangax/html-minifier#options-quick-reference
-      },
-      // necessary to consistently work with multiple chunks via CommonsChunkPlugin
-      chunksSortMode: 'dependency',
-      excludeChunks: [ 'app' ]
+     filename: path.join(config.build.assetsRoot, config.build.viewerSubDirectory, 'index.html'),
+     template: './3DViewer/viewer/index.html',
+     inject: true,
+     minify: {
+       removeComments: true,
+       collapseWhitespace: true,
+       removeAttributeQuotes: true
+       // more options:
+       // https://github.com/kangax/html-minifier#options-quick-reference
+     },
+     excludeChunks: [ 'app' ]
     }),
-    // split vendor js into its own file
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'vendor',
-      minChunks: function (module, count) {
-        // any required modules inside node_modules are extracted to vendor
-        return (
-          module.resource &&
-          /\.js$/.test(module.resource) &&
-          module.resource.indexOf(
-            path.join(__dirname, '../node_modules')
-          ) === 0
-        )
-      }
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: './3DViewer/build/*js', to: "3DViewer/[name][ext]" },
+        { from: './3DViewer/build/*wasm', to: "3DViewer/[name][ext]" },
+        { from: './3DViewer/viewer/*js', to: "3DViewer/[name][ext]" },
+        { from: './3DViewer/viewer/*css', to: "3DViewer/[name][ext]" },
+      ]
     }),
-    // extract webpack runtime and module manifest to its own file in order to
-    // prevent vendor hash from being updated whenever app bundle is updated
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'manifest',
-      chunks: ['vendor']
-    })
   ]
 })
 
 if (config.build.productionGzip) {
-  var CompressionWebpackPlugin = require('compression-webpack-plugin')
+  const CompressionWebpackPlugin = require('compression-webpack-plugin')
 
   webpackConfig.plugins.push(
     new CompressionWebpackPlugin({

@@ -11,7 +11,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       id="recycle-scroller"
       class="scroller"
       :items="sortedRows"
-      @scroll.native="wrapperScrollLeft = $event.target.scrollLeft"
+      @scroll="wrapperScrollLeft = $event.target.scrollLeft"
       :item-size="70"
     >
       <template #before>

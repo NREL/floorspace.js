@@ -20,7 +20,8 @@ export function assertThrows(func, message) {
 export function assertEqual(a, b) {
   assert(
     _.isEqual(a, b),
-    `expected ${JSON.stringify(a)} to equal ${JSON.stringify(b)}`);
+    `expected ${JSON.stringify(a)} to equal ${JSON.stringify(b)}`,
+  );
 }
 
 export function refute(condition, ...args) {
@@ -40,7 +41,10 @@ export function assertProperty(...args) {
     resp = resp.shrunk || resp;
     console.error(`${resp.result}`);
     console.error(
-      `Property failed to verify on input: ${JSON.stringify(resp.smallest || resp.fail)}`);
+      `Property failed to verify on input: ${JSON.stringify(
+        resp.smallest || resp.fail,
+      )}`,
+    );
     throw resp.result;
   }
   assert(resp.result, `Property failed to verify! ${JSON.stringify(resp)}`);
@@ -57,48 +61,44 @@ export function isNearlyEqual(obj, oth) {
 
 export const genPoint = gen.object({ x: gen.int, y: gen.int });
 
-export const
-  genPointLeftOfOrigin = gen.object({ x: gen.sNegInt, y: gen.int }),
-  genTriangleLeftOfOrigin = gen.array(genPointLeftOfOrigin, { size: 3 })
-    .suchThat(pts => !helpers.ptsAreCollinear(...pts)),
+export const genPointLeftOfOrigin = gen.object({ x: gen.sNegInt, y: gen.int }),
+  genTriangleLeftOfOrigin = gen
+    .array(genPointLeftOfOrigin, { size: 3 })
+    .suchThat((pts) => !helpers.ptsAreCollinear(...pts)),
   genPointRightOfOrigin = gen.object({ x: gen.sPosInt, y: gen.int }),
-  genTriangleRightOfOrigin = gen.array(genPointRightOfOrigin, { size: 3 })
-    .suchThat(pts => !helpers.ptsAreCollinear(...pts)),
-  genTriangle = gen.array(genPoint, { size: 3 })
-    .suchThat(pts => !helpers.ptsAreCollinear(...pts));
+  genTriangleRightOfOrigin = gen
+    .array(genPointRightOfOrigin, { size: 3 })
+    .suchThat((pts) => !helpers.ptsAreCollinear(...pts)),
+  genTriangle = gen
+    .array(genPoint, { size: 3 })
+    .suchThat((pts) => !helpers.ptsAreCollinear(...pts));
 
-
-export const genRectilinearRectangle = gen.array(genPoint, { size: 2 })
-  .suchThat(([v1, v2]) => (v1.x !== v2.x && v1.y !== v2.y))
-  .then(([v1, v2]) => (
-    [
-      v1,
-      { x: v1.x, y: v2.y },
-      v2,
-      { x: v2.x, y: v1.y },
-    ]
-  ));
+export const genRectilinearRectangle = gen
+  .array(genPoint, { size: 2 })
+  .suchThat(([v1, v2]) => v1.x !== v2.x && v1.y !== v2.y)
+  .then(([v1, v2]) => [v1, { x: v1.x, y: v2.y }, v2, { x: v2.x, y: v1.y }]);
 
 export const createIrregularPolygon = ({ center, radii }) => {
   const angleStep = (2 * Math.PI) / radii.length;
 
-  return radii
-    .map((radius, n) => ({
-      x: center.x + (radius * Math.sin(n * angleStep)),
-      y: center.y + (radius * Math.cos(n * angleStep)),
-    }));
+  return radii.map((radius, n) => ({
+    x: center.x + radius * Math.sin(n * angleStep),
+    y: center.y + radius * Math.cos(n * angleStep),
+  }));
 };
 
 export const genRectangle = gen.oneOf([
   // boring old rectangles aligned with coordinate axes
   genRectilinearRectangle,
   // and square diamonds!
-  gen.object({
-    center: genPoint,
-    radii: gen.intWithin(5, 100)
-      .then(radius => _.range(4).map(_.constant(radius))),
-  })
-  .then(createIrregularPolygon),
+  gen
+    .object({
+      center: genPoint,
+      radii: gen
+        .intWithin(5, 100)
+        .then((radius) => _.range(4).map(_.constant(radius))),
+    })
+    .then(createIrregularPolygon),
 ]);
 
 export const genIrregularPolygonPieces = gen.object({
@@ -106,16 +106,19 @@ export const genIrregularPolygonPieces = gen.object({
   radii: gen.array(gen.intWithin(5, 100), { minSize: 3, maxSize: 20 }),
 });
 
-export const genIrregularPolygon = genIrregularPolygonPieces
-.then(createIrregularPolygon);
+export const genIrregularPolygon = genIrregularPolygonPieces.then(
+  createIrregularPolygon,
+);
 
 export const genRegularPolygonPieces = gen.object({
   center: genPoint,
   radius: gen.intWithin(5, 100),
   numEdges: gen.intWithin(3, 20),
 });
-export const genRegularPolygon = genRegularPolygonPieces
-.then(({ center, radius, numEdges }) => createIrregularPolygon({
-  radii: _.range(numEdges).map(_.constant(radius)),
-  center,
-}));
+export const genRegularPolygon = genRegularPolygonPieces.then(
+  ({ center, radius, numEdges }) =>
+    createIrregularPolygon({
+      radii: _.range(numEdges).map(_.constant(radius)),
+      center,
+    }),
+);

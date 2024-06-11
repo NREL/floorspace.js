@@ -1,9 +1,6 @@
 <template>
   <div class="edit-bar">
-    <span v-for="col in columns"
-      :data-column="col.name"
-      :key="col.name"
-    >
+    <span v-for="col in columns" :data-column="col.name" :key="col.name">
       <GenericInput
         :col="col"
         :row="row"
@@ -16,17 +13,16 @@
   </div>
 </template>
 <script>
-import GenericInput from './GenericInput.vue';
-import Delete from './../assets/svg-icons/delete.svg';
-
+import GenericInput from "./GenericInput.vue";
+import Delete from "./../assets/svg-icons/delete.svg";
 
 export default {
-  props: ['row', 'columns', 'updateRow', 'destroy'],
+  props: ["row", "columns", "updateRow", "destroy"],
   components: {
     GenericInput,
     Delete,
   },
-}
+};
 </script>
 <style lang="scss" scoped>
 @import "./../scss/config";

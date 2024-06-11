@@ -1,41 +1,66 @@
-var config = require('../config')
-var webpack = require('webpack')
-var merge = require('webpack-merge')
-var utils = require('./utils')
-var baseWebpackConfig = require('./webpack.base.conf')
-var HtmlWebpackPlugin = require('html-webpack-plugin')
+const config = require("../config");
+const webpack = require("webpack");
+const { merge } = require('webpack-merge');
+const baseWebpackConfig = require("./webpack.base.conf");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const path = require("path");
 
-// add hot-reload related code to entry chunks
-Object.keys(baseWebpackConfig.entry).forEach(function (name) {
-  baseWebpackConfig.entry[name] = ['./build/dev-client'].concat(baseWebpackConfig.entry[name])
-})
+const cwd = process.cwd();
+const outputPath = path.resolve(cwd, 'dist');
 
 module.exports = merge(baseWebpackConfig, {
-  module: {
-    loaders: utils.styleLoaders({ sourceMap: config.dev.cssSourceMap })
-  },
-  // eval-source-map is faster for development
-  devtool: '#eval-source-map',
+  target: 'web',
+  mode: 'development',
+  devtool: 'cheap-module-source-map',
   plugins: [
     new webpack.DefinePlugin({
-      'process.env': config.dev.env
-    }),
-    // https://github.com/glenjamin/webpack-hot-middleware#installation--usage
-    new webpack.optimize.OccurrenceOrderPlugin(),
-    new webpack.HotModuleReplacementPlugin(),
-    new webpack.NoErrorsPlugin(),
-    // https://github.com/ampedandwired/html-webpack-plugin
-    new HtmlWebpackPlugin({
-      filename: 'index.html',
-      template: 'index.html',
-      inject: true,
-      chunks: [ 'app' ]
+      "process.env": config.dev.env,
+      __VUE_OPTIONS_API__: 'true',
+      __VUE_PROD_DEVTOOLS__: 'false',
+      __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: 'false'
     }),
     new HtmlWebpackPlugin({
-      filename: '3DViewer/index.html',
-      template: './3DViewer/viewer/index.html',
+      filename: "index.html",
+      template: "index.html",
       inject: true,
-      chunks: [ 'viewer' ]
-    })
-  ]
-})
+      chunks: ["app"],
+    }),
+    new HtmlWebpackPlugin({
+      filename: "3DViewer/index.html",
+      template: "./3DViewer/viewer/index.html",
+      inject: true,
+      chunks: ["viewer"],
+    }),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: './3DViewer/build/*js', to: "3DViewer/[name][ext]" },
+        { from: './3DViewer/build/*wasm', to: "3DViewer/[name][ext]" },
+        { from: './3DViewer/viewer/*js', to: "3DViewer/[name][ext]" },
+        { from: './3DViewer/viewer/*css', to: "3DViewer/[name][ext]" },
+      ]
+    }),
+  ],
+  devServer: {
+    static: {
+      directory: outputPath,
+    },
+    allowedHosts: 'all',
+    historyApiFallback: {
+      disableDotRule: true,
+    },
+    hot: true,
+    compress: true,
+    open: true,
+    liveReload: false,
+    client: {
+      overlay: {
+        errors: true,
+        warnings: false,
+      },
+    },
+    devMiddleware: {
+      writeToDisk: true,
+    },
+  },
+});

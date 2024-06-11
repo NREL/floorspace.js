@@ -16,8 +16,10 @@
 }
 
 .tool_drag #svg-grid {
-  polygon, rect, path {
-      pointer-events: none;
+  polygon,
+  rect,
+  path {
+    pointer-events: none;
   }
 }
 .tool_apply.property [data-model-type="space"] polygon {
@@ -31,202 +33,222 @@
 // styling for svg elements created by d3
 // Vue's inline template styling will not work with dynamically created markup
 #grid svg {
-    path, circle, line, rect, ellipse, polygon, text, .polygons, .image-group {
-        // prevent glitchy points caused by moving mouse over overlapping svg paths
-        pointer-events: none;
+  path,
+  circle,
+  line,
+  rect,
+  ellipse,
+  polygon,
+  text,
+  .polygons,
+  .image-group {
+    // prevent glitchy points caused by moving mouse over overlapping svg paths
+    pointer-events: none;
+  }
+  // points
+  ellipse:not(.origin) {
+    fill: $gray-light;
+    stroke: $gray-light;
+    &.gridpoint {
     }
-    // points
-    ellipse:not(.origin) {
-        fill: $gray-light;
-        stroke: $gray-light;
-        &.gridpoint {}
-        &.highlight {
-            stroke: red;
-            fill: red;
-        }
+    &.highlight {
+      stroke: red;
+      fill: red;
     }
-    ellipse.origin {
-        stroke: $gray-light;
-    }
-    // gridlines
-    line.horizontal, line.vertical {
-        stroke: red;
-        opacity: .25;
-    }
-    line.highlight {
-        stroke: yellow;
-        z-index: 10;
-    }
+  }
+  ellipse.origin {
+    stroke: $gray-light;
+  }
+  // gridlines
+  line.horizontal,
+  line.vertical {
+    stroke: red;
+    opacity: 0.25;
+  }
+  line.highlight {
+    stroke: yellow;
+    z-index: 10;
+  }
 
-    // shapes
-    polygon, rect, > path {
-        fill-opacity: .9;
-        z-index: 3;
-        stroke: $gray-light;
-        &.domain {
-          stroke: #fff;
-        }
-        &.guideline-area {
-          fill-opacity: 0.6;
-        }
+  // shapes
+  polygon,
+  rect,
+  > path {
+    fill-opacity: 0.9;
+    z-index: 3;
+    stroke: $gray-light;
+    &.domain {
+      stroke: #fff;
     }
-
-    .poly polygon {
-      pointer-events: all;
+    &.guideline-area {
+      fill-opacity: 0.6;
     }
+  }
 
-    // .poly.current {
-    //   > polygon, > rect, > path {
-    //     stroke: $black;
-    //     stroke-width: 2px;
-    //   }
-    // }
+  .poly polygon {
+    pointer-events: all;
+  }
 
-    .previousStory {
-      polygon, rect, path {
-        stroke-dasharray: 1 4;
-        stroke-linecap: round;
-        stroke: #888;
+  // .poly.current {
+  //   > polygon, > rect, > path {
+  //     stroke: $black;
+  //     stroke-width: 2px;
+  //   }
+  // }
+
+  .previousStory {
+    polygon,
+    rect,
+    path {
+      stroke-dasharray: 1 4;
+      stroke-linecap: round;
+      stroke: #888;
+      stroke-width: 2;
+    }
+  }
+  .previousStory,
+  .guideLine {
+    polygon,
+    rect,
+    path {
+      fill-opacity: 0.3;
+      z-index: -1;
+    }
+  }
+
+  rect.view {
+    fill-opacity: 0;
+  }
+  .axis line {
+    stroke-opacity: 0.3;
+    shape-rendering: crispEdges;
+    stroke: $gray-medium;
+  }
+  .polygons .windows,
+  .polygons .doors {
+    .window {
+      stroke-width: 3;
+      stroke: black;
+      .hatch {
+        stroke-width: 1;
+      }
+      .box {
+        stroke-width: 1;
+        stroke-dasharray: 4 7;
+        fill: none;
+      }
+      .sub-window {
         stroke-width: 2;
       }
     }
-    .previousStory, .guideLine {
-      polygon, rect, path {
-        fill-opacity: 0.3;
-        z-index: -1;
-      }
+    .window .facing-selection {
+      stroke: blue;
     }
+    .window .selected {
+      stroke: green;
+    }
+  }
+  .daylighting-control {
+    circle {
+      stroke: #222;
+    }
+    .bg {
+      fill: #222;
+      fill-opacity: 0.2;
+      stroke-width: 1.5px;
+    }
+    .quadrants {
+      fill: #ff7979;
+      stroke-width: 0;
+    }
+  }
+  .daylighting-control.facing-selection {
+    path {
+      fill: blue;
+    }
+    circle {
+      stroke: blue;
+    }
+  }
+  .daylighting-control.selected {
+    path {
+      fill: #dfda48;
+    }
+    circle {
+      stroke: #dfda48;
+    }
+  }
+  .highlight {
+    .window {
+      stroke: #008500;
+      fill: black;
+      stroke-width: 3;
 
-    rect.view {
-      fill-opacity: 0;
-    }
-    .axis line {
-      stroke-opacity: 0.3;
-      shape-rendering: crispEdges;
-      stroke: $gray-medium;
-    }
-    .polygons .windows, .polygons .doors {
-      .window {
-        stroke-width: 3;
-        stroke: black;
-        .hatch {
-          stroke-width: 1;
-        }
-        .box {
-          stroke-width: 1;
-          stroke-dasharray: 4 7;
-          fill: none;
-        }
-        .sub-window {
-          stroke-width: 2;
-        }
+      .window-wall-ratio .hatch {
+        stroke-width: 1;
       }
-      .window .facing-selection {
-        stroke: blue;
+      .repeating-windows .box {
+        stroke-dasharray: 4 7;
+        stroke-width: 1;
+        fill: none;
       }
-      .window .selected {
-        stroke: green;
+      .sub-window {
+        stroke-width: 2;
       }
     }
     .daylighting-control {
-      circle {
-        stroke: #222;
-      }
-      .bg {
-        fill: #222;
-        fill-opacity: 0.2;
-        stroke-width: 1.5px;
-      }
-      .quadrants {
-        fill: #ff7979;
-        stroke-width: 0;
-      }
-    }
-    .daylighting-control.facing-selection {
+      circle,
       path {
-        fill: blue;
+        pointer-events: none;
       }
-      circle{
-        stroke: blue;
+      circle {
+        stroke: #dfda48;
       }
-    }
-    .daylighting-control.selected {
       path {
         fill: #dfda48;
       }
-      circle{
-        stroke: #dfda48;
+    }
+  }
+  .window-guideline {
+    .distance-measure {
+      stroke-opacity: 1;
+      fill-opacity: 1;
+      stroke: red;
+      fill: red;
+      line {
+        stroke-width: 2;
+      }
+      path {
+        stroke-width: 0;
       }
     }
-    .highlight {
-      .window {
-        stroke: #008500;
-        fill: black;
-        stroke-width: 3;
-
-        .window-wall-ratio .hatch {
-          stroke-width: 1;
-        }
-        .repeating-windows .box {
-          stroke-dasharray: 4 7;
-          stroke-width: 1;
-          fill: none;
-        }
-        .sub-window {
-          stroke-width: 2;
-        }
+  }
+  .daylighting-control-guideline {
+    .distance-measure {
+      stroke-opacity: 1;
+      fill-opacity: 1;
+      fill: none;
+      stroke: blue;
+      line {
+        stroke-width: 2;
+        stroke-dasharray: 1 2;
       }
-      .daylighting-control {
-        circle, path {
-          pointer-events: none;
-        }
-        circle {
-          stroke: #dfda48;
-        }
-        path {
-          fill: #dfda48;
-        }
+      path.start,
+      path.end {
+        stroke: inherit;
+        stroke-width: 0.5;
+      }
+      text {
+        fill: blue;
       }
     }
-    .window-guideline {
-      .distance-measure {
-        stroke-opacity: 1;
-        fill-opacity: 1;
-        stroke: red;
-        fill: red;
-        line {
-          stroke-width: 2;
-        }
-        path {
-          stroke-width: 0;
-        }
-      }
-    }
-    .daylighting-control-guideline {
-      .distance-measure {
-        stroke-opacity: 1;
-        fill-opacity: 1;
-        fill: none;
-        stroke: blue;
-        line {
-          stroke-width: 2;
-          stroke-dasharray: 1 2;
-        }
-        path.start, path.end {
-          stroke: inherit;
-          stroke-width: 0.5;
-        }
-        text {
-          fill: blue;
-        }
-      }
-    }
+  }
 }
 
 .image-group {
   .controls {
     .rotation-handle {
-      fill: rgba(255, 255, 255, 0.0);
+      fill: rgba(255, 255, 255, 0);
       stroke: black;
       pointer-events: auto !important;
     }
@@ -254,7 +276,7 @@
     stroke: black;
     stroke-width: 2px;
     &.interior {
-        stroke-dasharray: 0 5 5;
+      stroke-dasharray: 0 5 5;
     }
   }
 }

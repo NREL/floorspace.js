@@ -1,0 +1,8 @@
+{
+  "name": "FloorspaceJS",
+  "short_name": "FloorspaceJS",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fff",
+  "description": "FloorspaceJS"
+}

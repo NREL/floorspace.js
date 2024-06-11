@@ -5,9 +5,7 @@
       expanded: expanded,
     }"
   >
-    <p @click="expanded = !expanded" class="title">
-      {{ caret }} {{ title }}
-    </p>
+    <p @click="expanded = !expanded" class="title">{{ caret }} {{ title }}</p>
     <p v-if="expanded">
       <slot />
     </p>
@@ -15,16 +13,16 @@
 </template>
 <script>
 export default {
-  props: ['title'],
+  props: ["title"],
   data() {
     return {
       expanded: false,
-    }
+    };
   },
   computed: {
     caret() {
-      return this.expanded ? '\u25BC' : '\u25BA';
+      return this.expanded ? "\u25BC" : "\u25BA";
     },
   },
-}
+};
 </script>
